@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Golden labeled example v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "example_id",
+    "text_redacted",
+    "primary_intent",
+    "secondary_intents",
+    "destination_team",
+    "automation_tier_max",
+    "template_id"
+  ],
+  "properties": {
+    "example_id": {
+      "type": "string",
+      "description": "Stable ID (e.g., gold_v1.0_2025-12-22:000123)"
+    },
+    "conversation_id": {
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ],
+      "description": "Optional; internal reference"
+    },
+    "message_index": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Optional; message position within conversation"
+    },
+    "channel": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "LiveChat/Email/Social/TikTok/Unknown"
+    },
+    "text_redacted": {
+      "type": "string"
+    },
+    "primary_intent": {
+      "type": "string",
+      "enum": [
+        "order_status_tracking",
+        "shipping_delay_not_shipped",
+        "delivered_not_received",
+        "missing_items_in_shipment",
+        "wrong_item_received",
+        "damaged_item",
+        "cancel_order",
+        "address_change_order_edit",
+        "cancel_subscription",
+        "billing_issue",
+        "promo_discount_issue",
+        "pre_purchase_question",
+        "influencer_marketing_inquiry",
+        "return_request",
+        "exchange_request",
+        "refund_request",
+        "technical_support",
+        "phone_support_request",
+        "tiktok_support_request",
+        "social_media_support_request",
+        "chargeback_dispute",
+        "legal_threat",
+        "harassment_threats",
+        "fraud_suspected",
+        "unknown_other"
+      ]
+    },
+    "secondary_intents": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "order_status_tracking",
+          "shipping_delay_not_shipped",
+          "delivered_not_received",
+          "missing_items_in_shipment",
+          "wrong_item_received",
+          "damaged_item",
+          "cancel_order",
+          "address_change_order_edit",
+          "cancel_subscription",
+          "billing_issue",
+          "promo_discount_issue",
+          "pre_purchase_question",
+          "influencer_marketing_inquiry",
+          "return_request",
+          "exchange_request",
+          "refund_request",
+          "technical_support",
+          "phone_support_request",
+          "tiktok_support_request",
+          "social_media_support_request",
+          "chargeback_dispute",
+          "legal_threat",
+          "harassment_threats",
+          "fraud_suspected",
+          "unknown_other"
+        ]
+      },
+      "maxItems": 2
+    },
+    "destination_team": {
+      "type": "string",
+      "enum": [
+        "Sales Team",
+        "Backend Team",
+        "Technical Support Team",
+        "Phone Support Team",
+        "TikTok Support",
+        "Returns Admin",
+        "LiveChat Support",
+        "Leadership Team",
+        "SocialMedia Team",
+        "Email Support Team",
+        "Chargebacks / Disputes Team"
+      ]
+    },
+    "automation_tier_max": {
+      "type": "string",
+      "enum": [
+        "TIER_0_ESCALATION",
+        "TIER_1_SAFE_ASSIST",
+        "TIER_2_VERIFIED",
+        "TIER_3_AUTO_ACTION"
+      ]
+    },
+    "template_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "t_order_status_ask_order_number",
+        "t_order_status_verified",
+        "t_shipping_delay_verified",
+        "t_delivered_not_received_intake",
+        "t_missing_items_intake",
+        "t_wrong_item_intake",
+        "t_damaged_item_intake",
+        "t_cancel_order_ack_intake",
+        "t_address_change_ack_intake",
+        "t_cancel_subscription_ack_intake",
+        "t_billing_issue_intake",
+        "t_return_request_intake",
+        "t_exchange_request_intake",
+        "t_refund_request_intake",
+        "t_technical_support_intake",
+        "t_promo_discount_info",
+        "t_pre_purchase_info",
+        "t_influencer_inquiry_route",
+        "t_chargeback_neutral_ack",
+        "t_legal_threat_ack",
+        "t_harassment_ack",
+        "t_fraud_ack",
+        "t_unknown_ack",
+        null
+      ]
+    },
+    "deterministic_match_possible": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "YES",
+        "NO",
+        "UNKNOWN",
+        null
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+gold \ predicted,cancel_subscription,damaged_item,fraud_suspected,order_status_tracking,technical_support,unknown_other
+cancel_subscription,1,0,0,0,0,0
+damaged_item,0,1,0,0,0,0
+fraud_suspected,0,0,0,1,0,0
+order_status_tracking,0,0,0,1,0,0
+technical_support,0,0,0,0,0,1
+unknown_other,0,0,0,0,0,0

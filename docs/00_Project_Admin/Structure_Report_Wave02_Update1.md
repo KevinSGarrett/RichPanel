@@ -1,0 +1,136 @@
+# Structure Report (Wave 02 Update 1)
+
+Generated: 2025-12-21
+
+This report summarizes the documentation structure after Wave 02 Update 1 (Architecture + Infra decisions).
+
+## What changed in this update
+**New file(s):**
+- `docs/02_System_Architecture/AWS_Serverless_Reference_Architecture.md`
+
+**Updated file(s):**
+- `docs/00_Project_Admin/Progress_Wave_Schedule.md`
+- `docs/00_Project_Admin/Rehydration.md`
+- `docs/00_Project_Admin/Open_Questions.md`
+- `docs/00_Project_Admin/Assumptions_Constraints.md`
+- `docs/00_Project_Admin/Decision_Log.md`
+- `docs/00_Project_Admin/Risk_Register.md`
+- `docs/00_Project_Admin/Change_Log.md`
+- `docs/02_System_Architecture/Architecture_Overview.md`
+- `docs/02_System_Architecture/Hosting_Options_and_Recommendation.md`
+- `docs/02_System_Architecture/Sequence_Diagrams.md`
+- `docs/02_System_Architecture/Data_Flow_and_Storage.md`
+- `docs/03_Richpanel_Integration/Queues_and_Routing_Primitives.md`
+- `docs/03_Richpanel_Integration/Automation_Rules_and_Config_Inventory.md`
+- `docs/07_Reliability_Scaling/Capacity_Plan_and_SLOs.md`
+- `docs/01_Product_Scope_Requirements/Success_Metrics_and_SLAs.md`
+- `docs/Waves/Wave_02_Architecture_Infra/Wave_Notes.md`
+
+## High-level tree (depth ≤ 3)
+```
+- 00_Project_Admin/
+  - Assumptions_Constraints.md
+  - Change_Log.md
+  - Decision_Log.md
+  - Open_Questions.md
+  - Progress_Wave_Schedule.md
+  - Rehydration.md
+  - Risk_Register.md
+  - Stakeholders_RACI.md
+  - Structure_Report_Wave00.md
+  - Structure_Report_Wave01_Update3.md
+  - Structure_Report_Wave01_Update4.md
+- 01_Product_Scope_Requirements/
+  - Customer_Message_Dataset_Insights.md
+  - Department_Routing_Spec.md
+  - FAQ_Automation_Scope.md
+  - Product_Vision_and_Non_Goals.md
+  - Success_Metrics_and_SLAs.md
+  - User_Journeys_and_Workflows.md
+- 02_System_Architecture/
+  - AWS_Serverless_Reference_Architecture.md
+  - Architecture_Overview.md
+  - Data_Flow_and_Storage.md
+  - Hosting_Options_and_Recommendation.md
+  - Sequence_Diagrams.md
+- 03_Richpanel_Integration/
+  - Attachments_Playbook.md
+  - Automation_Rules_and_Config_Inventory.md
+  - Idempotency_Retry_Dedup.md
+  - Queues_and_Routing_Primitives.md
+  - Richpanel_API_Contracts_and_Error_Handling.md
+  - Team_Tag_Mapping_and_Drift.md
+  - Webhooks_and_Event_Handling.md
+- 04_LLM_Design_Evaluation/
+  - Confidence_Scoring_and_Thresholds.md
+  - Offline_Evaluation_Framework.md
+  - Prompting_and_Output_Schemas.md
+  - Safety_and_Prompt_Injection_Defenses.md
+- 05_FAQ_Automation/
+  - Human_Handoff_and_Escalation.md
+  - Order_Status_Automation.md
+  - Response_Templates_and_Tone.md
+  - Top_FAQs_Playbooks.md
+- 06_Security_Privacy_Compliance/
+  - Data_Retention_and_Access.md
+  - Logging_Metrics_Tracing.md
+  - PII_Handling_and_Redaction.md
+- 07_Reliability_Scaling/
+  - Capacity_Plan_and_SLOs.md
+  - Cost_Model.md
+  - Failure_Modes_and_Recovery.md
+  - Rate_Limiting_and_Backpressure.md
+- 08_Testing_Quality/
+  - LLM_Evals_in_CI.md
+  - Load_and_Soak_Testing.md
+  - Test_Strategy_and_Matrix.md
+- 09_Deployment_Operations/
+  - CICD_Plan.md
+  - Environments.md
+  - Release_and_Rollback.md
+  - Runbooks.md
+- 10_Governance_Continuous_Improvement/
+  - Change_Management.md
+  - Model_Update_Policy.md
+  - Taxonomy_Drift_and_Calibration.md
+- 11_Cursor_Agent_Work_Packages/
+  - README.md
+- 90_Risks_Common_Issues/
+  - Common_Issues_Mitigation_Matrix.md
+  - FMEA.md
+  - Threat_Model.md
+- 99_Appendices/
+  - Data_Inputs.md
+  - Glossary.md
+  - References.md
+- CODEMAP.md
+- INDEX.md
+- ROADMAP.md
+- Waves/
+  - Wave_00_Phase0_Folder_Structure/
+    - Wave_Notes.md
+  - Wave_01_Discovery_Requirements/
+    - Wave_Notes.md
+  - Wave_02_Architecture_Infra/
+    - Wave_Notes.md
+  - Wave_03_Richpanel_Integration_Design/
+    - Wave_Notes.md
+  - Wave_04_LLM_Routing_Design/
+    - Wave_Notes.md
+  - Wave_05_FAQ_Automation_Design/
+    - Wave_Notes.md
+  - Wave_06_Security_Privacy_Compliance/
+    - Wave_Notes.md
+  - Wave_07_Reliability_Scaling_Capacity/
+    - Wave_Notes.md
+  - Wave_08_Observability_Analytics/
+    - Wave_Notes.md
+  - Wave_09_Testing_QA_Release/
+    - Wave_Notes.md
+  - Wave_10_Operations_Runbooks/
+    - Wave_Notes.md
+  - Wave_11_Governance_Continuous_Improvement/
+    - Wave_Notes.md
+  - Wave_12_Cursor_Agent_Execution_Packs/
+    - Wave_Notes.md
+```

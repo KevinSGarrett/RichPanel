@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "mw_tier2_verifier_v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "allow_tier2",
+    "confidence",
+    "downgrade_to_tier",
+    "reason_code",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "mw_tier2_verifier_v1"
+      ]
+    },
+    "allow_tier2": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "downgrade_to_tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_SAFE_ASSIST",
+        "ROUTE_ONLY",
+        "TIER_0_ESCALATION"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "NOT_ORDER_STATUS",
+        "CONFLICTING_INTENT",
+        "DETERMINISTIC_MATCH_FALSE",
+        "TOO_AMBIGUOUS",
+        "ESCALATION_PRESENT"
+      ]
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 300
+    }
+  }
+}

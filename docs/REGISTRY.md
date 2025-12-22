@@ -1,0 +1,198 @@
+# Docs Registry (All Files)
+
+Last updated: 2025-12-22
+
+This registry lists **every markdown file** under `docs/` so nothing becomes orphaned.
+Use `docs/INDEX.md` for curated navigation.
+
+## (root)
+- [CODEMAP.md](CODEMAP.md)
+- [INDEX.md](INDEX.md)
+- [REGISTRY.md](REGISTRY.md)
+- [ROADMAP.md](ROADMAP.md)
+
+## 00_Project_Admin/
+- [00_Project_Admin/Assumptions_Constraints.md](00_Project_Admin/Assumptions_Constraints.md)
+- [00_Project_Admin/Change_Log.md](00_Project_Admin/Change_Log.md)
+- [00_Project_Admin/Decision_Log.md](00_Project_Admin/Decision_Log.md)
+- [00_Project_Admin/Docs_Impact_Map_Wave06_Update2.md](00_Project_Admin/Docs_Impact_Map_Wave06_Update2.md)
+- [00_Project_Admin/Open_Questions.md](00_Project_Admin/Open_Questions.md)
+- [00_Project_Admin/Progress_Wave_Schedule.md](00_Project_Admin/Progress_Wave_Schedule.md)
+- [00_Project_Admin/Rehydration.md](00_Project_Admin/Rehydration.md)
+- [00_Project_Admin/Risk_Register.md](00_Project_Admin/Risk_Register.md)
+- [00_Project_Admin/Roles_and_Tooling.md](00_Project_Admin/Roles_and_Tooling.md)
+- [00_Project_Admin/Stakeholders_RACI.md](00_Project_Admin/Stakeholders_RACI.md)
+- [00_Project_Admin/Structure_Report_Wave00.md](00_Project_Admin/Structure_Report_Wave00.md)
+- [00_Project_Admin/Structure_Report_Wave01_Update3.md](00_Project_Admin/Structure_Report_Wave01_Update3.md)
+- [00_Project_Admin/Structure_Report_Wave01_Update4.md](00_Project_Admin/Structure_Report_Wave01_Update4.md)
+- [00_Project_Admin/Structure_Report_Wave02_Closeout_Wave03_Update1.md](00_Project_Admin/Structure_Report_Wave02_Closeout_Wave03_Update1.md)
+- [00_Project_Admin/Structure_Report_Wave02_Update1.md](00_Project_Admin/Structure_Report_Wave02_Update1.md)
+- [00_Project_Admin/Structure_Report_Wave02_Update2.md](00_Project_Admin/Structure_Report_Wave02_Update2.md)
+- [00_Project_Admin/Structure_Report_Wave02_Update3.md](00_Project_Admin/Structure_Report_Wave02_Update3.md)
+- [00_Project_Admin/Structure_Report_Wave02_Update4.md](00_Project_Admin/Structure_Report_Wave02_Update4.md)
+- [00_Project_Admin/Structure_Report_Wave02_Update5.md](00_Project_Admin/Structure_Report_Wave02_Update5.md)
+- [00_Project_Admin/Structure_Report_Wave03_Update2.md](00_Project_Admin/Structure_Report_Wave03_Update2.md)
+- [00_Project_Admin/Structure_Report_Wave03_Update3.md](00_Project_Admin/Structure_Report_Wave03_Update3.md)
+- [00_Project_Admin/Structure_Report_Wave03_Update4.md](00_Project_Admin/Structure_Report_Wave03_Update4.md)
+- [00_Project_Admin/Structure_Report_Wave03_Update5_Wave04_Start.md](00_Project_Admin/Structure_Report_Wave03_Update5_Wave04_Start.md)
+- [00_Project_Admin/Structure_Report_Wave04_Update2.md](00_Project_Admin/Structure_Report_Wave04_Update2.md)
+- [00_Project_Admin/Structure_Report_Wave04_Update3.md](00_Project_Admin/Structure_Report_Wave04_Update3.md)
+- [00_Project_Admin/Structure_Report_Wave04_Update4_Closeout.md](00_Project_Admin/Structure_Report_Wave04_Update4_Closeout.md)
+- [00_Project_Admin/Structure_Report_Wave05_Update1.md](00_Project_Admin/Structure_Report_Wave05_Update1.md)
+- [00_Project_Admin/Structure_Report_Wave05_Update2.md](00_Project_Admin/Structure_Report_Wave05_Update2.md)
+- [00_Project_Admin/Structure_Report_Wave05_Update3_Closeout.md](00_Project_Admin/Structure_Report_Wave05_Update3_Closeout.md)
+- [00_Project_Admin/Structure_Report_Wave06_Update1.md](00_Project_Admin/Structure_Report_Wave06_Update1.md)
+- [00_Project_Admin/Structure_Report_Wave06_Update2.md](00_Project_Admin/Structure_Report_Wave06_Update2.md)
+
+## 01_Product_Scope_Requirements/
+- [01_Product_Scope_Requirements/Customer_Message_Dataset_Insights.md](01_Product_Scope_Requirements/Customer_Message_Dataset_Insights.md)
+- [01_Product_Scope_Requirements/Department_Routing_Spec.md](01_Product_Scope_Requirements/Department_Routing_Spec.md)
+- [01_Product_Scope_Requirements/FAQ_Automation_Scope.md](01_Product_Scope_Requirements/FAQ_Automation_Scope.md)
+- [01_Product_Scope_Requirements/Product_Vision_and_Non_Goals.md](01_Product_Scope_Requirements/Product_Vision_and_Non_Goals.md)
+- [01_Product_Scope_Requirements/Success_Metrics_and_SLAs.md](01_Product_Scope_Requirements/Success_Metrics_and_SLAs.md)
+- [01_Product_Scope_Requirements/User_Journeys_and_Workflows.md](01_Product_Scope_Requirements/User_Journeys_and_Workflows.md)
+
+## 02_System_Architecture/
+- [02_System_Architecture/AWS_Organizations_Setup_Plan_No_Control_Tower.md](02_System_Architecture/AWS_Organizations_Setup_Plan_No_Control_Tower.md)
+- [02_System_Architecture/AWS_Region_and_Environment_Strategy.md](02_System_Architecture/AWS_Region_and_Environment_Strategy.md)
+- [02_System_Architecture/AWS_Serverless_Reference_Architecture.md](02_System_Architecture/AWS_Serverless_Reference_Architecture.md)
+- [02_System_Architecture/Architecture_Overview.md](02_System_Architecture/Architecture_Overview.md)
+- [02_System_Architecture/Data_Flow_and_Storage.md](02_System_Architecture/Data_Flow_and_Storage.md)
+- [02_System_Architecture/DynamoDB_State_and_Idempotency_Schema.md](02_System_Architecture/DynamoDB_State_and_Idempotency_Schema.md)
+- [02_System_Architecture/Hosting_Options_and_Recommendation.md](02_System_Architecture/Hosting_Options_and_Recommendation.md)
+- [02_System_Architecture/Sequence_Diagrams.md](02_System_Architecture/Sequence_Diagrams.md)
+
+## 03_Richpanel_Integration/
+- [03_Richpanel_Integration/Attachments_Playbook.md](03_Richpanel_Integration/Attachments_Playbook.md)
+- [03_Richpanel_Integration/Automation_Rules_and_Config_Inventory.md](03_Richpanel_Integration/Automation_Rules_and_Config_Inventory.md)
+- [03_Richpanel_Integration/Idempotency_Retry_Dedup.md](03_Richpanel_Integration/Idempotency_Retry_Dedup.md)
+- [03_Richpanel_Integration/Integration_Test_Plan.md](03_Richpanel_Integration/Integration_Test_Plan.md)
+- [03_Richpanel_Integration/Macros_and_Template_Alignment.md](03_Richpanel_Integration/Macros_and_Template_Alignment.md)
+- [03_Richpanel_Integration/Queues_and_Routing_Primitives.md](03_Richpanel_Integration/Queues_and_Routing_Primitives.md)
+- [03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md](03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md)
+- [03_Richpanel_Integration/Richpanel_Config_Changes_v1.md](03_Richpanel_Integration/Richpanel_Config_Changes_v1.md)
+- [03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md](03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md)
+- [03_Richpanel_Integration/Tenant_Capabilities_Clarifications.md](03_Richpanel_Integration/Tenant_Capabilities_Clarifications.md)
+- [03_Richpanel_Integration/Webhooks_and_Event_Handling.md](03_Richpanel_Integration/Webhooks_and_Event_Handling.md)
+
+## 04_LLM_Design_Evaluation/
+- [04_LLM_Design_Evaluation/Acceptance_Criteria_and_Rollout_Stages.md](04_LLM_Design_Evaluation/Acceptance_Criteria_and_Rollout_Stages.md)
+- [04_LLM_Design_Evaluation/Adversarial_and_Edge_Case_Test_Suite.md](04_LLM_Design_Evaluation/Adversarial_and_Edge_Case_Test_Suite.md)
+- [04_LLM_Design_Evaluation/Confidence_Scoring_and_Thresholds.md](04_LLM_Design_Evaluation/Confidence_Scoring_and_Thresholds.md)
+- [04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md](04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md)
+- [04_LLM_Design_Evaluation/Golden_Set_Labeling_SOP.md](04_LLM_Design_Evaluation/Golden_Set_Labeling_SOP.md)
+- [04_LLM_Design_Evaluation/Intent_Taxonomy_and_Labeling_Guide.md](04_LLM_Design_Evaluation/Intent_Taxonomy_and_Labeling_Guide.md)
+- [04_LLM_Design_Evaluation/Model_Config_and_Versioning.md](04_LLM_Design_Evaluation/Model_Config_and_Versioning.md)
+- [04_LLM_Design_Evaluation/Multi_Intent_Priority_Matrix.md](04_LLM_Design_Evaluation/Multi_Intent_Priority_Matrix.md)
+- [04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md](04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md)
+- [04_LLM_Design_Evaluation/Prompt_Library_and_Templates.md](04_LLM_Design_Evaluation/Prompt_Library_and_Templates.md)
+- [04_LLM_Design_Evaluation/Prompting_and_Output_Schemas.md](04_LLM_Design_Evaluation/Prompting_and_Output_Schemas.md)
+- [04_LLM_Design_Evaluation/Prototype_Validation_Notes.md](04_LLM_Design_Evaluation/Prototype_Validation_Notes.md)
+- [04_LLM_Design_Evaluation/Prototype_Wave04_LLMEval_Report.md](04_LLM_Design_Evaluation/Prototype_Wave04_LLMEval_Report.md)
+- [04_LLM_Design_Evaluation/Safety_and_Prompt_Injection_Defenses.md](04_LLM_Design_Evaluation/Safety_and_Prompt_Injection_Defenses.md)
+- [04_LLM_Design_Evaluation/Template_ID_Catalog.md](04_LLM_Design_Evaluation/Template_ID_Catalog.md)
+- [04_LLM_Design_Evaluation/prompts/classification_routing_v1.md](04_LLM_Design_Evaluation/prompts/classification_routing_v1.md)
+- [04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md](04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md)
+
+## 05_FAQ_Automation/
+- [05_FAQ_Automation/00_Overview.md](05_FAQ_Automation/00_Overview.md)
+- [05_FAQ_Automation/Automation_Sender_Identity_and_Channel_Scope.md](05_FAQ_Automation/Automation_Sender_Identity_and_Channel_Scope.md)
+- [05_FAQ_Automation/Brand_Constants_and_Policy_Links.md](05_FAQ_Automation/Brand_Constants_and_Policy_Links.md)
+- [05_FAQ_Automation/Customer_Experience_Metrics.md](05_FAQ_Automation/Customer_Experience_Metrics.md)
+- [05_FAQ_Automation/FAQ_Automation_Dedup_Rate_Limits.md](05_FAQ_Automation/FAQ_Automation_Dedup_Rate_Limits.md)
+- [05_FAQ_Automation/FAQ_Playbook_Test_Cases.md](05_FAQ_Automation/FAQ_Playbook_Test_Cases.md)
+- [05_FAQ_Automation/Human_Handoff_and_Escalation.md](05_FAQ_Automation/Human_Handoff_and_Escalation.md)
+- [05_FAQ_Automation/Macro_Alignment_and_Governance.md](05_FAQ_Automation/Macro_Alignment_and_Governance.md)
+- [05_FAQ_Automation/Order_Status_Automation.md](05_FAQ_Automation/Order_Status_Automation.md)
+- [05_FAQ_Automation/Pre_Launch_Copy_and_Link_Checklist.md](05_FAQ_Automation/Pre_Launch_Copy_and_Link_Checklist.md)
+- [05_FAQ_Automation/Response_Templates_and_Tone.md](05_FAQ_Automation/Response_Templates_and_Tone.md)
+- [05_FAQ_Automation/Richpanel_AUTO_Macro_Pack_v1.md](05_FAQ_Automation/Richpanel_AUTO_Macro_Pack_v1.md)
+- [05_FAQ_Automation/Richpanel_AUTO_Macro_Setup_Checklist.md](05_FAQ_Automation/Richpanel_AUTO_Macro_Setup_Checklist.md)
+- [05_FAQ_Automation/Stakeholder_Review_and_Approval.md](05_FAQ_Automation/Stakeholder_Review_and_Approval.md)
+- [05_FAQ_Automation/Template_Rendering_and_Variables.md](05_FAQ_Automation/Template_Rendering_and_Variables.md)
+- [05_FAQ_Automation/Templates_Library_v1.md](05_FAQ_Automation/Templates_Library_v1.md)
+- [05_FAQ_Automation/Top_FAQs_Playbooks.md](05_FAQ_Automation/Top_FAQs_Playbooks.md)
+
+## 06_Data_Privacy_Observability/
+- [06_Data_Privacy_Observability/Data_Retention_and_Access.md](06_Data_Privacy_Observability/Data_Retention_and_Access.md)
+- [06_Data_Privacy_Observability/Logging_Metrics_Tracing.md](06_Data_Privacy_Observability/Logging_Metrics_Tracing.md)
+- [06_Data_Privacy_Observability/PII_Handling_and_Redaction.md](06_Data_Privacy_Observability/PII_Handling_and_Redaction.md)
+- [06_Data_Privacy_Observability/README.md](06_Data_Privacy_Observability/README.md)
+
+## 06_Security_Privacy_Compliance/
+- [06_Security_Privacy_Compliance/AWS_Security_Baseline_Checklist.md](06_Security_Privacy_Compliance/AWS_Security_Baseline_Checklist.md)
+- [06_Security_Privacy_Compliance/Compliance_Readiness_Checklist.md](06_Security_Privacy_Compliance/Compliance_Readiness_Checklist.md)
+- [06_Security_Privacy_Compliance/Data_Classification_and_PII_Inventory.md](06_Security_Privacy_Compliance/Data_Classification_and_PII_Inventory.md)
+- [06_Security_Privacy_Compliance/Data_Retention_and_Access.md](06_Security_Privacy_Compliance/Data_Retention_and_Access.md)
+- [06_Security_Privacy_Compliance/Encryption_and_Data_Protection.md](06_Security_Privacy_Compliance/Encryption_and_Data_Protection.md)
+- [06_Security_Privacy_Compliance/IAM_Access_Review_and_Break_Glass.md](06_Security_Privacy_Compliance/IAM_Access_Review_and_Break_Glass.md)
+- [06_Security_Privacy_Compliance/IAM_Least_Privilege.md](06_Security_Privacy_Compliance/IAM_Least_Privilege.md)
+- [06_Security_Privacy_Compliance/Incident_Response_Security_Runbooks.md](06_Security_Privacy_Compliance/Incident_Response_Security_Runbooks.md)
+- [06_Security_Privacy_Compliance/Kill_Switch_and_Safe_Mode.md](06_Security_Privacy_Compliance/Kill_Switch_and_Safe_Mode.md)
+- [06_Security_Privacy_Compliance/Logging_Metrics_Tracing.md](06_Security_Privacy_Compliance/Logging_Metrics_Tracing.md)
+- [06_Security_Privacy_Compliance/Network_Security_and_Egress_Controls.md](06_Security_Privacy_Compliance/Network_Security_and_Egress_Controls.md)
+- [06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md](06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md)
+- [06_Security_Privacy_Compliance/Secrets_and_Key_Management.md](06_Security_Privacy_Compliance/Secrets_and_Key_Management.md)
+- [06_Security_Privacy_Compliance/Secure_SDLC_and_Security_Testing.md](06_Security_Privacy_Compliance/Secure_SDLC_and_Security_Testing.md)
+- [06_Security_Privacy_Compliance/Security_Controls_Matrix.md](06_Security_Privacy_Compliance/Security_Controls_Matrix.md)
+- [06_Security_Privacy_Compliance/Security_Monitoring_Alarms_and_Dashboards.md](06_Security_Privacy_Compliance/Security_Monitoring_Alarms_and_Dashboards.md)
+- [06_Security_Privacy_Compliance/Security_Privacy_Compliance_Overview.md](06_Security_Privacy_Compliance/Security_Privacy_Compliance_Overview.md)
+- [06_Security_Privacy_Compliance/Threat_Model_STRIDE.md](06_Security_Privacy_Compliance/Threat_Model_STRIDE.md)
+- [06_Security_Privacy_Compliance/Vendor_Data_Handling_OpenAI_Richpanel_Shopify.md](06_Security_Privacy_Compliance/Vendor_Data_Handling_OpenAI_Richpanel_Shopify.md)
+- [06_Security_Privacy_Compliance/Wave06_Definition_of_Done_Checklist.md](06_Security_Privacy_Compliance/Wave06_Definition_of_Done_Checklist.md)
+- [06_Security_Privacy_Compliance/Webhook_Auth_and_Request_Validation.md](06_Security_Privacy_Compliance/Webhook_Auth_and_Request_Validation.md)
+- [06_Security_Privacy_Compliance/Webhook_Secret_Rotation_Runbook.md](06_Security_Privacy_Compliance/Webhook_Secret_Rotation_Runbook.md)
+
+## 07_Reliability_Scaling/
+- [07_Reliability_Scaling/Capacity_Plan_and_SLOs.md](07_Reliability_Scaling/Capacity_Plan_and_SLOs.md)
+- [07_Reliability_Scaling/Cost_Model.md](07_Reliability_Scaling/Cost_Model.md)
+- [07_Reliability_Scaling/Failure_Modes_and_Recovery.md](07_Reliability_Scaling/Failure_Modes_and_Recovery.md)
+- [07_Reliability_Scaling/Rate_Limiting_and_Backpressure.md](07_Reliability_Scaling/Rate_Limiting_and_Backpressure.md)
+
+## 08_Testing_Quality/
+- [08_Testing_Quality/LLM_Evals_in_CI.md](08_Testing_Quality/LLM_Evals_in_CI.md)
+- [08_Testing_Quality/LLM_Regression_Gates_Checklist.md](08_Testing_Quality/LLM_Regression_Gates_Checklist.md)
+- [08_Testing_Quality/Load_and_Soak_Testing.md](08_Testing_Quality/Load_and_Soak_Testing.md)
+- [08_Testing_Quality/Test_Strategy_and_Matrix.md](08_Testing_Quality/Test_Strategy_and_Matrix.md)
+
+## 09_Deployment_Operations/
+- [09_Deployment_Operations/CICD_Plan.md](09_Deployment_Operations/CICD_Plan.md)
+- [09_Deployment_Operations/Environments.md](09_Deployment_Operations/Environments.md)
+- [09_Deployment_Operations/Release_and_Rollback.md](09_Deployment_Operations/Release_and_Rollback.md)
+- [09_Deployment_Operations/Runbooks.md](09_Deployment_Operations/Runbooks.md)
+
+## 10_Governance_Continuous_Improvement/
+- [10_Governance_Continuous_Improvement/Change_Management.md](10_Governance_Continuous_Improvement/Change_Management.md)
+- [10_Governance_Continuous_Improvement/Model_Update_Policy.md](10_Governance_Continuous_Improvement/Model_Update_Policy.md)
+- [10_Governance_Continuous_Improvement/Taxonomy_Drift_and_Calibration.md](10_Governance_Continuous_Improvement/Taxonomy_Drift_and_Calibration.md)
+
+## 11_Cursor_Agent_Work_Packages/
+- [11_Cursor_Agent_Work_Packages/README.md](11_Cursor_Agent_Work_Packages/README.md)
+
+## 90_Risks_Common_Issues/
+- [90_Risks_Common_Issues/Common_Issues_Mitigation_Matrix.md](90_Risks_Common_Issues/Common_Issues_Mitigation_Matrix.md)
+- [90_Risks_Common_Issues/FMEA.md](90_Risks_Common_Issues/FMEA.md)
+- [90_Risks_Common_Issues/Threat_Model.md](90_Risks_Common_Issues/Threat_Model.md)
+
+## 99_Appendices/
+- [99_Appendices/Data_Inputs.md](99_Appendices/Data_Inputs.md)
+- [99_Appendices/Glossary.md](99_Appendices/Glossary.md)
+- [99_Appendices/References.md](99_Appendices/References.md)
+
+## Waves/
+- [Waves/Wave_00_Phase0_Folder_Structure/Wave_Notes.md](Waves/Wave_00_Phase0_Folder_Structure/Wave_Notes.md)
+- [Waves/Wave_01_Discovery_Requirements/Wave_Notes.md](Waves/Wave_01_Discovery_Requirements/Wave_Notes.md)
+- [Waves/Wave_02_Architecture_Infra/Wave_Notes.md](Waves/Wave_02_Architecture_Infra/Wave_Notes.md)
+- [Waves/Wave_03_Richpanel_Integration_Design/Cursor_Agent_Quick_Checklist_Plain_English.md](Waves/Wave_03_Richpanel_Integration_Design/Cursor_Agent_Quick_Checklist_Plain_English.md)
+- [Waves/Wave_03_Richpanel_Integration_Design/Cursor_Agent_Tasks.md](Waves/Wave_03_Richpanel_Integration_Design/Cursor_Agent_Tasks.md)
+- [Waves/Wave_03_Richpanel_Integration_Design/Wave_Notes.md](Waves/Wave_03_Richpanel_Integration_Design/Wave_Notes.md)
+- [Waves/Wave_04_LLM_Routing_Design/Cursor_Agent_Tasks.md](Waves/Wave_04_LLM_Routing_Design/Cursor_Agent_Tasks.md)
+- [Waves/Wave_04_LLM_Routing_Design/Wave_Notes.md](Waves/Wave_04_LLM_Routing_Design/Wave_Notes.md)
+- [Waves/Wave_05_FAQ_Automation_Design/Wave_Notes.md](Waves/Wave_05_FAQ_Automation_Design/Wave_Notes.md)
+- [Waves/Wave_06_Security_Privacy_Compliance/Wave_Notes.md](Waves/Wave_06_Security_Privacy_Compliance/Wave_Notes.md)
+- [Waves/Wave_07_Reliability_Scaling_Capacity/Wave_Notes.md](Waves/Wave_07_Reliability_Scaling_Capacity/Wave_Notes.md)
+- [Waves/Wave_08_Observability_Analytics/Wave_Notes.md](Waves/Wave_08_Observability_Analytics/Wave_Notes.md)
+- [Waves/Wave_09_Testing_QA_Release/Wave_Notes.md](Waves/Wave_09_Testing_QA_Release/Wave_Notes.md)
+- [Waves/Wave_10_Operations_Runbooks/Wave_Notes.md](Waves/Wave_10_Operations_Runbooks/Wave_Notes.md)
+- [Waves/Wave_11_Governance_Continuous_Improvement/Wave_Notes.md](Waves/Wave_11_Governance_Continuous_Improvement/Wave_Notes.md)
+- [Waves/Wave_12_Cursor_Agent_Execution_Packs/Wave_Notes.md](Waves/Wave_12_Cursor_Agent_Execution_Packs/Wave_Notes.md)
