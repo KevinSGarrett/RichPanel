@@ -1,0 +1,3 @@
+Acknowledge Quickly: 
+
+Respond to Richpanel’s request quickly. Typically, webhooks should return a 200 OK as fast as possible. If your middleware needs to perform time-consuming actions (like calling multiple other APIs or doing heavy computation), consider queuing that work internally and immediately respond to Richpanel. This way, even if your middleware takes, say, 10 seconds to process the event, Richpanel isn’t left hanging – it got a quick 200 response. (While Richpanel’s specific timeout isn’t documented, a common pattern is a timeout on the order of a few seconds for webhooks.)

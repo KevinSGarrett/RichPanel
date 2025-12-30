@@ -1,0 +1,3 @@
+Subscriptions and Other Data: 
+
+If you run a subscription business or have any recurring orders, you can similarly push subscription records via the Create/Update Subscription API. Richpanel recently added integrations for subscription platforms (like Skio, Recharge, etc.), which essentially do the same thing – they send subscription info into Richpanel so agents can view and even manage subscriptions from the helpdesk. With a custom integration, you can decide what subscription fields to send (e.g., next billing date, current plan, etc.) so that information is on hand for support.

@@ -1,0 +1,12 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.createACustomer()
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

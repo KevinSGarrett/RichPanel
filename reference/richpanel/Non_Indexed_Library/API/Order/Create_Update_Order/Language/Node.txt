@@ -1,0 +1,13 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.createAnOrder({appclient_id: 'appclient_id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

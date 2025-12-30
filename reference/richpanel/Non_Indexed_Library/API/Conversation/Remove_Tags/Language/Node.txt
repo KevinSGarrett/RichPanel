@@ -1,0 +1,12 @@
+Remove Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/remove-tags
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.removeTags({id: 'id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

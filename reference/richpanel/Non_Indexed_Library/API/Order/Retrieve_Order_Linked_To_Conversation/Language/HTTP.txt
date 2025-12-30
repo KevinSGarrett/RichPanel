@@ -1,0 +1,11 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: HTTP
+
+GET /v1/order/conversationId HTTP/1.1
+Accept: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

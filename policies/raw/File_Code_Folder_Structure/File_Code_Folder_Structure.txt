@@ -1,0 +1,58 @@
+[File/Code/Folder layout structure]
+
+1. Organized code, file, and folder structure
+
+2. Maintain a clean, predictable file/code layout that is easy for humans and AI to navigate with minimal searching and minimal token/memory waste.
+
+3. Structural invariants (must always be true)
+- Every new file MUST have an intended “home” (module/folder) based on responsibility.
+- No orphan files: every non-trivial code/doc file must be linked from an index/roadmap.
+- Public vs internal boundaries must be explicit (stable entrypoints; internal modules not imported directly).
+- Folder structure must remain coherent during add/update/move/delete operations.
+
+4. 2) Required navigation artifacts (must be maintained)
+You MUST keep these up to date whenever code/doc structure changes:
+A) /docs/INDEX.md (or /docs/index.yaml) — master registry of docs + quick links
+B) /docs/CODEMAP.md — “where things live” map for code navigation
+C) /docs/ROADMAP.md — high-level module roadmap + current work streams
+D) Per-module README (e.g., /src/<module>/README.md) describing:
+   - purpose
+   - entrypoints
+   - key flows
+   - how to test
+   - links to related docs
+
+5. Search-minimization rule (“Index-first navigation”)
+Before running broad searches:
+- Consult CODEMAP + module READMEs + docs index.
+- If searching is required, use scoped search within the most likely module folder first.
+- Record any missing/weak mapping: if you had to search widely, improve CODEMAP so the next run won’t.
+
+6. File size + granularity guidelines (token-aware, but not micro-files)
+- Avoid “god files.” Prefer modular files grouped by responsibility.
+- Target size for logic files: ~200–400 lines.
+- Soft cap: ~600 lines. Hard cap: ~900 lines (requires justification + follow-up refactor ticket).
+- Avoid micro-files: do not split into many tiny files unless it improves clarity and reuse.
+- Prefer “few coherent files per subdomain” over “many tiny single-function files.”
+
+7. Module boundaries (how to split code)
+- Each module should represent one clear subdomain (e.g., routing, integrations, storage, auth, UI components).
+- Keep a small number of stable entrypoints per module (e.g., index.ts, __init__.py, public.py).
+- Internal helpers live under an /internal or /lib folder inside the module.
+- Cross-module access must go through the module’s public entrypoint, not deep imports.
+
+8. Change discipline (add/move/delete rules)
+Whenever you add/move/delete files or folders:
+- Update CODEMAP + docs index links (no broken navigation).
+- Update imports/entrypoints so boundaries remain clean.
+- Run structure sanity checks:
+  - no dead links in docs index
+  - no references to deleted/moved paths
+  - module READMEs still accurate
+
+9. Deliverable at end of each run (required)
+Output a “Structure Report” containing:
+- Files/folders added, moved, deleted (paths)
+- Which indexes/maps were updated (paths)
+- Any files exceeding the size cap + refactor plan/ticket if needed
+- Any navigation friction encountered + what you improved to reduce future searching

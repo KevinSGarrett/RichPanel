@@ -1,0 +1,5 @@
+Summary:
+
+treat “Team” as the department object. Plan to map your ML model’s output (e.g. “returns”) to a Richpanel Team ID, and then set that via the API. This will place the conversation into the correct team’s inbox. (And yes, you can retrieve all teams via API to get their IDs
+developer.richpanel.com
+, which confirms the team names/IDs for mapping.) If needed, you can also adjust routing via automations (e.g. an automation rule could look at a tag or conversation property set by the middleware and then assign a team), but directly calling the API from your middleware to update the team is straightforward and real-time.

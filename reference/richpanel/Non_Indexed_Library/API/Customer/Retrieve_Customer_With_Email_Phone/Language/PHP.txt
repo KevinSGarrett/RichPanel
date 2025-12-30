@@ -1,0 +1,19 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: PHP
+
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('GET', 'https://api.richpanel.com/v1/customers/type/id', [
+  'headers' => [
+    'accept' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();

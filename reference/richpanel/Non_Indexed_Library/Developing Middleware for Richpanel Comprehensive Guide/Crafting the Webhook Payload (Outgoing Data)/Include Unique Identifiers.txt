@@ -1,0 +1,3 @@
+Include Unique Identifiers: 
+
+It’s important to include a unique ticket identifier in the payload for idempotency. For instance, sending the conversation_id (or ticket URL which contains it) allows your middleware to recognize if it has processed a particular event already. Richpanel may not provide a direct “message ID” for each comment, but the combination of conversation ID and a timestamp or the message text can serve to uniquely identify an incoming message. Using these, your middleware can safely ignore duplicate calls or repeated notifications for the same event.

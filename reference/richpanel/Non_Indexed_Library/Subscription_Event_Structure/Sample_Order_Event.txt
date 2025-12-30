@@ -1,0 +1,90 @@
+Sample Order Event
+JSON
+
+{
+	"event": "subscription",
+	"properties": {
+		"orderId": "11111",
+		"email": "shubhanshu@gmail.com",
+		"amount": 169.97, //required
+    "start":  "2025-01-05T17:28:18+00:00",
+    "trialEnd":  "2025-01-05T17:28:18+00:00", //leave it empty if not available
+    "nextPayment": "2025-01-05T17:28:18+00:00",
+    "lastPayment":  "2025-01-05T17:28:18+00:00", //leave it empty if not available
+    "end": "2025-02-05T17:28:18+00:00", //leave it empty if not available
+    "shippingPhone": null,
+		"shippingCity": "LOCKPORT",
+		"shippingPostcode": "60441",
+		"shippingState": "Illinois",
+		"shippingCountry": "United States",
+		"shippingAddressLine1": "201B, lotus CHS",
+		"shippingAddressLine2": "",
+		"shippingFirstName": "Shubhanshu",
+		"shippingLastName": "Chouhan",
+    "status": "active",
+		"items": [{ //required
+				"id": "2493989519418",
+				"price": 49.99, //required
+				"optionId": "31858336956474",
+				"sku": "A31SSUJZ99COMTL1",
+				"name": "My Product - L",
+				"grams": 454,
+				"quantity": 1, //required
+				"imageURL": [
+					"https://cdn.abc.com/s/files/1/1067/2582/products/product1.jpg?v=1605207140"
+				]
+			},
+			{
+				"id": "4586759913530",
+				"price": 49.99,
+				"optionId": "32132068311098",
+				"sku": "A31SSUGI85ODGDM1",
+				"name": "My Product - M",
+				"grams": 454,
+				"quantity": 1,
+				"imageURL": [
+					"https://cdn.abc.com/s/files/1/1067/2582/products/product2.jpg?v=1605207140"
+				]
+			}
+		]
+	},
+	"user_properties": { //required
+		"uid": "shubhanshu@gmail.com", //required, Customer user id in database
+		"phone": null,
+		"email": "shubhanshu@gmail.com",
+		"firstName": "Shubhanshu",
+		"lastName": "Chouhan",
+		"billingAddress": {
+			"firstName": "Shubhanshu",
+			"lastName": "Chouhan",
+			"city": "LOCKPORT",
+			"state": "Illinois",
+			"stateCode": "IL",
+			"country": "United States",
+			"countryCode": "US",
+			"postcode": "60441",
+			"phone": null,
+			"address1": "201B, lotus chs",
+			"address2": "",
+			"company": ""
+		},
+		"shippingAddress": {
+			"firstName": "Shubhanshu",
+			"lastName": "Chouhan",
+			"city": "LOCKPORT",
+			"state": "Illinois",
+			"stateCode": "IL",
+			"country": "United States",
+			"countryCode": "US",
+			"postcode": "60441",
+			"phone": null,
+			"address1": "201B, lotus chs",
+			"address2": "",
+			"email": "shubhanshu@gmail.com"
+		},
+	},
+	"time": {
+		"sentAt": "2025-01-05T17:28:18+00:00" //when event occurred, use this property in case you're updating old orders, or synchronizing old orders
+	},
+	"appClientId": "API_KEY" //change for each website, can be found in Richpanel app.
+}

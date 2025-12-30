@@ -1,0 +1,1 @@
+This folder contain screenshots of the companies current Richpanel Automation Rules (Assignment Rules, Tagging Rules, and Auto Reply Rules)

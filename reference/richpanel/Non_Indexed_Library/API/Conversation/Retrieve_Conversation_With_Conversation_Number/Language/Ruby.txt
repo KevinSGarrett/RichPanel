@@ -1,0 +1,20 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Ruby
+
+require 'uri'
+require 'net/http'
+
+url = URI("https://api.richpanel.com/v1/tickets/number/conversationNo")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Get.new(url)
+request["accept"] = 'application/json'
+request["x-richpanel-key"] = 'test'
+
+response = http.request(request)
+puts response.read_body

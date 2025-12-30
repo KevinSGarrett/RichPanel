@@ -1,0 +1,12 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.addTags({id: 'id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

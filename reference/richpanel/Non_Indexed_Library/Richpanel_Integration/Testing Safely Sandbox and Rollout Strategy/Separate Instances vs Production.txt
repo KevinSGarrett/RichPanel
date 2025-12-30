@@ -1,0 +1,5 @@
+Separate Instances vs Production: 
+
+Ideally, use the sandbox instance to test major changes (like a new version of your AI model or a new automation rule) before applying to prod. Because automations can be exported/imported? – Currently, Richpanel does not have an export/import feature for automation rules or HTTP Targets that we know of. You will likely need to recreate rules in production manually after testing in sandbox. This is unfortunate (and you might want to ask Richpanel if they have any config migration tools on their roadmap). To mitigate risk, document the rule settings carefully and maybe have a second pair of eyes (another admin) verify them when reimplementing in prod.
+
+Also, ensure you have a way to disable the automation quickly if something goes awry. For example, keep the rule toggle handy or even a kill-switch in your middleware (if you detect a loop or error, maybe have the middleware stop responding or alert an admin to turn off the rule).

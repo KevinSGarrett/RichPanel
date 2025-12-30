@@ -1,0 +1,7 @@
+Requests
+Base API URL
+All requests are made against the Richpanel domain only.
+Base API URL for Richpanel Domain is: https://api.richpanel.com/v1/
+
+Partially updating objects
+When performing updates on objects (e.g: updating a ticket, a customer), you don't have to send all its attributes. Just send the attributes you want to modify. This will prevent overriding some other attributes in the case the data you fetched were outdated.

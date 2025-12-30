@@ -1,0 +1,15 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: JavaScript
+
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/order/appclient_id/order_id', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

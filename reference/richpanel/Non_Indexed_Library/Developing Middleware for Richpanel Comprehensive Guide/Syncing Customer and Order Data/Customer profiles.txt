@@ -1,0 +1,4 @@
+Orders: 
+
+One of Richpanel’s strengths is showing order data next to tickets, but if you’re not on a platform with a native integration, you’ll send orders via the API. Use the Create/Update Order endpoint for this. Typically, you would call this when a new order is placed (to create it in Richpanel) and if an order is updated (to keep statuses current). The order object includes details like order ID, status (e.g., fulfilled, shipped), line items, totals, etc., as well as a reference to the customer. By sending this data, an agent looking at a ticket from that customer can see “Order #12345 – shipped yesterday via UPS, tracking 1Z999...” without leaving Richpanel
+updates.richpanel.com

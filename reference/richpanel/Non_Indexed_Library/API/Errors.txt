@@ -1,0 +1,66 @@
+Errors
+The Richpanel API uses conventional HTTP response codes to indicate the success or failure of an API request.
+
+Status code
+
+Meaning
+
+Description
+
+2xx
+
+Success
+
+The request succeeded. Everything worked as expected.
+
+400
+
+Bad Request
+
+The request is invalid. Mainly due to:
+• required parameters not specified
+• parameters having invalid values
+• unknown parameters were specified.
+
+Read the error attribute contained in the data of the HTTP response to have more detailed information and understand the change you need to make to perform your request.
+
+401
+
+Unauthorized
+
+The request was not authenticated. Mainly due to:
+• invalid or expired API token
+• missing API token
+
+Read Authentication section to know how to authenticate your requests.
+
+404
+
+Not found
+
+The requested resource does not exist. It can be a ticket, a customer, etc... Most of the time, it means that the resource has been deleted.
+
+409
+
+Conflict
+
+The request tried to create or update a resource with an identifier already in use. E.g: Attempting to create a customer with an email address already used by another customer.
+
+413
+
+Payload Too Large
+
+The request failed because the payload is too large. Most of the time, it means that you've attempted to upload files above the size limit.
+
+429
+
+Too Many Requests
+
+The request failed because you performed too many requests in a period of time. In such scenario, you need to retry later.
+Read more information and learn how to handle this scenario programmatically in the Limitations section.
+
+5xx
+
+Server Errors
+
+The request is valid but something when wrong on our side. These are rare.

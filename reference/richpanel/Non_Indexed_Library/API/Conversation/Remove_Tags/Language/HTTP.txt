@@ -1,0 +1,12 @@
+Remove Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/remove-tags
+
+Language: JAVA
+
+PUT /v1/tickets/id/remove-tags HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

@@ -1,0 +1,18 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: Shell
+
+import requests
+
+url = "https://api.richpanel.com/v1/order/appclient_id/order_id"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.get(url, headers=headers)
+
+print(response.text)

@@ -1,0 +1,29 @@
+1) Automation loops that spam customers or endlessly re-trigger your middleware
+
+What goes wrong
+
+Your Richpanel automation (HTTP Target) triggers on a message.
+
+Your middleware posts an automated reply or updates the ticket.
+
+That action accidentally matches the same automation rule again (or another rule), causing repeated triggers and potentially an infinite loop.
+
+How to avoid it (do these early)
+
+In Richpanel automation rules, trigger your HTTP Target only for inbound customer messages, not outbound/operator messages.
+
+Use a “handled-by-middleware” flag:
+
+Add a tag like middleware_processed and ensure your rule only fires if that tag is not present.
+
+Or set a custom field like triage_status = processed.
+
+Use a dedicated bot/integration identity (where possible) and exclude that identity in “on agent reply” automations.
+
+Add a “loop guard” in middleware:
+
+If the ticket already has middleware_processed or auto_replied_order_status, do nothing.
+
+Richpanel’s HTTP Targets are designed specifically to call external systems from workflows/automation rules, so loop-proofing around them is crucial. 
+Richpanel updates
++1

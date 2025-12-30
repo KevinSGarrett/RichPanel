@@ -1,0 +1,3 @@
+Testing at Scale: 
+
+It can be useful to simulate a load of events to see how your integration holds up. If Richpanel doesn’t easily allow simulating many webhooks, you could temporarily point the HTTP Target to a script that calls your middleware many times. Or use a tool to send sample webhook payloads in rapid succession to your endpoint (bypassing Richpanel) to test your throughput and error handling.

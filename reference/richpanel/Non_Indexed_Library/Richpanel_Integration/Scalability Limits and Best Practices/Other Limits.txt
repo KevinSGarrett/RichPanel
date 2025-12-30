@@ -1,0 +1,5 @@
+Other Limits: 
+
+Aside from API call rate, Richpanel likely has limits on things like file upload size (if you ever use the file API) or number of automation rules, etc. From the pricing info, lower-tier plans limit the number of active automation rules (e.g. the free plan might allow 3 rules)
+richpanel.com
+, but higher tiers likely allow unlimited or a high number. For HTTP Targets themselves, there isn’t a stated limit on how many you can create, but you probably only need a couple (one per integration type). There’s also no specific quota given for webhook calls per minute – it’s mainly constrained by how many incoming events you have and the API rate limit on responses.

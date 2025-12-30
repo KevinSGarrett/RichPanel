@@ -1,0 +1,20 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: PHP
+
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('PUT', 'https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId', [
+  'headers' => [
+    'accept' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();

@@ -1,0 +1,5 @@
+Secure Webhook Calls:
+
+ On the security front, Richpanel allows you to secure HTTP Target calls through custom headers (as mentioned earlier)
+headwayapp.co
+. This means you can (and should) include an authentication token or secret in the header of each request Richpanel sends to your middleware. For example, you might configure a header X-Auth: <randomsecret> in the HTTP Target. Your middleware will check for this header and its value for each request – if it’s missing or incorrect, you know the request didn’t come from Richpanel (or at least not from your configured integration). This is effectively a static token authentication, which is simple and sufficient as long as the token is kept secret. Richpanel does not currently support more advanced request signing like HMAC signatures (where it would hash the payload with a secret each time). So, rely on the static header and HTTPS. Additionally, ensure your endpoint URL is HTTPS (Richpanel will be calling out from their cloud; you want TLS to encrypt the data in transit).

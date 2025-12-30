@@ -1,0 +1,5 @@
+Security Review: 
+
+If needed, ask Richpanel for their security documentation (they’ve some info on encryption, network security etc. on the security page). They use HTTPS for all client-server communication, and data is encrypted at rest, etc. Since your middleware will handle customer data (the payloads will contain emails, messages, maybe addresses), ensure your system also meets security best practices (use HTTPS, store data encrypted if you log it, etc.). The chain of custody: Customer → Richpanel → Your middleware → Richpanel → Customer means both Richpanel and your system need to be secure. Richpanel appears to have solid security certifications in place
+richpanel.com
+, so you’ll want to match that level.

@@ -1,0 +1,5 @@
+IP Whitelisting: 
+
+Richpanel hasn’t published a set of IP ranges for outbound webhook calls. Since they are hosted on AWS (in Oregon region)
+richpanel.com
+, the IPs could be dynamic. If your security policy requires IP whitelisting, you might ask Richpanel support if they have a range, but chances are they will say it can change (many SaaS don’t provide fixed IPs for webhooks). Instead, one approach is to deploy your middleware behind a reverse proxy or firewall that does IP allowlisting if needed – but without known ranges, that’s tricky. So again, the auth header is your main defense. (You could also do a DNS lookup allowlist – e.g., only accept hostnames that resolve to Richpanel’s domain, but since it’s direct HTTP call, that’s not straightforward.)

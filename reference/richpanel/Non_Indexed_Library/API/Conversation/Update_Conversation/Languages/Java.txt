@@ -1,0 +1,17 @@
+Update a Conversation
+
+Language: Java
+
+OkHttpClient client = new OkHttpClient();
+
+MediaType mediaType = MediaType.parse("application/json");
+RequestBody body = RequestBody.create(mediaType, "{\"ticket\":{\"status\":\"OPEN\",\"comment\":{\"public\":true},\"via\":{\"channel\":\"email\"},\"assignee_id\":\"unassigned\"}}");
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/tickets/id")
+  .put(body)
+  .addHeader("accept", "application/json")
+  .addHeader("content-type", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();

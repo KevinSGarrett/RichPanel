@@ -1,0 +1,50 @@
+Order Event
+Property Name
+
+Description
+
+event* (required)
+
+
+"event": "order"
+value should be in small case. (Like 'order' NOT 'ORDER')
+
+properties*
+(required)
+
+
+"properties": {
+  "orderId": "1234" 
+  "amount": 100.25 
+  "status": "pending" 
+}
+Required properties
+
+All properties related to order should be present inside properties, You be sent your custom event properties here too.
+
+userProperties*
+(required)
+
+
+"userProperties": {
+  "uid": '123456' //require properties, unique id of customer.
+  "email": "mangesh@richpanel.com",
+  "phone": "123-456-7890"
+}
+All properties related to customer should be present inside userProperties, You be sent your custom user properties here too.
+
+time*
+(required)
+
+"time": {
+sentAt: 1629131492259
+}
+sentAt : The date and time when the event was sent.
+
+appClientId*
+(required)
+
+
+"appClientId":  "API_KEY"
+Unique id represent the source in Richpanel.
+Change for each website, can be found in Richpanel app.

@@ -1,0 +1,5 @@
+Cleanest Routing Approach: 
+
+The best practice is to use Teams for departmental routing rather than relying on just tags. For instance, instead of tagging a ticket “Billing” and having agents filter by tag, it’s more reliable to set the ticket’s Team to “Billing” so it appears in the Billing team’s queue directly. You can set the team either through an automation rule action (if your workflow is simple), or via the API call from your middleware once your model predicts the department. Using the API gives you flexibility: your middleware can call PUT /v1/tickets/{id} with {"team_id": "<team_uuid>"} (and possibly an assignee_id if you want to auto-assign to a specific user) to route the conversation. Richpanel’s API also allows listing users (agents)
+developer.richpanel.com
+, which you might use if you decide to assign to a specific agent or need to check team membership.

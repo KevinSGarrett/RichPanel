@@ -1,0 +1,5 @@
+Routing a Ticket to the Right Queue: 
+
+To route a ticket to a specific team/department, you have a couple of options. If you’re doing it manually in Richpanel, you could set up an automation rule action to assign the conversation to a Team (or to a specific agent). However, since you are developing middleware, you will likely use the API to update the conversation’s assignment after your AI/middleware determines the correct department. Richpanel’s API for updating a conversation (PUT /v1/tickets/{id}) supports setting the assignee and team. For example, you can include a team_id field in the update payload to move the ticket into that team’s queue (and optionally an assignee_id to assign it to a particular agent) – these fields aren’t shown in the public docs snippet but are part of the conversation object. The list of Teams and their IDs can be fetched via the API
+developer.richpanel.com
+, so your middleware can maintain a mapping from department names to Richpanel team IDs.

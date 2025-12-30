@@ -1,0 +1,5 @@
+“Department” Concept in Richpanel: 
+
+Richpanel organizes agents into Teams, which effectively serve as departments or groups. There isn’t a separate object explicitly called “Department” – instead, you’ll use Teams to represent departmental queues. In the API and UI, a Team is a grouping of agents (e.g. “Sales Team”, “Returns Dept”, etc.). Richpanel’s API reference confirms the presence of Teams (you can list teams via the API)
+developer.richpanel.com
+, and these teams are used for assignment/routing purposes. There are also “Channels” in Richpanel (which denote the source channel like email, chat, etc.), and “Inboxes” (which may be views or collections of tickets, possibly filtered by team or channel). But the canonical routing object is the Team – when you want to route a conversation to a specific department, you will assign it to the corresponding Team.

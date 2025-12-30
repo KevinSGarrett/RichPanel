@@ -1,0 +1,7 @@
+Data Residency and Retention:
+
+Richpanel hosts data on AWS Oregon (us-west-2)
+richpanel.com
+. If you have EU data concerns, clarify if they offer EU data centers; from what we see, data is in the US by default. They likely retain data as long as your account is active, and they provide export tools (you can export conversations to CSV via their UI
+updates.richpanel.com
+, and via API you can fetch data). If you need data deleted, their DPA covers that process.

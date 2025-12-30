@@ -1,0 +1,33 @@
+List Teams
+get
+https://api.richpanel.com/v1/teams
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Responses
+
+200
+200
+
+Response body
+object
+team
+array of objects
+object
+updated_at
+string
+created_at
+string
+id
+string
+name
+string
+organization_id
+string
+
+400
+400

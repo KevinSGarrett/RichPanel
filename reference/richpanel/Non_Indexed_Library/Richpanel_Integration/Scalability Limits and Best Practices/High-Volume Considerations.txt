@@ -1,0 +1,3 @@
+High-Volume Considerations: 
+
+If you expect very high volume (hundreds of tickets per hour), coordinate with Richpanel support. They might advise on using bulk APIs or adjustments. Currently, the API is more transactional (one ticket at a time updates), so just be mindful of the throughput. Also test under load to see if any latency creeps in.

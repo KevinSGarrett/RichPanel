@@ -1,0 +1,26 @@
+Duplicate events and idempotency failures (double replies, double routing, double tagging)
+
+What goes wrong
+
+Richpanel can trigger multiple rules for the same ticket event.
+
+Customers can send multiple messages rapidly.
+
+Your middleware can retry on internal errors.
+Result: you post two auto-replies, tag twice, or bounce between teams.
+
+How to avoid it
+
+Build idempotency into every action:
+
+Derive an idempotency key such as {ticket_id}:{comment_id} (or {ticket_id}:{message_created_at}).
+
+Persist processed keys in Redis/DB with a TTL (e.g., 7–30 days).
+
+Make writes idempotent:
+
+“Add tag” should be safe to run twice.
+
+“Send message” should check if you already posted an “order status response” recently.
+
+Add a per-ticket lock (Redis lock with short TTL) so only one worker processes a ticket at a time.

@@ -1,0 +1,295 @@
+Issue Type,Summary,Description,Epic Link,Story Points,Priority,Labels,Component/s,Assignee,Scope,Sprint (suggested)
+Task,"W12-EP00-T001 — Inventory required access + secrets (Richpanel API key, Shopify access) and define secret storage plan","Ticket ID: W12-EP00-T001
+Epic: EP00 — Preflight & tenant verification
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP00-T001_Inventory_required_access_secrets_Richpanel_API_key_Shopify_access_and_define_se.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP00_KEY>,2,P0,"wave12,ep00,preflight",Preflight,Infra/DevOps,V1,S0_Preflight
+Task,W12-EP00-T002 — Verify Richpanel tenant automation capabilities needed for middleware trigger (deferred Wave 03 items),"Ticket ID: W12-EP00-T002
+Epic: EP00 — Preflight & tenant verification
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP00-T002_Verify_Richpanel_tenant_automation_capabilities_needed_for_middleware_trigger_de.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP00_KEY>,2,P0,"wave12,ep00,preflight",Preflight,Backend,V1,S0_Preflight
+Task,W12-EP00-T003 — Sample order linkage reality in tenant (Richpanel order endpoints) without storing PII,"Ticket ID: W12-EP00-T003
+Epic: EP00 — Preflight & tenant verification
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP00-T003_Sample_order_linkage_reality_in_tenant_Richpanel_order_endpoints_without_storing.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP00_KEY>,3,P0,"wave12,ep00,preflight",Preflight,Backend,V1,S0_Preflight
+Task,W12-EP00-T004 — Finalize webhook authentication approach and rotation strategy (based on tenant verification),"Ticket ID: W12-EP00-T004
+Epic: EP00 — Preflight & tenant verification
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP00-T004_Finalize_webhook_authentication_approach_and_rotation_strategy_based_on_tenant_v.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP00_KEY>,2,P0,"wave12,ep00,preflight",Preflight,Security,V1,S0_Preflight
+Task,W12-EP01-T010 — Set up AWS Organization and create dev/staging/prod accounts (Organizations-only),"Ticket ID: W12-EP01-T010
+Epic: EP01 — AWS foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP01-T010_Set_up_AWS_Organization_and_create_dev_staging_prod_accounts_Organizations_only.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP01_KEY>,5,P0,"wave12,ep01,infra",Infra,Infra/DevOps,V1,S0_Preflight
+Task,W12-EP01-T011 — Create IAM roles and least-privilege policies for middleware (ingress vs worker) and CI deploy,"Ticket ID: W12-EP01-T011
+Epic: EP01 — AWS foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP01-T011_Create_IAM_roles_and_least_privilege_policies_for_middleware_ingress_vs_worker_a.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP01_KEY>,5,P0,"wave12,ep01,infra",Infra,Infra/DevOps,V1,S1_Foundation
+Task,"W12-EP01-T012 — Enable baseline logging + audit (CloudTrail, CloudWatch log retention, budgets, alarms)","Ticket ID: W12-EP01-T012
+Epic: EP01 — AWS foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP01-T012_Enable_baseline_logging_audit_CloudTrail_CloudWatch_log_retention_budgets_alarms.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP01_KEY>,3,P0,"wave12,ep01,infra",Infra,Infra/DevOps,V1,S1_Foundation
+Task,W12-EP01-T013 — Create Secrets Manager + SSM parameter namespaces for env config (including kill switch flags),"Ticket ID: W12-EP01-T013
+Epic: EP01 — AWS foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP01-T013_Create_Secrets_Manager_SSM_parameter_namespaces_for_env_config_including_kill_sw.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP01_KEY>,3,P0,"wave12,ep01,infra",Infra,Infra/DevOps,V1,S1_Foundation
+Task,W12-EP02-T020 — Select IaC tool and scaffold infrastructure repo modules (serverless stack),"Ticket ID: W12-EP02-T020
+Epic: EP02 — IaC & CI/CD foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP02-T020_Select_IaC_tool_and_scaffold_infrastructure_repo_modules_serverless_stack.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP02_KEY>,5,P0,"wave12,ep02,infra",Infra,Infra/DevOps,V1,S1_Foundation
+Task,"W12-EP02-T021 — Create CI pipeline with quality gates (unit tests, schema validation, lint, security checks)","Ticket ID: W12-EP02-T021
+Epic: EP02 — IaC & CI/CD foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP02-T021_Create_CI_pipeline_with_quality_gates_unit_tests_schema_validation_lint_security.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP02_KEY>,5,P0,"wave12,ep02,infra",Infra,Infra/DevOps,V1,S1_Foundation
+Task,W12-EP02-T022 — Implement deployment promotion flow (dev → staging → prod) and rollback automation,"Ticket ID: W12-EP02-T022
+Epic: EP02 — IaC & CI/CD foundation
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP02-T022_Implement_deployment_promotion_flow_dev_staging_prod_and_rollback_automation.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP02_KEY>,5,P0,"wave12,ep02,infra",Infra,Infra/DevOps,V1,S2_Core_Pipeline
+Task,"W12-EP03-T030 — Implement API Gateway + ingress Lambda (fast ACK, validation, enqueue)","Ticket ID: W12-EP03-T030
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T030_Implement_API_Gateway_ingress_Lambda_fast_ACK_validation_enqueue.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,5,P0,"wave12,ep03,middleware",Middleware,Backend,V1,S2_Core_Pipeline
+Task,W12-EP03-T031 — Provision SQS FIFO + DLQ and internal message schema (conversation-ordered processing),"Ticket ID: W12-EP03-T031
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T031_Provision_SQS_FIFO_DLQ_and_internal_message_schema_conversation_ordered_processi.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,3,P0,"wave12,ep03,middleware",Middleware,Infra/DevOps,V1,S2_Core_Pipeline
+Task,W12-EP03-T032 — Create DynamoDB tables for idempotency + minimal conversation state with TTL,"Ticket ID: W12-EP03-T032
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T032_Create_DynamoDB_tables_for_idempotency_minimal_conversation_state_with_TTL.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,3,P0,"wave12,ep03,middleware",Middleware,Infra/DevOps,V1,S2_Core_Pipeline
+Task,"W12-EP03-T033 — Implement worker Lambda skeleton (dequeue, fetch context, decision pipeline placeholder, action stub)","Ticket ID: W12-EP03-T033
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T033_Implement_worker_Lambda_skeleton_dequeue_fetch_context_decision_pipeline_placeho.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,5,P0,"wave12,ep03,middleware",Middleware,Backend,V1,S2_Core_Pipeline
+Task,"W12-EP03-T034 — Implement runtime feature flags (safe_mode, automation_enabled, per-template toggles) with caching","Ticket ID: W12-EP03-T034
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T034_Implement_runtime_feature_flags_safe_mode_automation_enabled_per_template_toggle.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,3,P0,"wave12,ep03,middleware",Middleware,Backend,V1,S2_Core_Pipeline
+Task,W12-EP03-T035 — Implement observability event logging + correlation IDs (ingress and worker),"Ticket ID: W12-EP03-T035
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T035_Implement_observability_event_logging_correlation_IDs_ingress_and_worker.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,3,P0,"wave12,ep03,middleware",Middleware,Backend,V1,S2_Core_Pipeline
+Task,W12-EP03-T036 — Implement vendor retry/backoff utilities and concurrency bounds (prevent rate-limit storms),"Ticket ID: W12-EP03-T036
+Epic: EP03 — Middleware core pipeline
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP03-T036_Implement_vendor_retry_backoff_utilities_and_concurrency_bounds_prevent_rate_lim.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP03_KEY>,5,P0,"wave12,ep03,middleware",Middleware,Backend,V1,S2_Core_Pipeline
+Task,"W12-EP04-T040 — Create Richpanel team + tags (Chargebacks/Disputes, mw-routing-applied, feedback tags) and document mapping","Ticket ID: W12-EP04-T040
+Epic: EP04 — Richpanel integration
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP04-T040_Create_Richpanel_team_tags_Chargebacks_Disputes_mw_routing_applied_feedback_tags.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP04_KEY>,2,P0,"wave12,ep04,richpanel",Richpanel,Ops,V1,S0_Preflight
+Task,W12-EP04-T041 — Configure Richpanel automation to trigger middleware on inbound customer messages (avoid loops),"Ticket ID: W12-EP04-T041
+Epic: EP04 — Richpanel integration
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP04-T041_Configure_Richpanel_automation_to_trigger_middleware_on_inbound_customer_message.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP04_KEY>,3,P0,"wave12,ep04,richpanel",Richpanel,Backend,V1,S3_Richpanel_Routing_LLM
+Task,"W12-EP04-T042 — Implement Richpanel API client with retries, pagination, and rate-limit handling","Ticket ID: W12-EP04-T042
+Epic: EP04 — Richpanel integration
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP04-T042_Implement_Richpanel_API_client_with_retries_pagination_and_rate_limit_handling.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP04_KEY>,5,P0,"wave12,ep04,richpanel",Richpanel,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP04-T043 — Implement action executor (route/tag/assign/reply) with action-level idempotency keys,"Ticket ID: W12-EP04-T043
+Epic: EP04 — Richpanel integration
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP04-T043_Implement_action_executor_route_tag_assign_reply_with_action_level_idempotency_k.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP04_KEY>,8,P0,"wave12,ep04,richpanel",Richpanel,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP04-T044 — Build integration test harness for Richpanel actions (staging recommended),"Ticket ID: W12-EP04-T044
+Epic: EP04 — Richpanel integration
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP04-T044_Build_integration_test_harness_for_Richpanel_actions_staging_recommended.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP04_KEY>,5,P0,"wave12,ep04,richpanel",Richpanel,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP05-T050 — Implement deterministic order linkage lookup using Richpanel order endpoints,"Ticket ID: W12-EP05-T050
+Epic: EP05 — Order status data path
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP05-T050_Implement_deterministic_order_linkage_lookup_using_Richpanel_order_endpoints.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP05_KEY>,5,P0,"wave12,ep05,orderdata",OrderData,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP05-T051 — Map order details into template variables and handle common edge cases (multiple fulfillments),"Ticket ID: W12-EP05-T051
+Epic: EP05 — Order status data path
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP05-T051_Map_order_details_into_template_variables_and_handle_common_edge_cases_multiple_.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP05_KEY>,5,P0,"wave12,ep05,orderdata",OrderData,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP05-T052 — Implement Shopify Admin API fallback (only if required and credentials exist),"Ticket ID: W12-EP05-T052
+Epic: EP05 — Order status data path
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP05-T052_Implement_Shopify_Admin_API_fallback_only_if_required_and_credentials_exist.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP05_KEY>,8,P2,"wave12,ep05,orderdata",OrderData,Backend,POST_V1,POST_V1
+Task,"W12-EP05-T053 — Define and implement order-status-related routing rules (DNR, missing items, refund requests)","Ticket ID: W12-EP05-T053
+Epic: EP05 — Order status data path
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP05-T053_Define_and_implement_order_status_related_routing_rules_DNR_missing_items_refund.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP05_KEY>,3,P0,"wave12,ep05,orderdata",OrderData,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP06-T060 — Implement classifier model call with strict schema validation (mw_decision_v1) and fail-closed fallback,"Ticket ID: W12-EP06-T060
+Epic: EP06 — LLM routing & policy engine
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP06-T060_Implement_classifier_model_call_with_strict_schema_validation_mw_decision_v1_and.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP06_KEY>,5,P0,"wave12,ep06,llm",LLM,Backend,V1,S3_Richpanel_Routing_LLM
+Task,"W12-EP06-T061 — Implement policy engine (Tier 0 overrides, Tier 2 eligibility, Tier 3 disabled) as authoritative layer","Ticket ID: W12-EP06-T061
+Epic: EP06 — LLM routing & policy engine
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP06-T061_Implement_policy_engine_Tier_0_overrides_Tier_2_eligibility_Tier_3_disabled_as_a.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP06_KEY>,5,P0,"wave12,ep06,llm",LLM,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP06-T062 — Implement Tier 2 verifier call (mw_tier2_verifier_v1) and integrate into policy gating,"Ticket ID: W12-EP06-T062
+Epic: EP06 — LLM routing & policy engine
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP06-T062_Implement_Tier_2_verifier_call_mw_tier2_verifier_v1_and_integrate_into_policy_ga.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP06_KEY>,5,P0,"wave12,ep06,llm",LLM,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP06-T063 — Implement confidence threshold configuration + calibration workflow hooks,"Ticket ID: W12-EP06-T063
+Epic: EP06 — LLM routing & policy engine
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP06-T063_Implement_confidence_threshold_configuration_calibration_workflow_hooks.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP06_KEY>,3,P1,"wave12,ep06,llm",LLM,Backend,V1,S3_Richpanel_Routing_LLM
+Task,W12-EP06-T064 — Integrate offline eval harness into CI (golden set run + regression gates),"Ticket ID: W12-EP06-T064
+Epic: EP06 — LLM routing & policy engine
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP06-T064_Integrate_offline_eval_harness_into_CI_golden_set_run_regression_gates.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP06_KEY>,5,P1,"wave12,ep06,llm",LLM,Backend,V1,S5_Test_and_Rollout
+Task,W12-EP07-T070 — Implement template renderer (YAML templates + brand constants) with safe placeholder handling,"Ticket ID: W12-EP07-T070
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T070_Implement_template_renderer_YAML_templates_brand_constants_with_safe_placeholder.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,3,P0,"wave12,ep07,automation",Automation,Backend,V1,S3_Richpanel_Routing_LLM
+Task,"W12-EP07-T071 — Enforce template catalog: allowed template_ids, per-channel enablement, per-template feature flags","Ticket ID: W12-EP07-T071
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T071_Enforce_template_catalog_allowed_template_ids_per_channel_enablement_per_templat.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,3,P0,"wave12,ep07,automation",Automation,Backend,V1,S3_Richpanel_Routing_LLM
+Task,"W12-EP07-T072 — Implement Tier 1 safe-assist automation playbooks (DNR, missing items intake, refunds intake) + routing tags","Ticket ID: W12-EP07-T072
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T072_Implement_Tier_1_safe_assist_automation_playbooks_DNR_missing_items_intake_refun.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,5,P0,"wave12,ep07,automation",Automation,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP07-T073 — Implement Tier 2 verified order status auto-reply (tracking link/number) with deterministic match + verifier approval,"Ticket ID: W12-EP07-T073
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T073_Implement_Tier_2_verified_order_status_auto_reply_tracking_link_number_with_dete.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,8,P0,"wave12,ep07,automation",Automation,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP07-T074 — Enforce 'never auto-close' invariant across all automation paths,"Ticket ID: W12-EP07-T074
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T074_Enforce_never_auto_close_invariant_across_all_automation_paths.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,2,P0,"wave12,ep07,automation",Automation,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP07-T075 — Create Richpanel 'AUTO:' macros aligned to template IDs (ops task) and document governance,"Ticket ID: W12-EP07-T075
+Epic: EP07 — FAQ automation & templates
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T075_Create_Richpanel_AUTO_macros_aligned_to_template_IDs_ops_task_and_document_gover.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP07_KEY>,2,P1,"wave12,ep07,automation",Automation,Ops,V1,S5_Test_and_Rollout
+Task,W12-EP08-T080 — Implement webhook authentication in ingress (header token preferred) + request schema validation,"Ticket ID: W12-EP08-T080
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T080_Implement_webhook_authentication_in_ingress_header_token_preferred_request_schem.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,5,P0,"wave12,ep08,securityobs",SecurityObs,Infra/DevOps,V1,S4_Automation_Order_Security
+Task,"W12-EP08-T081 — Implement PII redaction enforcement + tests (logs, traces, eval artifacts)","Ticket ID: W12-EP08-T081
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T081_Implement_PII_redaction_enforcement_tests_logs_traces_eval_artifacts.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,5,P0,"wave12,ep08,securityobs",SecurityObs,Backend,V1,S4_Automation_Order_Security
+Task,W12-EP08-T082 — Deploy dashboards + alarms (Wave 06/07/08 alignment) and validate alert runbooks,"Ticket ID: W12-EP08-T082
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T082_Deploy_dashboards_alarms_Wave_06_07_08_alignment_and_validate_alert_runbooks.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,5,P0,"wave12,ep08,securityobs",SecurityObs,Infra/DevOps,V1,S4_Automation_Order_Security
+Task,"W12-EP08-T083 — Harden public endpoint (API Gateway throttling, optional WAF, SSRF/egress controls)","Ticket ID: W12-EP08-T083
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T083_Harden_public_endpoint_API_Gateway_throttling_optional_WAF_SSRF_egress_controls.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,5,P0,"wave12,ep08,securityobs",SecurityObs,Infra/DevOps,V1,S5_Test_and_Rollout
+Task,W12-EP08-T084 — Implement secret rotation support (multi-token validation) + document operational steps,"Ticket ID: W12-EP08-T084
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T084_Implement_secret_rotation_support_multi_token_validation_document_operational_st.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,3,P1,"wave12,ep08,securityobs",SecurityObs,Infra/DevOps,V1,S5_Test_and_Rollout
+Task,W12-EP08-T085 — Operationalize IAM access reviews and break-glass workflow (alerts + cadence),"Ticket ID: W12-EP08-T085
+Epic: EP08 — Security & observability hardening
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP08-T085_Operationalize_IAM_access_reviews_and_break_glass_workflow_alerts_cadence.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP08_KEY>,3,P1,"wave12,ep08,securityobs",SecurityObs,Infra/DevOps,V1,S5_Test_and_Rollout
+Task,W12-EP09-T090 — Implement and run smoke test pack in staging (routing + Tier1 + Tier2 + Tier0 + kill switch),"Ticket ID: W12-EP09-T090
+Epic: EP09 — Testing & staged rollout
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP09-T090_Implement_and_run_smoke_test_pack_in_staging_routing_Tier1_Tier2_Tier0_kill_swit.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP09_KEY>,3,P0,"wave12,ep09,qarelease",QARelease,Backend,V1,S5_Test_and_Rollout
+Task,W12-EP09-T091 — Run load/soak tests and validate backlog catch-up behavior without vendor storms,"Ticket ID: W12-EP09-T091
+Epic: EP09 — Testing & staged rollout
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP09-T091_Run_load_soak_tests_and_validate_backlog_catch_up_behavior_without_vendor_storms.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP09_KEY>,5,P1,"wave12,ep09,qarelease",QARelease,Infra/DevOps,V1,S5_Test_and_Rollout
+Task,W12-EP09-T092 — Execute first production deploy runbook (routing-only) and verify observability + rollback,"Ticket ID: W12-EP09-T092
+Epic: EP09 — Testing & staged rollout
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP09-T092_Execute_first_production_deploy_runbook_routing_only_and_verify_observability_ro.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP09_KEY>,3,P0,"wave12,ep09,qarelease",QARelease,Infra/DevOps,V1,S5_Test_and_Rollout
+Task,"W12-EP09-T093 — Progressive enablement: enable Tier 1 templates first, then Tier 2 order status after verification","Ticket ID: W12-EP09-T093
+Epic: EP09 — Testing & staged rollout
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP09-T093_Progressive_enablement_enable_Tier_1_templates_first_then_Tier_2_order_status_af.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP09_KEY>,3,P0,"wave12,ep09,qarelease",QARelease,Backend,V1,S5_Test_and_Rollout
+Task,"W12-EP09-T094 — Establish post-launch governance cadence (weekly review, monthly calibration) and close the loop with agent feedback tags","Ticket ID: W12-EP09-T094
+Epic: EP09 — Testing & staged rollout
+Doc: docs/12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP09-T094_Establish_post_launch_governance_cadence_weekly_review_monthly_calibration_and_c.md
+
+Acceptance Criteria + references are in the ticket doc. Coordinate with the plan docs under docs/ (architecture, security, testing, etc.).
+",<FILL_EP09_KEY>,2,P1,"wave12,ep09,qarelease",QARelease,Ops,V1,S5_Test_and_Rollout

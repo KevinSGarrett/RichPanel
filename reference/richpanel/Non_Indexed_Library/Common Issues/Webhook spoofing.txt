@@ -1,0 +1,37 @@
+Webhook spoofing and unauthorized calls to your middleware endpoint
+
+What goes wrong
+
+Your middleware endpoint is publicly reachable.
+
+Anyone can POST a fake “new message” payload and cause:
+
+misrouting, tag/assignment changes,
+
+automated customer messages,
+
+or even order-status lookups (data leakage risk).
+
+How to avoid it
+
+In Richpanel’s HTTP Target configuration, add a static secret header (e.g., X-Middleware-Token: <random>), and reject requests without it. Richpanel supports adding auth headers on HTTP targets. 
+Headway
+
+Require HTTPS and validate:
+
+content-type,
+
+payload schema,
+
+expected fields (ticket id, customer identifier).
+
+Put the middleware behind a gateway (Cloudflare / API Gateway / Nginx) with:
+
+rate limiting,
+
+IP reputation filtering,
+
+WAF rules (basic bot mitigation).
+
+Keep Richpanel API keys secure and scoped by environment; Richpanel API auth uses x-richpanel-key. 
+Richpanel

@@ -1,0 +1,39 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Ticket Id
+
+appClientId
+string
+required
+API Key for Order
+
+orderId
+string
+required
+Order Id
+
+Responses
+
+200
+200
+
+Response body
+object
+message
+string
+
+400
+400

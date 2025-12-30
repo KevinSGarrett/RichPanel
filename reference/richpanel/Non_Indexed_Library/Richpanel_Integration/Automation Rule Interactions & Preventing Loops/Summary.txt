@@ -1,0 +1,3 @@
+Summary:
+
+Design the automation with a one-direction flow: customer message → rule fires → bot responds (and marks ticket) → [stop]. By using a marker (tag/field) and proper conditions, you can avoid infinite loops. Also, confirm with Richpanel if their automation rules have an implicit protection (some systems allow rules to specify “do not trigger on API changes” or such – worth asking, but assume you need to handle it). Following these precautions will prevent your bot from spamming customers or creating recursive tickets.

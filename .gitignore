@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env / secrets (never commit)
+.env
+.env.*
+*.pem
+*.key
+secrets/
+**/secrets/
+
+# Local tooling
+.DS_Store
+.idea/
+.vscode/
+
+# Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
+artifacts/*
+!artifacts/README.md
+
+runs/*
+!runs/README.md
+
+# Generated docs registry (keep committed OR ignore depending on preference)
+# If you want it generated-only, uncomment:
+# docs/_generated/
+
+# Local backups / chat artifacts
+*.zip
+RichPanel_BACKUP*
+RichPanel_BACKUP_FULL_*

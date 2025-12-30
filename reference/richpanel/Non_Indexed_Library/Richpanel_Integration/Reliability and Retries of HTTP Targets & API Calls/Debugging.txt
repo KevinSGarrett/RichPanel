@@ -1,0 +1,3 @@
+Debugging: 
+
+If something isn’t working (say the HTTP Target isn’t calling your service at all), double-check the automation rule conditions and ensure the HTTP Target integration is active. For troubleshooting, you might point the HTTP Target to a requestbin or your test server first to verify payload contents. Once in production, any failures will be silent unless you catch them, so consider logging all requests on your middleware and perhaps having it send you an alert if it receives something unexpected or if it hasn’t received anything in a while (could indicate Richpanel stopped sending due to repeated failures).

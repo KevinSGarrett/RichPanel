@@ -1,0 +1,10 @@
+# DELETE_APPROVALS.yaml
+# Authorizes *specific* deletions/renames under protected paths.
+#
+# Add approvals like:
+# - path: docs/some/file.md
+#   approved_by: PM
+#   run_id: RUN_YYYYMMDD_HHMMZ
+#   reason: <why>
+#
+# Default: no approvals.

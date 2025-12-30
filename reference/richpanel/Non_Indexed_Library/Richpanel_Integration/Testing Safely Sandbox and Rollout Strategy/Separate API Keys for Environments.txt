@@ -1,0 +1,7 @@
+Separate API Keys for Environments: 
+
+Yes – you should use separate API credentials for sandbox and production. Richpanel allows you to generate API keys in the Settings -> API Keys section
+developer.richpanel.com
+. You can create one for sandbox and one for production. They can be revoked/rotated independently. The API key is what authenticates your requests (passed in the header x-richpanel-key for every API call)
+developer.richpanel.com
+. It’s good security hygiene to never use your production API key in a test environment or vice versa. Also, you might generate multiple keys for production if you have multiple integrations (Richpanel’s interface suggests you can have multiple active API keys). This way you could rotate keys without downtime – generate a new one, update your service to use it, then disable the old one.

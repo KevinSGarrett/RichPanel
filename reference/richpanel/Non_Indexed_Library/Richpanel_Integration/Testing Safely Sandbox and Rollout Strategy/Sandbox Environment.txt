@@ -1,0 +1,7 @@
+Sandbox Environment: 
+
+Richpanel does offer the possibility of a sandbox or demo environment for testing. In fact, as part of their sales/onboarding, they mention providing a personalized demo and a sandbox environment for new customers to try out configurations
+richpanel.com
+. If you already are a customer, you can likely get a separate Richpanel instance (e.g. a trial account or a sandbox workspace) where you can experiment with automation rules, HTTP Targets, and API calls without touching real customer data. It’s worth reaching out to your Richpanel account manager or support to request a sandbox account. This environment would be isolated – you can set up dummy channels (like a test email inbox or a dummy chat widget), create test tickets, and ensure your middleware behaves correctly.
+
+Using a sandbox is important because building automation in production can be risky (a misconfigured rule could spam customers or mis-route tickets). Richpanel’s sandbox, if provided, will have its own API key and you can safely trigger your HTTP Targets there. They likely can clone some of your production settings to it as needed.

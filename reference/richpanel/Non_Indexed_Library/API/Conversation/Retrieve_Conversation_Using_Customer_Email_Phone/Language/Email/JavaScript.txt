@@ -1,0 +1,15 @@
+Retrieve Conversations using Customer's Email or Phone
+get
+https://api.richpanel.com/v1/tickets/{type}/{id}
+
+Language: JavaScript
+
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/tickets/email/id', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

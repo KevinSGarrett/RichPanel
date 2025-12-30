@@ -1,0 +1,3 @@
+Agent Training/Visibility:
+
+ Inform your support agents about the new middleware behavior. For instance, if the middleware will automatically add notes or even send replies, make sure the team knows these are expected and knows how to identify them. You might decide to have the middleware prepend “[Automated]” to replies or notes it posts, so it’s clear in the conversation history. This transparency helps in case something goes wrong – an agent can see that an automated response was sent.

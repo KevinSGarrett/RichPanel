@@ -1,0 +1,17 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: Java
+
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId")
+  .put(null)
+  .addHeader("accept", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();

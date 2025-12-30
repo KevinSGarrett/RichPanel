@@ -1,0 +1,3 @@
+Audit Logging: 
+
+Richpanel provides audit logs of agent actions; however, actions via API keys might just show up as generic if not tied to a user. It’s a good practice for your middleware to keep its own audit log. For example, log “Closed ticket #123 via middleware at 2025-12-18 10:00 UTC”. This creates an audit trail of what your integration did, which can be crucial for compliance or debugging.

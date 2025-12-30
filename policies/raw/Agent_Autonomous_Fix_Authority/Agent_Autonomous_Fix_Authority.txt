@@ -1,0 +1,55 @@
+[Agent Autonomous Fix Authority]
+
+AUTONOMOUS FIX AUTHORITY (CURSOR AGENTS)
+
+Objective:
+Reduce PM bottlenecks by allowing agents to self-diagnose and fix problems they discover while building/testing, without waiting for instructions.
+
+Default behavior (no waiting):
+- If you encounter an error, failing test, broken build, flaky behavior, or mismatch vs expected behavior, immediately enter a Fix Cycle and attempt resolution autonomously.
+- Choose the smallest correct fix that restores expected behavior and keeps quality gates green.
+
+Fix Cycle (required):
+1) Reproduce: capture the exact failure (error text, failing test name, repro steps).
+2) Scope: identify the touched/impacted surface area (files/modules/endpoints/workflows).
+3) Diagnose: state likely root cause(s) and why.
+4) Fix: implement the minimal safe change (prefer localized fixes over broad refactors).
+5) Verify: run relevant tests/quality gates; do not claim “fixed” without executed proof.
+6) Document: update the appropriate docs/run log if the fix changes behavior or resolves an issue.
+
+Decision rules:
+- If multiple fixes are possible, prefer:
+  A) minimal blast radius
+  B) preserves existing contracts
+  C) adds/updates tests to prevent regression
+- Do not “patch around” symptoms if a clear root cause fix is feasible.
+
+Escalation triggers (STOP and ask PM before proceeding):
+- Requirement ambiguity: the “correct behavior” is unclear and you would be guessing intent.
+- Contract changes: changes that alter public APIs, event schemas, request/response shapes, DB schemas, or user-facing behavior.
+- Security/compliance risk: auth, permissions, secrets, PII handling, or anything that could create a vulnerability.
+- High-risk operations: data migrations, destructive deletes, irreversible actions, cost-impacting infra changes.
+- Major changes: large refactor / architecture change beyond the ticket’s scope, or adding major dependencies.
+- Test integrity: any “fix” that would require disabling tests, weakening assertions, or skipping validation.
+
+If no escalation trigger applies:
+Proceed autonomously through Fix Cycle and complete with proof.
+
+End-of-work output (required):
+Provide a Fix Report (template below) including test commands and results.
+
+FIX REPORT
+
+- Issue: <what failed + where>
+- Repro: <how to reproduce / failing test name>
+- Root cause: <1–3 sentences>
+- Fix summary: <what changed and why it’s minimal>
+- Files changed: <paths>
+- Tests run (commands + results):
+  - <command> → <pass/fail summary>
+- Evidence/artifacts: <logs, screenshots, reports paths if relevant>
+- Risk/edge cases: <what could regress + mitigation>
+- Escalations: <none OR what you asked PM about>
+
+TAILOR THE ESCALATION TRIGGERS TO YOUR EXACT WORKFLOW
+ (ex: “API changes require updating docs + contract tests,” “DB migrations require rollback plan,” “Playwright failures require attaching report path,” etc.)

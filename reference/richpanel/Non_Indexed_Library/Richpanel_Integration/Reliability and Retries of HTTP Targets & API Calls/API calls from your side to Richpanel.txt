@@ -1,0 +1,3 @@
+API calls from your side to Richpanel :
+
+(e.g. posting replies or updating tickets), Richpanel does enforce rate limiting and will tell you if a request didn’t succeed (you’ll get a non-2xx HTTP response). If your API call fails due to a 429 rate limit or a transient error, you should implement retry logic on your side (with exponential backoff and using the Retry-After header as guidance, see next section). Those API calls are fully in your control to retry; the HTTP Target calls from Richpanel, however, you cannot easily retry from Richpanel’s side without another trigger.

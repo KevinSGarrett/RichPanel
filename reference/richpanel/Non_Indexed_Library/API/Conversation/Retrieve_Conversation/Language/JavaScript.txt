@@ -1,0 +1,13 @@
+Retrieve a Conversation
+
+Language: JavaScript
+
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/tickets/id?show_visitor_profile=false', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

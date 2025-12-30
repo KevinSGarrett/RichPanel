@@ -1,0 +1,29 @@
+Webhook timeouts and lost events because your middleware is “doing too much” synchronously
+
+What goes wrong
+
+You try to do everything inside the webhook request:
+
+call OpenAI,
+
+call Shopify/OMS,
+
+update Richpanel,
+
+send message.
+
+Any slowdown means Richpanel sees a failure (or times out), and your flow becomes unreliable.
+
+How to avoid it
+
+Always ACK fast:
+
+Return 200 OK within ~1–2 seconds.
+
+Immediately enqueue the work (queue/job):
+
+SQS / RabbitMQ / Redis queue / Cloud Tasks / BullMQ, etc.
+
+Persist the inbound event before ACK (so you never lose it).
+
+Use timeouts on all downstream calls (OpenAI, Shopify, Richpanel API). Fail fast and fallback to human routing.

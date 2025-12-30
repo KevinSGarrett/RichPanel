@@ -1,0 +1,56 @@
+Importing Your Data to Richpanel
+Richpanel offers direct importers for the following platforms:
+
+Gorgias
+Zendesk
+Kustomer
+Helpscout
+If you are using any of these platforms, follow the steps below to seamlessly import your helpdesk data into Richpanel.
+
+Step 1: Set a Cut-off Date
+Before you begin, it's crucial to set a cut-off date. For instance, if you plan to use your Helpdesk Platform until December 31st, your cut-off date will be January 1st. Here's what you need to do:
+
+Keep Zendesk (or the respective platform) operational and live-sync active until December 31st.
+On January 1st, disable the live sync in your old platform so that new tickets will flow into Richpanel from this date onward.
+This ensures that future tickets will be handled in Richpanel, while your historical data will still be preserved in your old helpdesk.
+
+Step 2: Access the Helpdesk Importer
+To begin the import process, navigate to Settings in Richpanel, and click on Helpdesk Importer under the Installation tab.
+
+image
+Step 3: Choose Your Helpdesk Platform
+Select the helpdesk platform you're migrating from. We'll use Gorgias as an example, but the steps are similar for Zendesk, Kustomer, and Helpscout.
+
+image
+Step 4: Add Your Subdomain and API Key
+You’ll need to provide specific information to enable the connection between Richpanel and your helpdesk platform:
+
+Subdomain: The URL you use to log into Gorgias (or your respective platform).
+Login Email: The email address you use to log in to your platform (must be an admin).
+API Key: Generate an API token in Gorgias (or the relevant platform) using the steps below.
+image
+💡
+ How to Generate an API Token in other helpdesk platform:
+
+Log in to your Helpdesk account.
+Go to Settings → REST API.
+Click on Create API Key.
+Copy the generated API token and paste it into the Richpanel importer.
+Step 5: Select Import Duration and Data Types
+Once you've entered the necessary credentials, you can select the data you want to import. For a complete migration, we recommend choosing:
+
+Full Import
+Check all boxes, including:
+Users and Teams
+Tags
+Macros
+Conversations & Messages
+image
+Step 6: Final Sync and Data Validation
+Once you’ve configured the import settings, initiate the import by clicking Start Import. The system will begin importing your data into Richpanel.
+
+Final Sync: On your cut-off date (e.g., January 1st), disable live sync in your old helpdesk platform. Ensure all future tickets flow into Richpanel.
+Data Validation: After the import is complete, review the data to ensure everything has transferred correctly. Confirm that:
+Customer information is correct.
+Ticket statuses (open, pending, resolved) are accurate.
+Macros, tags, and teams have been imported successfully.

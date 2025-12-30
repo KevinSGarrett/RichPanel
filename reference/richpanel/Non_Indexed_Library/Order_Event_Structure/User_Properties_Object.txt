@@ -1,0 +1,72 @@
+User Properties Object (userProeprties)
+Example:
+{
+event: "order",
+properties: {},
+userProperties: {} // User Properties
+}
+
+Property Name
+
+Description
+
+uid* (required)
+
+Unique Id of the user.
+
+phone
+
+Phone number of the user.
+
+email
+
+Email address of the user.
+
+firstName
+
+First name of the user
+
+lastName
+
+Last name of the user.
+
+billingAddress
+
+"billingAddress": {
+"firstName": "Shubhanshu",
+"lastName": "Chouhan",
+"city": "LOCKPORT",
+"state": "Illinois",
+"stateCode": "IL",
+"country": "United States",
+"countryCode": "US",
+"postcode": "60441",
+"phone": null,
+"address1": "201B, lotus chs",
+"address2": "",
+"company": ""
+},
+
+Billing details of the customer.
+
+shippingAddress
+
+"shippingAddress": {
+"firstName": "Shubhanshu",
+"lastName": "Chouhan",
+"city": "LOCKPORT",
+"state": "Illinois",
+"stateCode": "IL",
+"country": "United States",
+"countryCode": "US",
+"postcode": "60441",
+"phone": null,
+"address1": "201B, lotus chs",
+"address2": "",
+"email": "shubhanshu@gmail.com"
+},
+Shipping details of the user.
+
+Custom Properties
+
+Any other properties which belong's to user.

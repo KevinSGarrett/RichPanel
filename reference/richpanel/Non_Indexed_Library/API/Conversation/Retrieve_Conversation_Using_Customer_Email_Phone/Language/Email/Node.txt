@@ -1,0 +1,12 @@
+Retrieve Conversations using Customer's Email or Phone
+get
+https://api.richpanel.com/v1/tickets/{type}/{id}
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.retrieveAConversationUsingUsersEmailOrPhone({type: 'email', id: 'id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

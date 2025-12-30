@@ -1,0 +1,37 @@
+Assuming Richpanel will “retry later” if your HTTP Target fails
+
+What goes wrong
+
+Your middleware endpoint is briefly down (deploy, outage, cold start) or returns a non‑200.
+
+You assume Richpanel will retry the HTTP Target delivery.
+
+Result: you can miss inbound messages entirely (and your automation silently “skips” work).
+
+How to avoid it
+
+Design your webhook handler to be durable-first:
+
+Validate + persist the event (DB/queue) immediately.
+
+Return 200 quickly.
+
+Add an internal retry system:
+
+job retries with backoff + jitter
+
+a dead-letter queue for “stuck” messages
+
+Add a “reconciliation/sweeper” job:
+
+periodically query for “open/unprocessed” conversations (e.g., missing your middleware_processed tag) and re-enqueue them.
+
+Build alerts on:
+
+non‑200 webhook responses,
+
+queue backlog,
+
+dead-letter volume.
+
+(Even if Richpanel does retry sometimes, designing as if it doesn’t makes your system much more reliable.)

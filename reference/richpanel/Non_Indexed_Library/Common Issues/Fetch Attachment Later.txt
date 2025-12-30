@@ -1,0 +1,40 @@
+“We can’t fetch the attachment later” → broken automation due to expiring URLs / auth / bad content-types
+What goes wrong
+
+Non-text content is often referenced by:
+
+URLs that expire (pre-signed links),
+
+URLs that require auth/cookies,
+
+redirects,
+
+or content-types that don’t match (e.g., says image/jpeg but returns HTML error page).
+
+So your pipeline becomes:
+
+message arrives → enqueue job → later fetch fails → OCR/STT fails → automation can’t proceed → your system either errors out or (worse) guesses.
+
+How to avoid it
+
+If you’re going to fetch attachments, do it quickly (close to ingestion) and store a copy in your own object storage.
+
+Validate before processing:
+
+content-length (size)
+
+content-type allowlist
+
+hash checksum (optional)
+
+Use strict timeouts and safe download rules:
+
+max bytes downloaded
+
+max redirects
+
+fail closed (route to human) if attachment fetch fails
+
+Have an explicit fallback response/tag:
+
+needs_attachment_review or attachment_fetch_failed

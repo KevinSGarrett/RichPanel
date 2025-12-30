@@ -1,0 +1,12 @@
+Frequency,Category,Check,Owner,Evidence,Status/Notes
+Weekly,Quality/Ops,Review routing accuracy trend and top misroutes,Engineering Owner / Quality Owner,Wave 08 dashboards,
+Weekly,Quality/Ops,"Review automation volume, block rate, and stop/reject signals",Engineering Owner / Support Ops,Wave 08 dashboards + logs,
+Weekly,Safety,Confirm Tier 0 escalations had no automation,Quality Owner,Tier 0 report / logs,
+Weekly,Cost,Review cost trend (tokens/message and spend),Engineering Owner,Cost dashboard/budget alarms,
+Monthly,Change control,Decision Log updated for policy/behavior changes,Engineering Owner,Decision_Log.md,
+Monthly,Change control,Change Log updated for artifact changes,Engineering Owner,Change_Log.md,
+Monthly,Quality,Drift signals reviewed and actions logged,Quality Owner,Quality_Monitoring_and_Drift_Detection.md,
+Monthly,Ops,DLQ depth is zero or actively worked,Engineering Owner,DLQ alarm + runbook R005,
+Monthly,Security,Secrets rotation performed or documented,Engineering Owner,Webhook_Secret_Rotation_Runbook.md,
+Monthly,Support Ops,Macros aligned to templates; no drift,Support Ops,Macro pack mapping + audit,
+Quarterly,Strategy,Taxonomy review and scope expansion decision,Engineering Owner / Quality Owner,Governance meeting notes,

@@ -1,0 +1,3 @@
+updating multiple properties at once is allowed. 
+
+The Update a Conversation call can take a JSON with multiple fields and apply them in one go. For example, you can in one API call assign the team, set the status, add a comment, and tag the ticket. This is great for efficiency and staying within rate limits. In summary, you won’t be limited by the API in terms of updating the conversation – all the key fields (status, assignment, tags, custom fields, etc.) are writable, enabling your middleware to perform the full loop (route to the correct department and even post an automated reply) through the API

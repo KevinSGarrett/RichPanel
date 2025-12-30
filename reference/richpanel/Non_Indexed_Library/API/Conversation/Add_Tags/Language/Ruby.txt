@@ -1,0 +1,21 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: Ruby
+
+require 'uri'
+require 'net/http'
+
+url = URI("https://api.richpanel.com/v1/tickets/id/add-tags")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Put.new(url)
+request["accept"] = 'application/json'
+request["content-type"] = 'application/json'
+request["x-richpanel-key"] = 'test'
+
+response = http.request(request)
+puts response.read_body

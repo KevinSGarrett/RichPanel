@@ -1,0 +1,5 @@
+Testing Flows Without Impacting Production: 
+
+If a full sandbox environment is not available or while you set one up, you can still test in production carefully by using internal/test tickets. For example, create a dummy customer account (like test customer with your email) and open a ticket or chat that only you and perhaps a couple of agents know about. Then enable your automation rule but add a condition to target only that test ticket (e.g. if customer email = your test email or if subject contains “[TEST]”). This way, you can see the automation and middleware in action on a live environment without affecting real users. Once you’re confident, you remove the test condition to apply it globally.
+
+Richpanel currently doesn’t have a built-in “dry run” mode for automations (some platforms have a preview mode, but I haven’t seen mention of it for Richpanel). So either use a sandbox or tightly scoped tests on prod.

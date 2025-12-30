@@ -1,0 +1,3 @@
+Verify the Source: 
+
+Set up a method to verify that the request is genuinely from Richpanel. Because the HTTP Target is a simple webhook, Richpanel doesn’t sign the requests. A common approach is to include a secret token in the URL or headers that only Richpanel (through your configuration) and your middleware know. For example, you might configure the HTTP Target URL as https://<your-domain>/rp-webhook?token=ABC123. Your middleware checks that the token matches before processing. This ensures that random hits to your endpoint won’t be mistaken for valid Richpanel calls.

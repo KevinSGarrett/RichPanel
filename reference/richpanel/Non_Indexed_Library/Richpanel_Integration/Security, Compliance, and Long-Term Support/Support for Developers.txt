@@ -1,0 +1,5 @@
+Support for Developers: 
+
+If your integration breaks or you encounter issues, Richpanel’s support team is the first point of contact. They provide support via chat (in-app) or email. For high-priority issues (like your webhooks failing or API not responding correctly), you should raise it with them and mention the impact. As a paying customer, you’ll get support according to your plan’s SLA (they haven’t published a support SLA publicly that we saw, but enterprise plans usually have faster response). They also have a “Support Policy” link on their site
+richpanel.com
+ which might outline response times. In addition, if you have a dedicated Customer Success Manager at Richpanel, involve them for any roadmap concerns – for example, if you need a feature like internal-note API or higher rate limits, they can advocate for you.

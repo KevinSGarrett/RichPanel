@@ -1,0 +1,18 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Python
+
+import requests
+
+url = "https://api.richpanel.com/v1/tickets/number/conversationNo"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.get(url, headers=headers)
+
+print(response.text)

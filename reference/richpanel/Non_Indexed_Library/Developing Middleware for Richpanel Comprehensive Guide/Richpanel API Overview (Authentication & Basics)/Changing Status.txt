@@ -1,0 +1,12 @@
+Changing Status: 
+
+To close or reopen a ticket via API, include the status field. Richpanel allows "status": "CLOSED" or "status": "OPEN" in the ticket update payload. For example, to close a conversation:
+
+{
+  "ticket": {
+    "status": "CLOSED"
+  }
+}
+
+
+This would mark the conversation as resolved/closed, the same as an agent closing it. Conversely, setting it to "OPEN" could reopen it (or just leave it open). Typically, you might close a ticket via middleware if, say, your external system resolved the issue (for example, a refund was completed and you want to automatically close the ticket with a note).

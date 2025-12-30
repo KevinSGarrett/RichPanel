@@ -1,0 +1,9 @@
+Rollout Plan – Shadow to Full: A recommended rollout would be:
+
+Stage 1: Shadow Mode. Keep the automation rule active to trigger the HTTP Target, but configure your middleware not to actually post replies initially. Instead, maybe log the intended action or send it as an email/slack to your team for review. Essentially, the bot is “thinking” and producing suggestions, but not acting in Richpanel. This lets you validate the AI’s decisions on real data without any customer impact. The agents can handle tickets normally, and you can compare their responses to what the bot would have done.
+
+Stage 2: Internal Suggestion (if feasible). If there’s a way to surface suggestions to agents (perhaps via an internal note or a custom integration in the agent UI), you can try that. But as discussed, Richpanel doesn’t have an obvious internal-note API. An alternative is to have your middleware send an email to a specific address or use Richpanel’s Sidekick AI feature (if accessible) to show suggestions. This stage is optional and depends on tooling.
+
+Stage 3: Partial/Canary Release. Enable the bot to start posting actual replies for a subset of cases. You could do this by narrowing the automation rule conditions. For example, only auto-reply if the message contains a very certain keyword or only for one specific topic that you’re confident in (like order status inquiries). Or even route those to a “Bot Testing” team where no human will intervene and let the bot respond. This way, only a small fraction of tickets get automated replies initially. Monitor those closely (set up alerts if customers respond negatively or if tickets reopen).
+
+Stage 4: Full Rollout. Once performance is satisfactory, gradually broaden the rule to cover more cases or all inbound messages. Keep monitoring KPIs like resolution time and CSAT.

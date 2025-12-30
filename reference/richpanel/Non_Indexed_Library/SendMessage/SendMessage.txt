@@ -1,0 +1,40 @@
+Send Message
+put
+https://api.richpanel.com/v1/tickets/{id}/send-message
+
+Send Message
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Body Params
+body
+string
+required
+attachments
+array of strings
+
+ADD string
+author_id
+string
+required
+Defaults to operator
+operator
+Responses
+
+200
+200
+
+Response body
+json
+
+400
+400
+

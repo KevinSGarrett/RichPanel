@@ -1,0 +1,114 @@
+# Observability Event Taxonomy (v1)
+# Format is intentionally simple to keep it tool-friendly.
+
+version: v1
+owner: engineering
+last_updated: 2025-12-22
+
+events:
+  - name: ingress.request.received
+    stage: ingress
+    severity: info
+    description: Webhook request received (before auth/schema validation)
+  - name: ingress.request.rejected
+    stage: ingress
+    severity: warn
+    description: Webhook rejected (auth failed or schema invalid)
+  - name: ingress.enqueue.success
+    stage: ingress
+    severity: info
+    description: Event enqueued successfully to SQS
+  - name: ingress.enqueue.failed
+    stage: ingress
+    severity: error
+    description: Failed to enqueue to SQS
+
+  - name: worker.job.start
+    stage: worker
+    severity: info
+    description: Worker started processing a queue message
+  - name: worker.context.fetch.success
+    stage: worker
+    severity: info
+    description: Successfully fetched ticket context from Richpanel API
+  - name: worker.context.fetch.failed
+    stage: worker
+    severity: error
+    description: Failed to fetch ticket context
+  - name: worker.job.complete
+    stage: worker
+    severity: info
+    description: Worker completed processing (success path)
+  - name: worker.job.failed
+    stage: worker
+    severity: error
+    description: Worker failed processing (error path)
+
+  - name: vendor.openai.classify.success
+    stage: vendor
+    severity: info
+    description: LLM classification succeeded
+  - name: vendor.openai.classify.failed
+    stage: vendor
+    severity: error
+    description: LLM classification failed (timeout, error, invalid schema)
+
+  - name: policy.decision.made
+    stage: policy
+    severity: info
+    description: Policy engine produced a final decision
+  - name: policy.automation.blocked
+    stage: policy
+    severity: info
+    description: Policy engine blocked automation and forced route-only
+
+  - name: vendor.richpanel.order_link.lookup.success
+    stage: vendor
+    severity: info
+    description: Order linkage lookup succeeded (order present)
+  - name: vendor.richpanel.order_link.lookup.empty
+    stage: vendor
+    severity: info
+    description: Order linkage lookup returned empty (no linked order)
+  - name: vendor.richpanel.order.fetch.success
+    stage: vendor
+    severity: info
+    description: Order details fetched successfully
+  - name: vendor.richpanel.order.fetch.failed
+    stage: vendor
+    severity: error
+    description: Order fetch failed
+
+  - name: vendor.richpanel.tags.add.success
+    stage: vendor
+    severity: info
+    description: Tag add succeeded
+  - name: vendor.richpanel.tags.add.failed
+    stage: vendor
+    severity: error
+    description: Tag add failed
+  - name: vendor.richpanel.message.send.success
+    stage: vendor
+    severity: info
+    description: Message send succeeded
+  - name: vendor.richpanel.message.send.failed
+    stage: vendor
+    severity: error
+    description: Message send failed
+
+  - name: system.safe_mode.enabled
+    stage: system
+    severity: warn
+    description: Safe mode enabled (route-only)
+  - name: system.automation.disabled
+    stage: system
+    severity: warn
+    description: Automation disabled (no auto replies)
+  - name: system.idempotency.duplicate_event_detected
+    stage: system
+    severity: info
+    description: Duplicate event detected and suppressed via idempotency
+  - name: system.dlq.message_written
+    stage: system
+    severity: error
+    description: Message moved to DLQ

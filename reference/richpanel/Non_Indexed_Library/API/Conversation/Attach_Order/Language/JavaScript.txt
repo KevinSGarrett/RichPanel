@@ -1,0 +1,16 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: JavaScript
+
+const options = {
+  method: 'PUT',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

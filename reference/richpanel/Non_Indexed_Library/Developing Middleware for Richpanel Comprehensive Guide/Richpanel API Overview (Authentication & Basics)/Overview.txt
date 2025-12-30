@@ -1,0 +1,22 @@
+Overview:
+
+To have your middleware perform actions in Richpanel (like updating a ticket or creating records), you’ll use the Richpanel REST API. Richpanel’s API uses API Key authentication – in your Richpanel dashboard, you can generate an API key (under Settings → Integrations → API Keys). Each request to the API must include this key in the headers as x-richpanel-key
+pipedream.com
+.
+
+Key points for using the API:
+
+Base URL & Version: Richpanel’s API base is https://api.richpanel.com/v1/. The current version as of 2025 is v1.1. All endpoints are under this base URL (for example, .../v1/tickets for conversations).
+
+Authentication: Use the API key in the header. You do not need OAuth or other tokens for Richpanel’s own API – the key is sufficient and acts as a secret. Keep this key secure (store it server-side). Avoid exposing it in client-side code or logs.
+
+Requests and Responses: The API accepts and returns JSON. Make sure to set Content-Type: application/json in your requests. Richpanel’s API generally returns standard HTTP status codes (200 for success, 4xx for client errors, 5xx for server errors). In particular, if you hit rate limits, you’ll get a 429 Too Many Requests.
+
+Rate Limiting: The Richpanel API is rate-limited to 50 requests per 30 seconds per account
+developer.richpanel.com
+. This is roughly 1.67 requests per second on average. If you exceed this, further requests will fail with HTTP 429. Pay attention to the response headers: Richpanel provides X-RateLimit-Remaining and Retry-After headers to help you handle throttling gracefully
+developer.richpanel.com
+developer.richpanel.com
+. Design your middleware to batch or queue actions if you anticipate bursts (for example, if processing ten events at once, don’t fire ten API calls in parallel without delays).
+
+Testing API Calls: During development, you can use tools like curl or Postman with the API key to test endpoints. Richpanel’s documentation (developer portal) provides “Try It” features for each endpoint, but you can also directly call them. Just remember any changes you make via API (like closing a ticket or adding a tag) will affect your live Richpanel data – so you may want to create test tickets or use a test account.

@@ -1,0 +1,17 @@
+Create Conversation
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.createConversation({
+  ticket: {
+    status: 'OPEN',
+    comment: {public: true},
+    via: {channel: 'email'},
+    assignee_id: 'unassigned'
+  }
+})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

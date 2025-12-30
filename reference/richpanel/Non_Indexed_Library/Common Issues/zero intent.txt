@@ -1,0 +1,62 @@
+“Non-text-only messages provide zero intent” → false positives on FAQs + unsafe automated replies
+What goes wrong
+
+A customer sends:
+
+“📷” with only a screenshot of an order page,
+
+a voice note saying “where is my stuff”
+
+a video of a damaged delivery
+
+no caption text
+
+Your classifier sees near-empty text and may:
+
+incorrectly match “order status” (or another FAQ) and auto-reply,
+
+route to the wrong team,
+
+or fail entirely.
+
+This is a very common source of “automation feels dumb” feedback.
+
+How to avoid it
+
+Make your middleware explicitly non-text aware with a decision policy:
+
+If no usable text AND there are attachments:
+
+do not run FAQ automation
+
+route to a dedicated queue (or a department based on channel/order linkage)
+
+add tag needs_attachment_review
+
+If minimal text like “help”, “??”, “see attached”:
+
+ask a structured clarifying question (one message):
+
+“Can you share your order number or the email used to place the order?”
+
+OR route to a human if you want zero friction
+
+Only use extraction (OCR/STT) when it’s worth it:
+
+For order status, OCR might be worthwhile only if:
+
+attachment is a screenshot-like image/PDF
+
+size is under your threshold
+
+you can do it quickly and reliably
+
+Otherwise, avoid adding fragile steps that slow everything down.
+
+Security/privacy guardrails (must-have):
+
+treat all attachments as untrusted input
+
+don’t send raw attachments into the LLM by default
+
+log minimal metadata (avoid storing PII-heavy images in plain logs)

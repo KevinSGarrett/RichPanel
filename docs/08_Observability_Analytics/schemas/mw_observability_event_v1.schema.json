@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mw_observability_event_v1.schema.json",
+  "title": "Middleware Observability Event (v1)",
+  "type": "object",
+  "required": [
+    "ts",
+    "level",
+    "event",
+    "mw_trace_id",
+    "mw_release",
+    "env",
+    "ticket_id",
+    "idempotency_key",
+    "step"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "description": "ISO8601 timestamp"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR"
+      ]
+    },
+    "event": {
+      "type": "string",
+      "description": "Canonical event name"
+    },
+    "mw_trace_id": {
+      "type": "string"
+    },
+    "mw_release": {
+      "type": "string"
+    },
+    "env": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "stage",
+        "prod"
+      ]
+    },
+    "ticket_id": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "step": {
+      "type": "string",
+      "enum": [
+        "ingress",
+        "worker",
+        "policy",
+        "action",
+        "vendor",
+        "system",
+        "eval"
+      ]
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "blocked",
+        "skipped",
+        "retry",
+        "timeout"
+      ]
+    },
+    "latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "aws_request_id": {
+      "type": "string"
+    },
+    "sqs_message_id": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "primary_intent": {
+          "type": "string"
+        },
+        "secondary_intents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "department": {
+          "type": "string"
+        },
+        "tier": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "template_id": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "route_only",
+            "send_reply"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "vendor": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "http_status": {
+          "type": "integer"
+        },
+        "latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "retry_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rate_limit": {
+          "type": "object",
+          "properties": {
+            "retry_after_s": {
+              "type": "number",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "remaining": {
+              "type": "integer"
+            },
+            "reset_s": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": true
+        },
+        "error_code": {
+          "type": "string"
+        },
+        "error_class": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

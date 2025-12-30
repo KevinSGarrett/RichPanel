@@ -1,0 +1,12 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.fetchACustomerFromEmailOrPhone({type: 'type', id: 'id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

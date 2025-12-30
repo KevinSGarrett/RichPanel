@@ -1,0 +1,101 @@
+Subscription Properties
+Property Name
+
+Description
+
+orderId* (required)
+
+"orderId": "1234"
+Unique id of order.
+
+orderDbKey
+(required)
+
+"orderDbKey": 876541234
+If the order has a different database id, it must be provided here or can be kept the same as orderId. We use this to create a link to the order management portal.
+
+amount*
+(required)
+
+"amount": 100.25
+Total amount of the order.
+
+start
+
+"2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the subscription started
+
+end
+
+"2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the subscription ends. Leave it empty if it is unknown
+
+nextPayment
+
+"2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the next payment happens for the subscription
+
+lastPayment
+
+"2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the last payment happens for the subscription. Leave it empty if it is unknown
+
+trialEnd
+
+"2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the trial ends for the subscription. Leave it empty if it is unknown
+
+createdAt
+
+"createdAt": "2025-01-05T17:28:18+00:00"
+The date and time (ISO 8601 format) when the subscription was created.
+
+status
+
+"status": "active"
+Example: active, expired, cancelled, paused or any custom text.
+Something that suits your system.
+
+shippingPhone
+shippingEmail
+shippingFirstName
+shippingLastName
+shippingAddressLine1
+shippingAddressLine2
+shippingCity
+shippingState
+shippingCountry
+shippingPostcode
+
+All string properties, and optional
+
+*shippingPhone**: The phone number at the shipping address.
+*shippingEmail**: The Email at the shipping address.
+*shippingFirstName**: The first name of the person associated with the shipping address.
+*shippingLastName**: The last name of the person associated with the shipping address.
+*shippingAddressLine1**: The street address of the shipping address.
+*shippingAddressLine2**: An optional additional field for the street address of the shipping address.
+*shippingCity**: The city, town, or village of the shipping address.
+*shippingState**: The name of the region (for example, province, state, or prefecture) of the shipping address.
+*shippingCountry**: The name of the country of the shipping address.
+*shippingPostcode**: The postal code (for example, zip, postcode, or Eircode) of the shipping address.
+items*
+(required)
+
+"items": [{
+"id": "2493989519418",
+"price": 49.99,
+"optionId": "31858336956474",
+"sku": "A31SSUJZ99COMTL1",
+"name": "My Product - L",
+"grams": 454,
+"quantity": 1,
+}][{ "id": "2493989519418", "price": 49.99, "optionId": "31858336956474", "sku": "A31SSUJZ99COMTL1", "name": "My Product - L", "grams": 454, "quantity": 1, }]
+
+*id**: The ID of the product.
+*price**: Price for single quantity of the variant product.
+*quantity**:The number of items that were purchased.
+*optionId**: The ID of the product variant.
+*sku**: The item's SKU (stock keeping unit).
+*name**: The name of the product variant.
+*grams**: The weight of the item in grams.

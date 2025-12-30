@@ -1,0 +1,33 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Use this API to fetch an order using order_id and appclient_id.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+appclient_id
+string
+required
+Unique appClientId given to each store. Also called as apI key
+
+order_id
+string
+required
+Unique identifier of an order using which details can be fetched.
+
+Responses
+
+200
+200
+
+Response body
+json
+
+400
+400

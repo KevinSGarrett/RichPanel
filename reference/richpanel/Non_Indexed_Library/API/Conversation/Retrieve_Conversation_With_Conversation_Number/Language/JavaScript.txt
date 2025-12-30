@@ -1,0 +1,15 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: JavaScript
+
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/tickets/number/conversationNo', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

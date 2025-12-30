@@ -1,0 +1,36 @@
+“We accidentally inline the attachment” (base64 blobs or huge HTML) → requests blow up / 413 errors
+What goes wrong
+
+A developer tries to be helpful and passes “everything” downstream by:
+
+embedding base64 file bytes inside JSON (to your middleware or to the LLM), or
+
+forwarding raw email bodies that include huge HTML + inline images/signatures.
+
+This can create:
+
+413 Payload Too Large responses,
+
+timeouts, memory spikes, queue bloat,
+
+and completely unhelpful LLM classification (because the model is drowning in junk).
+
+Richpanel explicitly calls out 413 Payload Too Large as happening when the payload is too large — commonly when attempting to upload files above the size limit. 
+Richpanel
+
+How to avoid it
+
+Never pass file bytes in webhook payloads or LLM prompts. Pass metadata only:
+
+attachment id / filename / content-type / size (bytes) / URL if provided
+
+plus the customer’s caption text (if any)
+
+If you need the file in Richpanel, use their file upload endpoint rather than embedding bytes in other requests. 
+Richpanel
+
+Add an explicit “max input size” gate before doing anything expensive:
+
+reject/route-to-human if payload > X KB
+
+store attachment externally (S3/GCS) and only keep a pointer in your internal event record

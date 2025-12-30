@@ -1,0 +1,5 @@
+Using Segment (Optional):
+
+ Richpanel has a Segment integration as an alternative way to get data in. If your organization uses Segment, you could send identify calls and track events to Richpanel via Segment. For example, calling analytics.identify('user123', { email: 'john.doe@example.com', firstName: 'John' }); through Segment would create or update that customer in Richpanel
+skywork.ai
+. And analytics.track() events could log things like “Placed Order” or “Visited Page” into the customer’s timeline. This can supplement or replace direct API calls in some cases. However, using the Richpanel API directly gives you full control and doesn’t require Segment as a middleman.

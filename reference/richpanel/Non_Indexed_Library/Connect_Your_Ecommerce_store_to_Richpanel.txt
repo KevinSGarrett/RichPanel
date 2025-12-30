@@ -1,0 +1,21 @@
+Connect Your Ecommerce store to Richpanel
+Use this guide to connect your Ecommerce store to Richpanel.
+
+Connecting your cart platform enables the following features
+
+Access orders in Richpanel helpdesk: Whenever a customer reaches out, agents will be able to view customer orders next to the conversations.
+Add chat widget to your store: The integration will automatically add the JS snippet on the website. This won’t automatically make the widget visible till you make it visible.
+Let customers track and manage orders: Your customers will be able to track and manage orders inside self-service portal.
+To get started
+If you have an ecommerce store, connect it to Richpanel by going to settings→ Integrations → select your cart platform from the list and follow the steps shown on the screen. 
+
+For detailed instructions, click your cart platform below.
+
+Shopify
+Shopify
+Woocommerce
+Woocommerce
+Magento
+Magento
+API
+API

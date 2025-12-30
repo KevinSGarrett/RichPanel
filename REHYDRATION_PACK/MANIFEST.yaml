@@ -1,0 +1,150 @@
+version: 2
+purpose: AI-first rehydration pack for ChatGPT PM + (later) Cursor agents
+last_generated: '2025-12-29'
+mode_source: MODE.yaml
+paths:
+- path: 00_START_HERE.md
+  kind: file
+  when: common
+  required: true
+  role: Entry point + read order
+- path: 01_NORTH_STAR.md
+  kind: file
+  when: common
+  required: true
+  role: Immutable purpose + MVP + non-negotiables
+- path: 02_CURRENT_STATE.md
+  kind: file
+  when: common
+  required: true
+  role: Current repo truth (code/docs/infra)
+- path: 03_ACTIVE_WORKSTREAMS.md
+  kind: file
+  when: common
+  required: true
+  role: Parallel workstreams + ownership (foundation/build aware)
+- path: 04_DECISIONS_SNAPSHOT.md
+  kind: file
+  when: common
+  required: true
+  role: Latest decisions snapshot (quick)
+- path: 05_TASK_BOARD.md
+  kind: file
+  when: common
+  required: true
+  role: "Task board (single source of truth for \u201Cwhat next\u201D)"
+- path: 06_AGENT_ASSIGNMENTS.md
+  kind: file
+  when: common
+  required: true
+  role: Build-mode prompt source (template only in foundation mode)
+- path: CORE_LIVING_DOCS.md
+  kind: file
+  when: common
+  required: true
+  role: Pointer map to the canonical living documentation set
+- path: ISSUES_SINCE_LAST.md
+  kind: file
+  when: common
+  required: true
+  role: Short rolling window of new/closed issues since last rehydration
+- path: LAST_REHYDRATED.md
+  kind: file
+  when: common
+  required: true
+  role: Timestamp + last wave + last build run id (if applicable)
+- path: MANIFEST.yaml
+  kind: file
+  when: common
+  required: true
+  role: Pack manifest (this file)
+- path: MODE.yaml
+  kind: file
+  when: common
+  required: true
+  role: Operational mode flag (foundation vs build)
+- path: FOUNDATION_STATUS.md
+  kind: file
+  when: common
+  required: true
+  role: Token-efficient snapshot of foundation readiness + remaining items before build mode
+- path: OPEN_QUESTIONS.md
+  kind: file
+  when: common
+  required: true
+  role: Questions to resolve before heavy build
+- path: PM_GUARDRAILS.md
+  kind: file
+  when: common
+  required: true
+  role: Anti-drift guardrails for PM
+- path: PM_INITIAL_PROMPT.md
+  kind: file
+  when: common
+  required: true
+  role: One-time setup prompt for ChatGPT PM (paste once per new chat)
+- path: PM_REHYDRATION_PROMPT.md
+  kind: file
+  when: common
+  required: true
+  role: Recurring rehydration prompt for ChatGPT PM (paste each cycle)
+
+- path: POLICIES_SUMMARY.md
+  kind: file
+  when: common
+  required: true
+  role: Short summary of agent policies + links
+- path: RUNS/
+  kind: dir
+  when: build
+  required: true
+  role: 'Build-mode: per-run reports (may be absent/empty in foundation mode)'
+- path: TESTS_SINCE_LAST.md
+  kind: file
+  when: common
+  required: true
+  role: Short rolling window of executed tests since last rehydration
+- path: WAVE_SCHEDULE.md
+  kind: file
+  when: common
+  required: true
+  role: Quick wave schedule (foundation + build summary)
+- path: WAVE_SCHEDULE_FULL.md
+  kind: file
+  when: common
+  required: true
+  role: Master wave schedule (goals + done for each wave)
+- path: _DRAFTS/
+  kind: dir
+  when: common
+  required: false
+  role: Draft material preserved for future (may be empty)
+- path: _TEMPLATES/
+  kind: dir
+  when: common
+  required: true
+  role: Templates for reports/prompts
+- path: GITHUB_STATE.md
+  kind: file
+  when: common
+  required: true
+  role: Snapshot of branches/PRs/CI status + last main update
+- path: DELETE_APPROVALS.yaml
+  kind: file
+  when: common
+  required: true
+  role: Explicit approvals for protected deletes/renames
+
+run_artifacts:
+  run_id_regex: ^RUN_\d{8}_\d{4}Z$
+  agent_ids:
+  - A
+  - B
+  - C
+  required_files_per_agent:
+  - RUN_SUMMARY.md
+  - STRUCTURE_REPORT.md
+  - DOCS_IMPACT_MAP.md
+  - TEST_MATRIX.md
+  optional_files_per_agent:
+  - FIX_REPORT.md

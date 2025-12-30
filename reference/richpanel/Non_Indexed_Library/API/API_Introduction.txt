@@ -1,0 +1,68 @@
+Introduction
+Use the APIs to send data from your application to Richpanel. Use this guide to sync customers and orders from your system into Richpanel.
+Prerequisites
+💡
+Ensure you have admin access to generate API keys and manage integrations in your Richpanel account.
+Step 1: Generate API Key for your Custom Store
+Log into your Richpanel account.
+Navigate to the Settings menu on the left sidebar.
+Scroll down to the Integrations section.
+image
+Click on API keys followed by clicking on Create key button to generate the API key.
+Enter the key name and click Generate button.
+image
+Step 2: Integrate Richpanel APIs for your Custom Store
+Integrate Richpanel APIs to send order and customer data to Richpanel using the API key generated in the above steps.
+💡
+Follow this document to know more about the APIs.
+Step 3: Load Richpanel Widget and Track Events
+Load the below script to a page on your custom store where events need to be tracked and widget needs to be loaded. The widget will be visible only if it’s enabled on Richpanel.
+Copy
+window.richpanel||(window.richpanel=[]),window.richpanel.q=[],mth=["track","debug","atr"],sk=function(e){return function(){a=Array.prototype.slice.call(arguments);a.unshift(e);window.richpanel.q.push(a)}};for(var i=0;mth.length>i;i++){window.richpanel[mth[i]]=sk(mth[i])}window.richpanel.load=function(e){var t=document,n=t.getElementsByTagName("script")[0],r=t.createElement("script");r.type="text/javascript";r.async=true;r.src="https://api.richpanel.com/v2/j/"+e+"?version=2.0.0";n.parentNode.insertBefore(r,n)};
+richpanel.load("API_KEY");
+💡
+Follow this document to know further about events and structure.Follow this document for order event structure detail.
+Step 4: Sending Bulk Events / Sending Order History
+Old events like order history can be sent in bulk to Richpanel.
+The individual events should be arranged as follows:
+Copy
+const events = [{
+	event: 'order',
+  properties: {...orderProperties},
+  time: {
+     "sentAt": <order-date> //when event occurred, use this property in case you're updating old orders, or synchronizing old orders
+  },
+  appClientId: API_KEY
+}]
+
+const events = {
+	"event": "send_batch",
+	"appClientId": "test_api_key_123",
+	"events": [...events]
+}
+Data can be passed to a batch API
+Copy
+	const eventData = btoa(JSON.stringify(events))
+
+const data = JSON.stringify({
+  "hs": eventData
+});
+
+const xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+
+xhr.addEventListener("readystatechange", function () {
+  if (this.readyState === this.DONE) {
+    console.log(this.responseText);
+  }
+});
+
+xhr.open("POST", "https://api.richpanel.com/v2/bt");
+xhr.setRequestHeader("Content-Type", "application/json");
+
+xhr.send(data);
+💡
+Always sync orders in the batch of 25 for smoother sync.
+Follow this document to learn more
+Conclusion
+Use the APIs to send customer data and enable your support team to directly access these details inside Richpanel.

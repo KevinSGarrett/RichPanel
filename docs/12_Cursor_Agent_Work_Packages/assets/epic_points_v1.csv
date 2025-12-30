@@ -1,0 +1,11 @@
+epic,epic_name,tickets,story_points
+EP00,EP00 — Preflight & tenant verification,4,9
+EP01,EP01 — AWS foundation,4,16
+EP02,EP02 — IaC & CI/CD foundation,3,15
+EP03,EP03 — Middleware core pipeline,7,27
+EP04,EP04 — Richpanel integration,5,23
+EP05,EP05 — Order status data path,4,21
+EP06,EP06 — LLM routing & policy engine,5,23
+EP07,EP07 — FAQ automation & templates,6,23
+EP08,EP08 — Security & observability hardening,6,26
+EP09,EP09 — Testing & staged rollout,5,16

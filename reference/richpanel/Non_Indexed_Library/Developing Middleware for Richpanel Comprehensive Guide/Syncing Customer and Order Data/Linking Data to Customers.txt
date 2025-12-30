@@ -1,0 +1,3 @@
+Linking Data to Customers:
+
+ Ensure that when you create/update orders or subscriptions in Richpanel, you link them to the correct Richpanel customer profile. In the API, the order payload will include a customer identifier (like email or a customer_id that matches the one from the customer profile). Richpanel uses that to associate the order with the customer. If the customer profile doesn’t exist yet, Richpanel might create a stub or you should create the profile first. The same holds for subscriptions.

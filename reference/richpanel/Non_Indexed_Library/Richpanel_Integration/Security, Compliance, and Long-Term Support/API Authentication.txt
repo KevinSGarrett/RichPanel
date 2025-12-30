@@ -1,0 +1,5 @@
+API Authentication: 
+
+For calls from your middleware to Richpanel’s API, Richpanel uses an API Key in the header (x-richpanel-key) for auth
+developer.richpanel.com
+. This key grants access to all API endpoints for your account. Currently, there is no granular scope on the API key – it’s essentially all-or-nothing. (We did not find any documentation of scopes like “read-only” or “ticket-only” keys.) So treat this key like a password – store it securely and restrict who has access. If possible, run your integration code on secure infrastructure and don’t expose the key anywhere it can be intercepted. If a scoped key feature is important (for example, you want a key that can only create tickets but not read customer data), you might bring that up to Richpanel as a feature request. For now, assume the API key can perform any action your user role allows (likely admin-level if you generated it).

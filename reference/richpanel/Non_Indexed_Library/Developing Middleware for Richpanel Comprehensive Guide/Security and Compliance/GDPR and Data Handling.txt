@@ -1,0 +1,3 @@
+GDPR and Data Handling: 
+
+If you have users in the EU (or other regions with data laws), be mindful of how data flows between Richpanel and your systems. For instance, if a customer invokes their right to be forgotten and you delete them from your system, you should also remove their data from Richpanel (Richpanel’s API would let you delete or anonymize a customer). Conversely, if they request data export, you might need to pull conversation data via the API. Ensure your middleware facilitates compliance – perhaps flagging or auto-tagging tickets that contain certain types of personal data so they can be handled appropriately.

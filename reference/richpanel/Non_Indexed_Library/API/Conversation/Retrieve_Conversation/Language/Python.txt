@@ -1,0 +1,16 @@
+Retrieve a Conversation
+
+Language: Python
+
+import requests
+
+url = "https://api.richpanel.com/v1/tickets/id?show_visitor_profile=false"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.get(url, headers=headers)
+
+print(response.text)

@@ -1,0 +1,3 @@
+Middleware Failures:
+
+ Make sure to handle exceptions in your code so that one failing operation doesn’t crash the whole service. For example, if your middleware on receiving a webhook tries to call two different APIs (say, one to update an order and another to log something to a Google Sheet), and one of them fails, catch that error and handle it gracefully. You might still return 200 to Richpanel and separately alert a human or log the error for later resolution, rather than return 500 and have the whole event potentially lost.

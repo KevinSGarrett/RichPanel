@@ -1,0 +1,10 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Powershell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/tickets/number/conversationNo' -Method GET -Headers $headers

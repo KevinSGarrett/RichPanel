@@ -1,0 +1,11 @@
+Issue Type,Summary,Epic Name,Description,Labels
+Epic,EP00 — Preflight & tenant verification,EP00 — Preflight & tenant verification,Wave 12 epic EP00. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP00_*.md for details.,"wave12,ep00"
+Epic,EP01 — AWS foundation,EP01 — AWS foundation,Wave 12 epic EP01. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP01_*.md for details.,"wave12,ep01"
+Epic,EP02 — IaC & CI/CD foundation,EP02 — IaC & CI/CD foundation,Wave 12 epic EP02. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP02_*.md for details.,"wave12,ep02"
+Epic,EP03 — Middleware core pipeline,EP03 — Middleware core pipeline,Wave 12 epic EP03. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP03_*.md for details.,"wave12,ep03"
+Epic,EP04 — Richpanel integration,EP04 — Richpanel integration,Wave 12 epic EP04. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP04_*.md for details.,"wave12,ep04"
+Epic,EP05 — Order status data path,EP05 — Order status data path,Wave 12 epic EP05. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP05_*.md for details.,"wave12,ep05"
+Epic,EP06 — LLM routing & policy engine,EP06 — LLM routing & policy engine,Wave 12 epic EP06. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP06_*.md for details.,"wave12,ep06"
+Epic,EP07 — FAQ automation & templates,EP07 — FAQ automation & templates,Wave 12 epic EP07. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP07_*.md for details.,"wave12,ep07"
+Epic,EP08 — Security & observability hardening,EP08 — Security & observability hardening,Wave 12 epic EP08. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP08_*.md for details.,"wave12,ep08"
+Epic,EP09 — Testing & staged rollout,EP09 — Testing & staged rollout,Wave 12 epic EP09. See docs/12_Cursor_Agent_Work_Packages/02_Epics/EP09_*.md for details.,"wave12,ep09"

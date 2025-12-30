@@ -1,0 +1,12 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.retrieveAConversationWithConversationNumber({conversationNo: 'conversationNo'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

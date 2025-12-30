@@ -1,0 +1,5 @@
+Use HTTPS: 
+
+Richpanel requires TLS for outgoing webhooks – their API and webhooks only communicate over HTTPS
+richpanel.com
+. Make sure your endpoint has a valid SSL certificate. This keeps the data (which could include customer emails, order numbers, etc.) encrypted in transit.

@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: RichPanel AI Middleware API
+  version: 0.1.0
+  description: >
+    Planned API surface for the RichPanel AI middleware.
+    Source of truth for endpoints once implementation begins.
+servers:
+  - url: https://example.invalid
+    description: Placeholder (set during deployment)
+
+paths:
+  /webhooks/richpanel:
+    post:
+      summary: Receive Richpanel webhook events
+      description: ACK-fast webhook receiver; validates and enqueues for async processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Accepted
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized / invalid signature
+        '500':
+          description: Server error
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK

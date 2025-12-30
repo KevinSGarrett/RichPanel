@@ -1,0 +1,8 @@
+Throughput and Rate Limits:
+
+ With the 50 requests/30s API limit in mind
+developer.richpanel.com
+, if your integration might spike (for example, 200 customers suddenly all message about the same issue, triggering 200 near-simultaneous webhooks and maybe 200 outbound API calls from your side), you need to throttle those. Implement a simple rate-limiter in your code or use a queue where workers process a limited number per second. Richpanel’s rate-limit headers (X-RateLimit-Remaining etc.) can inform your code about when to slow down
+developer.richpanel.com
+developer.richpanel.com
+.

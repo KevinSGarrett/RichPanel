@@ -1,0 +1,12 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+
+Language: Powershell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("content-type", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/order/appclient_id' -Method POST -Headers $headers

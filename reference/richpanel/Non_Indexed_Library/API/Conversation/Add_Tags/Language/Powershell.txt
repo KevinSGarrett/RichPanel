@@ -1,0 +1,11 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: Powershell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("content-type", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/tickets/id/add-tags' -Method PUT -Headers $headers

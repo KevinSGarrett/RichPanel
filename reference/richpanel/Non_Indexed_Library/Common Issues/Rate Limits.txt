@@ -1,0 +1,32 @@
+Hitting Richpanel (or OpenAI / Shopify) rate limits during traffic spikes
+
+What goes wrong
+
+A busy hour = bursts of tickets.
+
+Your middleware makes multiple API calls per message.
+
+Richpanel’s API is rate-limited to 50 requests per 30 seconds and returns 429 with headers like Retry-After, X-RateLimit-Remaining, etc. 
+Richpanel
++1
+
+Result: intermittent failures, delayed routing, missing tags, and slow responses.
+
+How to avoid it
+
+Reduce calls per ticket:
+
+Put the needed context into the HTTP Target payload so you don’t have to fetch the ticket again.
+
+Prefer one update over multiple updates when possible (e.g., set team + tags + status in one operation).
+
+Implement global rate limiting + backoff:
+
+A token bucket limiter on your side.
+
+On 429, honor Retry-After and retry with jitter. 
+Richpanel
+
+Queue the “write operations” to Richpanel separately so your system remains stable during bursts.
+
+Cache stable metadata (team IDs, tag IDs, etc.) rather than re-fetching constantly.

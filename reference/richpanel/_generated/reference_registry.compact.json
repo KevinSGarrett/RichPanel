@@ -1,0 +1,5311 @@
+[
+  {
+    "path": "reference/richpanel/INDEX.md",
+    "title": "Richpanel Reference Library",
+    "category": "",
+    "type": "md",
+    "tags": [
+      "index",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/API_Introduction.txt",
+    "title": "Introduction",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "introduction",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/API_Introduction_002.txt",
+    "title": "API Introduction",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "002",
+      "api",
+      "introduction",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Authentication.txt",
+    "title": "Authentication",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "authentication",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Channel/Fetch_Channel/Fetch_Channel.txt",
+    "title": "Fetch a Channel",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "channel",
+      "fetch",
+      "fetch_channel",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Channel/Fetch_Channel/Language/Languages_Fetch_Channel.txt",
+    "title": "Fetch a Channel",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "channel",
+      "fetch",
+      "fetch_channel",
+      "language",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Channel/List_Channel/Language/Languages_List_Channels.txt",
+    "title": "List Channels",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "channel",
+      "channels",
+      "language",
+      "languages",
+      "list",
+      "list_channel",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Channel/List_Channel/List_Channels.txt",
+    "title": "List Channels",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "channel",
+      "channels",
+      "list",
+      "list_channel",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Add_Tags.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add",
+      "add_tags",
+      "api",
+      "conversation",
+      "non_indexed_library",
+      "richpanel",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/HTTP.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "http",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Java.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/JavaScript.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Node.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/PHP.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "php",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Powershell.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Python.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "python",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Ruby.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Add_Tags/Language/Shell.txt",
+    "title": "Add Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "add_tags",
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Attach_Order.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach",
+      "attach_order",
+      "conversation",
+      "non_indexed_library",
+      "order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/HTTP.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "http",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/Java.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/JavaScript.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/Node.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/PHP.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "php",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/PowerShell.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/Python.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "python",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/Ruby.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Attach_Order/Language/Shell.txt",
+    "title": "Attach Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "attach_order",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Create_Conversation.txt",
+    "title": "Create a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create",
+      "create_conversation",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/http.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "http",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/java.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "java",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/javascript.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "javascript",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/node.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "languages",
+      "node",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/php.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "languages",
+      "non_indexed_library",
+      "php",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/python.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "languages",
+      "non_indexed_library",
+      "python",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/ruby.txt",
+    "title": "Create Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Create_Conversation/Languages/shell.txt",
+    "title": "Language",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "create_conversation",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/HTTP.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "http",
+      "language",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/Java.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/JavaScript.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/Node.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/PHP.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "php",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/PowerShell.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/Python.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "python",
+      "remove_tags",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/Ruby.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Language/Shell.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "remove_tags",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Remove_Tags/Remove_Tags.txt",
+    "title": "Remove Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "non_indexed_library",
+      "remove",
+      "remove_tags",
+      "richpanel",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/Java.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/JavaScript.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/Node.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/PHP.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "php",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/Python.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "python",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/Ruby.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Language/Shell.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation/Retrieve_A_Conversation.txt",
+    "title": "Retrieve a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "non_indexed_library",
+      "retrieve",
+      "retrieve_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/HTTP.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "http",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Java.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "java",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/JavaScript.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Node.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "node",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/PHP.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "non_indexed_library",
+      "php",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Powershell.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Python.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "non_indexed_library",
+      "python",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Ruby.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Email/Shell.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "email",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/HTTP.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "http",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Java.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/JavaScript.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Node.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/PHP.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "php",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Powershell.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "powershell",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Python.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "python",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Ruby.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Language/Phone/Shell.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "phone",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_Using_Customer_Email_Phone/Retrieve_Conversations_Using_Customers_Email_Phone.txt",
+    "title": "Retrieve Conversations using Customer's Email or Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "conversations",
+      "customers",
+      "email",
+      "non_indexed_library",
+      "phone",
+      "retrieve",
+      "retrieve_conversation_using_customer_email_phone",
+      "richpanel",
+      "using"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/Java.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "java",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/JavaScript.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/Node.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "node",
+      "non_indexed_library",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/PHP.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "php",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/PowerShell.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/Python.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "python",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/Ruby.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Language/Shell.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "language",
+      "non_indexed_library",
+      "retrieve_conversation_with_conversation_number",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Retrieve_Conversation_With_Conversation_Number/Retrive_A_Conversation_With_Conversation_Number.txt",
+    "title": "Retrieve a Conversation with conversation number",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "non_indexed_library",
+      "number",
+      "retrieve_conversation_with_conversation_number",
+      "retrive",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/Java.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "java",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/JavaScript.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "javascript",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/Node.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "languages",
+      "node",
+      "non_indexed_library",
+      "richpanel",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/PHP.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "languages",
+      "non_indexed_library",
+      "php",
+      "richpanel",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/Python.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "languages",
+      "non_indexed_library",
+      "python",
+      "richpanel",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/Ruby.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "ruby",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Languages/Shell.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "shell",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Conversation/Update_Conversation/Update_a_Conversation.txt",
+    "title": "Update a Conversation",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "non_indexed_library",
+      "richpanel",
+      "update",
+      "update_conversation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Create_Update_Customer.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create",
+      "create_update_customer",
+      "customer",
+      "non_indexed_library",
+      "richpanel",
+      "update"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/HTTP.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "http",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/Java.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "java",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/JavaScript.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "javascript",
+      "languages",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/Node.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "node",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/PHP.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "non_indexed_library",
+      "php",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/PowerShell.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "non_indexed_library",
+      "powershell",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/Python.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "non_indexed_library",
+      "python",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/Ruby.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Create_Update_Customer/Languages/Shell.txt",
+    "title": "Create/UpdateCustomer",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_customer",
+      "customer",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/HTTP.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "http",
+      "language",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/Java.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "java",
+      "language",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/JavaScript.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/Node.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "node",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/PHP.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "non_indexed_library",
+      "php",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/PowerShell.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "non_indexed_library",
+      "powershell",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/Python.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "non_indexed_library",
+      "python",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/Ruby.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Language/Shell.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "language",
+      "non_indexed_library",
+      "retrieve_customer_with_email_phone",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Customer/Retrieve_Customer_With_Email_Phone/Retrieve_Customer_With_Email_Phone.txt",
+    "title": "Retrieve a Customer with Email/Phone",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "customer",
+      "email",
+      "non_indexed_library",
+      "phone",
+      "retrieve",
+      "retrieve_customer_with_email_phone",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Errors.txt",
+    "title": "Errors",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "errors",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/File/Upload_File/Language/Languages_Upload_File.txt",
+    "title": "Upload file",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "file",
+      "language",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "upload",
+      "upload_file"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/File/Upload_File/Upload_File.txt",
+    "title": "Upload file",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "file",
+      "non_indexed_library",
+      "richpanel",
+      "upload",
+      "upload_file"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Getting_Started_RichPanel_API.txt",
+    "title": "Getting Started with Richpanel",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "getting",
+      "non_indexed_library",
+      "richpanel",
+      "started"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Limitations.txt",
+    "title": "Limitations",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "limitations",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Create_Update_Order.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create",
+      "create_update_order",
+      "non_indexed_library",
+      "order",
+      "richpanel",
+      "update"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/HTTP.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "http",
+      "language",
+      "non_indexed_library",
+      "order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/Java.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "java",
+      "language",
+      "non_indexed_library",
+      "order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/JavaScript.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/Node.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "node",
+      "non_indexed_library",
+      "order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/PHP.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "non_indexed_library",
+      "order",
+      "php",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/PowerShell.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "non_indexed_library",
+      "order",
+      "powershell",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/Python.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "non_indexed_library",
+      "order",
+      "python",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/Ruby.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "non_indexed_library",
+      "order",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Create_Update_Order/Language/Shell.txt",
+    "title": "Create/Update orders",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_order",
+      "language",
+      "non_indexed_library",
+      "order",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/HTTP.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "http",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/Java.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "java",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/JavaScript.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/Node.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "node",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/PHP.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "php",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/PowerShell.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "powershell",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/Python.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "python",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/Ruby.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Language/Shell.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order/Retrieve_An_Order.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "non_indexed_library",
+      "order",
+      "retrieve",
+      "retrieve_order",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/HTTP.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "http",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/Java.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "java",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/JavaScript.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "javascript",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/Node.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "node",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/PHP.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "php",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/PowerShell.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "powershell",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/Ruby.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel",
+      "ruby"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Language/Shell.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "non_indexed_library",
+      "order",
+      "retrieve_order_linked_to_conversation",
+      "richpanel",
+      "shell"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Order/Retrieve_Order_Linked_To_Conversation/Retrieve_Order_Linked_To_Conversation.txt",
+    "title": "Retrieve an Order",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "conversation",
+      "linked",
+      "non_indexed_library",
+      "order",
+      "retrieve",
+      "retrieve_order_linked_to_conversation",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Pagination.txt",
+    "title": "Pagination",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "non_indexed_library",
+      "pagination",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Requests.txt",
+    "title": "Requests",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "non_indexed_library",
+      "requests",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Subscription/Create_Update_Subscription/Create_Update_Subscription.txt",
+    "title": "Create/Update Subscriptions",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create",
+      "create_update_subscription",
+      "non_indexed_library",
+      "richpanel",
+      "subscription",
+      "update"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Subscription/Create_Update_Subscription/Language/Languages.txt",
+    "title": "Create/Update Subscriptions",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create_update_subscription",
+      "language",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "subscription"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Tag/Create_Tag/Create_Tag.txt",
+    "title": "Create Tag",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create",
+      "create_tag",
+      "non_indexed_library",
+      "richpanel",
+      "tag"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Tag/Create_Tag/Language/Languages_Create_Tag.txt",
+    "title": "Create Tag",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "create",
+      "create_tag",
+      "language",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "tag"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Tag/List_Tag/Language/Languages_List_Tags.txt",
+    "title": "List Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "languages",
+      "list",
+      "list_tag",
+      "non_indexed_library",
+      "richpanel",
+      "tag",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Tag/List_Tag/List_Tag.txt",
+    "title": "List Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "list",
+      "list_tag",
+      "non_indexed_library",
+      "richpanel",
+      "tag"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Teams/List_Teams/Language/Languages_List_Teams.txt",
+    "title": "List Teams",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "languages",
+      "list",
+      "list_teams",
+      "non_indexed_library",
+      "richpanel",
+      "teams"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/Teams/List_Teams/List_Teams.txt",
+    "title": "List Teams",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "list",
+      "list_teams",
+      "non_indexed_library",
+      "richpanel",
+      "teams"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/User(Agent)/Fetch_A_User/Fetch_A_User.txt",
+    "title": "Fetch a User",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "fetch",
+      "fetch_a_user",
+      "non_indexed_library",
+      "richpanel",
+      "user",
+      "user(agent)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/User(Agent)/Fetch_A_User/Language/Languages.txt",
+    "title": "Fetch a User",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "fetch_a_user",
+      "language",
+      "languages",
+      "non_indexed_library",
+      "richpanel",
+      "user(agent)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/User(Agent)/List_Users/Language/Language_List_Users.txt",
+    "title": "List Users",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "language",
+      "list",
+      "list_users",
+      "non_indexed_library",
+      "richpanel",
+      "user(agent)",
+      "users"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/API/User(Agent)/List_Users/List_Users.txt",
+    "title": "List Users",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "list",
+      "list_users",
+      "non_indexed_library",
+      "richpanel",
+      "user(agent)",
+      "users"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Authorizing_User.txt",
+    "title": "Authorizing User",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "authorizing",
+      "non_indexed_library",
+      "richpanel",
+      "user"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Attachment Bursts.txt",
+    "title": "\u201cAttachment bursts\u201d \u2192 rate limit problems, retries storm, cascading failures",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "attachment",
+      "bursts",
+      "common_issues",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Attachments.txt",
+    "title": "Attachments + non-text messages break classification and can cause \u201cpayload too large\u201d failures",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "attachments",
+      "common_issues",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Automation loops.txt",
+    "title": "1) Automation loops that spam customers or endlessly re-trigger your middleware",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation",
+      "common_issues",
+      "loops",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Automation pitfalls.txt",
+    "title": "Order status automation pitfalls (wrong order, missing order, privacy leaks) + safe fallback",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation",
+      "common_issues",
+      "non_indexed_library",
+      "pitfalls",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Context Overflow.txt",
+    "title": "\u201cWe send too much conversation context\u201d \u2192 LLM context overflow, slow classification, higher misroutes",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "context",
+      "non_indexed_library",
+      "overflow",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Duplicate events and idempotency.txt",
+    "title": "Duplicate events and idempotency failures (double replies, double routing, double tagging)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "duplicate",
+      "events",
+      "idempotency",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Fetch Attachment Later.txt",
+    "title": "\u201cWe can\u2019t fetch the attachment later\u201d \u2192 broken automation due to expiring URLs / auth / bad content-types",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "attachment",
+      "common_issues",
+      "fetch",
+      "later",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Handling API Errors.txt",
+    "title": "Weak handling of \u201cnormal\u201d Richpanel API errors (not just rate limits)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "common_issues",
+      "errors",
+      "handling",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/HTTP Target fails retry.txt",
+    "title": "Assuming Richpanel will \u201cretry later\u201d if your HTTP Target fails",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "fails",
+      "http",
+      "non_indexed_library",
+      "retry",
+      "richpanel",
+      "target"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Inline Attachment.txt",
+    "title": "\u201cWe accidentally inline the attachment\u201d (base64 blobs or huge HTML) \u2192 requests blow up / 413 errors",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "attachment",
+      "common_issues",
+      "inline",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/LLM classification failures.txt",
+    "title": "LLM classification failures (multi-intent, vague messages, and prompt-injection)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "classification",
+      "common_issues",
+      "failures",
+      "llm",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Mapping drift.txt",
+    "title": "Team/department mapping drift (your router sends tickets to the wrong place over time)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "drift",
+      "mapping",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Overwriting ticket state.txt",
+    "title": "Team/department mapping drift (your router sends tickets to the wrong place over time)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "non_indexed_library",
+      "overwriting",
+      "richpanel",
+      "state",
+      "ticket"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Pagination mistakes.txt",
+    "title": "Pagination mistakes = missing teams/tags/users, which breaks routing in subtle ways",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "mistakes",
+      "non_indexed_library",
+      "pagination",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Practical dev checklist.txt",
+    "title": "A practical dev checklist to prevent most of these at once",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "checklist",
+      "common_issues",
+      "dev",
+      "non_indexed_library",
+      "practical",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Rate Limits.txt",
+    "title": "Hitting Richpanel (or OpenAI / Shopify) rate limits during traffic spikes",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "limits",
+      "non_indexed_library",
+      "rate",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Webhook payload providers.txt",
+    "title": "Webhook payload doesn\u2019t include the identifiers you need (so everything becomes ambiguous)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "non_indexed_library",
+      "payload",
+      "providers",
+      "richpanel",
+      "webhook"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Webhook spoofing.txt",
+    "title": "Webhook spoofing and unauthorized calls to your middleware endpoint",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "non_indexed_library",
+      "richpanel",
+      "spoofing",
+      "webhook"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Webhook timeouts.txt",
+    "title": "Webhook timeouts and lost events because your middleware is \u201cdoing too much\u201d synchronously",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "non_indexed_library",
+      "richpanel",
+      "timeouts",
+      "webhook"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Common Issues/zero intent.txt",
+    "title": "\u201cNon-text-only messages provide zero intent\u201d \u2192 false positives on FAQs + unsafe automated replies",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "common_issues",
+      "intent",
+      "non_indexed_library",
+      "richpanel",
+      "zero"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Connect_Your_Ecommerce_store_to_Richpanel.txt",
+    "title": "Connect Your Ecommerce store to Richpanel",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "connect",
+      "ecommerce",
+      "non_indexed_library",
+      "richpanel",
+      "store"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Connect_your_Support_Email.txt",
+    "title": "Connect your Support Email",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "connect",
+      "email",
+      "non_indexed_library",
+      "richpanel",
+      "support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Connecting_your_Shopify_store_to_Richpanel.txt",
+    "title": "Introduction",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "connecting",
+      "non_indexed_library",
+      "richpanel",
+      "shopify",
+      "store"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Overview.txt",
+    "title": "Overview",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "overview",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085449.png",
+    "title": "Screenshot 2025 12 19 085449",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085449",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085745.png",
+    "title": "Screenshot 2025 12 19 085745",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085745",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085804.png",
+    "title": "Screenshot 2025 12 19 085804",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085804",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085819.png",
+    "title": "Screenshot 2025 12 19 085819",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085819",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085832.png",
+    "title": "Screenshot 2025 12 19 085832",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085832",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085850.png",
+    "title": "Screenshot 2025 12 19 085850",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085850",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085903.png",
+    "title": "Screenshot 2025 12 19 085903",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085903",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085920.png",
+    "title": "Screenshot 2025 12 19 085920",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085920",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 085936.png",
+    "title": "Screenshot 2025 12 19 085936",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "085936",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091100.png",
+    "title": "Screenshot 2025 12 19 091100",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091100",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091119.png",
+    "title": "Screenshot 2025 12 19 091119",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091119",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091141.png",
+    "title": "Screenshot 2025 12 19 091141",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091141",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091202.png",
+    "title": "Screenshot 2025 12 19 091202",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091202",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091231.png",
+    "title": "Screenshot 2025 12 19 091231",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091231",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091253.png",
+    "title": "Screenshot 2025 12 19 091253",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091253",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091317.png",
+    "title": "Screenshot 2025 12 19 091317",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091317",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091336.png",
+    "title": "Screenshot 2025 12 19 091336",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091336",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 091354.png",
+    "title": "Screenshot 2025 12 19 091354",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "091354",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 114837.png",
+    "title": "Screenshot 2025 12 19 114837",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "114837",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 115522.png",
+    "title": "Screenshot 2025 12 19 115522",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "115522",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 115541.png",
+    "title": "Screenshot 2025 12 19 115541",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "115541",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Automation/Screenshot 2025-12-19 115551.png",
+    "title": "Screenshot 2025 12 19 115551",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "115551",
+      "2025",
+      "automation",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Overview.txt",
+    "title": "This folder contains all of the companies current Richpanel Conversation Fields",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "overview",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120353.png",
+    "title": "Screenshot 2025 12 19 120353",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120353",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120401.png",
+    "title": "Screenshot 2025 12 19 120401",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120401",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120410.png",
+    "title": "Screenshot 2025 12 19 120410",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120410",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120425.png",
+    "title": "Screenshot 2025 12 19 120425",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120425",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120439.png",
+    "title": "Screenshot 2025 12 19 120439",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120439",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120446.png",
+    "title": "Screenshot 2025 12 19 120446",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120446",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120453.png",
+    "title": "Screenshot 2025 12 19 120453",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120453",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120501.png",
+    "title": "Screenshot 2025 12 19 120501",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120501",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120516.png",
+    "title": "Screenshot 2025 12 19 120516",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120516",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120524.png",
+    "title": "Screenshot 2025 12 19 120524",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120524",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120533.png",
+    "title": "Screenshot 2025 12 19 120533",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120533",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120542.png",
+    "title": "Screenshot 2025 12 19 120542",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120542",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120553.png",
+    "title": "Screenshot 2025 12 19 120553",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120553",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Conversation Fields/Screenshot 2025-12-19 120602.png",
+    "title": "Screenshot 2025 12 19 120602",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120602",
+      "2025",
+      "conversation_fields",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Overview.txt",
+    "title": "The file contains all of the companies current Richpanel Customer Fields",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "overview",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120727.png",
+    "title": "Screenshot 2025 12 19 120727",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120727",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120737.png",
+    "title": "Screenshot 2025 12 19 120737",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120737",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120746.png",
+    "title": "Screenshot 2025 12 19 120746",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120746",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120753.png",
+    "title": "Screenshot 2025 12 19 120753",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120753",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120804.png",
+    "title": "Screenshot 2025 12 19 120804",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120804",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120811.png",
+    "title": "Screenshot 2025 12 19 120811",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120811",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120823.png",
+    "title": "Screenshot 2025 12 19 120823",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120823",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Customer Fields/Screenshot 2025-12-19 120830.png",
+    "title": "Screenshot 2025 12 19 120830",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120830",
+      "2025",
+      "currentsetup",
+      "customer_fields",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Macros/Macros.csv",
+    "title": "Macros",
+    "category": "Non_Indexed_Library",
+    "type": "csv",
+    "tags": [
+      "currentsetup",
+      "macros",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Macros/Overview.txt",
+    "title": "This folder contains the companies current Richpanel Macros",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "currentsetup",
+      "macros",
+      "non_indexed_library",
+      "overview",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Tags/Overview.txt",
+    "title": "This folder contains all of the companies current Richpanel Tags",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "currentsetup",
+      "non_indexed_library",
+      "overview",
+      "richpanel",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Tags/Screenshot 2025-12-19 115937.png",
+    "title": "Screenshot 2025 12 19 115937",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "115937",
+      "2025",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Tags/Screenshot 2025-12-19 115953.png",
+    "title": "Screenshot 2025 12 19 115953",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "115953",
+      "2025",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/CurrentSetup/Tags/Screenshot 2025-12-19 120011.png",
+    "title": "Screenshot 2025 12 19 120011",
+    "category": "Non_Indexed_Library",
+    "type": "png",
+    "tags": [
+      "120011",
+      "2025",
+      "currentsetup",
+      "non_indexed_library",
+      "richpanel",
+      "screenshot",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/dev.txt",
+    "title": "dev",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "dev",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Avoiding Automation Loops/Don#U2019t Re-trigger on API Actions.txt",
+    "title": "Don\u2019t Re-trigger on API Actions:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "actions",
+      "api",
+      "avoiding_automation_loops",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "don#u2019t",
+      "non_indexed_library",
+      "richpanel",
+      "trigger"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Avoiding Automation Loops/Don\u2019t Re-trigger on API Actions.txt",
+    "title": "Don\u2019t Re-trigger on API Actions:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "actions",
+      "api",
+      "avoiding_automation_loops",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "don\u2019t",
+      "non_indexed_library",
+      "richpanel",
+      "trigger"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Avoiding Automation Loops/External Loops.txt",
+    "title": "External Loops:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "avoiding_automation_loops",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "external",
+      "loops",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Avoiding Automation Loops/One-way Trigger.txt",
+    "title": "One-way Trigger:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "avoiding_automation_loops",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "one",
+      "richpanel",
+      "trigger",
+      "way"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Avoiding Automation Loops/Tag-Based Flags.txt",
+    "title": "Tag-Based Flags:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "avoiding_automation_loops",
+      "based",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "flags",
+      "non_indexed_library",
+      "richpanel",
+      "tag"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Crafting the Webhook Payload (Outgoing Data)/Avoid Sensitive Data.txt",
+    "title": "Avoid Sensitive Data:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "avoid",
+      "crafting_the_webhook_payload_(outgoing_data)",
+      "data",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "sensitive"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Crafting the Webhook Payload (Outgoing Data)/Include Unique Identifiers.txt",
+    "title": "Include Unique Identifiers:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "crafting_the_webhook_payload_(outgoing_data)",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "identifiers",
+      "include",
+      "non_indexed_library",
+      "richpanel",
+      "unique"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Crafting the Webhook Payload (Outgoing Data)/Introduction.txt",
+    "title": "Introduction:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "crafting_the_webhook_payload_(outgoing_data)",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "introduction",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Integration Entry Points (Triggers)/Introduction.txt",
+    "title": "Integration Entry Points (Triggers) - Introduction:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "integration_entry_points_(triggers)",
+      "introduction",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Integration Entry Points (Triggers)/Stability of Webhook Triggers.txt",
+    "title": "Stability of Webhook Triggers:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "integration_entry_points_(triggers)",
+      "non_indexed_library",
+      "richpanel",
+      "stability",
+      "triggers",
+      "webhook"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Integration Entry Points (Triggers)/Unified Triggers Across Channels.txt",
+    "title": "Unified Triggers Across Channels:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "across",
+      "channels",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "integration_entry_points_(triggers)",
+      "non_indexed_library",
+      "richpanel",
+      "triggers",
+      "unified"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Overview.txt",
+    "title": "Overview",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "overview",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Receiving the Webhook in Your Middleware/Acknowledge Quickly.txt",
+    "title": "Acknowledge Quickly:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "acknowledge",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "quickly",
+      "receiving_the_webhook_in_your_middleware",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Receiving the Webhook in Your Middleware/Idempotency and Retries.txt",
+    "title": "Idempotency and Retries:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "idempotency",
+      "non_indexed_library",
+      "receiving_the_webhook_in_your_middleware",
+      "retries",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Receiving the Webhook in Your Middleware/Logging and Monitoring.txt",
+    "title": "Logging and Monitoring:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "logging",
+      "monitoring",
+      "non_indexed_library",
+      "receiving_the_webhook_in_your_middleware",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Receiving the Webhook in Your Middleware/Use HTTPS.txt",
+    "title": "Use HTTPS:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "https",
+      "non_indexed_library",
+      "receiving_the_webhook_in_your_middleware",
+      "richpanel",
+      "use"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Receiving the Webhook in Your Middleware/Verify the Source.txt",
+    "title": "Verify the Source:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "receiving_the_webhook_in_your_middleware",
+      "richpanel",
+      "source",
+      "verify"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Reliability and Scalability Considerations/Horizontal Scaling.txt",
+    "title": "Horizontal Scaling:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "horizontal",
+      "non_indexed_library",
+      "reliability_and_scalability_considerations",
+      "richpanel",
+      "scaling"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Reliability and Scalability Considerations/Middleware Failures.txt",
+    "title": "Middleware Failures:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "failures",
+      "middleware",
+      "non_indexed_library",
+      "reliability_and_scalability_considerations",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Reliability and Scalability Considerations/No Automatic Retries.txt",
+    "title": "No Automatic Retries (Richpanel Side):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automatic",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "reliability_and_scalability_considerations",
+      "retries",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Reliability and Scalability Considerations/Testing at Scale.txt",
+    "title": "Testing at Scale:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "reliability_and_scalability_considerations",
+      "richpanel",
+      "scale",
+      "testing"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Reliability and Scalability Considerations/Throughput and Rate Limits.txt",
+    "title": "Throughput and Rate Limits:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "limits",
+      "non_indexed_library",
+      "rate",
+      "reliability_and_scalability_considerations",
+      "richpanel",
+      "throughput"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Assignment to Agents-Teams.txt",
+    "title": "Assignment to Agents/Teams:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "agents",
+      "assignment",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)",
+      "teams"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Attaching Related Records.txt",
+    "title": "Attaching Related Records:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "attaching",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "records",
+      "related",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Changing Status.txt",
+    "title": "Changing Status:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "changing",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)",
+      "status"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Internal Notes.txt",
+    "title": "Internal Notes (Private Comments):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "internal",
+      "non_indexed_library",
+      "notes",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Overview.txt",
+    "title": "Overview:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "overview",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Posting Replies.txt",
+    "title": "Posting Replies (Public Comments):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "posting",
+      "replies",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Richpanel API Overview (Authentication & Basics)/Tags and Metadata.txt",
+    "title": "Tags and Metadata:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "metadata",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_api_overview_(authentication_&_basics)",
+      "tags"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/Audit Logging.txt",
+    "title": "Audit Logging:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "audit",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "logging",
+      "non_indexed_library",
+      "richpanel",
+      "security_and_compliance"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/GDPR and Data Handling.txt",
+    "title": "GDPR and Data Handling:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "data",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "gdpr",
+      "handling",
+      "non_indexed_library",
+      "richpanel",
+      "security_and_compliance"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/IP Whitelisting.txt",
+    "title": "IP Whitelisting (if applicable):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "security_and_compliance",
+      "whitelisting"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/Long-Term Maintenance.txt",
+    "title": "Long-Term Maintenance:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "long",
+      "maintenance",
+      "non_indexed_library",
+      "richpanel",
+      "security_and_compliance",
+      "term"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/Principle of Least Privilege.txt",
+    "title": "Principle of Least Privilege:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "least",
+      "non_indexed_library",
+      "principle",
+      "privilege",
+      "richpanel",
+      "security_and_compliance"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/Secure Storage of Keys.txt",
+    "title": "Secure Storage of Keys:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "keys",
+      "non_indexed_library",
+      "richpanel",
+      "secure",
+      "security_and_compliance",
+      "storage"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Security and Compliance/Security Posture.txt",
+    "title": "Richpanel\u2019s Security Posture:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "posture",
+      "richpanel",
+      "security",
+      "security_and_compliance"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Customer profiles.txt",
+    "title": "Orders:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "customer",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "profiles",
+      "richpanel",
+      "syncing_customer_and_order_data"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Linking Data to Customers.txt",
+    "title": "Linking Data to Customers:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "customers",
+      "data",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "linking",
+      "non_indexed_library",
+      "richpanel",
+      "syncing_customer_and_order_data"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Orders.txt",
+    "title": "[Conversation]",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "orders",
+      "richpanel",
+      "syncing_customer_and_order_data"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Overview.txt",
+    "title": "Overview",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "overview",
+      "richpanel",
+      "syncing_customer_and_order_data"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Subscriptions and Other Data.txt",
+    "title": "Subscriptions and Other Data:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "data",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "other",
+      "richpanel",
+      "subscriptions",
+      "syncing_customer_and_order_data"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Syncing Customer and Order Data/Using Segment.txt",
+    "title": "Using Segment (Optional):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "segment",
+      "syncing_customer_and_order_data",
+      "using"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Agent Training-Visibility.txt",
+    "title": "Agent Training/Visibility:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "agent",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "testing_and_deployment_tips",
+      "training",
+      "visibility"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Dry Run Mode.txt",
+    "title": "Dry Run Mode:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "dry",
+      "mode",
+      "non_indexed_library",
+      "richpanel",
+      "run",
+      "testing_and_deployment_tips"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Error Handling in Production.txt",
+    "title": "Error Handling in Production:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "error",
+      "handling",
+      "non_indexed_library",
+      "production",
+      "richpanel",
+      "testing_and_deployment_tips"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Gradual Deployment.txt",
+    "title": "Gradual Deployment:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "deployment",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "gradual",
+      "non_indexed_library",
+      "richpanel",
+      "testing_and_deployment_tips"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Staging Environment.txt",
+    "title": "Staging Environment:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "environment",
+      "non_indexed_library",
+      "richpanel",
+      "staging",
+      "testing_and_deployment_tips"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Developing Middleware for Richpanel Comprehensive Guide/Testing and Deployment Tips/Use a Test Ticket-Customer.txt",
+    "title": "Use a Test Ticket/Customer:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "customer",
+      "developing_middleware_for_richpanel_comprehensive_guide",
+      "non_indexed_library",
+      "richpanel",
+      "test",
+      "testing_and_deployment_tips",
+      "ticket",
+      "use"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/DRP/Richpanel IntegrationKeyQ&A.txt",
+    "title": "Richpanel Integration: Key Q&A for Middleware Development",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "drp",
+      "integrationkeyq&a",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Importing_Your_Data_to_Richpanel.txt",
+    "title": "Importing Your Data to Richpanel",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "data",
+      "importing",
+      "non_indexed_library",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Migrating_From_Other_Helpdesks.txt",
+    "title": "Migrating From Other Helpdesks",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "helpdesks",
+      "migrating",
+      "non_indexed_library",
+      "other",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Order_Event_Structure/Notes.txt",
+    "title": "Note:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "notes",
+      "order_event_structure",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Order_Event_Structure/Order_Event.txt",
+    "title": "Order Event",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "event",
+      "non_indexed_library",
+      "order",
+      "order_event_structure",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Order_Event_Structure/Order_Properties.txt",
+    "title": "Order Properties",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "order",
+      "order_event_structure",
+      "properties",
+      "richpanel"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Order_Event_Structure/Sample_Order_Event.txt",
+    "title": "Sample Order Event",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "event",
+      "non_indexed_library",
+      "order",
+      "order_event_structure",
+      "richpanel",
+      "sample"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Order_Event_Structure/User_Properties_Object.txt",
+    "title": "User Properties Object (userProeprties)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "object",
+      "order_event_structure",
+      "properties",
+      "richpanel",
+      "user"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Quick_Start_Guide.txt",
+    "title": "Quick Start Guide",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "guide",
+      "non_indexed_library",
+      "quick",
+      "richpanel",
+      "start"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel Middleware Documentation/Richpanel AI Middleware #U2013 Integration.txt",
+    "title": "Richpanel AI Middleware \u2013 Integration and Onboarding Guide",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "#u2013",
+      "integration",
+      "middleware",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_middleware_documentation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel Middleware Documentation/Richpanel AI Middleware \u2013 Integration.txt",
+    "title": "Richpanel AI Middleware \u2013 Integration and Onboarding Guide",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "integration",
+      "middleware",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_middleware_documentation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel Middleware Documentation/Richpanel Middleware Documentation.txt",
+    "title": "Richpanel Middleware Documentation Gaps & Expansion Suggestions",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "documentation",
+      "middleware",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_middleware_documentation"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automated Replies Public vs Internal Notes/Distinguishing Bot Messages to Agents.txt",
+    "title": "Distinguishing Bot Messages to Agents:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "agents",
+      "automated_replies_public_vs_internal_notes",
+      "bot",
+      "distinguishing",
+      "messages",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automated Replies Public vs Internal Notes/Posting Public Replies via API.txt",
+    "title": "Posting Public Replies via API:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "automated_replies_public_vs_internal_notes",
+      "non_indexed_library",
+      "posting",
+      "public",
+      "replies",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automated Replies Public vs Internal Notes/Summary.txt",
+    "title": "Summary:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automated_replies_public_vs_internal_notes",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "summary"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Avoid Triggering on Bot Actions.txt",
+    "title": "Avoid Triggering on Bot Actions:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "actions",
+      "automation_rule_interactions_&_preventing_loops",
+      "avoid",
+      "bot",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "triggering"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Introduction.txt",
+    "title": "Introduction",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "introduction",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/No Duplicate HTTP Calls.txt",
+    "title": "No Duplicate HTTP Calls:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "calls",
+      "duplicate",
+      "http",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Summary.txt",
+    "title": "Summary:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "summary"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Test in a Safe Environment.txt",
+    "title": "Test in a Safe Environment:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "environment",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "safe",
+      "test"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Trigger On Customer Message Only.txt",
+    "title": "Trigger on Customer Messages Only:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "customer",
+      "message",
+      "non_indexed_library",
+      "only",
+      "richpanel",
+      "richpanel_integration",
+      "trigger"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Automation Rule Interactions & Preventing Loops/Use A Processed Flag.txt",
+    "title": "Use a \u201cProcessed\u201d Flag:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "automation_rule_interactions_&_preventing_loops",
+      "flag",
+      "non_indexed_library",
+      "processed",
+      "richpanel",
+      "richpanel_integration",
+      "use"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/HTTP Target Payload and Available Fields/Auth Headers for Security.txt",
+    "title": "Auth Headers for Security:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "auth",
+      "headers",
+      "http_target_payload_and_available_fields",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/HTTP Target Payload and Available Fields/Customizing the JSON Body.txt",
+    "title": "Customizing the JSON Body:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "body",
+      "customizing",
+      "http_target_payload_and_available_fields",
+      "json",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/HTTP Target Payload and Available Fields/Default Payload Content.txt",
+    "title": "Default Payload Content:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "content",
+      "default",
+      "http_target_payload_and_available_fields",
+      "non_indexed_library",
+      "payload",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/HTTP Target Payload and Available Fields/Including IDs and Deduplication Keys.txt",
+    "title": "Including IDs and Deduplication Keys:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "deduplication",
+      "http_target_payload_and_available_fields",
+      "ids",
+      "including",
+      "keys",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/HTTP Target Payload and Available Fields/Payload Size and Timeouts.txt",
+    "title": "Payload Size and Timeouts:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "http_target_payload_and_available_fields",
+      "non_indexed_library",
+      "payload",
+      "richpanel",
+      "richpanel_integration",
+      "size",
+      "timeouts"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Official_Integration_Entry_Points/Helpdesk_Tickets_vs_Live_Chat.txt",
+    "title": "Helpdesk Tickets vs Live Chat:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "chat",
+      "helpdesk",
+      "live",
+      "non_indexed_library",
+      "official_integration_entry_points",
+      "richpanel",
+      "richpanel_integration",
+      "tickets"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Official_Integration_Entry_Points/Stability.txt",
+    "title": "Stability:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "official_integration_entry_points",
+      "richpanel",
+      "richpanel_integration",
+      "stability"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Official_Integration_Entry_Points/Triggering_External_Services.txt",
+    "title": "Triggering External Services:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "external",
+      "non_indexed_library",
+      "official_integration_entry_points",
+      "richpanel",
+      "richpanel_integration",
+      "services",
+      "triggering"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/API calls from your side to Richpanel.txt",
+    "title": "API calls from your side to Richpanel :",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "calls",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration",
+      "side"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Debugging.txt",
+    "title": "Debugging:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "debugging",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Delivery Guarantees for HTTP Targets.txt",
+    "title": "Delivery Guarantees for HTTP Targets:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "delivery",
+      "guarantees",
+      "http",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration",
+      "targets"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Duplicate Calls.txt",
+    "title": "Duplicate Calls:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "calls",
+      "duplicate",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Failure Visibility.txt",
+    "title": "Failure Visibility:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "failure",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration",
+      "visibility"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Plan for failures.txt",
+    "title": "Plan for failures:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "failures",
+      "non_indexed_library",
+      "plan",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Summary.txt",
+    "title": "Summary:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration",
+      "summary"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Reliability and Retries of HTTP Targets & API Calls/Timeouts and Success Codes.txt",
+    "title": "Timeouts and Success Codes:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "codes",
+      "non_indexed_library",
+      "reliability_and_retries_of_http_targets_&_api_calls",
+      "richpanel",
+      "richpanel_integration",
+      "success",
+      "timeouts"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Cleanest Routing Approach.txt",
+    "title": "Cleanest Routing Approach:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "approach",
+      "cleanest",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "routing",
+      "routing_primitives_teams_(departments)_and_ticket_assignment"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Department_Concept.txt",
+    "title": "\u201cDepartment\u201d Concept in Richpanel:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "concept",
+      "department",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "routing_primitives_teams_(departments)_and_ticket_assignment"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Routing in Live Chat.txt",
+    "title": "Routing in Live Chat:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "chat",
+      "live",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "routing",
+      "routing_primitives_teams_(departments)_and_ticket_assignment"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Routing Ticket To The Right Queue.txt",
+    "title": "Routing a Ticket to the Right Queue:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "queue",
+      "richpanel",
+      "richpanel_integration",
+      "right",
+      "routing",
+      "routing_primitives_teams_(departments)_and_ticket_assignment",
+      "ticket"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Summary.txt",
+    "title": "Summary:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "routing_primitives_teams_(departments)_and_ticket_assignment",
+      "summary"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/API Rate Limits.txt",
+    "title": "API Rate Limits:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "limits",
+      "non_indexed_library",
+      "rate",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/Can the limit be raised.txt",
+    "title": "Can the limit be raised?",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "can",
+      "limit",
+      "non_indexed_library",
+      "raised",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/High-Volume Considerations.txt",
+    "title": "High-Volume Considerations:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "considerations",
+      "high",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices",
+      "volume"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/Minimizing API Calls.txt",
+    "title": "Minimizing API Calls:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "calls",
+      "minimizing",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/Other Limits.txt",
+    "title": "Other Limits:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "limits",
+      "non_indexed_library",
+      "other",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/Parallelism and Queueing.txt",
+    "title": "Parallelism and Queueing:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "parallelism",
+      "queueing",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Scalability Limits and Best Practices/Throughput for Inbound Messages.txt",
+    "title": "Throughput for Inbound Messages:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "inbound",
+      "messages",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "scalability_limits_and_best_practices",
+      "throughput"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/API Authentication.txt",
+    "title": "API Authentication:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "authentication",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/API Versioning and Changes.txt",
+    "title": "API Versioning and Changes:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "changes",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support",
+      "versioning"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Compliance.txt",
+    "title": "Compliance (DPA, SOC2, etc.):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "compliance",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Data Residency and Retention.txt",
+    "title": "Data Residency and Retention:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "data",
+      "non_indexed_library",
+      "residency",
+      "retention",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Future-Proofing.txt",
+    "title": "Future-Proofing:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "future",
+      "non_indexed_library",
+      "proofing",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/IP Whitelisting.txt",
+    "title": "IP Whitelisting:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support",
+      "whitelisting"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Secure Webhook Calls.txt",
+    "title": "Secure Webhook Calls:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "calls",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "secure",
+      "security,_compliance,_and_long-term_support",
+      "webhook"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Security Review.txt",
+    "title": "Security Review:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "review",
+      "richpanel",
+      "richpanel_integration",
+      "security",
+      "security,_compliance,_and_long-term_support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Summary.txt",
+    "title": "Summary (Security & Support):",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support",
+      "summary"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Security, Compliance, and Long-Term Support/Support for Developers.txt",
+    "title": "Support for Developers:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "developers",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "security,_compliance,_and_long-term_support",
+      "support"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/API Key Rotation.txt",
+    "title": "API Key Rotation:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "key",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "rotation",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Rollout Plan #U2013 Shadow to Full.txt",
+    "title": "Rollout Plan \u2013 Shadow to Full: A recommended rollout would be:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "#u2013",
+      "full",
+      "non_indexed_library",
+      "plan",
+      "richpanel",
+      "richpanel_integration",
+      "rollout",
+      "shadow",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Rollout Plan \u2013 Shadow to Full.txt",
+    "title": "Rollout Plan \u2013 Shadow to Full: A recommended rollout would be:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "full",
+      "non_indexed_library",
+      "plan",
+      "richpanel",
+      "richpanel_integration",
+      "rollout",
+      "shadow",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Sandbox Environment.txt",
+    "title": "Sandbox Environment:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "environment",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "sandbox",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Separate API Keys for Environments.txt",
+    "title": "Separate API Keys for Environments:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "api",
+      "environments",
+      "keys",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "separate",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Separate Instances vs Production.txt",
+    "title": "Separate Instances vs Production:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "instances",
+      "non_indexed_library",
+      "production",
+      "richpanel",
+      "richpanel_integration",
+      "separate",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Summary.txt",
+    "title": "Summary:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "summary",
+      "testing_safely_sandbox_and_rollout_strategy"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Testing Safely Sandbox and Rollout Strategy/Testing Flows Without Impacting Production.txt",
+    "title": "Testing Flows Without Impacting Production:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "flows",
+      "impacting",
+      "non_indexed_library",
+      "production",
+      "richpanel",
+      "richpanel_integration",
+      "testing",
+      "testing_safely_sandbox_and_rollout_strategy",
+      "without"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Updating Conversations via API #U2013 Writable Fields/Fields You Can Update.txt",
+    "title": "Fields You Can Update:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "can",
+      "fields",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "update",
+      "updating_conversations_via_api_#u2013_writable_fields",
+      "you"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Updating Conversations via API #U2013 Writable Fields/Updating Multiple Properties.txt",
+    "title": "updating multiple properties at once is allowed.",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "multiple",
+      "non_indexed_library",
+      "properties",
+      "richpanel",
+      "richpanel_integration",
+      "updating",
+      "updating_conversations_via_api_#u2013_writable_fields"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Updating Conversations via API \u2013 Writable Fields/Fields You Can Update.txt",
+    "title": "Fields You Can Update:",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "can",
+      "fields",
+      "non_indexed_library",
+      "richpanel",
+      "richpanel_integration",
+      "update",
+      "updating_conversations_via_api_\u2013_writable_fields",
+      "you"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Updating Conversations via API \u2013 Writable Fields/Updating Multiple Properties.txt",
+    "title": "updating multiple properties at once is allowed.",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "multiple",
+      "non_indexed_library",
+      "properties",
+      "richpanel",
+      "richpanel_integration",
+      "updating",
+      "updating_conversations_via_api_\u2013_writable_fields"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/SendMessage/Language/Language.txt",
+    "title": "Send Message",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "language",
+      "non_indexed_library",
+      "richpanel",
+      "sendmessage"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/SendMessage/SendMessage.txt",
+    "title": "Send Message",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "richpanel",
+      "sendmessage"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Subscription_Event_Structure/Sample_Order_Event.txt",
+    "title": "Sample Order Event",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "event",
+      "non_indexed_library",
+      "order",
+      "richpanel",
+      "sample",
+      "subscription_event_structure"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Subscription_Event_Structure/Subscription_Event.txt",
+    "title": "Subscription Event",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "event",
+      "non_indexed_library",
+      "richpanel",
+      "subscription",
+      "subscription_event_structure"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Subscription_Event_Structure/Subscription_Properties.txt",
+    "title": "Subscription Properties",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "properties",
+      "richpanel",
+      "subscription",
+      "subscription_event_structure"
+    ]
+  },
+  {
+    "path": "reference/richpanel/Non_Indexed_Library/Subscription_Event_Structure/User_Properties_Object.txt",
+    "title": "User Properties Object (user_properties)",
+    "category": "Non_Indexed_Library",
+    "type": "txt",
+    "tags": [
+      "non_indexed_library",
+      "object",
+      "properties",
+      "richpanel",
+      "subscription_event_structure",
+      "user"
+    ]
+  },
+  {
+    "path": "reference/richpanel/TOP_20.md",
+    "title": "Richpanel Reference Library \u2014 Top 20 Docs",
+    "category": "",
+    "type": "md",
+    "tags": [
+      "richpanel",
+      "top"
+    ]
+  }
+]

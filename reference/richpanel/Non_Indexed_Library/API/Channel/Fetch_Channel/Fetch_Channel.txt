@@ -1,0 +1,36 @@
+Fetch a Channel
+get
+https://api.richpanel.com/v1/channel/{id}
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Responses
+
+200
+200
+
+Response body
+object
+channel
+object
+id
+string
+created_at
+string
+updated_at
+string
+business_brand_name
+string
+type
+string
+
+400
+400

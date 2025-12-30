@@ -1,0 +1,3 @@
+Introduction
+
+This is a crucial consideration – you don’t want your automation to get into a ping-pong loop where your HTTP Target triggers your middleware, your middleware updates the ticket, and that update triggers the automation again ad infinitum. Here’s how to prevent that:

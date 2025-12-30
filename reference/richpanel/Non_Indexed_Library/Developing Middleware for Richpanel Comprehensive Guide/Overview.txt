@@ -1,0 +1,3 @@
+Overview
+
+Richpanel is a customer service platform geared toward e-commerce, and “middleware” in this context refers to any custom integration layer that connects Richpanel with other systems. Developing middleware for Richpanel typically involves two sides: receiving events from Richpanel (for example, when a new customer message comes in, triggering an external webhook) and sending data to Richpanel (for example, using Richpanel’s API to update conversations or sync data). This guide covers the key concepts, official capabilities, and best practices for building such integrations.

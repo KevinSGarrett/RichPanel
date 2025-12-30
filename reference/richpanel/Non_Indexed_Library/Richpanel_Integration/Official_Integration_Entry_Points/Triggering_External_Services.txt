@@ -1,0 +1,7 @@
+Triggering External Services: 
+
+Richpanel supports HTTP Targets as the official way to call external services from the helpdesk. You can configure HTTP Targets under Settings → Integrations → HTTP Targets, then invoke them in various ways. In particular, automation rules can fire an HTTP Target when their conditions match, allowing you to send an outbound HTTP request as part of a workflow
+headwayapp.co
+. This is indeed the recommended mechanism for integrating with external systems on inbound messages. Richpanel’s updates confirm that HTTP Targets can be used in automation rules, and even manually by agents (via the reply box or as part of macros)
+headwayapp.co
+. In practice, this means whenever a new customer message comes in, you’d use an automation rule with an HTTP Target action to notify your middleware.

@@ -1,0 +1,3 @@
+No Duplicate HTTP Calls: 
+
+Another potential loop scenario is if Richpanel retries the HTTP Target (more on retries in section 7). If Richpanel were to retry calling your middleware, you want to ensure your middleware doesn’t duplicate actions. This again is solved by idempotency keys (e.g. message ID) and the “already processed” tag approach. If you get the same event twice, your middleware can check “did I already add a response to this ticket?” by looking at stored IDs or by querying the ticket (or seeing the tag).

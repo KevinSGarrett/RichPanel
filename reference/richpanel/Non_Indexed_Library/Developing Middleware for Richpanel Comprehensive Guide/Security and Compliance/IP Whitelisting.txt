@@ -1,0 +1,5 @@
+IP Whitelisting (if applicable): 
+
+Some integrations (like certain phone systems or CRMs) might require whitelisting Richpanel’s IP addresses when Richpanel calls them. If your middleware is behind a firewall, you might wonder what IP Richpanel’s requests come from. Richpanel is hosted on AWS, but they haven’t published specific outbound IP ranges publicly. If needed, consider allowing by DNS (perhaps calls come from a consistent domain or by using a token as mentioned earlier). In the Talkdesk integration instructions, for example, they suggested whitelisting “AWS” which implies Richpanel may call out from dynamic AWS IPs
+updates.richpanel.com
+. In short, design your security knowing you might not have a fixed IP for Richpanel; use other verification means.

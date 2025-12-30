@@ -1,0 +1,136 @@
+[Agent Testing]
+
+1. You must prove correctness for every change you make.
+
+2. Define “touched surface area”
+- List every file/module/API/automation/workflow you changed (from git diff).
+- List impacted components (direct + likely indirect dependencies).
+- If you can’t determine impact, assume it’s broad and test broadly.
+
+3. Build a test matrix BEFORE coding
+For each impacted component, specify:
+- Test types to run (unit, integration, contract, e2e, UI, API, automation/LLM eval, etc.)
+- Exact commands you will run
+- Expected pass criteria (what “good” looks like)
+
+4. Required baseline checks for ANY change
+- Format + lint
+- Typecheck (if applicable)
+- Build/compile (frontend + backend where relevant)
+- Unit tests for changed modules
+
+5. Additional required checks based on what you touched
+- Backend/API changes: integration tests + contract tests + API smoke tests
+- Frontend/UI changes: build + component tests + UI smoke + relevant e2e flows
+- DB/schema changes: migration tests + rollback safety + query sanity checks
+- Browser automation changes: run the automation against a staging target + capture proof (logs/screenshots/video)
+- LLM routing/automation changes: run an offline eval on a labeled “golden set” + show metrics + spot-check failures
+
+6. Evidence is required
+- Paste test commands executed and the summarized results (pass/fail counts).
+- Provide links/paths to logs/artifacts (test report, traces, screenshots, videos) when available.
+- If anything fails: fix the root cause, re-run the affected suite, and report results again.
+
+7. No “green by cheating”
+- Do not disable tests, loosen assertions, skip suites, or increase timeouts to hide failures.
+- If a test is flaky, isolate it and fix it or add deterministic stabilization, then rerun.
+
+8. If you cannot run required tests
+Stop and report:
+- Exactly what you tried
+- Why it failed (env/config/permissions)
+- The smallest safe next step to restore testability
+Do NOT claim the change is correct without executed proof.
+
+9. Pre-flight (required)
+- Repo must be clean before and after work:
+  - git status --porcelain must be empty (or explicitly list intentional uncommitted files).
+- Confirm dependencies are installed (or install them):
+  - Backend: pip install -r backend/requirements.txt
+  - Frontend: npm ci --prefix frontend
+
+10. Define “touched surface area” (required)
+From git diff, produce:
+- Changed files: git diff --name-only
+- Impacted components (direct + likely indirect):
+  - backend/app/** (API/DB/LLM/ingestion/retrieval)
+  - qa/** (tests, probes, harness)
+  - frontend/** (UI, Playwright tests)
+  - docs/** (plans/specs/indexes)
+  - scripts/**, tools/**, Makefile, .github/workflows/**
+
+11. Build the test matrix BEFORE coding (required)
+For each impacted area, list:
+- What risk level (low/med/high)
+- Test types needed (unit/integration/e2e/smoke/perf/contract)
+- Exact commands you will run (below)
+- Pass criteria + what evidence you will capture
+
+12. Baseline gates (MUST run for ANY code change)
+Run the repo CI suite (preferred):
+- make ci
+
+(make ci currently runs: plan sync check + frontend lint + backend pytest suite + frontend build)
+
+13. If make is unavailable, run the equivalent commands:
+- python scripts/verify_plan_sync.py
+- npm run lint --prefix frontend
+- (set PYTHONPATH to include backend, and stub vectorstore)
+  - PYTHONPATH=<repo_root>:<repo_root>/backend VECTORSTORE_MODE=stub python -m pytest qa/tests_api -ra -q
+- npm run build --prefix frontend
+
+14. Additional gates (required based on what you touched)
+A) Backend logic/API/DB/LLM/ingestion/retrieval changes
+- Must run smoke probes (FastAPI TestClient, stubbed LLM):
+  - LLM_MODE=stub VECTORSTORE_MODE=stub python -m qa.run_smoke
+- Must run relevant targeted pytest subset if your change is scoped:
+  - python -m pytest -k "<keyword>" qa/tests_api -ra -q
+- If you changed anything performance-sensitive or test runtime matters:
+  - python tools/perf_smoke.py
+
+15. Frontend/UI changes (or anything that impacts UI ↔ API behavior)
+- Must run Playwright E2E:
+  - npm run test:e2e --prefix frontend
+Notes:
+- Playwright global setup starts a stub backend via uvicorn on 127.0.0.1:8000.
+- Ensure port 8000 is free or tests will fail.
+
+16. Automation / “agent” behaviors / task routing changes
+- Must run:
+  - make backend-tests
+  - make smoke
+- If tests relevant to the behavior are currently ignored/disabled (ex: Playwright config ignores tests/ingestion-e2e.spec.ts),
+  you must either:
+  (1) enable and run them for this change, OR
+  (2) add/extend another reliable test/probe covering the same behavior,
+  and document what you did in the run output.
+
+17. Docs/spec/plan changes
+- Must run:
+  - python scripts/verify_plan_sync.py
+- Must confirm doc navigation/index still valid (no dead ends).
+
+18. Evidence requirements (required output)
+You must paste:
+- Commands executed (exact)
+- Summarized results (pass/fail counts)
+- Artifact locations when applicable:
+  - Playwright: frontend/playwright-report/ and/or frontend/test-results/
+  - QA HTML report (if using qa/config): test-results/playwright-html/
+If anything fails:
+- Fix root cause
+- Re-run the failing suite
+- Provide the new passing evidence
+
+19. No “green by cheating”
+Do NOT:
+- disable tests, loosen assertions, skip suites, or hide failures via timeouts
+If something is flaky:
+- isolate + stabilize or document and create a follow-up ticket WITH a reproduction
+
+20. If you cannot run required tests
+STOP and report:
+- What you tried
+- Why it failed (env/config/permissions)
+- The smallest safe step to restore testability
+Do NOT claim correctness without executed proof.

@@ -1,0 +1,19 @@
+Create Conversation
+
+Language: PHP
+
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('POST', 'https://api.richpanel.com/v1/tickets', [
+  'body' => '{"ticket":{"status":"OPEN","comment":{"public":true},"via":{"channel":"email"},"assignee_id":"unassigned"}}',
+  'headers' => [
+    'accept' => 'application/json',
+    'content-type' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();

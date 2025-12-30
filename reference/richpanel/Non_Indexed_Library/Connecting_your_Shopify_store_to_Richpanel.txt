@@ -1,0 +1,23 @@
+Introduction
+Connecting your Shopify store to Richpanel enhances your ability to manage customer interactions by centralizing them in one place. This integration allows for efficient tracking of orders, returns, exchanges, and product recommendations. Follow this guide to connect your Shopify store to Richpanel.
+Prerequisites
+💡
+
+Steps to Install Richpanel on Shopify
+Step 1: Create Richpanel Account
+Sign up on Richpanel.
+Navigate to Settings -> My Integrations -> Add Integration.
+Choose Shopify and click on Add on Shopify. You'll be redirected to Shopify to install.
+image
+Step 2: Install Richpanel on Shopify
+Once you have logged in, select the store and click on 'Add app' to install it.
+image
+Shopify will request confirmation to install the Richpanel app. Review the permissions that Richpanel requires and confirm the installation.
+After installing the app, you will be redirected to the Richpanel interface to complete the setup. Enter the necessary details such as your store URL.
+Once connected, perform a check by looking at order data or customer profiles within Richpanel to ensure the integration is working correctly.
+Conclusion
+Integrating your Shopify store with Richpanel streamlines your e-commerce customer service, providing a unified platform for handling all customer interactions and inquiries. This connection simplifies order and customer service management, allowing you to provide high-quality service efficiently.
+
+← Previous
+
+Getting Started
