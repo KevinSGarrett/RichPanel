@@ -44,11 +44,13 @@ def git_available(cwd: Path) -> bool:
         return False
 
 
-def git_diff_clean(cwd: Path) -> bool:
-    p = subprocess.run(["git", "status", "--porcelain"], cwd=str(cwd), capture_output=True, text=True)
+def git_status_porcelain(cwd: Path) -> str:
+    p = subprocess.run(
+        ["git", "status", "--short"], cwd=str(cwd), capture_output=True, text=True
+    )
     if p.returncode != 0:
-        return True  # cannot determine; don't block
-    return p.stdout.strip() == ""
+        return ""
+    return p.stdout.strip()
 
 
 def main() -> int:
@@ -84,10 +86,13 @@ def main() -> int:
             return rc
 
     # 3) CI mode: ensure regen produced no uncommitted diffs.
-    if args.ci:
-        if git_available(root) and (not git_diff_clean(root)):
+    if args.ci and git_available(root):
+        status = git_status_porcelain(root)
+        if status:
             print("\n[FAIL] Generated files changed after regen. Commit the regenerated outputs.")
             print("Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.")
+            print("\nUncommitted changes:")
+            print(status)
             return 2
 
     print("\n[OK] CI-equivalent checks passed.")
