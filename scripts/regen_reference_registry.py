@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -126,25 +126,43 @@ def main() -> int:
     records = scan_reference_files()
 
     # Combined registry
-combined = {
-    "count": len(records),
-    "records": records,
-}
+    combined = {
+        "count": len(records),
+        "records": records,
+    }
     write_json(REF_ROOT / "_generated" / "reference_registry.json", combined)
     write_json(
         REF_ROOT / "_generated" / "reference_registry.compact.json",
-        [{"path": r["path"], "vendor": r["vendor"], "title": r["title_guess"], "type": r["type"], "tags": r["tags"]} for r in records],
+        [
+            {
+                "path": r["path"],
+                "vendor": r["vendor"],
+                "title": r["title_guess"],
+                "type": r["type"],
+                "tags": r["tags"],
+            }
+            for r in records
+        ],
     )
 
     # Vendor-specific: Richpanel (if present)
     rp_root = REF_ROOT / "richpanel"
     if rp_root.exists():
         rp_records = [r for r in records if r["vendor"] == "richpanel"]
-rp_obj = {"count": len(rp_records), "records": rp_records}
+        rp_obj = {"count": len(rp_records), "records": rp_records}
         write_json(rp_root / "_generated" / "reference_registry.json", rp_obj)
         write_json(
             rp_root / "_generated" / "reference_registry.compact.json",
-            [{"path": r["path"], "title": r["title_guess"], "category": r.get("category", ""), "type": r["type"], "tags": r["tags"]} for r in rp_records],
+            [
+                {
+                    "path": r["path"],
+                    "title": r["title_guess"],
+                    "category": r.get("category", ""),
+                    "type": r["type"],
+                    "tags": r["tags"],
+                }
+                for r in rp_records
+            ],
         )
 
     print(f"OK: reference registry regenerated ({len(records)} files)")

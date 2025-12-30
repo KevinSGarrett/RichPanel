@@ -1,6 +1,6 @@
 # PLAN CHECKLIST — Extracted (Generated)
 
-Generated: 2025-12-29  
+Generated: (deterministic; see git history)  
 Source: markdown checkboxes across docs/ (excluding Agent Ops and To_Do outputs)
 
 Counts: total=576, checked=115, unchecked=461
