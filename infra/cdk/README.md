@@ -15,13 +15,30 @@ References:
 cd infra/cdk
 npm install
 npm run build
-npx cdk synth
+npx cdk synth            # synthesizes all envs (dev/staging/prod)
+# or only one env:
+npx cdk synth -c env=dev
 ```
 
 ## Environments
 Planned: `dev`, `staging`, `prod` (separate AWS accounts recommended).
 
+Environment metadata (account, region, owner, tags) lives inside `cdk.json > context.environments`.
+
+- Override per-run via `cdk synth -c env=dev` (also supports comma lists like `-c env=dev,staging`).
+- Customize account IDs/regions/tags by editing `cdk.json` or supplying a `cdk.context.json` with the same shape.
+
 > Secrets must come from AWS Secrets Manager. Do not put secrets in this repo.
+
+## Naming helper
+`lib/environments.ts` exposes `MwNaming`, which standardizes every namespace to `/rp-mw/<env>/...`.
+
+- Secrets: `rp-mw/<env>/richpanel/api_key`
+- SSM parameters: `/rp-mw/<env>/safe_mode`, `/rp-mw/<env>/automation_enabled`
+- Lambda log groups: `/aws/lambda/rp-mw/<env>/<function>`
+
+These match the paths documented in `docs/06_Security_Secrets/Access_and_Secrets_Inventory.md`
+and `docs/07_Reliability_Scaling/parameter_defaults_v1.yaml`.
 
 ## Status
 This is a **scaffold**. Later waves will add actual resources incrementally.
