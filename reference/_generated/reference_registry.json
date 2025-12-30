@@ -8,7 +8,7 @@
       "category": "",
       "title_guess": "Reference Library",
       "type": "md",
-      "size_bytes": 640,
+      "size_bytes": 658,
       "tags": [
         "index"
       ]
@@ -19,7 +19,7 @@
       "category": "",
       "title_guess": "Richpanel Reference Library",
       "type": "md",
-      "size_bytes": 4398,
+      "size_bytes": 4480,
       "tags": [
         "index",
         "richpanel"
@@ -3879,7 +3879,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Macros",
       "type": "csv",
-      "size_bytes": 156114,
+      "size_bytes": 158259,
       "tags": [
         "currentsetup",
         "macros",
@@ -6044,7 +6044,7 @@
       "category": "",
       "title_guess": "Richpanel Reference Library \u2014 Top 20 Docs",
       "type": "md",
-      "size_bytes": 4529,
+      "size_bytes": 4577,
       "tags": [
         "richpanel",
         "top"
