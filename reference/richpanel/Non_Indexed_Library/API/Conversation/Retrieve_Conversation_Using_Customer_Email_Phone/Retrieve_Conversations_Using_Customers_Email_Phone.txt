@@ -1,0 +1,41 @@
+Retrieve Conversations using Customer's Email or Phone
+get
+https://api.richpanel.com/v1/tickets/{type}/{id}
+
+Use this API to fetch conversations using email address or phone number of the customer.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+type
+string
+enum
+required
+type will be the attribute (like customer's email or customer's phone number) used to search for a customer. It's value can either be email or phone.
+
+
+email
+Allowed:
+
+email
+
+phone
+id
+string
+required
+id will contain the email or phone number of the customer whose conversations are being searched.
+
+Responses
+
+200
+200
+
+Response body
+json
+
+400
+400

@@ -1,0 +1,19 @@
+Remove Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/remove-tags
+
+Language: JAVA
+
+const options = {
+  method: 'PUT',
+  headers: {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    'x-richpanel-key': 'test'
+  }
+};
+
+fetch('https://api.richpanel.com/v1/tickets/id/remove-tags', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

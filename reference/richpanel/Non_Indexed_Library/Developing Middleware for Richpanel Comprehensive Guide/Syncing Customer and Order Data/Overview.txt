@@ -1,0 +1,1 @@
+Beyond reacting to events, a comprehensive middleware will also ensure Richpanel has the data it needs from your other systems. Richpanel’s platform can display customer profiles, order histories, subscription details, and more – but you need to send that data to Richpanel if you’re using a custom store or database.

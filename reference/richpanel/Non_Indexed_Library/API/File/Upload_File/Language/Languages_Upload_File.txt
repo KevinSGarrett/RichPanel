@@ -1,0 +1,126 @@
+Upload file
+post
+https://api.richpanel.com/v1/file/upload
+
+[Language: Shell]
+curl --request POST \
+     --url https://api.richpanel.com/v1/file/upload \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test'
+
+
+[Language: Node]
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.uploadFile()
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));
+
+
+[Language: Ruby]
+require 'uri'
+require 'net/http'
+
+url = URI("https://api.richpanel.com/v1/file/upload")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["accept"] = 'application/json'
+request["content-type"] = 'application/json'
+request["x-richpanel-key"] = 'test'
+
+response = http.request(request)
+puts response.read_body
+
+
+[Language: PHP]
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('POST', 'https://api.richpanel.com/v1/file/upload', [
+  'headers' => [
+    'accept' => 'application/json',
+    'content-type' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();
+
+
+[Language: PowerShell]
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("content-type", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/file/upload' -Method POST -Headers $headers
+
+
+[Language: HTTP]
+POST /v1/file/upload HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+
+
+
+
+[Language: Java]
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/file/upload")
+  .post(null)
+  .addHeader("accept", "application/json")
+  .addHeader("content-type", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();
+
+
+[Language: JavaScript]
+const options = {
+  method: 'POST',
+  headers: {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    'x-richpanel-key': 'test'
+  }
+};
+
+fetch('https://api.richpanel.com/v1/file/upload', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));
+
+
+[Language: PowerShell]
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("content-type", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/file/upload' -Method POST -Headers $headers
+
+
+[Language: Python]
+import requests
+
+url = "https://api.richpanel.com/v1/file/upload"
+
+headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.post(url, headers=headers)
+
+print(response.text)

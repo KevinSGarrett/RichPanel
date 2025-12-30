@@ -1,0 +1,3 @@
+External Loops: 
+
+Similarly, ensure your external system doesn’t loop back into Richpanel infinitely. For example, suppose a customer asks for a refund, your middleware triggers and creates a refund in an external system, and then that external system wants to update Richpanel (“refund completed”) – that’s fine, but just ensure that update (maybe posting a confirmation to the ticket) doesn’t itself look like a new customer message. Usually, because it’s an agent message, it won’t trigger the same rule. Just be cautious in how you design multi-step bi-directional integrations to not ping-pong the same info back and forth.

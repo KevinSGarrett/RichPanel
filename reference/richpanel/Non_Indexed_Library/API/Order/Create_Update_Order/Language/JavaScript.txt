@@ -1,0 +1,20 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+
+Language: JavaScript
+
+const options = {
+  method: 'POST',
+  headers: {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    'x-richpanel-key': 'test'
+  }
+};
+
+fetch('https://api.richpanel.com/v1/order/appclient_id', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

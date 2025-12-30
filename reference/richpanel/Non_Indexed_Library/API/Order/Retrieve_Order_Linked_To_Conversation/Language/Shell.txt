@@ -1,0 +1,10 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: Shell
+
+curl --request GET \
+     --url https://api.richpanel.com/v1/order/conversationId \
+     --header 'accept: application/json' \
+     --header 'x-richpanel-key: test'

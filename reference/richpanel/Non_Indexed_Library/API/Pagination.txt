@@ -1,0 +1,14 @@
+Pagination
+In Richpanel we use offset pagination.
+Most list endpoints return a maximum of 100 records per page. You can change the number of records on a per-request basis by passing a per_page parameter in the request URL parameters. Example: per_page=50. However, you can't exceed 100 records per page on most endpoints.
+
+When the response exceeds the per-page maximum, you can paginate through the records by incrementing the page parameter. Example: page=3. List results include next_page and previous_page URLs in the response body for easier navigation:
+
+JSON
+
+{
+  "users": [ ... ],
+  "count": 1234,
+  "next_page": "https://api.richpanel.com/v1/users?page=2",
+  "previous_page": null
+}

@@ -1,0 +1,9 @@
+Delivery Guarantees for HTTP Targets: 
+
+Richpanel’s documentation does not explicitly detail how it handles HTTP Target failures (such as your endpoint being down or returning an error). Based on typical behavior of webhook-like systems and absence of evidence to the contrary, you should assume best-effort, at-most-once delivery. That is, Richpanel will attempt the HTTP request once when the rule triggers, and if it fails (e.g. times out or gets a non-2xx response), it likely will not retry automatically (or might have a minimal retry logic, but not guaranteed). We did not find any mention of a retry queue or backoff strategy in their help center. So if your endpoint is down when a customer message arrives, that integration call could be lost. This means your middleware might miss that event unless you have some secondary check. It’s important to make your endpoint as reliable as possible and have monitoring on it.
+
+
+
+
+
+

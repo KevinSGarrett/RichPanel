@@ -1,0 +1,4 @@
+API Introduction
+The Richpanel API is structured with REST in mind. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
+
+On this page, you'll find the complete REST API reference, examples, definitions of objects, and guides. FYI: We're using the same REST API as described here to power our web and mobile applications.

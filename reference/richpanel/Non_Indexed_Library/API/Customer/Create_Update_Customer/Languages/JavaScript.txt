@@ -1,0 +1,19 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Language: JavaScript
+
+const options = {
+  method: 'POST',
+  headers: {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    'x-richpanel-key': 'test'
+  }
+};
+
+fetch('https://api.richpanel.com/v1/customers', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

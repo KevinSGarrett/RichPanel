@@ -1,0 +1,28 @@
+Fields You Can Update: 
+
+Richpanel’s Update Conversation API (PUT /v1/tickets/{id}) allows you to modify most of the key fields on a conversation. Although the official docs don’t list them in plain text, from examples and context we can confirm you can update the following: status (e.g. open, closed), assignee (which agent is assigned), team (department/team assignment), priority, tags, and custom fields on the ticket. Essentially, if a field is part of the conversation/ticket object in Richpanel, you can likely set it via this API. For instance, the sample payload for creating a ticket shows fields like status, tags, priority, subject, and even a customer profile being set
+developer.richpanel.com
+developer.richpanel.com
+ – by analogy, the update call supports similar fields (except you wouldn’t change customer info via the ticket update; that would be done via the Customer API if needed). In practice, our middleware will primarily concern itself with routing updates (team and assignee), status changes, adding tags, and possibly setting a custom field for categorization.
+
+Here’s a quick run-down of what’s writable:
+
+team_id – The UUID of the Team to assign the conversation to (for departmental routing). Usage: you include "team_id": "<uuid>" in your JSON payload to move the ticket to that team.
+
+assignee_id – The ID of the specific agent (user) to assign the ticket to. This is optional; you can leave it unassigned or just set the team. But you can assign to a bot user or a specific rep if needed.
+
+status – Tickets can have statuses like OPEN, PENDING, CLOSED, etc. You can set the status via the API (for example, mark a ticket solved/closed after providing an automated answer, or maybe set to pending if waiting on something). This is a simple string field in the payload.
+
+priority – If you use priority levels (Low, Medium, High, etc.), you can update that field to reflect urgency.
+
+tags – You can add or remove tags. Richpanel provides dedicated endpoints for adding/removing tags as well
+developer.richpanel.com
+, but you can also likely set the full list of tags in an update call. (Be mindful that using the separate Add Tag endpoint might be easier for appending one tag without affecting others
+developer.richpanel.com
+.)
+
+custom fields – Richpanel supports custom ticket fields (as indicated by the new “Update Field” automation feature and examples like an “Issue Type” field
+updates.richpanel.com
+). If you have custom fields (e.g. dropdown or text fields for categorization), those should be writable via the API as well. Often, custom fields might appear as part of the ticket object, possibly under a custom_fields dictionary or by field key. (You might need to get the field IDs or keys from Richpanel; their support can provide the mapping, or an API to list custom fields if available.) For example, if you have a custom field “Issue Type”, the API might expect something like "custom_fields": {"Issue Type": "Return Request"} or a field ID. We would confirm the exact format with Richpanel’s team or docs, but conceptually it’s supported since the UI and automations can set these fields.
+
+comment – This is how you add a message to the conversation (more on this in the next section). By including a comment object with a body and sender_type, you effectively post a reply or note. This is part of the update payload and is a key way the middleware can post replies.

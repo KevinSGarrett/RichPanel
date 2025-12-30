@@ -1,0 +1,20 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: PHP
+
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('PUT', 'https://api.richpanel.com/v1/tickets/id/add-tags', [
+  'headers' => [
+    'accept' => 'application/json',
+    'content-type' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();

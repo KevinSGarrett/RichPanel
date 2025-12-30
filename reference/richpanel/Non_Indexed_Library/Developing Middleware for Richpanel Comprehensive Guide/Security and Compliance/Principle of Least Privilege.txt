@@ -1,0 +1,3 @@
+Principle of Least Privilege: 
+
+Use separate API keys for separate functions if possible. Richpanel allows creating multiple API keys. You might generate one key specifically for the middleware’s use. That way, you could revoke just that key without affecting others if needed. Also, if Richpanel ever offers scoping (e.g., keys that can only read vs write), use the least-privileged option. (Currently the keys are general, but future updates might allow role-based keys.)

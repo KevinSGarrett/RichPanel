@@ -1,0 +1,3 @@
+One-way Trigger: 
+
+The automation rule in Richpanel should be crafted so it triggers only on the initial event (e.g., a customer message) and not on the actions your middleware takes. Richpanel rules have conditions – use them. For instance, you might set the rule condition to “message direction is Incoming” or “author is Customer.” That way, when your middleware posts a reply via the API, it won’t retrigger the rule (since that reply is an agent message).

@@ -1,0 +1,16 @@
+Internal Notes (Private Comments):
+
+ If you want to add a note to the conversation that only agents can see (not sent to the customer), Richpanel supports that as well. In the API, you would still use sender_type: "operator" (notes are by agents), but also include a flag to mark it internal. Richpanel’s API uses a public boolean for comments in some contexts (with public: false meaning an internal note). For example:
+
+{
+  "ticket": {
+    "comment": {
+      "body": "Checked customer history, looks good.",
+      "sender_type": "operator",
+      "public": false
+    }
+  }
+}
+
+
+This would record an internal note on the ticket, which the customer will not see. (In the Richpanel UI, this would appear as an “internal note” entry.)

@@ -1,0 +1,5 @@
+Summary:
+
+leverage the sandbox environment for initial development and realistic testing (Richpanel is willing to set one up
+richpanel.com
+). Use test tickets in prod for final sanity checks. Have separate API keys and toggle rules gradually. This approach will let you validate everything without jeopardizing the real operation, ensuring a smooth rollout of your middleware integration.

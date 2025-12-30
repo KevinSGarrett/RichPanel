@@ -1,0 +1,9 @@
+Retrieve a Conversation
+
+Language: Shell
+
+
+curl --request GET \
+     --url 'https://api.richpanel.com/v1/tickets/id?show_visitor_profile=false' \
+     --header 'accept: application/json' \
+     --header 'x-richpanel-key: test'

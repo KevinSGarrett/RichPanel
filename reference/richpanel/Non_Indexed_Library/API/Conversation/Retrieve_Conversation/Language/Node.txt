@@ -1,0 +1,10 @@
+Retrieve a Conversation
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.fetchConversation({show_visitor_profile: 'false', id: 'id'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

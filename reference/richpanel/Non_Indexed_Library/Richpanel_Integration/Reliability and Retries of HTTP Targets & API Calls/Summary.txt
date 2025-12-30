@@ -1,0 +1,3 @@
+Summary:
+
+ expect at-most-once delivery with no built-in retry. Use idempotent processing in case of any duplicate, and handle reliability on your side. We didn’t find any documentation of robust retry or a dead-letter queue for webhooks in Richpanel, so assume a lightweight implementation: one try per event, success on 2xx, no automatic replays. If guaranteed processing is needed, you might need to implement a polling fallback (for example, periodically poll for new tickets via API as a safety net – though that’s heavy and usually not needed if webhooks are working fine).

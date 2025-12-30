@@ -1,0 +1,47 @@
+Order status automation pitfalls (wrong order, missing order, privacy leaks) + safe fallback
+
+What goes wrong
+
+The customer asks “what’s my order status” but:
+
+they have multiple orders,
+
+they used a different email,
+
+they are not authenticated,
+
+Shopify/OMS is down,
+
+or your lookup matches the wrong customer.
+
+Worst case: you reveal someone else’s order info.
+
+How to avoid it
+
+Make “order status” automation data-driven and conservative:
+
+If you can’t confidently match a single order, don’t guess.
+
+Use identity checks:
+
+Require an order number + email or ZIP/postcode before disclosing details (depending on your policy).
+
+Respond with minimal necessary info:
+
+current state (processing/shipped/delivered),
+
+tracking link if available,
+
+no addresses or sensitive fields.
+
+Build clear fallbacks:
+
+If lookup fails or ambiguous → ask for order number OR route to human with a tag order_status_failed_lookup.
+
+Log and monitor “auto order status” outcomes:
+
+follow-up rate (“that’s wrong”),
+
+time-to-resolution,
+
+agent takeovers.

@@ -1,0 +1,3 @@
+Avoid Sensitive Data:
+
+ Since you decide which fields to send in the payload, make sure to exclude any personally identifiable information that isn’t necessary for your middleware’s task. Richpanel will happily send whatever you configure, so if, for example, you don’t need the customer’s full address or payment info for a given integration, do not include it in the webhook payload. This helps with privacy and security – only transfer the data you need. (Richpanel does not automatically mask or omit data in the payload; it’s up to you as the integrator to choose what to send.)

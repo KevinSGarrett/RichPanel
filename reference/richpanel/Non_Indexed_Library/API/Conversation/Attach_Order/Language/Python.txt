@@ -1,0 +1,19 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: Python
+
+import requests
+
+url = "https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.put(url, headers=headers)
+
+print(response.text)

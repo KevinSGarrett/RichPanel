@@ -1,0 +1,321 @@
+version: v1
+last_updated: '2025-12-29'
+template_format: mustache
+notes:
+- Machine-readable source of truth for customer-facing templates.
+- LLM must never output free-form customer-facing copy.
+templates:
+- template_id: t_order_status_verified
+  tier: 2
+  enabled_v1: true
+  purpose: Provide verified order status and (if available) tracking details for a deterministically-matched order.
+  required_vars:
+  - order_id
+  - order_status
+  optional_vars:
+  - first_name
+  - fulfillment_status
+  - tracking_url
+  - tracking_number
+  - tracking_company
+  - status_url
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 thanks for reaching out.\n\nHere\u2019s the latest update\
+      \ for your order {{order_id}}:\n\u2022 Status: {{order_status}}{{#fulfillment_status}} ({{fulfillment_status}}){{/fulfillment_status}}\n\
+      \n{{#status_url}}\nOrder status link:\n\u2022 {{status_url}}\n{{/status_url}}\n\n{{#tracking_url}}\nTracking:\n\u2022\
+      \ {{#tracking_company}}{{tracking_company}}{{/tracking_company}}{{#tracking_number}} \u2014 {{tracking_number}}{{/tracking_number}}\n\
+      \u2022 {{tracking_url}}\n{{/tracking_url}}\n\nIf anything looks off, just reply here and our team will jump in to help.\n\
+      \u2014 {{support_signature}}"
+    livechat: 'Hi{{#first_name}} {{first_name}}{{/first_name}}! Order {{order_id}} is currently: {{order_status}}.
+
+      {{#tracking_url}}Tracking: {{tracking_url}}{{/tracking_url}}
+
+      Reply here if you need help.'
+- template_id: t_shipping_delay_verified
+  tier: 2
+  enabled_v1: true
+  purpose: Acknowledge shipping delay / not shipped yet, stating only verified order facts and routing to a specialist.
+  required_vars:
+  - order_id
+  - order_status
+  - fulfillment_status
+  optional_vars:
+  - first_name
+  - order_created_at
+  - support_hours_note
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 thanks for checking in.\n\nI\u2019m seeing order {{order_id}}\
+      \ is currently marked as {{order_status}}{{#fulfillment_status}} ({{fulfillment_status}}){{/fulfillment_status}}, and\
+      \ it has not been marked as shipped yet.\n\nA support specialist will review this and follow up. If you have any extra\
+      \ context (needed-by date, address issues, etc.), reply here and we\u2019ll take it from there.\n\u2014 {{support_signature}}"
+    livechat: "Hi{{#first_name}} {{first_name}}{{/first_name}}! Order {{order_id}} is currently {{order_status}}{{#fulfillment_status}}\
+      \ ({{fulfillment_status}}){{/fulfillment_status}} and isn\u2019t marked as shipped yet. If you have a needed-by date\
+      \ or address concern, reply here and we\u2019ll help."
+- template_id: t_order_status_ask_order_number
+  tier: 1
+  enabled_v1: true
+  purpose: Ask for order number + email/phone so a human or system can securely locate the right order.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 happy to help with your order status.\n\nTo pull up the\
+      \ right order, please reply with:\n1) your order number, and\n2) the email or phone number used at checkout.\n\nOnce\
+      \ we have that, we\u2019ll get you the latest tracking/status right away.\n\u2014 {{support_signature}}"
+    livechat: 'Hi{{#first_name}} {{first_name}}{{/first_name}}! To check your order status, please send your order # and the
+      email or phone used at checkout.'
+- template_id: t_delivered_not_received_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Provide a short DNR checklist and request order number for investigation; always route to human.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 I\u2019m sorry you\u2019re dealing with this.\n\nA quick\
+      \ checklist that often resolves \u201Cdelivered but not received\u201D:\n\u2022 Check around your delivery area (porch/side\
+      \ door/garage) and with household members\n\u2022 Check with neighbors or your building office/package room\n\u2022\
+      \ If it was marked delivered within the last 24 hours, it may still arrive shortly\n\nWhen you reply, please include\
+      \ your order number so we can investigate and help with next steps.\n\u2014 {{support_signature}}"
+    livechat: "Sorry about that \u2014 I can help. Please send your order # and confirm your shipping address/city. Also,\
+      \ have you checked neighbors/mailroom/front desk? We\u2019ll investigate and follow up."
+
+- template_id: t_order_eta_no_tracking_verified
+  tier: 2
+  enabled_v1: true
+  purpose: Provide a conservative delivery window when no tracking exists yet (derived from order date + shipping bucket). Auto-close eligible when within SLA.
+  required_vars:
+  - order_id
+  - shipping_bucket
+  - eta_remaining_human
+  optional_vars:
+  - first_name
+  - order_created_date_human
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} — thanks for checking in.\n\nI’m not seeing a tracking number for order {{order_id}} yet. Tracking is sent once your package is boxed and shipped.\n\nBased on your {{shipping_bucket}} shipping and the date your order was placed{{#order_created_date_human}} ({{order_created_date_human}}){{/order_created_date_human}}, your order is expected to arrive in {{eta_remaining_human}}.\n\nI’m going to mark this as resolved for now. If you have any questions or if the order doesn’t arrive by the end of that window, reply to this message and we’ll jump back in.\n\n— {{support_signature}}"
+    livechat: "Thanks{{#first_name}} {{first_name}}{{/first_name}}. I’m not seeing tracking for order {{order_id}} yet. Based on {{shipping_bucket}} shipping, it should arrive in {{eta_remaining_human}}. I’ll mark this resolved for now — reply here anytime to reopen."
+
+- template_id: t_missing_items_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect info/photos for missing items; always route to human.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 sorry about that. We\u2019ll help.\n\nPlease reply with:\n\
+      1) your order number\n2) which item(s) are missing\n3) a photo of what you received (including the packing slip if available)\n\
+      \nOnce we have that, our team will review and take the next steps.\n\u2014 {{support_signature}}"
+    livechat: "Sorry about that. Please send your order # and list which items are missing. If you can, attach a photo of\
+      \ what you received and the packing slip/label. We\u2019ll take it from there."
+- template_id: t_wrong_item_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect photos/details for wrong item; always route to human.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 thanks for letting us know. We\u2019ll fix this.\n\n\
+      Please reply with:\n1) your order number\n2) a photo of the item you received (and the label on the box if possible)\n\
+      3) what you were expecting to receive\n\nA specialist will review and help with the quickest resolution.\n\u2014 {{support_signature}}"
+    livechat: "Thanks \u2014 please send your order #, what you expected vs what you received, and (if possible) a photo of\
+      \ the item/packing slip. We\u2019ll help with next steps."
+- template_id: t_damaged_item_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect photos/video for damaged/defective item; always route to human.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 I\u2019m sorry it arrived that way.\n\nPlease reply with:\n\
+      1) your order number\n2) clear photos of the damage/defect\n3) (if relevant) a short video showing the issue\n\nOnce\
+      \ we have this, our support team will review and help with next steps.\n\u2014 {{support_signature}}"
+    livechat: "Sorry your item arrived damaged. Please send your order # and a photo of the damage + packaging. We\u2019ll\
+      \ review and follow up with next steps."
+- template_id: t_cancel_order_ack_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Acknowledge cancellation request, request order number, avoid promising cancellation.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we can try to help with a cancellation.\n\nPlease reply\
+      \ with your order number. If the order has not shipped yet, we\u2019ll do our best to cancel it. If it has already shipped,\
+      \ we\u2019ll guide you through the best next option.\n\u2014 {{support_signature}}"
+    livechat: "I can help with a cancellation request. Please send your order #. If it hasn\u2019t shipped yet, we may be\
+      \ able to cancel; if it already shipped, we\u2019ll share the best next step."
+- template_id: t_address_change_ack_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Acknowledge address change request; ask for order number and full corrected address.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we may be able to update that.\n\nPlease reply with:\n\
+      1) your order number, and\n2) the full corrected shipping address.\n\nIf the order hasn\u2019t shipped yet, we\u2019\
+      ll do our best to update it. If it has shipped, we\u2019ll help with the next best steps.\n\u2014 {{support_signature}}"
+    livechat: "Got it \u2014 please send your order # and the full corrected shipping address. If it hasn\u2019t shipped yet,\
+      \ we\u2019ll try to update it; otherwise we\u2019ll advise next steps."
+- template_id: t_cancel_subscription_ack_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Acknowledge subscription cancellation request; ask for subscription email/details.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 happy to help with your subscription.\n\nPlease reply\
+      \ with the email used for the subscription (and any order/subscription details you have). Our team will locate it and\
+      \ assist you with cancellation.\n\u2014 {{support_signature}}"
+    livechat: "Please share the email associated with the subscription (and any order/subscription number if you have it).\
+      \ We\u2019ll get this routed and help you cancel."
+- template_id: t_billing_issue_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect minimal billing info; warn customer not to share full card numbers.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we can help with billing.\n\nPlease reply with:\n1) your\
+      \ order number (if you have one), and\n2) what you\u2019re seeing (amount + date).\n\nIf you\u2019re sharing screenshots,\
+      \ please remove any full card numbers or sensitive information.\n\u2014 {{support_signature}}"
+    livechat: "Happy to help. Please share your order # and a brief description of the billing issue (do not include full\
+      \ card details). We\u2019ll investigate and follow up."
+- template_id: t_return_request_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect return request info; route to Returns Admin.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we can help with a return.\n\nPlease reply with your\
+      \ order number and which item(s) you\u2019d like to return, and we\u2019ll guide you through the next steps.\n\u2014\
+      \ {{support_signature}}"
+    livechat: "To start a return, please share your order #, the items you\u2019d like to return, and the reason. We\u2019\
+      ll reply with next steps."
+- template_id: t_exchange_request_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect exchange request info; route to Returns Admin.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we can help with an exchange.\n\nPlease reply with your\
+      \ order number and what you\u2019d like to exchange (and the desired replacement item/variant), and we\u2019ll help\
+      \ from there.\n\u2014 {{support_signature}}"
+    livechat: "To start an exchange, please share your order #, the item you want to exchange, and what you\u2019d like instead\
+      \ (size/color/etc.). We\u2019ll reply with next steps."
+- template_id: t_refund_request_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect refund status request info; route to Returns Admin or billing team.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we can check on that.\n\nPlease reply with your order\
+      \ number and any return details you have (if applicable). Our team will review and follow up with the latest status.\n\
+      \u2014 {{support_signature}}"
+    livechat: "To help with a refund request, please share your order # and a short reason for the refund. We\u2019ll review\
+      \ and follow up."
+- template_id: t_technical_support_intake
+  tier: 1
+  enabled_v1: true
+  purpose: Collect troubleshooting intake info for product/app issues; route to Technical Support (or fallback tags).
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 we\u2019ll help troubleshoot this.\n\nTo get started,\
+      \ please reply with:\n1) the product/device model (if applicable)\n2) what exactly is happening (and any error message)\n\
+      3) what you\u2019ve tried so far\n4) your phone type (iPhone/Android) and app version (if the issue is app-related)\n\
+      \nA specialist will review and help you as quickly as possible.\n\u2014 {{support_signature}}"
+    livechat: "Sorry you\u2019re running into trouble. What product/device are you using, and what\u2019s happening? If you\
+      \ can, include a screenshot/video and what troubleshooting you\u2019ve tried."
+- template_id: t_promo_discount_info
+  tier: 1
+  enabled_v1: true
+  purpose: Provide general promo troubleshooting; do not generate new codes.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 happy to help.\n\nIf a discount code isn\u2019t applying,\
+      \ common causes include:\n\u2022 the code is expired\n\u2022 it doesn\u2019t apply to the items in your cart\n\u2022\
+      \ minimum spend requirements\n\u2022 it can\u2019t be combined with another discount\n\nReply with the code you tried\
+      \ and the exact message you see, and our team will take a look.\n\u2014 {{support_signature}}"
+    livechat: "Happy to help with discounts. Which item are you looking at, and do you have a promo code you\u2019re trying\
+      \ to apply?"
+- template_id: t_pre_purchase_info
+  tier: 1
+  enabled_v1: true
+  purpose: Acknowledge pre-purchase questions and gather requirements for Sales/Support.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 thanks for reaching out!\n\nCan you share what you\u2019\
+      re looking for (and any must-haves)? Our team will help you choose the best option.\n\u2014 {{support_signature}}"
+    livechat: Happy to help before you order. What product are you considering and what questions do you have (size, compatibility,
+      shipping, etc.)?
+- template_id: t_influencer_inquiry_route
+  tier: 1
+  enabled_v1: true
+  purpose: Acknowledge influencer inquiry and request media kit; route to Social Media.
+  required_vars: []
+  optional_vars:
+  - first_name
+  channels:
+    default: "Hi{{#first_name}} {{first_name}}{{/first_name}} \u2014 thanks for your interest in collaborating.\n\nWe\u2019\
+      ve routed your message to our partnerships team. Please share your social handle(s) and a link to your media kit if\
+      \ available.\n\u2014 {{support_signature}}"
+    livechat: "Thanks for reaching out! Please share your social handle(s), platform, and a link to your profile. If you have\
+      \ a media kit, feel free to attach it \u2014 we\u2019ll route this to the right team."
+- template_id: t_chargeback_neutral_ack
+  tier: 0
+  enabled_v1: false
+  purpose: Neutral acknowledgement for chargeback/dispute; recommended route-only in early rollout.
+  required_vars: []
+  optional_vars: []
+  channels:
+    default: "Thanks for reaching out. We\u2019ve forwarded this to the appropriate team for review and will follow up as\
+      \ soon as possible.\n\u2014 {{support_signature}}"
+- template_id: t_legal_threat_ack
+  tier: 0
+  enabled_v1: false
+  purpose: Neutral acknowledgement for legal threats; recommended route-only in early rollout.
+  required_vars: []
+  optional_vars: []
+  channels:
+    default: "Thanks for your message. We\u2019ve escalated this to the appropriate team for review.\n\u2014 {{support_signature}}"
+- template_id: t_harassment_ack
+  tier: 0
+  enabled_v1: false
+  purpose: Neutral acknowledgement for harassment; recommended route-only in early rollout.
+  required_vars: []
+  optional_vars: []
+  channels:
+    default: "Your message has been escalated for review.\n\u2014 {{support_signature}}"
+- template_id: t_fraud_ack
+  tier: 0
+  enabled_v1: false
+  purpose: Neutral acknowledgement for suspected fraud; recommended route-only in early rollout.
+  required_vars: []
+  optional_vars: []
+  channels:
+    default: "Thanks for your message. We\u2019ve escalated this for review.\n\u2014 {{support_signature}}"
+- template_id: t_unknown_ack
+  tier: 1
+  enabled_v1: false
+  purpose: Generic acknowledgement; keep disabled unless needed.
+  required_vars: []
+  optional_vars: []
+  channels:
+    default: "Thanks for your message \u2014 we\u2019re taking a look and will follow up.\n\u2014 {{support_signature}}"

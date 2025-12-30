@@ -1,0 +1,3 @@
+Test in a Safe Environment:
+
+ During testing, use a non-critical ticket or a sandbox (see section 9) to simulate the full loop. Intentionally cause your middleware to update the ticket and see if the automation triggers again. If it does, adjust the conditions. One common pattern is to use different fields for input vs output. For example, some setups use one tag like “needs_bot_reply” that triggers the HTTP Target and then the bot removes that tag and adds “bot_replied”. That way, the trigger won’t fire again because the “needs_bot_reply” condition is no longer true once the bot has done its job.

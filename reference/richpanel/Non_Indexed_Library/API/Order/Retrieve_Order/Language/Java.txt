@@ -1,0 +1,16 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: Java
+
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/order/appclient_id/order_id")
+  .get()
+  .addHeader("accept", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();

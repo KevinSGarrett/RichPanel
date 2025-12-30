@@ -1,0 +1,34 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+Order Object: https://developer.richpanel.com/docs/order-event-structure
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+appclient_id
+string
+required
+Unique appClientId given to each store. Also called as apI key
+
+Body Params
+orders
+array of objects
+
+ADD object
+Responses
+
+200
+200
+
+Response body
+string
+
+400
+400
+

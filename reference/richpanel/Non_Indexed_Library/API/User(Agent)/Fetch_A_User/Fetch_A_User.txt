@@ -1,0 +1,26 @@
+Fetch a User
+get
+https://api.richpanel.com/v1/users/{id}
+
+Use this API to fetch the details of a user(agent) using user id.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Responses
+
+200
+200
+
+Response body
+json
+
+400
+400

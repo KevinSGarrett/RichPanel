@@ -1,0 +1,53 @@
+“Attachment bursts” → rate limit problems, retries storm, cascading failures
+What goes wrong
+
+Customers often send multiple images (e.g., 8 photos of damaged items), or:
+
+a PDF + screenshots + a video,
+
+or several messages in a row.
+
+If your middleware tries to:
+
+upload each file,
+
+add internal notes,
+
+tag the ticket,
+
+post an auto-reply,
+
+…you can easily spike your API calls.
+
+Richpanel’s API is rate-limited to 50 requests per 30 seconds, and returns 429 Too Many Requests with headers like Retry-After, X-RateLimit-Remaining, etc. 
+Richpanel
+
+If you ignore that, you get:
+
+partial state updates (tag added but team not set),
+
+duplicate retries that worsen the spike,
+
+slowdowns that look random in production.
+
+How to avoid it
+
+Treat attachments as asynchronous work:
+
+webhook handler enqueues a job and returns immediately
+
+a worker processes attachments with concurrency limits
+
+Put attachment work on a separate queue from “routing/auto-reply” so classification stays fast.
+
+Enforce “attachment budgets”:
+
+process only the first N attachments
+
+or only attachments under a size threshold
+
+Implement proper 429 handling:
+
+respect Retry-After
+
+global throttling + jittered backoff

@@ -1,0 +1,19 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Language: Python
+
+import requests
+
+url = "https://api.richpanel.com/v1/customers"
+
+headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.post(url, headers=headers)
+
+print(response.text)

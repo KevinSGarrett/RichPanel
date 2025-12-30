@@ -1,0 +1,33 @@
+Attachments + non-text messages break classification and can cause “payload too large” failures
+
+What goes wrong
+
+Customers send screenshots, PDFs, videos, voice notes, etc.
+
+Your classifier sees little/no text → wrong intent classification.
+
+Or you try to push big blobs through APIs and hit 413 Payload Too Large (Richpanel explicitly documents 413 as a possible error). 
+Richpanel
+
+How to avoid it
+
+Decide an explicit policy for non-text inbound:
+
+If message has no usable text, route to a human queue with tag needs_attachment_review.
+
+Or reply asking for order number / a short description.
+
+Never embed raw file bytes in LLM prompts or webhook payloads.
+
+If you must upload files into Richpanel, use the file endpoint and enforce size limits client-side:
+
+POST https://api.richpanel.com/v1/file/upload 
+Richpanel
+
+Add pre-processing:
+
+strip HTML, remove email signatures/quoted threads,
+
+normalize whitespace/emojis,
+
+keep only the most recent customer-authored text for classification.

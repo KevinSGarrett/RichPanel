@@ -1,0 +1,10 @@
+Retrieve Conversations using Customer's Email or Phone
+get
+https://api.richpanel.com/v1/tickets/{type}/{id}
+
+Language: Shell
+
+curl --request GET \
+     --url https://api.richpanel.com/v1/tickets/email/id \
+     --header 'accept: application/json' \
+     --header 'x-richpanel-key: test'

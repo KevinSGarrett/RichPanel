@@ -1,0 +1,5 @@
+API Versioning and Changes:
+
+ Richpanel’s API is versioned in the URL (currently v1, and their docs show v1.1 as the latest minor version in documentation). So far, changes have been additive (new endpoints, new fields) under v1. They have not announced any deprecation of v1. If they were to make breaking changes, they would likely release a v2 API. Deprecation Policy: not explicitly stated, but typically you’d expect advance notice (several months) if they retire an API. To stay informed, you should subscribe to their “Recent Releases” updates feed
+headwayapp.co
+ and any developer newsletter if available. Also maintain contact with their support/CSM who might inform you of upcoming changes. Since your integration is business-critical, ask Richpanel if they have a channel for notifying integrators of changes (e.g. an email list for API users or a Slack community). At the very least, periodically check their developer docs for any updates or new versions. Given their pace, major breaking changes are not frequent – any improvements likely come as new fields or endpoints you can adopt when ready.

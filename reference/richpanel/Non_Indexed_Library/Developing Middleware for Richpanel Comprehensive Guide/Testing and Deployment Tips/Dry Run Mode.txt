@@ -1,0 +1,3 @@
+Dry Run Mode: 
+
+During development, you might want your middleware to receive webhooks but not actually perform certain actions on Richpanel (or external systems). Implement a “dry run” flag. For example, if dry_run=true, your middleware would log that it would have closed the ticket or would have sent a reply, but refrain from actually calling the Richpanel API. This can be helpful when verifying logic without altering real data. You can trigger this mode by checking an environment variable or a special field in the webhook (you could add a custom field in the payload like "dry_run": true for test rules).

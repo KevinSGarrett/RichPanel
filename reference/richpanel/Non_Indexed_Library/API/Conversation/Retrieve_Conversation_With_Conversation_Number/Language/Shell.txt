@@ -1,0 +1,10 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Shell
+
+curl --request GET \
+     --url https://api.richpanel.com/v1/tickets/number/conversationNo \
+     --header 'accept: application/json' \
+     --header 'x-richpanel-key: test'

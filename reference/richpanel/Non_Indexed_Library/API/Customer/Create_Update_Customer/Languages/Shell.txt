@@ -1,0 +1,11 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Language: Shell
+
+curl --request POST \
+     --url https://api.richpanel.com/v1/customers \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test'

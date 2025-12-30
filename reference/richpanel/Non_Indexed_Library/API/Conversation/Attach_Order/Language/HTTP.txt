@@ -1,0 +1,12 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: HTTP
+
+PUT /v1/tickets/id/attach-order/appClientId/orderId HTTP/1.1
+Accept: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

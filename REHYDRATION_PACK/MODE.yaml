@@ -1,0 +1,25 @@
+# REHYDRATION_PACK operational mode
+# - foundation: we are still building the documentation OS + repo structure
+# - build: Cursor agents run and produce RUN artifacts
+
+mode: foundation
+current_wave: WAVE_F12
+
+notes: |
+  Foundation mode: focus is repo structure, documentation architecture, indexing,
+  chunking standards, policy/template hardening, and build-readiness criteria.
+  No Cursor run outputs are required in this phase.
+
+  Clarifier: Build wave B00 is not required to complete Foundation (documentation OS).
+  It is only used when implementation begins.
+
+transition_to_build_mode: |
+  1) Complete `docs/00_Project_Admin/Build_Mode_Activation_Checklist.md`
+  2) Update this file:
+     - set `mode: build`
+     - set `current_wave: WAVE_B00`
+  3) Create a run folder skeleton:
+     - `python scripts/new_run_folder.py --now`
+  4) Populate `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md` with the first run set prompts
+  5) In build mode, validate strictly:
+     - `python scripts/verify_rehydration_pack.py --strict`

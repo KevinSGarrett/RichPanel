@@ -1,0 +1,14 @@
+Introduction:
+
+When you set up the HTTP Target in Richpanel, you define the request that will be sent to your middleware. You can choose the HTTP method (e.g. POST) and content type (JSON, form, etc.), and crucially, you can customize the payload. Richpanel does not force a fixed schema; instead, you insert placeholders for any ticket or customer fields you want to include. The placeholders use a {{...}} syntax. For example, you might define a JSON payload like:
+
+{
+  "ticket_id": "{{ticket.id}}",
+  "customer_email": "{{ticket.customer.email}}",
+  "customer_name": "{{ticket.customer.name}}",
+  "message": "{{ticket.lastMessage.text}}",
+  "ticket_url": "{{ticket.url}}"
+}
+
+
+In the above, Richpanel will replace those placeholders with the actual conversation’s ID, the customer’s email, name, the latest message text, and a URL or reference ID for the ticket. Richpanel’s documentation suggests variables such as customer name, email, phone, last order number, ticket creation time ({{ticket.createdAt}}), and the ticket’s unique URL are available to use in the template. You have full control over what to send – you can keep it minimal (just an ID and a snippet of text) or include rich context (customer info, order numbers, etc.) depending on your needs.

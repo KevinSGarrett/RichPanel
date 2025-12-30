@@ -1,0 +1,68 @@
+[Conversation]
+Create a Conversation
+post
+Update a Conversation
+put
+Retrieve a Conversation
+get
+Retrieve a Conversation with conversation number
+get
+Add Tags
+put
+Remove Tags
+put
+Attach Order
+put
+Retrieve Conversations using Customer's Email or Phone
+
+
+
+[Customer]
+Create/UpdateCustomer
+post
+Retrieve a Customer with Email/Phone
+
+
+[Order]
+Create/Update orders
+post
+Retrieve an Order
+get
+Retrieve an Order Linked to a Conversation
+
+
+[Subscription]
+Create/Update Subscriptions
+
+[User (Agent)]
+Fetch a User
+get
+List Users
+
+
+[Teams]
+List Teams
+get
+
+
+
+[Tag]
+List Tags
+get
+Create Tag
+
+
+
+[Channel]
+Fetch a Channel
+get
+List Channels
+
+
+[File]
+Upload file
+post
+
+
+
+

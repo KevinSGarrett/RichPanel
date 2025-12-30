@@ -1,0 +1,72 @@
+Update a Conversation
+put
+https://api.richpanel.com/v1/tickets/{id}
+
+Use this API to update an existing conversation using the conversation id.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Body Params
+ticket
+object
+
+ticket object
+id
+string
+Id to use for conversation, we'll update this before creating conversation to make sure its always unique. Supplying the same id will probably overwrite the existing conversation.
+
+status
+string
+enum
+Defaults to OPEN
+This can be either OPEN or CLOSED
+
+
+OPEN
+Allowed:
+
+OPEN
+
+CLOSED
+comment
+object
+This will go for message.
+
+
+comment object
+via
+object
+
+via object
+tags
+array of strings
+Pass array of tag ids
+
+
+ADD string
+assignee_id
+string
+Defaults to unassigned
+Use https://developer.richpanel.com/reference/list-users API to get the available assignee_id
+
+unassigned
+customer_profile
+object
+
+customer_profile object
+Responses
+
+200
+200
+
+
+400
+400

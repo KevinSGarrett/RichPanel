@@ -1,0 +1,11 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: HTTP
+
+GET /v1/customers/type/id HTTP/1.1
+Accept: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

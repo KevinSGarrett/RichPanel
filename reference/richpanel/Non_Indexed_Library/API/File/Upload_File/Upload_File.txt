@@ -1,0 +1,24 @@
+Upload file
+post
+https://api.richpanel.com/v1/file/upload
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Body Params
+file
+file
+No file chosen
+Responses
+
+200
+200
+
+Response body
+object
+
+400
+400

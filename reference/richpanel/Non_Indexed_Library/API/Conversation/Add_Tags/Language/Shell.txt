@@ -1,0 +1,11 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: Shell
+
+curl --request PUT \
+     --url https://api.richpanel.com/v1/tickets/id/add-tags \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test'

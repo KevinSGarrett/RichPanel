@@ -1,0 +1,6 @@
+Stability: 
+
+Using HTTP Targets in automations is an official, supported feature, so it’s stable and unlikely to break unexpectedly. This was introduced as a feature to allow custom integrations (e.g. with Zapier, survey triggers, etc.), and it’s the method Richpanel documents for performing external actions
+headwayapp.co
+headwayapp.co
+. In summary, you can confidently use an automation rule with an HTTP Target as the entry point for your middleware on inbound messages, knowing it’s a first-class integration point.

@@ -1,0 +1,16 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+Language: Java
+
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/tickets/number/conversationNo")
+  .get()
+  .addHeader("accept", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();

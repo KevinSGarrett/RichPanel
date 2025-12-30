@@ -1,0 +1,11 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: Shell
+
+curl --request PUT \
+     --url https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId \
+     --header 'accept: application/json' \
+     --header 'x-richpanel-key: test'

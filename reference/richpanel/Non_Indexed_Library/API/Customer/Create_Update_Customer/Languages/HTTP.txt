@@ -1,0 +1,12 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Language: HTTP
+
+POST /v1/customers HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

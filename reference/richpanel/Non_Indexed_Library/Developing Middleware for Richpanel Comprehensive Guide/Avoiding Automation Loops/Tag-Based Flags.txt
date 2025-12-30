@@ -1,0 +1,3 @@
+Tag-Based Flags:
+
+ A common strategy is to use a tag or custom field as a flag to indicate the ticket has been handled by the integration. For example, your automation rule could add a tag like “integration_called” when it triggers the HTTP Target. Then you include in the rule conditions that it should run only if that tag is not present (and perhaps have the rule add the tag once done). This ensures each conversation triggers the integration at most once. Your middleware could also add such a tag via API when it finishes processing.

@@ -1,0 +1,12 @@
+Remove Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/remove-tags
+
+Language: Shell
+
+
+curl --request PUT \
+     --url https://api.richpanel.com/v1/tickets/id/remove-tags \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test'

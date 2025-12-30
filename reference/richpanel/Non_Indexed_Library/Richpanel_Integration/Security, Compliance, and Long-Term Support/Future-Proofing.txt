@@ -1,0 +1,3 @@
+Future-Proofing: 
+
+Given you’re building a middleware, keep it decoupled and configurable, because SaaS platforms do evolve. Keep an eye on Richpanel’s Updates page – e.g., if they introduce a new “automation version 2” or change how HTTP Targets work, you’ll want to adapt quickly. Also note, Richpanel is investing in AI features (Sidekick, etc.), so they are likely to expand APIs in that area – possibly providing more event hooks or assistant APIs. Staying in touch with their product team can give you insight into upcoming integration capabilities (maybe a future where they have a proper webhook system for all events, etc.).

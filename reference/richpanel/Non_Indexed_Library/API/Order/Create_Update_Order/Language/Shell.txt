@@ -1,0 +1,12 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+
+Language: Shell
+
+curl --request POST \
+     --url https://api.richpanel.com/v1/order/appclient_id \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test'

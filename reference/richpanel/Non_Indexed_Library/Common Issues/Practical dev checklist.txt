@@ -1,0 +1,13 @@
+A practical dev checklist to prevent most of these at once
+
+Shadow mode first: run classification + confidence scoring, but don’t act; just log.
+
+Hard kill switch: environment flag that disables all auto-replies instantly.
+
+Idempotency everywhere: store processed message keys + tags.
+
+Queue-based architecture: webhook handler only validates + enqueues.
+
+Metrics: automation rate, false-positive rate, fallback rate, 429 rate, median end-to-end latency.
+
+Replay tooling: ability to replay a stored event through the pipeline for debugging.

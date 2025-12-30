@@ -1,0 +1,26 @@
+Limitations
+The Richpanel API is rate-limited meaning that the number of requests you can make in a period of time is limited. You can perform up to 50 requests per 30 seconds.
+Once you exceeded this quota, your request will fail and the API will respond with a 429 Too Many Requests HTTP code.
+
+All responses returned by the API contains rate-limiting headers to enable you to handle this scenario programmatically and retry when you know that your request will succeed:
+
+HTTP Response Header
+
+Description
+
+X-RateLimit-Limit
+
+It contains the max limit of requests you can make in the current period.
+E.g: 50. In this case, the limit is 50.
+
+X-RateLimit-Remaining
+
+It contains the remaining limit of requests you can make in the current period.
+E.g: 30. In this case, you can call API another 30 times in the current window.
+
+Retry-After
+
+It contains how many seconds you need to wait before you can retry the request.
+E.g: 5. In this case, you need to wait 5 seconds.
+
+If the rate limit is exceeded, the API responds with an HTTP 429 Too Many Requests response code and a body that details the reason for the rate limiter kicking in. The response has a Retry-After header that tells you for how many seconds to wait before retrying. You should anticipate this in your API client for the smoothest possible experience.

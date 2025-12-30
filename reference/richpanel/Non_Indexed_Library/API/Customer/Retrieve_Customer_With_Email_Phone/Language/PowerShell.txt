@@ -1,0 +1,10 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: PowerShell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/customers/type/id' -Method GET -Headers $headers

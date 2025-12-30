@@ -1,0 +1,2327 @@
+﻿Name,Subject,Description,Tags,Assign,Priority,Update Field,Last Order,HTTP Target,Close,Available To - Brands,Available To - Agents,Created By
+"Cancel last order","","Hello %First Name%,
+
+Thank you so much for reaching out! I am happy to help.
+
+I was able to get your order cancelled and created a refund request for your order number and it should be processed within 24 to 72 business hours. Once the refund is released, please allow 3-5 business days for you to receive the funds back depending on your bank's processing timeframe. You'll receive an email with your refund details as well.
+
+Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Let me know if you need any additional assistance. You can also access our Help Center here if you need additional assistance.
+
+Thank you!
+
+Sincerely,
+%Agent First Name%
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Cancellation Request (Cannot Cancel)","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+Orders are imported directly to our fulfillment facility upon receipt. Once the order has been imported to our fulfillment facility, we, unfortunately, have no ability to cancel the orders. We're so sorry for any inconvenience this may cause you. 
+
+Once the package arrives, if you do opt to arrange a return, please reach back out, and we can help you with some return instructions. 
+
+You can review our policy in full here: https://www.scentiment.com/pages/faqs. 
+
+If you have any additional questions, please let us know. We're happy to help. 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","order-cancellation-request","","","","","","","All Brands","Everyone","System"
+"GENERIC: Greeting","","Hello ​​%First Name%​​,
+
+Thank you for reaching out. How can I assist you?
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"REFUND REQUEST : Partial refund last order","","Hello %First Name%,
+
+Hope all is well!
+
+I have created a partial refund request for your last order %Order Name% and it should be processed within 24 to 72 business hours. Once the refund is released, please allow 3-5 business days for you to receive the funds back depending on your bank's processing timeframe. You'll receive an email with your refund details as well.
+
+Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Please let me know if you need any additional assistance. You can also access our Scentiment Help Center if you need additional assistance.
+
+Thank you.
+
+Sincerely, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Damage & Defect: Video Request","","Hello ​​%First Name%​​,
+
+Thank you for reaching out to us regarding the issue you are experiencing with your device. We are sorry to hear that it is not working properly, and we would be happy to help you resolve the issue as quickly as possible.
+
+In order to better understand the issue you are experiencing, we kindly request that you provide us with a brief video and description of what is occurring when you attempt to use the device. This will help us to identify the problem more quickly and provide you with the most effective solution.
+
+Once we receive this information, our technical support team will review it and provide you with further instructions on how to proceed. We understand that this may be an inconvenience, but we want to ensure that we address the issue in the most efficient way possible.
+
+If you have any questions or concerns, please do not hesitate to reach out to us. We are here to assist you in any way we can.
+
+Thank you for your understanding, and we look forward to hearing back from you soon.
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","return-defective","","","","","","","All Brands","Everyone","System"
+"ORDERS: Swapped with other variant","","Hi ​​%First Name%​​
+
+Thank you for responding back. We have gone ahead and updated your order to your chosen alternative variant. You'll receive a separate email with the tracking number. 
+
+As always, feel free to reach out to us should you need further assistance. 
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","replacement-order","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Standard Diffuser V1: Resetting Remote (w/ Video)","","Hello %First Name%,
+Thank you for reaching out, and we're so sorry to hear you're having trouble with your diffuser remote. 
+We have some great resources available to get your remote up and running. I've included a video here for your review.
+Please watch this video and give the suggestions a try.
+If you have a different model of diffuser, please review the troubleshooting steps here.
+
+If the issue is not resolved, your diffuser is under warranty and you’ve already completed the troubleshooting steps and submitted your video, we’ll provide you with a link to initiate your warranty replacement.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS : Address change: Unable to process","","Hello %First Name%,
+
+Thank you for your email.
+
+Unfortunately, we are unable to process an address change at this point.
+
+Orders are imported directly to our fulfillment facility upon receipt. Once the order has been imported to our fulfillment facility, we, unfortunately, have no ability to edit the orders. We're so sorry for any inconvenience this may cause you.
+
+You can review our policy in full here: https://www.scentiment.com/pages/faqs.
+
+Once the package arrives, if you do opt to arrange a return, please click on Scentiment Help Center.
+
+If you have any additional questions, please let us know, we're happy to help.
+
+Sincerely,%Agent First Name%Scentiment Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Wrong Item Received: STEP 2: Diffuser items -Reshipment","","Hello %First Name%,
+
+Thank you for following up!
+
+We apologize for any inconvenience caused due to the incorrect diffuser that you received. We understand that receiving the wrong item can be frustrating, and we take full responsibility for the error.
+
+We have reviewed your order and have identified the issue. To rectify this error, we will be shipping you the correct package as soon as we see movement in the return of the incorrect item you have received. Please initiate the return of the incorrect item by clicking here: https://orders.scentiment.com/. We will ensure that the new package is prioritized and shipped to you in the shortest possible time.
+
+We assure you that we have taken corrective measures to avoid such errors in the future. We value your trust in our brand and hope that this mistake does not deter you from shopping with us in the future.
+
+If you have any questions or concerns, please feel free to contact us. We are committed to providing excellent customer service and will be happy to assist you. You can also access our Scentiment Help Center if you need additional assistance.
+
+Thank you for your patience and understanding.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","replacement-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: RTS Outreach","RE: Address Verification for Reshipment","Hello ​​%First Name%​​,
+
+​​%Agent First Name%​​ here from the Scentiment Customer Support Team.  I'm so sorry to report that your order XXXXX has been marked as returned to sender and has been received back at our warehouse.
+
+We'd be happy to reship this order to you, or we can process a refund, whichever you prefer. 
+
+If you'd like a reshipment, can you confirm the complete shipping address?
+
+Looking forward to hearing back! 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: DIFFUSERS: Battery Operated?","","Hello %First Name%
+Thank you for reaching out! Our rechargeable diffusers include:
+• Scent Diffuser Mini
+• Diffuser Mini 2
+• Diffuser Mini 2 LE
+• Diffuser Air 2
+• Car Diffuser
+
+Please note that our other diffusers are designed for continuous use with an electric plug-in unit.
+
+If you’d like, we can help you choose the best option based on your space or scenting preferences!
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Shipping Delay: Partial Refund Last offer","","Hello ​​%First Name%​​
+
+We sincerely apologize for the long wait. As we have communicated with you in our previous emails, we're looking to receive all stocks by (INSERT DATE PROVIDED BY WAREHOUSE) 
+
+Rest assured that your order will start to be dispatched by this week. Your order will be shipped via 2-day express shipping, and a complimentary oil has been added to your order now. 
+
+We understand how frustrating this situation has been for you, and as a gesture of goodwill, we are willing to offer a one-time partial refund of $20 / $40 on your order.
+
+We sincerely hope you will allow us to fulfill your order and allow you to experience the delightful fragrances of our oils.
+
+Thank you for your understanding and patience.
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-partial-refund","","","","","","","All Brands","Everyone","System"
+"PACKAGE PROTECTION: Protect+ Claim Instructions (Lost/Damaged/Stolen)","","Hi %First Name%,
+
+We’re very sorry to hear about the issue with your order. We understand how frustrating this situation can be, and we sincerely apologize for the inconvenience it has caused.
+
+Because you purchased Protect+ package protection with your order, your shipment is fully covered in situations such as loss, damage, or theft during transit. This added protection allows your concern to be resolved as quickly and smoothly as possible. To get started, please submit a claim directly through the Protect Plus portal using the link below:
+File a Claim: http://orders.scentiment.com
+
+Once submitted, the Protect Plus team will guide you through the process and work promptly to resolve your claim.
+If you have any questions or need assistance at any point, please don’t hesitate to reach out and we’re always here to help.
+
+Thank you for your patience and understanding.
+
+Warm regards,%Agent First Name%Scentiment Customer Support Team","refund-package-protection","","","","","","","All Brands","Everyone","System"
+"ORDERS: Invoice sent for New Remote","","Hello there,
+
+Thank you for confirming. I have now sent over an invoice for payment on the new remote for your diffuser. Once that invoice is paid, the order will be placed with our warehouse for shipment.
+
+Please let me know if you need any additional assistance!
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Card Charged, No Order Placed","","Hello, ​​%First Name%​​,
+
+Thank you for reaching out about this!  We currently see that the payment for your order was not able to be successfully charged to your card, so the order was not created.  You may see the charge as pending on your card due to the payment request made by our system. However, that request was declined by your financial institution, so the charge should not post as final and instead fall off your statement.
+
+If you do see this charge posted as final, please follow up with us so we can investigate further. Thank you!
+
+Regards,
+
+​​%Agent First Name%​​
+
+Customer Support Team","refund-accidental-order","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Flashing Yellow Light: Step 1","","Hi %First Name%,
+
+Thanks for reaching out—and I’m really sorry to hear this has been such a bumpy experience so far. Let’s get this sorted quickly. The yellow flashing light typically indicates a “Low Oil Alert,” which means the diffuser senses the oil level is at or below 20%. But just to be sure, I have a couple of quick questions:
+Did you use one of the 20ml sample bottles from your order?
+
+How full is the bottle right now—is it close to empty or more than half full?
+
+If you can also send a quick photo or video of the bottle inside the diffuser, that will help us rule out a sensor issue or anything unusual with the bottle fit.
+
+Looking forward to your reply!
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Duplicate Charge","","Hello ​​%First Name%​​,
+
+Thank you for reaching out about this!  We currently see that only one payment was successfully processed for your order, but do see your initial charge attempt was not able to be successfully charged to your card. You may see the charge as pending on your card due to the payment request made by our system. However, that request was declined by your financial institution, so the charge should not post as final and instead fall off your statement.
+
+If you do see this charge posted as final, please follow up with us so we can investigate further. Thank you! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-accidental-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: How to file a claim with Protect+","","Hello %First Name%,
+
+Thank you for reaching out, and I'm sorry to hear about the issues with your order.
+Upon reviewing your order, I see that you did opt for our protect plus, which was a great decision! In this situation, you can easily file a claim.
+
+If your item was lost during transit, stolen, or marked as delivered but not received, you'll need to initiate a claim with the carrier. Once you have the claim number from the carrier, please contact us at support@scentiment.com to inform us and provide the claim number. This will enable us to follow up with the carrier. This will also enable us to either replace your order or issue a refund in the form of store credit, minus the shipping cost, addressing any shipping-related problems as mentioned earlier.
+
+For damaged items, please ensure you take photos as you'll need to submit them to us.
+
+Please remember that all package claims must be made within 5 business days from your delivery date.
+File a claim here: http://orders.scentiment.com.
+
+Thank you.Regards,%Agent First Name%Scentiment Customer Support","refund-package-protection","","","","","","","All Brands","Everyone","System"
+"ORDERS: ID Verification Inquiry","","Hello ​​%First Name%​​,
+
+Thank you for reaching out!  This is a standard security measure that we have implemented to protect our customers and prevent any fraudulent activities.
+
+To ensure that the credit card used in the order belongs to you, we kindly ask that you provide the requested information to our ID verification program so we can proceed with your order. 
+
+Thank you for your cooperation.
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PACKAGE PROTECTION: Protect+ Not Purchased: One Time Exception","","Hello %First Name%,
+
+Thank you for your patience while I worked on this for you, and again, so sorry to see it arrived damaged.
+Unfortunately, Protect+ was not included in your order, but we can send you a replacement as a one-time courtesy.
+In the future, though, please make sure to opt in for our Package Protection, which is automatically selected at checkout. This insurance covers your order if anything should happen in transit, such as damage or theft, as well as if your item happens to be defective. If you do not select it, we are unable to be responsible or assist if anything happens in transit or if the package is lost/stolen on delivery.
+
+Thank you.Regards,%Agent First Name%Scentiment Customer Support","refund-package-protection","","","","","","","All Brands","Everyone","System"
+"Return Request : Return Portal link","","Hello %First Name%,
+
+We apologize for any inconvenience this has caused. We're happy to offer returns for a full refund up to 14 days from the date of delivery provided the unit is unused and original packaging is still intact. If you received a defective unit, we will send a replacement.
+
+To proceed with the return procedure and generate a return label for your order, please click on the following link to access our Return & Exchange Portal: https://orders.scentiment.com/
+
+Please follow the instructions on the portal to complete the return process. Please note that our warehouse inspects all returned items and may require 10-14 business days. Feel free to reach out after the 14th business day if you haven't received an update.
+
+If you encounter any difficulties or have any questions, please reply to this email for further assistance.
+
+Thank you for your understanding and cooperation.
+
+Best regards,%Agent First Name%Scentiment Customer Service Team","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Video Review Update - Your diffuser is functioning as expected","","Dear %First Name%,
+Thank you for sharing the video with us—we truly appreciate your patience while we carefully reviewed your footage.
+Based on our assessment, we can confirm that the unit is functioning as expected and, therefore, does not qualify for a warranty replacement.
+
+That said, we want to ensure you have the best possible experience with your diffuser! If you’re encountering any challenges with its operation, we’d be happy to answer any questions.
+Please don’t hesitate to reach out—we’re here to help!
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Package Delivered","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+Your order tracking has now been updated to show your order as delivered. 
+
+Order: ​%Order Name%​
+
+Please see your order tracking here: ​%Order Tracking URL%​
+
+This package was delivered to: ​%Order Shipping Address Line 1%​ ​%Order Shipping Address Line 2%​, ​%Order Shipping Postcode%​ ​%Order Shipping City%​ ​%Order Shipping State/Province%​
+
+Please let me know if you need any additional assistance. I'm always happy to help! 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Refunds Processing Time","","Hello​​%First Name%​​,
+
+Thank you for reaching out regarding your refund. Please note that refunds are processed within 24-72 business hours once reviewed and approved.
+
+After processing, it may take an additional 3-7 business days for the funds to appear back on your payment method, depending on your financial institution.
+
+We appreciate your patience and understanding. If you have any further questions, feel free to contact us.
+
+Best regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: RTS First Response","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! I'm so sorry to see your order has been marked as return to sender and is being shipped back to our warehouse.
+
+We'd be happy to reship this order to you.
+
+If you'd like a reshipment, can you confirm the complete shipping address?
+
+Looking forward to hearing back! 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PHONE SUPPORT ONLY: Ticket Escalation Case","Urgent: Your Concern is Under Review by Our Escalation Support Team","Hello ​​%First Name%​​,
+
+Thank you for reaching out to us.
+
+We understand your concern about (INSERT ISSUE) from your order ​%Order Name%​and want to assure you that it has been received. Your case is now being managed by our Escalation Support team and is under review. We are committed to providing a resolution as quickly as possible.
+
+We appreciate your patience and will update you momentarily with further information.
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY : 20ml Sample Size Bottles","","Hello, ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+The sample bottles will all be for 20ml each and will be poured directly into the machine to use. Full-sized bottles that will fit directly into the standard diffuser will be 50ml and 120ml. The mini will always need to have the oil poured into the diffuser, as we do not currently have bottles to fit that device.
+
+I hope this helps. Please let me know if you need any additional assistance.
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY : Cord/Cable Required","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+Our Scent Diffuser Mini, Diffuser Mini 2, Diffuser Mini 2 LE & Diffuser Air 2  are rechargeable, so they can be used without the power cord. However, all other diffusers do need to be plugged in for use. 
+
+Let me know if you have any other questions. I'm always happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY : Product Availability","","Hello ​​%First Name%​​,
+
+Thank you for your interest in Scentiment!  We are not made aware of product restocking dates unless it is listed on the website. 
+
+Be sure to sign up for our emails to keep up to date on new releases and restocks. 
+
+I would be more than happy to inquire about this product stock replenishment ETA and get back to you.
+
+Please let us know if you need anything else! We appreciate you and are always happy to help!
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: Customer Feels Kit Is Misleading","","Hello ​​%First Name%​​,
+
+Thank you for following up and for your feedback. We're so sorry you feel our product listing was misleading. We do show the product with oils, as those are added to the kit on the same ordering page. 
+
+I'll certainly pass your feedback along to our marketing and web design team for review and consideration. We definitely want our site to be as transparent as possible and easy to understand, so this feedback is appreciated. 
+
+In the meantime, please let me know if you need any additional assistance. Thank you! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: How Long Do Bottles Last","","Hello, ​​%First Name%​​
+
+On average, a 20 ml fragrance oil can last up to 30 days when used in a Scent Diffuser Mini, Diffuser Mini 2, or Diffuser Mini 2 LE at the recommended setting of 4 hours per day.
+
+For larger units like the Scent Diffuser or Diffuser Air 2, a 120 ml bottle can last up to 30 days when used around 8 hours per day.
+
+Please note that actual duration may vary depending on your chosen scent intensity, usage frequency, and fragrance concentration. 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: Oil Stain on Wood","","Hi %First Name%
+
+Thank you for reaching Scentiment Customer Support. I'm %Agent First Name%, and I would be glad to assist you today.
+
+I'm truly sorry to hear about the oil stains caused by our scent diffusers. Removing oil stains from wood furniture can indeed be a bit challenging, but there are some friendly and effective workarounds you can try, most of which require ingredients commonly found in your kitchen:
+
+1. Paper Towel Blotting:
+If the oil stain is fresh, gently blot it with paper towels to absorb as much oil as possible. Avoid rubbing, as it might spread the stain further.
+
+2. Baking Soda or Cornstarch:
+Sprinkle either baking soda or cornstarch onto the stain, allowing it to sit for several hours or overnight. These powders can help soak up the oil. Afterwards, simply brush or vacuum away the powder.
+
+3. Dishwashing Detergent:
+Create a mild soapy solution by mixing a few drops of dishwashing detergent with water. Dampen a cloth with this solution and delicately blot the stain. Rinse the area with a clean, damp cloth and pat it dry.
+
+4. Vinegar and Water:
+Blend equal parts of white vinegar and water to create a vinegar-water mixture. Dampen a cloth with this solution and gently blot the stain. Finish by rinsing with a clean, damp cloth and patting it dry.
+
+I hope one of these methods proves helpful in addressing the oil stains on your wood furniture. If you have any further questions or need additional assistance, please don't hesitate to reach out. We genuinely value your satisfaction and are here to help.
+
+As always, feel free to reach out to us should you need further assistance.
+
+All the best, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Order Ready To Be Placed Confusion","","Hello there,
+
+Thank you for reaching out! No need to worry, the text message you received is a reminder that there are items in your cart for purchase. No purchase or order has been made as of yet. So sorry for the confusion! 
+
+Let me know if you need any additional assistance! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: Safe for Pets?","","Hello ​​%First Name%​​,
+
+Thank you for reaching out. Great question! 
+
+All of our are safe to use around people, pets, plants, and furniture. 100% free of all Parabens, Formaldehyde, Color Additives, Synthetic Dyes, and Preservatives.
+
+Let me know if you have any other questions, I'm always happy to assist!
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SALE: BOGO Anniversary sale","","Hello there,
+
+Thank you for your interest! You can visit our site here: https://www.scentiment.com/ to take advantage our our sale. Discounts will be applied automatically. 
+
+Please note - our BOGO sale is not applicable for diffuser kits or subscription items. 
+
+Please see our Promo Terms and Conditions: https://www.scentiment.com/pages/promo-terms-conditions.
+
+Please let me know if you need any additional assistance. I'm always happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"(MANAGER ONLY) Outreach: Candle OOS","Your Scentiment Order - Item OOS","Hello %First Name%,
+Thank you for your Scentiment order! Upon review, it looks like the XXXXX in your order is now out of stock. Is there another candle scent you'd like sent instead, or would you prefer we cancel that item from your order?
+Looking forward to hearing back!","","","","","","","","All Brands","Everyone","System"
+"SALE: BOGO was not applied because discount code was used","","Hello %First Name%,
+
+Thank you for reaching out! Upon reviewing your order, we noticed a discount code applied at checkout. Unfortunately, the BOGO promotion is valid only when a full-price item is included in your cart.
+
+For your reference, I've attached a copy of your order below. [INSERT SCREENSHOT OF ORDER WITH DISCOUNT AND TOTAL]
+
+I hope this helps clarify things, but please don't hesitate to reach out if you have any further questions or concerns. We'd be happy to assist!
+
+Warm regards,%Agent First Name%Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"SALE: Clarification on Our BOGO Offer: Here's How It Works!","","Hi %First Name%,
+
+Thank you for reaching out to us! We understand that you have some questions about our current Buy One, Get One Free (BOGO) offer, and we're here to make sure everything is as clear as possible so you can enjoy the benefits of this promotion. To take advantage of our BOGO offer, it's important to add at least two quantities of the item to your cart. By doing so, one of those items will automatically be set to free during the checkout process. The system needs to recognize that there are two of the same items in your cart so that it can apply the discount correctly.Here is a simple step-by-step guide to help:Choose the product you wish to purchase.Add two quantities of that product to your shopping cart.Once you proceed to checkout, you will see that one of the items is free as part of the promotion.Please note that the free item will not be reflected until both items are in your cart and you head to the checkout page. If you're not seeing the discount applied, it might be helpful to refresh your page or ensure that you're adding the same product twice or at least 2 items.We hope this clears things up! If you have any more questions or need any assistance while completing your order, don't hesitate to reach out and we're always happy to help.Thank you for being a valued part of our Scentiment community!
+
+Best regards,%Agent First Name%Scentiment Customer Support Team","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"RETENTION OFFER : Complimentary Oil Offer (Under $200)","","Hello, ​​%First Name%​​,
+
+We're so sorry to hear you'd like to cancel! We'd love to keep you as a customer because we know you'll love your products once they are received. 
+
+To keep your order, we'd like to offer you a free fragrance oil of your choice, a $20 value, OR we can offer store credit for $20, which can be used on a future order. 
+
+Would that work for you? And if so, which option would you prefer? If you'd like the complimentary fragrance oil, which scent would you like shipped to you?
+
+Looking forward to hearing back! 
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"SNOWBALL : Payout Commission","","Hello %First Name%,
+
+Thank you for reaching out and for your continued support! For any inquiries or follow-ups regarding your payout commission, please contact Abigail Paat at Abigail.paat@scentiment.com. She will be happy to assist you with any updates or clarifications you may need.
+
+Please let us know if there is anything else we can assist you with.
+
+Looking forward to your response.
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"Troubleshooting: Standard Diffuser V1: No power/ Not turning on","","Hello %First Name%,
+
+We apologize for the inconvenience you are experiencing with your diffuser. Please follow the troubleshooting steps to resolve this issue.
+
+If the issue is not resolved, your diffuser is under warranty, and you’ve already completed the troubleshooting steps and submitted your video, we’ll provide you with a link to initiate your warranty replacement.
+
+If you have any further questions, don’t hesitate to reply—we’re happy to help! You can also visit our Help Center for additional support.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Video Review Update - Next Steps for Your Diffuser Replacement","","Dear %First Name%,
+
+Thank you for sharing the video with us—we truly appreciate your patience as we assess the issue. After reviewing it, we can confirm that your diffuser is experiencing a problem, and we’d like to take a closer look to provide the best resolution for you.
+To proceed, please return the diffuser to us for a thorough inspection by our technicians. You can initiate your replacement by clicking on this link.
+Once your RMA is created, you will have 14 days to return your unit. If the return is not received within this timeframe, the RMA will be automatically canceled and will no longer be valid.
+
+If we’re unable to repair the unit within the expected turnaround time of 10 to 14 business days, we will send you a replacement to ensure you can continue enjoying your diffuser without delay.
+
+If you need any assistance with the return process, please don’t hesitate to reach out—we’re happy to help!
+Best regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Scentiment Contact Information: We are here to Help!","","Hello %First Name%,
+
+At Scentiment, we believe that every step of your scenting journey should be delightful and stress-free. If you have questions, concerns, or just need a little guidance, we’ve got a support team that’s ready to sprinkle a bit of magic your way. Here’s how you can get in touch with us:
+
+1. Contact Us via Email Have a burning question or feedback to share? Shoot us an email at Support@Scentiment.com. We’ll respond as quickly as we can because your satisfaction is our top priority. Promise, no ghosting here!
+
+2. Chat with Us Live Sometimes, you just need instant answers. That’s why our friendly customer support agents are ready to chat during business hours. Simply click the ""Chat with Us"" button on our website and let’s solve your queries together in real-time.
+Business Hours: Monday - Friday: 9:00 AM - 5:00 PM EST Weekends: Time to relax (but we’ll get back to you first thing Monday!)
+
+3. Give Us a Ring Prefer to talk it out? Our dedicated support team is just a phone call away. Whether it’s about your latest scent obsession or troubleshooting, we’re here to make it right.
+Customer Support Hotline: +1 323 310 1000 Available Hours: Monday - Friday, 9:00 AM - 5:00 PM EST
+
+4. Still Have Questions? Please see our Help Center. The answer to your inquiry may be there as well.
+
+5. Experiencing an issue with your diffuser?
+Please see our troubleshooting steps to help resolve your issue
+
+At Scentiment, we’re not just about amazing scents; we’re about amazing support too. Don’t hesitate to reach out — we can’t wait to assist you on your scent-filled adventure!
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Cancel/Refund -Order put on hold","","Hello ​​%First Name%​​,
+
+We truly appreciate your support for our products. :)
+
+We're sorry to hear that you no longer want to continue with your order, care to share your thoughts as to why, or do you have any issues at all? We can probably address that. 
+
+I see that your order has been processed but let me see if we can still intercept the shipment, I'll get back to you within 24 hours. 
+
+But hopefully, we can change your mind if we can offer you a complimentary 20ml fragrance oil should you agree to proceed with your order. Please let me know your thoughts.
+
+As always, please do not hesitate to contact us should you require further assistance. Have a good day!
+
+Thank you! 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","order-cancellation-request","","","","","","","All Brands","Everyone","System"
+"CUSTOMER RETENTION: Upgraded Shipping + Store Credit","","Hello ​​%First Name%​​,
+
+Thank you for following up!
+
+You're all set. I have arranged for your order to ship out via 2-day express and emailed your store credit of $XXXX to ​%Customer Email%​.
+
+Let me know if you need any additional assistance, I'm always happy to help!","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Cannot Split Ship Order","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+Unfortunately, we are only able to ship an order to one address. For items that need to be sent to different addresses, we kindly ask that you place different orders so we can accommodate that for you. 
+
+Please let me know if you need any additional assistance. Thank you! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Complimentary Oil Offer: Order Placed","","Hello ​​%First Name%​​,
+
+Thank you for following up! 
+
+No problem. I went ahead and arranged a new order for the complimentary fragrance oil. You should receive an email shortly with the new order details, and another with tracking when that order ships. 
+
+Please let me know if you need any additional assistance. Thank you! 
+
+Best Regards,
+
+​​%Agent First Name%​​","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Contact Warehouse: Tracking Not Updated","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! We're so sorry to see there has not been a recent update made to your package tracking. I have sent a message to our warehouse team for some additional information/update on the status of this order. I will follow up as soon as I hear back.
+
+Thank you so much, and we do apologize for the delay and inconvenience. 
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Discount Code Request","","Please use the code SCENT15 for 15% off your purchase with us. This will be valid for any one-time purchase only. Subscription items are not eligible. 
+
+Regards,
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"[ADMIN ONLY]: Dispute Resolution","We’re Committed to Resolving This for You!","Dear %First Name%
+
+We hope this message finds you well. We are reaching out to acknowledge your concern and to assure you that we are here to help resolve it as quickly and efficiently as possible.
+
+At Scentiment, we deeply value our customers and understand how frustrating it can be when things don't go as planned. While the standard timeline for dispute resolutions can take up to 120 business days to complete, we want to make every effort to resolve this issue for you sooner. Your satisfaction is our priority, and we're committed to finding a solution that works for you.
+
+To help expedite the process, we'd like to propose a resolution. If you decide to move forward with our offered solution, we can [INSERT RESOLUTION] right away. Additionally, as a gesture of our appreciation for your understanding, we'd be happy to include [INSERT RESOLUTION] to make up for the inconvenience.
+
+We hope this approach meets your expectations and brings a satisfactory resolution to the matter. Please let us know how you'd like to proceed, or if there's anything else we can do to make things right. You can simply reply to this email, and we'll take it from there.
+
+Thank you for allowing us to address your concerns and for being a valued member of the Scentiment family. We're here for you every step of the way and look forward to resolving this matter to your satisfaction.
+
+Warm regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: Cancel Subscription Request (Already Cancelled Prior to Reach Out)","","Hi %First Name%,
+
+Thank you so much for reaching out.
+I can confirm the subscription under the email address %Customer Email% has already been canceled, and no additional orders will be placed on your behalf.
+
+Let me know if you need any additional assistance. I'm always happy to help. You can also access our Scentiment Help Center if you need additional assistance.
+
+Sincerely,%Agent First Name%  Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: How to Manage Subscription","","Hi %First Name%,
+
+Thank you for reaching out! I am happy to help with this.
+
+To manage your subscription, all you need to do is click on the link below, and from there you can access your subscription and cancel or make any changes.
+
+Manage  Subscription
+
+Let me know if you need any additional assistance. Thank you!","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"TUTORIALS - Set up - Scent Diffuser HVAC : Written step by step installation to Hvac system","","Hello %First Name%
+
+Thank you for reaching Scentiment Customer Support. I'm %Agent First Name% and I would be glad to assist you today.
+
+We know how excited you are to infuse your home with delightful fragrances using our Scent Diffuser HVAC integration system. We're here to guide you through the setup process, step by step. You can refer to the diagram as shown here to better get an idea of how the set up should look:
+
+Then follow the steps for setting it up:
+
+Step 1: Unbox and InspectStart by unboxing your Scent Diffuser HVAC unit. Take a moment to inspect it for any visible damage and ensure that all the components are included.
+
+Step 2: Choose a LocationSelect a suitable location for your Scent Diffuser. It should be placed near your HVAC system's air intake or ductwork for optimal scent distribution.
+
+Step 3: Power ConnectionPlug the provided power cord into your Scent Diffuser HVAC unit and connect the other end to a standard electrical outlet.
+
+Step 4: Fill the Fragrance BottleOpen the Scent Diffuser unit and locate the fragrance bottle compartment. Unscrew the cap of the fragrance bottle and carefully pour your chosen fragrance oil into the included 800 ml bottle. Be cautious not to spill any oil.
+
+Step 5: Install the Fragrance BottleInsert the filled fragrance bottle into the designated compartment within the Scent Diffuser unit.
+
+Step 6: Set Fragrance IntensityYou can easily customize the fragrance intensity to your liking. Access the unit's touch screen display or use the Wi-Fi app on your smartphone for this. Adjust the settings to find your perfect scent level.
+
+Step 7: HVAC IntegrationThis step may vary depending on your HVAC system's brand and model. Consult your HVAC system's user manual for specific integration instructions. Typically, you'll attach the Scent Diffuser HVAC unit to your air intake or ductwork using brackets or adhesive strips.
+
+Step 8: Power On HVAC and Scent DiffuserNow, turn on your HVAC system, allowing it to start circulating air through the Scent Diffuser HVAC unit.
+Sit back, relax, and savor the delightful fragrances that will efficiently spread throughout your space.
+
+Maintenance:Remember to occasionally check the fragrance oil level in the bottle and top it up when needed. Follow the manufacturer's instructions for cleaning to ensure that your Scent Diffuser continues to work its magic.
+If you have any questions or encounter any issues during the setup process, please don't hesitate to reach out to our customer support team. We're here to assist you every step of the way.
+
+Best regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"[ADMIN ONLY]: TRUSTPILOT & BBB Review Invite","Exclusive Appreciation Gifts for Your 5-Star Review! 🌟","Thank you for being a valued customer of Scentiment!
+We hope this email finds you in great spirits! 🌸 Firstly, we want to express our deepest gratitude for your recent 5-star review! Your support means the world to us, and we are thrilled to have customers like you who appreciate the magic of our scents.
+To show our appreciation, we have a special offer just for you! As a token of our gratitude, we would love to gift you 2 bottles of complimentary 20ml Scent Oils of your choice. On top of that, we are sending you a discount code with your next purchase—it's our way of saying thank you for being a valued member of the Scentiment community.
+We also love to invite you to share your experience with Scentiment on TRUSTPILOT and BBB. Your feedback helps us grow and inspires others to discover the joy of our fragrances. As a thank you for taking the time to leave a review, we will send you free 20ml Scent Oils of your choice – our little way of saying thank you for being a cherished part of the Scentiment family.
+
+🌟 How to Claim Your Free 20ml Oils:
+
+1. Click on this BBB link to leave your review.
+2. Click on this TRUSTPILOT link to leave your review.
+3. After submitting your feedback, kindly reply to this email with the screenshot of your reviews, your preferred shipping address, and the Scent Oils of your choice.
+We will ship you our gift in priority, plus, you will receive your exclusive discount code that you can use towards your next purchase with us. Your honest opinion means everything to us, and we genuinely appreciate you taking the time to share your thoughts on Trustpilot and BBB.
+Thank you once again for choosing Scentiment. We look forward to hearing your thoughts and hope you enjoy your complimentary Scent Oils!
+
+Best Regards,
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Standard Diffuser V1 : No mist/ No airflow/ No scent","","Hello %First Name%,
+
+We apologize for the inconvenience you are experiencing with your diffuser.
+
+Please follow the troubleshooting steps to resolve this issue.
+
+If the issue remains unresolved, and since your diffuser is still under warranty, we’ll provide you with a link to initiate your warranty replacement once you’ve completed the troubleshooting steps and submitted your video.
+
+If you have any further questions, don't hesitate to reply and we're happy to help! You can also visit our Scentiment Help Center for additional support.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: How Long Do Bottles Last","","A 20 ml bottle lasts up to 30 days in the Mini, Mini 2, or Mini 2 LE (≈ 4 hrs/day).
+A 120 ml bottle lasts up to 30 days in the Scent Diffuser or Air 2 (≈ 8 hrs/day).
+
+Duration may vary based on scent strength and usage.","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Order Inquiry: Doesn't want a subscription","","We do offer an option to purchase fragrance oils without a subscription. To do this, simply toggle off the subscription option before adding your selected items to the cart.
+
+Please note that this option applies when purchasing diffusers and fragrance oils separately. For Diffuser Starter Kits, the subscription feature cannot be removed at checkout. However, subscriptions can be cancelled at any time, with no long-term commitment.
+
+As an added benefit, customers who maintain an active subscription receive an extended diffuser warranty of up to 24 months, providing extra peace of mind and product protection.
+
+Regards,%Agent First Name% Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: Change Address (Update Completed)","","Hi %First Name%,
+
+Thank you for contacting us! I am happy to help.
+
+I've updated your shipping address and you should be all set now. You will receive a confirmation email when your package ships.
+
+Let me know if there's anything else I can help with. You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Pricing","","Pricing for items will vary based on the diffuser size and oils you order. All pricing can be viewed on our site at https://www.scentiment.com/","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Oil Discovery Sets","","Hello ​​%First Name%​​,
+
+Thank you for your interest! Great question.
+
+We offer discovery sets of our top 3, top 5, and top 10 favorite fragrances. You can find those packs on our website, here: https://www.scentiment.com/products/hotel-discovery-set.
+
+Discovery sets come in 20ml bottles. These can be poured into the diffuser for use. 
+
+Let me know if you need any additional assistance. 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Oil Discovery Sets","","We offer discovery sets of our top 3, top 5, and top 10 favorite fragrances. You can find those packs on our website, here: https://www.scentiment.com/products/hotel-discovery-set.
+
+Discovery sets come in 20ml bottles. These can be poured into the diffuser for use.","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Scent Not Yet Available (Request)","","We don't have a scent for that hotel just yet, but we'll add it to the request list!","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: Preserved Roses – Refund & Exchange Policy","","Hi%First Name%,
+
+Thanks for reaching out.
+
+Each of our Preserved Roses arrangements is made just for you, so we’re not able to offer returns or exchanges.
+
+That said, if your order arrived damaged or something doesn’t seem right, we’re here to help! Please email us at support@scentiment.com as soon as your package is delivered.
+Be sure to include clear photos of both the roses and the packaging so we can resolve the issue as quickly as possible.
+
+Let us know if you need anything else, we’re happy to assist.
+
+Warm regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Introduction","","Hi ​​%First Name%​​
+
+Thank you for reaching Scentiment Customer Support. I'm ​​%Agent First Name%​​, and I would be glad to assist you today. 
+
+As always, feel free to reach out to us should you need further assistance. 
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: Cancel Subscription & Subscription Order","","Hello %First Name%,
+
+Thank you so much for reaching out — we’re truly sorry to see you go!
+
+I’ve successfully cancelled your subscription associated with %Email%, and I can confirm that no further orders will be generated moving forward.
+Regarding your most recent order %Order ID%, I’ve also processed the cancellation request. In accordance with our policy, instead of a refund, a gift card for the full value of your unfulfilled order will be issued. You can expect to receive this gift card via email within 24–72 business hours.
+
+Please review our updated Subscription Policy below:
+Subscription OrdersOnce a subscription order has been processed, it cannot be canceled. Subscription items are not eligible for refunds. If your request is submitted within 14 days of delivery, we’ll gladly issue a gift card equivalent to the item’s value. This applies to both shipped and unshipped subscription orders, regardless of returns.
+Maintaining an active subscription also provides a valuable benefit — your diffuser warranty is extended to 24 months, giving you additional coverage and peace of mind.
+For full details, please refer to our Order Cancellation Policy and Refund Policy.
+Please note that canceling your subscription will also cancel your extended diffuser warranty.
+
+If you have any other questions or need further assistance, please don’t hesitate to reach out — we’re always here to help.
+
+Regards,%Agent First Name%Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"[ADMIN ONLY]: Low CSAT Outreach","We're here to make things right!","Hi %First Name%,
+
+Thank you so much for taking the time to leave us feedback even if it wasn’t the kind we were hoping for. We’re truly sorry to hear that your experience didn’t go as smoothly as it should have.
+
+At Scentiment, your satisfaction means the world to us, and we’d love a chance to make it right. If something wasn’t resolved or if there’s anything more we can do, please don’t hesitate to let us know. Just hit ""Reply"" and share a bit more about what went wrong, we’re listening and ready to help!
+
+We appreciate your honesty, and we’re committed to learning from this so we can do better for you (and everyone we serve).
+
+Looking forward to hearing from you soon.
+
+Warmly,Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"INTERNAL: Message/Post Hidden","","Action taken on ticket: Message/post hidden","","","","","","","","All Brands","Everyone","System"
+"MARKETING: Influencer/Collaboration request","","Hello %First Name%,
+
+Thank you for reaching out and for the interest you have in our products. Please contact Abigail.paat@scentiment.com and kristyl.DelaCerna@scentiment.com for all collaboration requests.
+
+Looking forward to hearing from you.
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Product Inquiry: Can I Use My Own Oils","","Thank you for your interest! Our Scentiment diffusers are perfectly designed to work with our unique fragrance oils for optimal scent dispersion and protection. For the best experience, please use Scentiment oils exclusively with our diffusers!","","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: How to cancel","","Hi %First Name%,
+
+Thank you for reaching out!
+
+To cancel your subscription, all you need to do is click on the link below, and from there you can access your subscription and cancel or make any changes.
+Please note you will need to use the email you provided when placing your order.
+
+https://www.scentiment.com/apps/retextion#/login
+
+In the meantime, you can access our Help Center here if you need additional assistance. 
+Regards,%Agent First Name%Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"GENERAL: Rush Shipping Offer","Rush Shipping Order","Hello %First Name%,
+
+We are excited to introduce our new Rush Order option! With Rush Order, your order will be prioritized and prepared from our warehouse within 24-business hours, ensuring that your items will be processed faster.
+
+Here's what you need to know about Rush Order:
+- Orders placed with Rush Order will be processed ahead of standard orders.
+- You can expect the tracking information within 1 business day.
+- Rush Order is available for a nominal fee, and it's perfect for those times when you need your items to be prioritized on our warehouse.
+
+How to select Rush Order:
+1. Add the items you want to your cart.
+2. At the bottom of your cart, you can choose the Rush Order option by toggling it on. It should be added directly from your cart.
+3. Complete your order, and we'll take care of the rest!
+
+Thank you for choosing Scentiment. We appreciate your business, and we're committed to providing you with exceptional service!
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"Troubleshooting: Standard Diffuser V1: Cleaning Written Instructions & Video","","Hello %First Name%,
+
+Thank you for reaching out! Diffusers should be cleaned every 15 to 30 days. To do so, please see the instructions below or watch this instructional video guide.
+1. Fill the empty oil bottle that came with your diffuser with 1/4 inch of rubbing alcohol.
+2. Screw the alcohol-filled bottle into the diffuser.
+3. Run the diffuser for 15 minutes to ensure the alcohol can filter through the whole device.
+4. Unplug the device from the wall outlet and keep the diffuser in an upright position. Wipe the device with a damp cloth to remove oil stains and fingerprints. Avoid using any harsh or abrasive cleaning products.
+5. Remove the alcohol-filled bottle, insert the fragrance oil of your choice, reconnect both halves of the diffuser, and plug it into the wall outlet.
+
+Please let me know if you have any further questions or concerns.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: Set up: Standard Scent Diffuser V1: Setting Up Your Scent Diffuser written step by step & video","","Hello %First Name%,
+Thank you for reaching out! I am happy to help get your Scent Diffuser set up! We've just made a comprehensive video on how to set up your Standard Scent Diffuser, watch it here. But below is a step-by-step procedure you can follow as well:
+
+Step 1: Opening the Diffuser
+Open the Scentiment diffuser by rotating the upper half counterclockwise while holding the bottom half firmly.
+
+Step 2: Removing the Empty Bottle
+Remove the empty Scentiment bottle by turning it clockwise from the top part of the diffuser.
+
+Step 3: Adding the Scenting Oil
+Screw the chosen scenting oil bottle counterclockwise into the diffuser, ensuring it is tightly secured, OR pour the contents of an oil bottle into the provided bottle.
+Only fragrance oils that come in a 50ml or 120ml bottle can be directly plugged into the diffuser without pouring it into the included bottle.
+
+Step 4: Closing the Diffuser
+Close the unit tightly by sliding the upper half back into place and turning it clockwise.
+
+Step 5: Connecting the Power Adapter
+Plug the power adapter into a 110V power outlet.
+
+Step 6: Understanding the LED Lights
+The blue light shows when the device is powered on, the green light shows when the device is diffusing oil, and red flashing when using the remote control.
+Power on the device and show the blue light
+
+Turn the misting on and show the green light
+
+Use the remote to demonstrate the flashing red light
+
+Step 7: Powering On and Off
+Use the ""On/Off"" button on the remote control to power the device.
+
+Step 8: Adjusting Aroma Density
+There are ""Density +"" and ""Density -"" buttons on the remote control.
+Density + (plus) - Increases aroma’s density by 10%. Press 10 times for maximum density
+Density - (minus) - Decreases aroma’s density by 10%. Press 10 times for minimum density
+
+Step 9: Activating Continuous Operation
+By pressing the ""Aroma"" button you'll activate the continuous operation of the diffuser.
+
+You can adjust the density using the density buttons.
+
+ 
+
+Step 10: Controlling Scenting Intervals
+Scent intervals are provided on buttons L1 - L6
+
+Step 11: Understanding Scenting Intervals
+You will see one of the following settings, depending on the remote you have:
+L1 (25%)- Diffuser will diffuse scent for 40s and pause for 160s
+L3 (50%)- Diffuser will diffuse scent for 100s and pause for 100s
+L6 (95%) - Diffuser will diffuse scent for 180s and pause for 10s
+
+OR
+
+20% 16sec misting, 60sec pause
+35% 16sec misting, 120sec pause
+50% 16sec misting, 180sec pause
+65% 16sec misting, 240sec pause
+80% 16sec misting, 300sec pause
+95% 16sec misting, 360sec pause
+
+Step 12: Setting the Timer
+You can use the remote to select your preferred timer options, which are 1 hour, 4 hours, and 8 hours.
+
+Please let us know if you have any other questions!
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERAL: CS Phone Number","","Hello %First Name%,
+
+Thank you for reaching out!
+
+We can be reached by telephone at 323-310-1000 Monday to Friday between the hours of 9:00 AM - 5:00 PM EST.
+
+You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Let me know if you need any additional assistance.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Flashing Yellow Light: Step 2","","Hi %First Name%,
+
+Thanks for sending the photo. I really appreciate it!
+
+Just to give you a little context, the 20ml fragrance scent oils you have received is designed to help you explore our range of scents before committing to a full-sized oil bottle. That’s why our kits - whether starter or discovery, includes 20ml sample bottles. They’re perfect for testing out different scents, but they do hold less oil than our standard 50ml or 120ml sizes.
+
+Since the diffuser is built to detect oil levels automatically, smaller bottles like these can sometimes trigger the “Low Oil Alert” (flashing yellow light) sooner than expected — especially if the bottle isn’t at least half full or if it’s slightly off-center inside the chamber. I recommend filling up the bottle inside your diffuser and if the flashing light won't stop, we'd be happy to proceed with a replacement. Just send a quick video showing the flashing light after filling in the diffuser bottle.
+
+Please let me know if you need further assistance.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Mini V1: Cleaning MINI Diffuser (w/ Video)","","Hello %First Name%,
+
+Thank you for reaching out! Scentiment diffusers should be cleaned every 15 - 30 days to ensure optimal performance.
+
+I've included a comprehensive video here to show you how to properly clean your device.
+
+Please review the video and let me know if you have any questions.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: MINI V1: Loud Noise (VIDEO link)","","Hello %First Name%,
+
+Thank you for reaching out, and we're so sorry to hear your having trouble with your Scent Diffuser Mini.
+
+1) Proceed with cleaning the Mini Scent Diffuser. Please follow these short videos to fully clean your diffuser
+
+Cleaning the NozzleCleaning the PipeRunning diffuser in your Mini Scent Diffuser
+
+2) Once you are done with cleaning the Mini Scent Diffuser, fill it with your Scentiment fragrance oil: We have attached here the video. 3) Make sure you correctly install the bottle back on the nozzle.4) Ensure the bottle is securely tightened.5) Before re-installing the nozzle module, make sure that you align the position direction mark on the nozzle with the marking on the diffuser.6) Push the nozzle all the way in, ensuring that the triangle symbols on the nozzle match the markings on the diffuser.
+You can also access our Troubleshooting steps in our Scentiment Help Center to access more troubleshooting videos.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: MINI V1: Oil Leakage","","Hello %First Name%,
+
+I would be glad to assist you with your concern. We appreciate you reaching out to us regarding this matter, and we're truly sorry to hear about what happened with your unit.
+
+To gain a better understanding of the situation and provide the most appropriate assistance, we would like to inquire whether there is a possibility that the unit may have been tipped over or tilted sideways while it was in operation.
+
+We want to stress how important it is to put the unit on a steady surface when you use it. This helps prevent similar accidents from happening again. Keeping the unit stable when it's running is not just about making it work well, but it's also about keeping things safe.
+
+We would advise that you review this short video to troubleshoot the issue, and let's monitor within 24 to 48 hours to see if the issue will recur.
+
+Please do not hesitate to review our Scentiment Help Center for more troubleshooting videos.
+
+If the issue is not resolved, your diffuser is under warranty, and you've already completed the troubleshooting steps we'll provide you with a link to initiate your warranty replacement.
+
+Sincerely, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: My diffuser is not working","","Hi %First Name%,
+
+Thank you for reaching out! We're sorry to hear that your scent diffuser is not working as expected. Our team is here to assist you in getting it up and running as quickly as possible.
+
+To help resolve the issue, we recommend going through our troubleshooting steps. These steps should address the most common concerns and get your diffuser working again.
+
+If your diffuser is still not functioning and is under warranty, please ensure you have submitted the required video demonstrating the issue. Once received, one of our customer support agents will review it and get back to you with the next steps.
+
+We appreciate your patience and look forward to resolving this for you! If you have any questions, feel free to reply to this email.
+
+Best regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Generic- Replacement Order processed","","Hello ​​%First Name%​​,
+
+Thank you for your patience while I worked on this for you. 
+
+We have created a replacement order for you. Your new order number is ​%Order Name%​. 
+
+You should receive an email with the new order details shortly, and another with tracking once the order ships. 
+
+In the meantime, please let me know if you need any additional assistance. Thank you! 
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","replacement-order","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Standard Diffuser V1: Cleaning Standard Diffuser: Video","","Hello %First Name%,
+
+Thank you for reaching out! Scentiment diffusers should be cleaned every 15 - 30 days to ensure optimal performance.
+
+I've included a comprehensive video here : to show you how to properly clean your device.
+
+Please review the video and let me know if you have any questions.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Standard Diffuser V1: How To Replace Nozzle (w/ video)","","Hello %First Name%,
+
+Replacing the nozzle on your Scentiment Diffuser is a quick and easy process, and can be complete in a few simple steps. I've included a helpful video here  for instructions on how to change that in your diffuser.
+
+Let me know if you need any additional assistance!
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISCOUNTS: Discount Code Not Applied (Need Code From Customer)","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! I am happy to help with this. 
+
+Can you please confirm the discount code you need to be added to your purchase?
+
+Looking forward to hearing back! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: MINI V1: Setting Timer and Mist Frequency","","Hello %First Name%,
+Thank you for reaching out! You can watch the below short videos to help you set the timer and the mist frequency of your Scent Diffuser Mini.
+Timer Settings
+Mist Frequency
+
+We also have included the instructions below for setting the timer and mist frequency on your Scent Diffuser Mini
+
+By default, the Mini works continuously for 4 hours and then turns off automatically. However, you have the flexibility to shut it off after a shorter amount of time between 1 to 3 hours. A short press on the timer button will allow you to move between the 3 timed selections.
+
+It also offers three timer options to control the mist frequency. First one being 120 seconds of misting following a 60-second pause, the 2nd being the 60-second misting, followed by a 2-minute pause. Lastly, a 15-second misting, followed by a 2 and a half minute pause.
+
+You can set the mist frequency using the power button. A long 2 second press will turn the machine on, a short press on the same button will allow you to select your ideal mist frequency from the selections listed above.
+
+Let me know if you have any other questions, I'm always happy to help!
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISPUTES: Chargeback Lost","","Hi %First Name%,
+
+We appreciate your patience while waiting for the resolution of your chargeback for Order #[Order Number]. After a thorough review, your financial institution has unfortunately ruled against the dispute and in favor of Scentiment.
+
+We know this may not be the outcome you were hoping for, and we truly understand how frustrating that can be. While we don't have control over the bank's final decision, we still want to support you and explore any possible solutions to make this right.
+
+If there's anything we can do to assist you further, please don't hesitate to reach out. We are committed to providing the best experience for our customers, and we are more than happy to help however we can!
+
+Sincerely,%Agent First Name%Scentiment Customer Support","chargeback-lost","","","","","","","All Brands","Everyone","System"
+"ORDERS: ID Verification","Scentiment Order Verification","Hi %First Name%,
+
+We are writing to request your assistance in verifying your identity for the credit card used in your recent order with us. This is a standard security measure that we have implemented to protect our customers and prevent any fraudulent activities.
+To ensure that the credit card used in the order belongs to you, we kindly ask that you provide us with the following information:
+
+-A copy of the front and back of the credit card used in the order (Please block out the CVV code for security purposes).
+-A copy of a valid government-issued photo ID (e.g. passport, driver's license).Please send us the above information as soon as possible to verify your identity. You can reply to this email with the attachments. Once we have verified your identity, we will process your order promptly.We apologize for any inconvenience this may have caused you and appreciate your understanding and cooperation in this matter. If you have any questions or concerns, please do not hesitate to contact us.
+
+Thank you for your cooperation.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Cord/Cable Required","","Our Scent Diffuser Mini, Diffuser Mini 2, Diffuser Mini 2 LE, and Diffuser Air 2 are rechargeable, so they can be used without the power cord. However, all other diffusers do need to be plugged in for use. 
+
+Regards,
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Gift Card Accepted","","Hi %First Name%
+
+Thank you for accepting our offer to convert the amount of your order to Gift Card and we have sent it to you via email. You should receive a separate notification containing the details. Kindly use the Gift Card when you are ready to purchase to have your order discounted.
+
+As always, feel free to reach out to us should you need further assistance. You can also access our Help Center here: Scentiment Help Center
+
+All the best, %Agent First Name%","gift-card","","","","","","","All Brands","Everyone","System"
+"DIFFUSERS: Battery Life – Diffuser Air 2","","Hi %First Name%,
+
+Thanks for reaching out! Here’s how long your Diffuser Air 2 should run without being plugged in, depending on the misting setting:
+Low setting: ~8 hours
+
+Medium setting: ~7 hours
+
+High setting: ~8 hours
+
+To get the best performance and battery life, we recommend connecting your diffuser to the Scentiment App and making sure the latest firmware update is installed. This helps optimize how the diffuser functions, especially in wireless mode.
+
+Please see the links below:
+
+Android: https://play.google.com/store/apps/details?id=com.scentiment.app&pli=1
+IOS: https://apps.apple.com/ph/app/scentiment/id6478093653
+
+Also, please note that the diffuser is designed to automatically shut off after 8 hours of continuous use to help preserve the motor.
+
+If you have any questions or need help connecting to the app, we're happy to assist.
+
+Best Regards,
+%Agent First Name%
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: HVAC Hookup Guide","","Hello %First Name%,
+Thank you for reaching out! I am happy to help with some instructions on how to hook up your Scentiment diffuser to your HVAC system.
+
+I've included a diagram attached to this email, however, you can also review the written instructions below for additional installation instructions.
+(1) Insert the thick transparent tubing that comes with your Diffuser into the external HVAC connector.
+(2) Use a screwdriver to make a small hole in the ductwork.
+(3) Measure the tubing from the unit to the ductwork, and cut off the excess with a scissor.
+(4) The tubing should form a 90° angle to enter the ductwork. Ensure the tubing is straight with no loops or curves.
+(5) Seal the tubing with HVAC tape.
+
+Please note - No more than an inch of transparent tubing should be inserted into the ductwork.
+Ensure the tubing is placed in the supply of the duct work for an even distribution of scent (after the return and filter).
+To remove this tubing, simply press and hold the black ring on the HVAC connector and carefully pull the tube out.
+Please let us know if you need any additional assistance with this.","","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: Set Up - Scent Diffuser Pro V1: Video","","Hello %First Name%,
+I am happy to help with setting up your new Scentiment Scent Diffuser PRO. 
+We have a great video to get you going and show you how to properly set up the device. Please review the video here and let me know if you have any questions I can help with. 
+
+Thank you so much! 
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: Set up- Mini V1: How to set up Mini Scent diffuser video","","Hello %First Name%,
+
+I am happy to help with setting up your new Scentiment Scent Diffuser Mini. 
+
+We have a great video to get you going and show you how to properly set up the device. Please review the video here and let me know if you have any questions I can help with. 
+Thank you so much! 
+Regards,%Agent First Name%","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Post Video Review -Warranty Replacement Request : Troubleshooting and Warranty Portal links","","Hello %First Name%,
+
+We apologize for any inconvenience this has caused. We appreciate you following the Troubleshooting Guides to address the issue with your product.
+
+After reviewing your case, we’re happy to confirm that your product is covered under warranty. To proceed, please click the link below to access our Warranty Replacement Request Portal and generate your return label:
+
+https://orders.scentiment.com/
+
+Please follow the instructions on the portal to complete your return. You only need to send back the diffuser unit itself — there’s no need to return the oils, cords, or other parts. Our team will handle the inspection and repair process to ensure your diffuser is fully restored and functioning properly.
+
+Once your RMA is created, you’ll have 14 days to send the diffuser. If it’s not received within that timeframe, the RMA will automatically be canceled and no longer valid.
+
+Our warehouse will inspect all returned units, and this process may take 10–14 business days. Feel free to reach out after the 14th business day if you haven’t received an update.
+
+If you have any questions or need help along the way, please don’t hesitate to reply to this email — we’ll be happy to assist.
+
+Thank you for your understanding and cooperation.
+Best regards,%Agent First Name%Scentiment Customer Service Team","return-defective","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Wrong Item Received: STEP 1: Photo Request","","Hello ​​%First Name%​​,
+
+Thank you for reaching out, and we're so sorry to hear your order arrived incorrect, or incomplete.
+
+Would you kindly send a photo of what you did receive so we can get a claim filed for you and the correct, or missing items, sent out? If you still have the packing slip, kindly include it in the photo as well.
+
+Looking forward to hearing back.
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-wrong-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: Tracking Updated to Show in Transit","","Hello ​​%First Name%​​,
+
+Thanks for your patience on this. 
+
+Good news! Your order tracking has now been updated to show your package is in transit and on its way to you. 
+
+Order: ​%Order Name%​
+
+Please see your order tracking here: ​%Order Tracking URL%​
+
+Please let me know if you need any additional assistance. I'm always happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: Cancel Subscription Request (Completed)","","Hi ​​%First Name%​​,
+
+Thank you so much for reaching out.  We're sorry to see you go! 
+
+I can confirm the subscription under the email address ​%Customer Email%​ has been cancelled, and no additional orders will be placed on your behalf. 
+
+Let me know if you need any additional assistance. I'm always happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: Store Credit Issued","","Hi ​​%First Name%​​
+
+Thank you for accepting our offer to convert the amount of your order to store credit. Once you're ready to purchase, just click this link or enter this code: xxxxx
+
+As always, feel free to reach out to us should you need further assistance. 
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY: How to Care for Your Preserved Roses ?","","Hi %First Name%,
+
+Thanks for reaching out!
+
+Keeping your Preserved Roses looking beautiful is super easy; just follow these simple care tips, and they’ll stay stunning for a year or more with no watering or special maintenance required:
+
+DO:
+• Keep your arrangement in a room with normal temperature.
+• Gently dust with a soft duster as needed.
+• Store the box lid beside or underneath the box.
+• Handle carefully, these roses are delicate.
+
+DON’T:
+• No watering needed—these flowers are designed to last without it.
+• Avoid direct sunlight to help prevent fading.
+• Don’t place anything on top of the roses.
+• Please don’t remove them from the box; they’re arranged to stay perfectly in place.
+
+These beautiful blooms are made to be enjoyed with little effort, so you can focus on simply loving how they look.
+
+If you have any other questions regarding our Preserved Roses, please see our Help Center.
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISCOUNTS: Military Discounts","","Hello ​​%First Name%​​,
+
+Thank you for your interest in Scentiment! While we do not have a military-specific discount code, you can use the code SCENT15 for 15% off your order with us. 
+
+We thank you for your service.
+
+Let me know if you need any additional assistance! 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Square Footage","","Different devices provide coverage for varying amounts of square footage. The maximum coverage area for each model is listed on our website under each product description.
+For quick reference:
+Scent Diffuser Mini / Mini 2 / Mini 2 LE – up to 500 sq. ft.
+
+Scent Diffuser Air 2 – up to 1,000 sq. ft.
+
+Scent Diffuser Pro 2 – up to 2,000 sq. ft.
+
+HVAC System – up to 5,000 sq. ft.","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Mystery Gift Not Received: Reship or Refund","","Hi ​​%First Name%​​,
+
+Thank you for reaching out to us regarding your mystery gift order. We are sorry to hear that you have not received your order and we understand your frustration.
+
+After investigating the matter, we have found that the mystery gift was not shipped. We sincerely apologize for the inconvenience caused to you due to this issue. As a valued customer, we would like to offer you the option to either have the mystery gift reshipped or to receive a full refund.
+
+If you choose to have the mystery gift reshipped, we will make sure it is shipped out to you as soon as possible, at no additional cost. Alternatively, if you prefer a refund instead, we will issue it. Your refund should be processed within 24-72 business hours.
+
+Please let us know your preference, and we will take care of it for you. If you have any further questions or concerns, please do not hesitate to contact us.
+
+Thank you for bringing this issue to our attention, and we hope to resolve this matter to your satisfaction.
+
+Sincerely,
+
+​​%Agent First Name%​​","replacement-order","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Can't Cancel/Change Already Shipped: Return Request","","Hi %First Name%,
+
+Thank you for reaching us and we are so sorry that you wish to cancel the order.
+
+Orders are imported directly to our fulfillment facility upon receipt. Unfortunately, it looks like your order has already processed or shipped from our warehouse. Therefore, I am unable to make any changes to it at this time.
+
+We're happy to offer returns up to 14 days from the date of delivery. Once the package arrives, if you do opt to arrange a return, please click here: https://orders.scentiment.com/You can review our policy in full here: https://www.scentiment.com/pages/faqs.
+
+If you have any other questions please don't hesitate to reach out. You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","order-cancellation-request","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Contact Us","","We'd love to help resolve this for you. Please send us a message to support@scentiment.com. We'll get back to you within 24 - 48 hours.
+
+Thank you.Regards,Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"INTERNAL: Working with customer in another email","","Working with customer in another email","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: OOS Outreach","URGENT: Your Scentiment Order","Dear ​​%First Name%​​,
+
+I hope this message finds you well. We wanted to provide you with an update regarding your recent order ​%Order Name%​ for the  XXXXX. Unfortunately, the specific variant of the room spray/oil/candle you ordered is currently out of stock, and we do not have an exact timeline for when it will become available at the moment. We understand how frustrating this can be, and we sincerely apologize for any inconvenience it may have caused you.
+
+To minimize any further delay, we would like to ask if we can switch it with another variant that we have ample stock of, which we can ship to you immediately if you are interested. If you are open to this alternative option, please let us know at your earliest convenience by replying to this email or contacting our phone support team at +1323-310-1000, Monday to Friday from 9:00 AM to 5:00 PM EST. We will prioritize shipping your order.
+
+However, if you prefer not to proceed with this alternative option and would like to cancel your order instead, we completely understand. Your satisfaction is our top priority, and we are happy to accommodate your request for a full refund. Please inform us of your decision, and we will process the refund as soon as possible.
+
+Once again, we apologize for any inconvenience this delay may have caused you, and we appreciate your understanding and patience during this time. If you have any questions or require further assistance, please do not hesitate to reach out to us.
+
+Thank you for choosing Scentiment, and we look forward to resolving this matter to your satisfaction.
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERAL: Free Shipping Offer","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! 
+
+We're happy to offer free shipping for all orders of $200 or more. The total must be at or above the $200 threshold after any discounts are applied and before tax and shipping. 
+
+Please let us know if you have any other questions. We're always happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"ORDERS: Issues Ordering On Site","","Hi there,
+
+Thank you for reaching out! I'm so sorry to hear you are having an issue ordering. 
+
+Can you let me know a bit about your issue?  
+
+Can you try your purchase from another browser? If on a mobile device, can you try from a computer?
+
+Let me know how it goes!
+
+Regards,
+
+​​%Agent First Name%​​ 
+
+Scentiment Support Team","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Closing - You're Welcome","","You're very welcome! 
+
+It was my pleasure to assist you today. 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER INQUIRY: Doesn't want a subscription","","Hello %First Name%,
+Thank you for your interest in Scentiment.
+
+We do offer an option to purchase fragrance oils without a subscription. To do this, simply toggle off the subscription option before adding your selected items to the cart.
+
+Please note that this option applies when purchasing diffusers and fragrance oils separately. For Diffuser Starter Kits, the subscription feature cannot be removed at checkout. However, subscriptions can be cancelled at any time, with no long-term commitment.
+
+As an added benefit, keeping an active subscription extends the diffuser warranty to 24 months, giving you extra coverage and peace of mind.
+
+I hope this helps! Please don’t hesitate to reach out if you need any further assistance.
+
+Best Regards,%Agent First Name%","","","","","","","","All Brands","Everyone","System"
+"(MANAGER ONLY) Outreach: Chargeback, Order Shipped","Scentiment Order On The Way!","Hello %First Name%,
+
+Scentiment Customer Support Team here! We just wanted to reach out and let you know your order %Order Name% has now shipped.
+
+You can track your package right to your door here: %Order Tracking URL%
+
+Please let us know if you need any additional assistance, we're always happy to help!","chargeback-inprocess","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: (Didn't know they had subscription): No Refund","","Hello %First Name%,
+
+Thank you for reaching out. I’m sorry for any confusion regarding your recent order.
+
+After reviewing your account, it shows that the auto-subscription option was selected during checkout when you ordered the (INSERT PRODUCT NAME). This option provides a 10% discount and automatically schedules a new order every 30 days (or the interval you chose). Because this option was selected at checkout, the subscription was automatically created on your account.
+
+For your reference, here is a copy of your invoice:
+(INSERT INVOICE LINK)
+
+Since it seems this was not your intention, I have gone ahead and canceled the subscription for you. We completely understand that mistakes can happen, and we’re here to help.
+
+Please note the following regarding subscription orders:
+Subscription Orders Once a subscription order has been processed, it cannot be canceled. Subscription items are also not eligible for refunds. However, if your request is submitted within 14 days of delivery, we’ll be happy to issue a gift card for the value of the item. Please refer to our Order Cancellation Policy and Refund Policy for more details.
+As your order has already been processed, the subscription has been canceled to prevent future charges, but we are unable to process refunds for unfulfilled subscription orders in accordance with our policy.
+
+If you need any further assistance or have additional questions, please feel free to let us know. Thank you!
+
+Regards,%Agent First Name%Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"ORDERS: Tracking Request","","Hello %First Name%,
+
+Thanks for reaching out!
+
+Your order has shipped and I've included the information below so you can track it right to your door.
+
+Order Number: %Order Name%Please see your order tracking here: %Order Tracking URL%
+
+Please let me know if you need any additional assistance, I'm always happy to help! You can access our Scentiment Help Center if you need additional assistance.
+
+Sincerely, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Change Address (Need Address)","","Hello ​​%First Name%​​,
+
+Thank you for reaching out!  I am happy to help with an address update. 
+
+Can you please confirm the correct full and complete shipping address?
+
+Looking forward to hearing back! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"Retention - Complimentary Oil Offer (Above $200)","","Hello ​​%First Name%​​,
+
+We're so sorry to hear you'd like to cancel! We'd love to keep you as a customer because we know you'll love your products once they are received. 
+
+To keep your order, we'd like to offer you a free fragrance oil of your choice, a $40 value, OR we can offer  store credit in the amount of $40, which can be used on a future order. 
+
+Would that work for you? And if so, which option would you prefer? If you'd like the complimentary fragrance oil, which scent would you like shipped to you?
+
+Looking forward to hearing back!","","","","","","","","All Brands","Everyone","System"
+"(MANAGER ONLY) Outreach: Missing/Incorrect Items - Reshipped","","Hello %First Name%,
+
+We're so sorry to see you received an incorrect item in your order. I have already arranged a reshipment for the correct item(s). You should receive an email shortly with your new order details, and another with tracking once the order ships.
+In the meantime, please let me know if you need any additional assistance. You can also access our Help Center here: Scentiment Help Center  if you need additional assistance. Thank you!
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Refund Accepted","","Hello %First Name%,
+
+Thank for getting back to me so quickly.
+
+I have processed your refund and it should post within 3-5 business days, depending on your bank's processing timeframe. You'll receive an email with your refund details as well. Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Let me know if you need any additional assistance. You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+All the Best,%Agent First Name%Scentiment Customer Support","refund-order-adjustment","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Gift Card Offer for Returns","Refund or Gift Card of Your Choice!","Dear %First Name%,
+
+Thank you for returning your recent order! We're excited to offer you an exclusive opportunity to upgrade your return experience. Instead of a standard refund, we'd like to present you with a gift card worth 135% of your original order amount! This gift card never expires, giving you the freedom to redeem it at your convenience. Plus, you can use it towards any future purchase, unlocking even more value for your money.
+By choosing the gift card option, you'll enjoy:
+
+Added value of 35% on top of your original order amount
+
+No expiration date, so you can redeem it at your leisure
+
+Flexibility to use it towards any future purchase
+
+If this enhanced offer appeals to you, simply let us know, and we'll promptly process the gift card. Of course, if you still prefer a refund to your original payment method, we're happy to accommodate that as well.
+
+We look forward to your response and the opportunity to serve you better in the future!
+
+Best regards,%Agent First Name%","gift-card","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Return/Refund Notification","Scentiment Return Update","Dear %First Name%
+
+I hope this email finds you well. I am writing to provide you with an update regarding your recently returned order %Order Name%
+
+I am pleased to inform you that we have successfully located your packages.
+
+I understand the inconvenience this delay may have caused, and I want to extend my sincerest apologies for any frustration or inconvenience you may have experienced as a result.
+
+Rest assured, your refund is currently being processed, and you can expect it to be submitted within the next 24 hours.
+
+We are committed to ensuring that our customers receive the best service possible, and we appreciate your patience and understanding in this matter.
+
+If you have any further questions or concerns, please do not hesitate to reach out to us at support@scentiment.com.
+
+Best regards,%Agent First Name%Returns Specialist","refund-order-adjustment","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Used items","Returned Items Update","Dear %First Name%
+
+Thank you for your recent return. We appreciate your business and are committed to providing the best possible service.
+
+After reviewing the items you returned, we noticed that the oils were used/opened. As stated in our Return & Exchange Policy, we can only accept returns of unused items in their original packaging. Unfortunately, we are unable to keep opened oils due to health and safety regulations. These used oils will be returned to you.
+
+Regarding diffusers, please note that while we do accept returns within 14 days, the diffuser must be unused, in its original packaging, and include all original parts and accessories to qualify for a refund. If a diffuser is returned used but within the 14-day window, we provide a gift card for the value of the diffuser instead of a refund.
+
+If you have any questions or need assistance with your return, please don't hesitate to reach out to us at support@scentiment.com. Your items have been repackaged and will be reshipped within 24 hours.
+
+SS Order: ( X X X X X ) We truly value your understanding and are here to help with any concerns.
+
+Warm regards,%Agent First Name%Returns SpecialistScentiment Customer Supportsupport@scentiment.com","return-defective","","","","","","","All Brands","Everyone","System"
+"(RETURNS ADMINS ONLY): Wrong Returned Item","Scentiment Return Notification - Wrong Item","Dear %First Name%,
+
+I hope this message finds you well.
+
+I wanted to provide you with an update regarding the return process for order %Order Name%. Upon receiving the return package at our warehouse, we discovered that it contained a different item than what was originally ordered.
+To ensure a swift resolution, we have resealed the package and arranged for it to be sent back to you. You can expect it to be shipped within the next 24 hours on business days.
+
+Thank you for your cooperation in this matter. If you have any questions or concerns, please feel free to reach out to us.
+
+Best regards,%Agent First Name%Returns SpecialistScentiment.com","","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Order Processing Time","","Great question! Processing is currently taking between 3 - 5 business days.","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Order Delay: All Diffusers","","Hello ​​%First Name%​​,
+
+Thank you so much for your Scentiment order! 
+
+We're so excited for you to receive your order. Unfortunately, we are slightly backlogged due to a recent surge in demand. I'm so sorry for the delay, and any inconvenience this may cause you. 
+
+That being said, we are expecting to ship your order between (INSERT DATE), although it may certainly be sooner.
+
+We truly appreciate your patience and understanding while we work through this backlog, and do not anticipate this will happen with future orders. 
+
+We appreciate your patience. Please let me know if you need any additional assistance, I'm always happy to help. 
+
+Sincerely, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-shipping-delay","","","","","","","All Brands","Everyone","System"
+"SALE: BOGO Customer only added 1 item to Cart","","Hello %First Name%,
+
+Thank you for reaching out regarding your recent order.
+
+Upon reviewing your concern, we found that the Buy One, Get One Free (BOGO) promotion required customers to add two items to their cart at checkout for the offer to apply. This detail was clearly indicated in the promotional ad, which we've attached for your reference.
+
+It appears that only one item was added to your cart during checkout, which is why the BOGO did not apply. However, as a gesture of goodwill, we've processed an order for the additional diffuser and will ship it to you shortly.
+
+We apologize for any confusion and appreciate your understanding. If you have any further questions, feel free to reach out.
+
+Best Regards,%Agent First Name%Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Scentiment App: Troubleshooting WI-FI Connection for Diffuser Mini 2","","Hi %First Name%I'm sorry to hear you're having trouble connecting your Diffuser Mini 2 to the Scentiment app. Let's go through some quick troubleshooting steps to get you back up and running:
+
+1. Remove the Device from the App
+- Open the Scentiment app.
+- Navigate to ""My Devices.""
+- Select your diffuser and remove it from the app. 
+2. Reset the Diffuser
+- Power off the device.
+- Press and hold the power button for 5-6 seconds (or until you see a pulsing blue light). 
+3. Reconnect the Device
+- Open the Scentiment app.
+- Go to My Devices and tap the “+” icon in the top right corner.
+- Select Find Devices and reconnect your diffuser. 
+This process performs a factory reset, allowing you to send commands to your diffuser through the app again. If you're still experiencing issues, please let us know—we're happy to assist further!
+
+Best, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"[ADMIN ONLY]: Outreach: Invalid Address","URGENT: Action Required | Scentiment Order | Address issue","Hello %First Name%,
+Thanks so much for ordering with us!
+
+We're excited to get your order out to you! Unfortunately, the address you provided is giving us an ""invalid"" error when trying to create a shipping label. Can you have a look at the address below and correct it as needed?
+%Order Shipping Address Line 1% %Order Shipping Address Line 2%, %Order Shipping Postcode% %Order Shipping City% %Order Shipping State/Province%
+
+If you have a house or apartment number, make sure we have the city, state, and zip code correct.
+Thank you in advance!
+
+All the best, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TUTORIALS - Set up- Standard diffuser : How to set up video","","Hello %First Name%,
+
+I am happy to help with setting up your new Scentiment Scent Diffuser.
+
+We have a great video to get you going and show you how to properly set up the device. Please review the video here and let me know if you have any questions I can help with.
+
+Thank you so much!
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ACCOUNT: Sent Account Activation Email","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! I am happy to help with this. 
+
+It looks like you have an account, but it has not yet been set up/activated. I have sent an email to ​%Customer Email%​ to help get your account activated for use.
+
+Let me know if you need any additional assistance! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DIFFUSERS: Battery Life – Scent Diffuser Mini 2","","Hi %First Name%,
+
+Thanks for reaching out! Here’s how long your Scent Diffuser Mini 2 should run without being plugged in, depending on the misting setting:
+
+Low setting: ~12 hours
+
+Medium setting: ~10 hours
+
+High setting: ~8 hours
+
+To get the best performance and battery life, we recommend connecting your diffuser to the Scentiment App and making sure the latest firmware update is installed. This helps optimize how the diffuser functions, especially in wireless mode.
+
+Please see the links below:
+
+Android: https://play.google.com/store/apps/details?id=com.scentiment.app&pli=1
+IOS: https://apps.apple.com/ph/app/scentiment/id6478093653
+
+Also, please note that the diffuser is designed to automatically shut off after 4 hours of continuous use to help preserve the motor.
+
+If you have any questions or need help connecting to the app, we're happy to assist.
+
+Best Regards,
+%Agent First Name%
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DIFFUSERS: Battery Operated","","Hello %First Name%
+
+Thank you for reaching out! Our rechargeable diffusers include: • Scent Diffuser Mini
+• Diffuser Mini 2
+• Diffuser Mini 2 LE
+• Diffuser Air 2
+• Car Diffuser
+
+Please note that our other diffusers are designed for continuous use with an electric plug-in unit.
+
+If you’d like, we can help you choose the best option based on your space or scenting preferences!
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISCOUNTS: Discount Code Applied To Order","","Hello ​​%First Name%​​,
+
+Thank you for confirming! 
+
+The code  has now been applied to your order ​%Order Name%​, and a refund request has been created. It should be processed within 24 to 72 business hours. Once the refund is released, please allow 3-5 business days for you to receive the funds back depending on your bank's processing timeframe. You'll receive an email with your refund details as well. 
+
+Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Let me know if you need any additional assistance, I'm happy to help! 
+
+Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"DISCOUNTS: Discount Code Request","","Hello ​​%First Name%​​,
+
+Thank you for reaching out! Please use the code SCENT15 for 15% off your purchase with us. 
+
+This will be valid for any one-time purchase only. Subscription items are not eligible. 
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: Set up - Mini Scent Diffuser: Setting Up Mini Diffuser - Step by step & video","","Hello %First Name%,
+Thank you for reaching out! I am happy to help get your Scent Diffuser Mini set up! You can watch the detailed video here or follow the step-by-step procedure below. 
+Step 1: Touch Screen Display
+You'll use the display screen to control the mist timer settings and device timer settings.
+By default, the Mini works continuously for 4 hours and then turns off automatically. However, you have the flexibility to shut it off after a shorter amount of time between 1 to 3 hours. It offers three timer options to control the mist frequency. First one being 120 seconds of misting following a 60-second pause, the 2nd being the 60-second misting, followed by a 2-minute pause. Lastly, a 15-second misting, followed by a 2 and a half minute pause.
+
+Step 2: Removing the Bottle
+In order to pour your fragrance, you must first access the fragrance bottle inside the Mini. In order to do so, you’re going to reach under the bottom of the diffuser and find an opening where you’re able to push up the bottom of the bottle until the motor lid pops up. Pull the lid up away from the diffuser and unscrew the bottle from it.
+Step 3: Filling the Bottle
+Unscrew the empty oil bottle and fill it with the desired Scentiment fragrance oil.
+Ensure that the filled bottle is securely and correctly installed back in to the nozzle.
+
+Step 4: Reinstalling the Nozzle
+It’s very important to align the arrow indicators on the nozzle and the diffuser together before pushing it back, otherwise you won’t be able to open it again and may cause damage to the device.
+
+Step 5: Important Notes and Features
+In order to power the device on / off you will need to press and hold the power button for 2 seconds each time.
+You can switch between the misting frequency by pressing the power button once for each of the three options: 15 seconds, 60 seconds or 120 seconds.
+Press and show settings switching between 15s, 60s and 120s.
+Hold the timer button for 2 seconds to switch between the three timer settings with three options (1h, 2h, 3h).
+This device has a memory function that retains the chosen settings even when the device is turned off and back on.
+
+Please let us know if you have any other questions!
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISCOUNTS: Valid For Non-Subscription Items Only","","Hello %First Name%,
+
+Thank you so much for reaching out!
+
+Just a quick note, discount codes apply only to one-time purchases. Subscription or renewable items aren't eligible for additional discounts since they already come with built-in savings.
+
+I completely understand how that could be confusing and truly appreciate your understanding. If you have any other questions or need help adjusting your order, I'm happy to assist!
+
+Regards,%Agent First Name%  Scentiment Customer Support","promotions-inquiry","","","","","","","All Brands","Everyone","System"
+"GENERIC: Follow Up Reach out","","Hi ​​%First Name%​​
+
+I am just following up on my earlier email. We would need to know how you wish to proceed with your order, particularly with this unfulfilled item in your order. 
+
+Looking forward to being of assistance to you. 
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Closing","","Hi ​​%First Name%​​
+
+Please let me know if you need any additional assistance, I'm always happy to help! 
+
+All the Best,
+
+​​%Agent First Name%​​","","","","","","","","All Brands","Everyone","System"
+"INTERNAL: No Response Needed","","No response needed.","","","","","","","","All Brands","Everyone","System"
+"PRODUCT INQUIRY : Can I Use My Own Oils ?","","Hello ​​%First Name%​​,
+
+I hope you're enjoying your Scentiment diffuser! We wanted to share some important information to help you get the best experience possible.
+
+Our diffusers are uniquely designed to work perfectly with Scentiment fragrance oils. These oils have been carefully crafted with just the right consistency to ensure they diffuse beautifully without damaging the diffuser's internal parts. Because of this, we recommend using Scentiment oils exclusively with our diffusers.
+
+We're excited for you to continue enjoying the delightful scents and hope this helps you make the most of your Scentiment products.
+
+Let me know if you have any other questions!
+
+Warm Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"DISPUTES: Chargeback In Progress","","Hi %First Name%,
+
+Thank you for reaching out! We completely understand how important this is to you, and we want to ensure you have all the details regarding your chargeback for %Order Name%.
+
+Since a chargeback has been submitted, your bank has taken over the review process. These investigations typically take 75 to 120 business days, as your bank carefully evaluates the case before making a final decision.
+
+Unfortunately, we cannot process refunds or replacements directly, as your bank now controls the outcome. However, if you’re open to canceling the chargeback, we can certainly step in and explore solutions together—whether that means a refund, store credit, or replacement. We want to make things right and meet you halfway!
+
+Please let us know how you’d like to move forward, and we’ll do our best to take care of you right away. Looking forward to hearing your thoughts so we can find the best possible outcome for you!
+
+Sincerely
+%Agent First Name%
+Scentiment Customer Support","chargeback-inprocess","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Delivered, Not Received - NO PROTECT+ - 2ND RESPONSE","","Hello %First Name%,
+
+Thank you for your patience while I worked on this for you.
+We have created a replacement order for you for the missing package. Your new order number is XXXX. You should receive an email with the new order details shortly, and another with tracking once the order ships.
+In the meantime, please let me know if you need any additional assistance. You can also access our Scentiment Help Center if you need additional assistance. Thank you.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","refund-lost-in-transit","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Holiday Shipping Delay","","Hello %First Name%
+
+Unfortunately, due to circumstances beyond our control, there were unexpected delays in receiving stock from our manufacturer, which impacted the timely shipment of your order.
+
+We understand how important it is to receive your orders on time, especially during this busy and festive time of year, and we deeply regret the inconvenience this situation has caused. Additionally, the surge in customer inquiries during this period has resulted in delays in responding to some of your messages, which is certainly not the level of service we strive to provide.
+
+As a token of our appreciation for your patience, I have added a complimentary XX ml bottle of fragrance oil to your order.[Please add an offer depending on the order amount listed below.]$0 - $50 offer a 30% immediate discount on the order$50-$100 - offer 2 x 20ml oils for free$100 - $250 - offer 2 x 50ml oils free
+
+Please rest assured that we have resolved the underlying issue and are diligently working to catch up on all delayed shipments. We expect to have all pending orders shipped within the next 5 business days. Our team is committed to ensuring you receive your products as quickly as possible and providing the excellent service you deserve.
+
+We greatly appreciate your patience, understanding, and continued trust in Scentiment. Your satisfaction is our top priority, and we are taking every step to prevent similar delays in the future.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","refund-shipping-delay","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Not shipped: still in processing window","","Hello %First Name%,
+
+Thank you for reaching out! Your order %Order Name% has been received and we are working on getting it shipped out.
+
+Our processing time before an order ships is 3-5 days, excluding weekends.
+
+We will email you a confirmation once it ships and that will include tracking information as well.
+
+If you have any questions in the meantime, please don't hesitate to reach out. In the meantime, you can also access our Scentiment Help Center if you need additional assistance.
+
+Sincerely, %Agent First Name%Scentiment Customer Support","refund-stuck-in-preshipment","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: OOS Candle convert to Store Credit","SCENTIMENT: Regarding your unfulfilled item...","Hello ​​%First Name%​​
+
+We hope you're well! We are reaching out to you regarding the unfulfilled order you recently placed with us. 
+
+Unfortunately, this variant of our candle is currently out of stock. We're really sorry for any inconvenience this may cause. We're working hard to restock it, but we don't have a fixed date yet.
+
+Here are your options:
+
+Wait for Restock: You can keep your order as is, and we'll ship the item to you as soon as it's back in stock. We can't give you an exact date, but we'll do our best to get it to you ASAP.
+
+Convert to Store Credit: If you'd rather not wait, we can turn the value of the out-of-stock item into store credit. You can use this credit on your next purchase with us anytime. It is also transferrable, so you can pass it on to a friend or family. 
+
+Swap for another variant: You can choose between Fresh Rain or Minuit a Paris.
+
+Let me know how you wish to proceed. Thanks a lot!
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: OOS room spray convert to Store Credit","SCENTIMENT: Regarding your unfulfilled item...","Hello ​​%First Name%​​
+
+We hope you're well! We are reaching out to you regarding your order that has unfulfilled items.
+
+Unfortunately, the variant you have selected for our room spray is currently out of stock. We're really sorry for any inconvenience this may cause. We're working hard to restock it, but we don't have a fixed date yet.
+
+Here are your options:
+
+Wait for Restock: You can keep your order as is, and we'll ship the item to you as soon as it's back in stock. We can't give you an exact date, but we'll do our best to get it to you ASAP.
+
+Convert to Store Credit: If you'd rather not wait, we can turn the value of the out-of-stock item into store credit. You can use this credit on your next purchase with us anytime. It is also transferrable, so you can pass it on to a friend or family. 
+
+Swap for another variant: Here are the choices you can choose from: The One, Day Dream or Ocean Breeze. 
+
+Let me know how you wish to proceed. Thanks a lot!
+
+All the best, 
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Order Delay: All Diffusers (Still backlogged 1st response)","","Hello ​​%First Name%​​,
+
+Thank you for following up! 
+
+We are still a bit backlogged due to a recent surge in demand. We are expecting to ship your order between October 17 - October 20, although it may certainly be sooner. 
+
+We're so sorry for the continued delay, but we are working to get this out to you as soon as possible. 
+
+Please let me know if you need any additional assistance. I'm always happy to help. 
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-shipping-delay","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE: Still Backlogged (2nd Response: Upset Customer)","","Hello ​​%First Name%​​,
+
+Thank you for following up, and I'm so sorry for the continued delay. Rest assured, we are working tirelessly to get all orders out as soon as possible. I have added your order to our priority list and am hoping we can get this to you by the (INSERT DATE) deadline. 
+
+Again, I'm so sorry for this delay and any inconvenience this may have caused.
+
+Sincerely,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","refund-shipping-delay","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Damaged in Transit: STEP 1: Photo Request","","Hello ​​%First Name%​​,
+
+Thank you for reaching out, and we're so sorry to hear your order arrived damaged.  As we try our best to provide exceptional service, some factors like shipping and handling are outside of our control, and issues like this can happen.
+
+Can you please send us a photo of the broken/damaged item(s) you received and we'll do our best to resolve this as soon as possible.
+
+Looking forward to hearing back! 
+
+Sincerely,
+
+​​%Agent First Name%​​","refund-damaged-product","","","","","","","All Brands","Everyone","System"
+"SOCIAL MEDIA: Safe for Pets?","","All of our fragrance oils are safe to use around people, pets, plants, and furniture. 100% free of all Parabens, Formaldehyde, Color Additives, Synthetic Dyes, and Preservatives.","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Standard Diffuser V1: Loud noise/ Unusual Sound","","Hello %First Name%,
+
+We apologize for the inconvenience you are experiencing with your diffuser. Please follow the troubleshooting steps to resolve this issue.
+
+If the issue is not resolved, your diffuser is under warranty, and you've already completed the troubleshooting steps and submitted your video, we'll provide you with a link to initiate your warranty replacement.
+
+If you have any further questions, don't hesitate to reply and we're happy to help! You can also visit our Scentiment Help Center for additional support.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Cancel & Refund Last Order","","Hello %First Name%,
+
+Thank you so much for reaching out! I am happy to help.
+
+I was able to get your order cancelled and created a refund request for your order %Order Name% and it should be processed within 24 to 72 business hours. Once the refund is released, please allow 3-5 business days for you to receive the funds back depending on your bank's processing timeframe. You'll receive an email with your refund details as well.
+
+Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Let me know if you need any additional assistance. You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Thank you!
+
+Sincerely, %Agent First Name%Scentiment Customer Support","order-cancellation-request","","","","","","","All Brands","Everyone","System"
+"ORDERS: Full refund last order","","Hello %First Name%,
+
+Hope all is well!
+
+I have created a full refund request for your last order %Order Name% and it should be processed within 24 to 72 business hours. Once the refund is released, please allow 3-5 business days for you to receive the funds back depending on your bank's processing timeframe. You'll receive an email with your refund details as well.
+
+Reimbursement of funds will be allocated back to the original form of payment used for purchase.
+
+Please let me know if you need any additional assistance. You can access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Thank you.
+
+Sincerely, %Agent First Name%
+
+Scentiment Customer Support","refund-order-adjustment","","","","","","","All Brands","Everyone","System"
+"Troubleshooting: Mini V1: No power/ Not turning on","","Hello %First Name%,
+
+I'm so sorry to hear your diffuser may have a power issue. Here is a comprehensive video: on how to make sure your diffuser is connected.If there is still no power to your diffuser, do you happen to have an extra USB-C cable around your home? If so, can you try using that to plug to follow the comprehensive video.
+
+If your diffuser is still not turning on or has no power, we're here to help!Please follow our troubleshooting steps to see if the issue can be resolved. If the problem persists, kindly submit a video showing the issue so we can better assist you.If your diffuser is still under warranty and the troubleshooting steps don't resolve the issue, we'll provide you with a link to initiate your warranty replacement.
+
+Let us know if you have any questions and we're happy to assist!
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: MINI V1: No Mist / No Airflow (VIDEO link)","","Hello %First Name%,
+
+Thank you for reaching out, and we're so sorry to hear you're having trouble with your Scent Diffuser Mini.
+
+We have some great resources available to get your diffuser up and running. I've included a video here : for your review. Please watch this video and give the suggestion a try.
+You can also access our Troubleshooting steps in our Scentiment Help Center.
+If the issue is not resolved, your diffuser is under warranty, and you've already completed the troubleshooting steps and submitted your video, we'll provide you with a link to initiate your warranty replacement.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Stuck at Label Created (Pre-Shipment)","","Hello %First Name%,
+
+Thank you for bringing this to our attention. We sincerely apologize for the inconvenience.
+
+We have escalated your order to our warehouse team for reshipment. Additionally, we will be coordinating with the courier to locate and retrieve the original package in case it was not properly scanned for delivery.
+
+Once the replacement package has been shipped, you will receive an email notification with the new tracking information within 24–48 business hours.
+
+In the meantime, please let us know if you need any additional assistance.
+
+Best Regards,%Agent First Name%Scentiment Customer Support","refund-stuck-in-preshipment","","","","","","","All Brands","Everyone","System"
+"GENERIC: [Auto Rules]: Follow up","","Hi %First Name%,
+
+Just checking in—We're here for you.
+
+We hope you’re doing well. We just wanted to follow up on your recent ticket to see if you still need assistance.
+
+Our team replied, but we haven’t heard back yet. If everything’s resolved on your end, that’s wonderful—we’ll go ahead and close this ticket in 24 hours. But if you still need help, we’re here for you and happy to continue supporting you.
+You can simply reply to this message, or if it’s more convenient, give us a call at (323) 310-1000, Monday to Friday from 9:00 AM to 5:00 PM EST.
+
+We’re always just a message or call away and would love to assist you in any way we can.
+All the best, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"PACKAGE PROTECTION: What is Package Protect+","","Hello %First Name%,
+
+Thank you for reaching out! Great question. 
+Package protection is offered as an additional item at checkout to protect your order against the following issues:
+Damaged in transit
+
+Lost in transit 
+
+Stolen 
+
+Delivered not received 
+
+If one of these issues occurs, you can submit a claim by contacting us at support@scentiment.com. 
+
+This insurance, which we highly recommend, is an option that shows up marked “yes” at checkout, and you are able to uncheck the box if you wish to opt out of it. However, if you do choose opt out we are not responsible for your parcel should something happen to it.
+
+We strongly advise considering shipping protection for your purchase. This protection allows us to replace your order or issue a refund in the form of store credit, minus the shipping cost, in case of any shipping-related problems as mentioned above.
+
+With so much inconsistency currently due to the national postal situation, we've found Package Protection is a great, affordable protection option for our customers. 
+
+Regards,%Agent First Name%Scentiment Customer Support","refund-package-protection","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: Customer Indicates Sub Was Cancelled Before Order Placement","","Hello %First Name%,
+
+Thank you for reaching out!
+
+Upon review, the subscription under %Email% was cancelled on [DATE], after the renewal order %Order number% was placed in our system. I'm so sorry for any confusion this may have caused.
+We process and ship orders very quickly — they’re imported directly to our fulfillment facility upon receipt. Once the order has been imported, we, unfortunately, have no ability to modify or cancel it, as clearly outlined on our site here.
+
+That said, we will gladly accept a return once the order is received, provided it is returned in new and unused condition. We kindly ask that you reach back out once your order arrives, and we’ll be happy to assist with return instructions.
+
+Please note our updated policy regarding subscription orders:
+Subscription Orders Once a subscription order has been processed, it cannot be canceled. Subscription items are not eligible for refunds, whether shipped or not. If your request is submitted within 14 days of delivery, we’ll be happy to issue a gift card for the value of the item. Refunds are no longer issued under any circumstance for subscription orders, including returned items. For full details, please refer to our Order Cancellation Policy and Return Policy.
+Please note that canceling the subscription will also cancel the extended limited manufacturer warranty.
+In the meantime, feel free to reach out if you have any additional questions — I’m always happy to help!
+
+Best Regards,%Agent First Name%Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"GENERAL: Issues Ordering","","Hello ​​%First Name%​​,
+
+Thank you for your interest in Scentiment! If you are having issues placing your order, please try from another internet browser. If you are on a mobile device, can you try from a computer?
+
+Thank you.
+
+Best Regards,
+
+​​%Agent First Name%​​
+
+Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Video Review Update - Manufacturer defect detected","","Dear %First Name%,
+
+Thank you for sharing the video with us—we truly appreciate your patience while we assessed the issue. After reviewing it, we’ve confirmed that your diffuser has a warranty defect and needs to be returned to us. To ensure a smooth replacement process, please send the diffuser back to us by initiating your return here. 
+Once your RMA is created, you will have 14 days to return your unit. If the return is not received within this timeframe, the RMA will be automatically canceled and will no longer be valid.
+
+As soon as we see that your diffuser is in transit, we’ll promptly send out your replacement so you can continue enjoying your scenting experience without delay. If you need any assistance with the return process, please don’t hesitate to reach out—we’re always happy to help!
+
+Best regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: Return Request: Used products","","Hello %First Name%,
+
+Thank you for reaching out! We truly appreciate you taking the time to contact us, and we want to ensure you have the best possible experience with our products.
+
+We offer refunds within 14 days of delivery for products that are unused and in their original packaging (except diffusers). For used diffusers, refunds may be approved within 7 days of delivery. You can review our full return policy here for more details:🔗 Scentiment Refund Policy
+
+Because scent diffusers come into direct contact with fragrance oils, returning a used unit beyond this timeframe presents hygiene and product integrity concerns. However, if you’re experiencing a defect or performance issue, we’re happy to assist you with a warranty replacement, provided your diffuser is still covered under warranty.
+
+If your diffuser is under warranty and you’ve already completed the troubleshooting steps listed in the Scentiment Help Center and submitted your video, we’ll provide you with a link to initiate your warranty replacement.
+
+Once your RMA  is created, you’ll have 14 days to return your unit. If the return is not received within this timeframe, the RMA will automatically be canceled and will no longer be valid.
+
+Please note that used fragrance oils, candles, room sprays, reed diffusers, preserved roses, and perfumes cannot be returned or replaced. This policy helps us ensure that every customer receives a new and unused product for the best experience.
+
+If you have any further questions, please don’t hesitate to reply — we’re always happy to help! You can also visit our Scentiment Help Center for additional support.
+Regards,%Agent First Name%Scentiment Customer Support Team","return-defective","","","","","","","All Brands","Everyone","System"
+"ORDERS: Diffuser out of warranty","","Hi %First Name%,
+
+Thank you for reaching out. I understand how disappointing it can be when a product doesn't perform as expected.
+
+After reviewing your order, I wanted to let you know that your diffuser is no longer covered under our limited manufacturer warranty. Our diffusers come with a 6-month warranty unless otherwise specified in the user manual. You can also find full warranty details anytime in our Help Center under the “Diffuser” section.
+
+While this unit is no longer eligible for a warranty replacement, we’d still love to help. If you’re interested in replacing your diffuser, I’d be happy to offer you a special discount on a new one.
+
+Please let me know how you'd like to proceed or if there's anything else I can assist you with.
+
+Warm regards,%Agent First Name%Scentiment Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Delivered, Not Received - NO PROTECT+ (1st Response)","","Hello %First Name%,
+Thank you so much for your Scentiment order! I am sorry to hear you have not received your package.
+Although your package says delivered, XXXX sometimes delivers within a few days to follow. XXXX is asking we wait up to 5 days for receipt of the package upon receiving the ""delivered"" notification.
+In the meantime, if you would be so kind as to check some things on your end and get back to us, that would be great.
+Please verify this is your current mailing address:
+
+INSERT ADDRESS
+
+Please check with other members of your household to see if anyone may have put your package aside. This happens a lot, myself included!
+If you live in an apartment complex, please contact your rental office to see if they are holding your package there. Some packages won’t fit in your mailbox, so carriers will often leave packages at a manager’s office for safekeeping.
+Please call XXXX with the tracking # and ask them if they can assist you further. Sometimes they have more information than what we can see online. They may even have your package on hold for you. They are very helpful in finding missing packages within the postal system, especially when the local post office is claiming to have delivered your package.
+
+We look forward to hearing back from you.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","refund-lost-in-transit","","","","","","","All Brands","Everyone","System"
+"TUTORIALS: Set up: Scent Diffuser Pro V1: Written Step by Step and Video","","Hello %First Name%,
+Thank you for reaching out! I am happy to help get your Scent Diffuser Pro set up! Here's a comprehensive video tutorial you can watch. Otherwise, you can also follow the step by step guide below: 
+Step 1: Loading the Oil
+Use the included key to unlock the door on the side of the machine and remove the oil container.
+
+Take the 200 mL scent oil bottle and unscrew the top and fill it will your preferred oil.
+
+Connect the oil bottle to the system, ensuring the tube inside fits inside the oil bottle.
+
+Thread the oil bottle into the machine securely.
+
+Close the door and lock it.
+
+Step 2: Setting Time and Date
+Power on the unit.
+
+Check if the time and date are correct on the LCD screen.
+
+To change the time, press the set button once to change the hours, press again to change the minutes.
+
+To change the day, press the set button a third time and use the up and down buttons to select the desired day.
+
+Press the set button to confirm the selection.
+
+The volume screen will appear, leave it at 200 and press the set button.
+
+The level screen will appear, leave it at 200 and press the set button.
+
+The milliliters per hour screen will appear, leave it at 10.0 (adjust by holding the up button and press set when it reaches 10.0).
+
+Once the correct time and date are set, the system is ready for scheduling.
+
+Step 3: Setting the Schedule
+Press the mode button once to enter schedule mode.
+
+The first schedule event, ""Event 1,"" will appear.
+
+Press the set button to set the start time.
+
+Use the set button to change hours and minutes accordingly.
+
+To select which days the event will operate, use the up button to add or remove arrows for each day.
+
+Press the mode button to move to the end time of the schedule.
+
+Use the set button to set the end time.
+
+Press the mode button to lock in the first schedule.
+
+Step 4: Scent Dispensing Settings
+Set the initial scent duration to 30 seconds by pressing the mode button.
+
+Set the pause duration to 160 by pressing the mode button again.
+
+If desired, set additional schedules following the same steps.
+
+Step 5: Monitoring Oil Level
+The green light indicates a full bottle, blue indicates half a bottle, and red indicates it's time to replace the bottle.
+
+Step 6: Loading a New Bottle
+When loading a new bottle, ensure the volume and level settings are set back to 200.
+
+Press the set button until reaching the ""Bi"" screen and set it to 200.
+
+Press the set button again until reaching the ""Level"" screen and set it to 200.
+
+Press the set button twice more to exit the settings.
+
+Please let us know if you have any other questions! 
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDER ISSUE : Wrong Item Received: STEP 2: Non-Diffuser items -Reshipment","","Dear %First Name%,
+
+We apologize for any inconvenience caused due to the incorrect order that you received. We understand that receiving the wrong items can be frustrating, and we take full responsibility for the error.
+
+We have reviewed your order and have identified the issue. To rectify this error, we will be shipping you the correct package as soon as possible. We will ensure that the new package is shipped to you on priority and that it reaches you in the shortest possible time.
+
+We assure you that we have taken corrective measures to avoid such errors in the future. We value your trust in our brand and hope that this mistake does not deter you from shopping with us in the future.
+
+If you have any questions or concerns, please feel free to contact us. We are committed to providing excellent customer service and will be happy to assist you. You can also access our Scentiment Help Center if you need additional assistance.
+
+Thank you for your patience and understanding.
+
+Sincerely,%Agent First Name%Scentiment Customer Support","replacement-order","","","","","","","All Brands","Everyone","System"
+"GENERAL: Wholesale Inquiry","","Hello %First Name%,
+
+Thank you for your interest in wholesale with us.
+
+Can you please send your email to Ahmead@scentiment.com we can discuss this in more detail with you?
+
+Thank you!
+
+Best Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Sign off","","Thank you.%First Name%.
+
+If you need further assistance you can also access our help center here: Scentiment Help Center.
+
+We appreciate your business.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"ORDERS: No Order Found","","Hi %First Name%,
+
+Thank you for reaching out!
+
+We can't seem to find any orders that correspond to this email address. Would you mind sending us your order number as well as the date of the order?
+
+If you do not have the order number, can you please confirm the full name on the order, as well as the complete shipping address?
+
+Looking forward to hearing back!
+
+You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Sincerely, %Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"GENERIC: Abandoned Cart Outreach","Thank You for Considering Scentiment - Complete Your Purchase Today!","Hi %First Name%,
+
+I hope this email finds you well.
+
+I noticed that you recently added some items to your cart on our website, but didn't complete your purchase. We understand that sometimes things come up, and we're here to help!
+
+Is there anything specific that prevented you from completing your purchase? We're happy to answer any questions or assist you with any issues you might have encountered.
+
+As a token of our appreciation, we’re offering a special discount if you complete your purchase below today: [Link to Abandoned Cart]
+
+If you have any questions or need assistance, please reply to this email, and we'll be more than happy to help. You can also reach us at +1 (323) 310-1000, Monday to Friday from 9:00 AM to 5:00 PM EST.
+
+Thank you for considering Scentiment. We look forward to serving you!
+
+Sincerely,%Agent First Name%Customer Experience Specialist","","","","","","","","All Brands","Everyone","System"
+"GENERIC: How can I help?","","Hi %First Name%!
+
+Thanks for reaching Scentiment Customer Support. How can I help you today?
+
+You can also access our Help Center here: Scentiment Help Center if you need additional assistance.
+
+Regards,%Agent First Name%Scentiment Customer Support","","","","","","","","All Brands","Everyone","System"
+"SUBSCRIPTION: Didn't know they had subscription + Return Info","","Hello %First Name%,
+After reviewing your account, it shows that the auto-subscription option was selected during checkout when you ordered the (INSERT PRODUCT NAME). This option provides a 10% discount and automatically schedules a new order every 30 days (or the interval you chose). Because this option was selected at checkout, the subscription was automatically created on your account.
+For your reference, here is a copy of your invoice:(INSERT INVOICE LINK)
+
+Since this seems like not what you intended to do, I will cancel that subscription. Pleas be advised that orders are imported directly to our fulfillment facility upon receipt. Once the order has been imported to our fulfillment facility, we, unfortunately, have no ability to cancel the orders. We're so sorry for any inconvenience this may cause you.
+
+You can review our policy in full here. Once the package arrives, if you do opt to arrange a return, please click on this link to initiate your return. Please note that we no longer process refunds for subscription orders, in accordance with our policy but we’ll be happy to issue a gift card for the value of the item.
+
+If you have any additional questions, please let us know, we're happy to help. You can also access our Help Center here if you need additional assistance. 
+Sincerely,%Agent First Name%Scentiment Customer Support","refund-subscription-order","","","","","","","All Brands","Everyone","System"
+"ORDERS : Warranty Replacement (Same Unit Returned)","","Hi *,
+Thank you for reaching out and sharing your concern. I completely understand how it might
+seem that you’ve received a used diffuser, and I truly appreciate the chance to clarify this for
+you.
+The diffuser you received is actually your original unit, which has been repaired and restored
+under our Warranty Replacement policy. Our technicians carefully inspected your diffuser,
+addressed the reported issue, and ensured it’s cleaned, tested, and in perfect working condition
+before sending it back to you.
+As part of our warranty process, we always aim to repair and return the customer’s own diffuser
+whenever possible, as this helps maintain product familiarity and supports our sustainability
+efforts. However, if a diffuser is assessed and found to be non-repairable, we then send a
+brand-new replacement unit instead.
+We truly appreciate your patience and understanding as we make sure your diffuser performs
+just as it should. If you experience any further issues or have any questions, please don’t
+hesitate to let us know — we’ll be happy to help.
+Warmly,
+%Agent First Name%
+Scentiment Support","","","","","","","","All Brands","Everyone","System"
+"ORDER INQUIRY: Pre-Order Follow-Up","","Hi %Customer Name% ,
+
+Thank you so much for reaching out. I completely understand the anticipation while waiting for your order.
+
+I checked your order and can confirm that it was placed as a Pre-order. At checkout, the estimated delivery date (DATE) was displayed so customers could make an informed decision before completing their purchase.
+
+Rest assured, We've also flagged it as priority your order is already queued as one of the first to ship out as soon as the item is back in stock. Once it ships, you’ll automatically receive a shipping confirmation email with your tracking details.
+
+Thank you again for your patience and understanding—please feel free to reach out anytime if you need anything else.
+
+Warm regards,%Agent First Name% Scentiment Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"OnTrac Claim – Delivered but Not Received","","Hi [Customer Name],
+
+We understand that your order with tracking number [Tracking Number] shows as delivered but has not been received. We sincerely apologize for any inconvenience this may have caused.
+To help resolve this matter, you may file a claim directly with OnTrac by following these steps:
+1. Visit the OnTrac delivery status page for your order and click “Chat Now.”
+2. Enter your name and email address.
+3. Click “Track My Package” and enter your tracking number.
+4. In the chat, kindly explain your situation, for example:  “I need to file a claim for a lost or missing delivery.”
+5. Once your claim is submitted, you will receive an email confirmation from OnTrac with a Claim ID.
+
+Kind Reminder:
+If you do not receive an update from OnTrac within 72 business hours, please contact us with your Claim ID, and we will be happy to assist you further.
+
+Please ensure your name and email address are entered accurately to avoid any delays in processing your claim.
+
+For future shipments, if you would like additional protection, we offer Protect Plus, which provides insurance for your packages. With Protect Plus, it is easier and faster for us to file a claim directly on your behalf if any issues arise.
+
+We truly appreciate your patience and understanding as we work to resolve this matter promptly.
+
+Warm regards,%Agent First Name%
+Scentiment Customer Support Team","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Diffuser Air 2 - No Mist","","Hi %Customer Name% ,
+
+Thanks for reaching out! We know it’s frustrating when your diffuser isn’t working, and we’re here to help get it back to normal as quickly as possible. Rest assured, we’ll make sure it’s working properly for you.
+To start, could you kindly check a couple of things:
+Check for airflow: Please confirm if you can feel any airflow coming out of the misting hole when the diffuser is in operation. Gently lift the diffusion head, locate the small hole, and place your finger over it to check for air pressure. If you do not feel any air pressure, please let us know so we can arrange a replacement motor pump for you.
+
+If you do feel air pressure: Try poking the misting hole with the provided pipe. Insert it into the misting hole at the top of the diffuser head. This helps release the anti-leak ball inside, which can sometimes get stuck and block airflow. See Attached photo below as a reference.
+
+For additional guidance, here’s a video showing how to troubleshoot your Scentiment Air 2, including how to check airflow and poke the misting hole.: YouTube Guide.
+No Mist: 1:00
+
+Diffuser No Airflow: 4:00
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""productIssue"",""displayName"":""Product Issue"",""type"":""dropdownSelect"",""value"":[""No mist""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Diffuser Air 2 – Oil Leaking","","Hi %Customer Name%,
+Thanks for reaching out! We understand how frustrating it can be when your diffuser is leaking, and we’re here to help get it back to normal as quickly as possible. Rest assured, we’ll make sure it’s working properly for you.
+To start, could you kindly check a couple of things:
+Check Oil Level: Make sure the oil bottle is filled just below the shoulder line to prevent spills.
+
+Clean Diffuser Parts: Soak the nozzle and pipe in diffuser cleaner or isopropyl alcohol for 5 minutes, then reattach.
+
+Release the Anti-Leak Ball: try poking the misting hole with the provided pipe. Insert the pipe into the misting hole and gently press down to release the anti-leak ball, which can sometimes get stuck and cause leaking.
+
+For additional guidance, here’s a video showing how to troubleshoot your Scentiment Air 2, including how to check airflow and poke the misting hole.: YouTube Guide.
+Oil Leaking Out of Diffuser Time Stamp: 5:30
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""productIssue"",""displayName"":""Product Issue"",""type"":""dropdownSelect"",""value"":[""Leaking product""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Diffuser Air 2 – Not Turning On","","Hi %Customer Name%,
+Thanks for reaching out! We know it’s frustrating when your diffuser won’t turn on, and we’re here to help get it working properly again. Rest assured, we’ll guide you every step of the way.
+To start, could you kindly check a couple of things:
+Check Remote and Power Button: Press any button on the remote and check if the small LED lights up red. If it does, the remote has power. Ensure the plastic tab on the bottom of the remote has been removed and the battery is installed correctly.
+
+Check Charging: Use the USB-C cable that came with your diffuser to charge it fully (up to 4 hours). The LED should pulse green while charging.
+
+Check Power Button: Make sure the power button isn’t loose or unresponsive.
+
+If the diffuser still doesn’t turn on, or if the LED lights up but there’s no mist or airflow, you may want to check the No Mist or No Airflow troubleshooting steps.
+
+For additional guidance, here’s a video showing how to troubleshoot your Scentiment Air 2, including checking power, remote, and charging: YouTube Guide.
+No Mist: 1:00
+
+Diffuser No Airflow: 4:00
+
+Diffuser Not Turning On Time Stamp: 9:24
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""product123456"",""displayName"":""Product"",""type"":""dropdownSelect"",""value"":[""Standard Diffuser V2""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Diffuser Air 2 – Keeps Turning Off","","Hi %Customer Name%,
+
+Thanks for reaching out! We understand how frustrating it can be when your diffuser keeps shutting off. Don’t worry—we’ll help get it working smoothly again.
+To start, could you kindly check a couple of things:
+Check Diffuser Settings: The single button near the charging port cycles through three misting levels:
+Low: Mists for 15 seconds, pauses for 90 seconds
+
+Medium: Mists for 30 seconds, pauses for 60 seconds
+
+High: Mists for 60 seconds, pauses for 30 seconds
+
+The diffuser is designed to automatically shut off after 8 hours of total run time.*
+Check Charging: Make sure you’re using the USB-C cable that came with your diffuser. When plugged in, the LED strip should gently pulse green.
+
+Power Issue: If your diffuser continues turning off or pulsing even after charging fully, try unplugging and plugging it back in.
+
+For additional guidance, here’s a video showing how to troubleshoot your Scentiment Air 2 and manage power or misting issues: YouTube Guide.
+Diffuser Continuously Turning Off Time Stamp: 8:00
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""productIssue"",""displayName"":""Product Issue"",""type"":""dropdownSelect"",""value"":[""Not turning on""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Diffuser Air 2 – Remote Not Responding","","Hi %Customer Name%,
+
+Thanks for reaching out! We know it’s frustrating when your diffuser remote isn’t responding, and we’re here to help get it working properly again. Rest assured, we’ll guide you through the steps.
+To start, could you kindly check a couple of things:
+Check Remote LED: Press any button on the remote and see if the small LED lights up red. If it does, the remote has power. If it doesn’t light up, ensure the plastic tab at the bottom of the remote has been removed and the battery is installed correctly.
+
+Replace Remote Battery (if needed): Insert a new CR2025 battery, making sure the polarity matches the diagram inside.
+
+Remote Pairing: The Diffuser Air 2 remote is pre-paired out of the box. It can also control any other Diffuser Air 2 nearby if pointed in the same direction.
+
+Also here’s a video showing how to troubleshoot your Scentiment Air 2 remote and get it responding: YouTube Guide.
+Diffuser Remote Not Responding: 11:20
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Mini Diffuser 2 LE – No Mist","","Hi %Customer Name%,
+
+Thanks for reaching out! We know it’s frustrating when your Mini 2 LE isn’t producing mist, and we’re here to help get it working properly again. Rest assured, we’ll guide you through the steps.
+To start, could you kindly check a couple of things:
+
+Check Airflow: Remove the oil bottle from the diffuser. Turn the diffuser on and place your finger near the airflow hole inside the hollow area at the top. If you feel air pressure, the pump is working.
+
+Use Spare Parts (if available): Remove the nozzle using the provided tool and check the gasket. If the gasket is missing, please let us know. Install the replacement nozzle and pipe from your spare parts kit.
+
+Clean Old Parts (if no spare parts): Soak the nozzle and pipe in diffuser cleaner or isopropyl alcohol for 5 minutes. Then reattach and flush the system with a cleaner for about 3 minutes. Once done, refill the oil bottle and power on your diffuser.
+
+For additional guidance, here’s a video showing how to troubleshoot your Mini 2 LE, including how to check airflow: YouTube Guide
+No Mist Time Stamp: 0:56
+
+Please try these steps and let us know the results. If you’re still not seeing mist, please let us know and we’ll assist further.
+
+Thank you again for reaching out – we appreciate your patience and understanding.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""resolution"",""displayName"":""Resolution"",""type"":""dropdownSelect"",""value"":[""Information::Educational link provided""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Mini Diffuser 2 LE – Oil Leaking","","Hi %Customer Name%,
+
+Thanks for reaching out! We know it’s frustrating when your Mini 2 LE is leaking oil, and we’re here to help get it working properly again. Rest assured, we’ll guide you through the steps.
+To start, could you kindly check a couple of things:
+Check Oil Level: Make sure the oil bottle is filled just below the shoulder line to prevent spills.
+
+Clean Diffuser Parts: Remove the nozzle and pipe. Soak and shake them in diffuser cleaner or isopropyl alcohol for about 5 minutes. Then reattach them. Flush the system with a cleaner for about 3 minutes.
+
+Refill and Test: Once done, refill the oil bottle and power on your diffuser.
+
+For additional guidance, here’s a video showing how to troubleshoot your Mini 2 LE, including Troubleshooting Diffuser Leaking Oil: YouTube GuideOil Leaking Time Stamp: 2:50
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""resolution"",""displayName"":""Resolution"",""type"":""dropdownSelect"",""value"":[""Information::Educational link provided""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Mini Diffuser 2 LE – Keeps Turning Off","","Hi %Customer Name%,
+
+Thanks for reaching out! We know it’s frustrating when your Mini 2 LE keeps turning off, and we’re here to help get it working properly again.
+
+To start, could you kindly check a few things:
+Check Diffuser Settings: Your Mini 2 LE has a single button that controls mist intensity. Each tap cycles through three misting levels:
+Low: Mists for 15 seconds, pauses for 90 seconds
+
+Medium: Mists for 30 seconds, pauses for 60 seconds
+
+High: Mists for 60 seconds, pauses for 30 seconds
+
+Battery Life & Auto Shut-Off: The diffuser is designed to automatically turn off after 8 hours of total runtime. Depending on your misting level, the battery lasts 12–30 hours.
+
+Custom Schedules (Optional): You can install the Scentiment app to create custom misting schedules. Keep in mind that each schedule is also subject to the 8-hour total runtime.
+
+Check Charging: Make sure you are using the USB-C cable that came with your diffuser. When plugged in, the front LED should softly pulse green. If it continues to pulse even after 4 hours of charging, please let us know. 
+
+After charging, power on the diffuser.
+
+For additional guidance, here’s a video showing how to troubleshoot your Mini 2 LE, including misting modes and charging checks: YouTube Guide Diffuser Keeps Turning Off Time Stamp: 4:44
+
+Please try these steps and let us know the results. We’ll be here to assist further if the issue continues.
+
+Regards,%Agent First Name% Scentiment Customer Service","","","","","{""propertyName"":""productIssue"",""displayName"":""Product Issue"",""type"":""dropdownSelect"",""value"":[""Not turning on""],""under"":""message""}","","","All Brands","Everyone","System"
+"TROUBLESHOOTING: Mini Diffuser 2 LE – Not Turning On","","Hi %Customer Name%,
+
+Thanks for reaching out! We understand how frustrating it can be when your diffuser won’t turn on, and we’re here to help get this sorted out as quickly as possible.
+To get started, please try the steps below:
+Check Charging & Power: Make sure you’re using the USB-C charging cable that came with your Mini Diffuser 2 LE. Plug the diffuser into a working power source and let it charge for up to 4 hours. While charging, you should see a soft pulsing green light on the front of the diffuser.
+
+If the light is still pulsing after 4 hours, please let us know so we can help further.
+Inspect the Power Button: Check the top surface of the diffuser for any oil, dust, or residue that may interfere with the touch-sensitive power button. Gently wipe the surface clean, then try turning the diffuser on again.
+
+LED On but No Mist or Airflow: If the diffuser powers on and the LED lights up but there’s still no mist or airflow, this may be related to a no-mist issue. In that case, please follow the no-mist troubleshooting steps below.
+
+For additional guidance, here’s a video that walks you through Mini Diffuser 2 LE troubleshooting:  YouTube Guide
+No Mist Time Stamp: 0:56
+
+Diffuser Not Turning On Time Stamp: 6:40
+
+Please try these steps and let us know the results. We’ll be happy to assist further if the issue continues.
+Thank you for your patience—we’re here to make sure your diffuser is working properly for you
+
+Regards,%Agent First Name%,Scentiment Customer Service","","","","","{""propertyName"":""productIssue"",""displayName"":""Product Issue"",""type"":""dropdownSelect"",""value"":[""Not turning on""],""under"":""message""}","","","All Brands","Everyone","System"

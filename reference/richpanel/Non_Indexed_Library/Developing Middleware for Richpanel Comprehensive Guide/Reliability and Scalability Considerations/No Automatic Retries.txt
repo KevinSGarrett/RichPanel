@@ -1,0 +1,3 @@
+No Automatic Retries (Richpanel Side):
+
+ As noted, Richpanel’s webhook mechanism (HTTP Target) likely does not retry on failure by default. If your endpoint is down or returns an error, Richpanel moves on. Therefore, if guaranteed processing is critical, you need to implement your own retry logic. This could mean having Richpanel call an intermediary that always returns 200 and queues the event for processing, which then retries if it fails to process. For most cases, a lost webhook or two might be acceptable (they might be rare), but it’s something to consider in high-stakes integrations.

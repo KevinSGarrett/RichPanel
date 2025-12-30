@@ -1,0 +1,211 @@
+Order Properties
+Property Name
+
+Description
+
+orderId* (required)
+
+
+"orderId": "1234"
+Unique id of order.
+
+orderDbKey
+(required)
+
+
+"orderDbKey": 876541234
+If the order has a different database id, it must be provided here or can be kept the same as orderId. We use this to create a link to the order management portal.
+
+amount*
+(required)
+
+
+"amount": 100.25
+Total amount of the order.
+
+currency
+
+
+"currency": "USD"
+Currency in which the order amount's are defined.
+
+createdAt
+
+
+"createdAt": 1629131492259
+The date and time (ISO 8601 format) when the order was created.
+
+updatedAt
+
+
+"updatedAt":1629131492259
+The date and time (ISO 8601 format) when the order was updated.
+
+status
+
+
+"status": "processing"
+Example: cancelled, proessing, confirmed, or any custom text.
+Something that suits your system.
+
+fulfillmentStatus
+
+
+"fulfillmentStatus": "fulfilled"
+The order's status in terms of fulfilled line items.
+Example: fulfilled, unfulfilled, partially_fulfilled, or any custom text. Something that suits your system.
+
+financialStatus
+
+
+"financialStatus": "paid"
+The status of payments associated with the order. Example : paid, pending, partially_refunded, refunded, authorized, or any other text. Something that suits your system.
+
+paymentMethod
+
+
+"paymentMethod": "paypal"
+Name of the payment method used.
+
+processingMethod
+
+
+"processingMethod": "express",
+statusUrl
+
+"statusUrl": "https://ecome.com/26376372301/orders/21a1de0135e78dcda5f9fa2bac72587f/authenticate?key=cf1180676b7f5ec2d83e0bf1e563b126",
+
+discountAmount
+shippingAmount
+taxAmount
+tipAmount
+amount
+
+Float properties
+"discountAmount": 10.50
+"shippingAmount": 25
+"taxAmount": 12.25
+"tipAmount": 5
+amount: 100.00
+
+"discountAmount": total discount amount for the order.
+"shippingAmount": Total shipping amount of the order.
+"taxAmount": Total amount spend in tax for the order.
+tipAmount: Total tip collected from the order.
+amount: Total amount of the order.
+
+billingPhone
+billingEmail
+billingFirstName
+billingLastName
+billingAddressLine1
+billingAddressLine2
+billingCity
+billingState
+billingCountry
+billingPostcode
+
+All string properties, and optional
+
+*billingPhone**: The phone number at the billing address.
+
+*billingEmail**: The Email at the billing address.
+
+*billingFirstName**: The first name of the person associated with the payment method.
+
+*billingLastName**: The last name of the person associated with the payment method.
+
+*billingAddressLine1**: The street address of the billing address.
+
+*billingAddressLine2**: An optional additional field for the street address of the billing address.
+
+*billingCity**: The city, town, or village of the billing address.
+
+*billingState**: The name of the region (for example, province, state, or prefecture) of the billing address.
+
+*billingCountry**: The name of the country of the billing address.
+
+*billingPostcode**: The postal code (for example, zip, postcode, or Eircode) of the billing address.
+
+shippingPhone
+shippingEmail
+shippingFirstName
+shippingLastName
+shippingAddressLine1
+shippingAddressLine2
+shippingCity
+shippingState
+shippingCountry
+shippingPostcode
+
+All string properties, and optional
+
+*shippingPhone**: The phone number at the shipping address.
+*shippingEmail**: The Email at the shipping address.
+*shippingFirstName**: The first name of the person associated with the shipping address.
+*shippingLastName**: The last name of the person associated with the shipping address.
+*shippingAddressLine1**: The street address of the shipping address.
+*shippingAddressLine2**: An optional additional field for the street address of the shipping address.
+*shippingCity**: The city, town, or village of the shipping address.
+*shippingState**: The name of the region (for example, province, state, or prefecture) of the shipping address.
+*shippingCountry**: The name of the country of the shipping address.
+*shippingPostcode**: The postal code (for example, zip, postcode, or Eircode) of the shipping address.
+shippingMethod
+
+"shippingMethod": "Free Shipping 2-5 Days",
+
+Name of the shippping method used.
+
+coupons
+
+"coupons": ["NEW_USER", "FREE20"]["NEW_USER", "FREE20"]
+Coupons use in the order, while placing the order.
+
+items*
+(required)
+
+"items": [{
+"id": "2493989519418",
+"price": 49.99,
+"optionId": "31858336956474",
+"sku": "A31SSUJZ99COMTL1",
+"name": "My Product - L",
+"grams": 454,
+"quantity": 1,
+}][{ "id": "2493989519418", "price": 49.99, "optionId": "31858336956474", "sku": "A31SSUJZ99COMTL1", "name": "My Product - L", "grams": 454, "quantity": 1, }]
+
+*id**: The ID of the product.
+*price**: Price for single quantity of the variant product.
+*quantity**:The number of items that were purchased.
+*optionId**: The ID of the product variant.
+*sku**: The item's SKU (stock keeping unit).
+*name**: The name of the product variant.
+*grams**: The weight of the item in grams.
+fulfillment
+
+"fulfillment": [{
+"id": "2488098717754", //required
+"createdAt": 1608611436000,
+"updatedAt": 1609187662000,
+"status": "delivered",
+"tracking": [{
+"trackingNumber": "1234578162783",
+"trackingCompany": "USPS",
+"shippingDate": 1608611436000,
+"trackingUrl": "https://tools.usps.com/go/TrackConfirmAction.action?tLabels=1234578162783"
+}][{ "trackingNumber": "1234578162783", "trackingCompany": "USPS", "shippingDate": 1608611436000, "trackingUrl": "https://tools.usps.com/go/TrackConfirmAction.action?tLabels=1234578162783" }],
+"items": [{
+"id": "2493989519418", //required, Product base id
+"price": 49.99, //required
+"optionId": "31858336956474", //product variant id
+"sku": "A31SSUJZ99COMTL1",
+"name": "My Product - L", //required
+"grams": 454,
+"quantity": 1, //required
+}][{ "id": "2493989519418", //required, Product base id "price": 49.99, //required "optionId": "31858336956474", //product variant id "sku": "A31SSUJZ99COMTL1", "name": "My Product - L", //required "grams": 454, "quantity": 1, //required }]
+}
+
+*id** : Unique Id of fulfillment object.
+*status**: Current status of fulfillment.
+*tracking**: Tracking details of fulfillment.
+*items**: Product details of fulfillment.

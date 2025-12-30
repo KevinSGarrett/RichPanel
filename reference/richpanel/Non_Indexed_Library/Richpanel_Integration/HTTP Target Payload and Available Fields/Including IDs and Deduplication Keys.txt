@@ -1,0 +1,3 @@
+Including IDs and Deduplication Keys: 
+
+It’s important to include a unique ticket or message ID in the payload for idempotency. Richpanel’s payload placeholders allow you to include the ticket’s unique URL or number (as shown in the example sending TicketID: {{ticket.url}}). While we didn’t find an explicit “message ID” placeholder in the documentation, using the conversation ID (or URL which contains it) plus perhaps a timestamp can serve to uniquely identify an event. In practice, you should include the conversation_id (ticket ID) and maybe the message body or createdAt timestamp in the payload so your middleware can detect duplicates and ignore any repeated calls.

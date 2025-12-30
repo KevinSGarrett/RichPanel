@@ -1,0 +1,7 @@
+Parallelism and Queueing: 
+
+Ensure your middleware respects the rate limit by implementing a local queue or throttle. If you receive many webhook events in a short time (say a flood of chat messages), you might have to enqueue the subsequent API actions slightly. The X-RateLimit-Remaining header in each response can be monitored by your code to adjust speed. Also, if you do hit 429, use the Retry-After header (Richpanel specifies how many seconds to wait)
+developer.richpanel.com
+ – back off for that duration before retrying the failed requests
+developer.richpanel.com
+.

@@ -1,0 +1,19 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: Python
+
+import requests
+
+url = "https://api.richpanel.com/v1/tickets/id/add-tags"
+
+headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.put(url, headers=headers)
+
+print(response.text)

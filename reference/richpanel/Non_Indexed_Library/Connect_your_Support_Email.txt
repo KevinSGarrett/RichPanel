@@ -1,0 +1,42 @@
+Connect your Support Email
+Use this guide to connect your support emails to Richpanel.
+
+💡
+Support emails are different from user email IDs. Support emails are addresses like support@company.com or sales@company.com, which are shared by a group of users.
+Benefits
+If you have a shared email (like support@company.com or info@company.com), it’s recommended to use a ticketing system like Richpanel to keep track of all messages and ensure nothing falls through the cracks.
+
+Clear accountability: Each email can be assigned to a particular user so the team has visibility.
+Continue conversation with context: If a user needs to pick up a conversation that started with a team member, the entire conversation history is in one place.
+Get actionable analytics: You’ll be able to measure response times, time to resolve, and customer satisfaction. You can break down these reports by team or individual.
+To get started, head over to Settings → Channels → Email and click “Add new.” Select your email provider below for detailed instructions.
+
+Forwarding Emails to Richpanel from Email Provider
+Gmail
+Gmail
+Microsoft 365
+Microsoft 365
+Google Group Email
+Google Group Email
+Outlook
+Outlook
+Amazon WorkMail
+Amazon WorkMail
+Yahoo! Mail Plus
+Yahoo! Mail Plus
+Zoho Mail
+Zoho Mail
+Other email providers
+Other email providers
+Forwarding Emails to Richpanel from a Host
+GoDaddy
+GoDaddy
+Namecheap
+Namecheap
+Bluehost
+Bluehost
+Using DKIM For Email Delivery
+Use DKIM for Email Delivery
+Use DKIM for Email Delivery
+Preventing Email Delivery Issues by Adding AWS SES to SPF Records
+Preventing Email Delivery Issues by Adding AWS SES to SPF Records

@@ -1,0 +1,4 @@
+Authentication
+The Richpanel API uses the API Key Authentication method to authenticate your requests. You can view or generate an API key in your Richpanel account in the menu Settings -> Integrations->API Keys.
+
+You need to pass this API Key in your request header with x-richpanel-key.

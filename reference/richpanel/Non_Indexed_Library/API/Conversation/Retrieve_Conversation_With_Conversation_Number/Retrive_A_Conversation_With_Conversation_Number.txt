@@ -1,0 +1,96 @@
+Retrieve a Conversation with conversation number
+get
+https://api.richpanel.com/v1/tickets/number/{conversationNo}
+
+This end point has limited availability and may not work for imported conversations from other systems.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+conversationNo
+int32
+required
+1234
+
+Query Params
+show_visitor_profile
+boolean
+
+Responses
+
+200
+200
+
+Response body
+object
+ticket
+object
+id
+string
+created_at
+string
+first_closed_at
+string
+first_response_time
+string
+first_response_duration
+integer
+Defaults to 0
+resolution_duration
+integer
+Defaults to 0
+updated_at
+string
+assignee_id
+string
+organization_id
+string
+priority
+string
+recipient
+string
+status
+string
+subject
+string
+via
+object
+comments
+array of objects
+object
+attachments
+array
+author_id
+string
+created_at
+string
+body
+string
+id
+string
+metadata
+object
+plain_body
+string
+type
+string
+via
+object
+
+via object
+channel
+string
+isOperator
+boolean
+Defaults to true
+url
+string
+tags
+array
+
+400
+400

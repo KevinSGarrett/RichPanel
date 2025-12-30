@@ -1,0 +1,3 @@
+Stability of Webhook Triggers: 
+
+Using HTTP Targets in automation rules is an official, supported feature of Richpanel. It’s the recommended method for custom integrations (for things like triggering external workflows or syncing with third-party systems). Because it’s built into the platform, you can expect it to be stable over time – Richpanel added this feature to enable precisely these kinds of extensions. (Agents can even invoke HTTP Targets manually as part of macros or via the reply interface if needed, which shows that Richpanel considers them a first-class integration mechanism.)

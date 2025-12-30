@@ -1,0 +1,3 @@
+Tags and Metadata:
+
+ You can add or remove tags on the conversation by updating tags via the API. Richpanel’s API has dedicated endpoints to add/remove tags by ID, but you can also pass a list of tag IDs in the update payload (check their API reference for the exact format). First, you’d retrieve tag IDs using the “List Tags” API if you need dynamic tagging. Adding tags could be useful if your middleware wants to categorize tickets (e.g., tag a conversation as “Fraud Check Passed” or “Needs Follow-up”).

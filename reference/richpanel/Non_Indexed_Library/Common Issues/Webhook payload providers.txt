@@ -1,0 +1,37 @@
+Webhook payload doesn’t include the identifiers you need (so everything becomes ambiguous)
+
+What goes wrong
+
+Your automation rule triggers the HTTP Target, but you only send the message text.
+
+Now you don’t reliably know:
+
+which conversation/ticket it belongs to,
+
+which customer it belongs to,
+
+which channel it came from,
+
+whether you already processed it (idempotency).
+
+Result: extra API calls, ambiguous lookups (multiple tickets per email), and higher misrouting risk.
+
+How to avoid it
+
+Treat your HTTP Target body as a contract (version it like schema_version: 1).
+
+Include at minimum:
+
+conversation_id (ticket ID) and (if available) conversation_number
+
+customer_id and/or customer email/phone
+
+message timestamp (and message text)
+
+channel identifier (email/chat/sms/etc.)
+
+any tags/status/team currently set (so you can short-circuit work)
+
+Generate a stable idempotency key in middleware (e.g., conversation_id + message_created_at) and store it.
+
+This avoids a lot of downstream complexity (and reduces rate-limit pressure) because you don’t have to “re-discover” context later.

@@ -1,0 +1,3 @@
+Idempotency and Retries: 
+
+Although Richpanel’s automations are meant to fire each rule once per event, network issues could theoretically cause duplicate calls (for example, if a timeout occurs). Design your handler to be idempotent – use the unique identifiers in the payload to detect repeats. Also, log events and any failures on your side. If your endpoint was down or returned a non-200 status, Richpanel does not publicly guarantee retries (there’s no official retry policy mentioned), so that call might be lost. It’s on you to catch such scenarios (for instance, you might periodically reconcile by using the Richpanel API to check for any missed events if absolute consistency is required).

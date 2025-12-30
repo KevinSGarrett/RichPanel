@@ -1,0 +1,16 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: Java
+
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/customers/type/id")
+  .get()
+  .addHeader("accept", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();

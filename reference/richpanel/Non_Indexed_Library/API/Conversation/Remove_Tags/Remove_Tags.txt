@@ -1,0 +1,32 @@
+Remove Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/remove-tags
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Path Params
+id
+string
+required
+Ticket Id
+
+Body Params
+tags
+array of strings
+
+ADD string
+Responses
+
+200
+200
+
+Response body
+object
+
+400
+400
+

@@ -1,0 +1,3 @@
+Logging and Monitoring:
+
+ Implement logging in your middleware for each request (at least in a debug mode). This will be invaluable for troubleshooting. You may also want alerts if your endpoint starts receiving error responses from Richpanel (e.g., if your server is returning 500 errors, or if you realize no calls have come through in a period, indicating a possible problem).

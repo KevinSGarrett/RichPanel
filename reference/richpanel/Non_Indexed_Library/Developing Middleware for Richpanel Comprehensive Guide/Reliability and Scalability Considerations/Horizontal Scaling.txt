@@ -1,0 +1,3 @@
+Horizontal Scaling: 
+
+If your business grows, you might need to scale the middleware service. Because Richpanel’s HTTP Target will hit a single URL, you can put that behind a load balancer or cloud function endpoint. The calls are stateless HTTP requests, so you can run multiple instances of your middleware to handle them concurrently. Just ensure that if you use in-memory caching or similar, multiple instances won’t duplicate work incorrectly (again, idempotent design helps).

@@ -1,0 +1,3 @@
+Gradual Deployment: 
+
+When you’re confident in testing, deploy the integration for a small subset of cases first. Perhaps enable the automation rule only for a specific tag or for one support channel to start. Monitor the outcomes in Richpanel: Are tickets getting updated correctly? Are the right replies being posted? Check the Richpanel logs (if any) or your middleware logs to confirm each event. Once everything looks good, broaden the rule.

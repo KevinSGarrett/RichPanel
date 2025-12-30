@@ -1,0 +1,13 @@
+Create/Update orders
+post
+https://api.richpanel.com/v1/order/{appclient_id}
+
+
+Language: HTTP
+
+POST /v1/order/appclient_id HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

@@ -1,0 +1,3 @@
+Plan for failures:
+
+ by implementing your own monitoring. For example, have your endpoint return a specific success code and body, and if your service is down, ensure you can catch up later (maybe via a backlog or periodically reconciling recent tickets). Because Richpanel’s automation is more of a real-time trigger, if it fails, it won’t automatically re-run when your service comes back (unless you intentionally trigger it again, say by an agent clicking the macro manually or re-sending last customer message which isn’t practical). So treat the webhook like a fire-and-forget event: no guaranteed retry.

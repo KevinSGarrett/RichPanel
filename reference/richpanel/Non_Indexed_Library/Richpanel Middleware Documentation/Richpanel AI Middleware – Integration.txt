@@ -1,0 +1,257 @@
+Richpanel AI Middleware – Integration and Onboarding Guide
+Richpanel Integration Overview
+
+Our middleware acts as a bridge between Richpanel and advanced AI services to streamline customer support. When a customer sends a message via Richpanel (e.g. through live chat or email), Richpanel triggers our middleware to process the message
+pipedream.com
+. This can be achieved using Richpanel’s API or webhook capabilities to notify the middleware of new conversations or messages. The middleware then analyzes the content using OpenAI’s language model and determines the appropriate action:
+
+Department Routing: Identify which department or team should handle the inquiry (sales, support, billing, etc.).
+
+FAQ Automation: Recognize if the message matches one of the top 5 frequently asked questions and can be answered automatically.
+
+To facilitate this, our integration uses Richpanel’s API endpoints for conversations and tickets. For example, the middleware can update conversation tags or assign teams via the Richpanel API to route the ticket to the correct department
+developer.richpanel.com
+. Richpanel’s API provides endpoints to add tags, assign conversations to teams, or even attach order data to a ticket if needed
+developer.richpanel.com
+. This ensures that after the AI categorization, the customer’s message is immediately directed to the relevant support queue or receives an automated answer, all within the Richpanel system.
+
+How it Works in Real Time: A customer message enters Richpanel and is forwarded to the middleware (via a webhook or periodic API check). The middleware’s AI component reads the message and, within seconds, classifies it. If it’s a simple FAQ (like “What is my order status?”), the middleware can fetch the required data (e.g. order status from Shopify) and send a response back to the customer through Richpanel’s messaging API. If it’s a more complex issue, the middleware adds appropriate tags or assigns the conversation to a department’s queue in Richpanel for a human agent to handle. This blended approach of AI and Richpanel’s routing ensures customers get fast answers for common issues and proper human attention for complex ones.
+
+AI-Powered Message Routing to Departments
+
+We leverage OpenAI’s GPT models to perform intelligent message classification. The AI examines the text of the customer’s inquiry in depth – understanding intent, context, and even tone – to decide which department should handle it. Large Language Models like OpenAI’s GPT are exceptionally good at interpreting unstructured text and categorizing support tickets with high accuracy
+getcensus.com
+. We define a set of target categories (departments or issue types) relevant to our business, and the AI is prompted to decide which category best fits the message.
+
+For example, if a customer says “I was billed twice for my order, need a refund,” the AI would recognize this as a billing issue and tag or route it to the Billing/Payments department. Another message like “My app is crashing when I try to checkout” would be identified as a technical support issue and routed to the Tech Support team. By automating this triage, we ensure each message lands in the correct hands without initial manual sorting.
+
+Under the hood, the middleware might use either a fine-tuned classification model or prompt the GPT model with a list of possible departments and a request to choose the best fit. OpenAI’s models can not only categorize but also explain their reasoning, which we could log for audit purposes. The outcome of this AI analysis is a department recommendation along with a confidence score indicating how sure the model is about its classification. The middleware then uses Richpanel’s API to attach the appropriate tag or assign the conversation to the corresponding team in Richpanel
+developer.richpanel.com
+. (Richpanel supports organizing agents into teams/departments, and our system maps AI-chosen categories to those team IDs or tags.)
+
+This AI-driven routing greatly accelerates response times. Industry insights show that automatically categorizing and routing support tickets to the right team leads to faster resolutions and more consistent triage
+getcensus.com
+. By utilizing AI for first-line categorization, our support workflow becomes more efficient, ensuring customers get to the right agent or team on the first try.
+
+Confidence Scores and Routing Logic
+
+Because the AI model provides a confidence score for each classification, our middleware uses this to decide how to handle the message. The confidence score is essentially a percentage or probability indicating how sure the model is about its decision. We configure a threshold – a cutoff value – to determine when the AI’s guess is confident enough to trust. For instance, we might set an initial confidence threshold around 60%. This means if the model is ≥60% confident in its prediction, we act on it (auto-route or auto-respond); if not, we fall back to manual handling
+support.zendesk.com
+support.zendesk.com
+.
+
+This approach is in line with best practices in AI-driven support. Zendesk’s AI, for example, uses about a 60% confidence threshold by default, and many users adjust within 50–70% as the “sweet spot”
+support.zendesk.com
+. A higher threshold ensures the AI only acts when it’s quite sure, avoiding mistakes at the cost of deferring some opportunities. A lower threshold makes the AI more proactive but risks misclassification
+support.zendesk.com
+.
+
+In our middleware, if a message falls below the confidence threshold (say the model is very unsure whether a message is a simple FAQ or something else), we do not automate an answer or routing. Instead, we can either:
+
+Pass the conversation untagged for a human agent to review from scratch.
+
+Or apply a generic tag like “Needs Review” and send it to a general queue or escalation team.
+
+On the other hand, if the confidence is high, the middleware proceeds with automated actions. For routing, it will tag/assign the conversation to the predicted department immediately. For FAQ automation (discussed next), it will send the crafted answer. Every automated action is logged along with the AI’s confidence score, so we can review later. Over time, as we gather data, we might adjust the threshold. For instance, if we find the AI is very accurate even at 50% confidence, we could lower the threshold to automate more responses. Initially, though, we “start high” as recommended (e.g. requiring ~60-70% confidence) and only broaden automation when we’re satisfied with the AI’s performance
+support.zendesk.com
+support.zendesk.com
+. This ensures accuracy and customer trust remain paramount – we’d rather slightly under-automate (and have a human handle it) than risk an incorrect automatic reply.
+
+Automating Top 5 Customer FAQs
+
+One major feature of our middleware is the automation of the top five frequently asked questions. These FAQs typically are repetitive queries that don’t require a human touch every time. By handling them automatically, we improve response times and free up our agents for more complex issues. Our current top-5 FAQ list includes questions like:
+
+“What is my order status?” – Customers asking for an update on their order delivery or tracking.
+
+“How do I initiate a return or exchange?” – Questions about the returns process or obtaining return labels.
+
+“I need help with my account/password.” – Common account access issues (resets, login problems).
+
+“Do you offer [specific] shipping options or when will my order arrive?” – Shipping policy queries or delivery time estimates.
+
+“Can I change or cancel my order?” – Requests to modify an existing order.
+
+When a customer’s message matches one of these FAQ intents with high confidence, the middleware will automatically generate a reply using predefined logic and data. Each FAQ is handled a bit differently:
+
+For informational questions (e.g. shipping options, return policy), we have templated answers or we pull text from our knowledge base. The AI may fill in dynamic details (like the customer’s name or order number) to personalize the response.
+
+For status queries or account-specific questions (e.g. order status or account help), the middleware will fetch data from relevant systems (like Shopify for order info, or our user database for account status) and then compose a response.
+
+We use the AI both to detect the FAQ and to draft the answer. The detection uses the same classification approach described earlier, but specifically tuned for these top FAQs. Essentially, the middleware asks the AI model: “Is this question one of our known FAQs? If so, which one and how should we answer?” If the confidence is high that it’s a known FAQ, we proceed to automation; if not, the message is handled by a human as usual.
+
+Notably, our solution doesn’t just spit out static FAQ answers blindly – it incorporates real-time data when needed to ensure accuracy. This is crucial for something like order status, where every customer’s answer will be different. By automating FAQs, we aim to handle the repetitive queries instantly (often within seconds of the customer’s question) while ensuring the information is correct and up-to-date. Other companies have shown the effectiveness of this approach: for example, Rep AI’s integration with Richpanel advertises that their AI can handle over 90% of common customer inquiries automatically, handing off only the remainder to human agents
+hellorep.ai
+hellorep.ai
+. Our middleware strives for a similar outcome – deflecting the bulk of simple questions with AI so that agents can focus on complex problems.
+
+Of course, we continuously monitor the automated FAQ responses for accuracy. If the AI isn’t sufficiently confident or if the query is ambiguous (e.g. a question that could be interpreted as one of our FAQs but not certain), we prefer to have an agent handle it. The goal is to improve customer experience with instant answers, but without sacrificing quality of support. Over time, we may expand the FAQ list or adjust the responses based on feedback, ensuring the automated answers remain helpful and correct.
+
+Order Status Inquiry – Automated Workflow Example
+
+To illustrate the FAQ automation, let’s walk through our process for the most common question: “What is my order status?” When such a message comes in, the AI model typically identifies it as an Order Status FAQ with a very high confidence (this intent is usually clear from keywords like “order status,” “where is my order,” “tracking,” etc.). Here’s what happens next:
+
+Customer Identification: The middleware obtains the customer’s identity from the Richpanel conversation. Richpanel provides customer details (like email or customer ID) alongside the message data. If not, the middleware can call Richpanel’s API to fetch the customer’s email or profile associated with the conversation
+developer.richpanel.com
+developer.richpanel.com
+. Having the email or an order number from the message is key to finding the right order.
+
+Fetch Order Data (Shopify Integration): Since our store is on Shopify, the middleware queries Shopify’s API to retrieve the customer’s latest order or the specific order in question. Thanks to Richpanel’s native Shopify integration, our agents can see order details in Richpanel, but our middleware still needs to fetch that data programmatically for the automated reply. We use either the Shopify REST Admin API or GraphQL API to get details like order status, fulfillment status, and tracking number
+shopify.dev
+. For example, using the Admin API’s Order endpoint, we can retrieve an order’s current fulfillment state (e.g. fulfilled, in transit, out for delivery) and any tracking link. Shopify’s API allows us to retrieve this information in real-time given the order ID or customer info
+shopify.dev
+. (If the conversation in Richpanel is already linked to an order, we could alternatively use Richpanel’s own endpoint to get the order linked to the ticket
+developer.richpanel.com
+, but a direct Shopify API call ensures we have the most up-to-date status.)
+
+Compose Response: Once the relevant data is fetched, the middleware uses a response template to craft a message. We might have a template such as: “Hi [Customer Name], I’ve checked on your order [Order #]. It is currently [Status]. [If shipped, include: It was shipped on [Date] and is in transit with tracking number [XYZ], which you can track here: [link].] Let us know if you need anything else!”. The AI can fill in these blanks or we can do a simple programmatic string format. We rely on live data – for example, if the order status is Delivered, we include the delivery date; if Out for Delivery, we emphasize it’s almost there, etc. This way, the answer is personalized and accurate, not a generic FAQ quote.
+
+Deliver via Richpanel: The middleware then calls Richpanel’s API to send this message to the customer in the ongoing conversation. Using Richpanel’s “Update Conversation” or messaging API, we post the AI-generated reply so that it appears just like a normal agent response in the Richpanel chat timeline
+pipedream.com
+. From the customer’s perspective, they asked about their order and got a helpful answer almost immediately, with the latest info.
+
+Resolution or Handoff: If this fully answers the question, great – the customer may not need to speak to an agent at all. The middleware could optionally mark the conversation as resolved or leave a note for agents. However, if the customer responds or the AI wasn’t confident, we ensure a smooth handoff. For instance, we might leave the conversation open for the relevant department to double-check later.
+
+Because Shopify is integrated with Richpanel, any data we fetch might also be visible to agents. Richpanel’s dashboard lets agents easily access Shopify order details
+richpanel.com
+, which means even if the AI responds first, a human agent can later see all the order info in Richpanel if the issue reopens. Our middleware essentially mimics what an agent would do (look up the order and reply) but does it faster and 24/7.
+
+One important aspect is data security and accuracy. We use secure API calls to Shopify with an API key that has permission to read orders (and no more than necessary). By querying Shopify directly at the time of the question, we ensure the status is up-to-the-minute (for example, if an order got shipped just an hour ago, the AI’s answer reflects that). This automated order status workflow is perhaps the most tangible benefit of our AI middleware – it turns a question that usually requires a manual lookup and a few minutes of waiting into an instant self-service answer, improving customer satisfaction.
+
+Shopify Integration in the Middleware
+
+Since our e-commerce platform is Shopify, integrating it is crucial for the middleware’s effectiveness, especially for order-related FAQs. We have connected our Shopify store to Richpanel, which already centralizes a lot of customer and order data in the Richpanel interface. (Richpanel’s native integration with Shopify allows it to pull in customer profiles, order history, and even let agents perform actions like refunds right from Richpanel
+richpanel.com
+richpanel.com
+.) Our middleware builds on this by also connecting to Shopify’s APIs behind the scenes.
+
+Accessing Shopify Data: To enable the middleware to fetch order status or other details, we use Shopify’s Admin API. A Shopify Private App or Custom App is set up to provide API credentials (an access token) for our store. The developer will need to ensure this app has the necessary scopes, such as read_orders, so that it can read order information via the API
+help.zoho.com
+. (Shopify requires explicit scopes for apps; for example, to read all orders beyond the last 60 days, the read_all_orders scope would also be needed
+shopify.dev
+.) Once the app is created and installed on our store, it provides an Admin API access token which our middleware uses to authenticate when making requests to Shopify.
+
+Using the Shopify API: With the credentials in place, the middleware can make HTTPS requests to Shopify. For instance, to get order details, we might call the REST endpoint /orders.json or GraphQL endpoint for orders, filtering by the customer’s email or order number. We typically retrieve fields like order status, fulfillment status, tracking numbers, line items (if needed to answer product questions), etc. The Shopify API is well-documented and allows us to retrieve a specific order by ID or search orders by customer email
+shopify.dev
+stackoverflow.com
+. We keep the API calls efficient – e.g., fetching only the latest order if the question is general “Where is my order?” (often customers refer to their most recent order). If a customer specifically provides an order number, we fetch that exact order.
+
+Data Handling and Security: It’s important to handle Shopify data carefully. The API token is stored securely (not hard-coded). Our middleware only uses it server-side, and communication with Shopify is over HTTPS. We do not expose raw Shopify data directly to the customer; instead we translate it into a user-friendly answer. For example, rather than giving internal status codes, we say “Your order is Shipped and on its way” instead of “fulfillment_status: shipped”. By integrating Shopify in this way, we ensure the AI responses are grounded in real data. This prevents hallucinations (the AI can’t just make up an order status – it uses the actual data) and keeps answers factual
+shopify.dev
+.
+
+Another benefit of leveraging Shopify’s integration is that our AI could potentially automate other tasks. For instance, if a customer asks, “I want to return my order,” the AI could provide the return instructions and even initiate a return by creating a return merchandise authorization via Shopify (if we extend our middleware for that). Or for “Cancel my order,” the AI could check if the order is unfulfilled and eligible to cancel, then either guide the user or alert an agent. Those are potential future expansions – currently, we primarily read data from Shopify to include in responses.
+
+In summary, the Shopify integration ensures our AI middleware has the same single source of truth for orders that our support team uses. By programmatically tapping into Shopify, our automated responses remain consistent with what an agent would see in Richpanel’s Shopify panel, closing the loop between e-commerce data and customer communication.
+
+Developer Onboarding Guide
+
+If you’re a new developer joining this project, welcome! This section will help you get set up and understand the moving parts of the Richpanel AI Middleware system. Our goal is to make onboarding smooth so you can start contributing quickly.
+
+1. Access and Credentials
+
+Before running any code, you’ll need to obtain the necessary API keys and tokens:
+
+Richpanel API Key and Secret: Log in to our Richpanel account and navigate to Settings -> Apps -> Custom Connector (Richpanel’s interface for API access). Generate an API Key and Secret there
+developer.richpanel.com
+. This key/secret pair will allow our middleware to authenticate with Richpanel’s API to read/update conversations. Keep these credentials safe – treat them like a password.
+
+OpenAI API Key: If you don’t already have one, sign up for an OpenAI account (if not provided by the team) and create an API key from the OpenAI dashboard
+platform.openai.com
+. This key will be used for calling the OpenAI GPT model for message analysis. We usually store it in our configuration as OPENAI_API_KEY. Again, this is sensitive; don’t share it publicly.
+
+Shopify API Token: As discussed, we have a private/custom app in Shopify for API access. Ask a team lead or check our password manager for the Shopify Admin API access token for the project. This token has the required scopes (like read_orders) to fetch data. You might also need the Shopify shop domain (e.g. yourstore.myshopify.com) and the API version we’re using. This token should be kept in an environment variable (e.g. SHOPIFY_API_TOKEN). Make sure the token’s scopes include read_orders (and read_all_orders if needed) so that you can retrieve order details
+shopify.dev
+.
+
+It’s recommended to set up a local environment file (e.g. a .env file) with all these credentials. For example:
+
+RICHPANEL_API_KEY=...
+RICHPANEL_API_SECRET=...
+OPENAI_API_KEY=...
+SHOPIFY_API_TOKEN=...
+SHOPIFY_STORE_DOMAIN=...
+
+
+Our code will load these values at runtime.
+
+2. Setting Up the Development Environment
+
+Next, get the codebase up and running:
+
+Clone the Repository: Check out the project repository from our source control. (Ensure you have the correct branch if we maintain separate branches for development.)
+
+Install Dependencies: Our middleware is built with Node.js (for example) and uses a few libraries/SDKs (Richpanel API client, OpenAI SDK, etc.) – run npm install (or the equivalent command) in the project directory to install all dependencies. If it’s Python instead, create a virtual environment and install from requirements.txt. The README in the repo should specify this.
+
+Configuration: Place your .env file (with the keys from step 1) in the project root. Double-check any config files (like a config.json or settings module) to ensure things like API base URLs or model names are correct. By default, we target OpenAI’s gpt-3.5-turbo model for quick responses. Also verify the Richpanel API base URL (should be https://api.richpanel.com/v1/... as per docs) and our Richpanel account ID if needed.
+
+Environment Verification: Make sure you’re using the correct runtime versions (Node version, Python version, etc., as specified by the project). Also, it’s helpful to run a quick test to verify each key: for example, a small script to list Richpanel teams via the API (to ensure the Richpanel key works)
+developer.richpanel.com
+, or a simple OpenAI prompt test to ensure the OpenAI key is valid.
+
+3. Understanding the Codebase
+
+Our middleware has several key components:
+
+Richpanel Webhook Handler (or Poller): This part receives incoming data from Richpanel. If Richpanel is calling our webhook for new messages, you’ll see an endpoint like /webhook/richpanel in our code. It likely parses the JSON payload from Richpanel, which contains the conversation ID, message text, customer info, etc. In case we use polling, there might be a scheduled job that checks Richpanel’s API for new messages at intervals. Familiarize yourself with how we capture incoming messages. The format of Richpanel’s payload or API response can be found in Richpanel’s developer docs (e.g., conversation object structure).
+
+AI Processing Module: This is where we send the customer message to OpenAI’s API. Look for a function that constructs the prompt for classification. It might be doing something like: “Given this message, decide the department or if it’s an FAQ (list of FAQs).” If we fine-tuned a model or use few-shot examples, those will be in this logic. This module will return the AI’s decision (e.g., a label like “FAQ_OrderStatus” or “Dept_Billing”) and a confidence score (if provided by a classifier model or by some probability logic). The OpenAI API (especially if using the completion/chat models) might not directly give a numeric confidence, so we might simulate one or use a heuristic (like model logprobabilities if available). Check the code comments for how confidence is derived. This part will also likely contain the logic for threshold-checking (don’t worry, you don’t have to implement it from scratch – it should be there to use).
+
+Action Executors: After AI categorization, the code branches into either routing or auto-reply. There might be a function like routeToDepartment(dept, conversationId) which calls the Richpanel API to assign a conversation or add a tag. That would use the Richpanel ticket update endpoint. Another function might be sendAutomatedReply(conversationId, message) that posts a message into the conversation via Richpanel’s API. Read these functions to see how they interact with Richpanel (headers, payload format, etc.). Richpanel’s API expects our API key/secret for auth (often via an Authorization header or HTTP Basic auth – the developer docs will clarify the auth method
+developer.richpanel.com
+).
+
+Shopify Helper: A utility module likely exists for Shopify API calls (perhaps shopifyClient.js or similar). This would wrap HTTP calls to Shopify. It might use Shopify’s Node SDK or just direct REST calls via axios/fetch. See how it’s implemented – for instance, there could be a function getOrderStatus(orderId or email) that the FAQ logic calls. You should test this in a dev environment to ensure it’s pulling the expected data. If it’s using GraphQL, you’ll see queries in the code; if REST, the endpoints will be constructed (e.g., GET /orders.json?email=customer@example.com).
+
+Logging & Error Handling: We log AI decisions and actions for future analysis. Look for logging statements – these are important for debugging. For example, every time the AI classifies a message, we log the conversation ID, AI result, and confidence. If something goes wrong (an API call fails), errors should be caught and perhaps an alert or fallback happens (like if we fail to get order status, maybe the code decides not to auto-reply). Understanding these will help you troubleshoot during development.
+
+Spend some time reading through the code and comments. We strive to document functions and have an architecture overview in the README.md (check the repository README for a high-level diagram or description of flow). If anything is unclear, don’t hesitate to ask a team member – we’ve all been new to the project at some point!
+
+4. Testing the System
+
+Before deploying changes or new features, you’ll want to test the middleware in a safe environment:
+
+Local Testing: We have sample payloads from Richpanel (check the tests/ or samples/ directory). You can use those to simulate an incoming message. For example, we have a JSON file representing a Richpanel webhook for a new message event. You can POST this to your local server endpoint to mimic Richpanel. This will trigger the whole flow (AI classification, etc.) locally. Verify that the AI returns a reasonable category and that the subsequent actions are attempted (you might stub out the actual API calls in test mode to not spam the live Richpanel or Shopify).
+
+Richpanel Sandbox: If Richpanel offers a sandbox mode or if we have a test Richpanel project, use that for end-to-end testing. Often, we might create a test ticket in Richpanel and see if our middleware picks it up and responds. You can also utilize the Richpanel API directly in a tool like Postman: for instance, create a test conversation via the API, then call our middleware’s classify function on it.
+
+Unit Tests: Our project may include some automated tests (check for any .spec.js or similar files). Run npm test if applicable. These tests might cover the classification logic (with sample messages) and the formatting of FAQ answers. Ensure all tests pass after you set up.
+
+Integration Tests: If possible, test with a real scenario: for example, use a real (but low-stakes) customer inquiry from the past and run it through the system to see what the AI would do. This can reveal if the prompt needs tweaking or if the routing is correct.
+
+Adjusting Thresholds in Testing: You might want to experiment with the confidence threshold in a controlled way. For instance, test what happens if the AI is only 40% confident – does the code correctly skip automation? You can simulate this by tweaking a parameter or forcing a certain branch in the code.
+
+Throughout testing, monitor the console logs and any output. We also have logging to a file or database for AI decisions – you might get access to that to see historical performance. It’s crucial to verify that automated replies look good (no embarrassing typos or wrong information) and that routing truly sends to the right team (check in Richpanel UI if the ticket got tagged or moved as expected).
+
+5. Deployment and Monitoring
+
+Once you are comfortable with the system and perhaps have made your code contributions, the deployment process is as follows (at a high level):
+
+We typically deploy this middleware as a cloud function or a small web service on our infrastructure (could be AWS Lambda, Google Cloud Run, or a Docker container on a server). There is likely a CI/CD pipeline in place. Check our internal docs for deployment (perhaps in the repo Wiki or README deployment section).
+
+Ensure you never commit sensitive keys into the code repository. Our deployment uses secure environment variable injection for keys. Verify that in the CI config or ask DevOps if unsure.
+
+After deployment, closely monitor the system, especially if you changed something in the AI logic. Watch the logs in real-time when new tickets come in. We also have an alerting mechanism – for example, if the AI fails (throws an exception) or an API call errors out, it might send an alert to our Slack or logging service. Make sure you have access to those channels to catch any issues early.
+
+Fallback Plan: If something goes wrong in production (e.g., OpenAI API outage or a bug causing wrong auto-replies), our middleware is designed to fail safe – meaning it should default to letting the message go to an agent. But in worst case, we can disable the middleware by turning off the Richpanel webhook or integration temporarily. Know how to do this: usually, in Richpanel settings, one can deactivate the external target or we can add a feature flag in our code to skip automation. Coordinate with the team lead before making such changes in production.
+
+Finally, part of onboarding is also understanding the future roadmap. We plan to enhance this system, perhaps adding more FAQs or integrating other channels. Stay updated by joining our regular project meetings and reading the project notes. Don’t hesitate to propose improvements – whether it’s a better prompt for the AI, a new metric to track, or a refactor for clarity. The documentation (like this guide) is also living – as you learn new things or if something was missing, feel free to update the docs so the next person finds it even easier.
+
+Ensuring Accuracy and Continuous Improvement
+
+We place heavy emphasis on factual accuracy and reliability in our AI middleware. Aside from the confidence-threshold mechanism discussed, we implement several safeguards:
+
+Real Data Verification: Whenever possible, the AI’s output is backed by real data. For FAQs like order status, we don’t rely on the AI to guess the status – it must retrieve it from Shopify, ensuring the answer is correct at the time of sending. By grounding answers in data, we prevent the AI from hallucinating incorrect information. Richpanel’s integration with our e-commerce store further ensures that any data used (orders, returns, etc.) is the single source of truth
+richpanel.com
+.
+
+Review Loops: We regularly review a sample of automated responses and routed tickets. If the AI made an incorrect routing (e.g., sent a billing issue to the sales team), we analyze why – maybe the prompt needs adjustment or we need to add training examples for that case. Similarly, if an automated FAQ answer was not helpful, we refine the answer template. All automated messages are tagged internally (for example, we might prepend a hidden note or metadata in Richpanel that the message was auto-generated), making it easier to filter them for QA review.
+
+Incremental Rollout: Initially, we might not turn on automation for all 5 FAQs at once. We could start with one or two (like order status and maybe returns) and see how customers react. This staged rollout lets us ensure each answer is well-received. As our confidence in the AI grows, we enable more automation. This aligns with the idea of starting with a higher confidence threshold or limited scope, then gradually expanding as data proves the AI’s capability
+support.zendesk.com
+.
+
+Fail-safes: If the AI’s result is ambiguous or below confidence threshold, the middleware errs on the side of caution. It will either route the ticket to a human or ask a clarifying question rather than giving a potentially wrong answer. We’ve also configured timeouts – if an AI response doesn’t come back in a few seconds (say OpenAI is slow or down), we don’t leave the customer hanging; we’ll route to an agent instead of silence. The system is designed to never be worse than the default (which is agents handling everything). It should only add value when it’s sure.
+
+Logging and Metrics: We track metrics such as: automation success rate, number of tickets auto-routed vs total, FAQ auto-responses sent, and any customer follow-up messages (to gauge if the answer solved their issue). For example, if we notice a lot of customers still ask “Thanks, but actually I meant X,” after an auto-response, that signals the automation might be missing context. These metrics inform tweaks to the model or process. We also keep an eye on customer satisfaction scores or feedback in cases where automation was used versus not, to ensure it’s truly benefiting customers.
+
+Our commitment is that the AI middleware should maintain or improve the support quality. By validating information through trusted sources and using conservative thresholds, we have a high degree of confidence in the outputs. In other words, when the middleware says “Your order is in transit, arriving tomorrow”, we know that’s true because it was fetched from Shopify, and we only allowed that answer because the AI was sure the question was about order status. As we continue to develop this project, each new iteration will include testing and validation phases to keep that confidence high.

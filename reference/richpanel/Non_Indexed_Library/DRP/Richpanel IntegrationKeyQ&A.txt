@@ -1,0 +1,288 @@
+Richpanel Integration: Key Q&A for Middleware Development
+1. Official Integration Entry Points
+
+Triggering External Services: Richpanel supports HTTP Targets as the official way to call external services from the helpdesk. You can configure HTTP Targets under Settings → Integrations → HTTP Targets, then invoke them in various ways. In particular, automation rules can fire an HTTP Target when their conditions match, allowing you to send an outbound HTTP request as part of a workflow
+headwayapp.co
+. This is indeed the recommended mechanism for integrating with external systems on inbound messages. Richpanel’s updates confirm that HTTP Targets can be used in automation rules, and even manually by agents (via the reply box or as part of macros)
+headwayapp.co
+. In practice, this means whenever a new customer message comes in, you’d use an automation rule with an HTTP Target action to notify your middleware.
+
+Helpdesk Tickets vs Live Chat: The trigger mechanism works consistently across channels. In Richpanel, email tickets, live chats, and other channels are all treated as “conversations” in the helpdesk. Automation rules apply to conversations regardless of channel, so a new inbound message will trigger the same rule whether it’s from an email or a live chat session. (Richpanel emphasizes that its automation rules “work across all channels, not just live-chat”
+richpanel.com
+.) In short, you can rely on a unified automation trigger for any customer message, and there’s no special difference in how you’d set up the rule for chat vs. email – just ensure your rule conditions catch the events you want.
+
+Stability: Using HTTP Targets in automations is an official, supported feature, so it’s stable and unlikely to break unexpectedly. This was introduced as a feature to allow custom integrations (e.g. with Zapier, survey triggers, etc.), and it’s the method Richpanel documents for performing external actions
+headwayapp.co
+headwayapp.co
+. In summary, you can confidently use an automation rule with an HTTP Target as the entry point for your middleware on inbound messages, knowing it’s a first-class integration point.
+
+2. HTTP Target Payload and Available Fields
+
+Example JSON template for a Richpanel HTTP Target payload, showing placeholders for ticket fields (e.g. customer name, email, order ID, etc.) to send contextual data.
+
+Default Payload Content: By default, when you set up an HTTP Target in Richpanel, you have the ability to define the request payload yourself. Richpanel doesn’t automatically send a fixed schema of ticket data; instead, you compose the payload (JSON, form data, or XML) and insert whatever variables you need. In other words, the default payload is essentially blank until you configure it. Richpanel provides templating with placeholders (using {{...}} syntax) to include conversation data. For example, in the screenshot above, the JSON template explicitly includes fields like the customer’s name ({{ticket.customer.name}}), email ({{ticket.customer.email}}), last order number ({{ticket.customer.lastOrderNumber}}), ticket creation time ({{ticket.createdAt}}), and even a ticket identifier URL ({{ticket.url}}). This shows that you can include key identifiers such as the conversation ID or URL, customer info, and even specific message content if there are placeholders for it. Common variables available include the customer’s name, email, phone, last order ID, ticket subject, status, etc., and you can likely include the latest message text (Richpanel’s templating would have a placeholder for the newest message or comment, though we’d confirm the exact placeholder name with their docs or support).
+
+Including IDs and Deduplication Keys: It’s important to include a unique ticket or message ID in the payload for idempotency. Richpanel’s payload placeholders allow you to include the ticket’s unique URL or number (as shown in the example sending TicketID: {{ticket.url}}). While we didn’t find an explicit “message ID” placeholder in the documentation, using the conversation ID (or URL which contains it) plus perhaps a timestamp can serve to uniquely identify an event. In practice, you should include the conversation_id (ticket ID) and maybe the message body or createdAt timestamp in the payload so your middleware can detect duplicates and ignore any repeated calls.
+
+Customizing the JSON Body: You have full control over the JSON structure that gets sent. You can choose which fields to send and what to name them. Richpanel does not restrict you to a fixed schema – you craft the request body in the HTTP Target setup. In the UI, when creating an HTTP Target, you’ll select the HTTP method (GET/POST/etc.), content type (e.g. “JSON template”), and then enter the body with placeholders for any ticket attributes you need. This means you can keep the payload minimal (e.g. just send conversation ID and latest message text), or include rich context (customer info, entire order details if available, etc.) depending on your needs. Masking PII would be your responsibility – since you decide which fields to send, you can simply choose not to include sensitive data like full customer addresses, or you could redact part of it in your middleware. Richpanel does not appear to offer an automatic PII-masking function for the webhook payload; you’ll want to only include what’s necessary to maintain privacy.
+
+Payload Size and Timeouts: Richpanel’s documentation doesn’t specify a maximum payload size or an exact timeout for HTTP Target calls. However, it’s safe to assume the payload should be reasonably sized (likely in the order of a few kilobytes at most) – sending extremely large JSON objects (like entire transcripts) may not be advisable. As for timeouts, since these calls happen as part of an automation rule, Richpanel will have a timeout to avoid delays (commonly webhooks time out after ~5–10 seconds if not sooner). Although not explicitly stated, you should design your endpoint to respond quickly (within a few seconds). A slow endpoint could cause the automation to fail or be skipped. In absence of official numbers, we recommend keeping response times under ~3–5 seconds.
+
+Auth Headers for Security: Richpanel allows you to add custom HTTP headers to the outgoing request, which is how you can include authentication for your middleware service
+headwayapp.co
+. For example, you can set an API key header or an HMAC signature header in the HTTP Target configuration so that your server can verify the request is legitimate. (The UI provides fields to add headers when creating the HTTP Target.) This means you can secure the webhook by requiring a token – Richpanel will send that header on every call. However, request signing/HMAC isn’t generated by Richpanel beyond what you set as static headers – i.e. Richpanel doesn’t calculate dynamic signatures itself; it will only send whatever static secret or token you configure. Also, there’s no mention of IP whitelisting for Richpanel’s webhook calls, so you should rely on the auth header to authenticate the request (Richpanel’s servers likely use dynamic IPs on AWS). In summary, the HTTP Target payload is fully customizable: you’ll construct a JSON body with all the context your middleware needs, and you can include identifiers for deduplication and auth tokens for security.
+
+3. Routing Primitives: Teams (Departments) and Ticket Assignment
+
+“Department” Concept in Richpanel: Richpanel organizes agents into Teams, which effectively serve as departments or groups. There isn’t a separate object explicitly called “Department” – instead, you’ll use Teams to represent departmental queues. In the API and UI, a Team is a grouping of agents (e.g. “Sales Team”, “Returns Dept”, etc.). Richpanel’s API reference confirms the presence of Teams (you can list teams via the API)
+developer.richpanel.com
+, and these teams are used for assignment/routing purposes. There are also “Channels” in Richpanel (which denote the source channel like email, chat, etc.), and “Inboxes” (which may be views or collections of tickets, possibly filtered by team or channel). But the canonical routing object is the Team – when you want to route a conversation to a specific department, you will assign it to the corresponding Team.
+
+Routing a Ticket to the Right Queue: To route a ticket to a specific team/department, you have a couple of options. If you’re doing it manually in Richpanel, you could set up an automation rule action to assign the conversation to a Team (or to a specific agent). However, since you are developing middleware, you will likely use the API to update the conversation’s assignment after your AI/middleware determines the correct department. Richpanel’s API for updating a conversation (PUT /v1/tickets/{id}) supports setting the assignee and team. For example, you can include a team_id field in the update payload to move the ticket into that team’s queue (and optionally an assignee_id to assign it to a particular agent) – these fields aren’t shown in the public docs snippet but are part of the conversation object. The list of Teams and their IDs can be fetched via the API
+developer.richpanel.com
+, so your middleware can maintain a mapping from department names to Richpanel team IDs.
+
+Cleanest Routing Approach: The best practice is to use Teams for departmental routing rather than relying on just tags. For instance, instead of tagging a ticket “Billing” and having agents filter by tag, it’s more reliable to set the ticket’s Team to “Billing” so it appears in the Billing team’s queue directly. You can set the team either through an automation rule action (if your workflow is simple), or via the API call from your middleware once your model predicts the department. Using the API gives you flexibility: your middleware can call PUT /v1/tickets/{id} with {"team_id": "<team_uuid>"} (and possibly an assignee_id if you want to auto-assign to a specific user) to route the conversation. Richpanel’s API also allows listing users (agents)
+developer.richpanel.com
+, which you might use if you decide to assign to a specific agent or need to check team membership.
+
+In summary, treat “Team” as the department object. Plan to map your ML model’s output (e.g. “returns”) to a Richpanel Team ID, and then set that via the API. This will place the conversation into the correct team’s inbox. (And yes, you can retrieve all teams via API to get their IDs
+developer.richpanel.com
+, which confirms the team names/IDs for mapping.) If needed, you can also adjust routing via automations (e.g. an automation rule could look at a tag or conversation property set by the middleware and then assign a team), but directly calling the API from your middleware to update the team is straightforward and real-time.
+
+Routing in Live Chat: One special note for live chat conversations – you can route a live chat to a team as soon as it’s created (or as soon as the customer sends the first message) by using the same approach. The automation rule for “conversation created” or “new message” can trigger your middleware, which then assigns the team. This should happen before an agent picks up the chat. Richpanel will typically hold new chats unassigned (or assign based on round-robin rules if configured) until an agent accepts it. By assigning a Team quickly via API, you ensure the chat goes into the right department’s queue. It’s advisable to configure Richpanel’s chat settings so that there’s a brief window for the automation to run (e.g. don’t auto-assign to any online agent universally; use teams or wait a couple seconds). That way, the chat can be transferred to the correct team without an agent from the wrong department grabbing it. Once your middleware sets the team, Richpanel will notify only agents of that team (or follow any assignment rules defined for that team) for the incoming chat. In essence, the same team assignment logic applies to chats as to tickets.
+
+4. Updating Conversations via API – Writable Fields
+
+Fields You Can Update: Richpanel’s Update Conversation API (PUT /v1/tickets/{id}) allows you to modify most of the key fields on a conversation. Although the official docs don’t list them in plain text, from examples and context we can confirm you can update the following: status (e.g. open, closed), assignee (which agent is assigned), team (department/team assignment), priority, tags, and custom fields on the ticket. Essentially, if a field is part of the conversation/ticket object in Richpanel, you can likely set it via this API. For instance, the sample payload for creating a ticket shows fields like status, tags, priority, subject, and even a customer profile being set
+developer.richpanel.com
+developer.richpanel.com
+ – by analogy, the update call supports similar fields (except you wouldn’t change customer info via the ticket update; that would be done via the Customer API if needed). In practice, our middleware will primarily concern itself with routing updates (team and assignee), status changes, adding tags, and possibly setting a custom field for categorization.
+
+Here’s a quick run-down of what’s writable:
+
+team_id – The UUID of the Team to assign the conversation to (for departmental routing). Usage: you include "team_id": "<uuid>" in your JSON payload to move the ticket to that team.
+
+assignee_id – The ID of the specific agent (user) to assign the ticket to. This is optional; you can leave it unassigned or just set the team. But you can assign to a bot user or a specific rep if needed.
+
+status – Tickets can have statuses like OPEN, PENDING, CLOSED, etc. You can set the status via the API (for example, mark a ticket solved/closed after providing an automated answer, or maybe set to pending if waiting on something). This is a simple string field in the payload.
+
+priority – If you use priority levels (Low, Medium, High, etc.), you can update that field to reflect urgency.
+
+tags – You can add or remove tags. Richpanel provides dedicated endpoints for adding/removing tags as well
+developer.richpanel.com
+, but you can also likely set the full list of tags in an update call. (Be mindful that using the separate Add Tag endpoint might be easier for appending one tag without affecting others
+developer.richpanel.com
+.)
+
+custom fields – Richpanel supports custom ticket fields (as indicated by the new “Update Field” automation feature and examples like an “Issue Type” field
+updates.richpanel.com
+). If you have custom fields (e.g. dropdown or text fields for categorization), those should be writable via the API as well. Often, custom fields might appear as part of the ticket object, possibly under a custom_fields dictionary or by field key. (You might need to get the field IDs or keys from Richpanel; their support can provide the mapping, or an API to list custom fields if available.) For example, if you have a custom field “Issue Type”, the API might expect something like "custom_fields": {"Issue Type": "Return Request"} or a field ID. We would confirm the exact format with Richpanel’s team or docs, but conceptually it’s supported since the UI and automations can set these fields.
+
+comment – This is how you add a message to the conversation (more on this in the next section). By including a comment object with a body and sender_type, you effectively post a reply or note. This is part of the update payload and is a key way the middleware can post replies.
+
+To answer the question directly: yes, team, assignee, status, priority, tags, and more are writable. In fact, Richpanel’s own API documentation shows many of these as examples. For instance, creating a conversation included setting status, tags, priority, subject, etc. and adding an initial comment
+developer.richpanel.com
+developer.richpanel.com
+. The update call is analogous, except you specify the ticket ID in the URL. If you need examples beyond the docs UI, you can use the “Try It” feature in their docs or ask Richpanel support – but from what we gathered, if a field exists on a ticket, you can set it. There’s also an Attach Order endpoint
+developer.richpanel.com
+, which indicates you can attach an order record to the conversation (helpful for e-commerce context). So your middleware could even attach order info via the API if needed (e.g. when auto-responding with order status, attach the order to the ticket for agent visibility).
+
+One thing to note: updating multiple properties at once is allowed. The Update a Conversation call can take a JSON with multiple fields and apply them in one go. For example, you can in one API call assign the team, set the status, add a comment, and tag the ticket. This is great for efficiency and staying within rate limits. In summary, you won’t be limited by the API in terms of updating the conversation – all the key fields (status, assignment, tags, custom fields, etc.) are writable, enabling your middleware to perform the full loop (route to the correct department and even post an automated reply) through the API
+developer.richpanel.com
+developer.richpanel.com
+.
+
+5. Automated Replies: Public vs Internal Notes
+
+Posting Public Replies via API: When your middleware wants to post a message back to the customer (e.g. “Your order is on the way!”), you will use the API to add a comment to the conversation. In the API payload, this is done by including a comment object with a body (the text of the message) and a sender_type. Richpanel’s API uses sender_type to denote who the author of the message is. The two relevant values are "customer" and "operator"
+pipedream.com
+. For an automated reply from your side (acting as an agent), you would use sender_type: "operator" along with your message body. This will create a comment that appears as coming from an operator/agent. By default, an operator’s comment is a public reply – meaning the customer will be notified or will see it just as if an agent responded.
+
+Richpanel does not have a documented separate flag for an “internal note” via the API. In the Richpanel app, agents can switch a reply to “internal” (a note that customers don’t see), but in the API we haven’t found a parameter like internal: true or a different sender_type to mark it private. The Pipedream connector for Richpanel, for example, only offers “Customer” or “Operator” as the sender type for new comments
+pipedream.com
+, with no mention of an internal note option. This suggests that any comment posted as an operator will behave as a normal agent reply (visible to the customer, sending notifications if applicable). Thus, if you add a comment via API with sender_type "operator", expect that the customer will receive that message. It will show up in the conversation thread as a reply from an agent (it might be attributed to whichever user is associated with the API key, see “bot identity” below).
+
+If your workflow includes an “assist mode” where the AI suggests a reply for the agent (instead of directly messaging the customer), you have to be careful. Richpanel currently doesn’t provide a clear way to insert an internal-only comment via API that the agent can see but the customer cannot. A workaround might be to send the suggestion to the agent through a different channel (like a Sidekick suggestion if they have an AI plugin, or via email/slack to the agent). Another possible approach is to use a tag or custom field to hold the AI-suggested answer and have the agent interface surface that (though Richpanel UI would likely not show a tag’s text to an agent, so this may not be viable). Given these limitations, most likely you will either send public replies or hold suggestions outside of Richpanel. If internal note capability via API is critical, it’s worth asking Richpanel support if there’s any undocumented parameter to create an internal note. (At the time of our research, we didn’t find evidence of one, so assume that API-originated comments = customer-visible.)
+
+Distinguishing Bot Messages to Agents: If you do post replies automatically, it’s good practice to let agents know it was an automated message (so they have context). Since the message will appear as coming from an “operator,” one way to do this is to create a dedicated agent account for the bot. For example, you might create an agent user named “ACME Bot” or “Auto Assistant”. Then generate your API key under that user (or have that user’s credentials used for API). That way, when a comment is posted, it will show the author as “ACME Bot” (with perhaps a bot icon if you set one). Agents will immediately see that the response was automated by the bot user. However, note that Richpanel licenses agents by seat, so using a bot account could consume a paid seat. You should clarify with Richpanel if they offer a free or discounted seat for an automation/bot user. Some platforms treat “light agent” or “bot” differently, but Richpanel doesn’t explicitly mention a bot user type in their materials. It’s likely you’ll have to use a standard agent slot for the bot identity.
+
+If you don’t use a separate bot user, the automated reply will appear to come from whichever API key or account you used. If your API key is tied to an admin user, it might show that admin as the author of the message (which could confuse agents). Therefore, using a separate bot agent is recommended for clarity, even if it costs an extra seat. Label that user clearly as a bot in the name. As for customers, they will just see a normal reply (unless you choose to phrase it as coming from an AI). You might want to include in the message text something like “[Automated Message]” or a particular tone so the customer knows it’s an automated reply (that’s a business decision).
+
+Summary: Use sender_type: "operator" for any reply you want the customer to receive
+pipedream.com
+. That will notify the customer on the channel (send email, show in live chat, etc., just as if an agent responded). There is no built-in “internal note via API” (no sender_type: "internal" exists in the docs), so avoid trying to post internal-only messages through the API. Plan your “agent assist” mode such that suggestions are delivered to agents outside of the normal public reply flow (or use a clearly-marked bot account to post and perhaps immediately follow-up with an internal note by that same bot saying “This was an automated suggestion” – but again, that note might not be truly internal).
+
+Finally, ensure your automated replies are safe and contextually appropriate. Agents should be able to tell the message was automated (via the bot username or tags), and you should monitor initial roll-out. It might also be wise initially to start with internal suggestions (even if just via a side channel) before allowing the bot to send public replies, to build trust in its accuracy.
+
+6. Automation Rule Interactions & Preventing Loops
+
+This is a crucial consideration – you don’t want your automation to get into a ping-pong loop where your HTTP Target triggers your middleware, your middleware updates the ticket, and that update triggers the automation again ad infinitum. Here’s how to prevent that:
+
+Trigger on Customer Messages Only: The first step is to configure your Richpanel automation rule to only fire on inbound customer events, not on every single update. Richpanel’s rules engine allows conditions based on events and properties. You’ll want your HTTP Target rule to run when a new message from a customer is received (or when a ticket is created by a customer). Do not have it trigger on “any update” or on agent replies. In many helpdesks, there’s a condition like “if last message is from customer” or “message sender = customer”. If Richpanel’s UI offers that, use it. This ensures that when your middleware adds a reply or tag (which counts as an update), it doesn’t satisfy the trigger conditions and thus won’t re-fire the rule. Essentially, scope the automation to customer-side activity only.
+
+For example, if the rule is “When a message is received and Channel is Email and (maybe some condition about content)… then HTTP Target,” make sure there isn’t a case where your own API-driven message could meet those conditions. If your bot’s reply could possibly trigger other rules, use conditions to prevent that (like “Message author is not bot” or similar – although “author” might not be directly exposed, using teams or tags can proxy this).
+
+Use a “Processed” Flag: A very reliable pattern is to use a tag or custom field as a loop-prevention flag. For instance, have your automation rule check that a certain tag (say “bot_processed”) is not present on the ticket before firing. Then, as part of your middleware’s response, add that “bot_processed” tag (or set a field) on the ticket. This way, if the same ticket sees another customer message or somehow re-enters the rule, the presence of the tag will cause the rule condition to fail and it won’t fire again. You can implement this easily: in your automation rule conditions, add “Tags does not contain ‘bot_processed’”. And in your middleware, when you send the reply via API, also include an update to add the ‘bot_processed’ tag (or perhaps set a custom field “Last response by bot = true”). This ensures one-time execution per ticket. If you need it per message, you could have the middleware remove the tag when a new customer reply comes in (that might be overkill; usually one automated attempt per conversation is enough, then hand off to humans).
+
+Avoid Triggering on Bot Actions: Make sure any other automation rules (not just the HTTP Target one) are also constrained appropriately. For example, if you have a rule like “if ticket status changes to X, do Y”, be mindful that your API might change a status and unintentionally fire another rule. Audit your automations and use conditions like “initiator is customer” or use tags to differentiate. Richpanel might eventually introduce an explicit setting like “Run this rule only on customer messages” – if so, enable that.
+
+No Duplicate HTTP Calls: Another potential loop scenario is if Richpanel retries the HTTP Target (more on retries in section 7). If Richpanel were to retry calling your middleware, you want to ensure your middleware doesn’t duplicate actions. This again is solved by idempotency keys (e.g. message ID) and the “already processed” tag approach. If you get the same event twice, your middleware can check “did I already add a response to this ticket?” by looking at stored IDs or by querying the ticket (or seeing the tag).
+
+Test in a Safe Environment: During testing, use a non-critical ticket or a sandbox (see section 9) to simulate the full loop. Intentionally cause your middleware to update the ticket and see if the automation triggers again. If it does, adjust the conditions. One common pattern is to use different fields for input vs output. For example, some setups use one tag like “needs_bot_reply” that triggers the HTTP Target and then the bot removes that tag and adds “bot_replied”. That way, the trigger won’t fire again because the “needs_bot_reply” condition is no longer true once the bot has done its job.
+
+In summary, design the automation with a one-direction flow: customer message → rule fires → bot responds (and marks ticket) → [stop]. By using a marker (tag/field) and proper conditions, you can avoid infinite loops. Also, confirm with Richpanel if their automation rules have an implicit protection (some systems allow rules to specify “do not trigger on API changes” or such – worth asking, but assume you need to handle it). Following these precautions will prevent your bot from spamming customers or creating recursive tickets.
+
+7. Reliability and Retries of HTTP Targets & API Calls
+
+Delivery Guarantees for HTTP Targets: Richpanel’s documentation does not explicitly detail how it handles HTTP Target failures (such as your endpoint being down or returning an error). Based on typical behavior of webhook-like systems and absence of evidence to the contrary, you should assume best-effort, at-most-once delivery. That is, Richpanel will attempt the HTTP request once when the rule triggers, and if it fails (e.g. times out or gets a non-2xx response), it likely will not retry automatically (or might have a minimal retry logic, but not guaranteed). We did not find any mention of a retry queue or backoff strategy in their help center. So if your endpoint is down when a customer message arrives, that integration call could be lost. This means your middleware might miss that event unless you have some secondary check. It’s important to make your endpoint as reliable as possible and have monitoring on it.
+
+Timeouts and Success Codes: Although not specified, typically Richpanel will consider any HTTP 2xx response as a success for the HTTP Target call. If your endpoint returns a 200 OK (or 204, etc.), Richpanel will treat the automation action as completed. If you return a 4xx or 5xx status, Richpanel will consider it a failure. We don’t have the exact timeout value, but many webhook systems use ~5 seconds. If your service doesn’t respond within that time, Richpanel might cut off the request (and possibly mark the automation action as failed). They haven’t published a “retry 3 times” or anything, so assume no built-in retries on failure. Therefore, design your endpoint to respond quickly (acknowledge the request and process asynchronously if needed) so that you rarely hit the timeout.
+
+Duplicate Calls: If Richpanel does implement a retry on failure, you could get the same payload multiple times (in an at-least-once scenario). It’s wise to build idempotency into your middleware regardless. Use the conversation_id and perhaps a message timestamp to detect if you’ve already handled this event. That way, even if Richpanel were to send it twice (e.g. network issue on acknowledging the first attempt), your system won’t double-post a reply. But again, the likely scenario is at-most-once (no retry), which means you trade the risk of missing a message vs. duplicate handling. Given that, you might want to log all incoming webhook calls and have alerting if one fails, so you can manually intervene if needed (since Richpanel doesn’t appear to queue and retry for an extended period).
+
+Failure Visibility: Does Richpanel provide logs for HTTP Target deliveries? There’s no user-facing log dashboard mentioned for HTTP Targets. In the UI, you create the target and use it in rules, but there isn’t a known “webhook deliveries” log section. If an HTTP Target fails, you might only notice because the expected action didn’t happen (or perhaps the automation rule could have an action after the HTTP call that doesn’t execute – unclear). It would be great if Richpanel surfaced webhook errors (some systems will show an error in the rule execution log). We recommend asking Richpanel support if there is any log or record of HTTP Target calls (especially failures). They might be able to check on their side if a webhook was delivered successfully or not, but proactive logging isn’t in the docs.
+
+In practice, plan for failures by implementing your own monitoring. For example, have your endpoint return a specific success code and body, and if your service is down, ensure you can catch up later (maybe via a backlog or periodically reconciling recent tickets). Because Richpanel’s automation is more of a real-time trigger, if it fails, it won’t automatically re-run when your service comes back (unless you intentionally trigger it again, say by an agent clicking the macro manually or re-sending last customer message which isn’t practical). So treat the webhook like a fire-and-forget event: no guaranteed retry.
+
+For API calls from your side to Richpanel (e.g. posting replies or updating tickets), Richpanel does enforce rate limiting and will tell you if a request didn’t succeed (you’ll get a non-2xx HTTP response). If your API call fails due to a 429 rate limit or a transient error, you should implement retry logic on your side (with exponential backoff and using the Retry-After header as guidance, see next section). Those API calls are fully in your control to retry; the HTTP Target calls from Richpanel, however, you cannot easily retry from Richpanel’s side without another trigger.
+
+Debugging: If something isn’t working (say the HTTP Target isn’t calling your service at all), double-check the automation rule conditions and ensure the HTTP Target integration is active. For troubleshooting, you might point the HTTP Target to a requestbin or your test server first to verify payload contents. Once in production, any failures will be silent unless you catch them, so consider logging all requests on your middleware and perhaps having it send you an alert if it receives something unexpected or if it hasn’t received anything in a while (could indicate Richpanel stopped sending due to repeated failures).
+
+To summarize, expect at-most-once delivery with no built-in retry. Use idempotent processing in case of any duplicate, and handle reliability on your side. We didn’t find any documentation of robust retry or a dead-letter queue for webhooks in Richpanel, so assume a lightweight implementation: one try per event, success on 2xx, no automatic replays. If guaranteed processing is needed, you might need to implement a polling fallback (for example, periodically poll for new tickets via API as a safety net – though that’s heavy and usually not needed if webhooks are working fine).
+
+8. Scalability Limits and Best Practices
+
+API Rate Limits: Richpanel’s API is rate-limited to 50 requests per 30 seconds
+developer.richpanel.com
+. This is approximately 1.67 requests per second on average, with burst capacity up to 50 in a short span. If you exceed this (for example, if your middleware tries to update a large number of tickets at once), Richpanel will respond with HTTP 429 Too Many Requests
+developer.richpanel.com
+. The response headers will include X-RateLimit-Limit: 50, X-RateLimit-Remaining (how many calls left in the window), and Retry-After (how many seconds to wait before retrying)
+developer.richpanel.com
+developer.richpanel.com
+. This is a fixed limit as per documentation. It’s not stated that this can be increased on a per-account basis. Usually, such limits are global, but if you anticipate needing more throughput (say your volume is extremely high), you could discuss it with Richpanel to see if they have flexibility for enterprise clients. For planning purposes, assume 50/30s is a hard cap.
+
+Throughput for Inbound Messages: You plan to process every inbound message with the middleware. If volume is, for instance, 100 messages per minute (just an example), that’s under the limit (100/min = ~1.67 per sec). But if volume spikes or if your middleware is making multiple API calls per message, you need to be careful. The “safe” throughput given the limit is roughly 100 messages per minute (if one API call per message). If each message might lead to 2 or 3 API calls, then the safe throughput is proportionally lower (e.g., ~33 messages/minute if 3 calls each, to stay around 100 calls/minute). Keep in mind, rate limit is 50 per 30 seconds, which resets every 30s window. If you overshoot in one window, you’ll get blocked until the window resets (the Retry-After header will tell you how many seconds to pause).
+
+Minimizing API Calls: It’s crucial to optimize the number of API calls your middleware makes per conversation. The good news is Richpanel’s API design lets you combine actions. As mentioned, you can update multiple fields (assign team, set status, add comment, and add a tag) in one single PUT request to /tickets/{id} rather than separate calls for each. Use that to your advantage. For example, when your bot handles a message, you can send one payload that contains the reply comment, the new status (maybe “pending” or leave as is), the team assignment, and a tag (like “bot_reply”) all together. That’s 1 call instead of 4. Similarly, if you needed to create a ticket and immediately post a message, the Create API allows an initial comment in the payload, avoiding a second call.
+
+Another strategy is to avoid unnecessary polling or lookups. If you get all necessary data in the webhook payload (customer email, message text, etc.), you might not need to call Richpanel’s API to fetch additional info (like customer profile) unless required. Richpanel does have endpoints to get customer details
+developer.richpanel.com
+ or order info, but use them sparingly or cache results if possible.
+
+Can the limit be raised? Richpanel hasn’t publicly advertised higher rate limits for higher plans. Some competitors do allow increasing limits for enterprise. It’s worth asking Richpanel directly if you foresee hitting the ceiling – they might evaluate on a case-by-case basis. However, unless you’re doing heavy operations, 50 requests/30s is usually sufficient for normal ticket flows, especially with efficient use of each request.
+
+Parallelism and Queueing: Ensure your middleware respects the rate limit by implementing a local queue or throttle. If you receive many webhook events in a short time (say a flood of chat messages), you might have to enqueue the subsequent API actions slightly. The X-RateLimit-Remaining header in each response can be monitored by your code to adjust speed. Also, if you do hit 429, use the Retry-After header (Richpanel specifies how many seconds to wait)
+developer.richpanel.com
+ – back off for that duration before retrying the failed requests
+developer.richpanel.com
+.
+
+Other Limits: Aside from API call rate, Richpanel likely has limits on things like file upload size (if you ever use the file API) or number of automation rules, etc. From the pricing info, lower-tier plans limit the number of active automation rules (e.g. the free plan might allow 3 rules)
+richpanel.com
+, but higher tiers likely allow unlimited or a high number. For HTTP Targets themselves, there isn’t a stated limit on how many you can create, but you probably only need a couple (one per integration type). There’s also no specific quota given for webhook calls per minute – it’s mainly constrained by how many incoming events you have and the API rate limit on responses.
+
+High-Volume Considerations: If you expect very high volume (hundreds of tickets per hour), coordinate with Richpanel support. They might advise on using bulk APIs or adjustments. Currently, the API is more transactional (one ticket at a time updates), so just be mindful of the throughput. Also test under load to see if any latency creeps in.
+
+In summary, 50 requests/30s is the fixed rate limit
+developer.richpanel.com
+. Design your integration to stay within that by consolidating actions. If you do need to go beyond, open a dialogue with Richpanel early. And always implement graceful handling of 429 responses (wait and retry after the specified time) – Richpanel clearly provides Retry-After headers to guide you
+developer.richpanel.com
+. By following these practices, you can scale your integration without hitting random failures.
+
+(On a positive note, Richpanel’s status page indicates 99.9% uptime and you can monitor their system status
+richpanel.com
+, so the platform should handle volume as long as you handle the throttling.)
+
+9. Testing Safely: Sandbox and Rollout Strategy
+
+Sandbox Environment: Richpanel does offer the possibility of a sandbox or demo environment for testing. In fact, as part of their sales/onboarding, they mention providing a personalized demo and a sandbox environment for new customers to try out configurations
+richpanel.com
+. If you already are a customer, you can likely get a separate Richpanel instance (e.g. a trial account or a sandbox workspace) where you can experiment with automation rules, HTTP Targets, and API calls without touching real customer data. It’s worth reaching out to your Richpanel account manager or support to request a sandbox account. This environment would be isolated – you can set up dummy channels (like a test email inbox or a dummy chat widget), create test tickets, and ensure your middleware behaves correctly.
+
+Using a sandbox is important because building automation in production can be risky (a misconfigured rule could spam customers or mis-route tickets). Richpanel’s sandbox, if provided, will have its own API key and you can safely trigger your HTTP Targets there. They likely can clone some of your production settings to it as needed.
+
+Testing Flows Without Impacting Production: If a full sandbox environment is not available or while you set one up, you can still test in production carefully by using internal/test tickets. For example, create a dummy customer account (like test customer with your email) and open a ticket or chat that only you and perhaps a couple of agents know about. Then enable your automation rule but add a condition to target only that test ticket (e.g. if customer email = your test email or if subject contains “[TEST]”). This way, you can see the automation and middleware in action on a live environment without affecting real users. Once you’re confident, you remove the test condition to apply it globally.
+
+Richpanel currently doesn’t have a built-in “dry run” mode for automations (some platforms have a preview mode, but I haven’t seen mention of it for Richpanel). So either use a sandbox or tightly scoped tests on prod.
+
+Separate API Keys for Environments: Yes – you should use separate API credentials for sandbox and production. Richpanel allows you to generate API keys in the Settings -> API Keys section
+developer.richpanel.com
+. You can create one for sandbox and one for production. They can be revoked/rotated independently. The API key is what authenticates your requests (passed in the header x-richpanel-key for every API call)
+developer.richpanel.com
+. It’s good security hygiene to never use your production API key in a test environment or vice versa. Also, you might generate multiple keys for production if you have multiple integrations (Richpanel’s interface suggests you can have multiple active API keys). This way you could rotate keys without downtime – generate a new one, update your service to use it, then disable the old one.
+
+Rollout Plan – Shadow to Full: A recommended rollout would be:
+
+Stage 1: Shadow Mode. Keep the automation rule active to trigger the HTTP Target, but configure your middleware not to actually post replies initially. Instead, maybe log the intended action or send it as an email/slack to your team for review. Essentially, the bot is “thinking” and producing suggestions, but not acting in Richpanel. This lets you validate the AI’s decisions on real data without any customer impact. The agents can handle tickets normally, and you can compare their responses to what the bot would have done.
+
+Stage 2: Internal Suggestion (if feasible). If there’s a way to surface suggestions to agents (perhaps via an internal note or a custom integration in the agent UI), you can try that. But as discussed, Richpanel doesn’t have an obvious internal-note API. An alternative is to have your middleware send an email to a specific address or use Richpanel’s Sidekick AI feature (if accessible) to show suggestions. This stage is optional and depends on tooling.
+
+Stage 3: Partial/Canary Release. Enable the bot to start posting actual replies for a subset of cases. You could do this by narrowing the automation rule conditions. For example, only auto-reply if the message contains a very certain keyword or only for one specific topic that you’re confident in (like order status inquiries). Or even route those to a “Bot Testing” team where no human will intervene and let the bot respond. This way, only a small fraction of tickets get automated replies initially. Monitor those closely (set up alerts if customers respond negatively or if tickets reopen).
+
+Stage 4: Full Rollout. Once performance is satisfactory, gradually broaden the rule to cover more cases or all inbound messages. Keep monitoring KPIs like resolution time and CSAT.
+
+Separate Instances vs Production: Ideally, use the sandbox instance to test major changes (like a new version of your AI model or a new automation rule) before applying to prod. Because automations can be exported/imported? – Currently, Richpanel does not have an export/import feature for automation rules or HTTP Targets that we know of. You will likely need to recreate rules in production manually after testing in sandbox. This is unfortunate (and you might want to ask Richpanel if they have any config migration tools on their roadmap). To mitigate risk, document the rule settings carefully and maybe have a second pair of eyes (another admin) verify them when reimplementing in prod.
+
+Also, ensure you have a way to disable the automation quickly if something goes awry. For example, keep the rule toggle handy or even a kill-switch in your middleware (if you detect a loop or error, maybe have the middleware stop responding or alert an admin to turn off the rule).
+
+API Key Rotation: Richpanel API keys can be generated and revoked in the UI easily
+developer.richpanel.com
+. It’s good practice to rotate keys periodically. If a key is compromised, you can revoke it from the dashboard and generate a new one. Plan your deployment such that the key is stored securely (use a secret manager, not hard-coded). There’s no mention of API keys being environment-scoped (each key is for your whole account environment), so separate accounts for sandbox/prod is the way to separate concerns.
+
+In short, leverage the sandbox environment for initial development and realistic testing (Richpanel is willing to set one up
+richpanel.com
+). Use test tickets in prod for final sanity checks. Have separate API keys and toggle rules gradually. This approach will let you validate everything without jeopardizing the real operation, ensuring a smooth rollout of your middleware integration.
+
+10. Security, Compliance, and Long-Term Support
+
+Secure Webhook Calls: On the security front, Richpanel allows you to secure HTTP Target calls through custom headers (as mentioned earlier)
+headwayapp.co
+. This means you can (and should) include an authentication token or secret in the header of each request Richpanel sends to your middleware. For example, you might configure a header X-Auth: <randomsecret> in the HTTP Target. Your middleware will check for this header and its value for each request – if it’s missing or incorrect, you know the request didn’t come from Richpanel (or at least not from your configured integration). This is effectively a static token authentication, which is simple and sufficient as long as the token is kept secret. Richpanel does not currently support more advanced request signing like HMAC signatures (where it would hash the payload with a secret each time). So, rely on the static header and HTTPS. Additionally, ensure your endpoint URL is HTTPS (Richpanel will be calling out from their cloud; you want TLS to encrypt the data in transit).
+
+IP Whitelisting: Richpanel hasn’t published a set of IP ranges for outbound webhook calls. Since they are hosted on AWS (in Oregon region)
+richpanel.com
+, the IPs could be dynamic. If your security policy requires IP whitelisting, you might ask Richpanel support if they have a range, but chances are they will say it can change (many SaaS don’t provide fixed IPs for webhooks). Instead, one approach is to deploy your middleware behind a reverse proxy or firewall that does IP allowlisting if needed – but without known ranges, that’s tricky. So again, the auth header is your main defense. (You could also do a DNS lookup allowlist – e.g., only accept hostnames that resolve to Richpanel’s domain, but since it’s direct HTTP call, that’s not straightforward.)
+
+API Authentication: For calls from your middleware to Richpanel’s API, Richpanel uses an API Key in the header (x-richpanel-key) for auth
+developer.richpanel.com
+. This key grants access to all API endpoints for your account. Currently, there is no granular scope on the API key – it’s essentially all-or-nothing. (We did not find any documentation of scopes like “read-only” or “ticket-only” keys.) So treat this key like a password – store it securely and restrict who has access. If possible, run your integration code on secure infrastructure and don’t expose the key anywhere it can be intercepted. If a scoped key feature is important (for example, you want a key that can only create tickets but not read customer data), you might bring that up to Richpanel as a feature request. For now, assume the API key can perform any action your user role allows (likely admin-level if you generated it).
+
+Compliance (DPA, SOC2, etc.): Richpanel is geared towards e-commerce businesses and is cognizant of data protection regulations. They have a published Data Processing Addendum (DPA) and Privacy Policy available on their site
+richpanel.com
+ – you should sign the DPA with them if you handle EU customer data, to be GDPR compliant. In terms of security certifications: Richpanel lists compliance with ISO 27001 and ISO 27018 (information security and cloud privacy standards)
+richpanel.com
+. They also mention HIPAA self-certification
+richpanel.com
+, meaning they have internal processes to handle health data securely if needed (useful if you ever integrate health-related info, though in e-commerce that’s unlikely). They are also a Cloud Security Alliance member and have completed a CASA assessment
+richpanel.com
+. While not explicitly stated, SOC 2 isn’t listed on their page, so they may not have a SOC 2 report yet (ISO is similar in rigor though). If compliance is a big factor, you can ask them for any audit reports or security whitepapers. They do have a “Security Policy” and “Subprocessor list” on their website
+richpanel.com
+ for transparency.
+
+Data Residency and Retention: Richpanel hosts data on AWS Oregon (us-west-2)
+richpanel.com
+. If you have EU data concerns, clarify if they offer EU data centers; from what we see, data is in the US by default. They likely retain data as long as your account is active, and they provide export tools (you can export conversations to CSV via their UI
+updates.richpanel.com
+, and via API you can fetch data). If you need data deleted, their DPA covers that process.
+
+API Versioning and Changes: Richpanel’s API is versioned in the URL (currently v1, and their docs show v1.1 as the latest minor version in documentation). So far, changes have been additive (new endpoints, new fields) under v1. They have not announced any deprecation of v1. If they were to make breaking changes, they would likely release a v2 API. Deprecation Policy: not explicitly stated, but typically you’d expect advance notice (several months) if they retire an API. To stay informed, you should subscribe to their “Recent Releases” updates feed
+headwayapp.co
+ and any developer newsletter if available. Also maintain contact with their support/CSM who might inform you of upcoming changes. Since your integration is business-critical, ask Richpanel if they have a channel for notifying integrators of changes (e.g. an email list for API users or a Slack community). At the very least, periodically check their developer docs for any updates or new versions. Given their pace, major breaking changes are not frequent – any improvements likely come as new fields or endpoints you can adopt when ready.
+
+Support for Developers: If your integration breaks or you encounter issues, Richpanel’s support team is the first point of contact. They provide support via chat (in-app) or email. For high-priority issues (like your webhooks failing or API not responding correctly), you should raise it with them and mention the impact. As a paying customer, you’ll get support according to your plan’s SLA (they haven’t published a support SLA publicly that we saw, but enterprise plans usually have faster response). They also have a “Support Policy” link on their site
+richpanel.com
+ which might outline response times. In addition, if you have a dedicated Customer Success Manager at Richpanel, involve them for any roadmap concerns – for example, if you need a feature like internal-note API or higher rate limits, they can advocate for you.
+
+Future-Proofing: Given you’re building a middleware, keep it decoupled and configurable, because SaaS platforms do evolve. Keep an eye on Richpanel’s Updates page – e.g., if they introduce a new “automation version 2” or change how HTTP Targets work, you’ll want to adapt quickly. Also note, Richpanel is investing in AI features (Sidekick, etc.), so they are likely to expand APIs in that area – possibly providing more event hooks or assistant APIs. Staying in touch with their product team can give you insight into upcoming integration capabilities (maybe a future where they have a proper webhook system for all events, etc.).
+
+Security Review: If needed, ask Richpanel for their security documentation (they’ve some info on encryption, network security etc. on the security page). They use HTTPS for all client-server communication, and data is encrypted at rest, etc. Since your middleware will handle customer data (the payloads will contain emails, messages, maybe addresses), ensure your system also meets security best practices (use HTTPS, store data encrypted if you log it, etc.). The chain of custody: Customer → Richpanel → Your middleware → Richpanel → Customer means both Richpanel and your system need to be secure. Richpanel appears to have solid security certifications in place
+richpanel.com
+, so you’ll want to match that level.
+
+Summary (Security & Support): Richpanel supports secure integration through custom auth headers on HTTP calls
+headwayapp.co
+ – use that. They don’t have fancy HMAC signing or known IP addresses, so rely on token auth and TLS. They have robust compliance credentials (ISO 27001, GDPR compliance, HIPAA readiness) to protect data
+richpanel.com
+richpanel.com
+. For API changes, watch their versioning (currently v1.1) and subscribe to updates. And if things break, reach out via their support channels – you can typically get help via the helpdesk or through your account contacts. Because your integration will be important, it’s a good idea to periodically review Richpanel’s release notes and perhaps join any beta programs they might have for developers. That way you won’t be caught off-guard by breaking changes and will have a line of communication with them for any urgent issues.

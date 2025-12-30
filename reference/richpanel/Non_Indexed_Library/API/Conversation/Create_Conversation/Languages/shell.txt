@@ -1,0 +1,44 @@
+Language
+
+Shell
+
+
+1
+curl --request POST \
+2
+     --url https://api.richpanel.com/v1/tickets \
+3
+     --header 'accept: application/json' \
+4
+     --header 'content-type: application/json' \
+5
+     --header 'x-richpanel-key: test' \
+6
+     --data '
+7
+{
+8
+  "ticket": {
+9
+    "status": "OPEN",
+10
+    "comment": {
+11
+      "public": true
+12
+    },
+13
+    "via": {
+14
+      "channel": "email"
+15
+    },
+16
+    "assignee_id": "unassigned"
+17
+  }
+18
+}
+19
+'
+

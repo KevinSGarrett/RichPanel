@@ -1,0 +1,3 @@
+Avoid Triggering on Bot Actions: 
+
+Make sure any other automation rules (not just the HTTP Target one) are also constrained appropriately. For example, if you have a rule like “if ticket status changes to X, do Y”, be mindful that your API might change a status and unintentionally fire another rule. Audit your automations and use conditions like “initiator is customer” or use tags to differentiate. Richpanel might eventually introduce an explicit setting like “Run this rule only on customer messages” – if so, enable that.

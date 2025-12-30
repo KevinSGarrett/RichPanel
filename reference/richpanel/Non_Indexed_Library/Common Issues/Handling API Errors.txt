@@ -1,0 +1,51 @@
+Weak handling of “normal” Richpanel API errors (not just rate limits)
+
+What goes wrong
+
+Middleware code treats all failures the same and either:
+
+retries everything (including non-retryable 4xx), or
+
+gives up too early.
+
+Common Richpanel API failures include:
+
+400 invalid request
+
+401 missing/invalid API key
+
+404 resource deleted/not found
+
+409 conflict (e.g., creating a customer with an email already in use)
+
+413 payload too large
+
+5xx server errors 
+Richpanel
++1
+
+How to avoid it
+
+Implement a single “Richpanel API client” layer with typed error handling:
+
+401: immediately alert + disable automation (stop posting replies) until fixed. 
+Richpanel
++1
+
+400: log request/response + mark job as failed (don’t retry endlessly).
+
+404: treat as terminal for that job (ticket/customer likely deleted). 
+Richpanel
+
+409: fetch the existing record instead of trying to recreate it. 
+Richpanel
+
+413: shrink payload / avoid file upload / route to human. 
+Richpanel
+
+5xx: retry with backoff + jitter; if repeated, fall back to human routing. 
+Richpanel
+
+Keep a “customer-facing safety rule”:
+
+if any step in automation fails, do not send a half-baked auto-reply; route to a team instead.

@@ -1,0 +1,112 @@
+List Teams
+get
+https://api.richpanel.com/v1/teams
+
+[Language: Shell]
+curl --location --request GET 'https://api.richpanel.com/v1/teams' \
+--header 'x-richpanel-key: secret-key'
+
+
+[Language: Node]
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.listTeams()
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));
+
+
+[Language: Ruby]
+require 'uri'
+require 'net/http'
+
+url = URI("https://api.richpanel.com/v1/teams")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Get.new(url)
+request["accept"] = 'application/json'
+request["x-richpanel-key"] = 'test'
+
+response = http.request(request)
+puts response.read_body
+
+
+[Language: PHP]
+<?php
+require_once('vendor/autoload.php');
+
+$client = new \GuzzleHttp\Client();
+
+$response = $client->request('GET', 'https://api.richpanel.com/v1/teams', [
+  'headers' => [
+    'accept' => 'application/json',
+    'x-richpanel-key' => 'test',
+  ],
+]);
+
+echo $response->getBody();
+
+
+[Language: PowerShell]
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/teams' -Method GET -Headers $headers
+
+
+[Language: HTTP]
+GET /v1/teams HTTP/1.1
+Accept: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+
+
+
+
+[Language: Java]
+OkHttpClient client = new OkHttpClient();
+
+Request request = new Request.Builder()
+  .url("https://api.richpanel.com/v1/teams")
+  .get()
+  .addHeader("accept", "application/json")
+  .addHeader("x-richpanel-key", "test")
+  .build();
+
+Response response = client.newCall(request).execute();
+
+
+[Language: JavaScript]
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-richpanel-key': 'test'}
+};
+
+fetch('https://api.richpanel.com/v1/teams', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));
+
+
+[Language: PowerShell]
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/teams' -Method GET -Headers $headers
+
+
+[Language: Python]
+import requests
+
+url = "https://api.richpanel.com/v1/teams"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.get(url, headers=headers)
+
+print(response.text)

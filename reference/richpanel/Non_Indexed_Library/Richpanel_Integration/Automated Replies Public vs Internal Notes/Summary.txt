@@ -1,0 +1,7 @@
+Summary: 
+
+Use sender_type: "operator" for any reply you want the customer to receive
+pipedream.com
+. That will notify the customer on the channel (send email, show in live chat, etc., just as if an agent responded). There is no built-in “internal note via API” (no sender_type: "internal" exists in the docs), so avoid trying to post internal-only messages through the API. Plan your “agent assist” mode such that suggestions are delivered to agents outside of the normal public reply flow (or use a clearly-marked bot account to post and perhaps immediately follow-up with an internal note by that same bot saying “This was an automated suggestion” – but again, that note might not be truly internal).
+
+Finally, ensure your automated replies are safe and contextually appropriate. Agents should be able to tell the message was automated (via the bot username or tags), and you should monitor initial roll-out. It might also be wise initially to start with internal suggestions (even if just via a side channel) before allowing the bot to send public replies, to build trust in its accuracy.

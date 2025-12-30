@@ -1,0 +1,17 @@
+Posting Replies (Public Comments): 
+
+To post a message as an agent, you will include a comment in your API request. Within the JSON body, this looks like:
+
+{
+  "ticket": {
+    "comment": {
+      "body": "Your order is on the way!",
+      "sender_type": "operator"
+    }
+  }
+}
+
+
+Here, sender_type: "operator" indicates the comment is from an agent (as opposed to "customer" if it were a customer message). This will create a new message in the conversation, visible to the customer, just as if an agent had replied through the Richpanel inbox. By default, the message will go out via the same channel the ticket is in (e.g., email or chat). Richpanel’s integration on Pipedream confirms these fields: the values for sender_type can be “customer” or “operator”
+pipedream.com
+.

@@ -1,0 +1,29 @@
+Pagination mistakes = missing teams/tags/users, which breaks routing in subtle ways
+
+What goes wrong
+
+You call “List Teams” or “List Tags” once and assume you have the full list.
+
+But Richpanel uses offset pagination and many list endpoints return max 100 records per page; you must use page / per_page and follow next_page. 
+Richpanel
+
+Result: your mapping layer is incomplete → the router can’t find the correct team/tag → fallback routing spikes.
+
+How to avoid it
+
+Build a small internal “Richpanel directory cache” service/module:
+
+Fetch all pages (loop until next_page = null). 
+Richpanel
+
+Cache results (Redis/in-memory) with a refresh interval (e.g., every 5–30 minutes).
+
+Add a startup health check:
+
+“Can I resolve every department label to a team_id?”
+
+When a mapping fails:
+
+route to fallback team,
+
+emit an alert (“unknown team/tag”) with the label and ticket ID.

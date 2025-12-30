@@ -1,0 +1,23 @@
+Update a Conversation
+
+Language: Shell
+
+curl --request PUT \
+     --url https://api.richpanel.com/v1/tickets/id \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --header 'x-richpanel-key: test' \
+     --data '
+{
+  "ticket": {
+    "status": "OPEN",
+    "comment": {
+      "public": true
+    },
+    "via": {
+      "channel": "email"
+    },
+    "assignee_id": "unassigned"
+  }
+}
+'

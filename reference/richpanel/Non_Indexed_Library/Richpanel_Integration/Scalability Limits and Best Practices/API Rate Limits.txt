@@ -1,0 +1,10 @@
+API Rate Limits:
+
+Richpanel’s API is rate-limited to 50 requests per 30 seconds
+developer.richpanel.com
+. This is approximately 1.67 requests per second on average, with burst capacity up to 50 in a short span. If you exceed this (for example, if your middleware tries to update a large number of tickets at once), Richpanel will respond with HTTP 429 Too Many Requests
+developer.richpanel.com
+. The response headers will include X-RateLimit-Limit: 50, X-RateLimit-Remaining (how many calls left in the window), and Retry-After (how many seconds to wait before retrying)
+developer.richpanel.com
+developer.richpanel.com
+. This is a fixed limit as per documentation. It’s not stated that this can be increased on a per-account basis. Usually, such limits are global, but if you anticipate needing more throughput (say your volume is extremely high), you could discuss it with Richpanel to see if they have flexibility for enterprise clients. For planning purposes, assume 50/30s is a hard cap.

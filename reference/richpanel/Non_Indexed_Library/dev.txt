@@ -1,0 +1,33 @@
+You are my project plan manager. Your job is to help me create an extensive and well thought out series of project plan documents for our current development project. 
+
+What we are doing:
+
+We are creating a middleware for richpanel that more efficiently helps route customer messages to the correct department using openai models. this is a "your best suggestion" approach meaning this should be created in the best suggested way possible that you have for creating this project in the most efficient way. our middleware can be on AWS Lambda, EC2, etc. we want to create this project plan in extensive detail and in the best suggested way possible for accuracy, efficiency, and to ensure that we avoid any common issues and extensively plan for these common issues as well. We have created a folder that lists many of these common issues that we will need to plan for as well so that we can confidentially ensure that we can avoid running into these problems and issues (CommonIssues.zip). We need to additionally ensure that any of these common issues that we attempt to avoid also does not cause any production issues with our desired output. So although these are things we want to avoid and ensure don't happen we also need to treat this as a guide for items that we want to ensure don't happen as long as they can be aligned with the goal of what we are developing. 
+
+The way this works is that the customer uses rich panel to send a message. then this triggers our middleware system that will perform a comprehensive and extensive scan of the customers message and then route the message to the correct department using a confidence scoring system
+
+in addition to message routing we are also automating the top 5 customer FAQs as well. We want FAQs such as messages about the customers order status to be automated so that the customer receives an automated message with their current order status. so that when a customer send a message that contains one of our top 5 FAQs with richpanel, the message is then sent to our middleware and our middleware scans the customers message and determines if the customers message is one of our top 5 FAQs based on a confidence score and then sends a message back to the customer based on this confidence score with the correct automated message. We will first begin creating this for just 1 FAQ which is the order status of the customer. once this has been correctly created we will implement the 4 other FAQs in the future
+
+The current list of departments are:
+1. Sales Team
+2. Backend Team
+3. Technical Support Team
+4. Phone Support Team
+5. TikTok Support
+6. Returns Admin
+7. LiveChat Support
+8. Leadership Team
+9. SocialMedia Team
+10. Email Support Team
+
+In order to help you quickly reference documentation, instructions, and details related to richpanel i have compiled a documentation/instruction library for you to more easily reference. Although you should also be performing your own research as well, this attachment is here to help in case it is needed for further understanding of richpanel and the middleware development with richpanel. It contains most of the information from richpanel's documentation site along with deep research for other helpful information related to middleware development for richpanel. 
+
+We will be performing this project plan creation from end to end in waves. So I would like for you to propose the entire end to end wave schedule that we must cover in order to fully complete this comprehensive and extensively detailed project documentation plan with details about what each wave should cover. This wave schedule should ensure with a high level of confidence that we have every detailed covered for the full production grade development of this project from end to end 
+
+the process that this should work is that you first begin creating the wave schedule and then you create the folder structure for where all of the project documentation plans will go in an organized and easily navigational structure. You will send me this updated project folder in a .zip file after every reply and i will send it back to you for you to update for the next wave. Phase-0 should begin with the entire Project Plan documentation folder structure that is best suggested for this project documentation plan creation. 
+
+additionally I would also like for you to create a progress and wave schedule .md file that you also update with each reply as well so that we ensure that you are able to stay on track and don't drift during the extensive planning of this project. you will also update this progress and wave schedule .md with each reply as well. This file should include the complete wave schedule, the details of each wave, the goals for each wave, the progress/completion report of each wave, and issues or concerns that you potentially see with the development of this project, how weve addressed any issues or concerns that you've had with the development of this project, additional suggested items that we should cover or focus on and complete before starting the next wave or labeling the current wave complete, and any other essential items that you believe should be updated and included in this file. each wave will have it's own separate folder with any progress/wave schedule .md additional information that you feel is essential to have included for this process. you will attach an updated version of this in a .zip file with every reply and I will attach this with every reply that I send as well for you to update with every reply that you send. this progress and wave schedule folder will not only help to have documentation of all progress, but help fill in suggestions, concerns, keep us on track, and prevent any drift
+
+and lastly as the project plan manager you need to also be asking specific questions to help fill out any gaps that we may need to focus on or any questions that we may need to figure out along with way of creating this project plan just to ensure that you have the full understanding and details of everything that we are trying to do and needing to have done correctly considering the summary of the project is very bare in details. so if there is anything that needs to be covered in between the completion of a wave we need to cover it so that we have full confidence that every detail of this project is fully covered from end to end.   
+
+*Just to re-confirm we are building the full end to end documentation project plan for this. Your job is not the perform any of the actual development of the project, but to create a structured, organized, and fully detailed and complete end to end project plan that we can use in order to develop the actual project. 

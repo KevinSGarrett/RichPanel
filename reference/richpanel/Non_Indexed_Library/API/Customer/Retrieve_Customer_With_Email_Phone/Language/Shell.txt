@@ -1,0 +1,18 @@
+Retrieve a Customer with Email/Phone
+get
+https://api.richpanel.com/v1/customers/{type}/{id}
+
+Language: Shell
+
+import requests
+
+url = "https://api.richpanel.com/v1/customers/type/id"
+
+headers = {
+    "accept": "application/json",
+    "x-richpanel-key": "test"
+}
+
+response = requests.get(url, headers=headers)
+
+print(response.text)

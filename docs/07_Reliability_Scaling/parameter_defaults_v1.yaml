@@ -1,0 +1,153 @@
+# Richpanel Middleware - Reliability Defaults (v1)
+# Canonical runtime knobs for initial production rollout.
+# Last updated: 2025-12-22
+#
+# Conventions:
+# - "{{env}}" is a placeholder for environment name: dev|staging|prod
+# - Values are conservative to protect downstream rate limits and reduce risk.
+
+version: v1
+last_updated: 2025-12-22
+
+# Primary deployment region (v1)
+aws_region: us-east-2
+
+ingress:
+  api_gateway:
+    # Protects against webhook storms / accidental public traffic.
+    # Tune after observing real inbound webhook rates.
+    rate_limit_rps: 20
+    burst_limit: 50
+    # Keep payload small; prefer ticket_id only.
+    max_payload_kb: 32
+    # Ingress must only return 2xx after enqueue succeeds.
+    respond_2xx_on_enqueue_only: true
+
+  lambda:
+    timeout_seconds: 10
+    memory_mb: 256
+    # Optional: keep small reserved concurrency to guarantee ACK even during worker spikes.
+    reserved_concurrency: 5
+    log_level: INFO
+
+queue:
+  type: sqs_fifo
+  name: rp-mw-events.fifo
+  dlq_name: rp-mw-events-dlq.fifo
+
+  batch_size: 1
+  # Keep it comfortably above worker timeout.
+  visibility_timeout_seconds: 180
+  # 4 days
+  message_retention_seconds: 345600
+  max_receive_count: 5
+
+  grouping:
+    # Ensures per-conversation ordering.
+    message_group_id: conversation_id
+
+  deduplication:
+    # Prefer explicit dedup ids if the trigger provides event ids.
+    # Else use a deterministic hash of (ticket_id + message_id + direction + created_at).
+    strategy: explicit_or_hashed
+    # FIFO dedup window ~5 minutes; beyond that, DynamoDB idempotency is primary.
+    fifo_dedup_window_minutes: 5
+
+worker:
+  lambda:
+    timeout_seconds: 45
+    memory_mb: 1024
+    # Starting point; tune with playbook.
+    reserved_concurrency: 10
+
+  processing:
+    max_inflight_per_conversation: 1
+    # Hard guardrail to prevent runaway side effects.
+    max_actions_per_ticket_per_event: 3
+    # Avoid spamming customers if loops slip through.
+    max_auto_replies_per_conversation_per_24h: 3
+    enforce_policy_engine: true
+
+  retries:
+    max_attempts: 3
+    respect_retry_after_header: true
+    # Each tuple is an inclusive range; pick randomly inside for jitter.
+    backoff_schedule_seconds:
+      - [2, 5]
+      - [10, 20]
+      - [60, 120]
+    jitter: full
+
+vendors:
+  richpanel:
+    timeout_seconds: 10
+    max_attempts: 2
+    backoff_schedule_seconds:
+      - [1, 2]
+      - [5, 10]
+
+  openai:
+    timeout_seconds: 30
+    max_attempts: 2
+    backoff_schedule_seconds:
+      - [1, 2]
+      - [5, 10]
+    # Default safest posture: do not store.
+    store: false
+    # Guardrails
+    max_input_chars: 8000
+    max_output_tokens: 600
+
+  shopify:
+    # v1 default: off until creds/scopes confirmed.
+    enabled: false
+    timeout_seconds: 15
+    max_attempts: 2
+    backoff_schedule_seconds:
+      - [1, 2]
+      - [5, 10]
+
+automation:
+  # Runtime feature flags (Wave 06 kill switch).
+  safe_mode:
+    ssm_param: "/rp-mw/{{env}}/safe_mode"
+    default: false
+
+  automation_enabled:
+    ssm_param: "/rp-mw/{{env}}/automation_enabled"
+    default: true
+
+observability:
+  logging:
+    retain_days_dev: 14
+    retain_days_staging: 30
+    retain_days_prod: 30
+
+    log_request_bodies: false
+    log_model_raw_outputs: false
+    redact_pii: true
+
+    # Optional: enable temporarily during incident debugging.
+    sampling_debug_percent: 0
+
+  alarms:
+    # Queue age (oldest message) thresholds.
+    queue_age_seconds_warn: 120
+    queue_age_seconds_crit: 300
+
+    # DLQ thresholds.
+    dlq_messages_warn: 1
+    dlq_messages_crit: 5
+
+  tracing:
+    enabled: true
+
+run_modes:
+  # Degraded-mode knobs used by the tuning playbook.
+  route_only:
+    description: "Apply routing/tags only; no customer-facing replies."
+    enabled_by_safe_mode: true
+
+  disable_automation:
+    description: "Do not send any automated messages; continue routing."
+    enabled_by_flag: "automation_enabled=false"

@@ -1,0 +1,3 @@
+Unified Triggers Across Channels: 
+
+Richpanel’s automation rules work across all channels (email, live chat, social, etc.), treating them uniformly as “conversations.” This means your HTTP Target rule for “new message” will fire regardless of channel, so you don’t need separate webhooks for chat vs. email. In other words, a new email from a customer or a new chat message can both trigger the same external call. This simplifies your middleware logic.

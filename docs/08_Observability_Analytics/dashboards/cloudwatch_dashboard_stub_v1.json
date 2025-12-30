@@ -1,0 +1,50 @@
+{
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 24,
+      "height": 2,
+      "properties": {
+        "markdown": "# Middleware \u2014 System Health (v1 stub)\nEdit this JSON to match your metric namespaces and dimensions."
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 2,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "mw",
+            "mw.ingress.requests_total"
+          ]
+        ],
+        "stat": "Sum",
+        "period": 300,
+        "title": "Ingress Requests"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 2,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "mw",
+            "mw.ingress.ack_latency_ms"
+          ]
+        ],
+        "stat": "p95",
+        "period": 300,
+        "title": "ACK Latency (p95)"
+      }
+    }
+  ]
+}

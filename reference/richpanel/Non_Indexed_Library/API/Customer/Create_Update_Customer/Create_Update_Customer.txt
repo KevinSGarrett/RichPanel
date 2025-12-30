@@ -1,0 +1,90 @@
+Create/UpdateCustomer
+post
+https://api.richpanel.com/v1/customers
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Custom properties can also be added here in the body directly.
+Custom properties can be added here.
+
+Body Params
+customer
+object
+
+customer object
+uid
+string
+appClientId
+string
+Use the apiKey/app clientId provided in richpanel integration settings(Ex: abc1)
+
+email
+string
+name
+string
+facebook
+string
+twitter
+string
+state
+string
+city
+string
+country
+string
+phone
+string
+billingEmail
+string
+billingPhone
+string
+billingCity
+string
+billingState
+string
+billingCountry
+string
+billingPostcode
+string
+billingAddressLine1
+string
+billingAddressLine2
+string
+shippingEmail
+string
+shippingPhone
+string
+shippingCity
+string
+shippingState
+string
+shippingCountry
+string
+shippingPostcode
+string
+shippingAddressLine1
+string
+shippingAddressLine2
+string
+Responses
+
+200
+200
+
+Response body
+object
+message
+string
+customer
+object
+id
+string
+uid
+string
+
+400
+400

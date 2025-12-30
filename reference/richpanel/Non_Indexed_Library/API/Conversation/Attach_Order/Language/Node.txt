@@ -1,0 +1,13 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.attachOrder({id: 'id', appClientId: 'appClientId', orderId: 'orderId'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

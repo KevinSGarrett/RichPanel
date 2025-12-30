@@ -1,0 +1,25 @@
+Create Conversation
+
+Language: javascript
+
+const options = {
+  method: 'POST',
+  headers: {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    'x-richpanel-key': 'test'
+  },
+  body: JSON.stringify({
+    ticket: {
+      status: 'OPEN',
+      comment: {public: true},
+      via: {channel: 'email'},
+      assignee_id: 'unassigned'
+    }
+  })
+};
+
+fetch('https://api.richpanel.com/v1/tickets', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err));

@@ -1,0 +1,14 @@
+Assignment to Agents/Teams: 
+
+To assign a conversation to a specific agent, use the assignee_id field in the update. The value should be a Richpanel User ID. You can get your team’s user IDs via the “List Users” API (which returns agents and their IDs). For example:
+
+{
+  "ticket": {
+    "assignee_id": "abcd-1234-efgh-5678"
+  }
+}
+
+
+would assign the ticket to the user with that ID. If you want to unassign, you can set "assignee_id": "unassigned" (Richpanel treats that as no specific agent).
+
+What about assigning to a Team (department)? In Richpanel, teams are groupings of agents (like “Billing Team” or “Tier-2 Support”). Richpanel tickets don’t have a direct team field that you can set via API – instead, assignment is typically to an agent or left unassigned in a team queue. The way teams work is that an agent belongs to a team, and you can create Views or automations based on teams. So if you want a ticket to be handled by, say, the “Returns Team,” you might either assign it to a specific agent on that team, or leave it unassigned but have an automation route it to that team’s queue. You can fetch team IDs and names via the “List Teams” API and use those in automation rules if needed (for example, an automation could say “if tag = X, assign to Returns Team”). From the API perspective, however, you primarily assign to agents.

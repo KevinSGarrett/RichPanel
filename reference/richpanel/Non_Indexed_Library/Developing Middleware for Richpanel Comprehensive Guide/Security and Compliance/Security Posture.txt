@@ -1,0 +1,7 @@
+Richpanel’s Security Posture: 
+
+On Richpanel’s side, they adhere to industry standards – they are certified for ISO 27001, ISO 27018 (cloud privacy), and are members of the Cloud Security Alliance
+richpanel.com
+. They also mention HIPAA compliance readiness (self-certification)
+richpanel.com
+. While this means Richpanel’s platform is secure for handling even healthcare data, when you pull data out into your middleware, you need to uphold similar standards. Use secure databases, encryption at rest for any logs or stored data, and transmit to other APIs over HTTPS.

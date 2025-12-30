@@ -1,0 +1,11 @@
+Attach Order
+put
+https://api.richpanel.com/v1/tickets/{id}/attach-order/{appClientId}/{orderId}
+
+
+Language: PowerShell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/tickets/id/attach-order/appClientId/orderId' -Method PUT -Headers $headers

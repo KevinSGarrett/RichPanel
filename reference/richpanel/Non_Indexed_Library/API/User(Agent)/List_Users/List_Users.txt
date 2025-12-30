@@ -1,0 +1,22 @@
+List Users
+get
+https://api.richpanel.com/v1/users
+
+Use this API to fetch the details of all the users(agents).
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Responses
+
+200
+200
+
+Response body
+json
+
+400
+400

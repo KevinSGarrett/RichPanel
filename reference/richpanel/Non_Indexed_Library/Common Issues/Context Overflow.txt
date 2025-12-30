@@ -1,0 +1,48 @@
+“We send too much conversation context” → LLM context overflow, slow classification, higher misroutes
+What goes wrong
+
+Even when there are no attachments, payloads often get huge because you include:
+
+the full ticket transcript,
+
+entire email threads with quoted history (“On Tue, … wrote:”),
+
+long signatures/disclaimers,
+
+HTML markup.
+
+This leads to:
+
+slower processing and higher cost,
+
+worse classification (noise dominates signal),
+
+failures when you exceed your model/context limits (or your own gateway limits).
+
+How to avoid it
+
+Implement message canonicalization before classification:
+
+Extract the latest customer-authored message chunk only
+(ignore prior quoted thread, agent replies, and boilerplate).
+
+Strip noise:
+
+remove HTML tags
+
+remove email signatures
+
+collapse whitespace
+
+drop long legal disclaimers
+
+Cap the classifier input:
+
+hard cap at N characters (or N tokens) for the routing model
+
+keep the raw original stored internally, but don’t send it to the model
+
+Use “partial updates” when writing back to Richpanel
+
+Richpanel specifically recommends sending only the fields you want to modify to avoid overwriting and (bonus) this keeps your request bodies smaller. 
+Richpanel

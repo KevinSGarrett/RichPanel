@@ -1,0 +1,52 @@
+Migrating From Other Helpdesks
+If you're using Zendesk, Kustomer, HelpScout, or Gorgias, please refer to our guide "Importing Your Data." 
+For unsupported platforms like Reamaze or eDesk, this guide will walk you through setting up Richpanel to manage future communications, though direct migration of historical data is not available.
+
+Step 1: Integrate Channels in Richpanel
+Begin by integrating all your customer-facing channels (email, chat, etc.) into Richpanel.
+
+Ensure that all new customer communications are routed directly into Richpanel.
+Set up forwarding rules for email and update chat widgets to point to Richpanel.
+image
+Step 2: Set a Cut-off Date
+Choose a cut-off date for the migration :
+
+After this date, all new tickets will be handled in Richpanel.
+Any existing tickets in the existing helpdesk will remain there to be resolved.
+Step 3: Automate Tagging of Conversations in your Old Helpdesk
+To ensure that agents can easily distinguish between tickets handled in Richpanel and those that remain in old Helpdesk, you can set up an automation rule.
+
+Tag all incoming tickets with "Reply in Richpanel." Here's how you can create the rule:
+
+Steps to Set Up Automation Rule in edesk (For reference):
+Navigate to the Settings menu in eDesk.
+Select “Tags”
+image
+Create a New Tag  with name “Reply in Richpanel”
+Save the created tag
+image
+Then Select Automation Rules in Settings.
+Click Create New Rule.
+image
+Set up the conditions to automatically tag new conversations. Here’s an example of the rule configuration:
+Condition: When a new conversation is created (trigger).
+Action: Automatically add the tag "Reply in Richpanel" to the conversation.
+Optional Action: Send a notification or alert to agents reminding them to reply only in Richpanel.
+image
+Rule Example:
+
+If: A new conversation is received.
+Then: Tag the conversation with "Reply in Richpanel."
+This rule will ensure that every incoming ticket in your old Helpdesk after your cut-off date is automatically tagged with "Reply in Richpanel," making it easy for your team to identify and manage tickets that need attention in Richpanel.
+
+Step 4: Migrate Agents
+Once your automation rule is set, begin migrating agents to Richpanel:
+
+Move most agents to handle new tickets in Richpanel, leaving only 1-2 agents in old Helpdesk to resolve any existing tickets.
+Agents in Richpanel will handle any new tickets tagged with "Reply in Richpanel."
+Step 5: Resolve Pending Tickets in Old Helpdesk
+The remaining agents should focus on resolving all pending tickets.
+They should not touch any tickets tagged as "Reply in Richpanel" since those are being handled in Richpanel.
+Step 6: Close Resolved Tickets
+After tickets are resolved in old Helpdesk ensure that any corresponding tickets in Richpanel are marked as closed to maintain consistency.
+

@@ -1,0 +1,32 @@
+Quick Start Guide
+Follow these steps to get up and running with Richpanel quickly!
+
+1. Import your data
+If you are migrating from an existing helpdesk. Start by importing your data from your previous helpdesk.
+
+2. Connect your support channels
+You can connect all your support channels in Richpanel to unify conversations in one place. Richpanel supports integrations with email, chat, sms, Facebook, Instagram, phone (via Aircall) and more. 
+
+To get started head over to Settings→ Channels and select the channels you wish to connect. For detailed instructions, follow these guides.
+
+Connect your Support Email
+Connect your Support Email
+Connect your Support Email
+Connect your Support Email
+3. Connect your ecommerce store
+If you have an ecommerce store, connect it to Richpanel by going to settings→ Integrations → select your cart platform from the list and follow the steps shown on the screen.
+
+Connecting your cart platform enables the following features
+
+Access orders in Richpanel helpdesk
+Add chat widget to your store
+Let customers track and manage orders
+For detailed instructions, follow the below guide.
+
+Connect Your Ecommerce store
+Connect Your Ecommerce store
+4. Invite your team members
+Simply navigate to Settings → Users & teams → Add users. Add all the team members that will be needing access to the platform.
+
+💡
+It’s free to add collaborator seats, so feel free to add members from Shipping, Marketing & Tech teams that will be collaborating with your support team.

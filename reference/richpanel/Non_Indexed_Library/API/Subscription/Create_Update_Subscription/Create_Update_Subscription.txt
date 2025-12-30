@@ -1,0 +1,36 @@
+Create/Update Subscriptions
+post
+https://api.richpanel.com/v1/subscription/{appclient_id}
+
+Subscription Object: https://developer.richpanel.com/docs/subscription-event-structure
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Use this API to create subscriptions.
+
+Path Params
+appclient_id
+string
+required
+Unique appClientId given to each store. Also called as apI key
+
+Body Params
+subscriptions
+array of objects
+
+ADD object
+Responses
+
+200
+200
+
+Response body
+object
+
+400
+400
+

@@ -1,0 +1,7 @@
+Minimizing API Calls: 
+
+It’s crucial to optimize the number of API calls your middleware makes per conversation. The good news is Richpanel’s API design lets you combine actions. As mentioned, you can update multiple fields (assign team, set status, add comment, and add a tag) in one single PUT request to /tickets/{id} rather than separate calls for each. Use that to your advantage. For example, when your bot handles a message, you can send one payload that contains the reply comment, the new status (maybe “pending” or leave as is), the team assignment, and a tag (like “bot_reply”) all together. That’s 1 call instead of 4. Similarly, if you needed to create a ticket and immediately post a message, the Create API allows an initial comment in the payload, avoiding a second call.
+
+Another strategy is to avoid unnecessary polling or lookups. If you get all necessary data in the webhook payload (customer email, message text, etc.), you might not need to call Richpanel’s API to fetch additional info (like customer profile) unless required. Richpanel does have endpoints to get customer details
+developer.richpanel.com
+ or order info, but use them sparingly or cache results if possible.

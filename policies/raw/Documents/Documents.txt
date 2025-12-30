@@ -1,0 +1,54 @@
+[Documents]
+1. documentation coverage gate
+
+2. Provide proof of what was reviewed vs changed (prevent silent drift)
+
+3. update essential documentation files every run
+
+4. scan every document 
+
+5. Every changed functional area has at least one doc updated or explicitly confirmed as already accurate.
+
+7. All always-update docs were updated.
+
+8. The docs index/registry has no dead links for any doc you referenced or created.
+
+9. Do NOT claim docs are “up to date” without completing the scan + impact map.
+
+10. Do NOT mass-edit timestamps or reformat docs just to show activity.
+
+11. Do NOT claim docs are “up to date” without completing the scan + impact map.
+
+12. At end of run, output:
+    Docs Scan Summary:
+   - Total docs scanned
+   - List of docs updated (with 1-line reason each)
+   - List of docs reviewed but unchanged (grouped by folder)
+
+13. Changelog excerpt for always-update docs
+
+14. Any new docs created + where they were linked
+
+15. For every doc you update or create:
+- Include “Last verified” date/time + what was verified
+- Include exact references (file paths, endpoints, commands, config keys)
+- Remove contradictions: if two docs conflict, resolve and note what changed
+- Prefer small edits; avoid rewriting content that remains correct
+
+16. If no doc exists for an impacted area, create one in the correct folder and link it from the index.
+
+17. Find the corresponding docs by:
+   - filename/path matching
+   - searching for related keywords (module name, endpoint, service name, workflow name)
+   - following internal doc links (indexes, references)
+
+18. Identify all impacted areas from git diff + architectural dependencies.
+
+19. Produce a “Docs Impact Map”:
+   - Touched-by-this-run docs (must review + update if needed)
+   - Always-update docs (must be updated every run)
+   - Unchanged docs (explicitly confirm “reviewed, no changes needed”)
+
+20. You must scan ALL files under /docs at the start of the run.
+
+21. Full docs scan (read-only pass)

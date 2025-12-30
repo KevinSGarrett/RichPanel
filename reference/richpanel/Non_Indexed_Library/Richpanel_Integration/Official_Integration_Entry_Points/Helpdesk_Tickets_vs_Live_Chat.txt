@@ -1,0 +1,5 @@
+Helpdesk Tickets vs Live Chat: 
+
+The trigger mechanism works consistently across channels. In Richpanel, email tickets, live chats, and other channels are all treated as “conversations” in the helpdesk. Automation rules apply to conversations regardless of channel, so a new inbound message will trigger the same rule whether it’s from an email or a live chat session. (Richpanel emphasizes that its automation rules “work across all channels, not just live-chat”
+richpanel.com
+.) In short, you can rely on a unified automation trigger for any customer message, and there’s no special difference in how you’d set up the rule for chat vs. email – just ensure your rule conditions catch the events you want.

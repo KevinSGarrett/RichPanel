@@ -1,0 +1,12 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: Node
+
+import richpanel from '@api/richpanel';
+
+richpanel.auth('test');
+richpanel.retrieveOrderLinkedToAConversation({conversationId: 'conversationId'})
+  .then(({ data }) => console.log(data))
+  .catch(err => console.error(err));

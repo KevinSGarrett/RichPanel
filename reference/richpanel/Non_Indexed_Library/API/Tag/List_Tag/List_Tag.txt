@@ -1,0 +1,35 @@
+List Tags
+get
+https://api.richpanel.com/v1/tags
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Responses
+
+200
+200
+
+Response body
+object
+tag
+array of objects
+object
+id
+string
+updated_at
+string
+organization_id
+string
+created_at
+string
+description
+string
+name
+string
+
+400
+400

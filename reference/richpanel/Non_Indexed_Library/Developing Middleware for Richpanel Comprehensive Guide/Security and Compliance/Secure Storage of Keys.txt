@@ -1,0 +1,3 @@
+Secure Storage of Keys: 
+
+Your Richpanel API key is essentially a master key to your helpdesk data. Store it securely (in an encrypted vault or environment variable, not hard-coded). If your middleware is compromised, an attacker with that key could read or alter your support tickets. Rotate the key if you suspect any leak.

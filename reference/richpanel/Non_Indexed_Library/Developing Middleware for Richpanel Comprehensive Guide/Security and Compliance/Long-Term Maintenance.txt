@@ -1,0 +1,3 @@
+Long-Term Maintenance: 
+
+Keep an eye on Richpanel’s “Recent releases” or updates page. They sometimes introduce new integration features (for example, new webhook triggers or new API endpoints). These could either benefit your middleware (you might simplify code if a feature becomes native) or require a change (if an API is deprecated). Also monitor your middleware’s usage over time: if you see it hitting rate limits or if response times are creeping up, you might need to refactor or allocate more resources.

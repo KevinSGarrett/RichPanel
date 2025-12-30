@@ -1,0 +1,5 @@
+API Key Rotation: 
+
+Richpanel API keys can be generated and revoked in the UI easily
+developer.richpanel.com
+. It’s good practice to rotate keys periodically. If a key is compromised, you can revoke it from the dashboard and generate a new one. Plan your deployment such that the key is stored securely (use a secret manager, not hard-coded). There’s no mention of API keys being environment-scoped (each key is for your whole account environment), so separate accounts for sandbox/prod is the way to separate concerns.

@@ -1,0 +1,3 @@
+Use a Test Ticket/Customer: 
+
+Create a dummy customer in Richpanel (e.g., Jane Doe with your email address) and initiate a conversation from that customer. You can then use this conversation to trigger your automations. For instance, send a test message as that customer (via email or your website chat with a test account). The automation rule will fire, and your middleware will get the webhook, but you’re not involving a real customer. Verify that your middleware logs the event and takes the expected actions (maybe it updates the ticket or sends a response).

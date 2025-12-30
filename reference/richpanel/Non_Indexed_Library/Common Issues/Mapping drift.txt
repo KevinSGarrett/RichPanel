@@ -1,0 +1,24 @@
+Team/department mapping drift (your router sends tickets to the wrong place over time)
+
+What goes wrong
+
+Your model outputs “Billing”, but in Richpanel the team is renamed to “Payments”.
+
+Team IDs change or you add/remove departments.
+
+Hard-coded mappings become wrong silently.
+
+How to avoid it
+
+Fetch teams from Richpanel (and their IDs) via the Teams API and validate mappings at startup. 
+Richpanel
+
+Store your mapping in configuration (DB/config service), not in code.
+
+Add a “fallback team” (e.g., General Support) if the mapping is missing.
+
+Add an alert when:
+
+the model selects an unmapped label,
+
+or assignment fails with a 4xx.

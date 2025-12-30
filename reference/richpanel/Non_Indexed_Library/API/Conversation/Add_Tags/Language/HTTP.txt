@@ -1,0 +1,12 @@
+Add Tags
+put
+https://api.richpanel.com/v1/tickets/{id}/add-tags
+
+Language: HTTP
+
+PUT /v1/tickets/id/add-tags HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+X-Richpanel-Key: test
+Host: api.richpanel.com
+

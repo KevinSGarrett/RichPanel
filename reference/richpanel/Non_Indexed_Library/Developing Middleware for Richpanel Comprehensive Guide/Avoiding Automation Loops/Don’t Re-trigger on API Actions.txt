@@ -1,0 +1,3 @@
+Don’t Re-trigger on API Actions:
+
+ Be mindful that some actions your middleware takes could match other automation rules. Check your Richpanel automations for things like “on any agent reply, do X.” If those exist, you might want to refine them (maybe exclude replies that contain a certain signature or exclude those added by a specific integration user, if applicable). Generally, an internal note added by API or a status change shouldn’t trigger a customer message rule, but it could trigger other workflows if set up broadly.

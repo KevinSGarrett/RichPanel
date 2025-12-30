@@ -1,0 +1,10 @@
+Retrieve an Order
+get
+https://api.richpanel.com/v1/order/{appclient_id}/{order_id}
+
+Language: PowerShell
+
+$headers=@{}
+$headers.Add("accept", "application/json")
+$headers.Add("x-richpanel-key", "test")
+$response = Invoke-WebRequest -Uri 'https://api.richpanel.com/v1/order/appclient_id/order_id' -Method GET -Headers $headers

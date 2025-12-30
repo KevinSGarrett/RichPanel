@@ -1,0 +1,8 @@
+Summary (Security & Support): 
+
+Richpanel supports secure integration through custom auth headers on HTTP calls
+headwayapp.co
+ – use that. They don’t have fancy HMAC signing or known IP addresses, so rely on token auth and TLS. They have robust compliance credentials (ISO 27001, GDPR compliance, HIPAA readiness) to protect data
+richpanel.com
+richpanel.com
+. For API changes, watch their versioning (currently v1.1) and subscribe to updates. And if things break, reach out via their support channels – you can typically get help via the helpdesk or through your account contacts. Because your integration will be important, it’s a good idea to periodically review Richpanel’s release notes and perhaps join any beta programs they might have for developers. That way you won’t be caught off-guard by breaking changes and will have a line of communication with them for any urgent issues.

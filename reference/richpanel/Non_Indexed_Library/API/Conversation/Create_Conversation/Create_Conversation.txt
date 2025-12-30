@@ -1,0 +1,90 @@
+Create a Conversation
+post
+https://api.richpanel.com/v1/tickets
+
+Use this API to create a new conversation.
+
+Recent Requests
+Log in to see full request history
+Time	Status	User Agent	
+Make a request to see history.
+0 Requests This Month
+
+Email Sample Payload
+
+{
+    "ticket": {
+        "status": "CLOSED",
+        "comment": {
+            "sender_type": "customer",
+            "body": "Test Message"
+        },
+        "tags": [
+            "009a8844-4c94-4546-be2f-de68be9d8c34",
+            "017ec14f-2845-4160-86a8-7eb1325dc302"
+        ],
+        "customer_profile": {
+          "firstName": "Jhon",
+          "lastName": "Doe"
+       },
+        "priority": "LOW",
+        "subject": "Testing",
+        "via": {
+            "channel": "email",
+            "source": {
+                "from": {
+                    "address": "abc@gmail.com"
+                },
+                "to": {
+                    "address": "support@abc.customerdesk.io"
+                }
+            }
+        }
+    }
+}
+Aircall Sample Payload
+
+{
+    "ticket": {
+        "status": "OPEN",
+        "comment": {
+            "sender_type": "customer",
+            "body": "Test Message"
+        },
+         "tags": [
+            "009a8844-4c94-4546-be2f-de68be9d8c34",
+            "017ec14f-2845-4160-86a8-7eb1325dc302"
+        ],
+         "customer_profile": {
+          "firstName": "Jhon",
+          "lastName": "Doe"
+       },
+        "priority": "LOW",
+        "subject": "Testing",
+        "via": {
+            "channel": "aircall",
+            "source": {
+                "from": {
+                    "id": "+16692668044"
+                },
+                "to": {
+                    "id": "+11234567890"
+                }
+            }
+        }
+    }
+}
+Body Params
+ticket
+object
+
+ticket object
+Responses
+
+200
+200
+
+
+400
+400
+
