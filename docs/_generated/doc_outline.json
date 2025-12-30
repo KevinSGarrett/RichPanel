@@ -9420,6 +9420,56 @@
     ]
   },
   {
+    "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Access & Secrets Inventory (Sprint 0)",
+        "anchor": "access-secrets-inventory-sprint-0"
+      },
+      {
+        "level": 2,
+        "text": "1) Quick status snapshot",
+        "anchor": "1-quick-status-snapshot"
+      },
+      {
+        "level": 2,
+        "text": "2) AWS account + role requirements",
+        "anchor": "2-aws-account-role-requirements"
+      },
+      {
+        "level": 2,
+        "text": "3) Richpanel API + webhook credentials",
+        "anchor": "3-richpanel-api-webhook-credentials"
+      },
+      {
+        "level": 2,
+        "text": "4) OpenAI access",
+        "anchor": "4-openai-access"
+      },
+      {
+        "level": 2,
+        "text": "5) ShipStation / marketplace credentials",
+        "anchor": "5-shipstation-marketplace-credentials"
+      },
+      {
+        "level": 2,
+        "text": "6) Email provider / inbox credentials",
+        "anchor": "6-email-provider-inbox-credentials"
+      },
+      {
+        "level": 2,
+        "text": "7) Secrets handling + variable mapping",
+        "anchor": "7-secrets-handling-variable-mapping"
+      },
+      {
+        "level": 2,
+        "text": "8) Open issues & next steps",
+        "anchor": "8-open-issues-next-steps"
+      }
+    ]
+  },
+  {
     "path": "07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md",
     "outline": [
       {

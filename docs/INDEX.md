@@ -105,6 +105,7 @@ Quick links:
 - [Data classification & PII inventory](06_Security_Privacy_Compliance/Data_Classification_and_PII_Inventory.md)
 - [PII handling and redaction](06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md)
 - [Data retention and access](06_Security_Privacy_Compliance/Data_Retention_and_Access.md)
+- [Access & secrets inventory](06_Security_Secrets/Access_and_Secrets_Inventory.md)
 - [Webhook auth and request validation](06_Security_Privacy_Compliance/Webhook_Auth_and_Request_Validation.md)
 - [Secrets and key management](06_Security_Privacy_Compliance/Secrets_and_Key_Management.md)
 - [IAM least privilege](06_Security_Privacy_Compliance/IAM_Least_Privilege.md)

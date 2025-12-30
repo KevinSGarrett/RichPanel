@@ -10451,6 +10451,60 @@
       "anchor": "6-documentation-required-every-rotation"
     }
   ],
+  "access & secrets inventory (sprint 0)": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "access-secrets-inventory-sprint-0"
+    }
+  ],
+  "1) quick status snapshot": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "1-quick-status-snapshot"
+    }
+  ],
+  "2) aws account + role requirements": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "2-aws-account-role-requirements"
+    }
+  ],
+  "3) richpanel api + webhook credentials": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "3-richpanel-api-webhook-credentials"
+    }
+  ],
+  "4) openai access": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "4-openai-access"
+    }
+  ],
+  "5) shipstation / marketplace credentials": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "5-shipstation-marketplace-credentials"
+    }
+  ],
+  "6) email provider / inbox credentials": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "6-email-provider-inbox-credentials"
+    }
+  ],
+  "7) secrets handling + variable mapping": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "7-secrets-handling-variable-mapping"
+    }
+  ],
+  "8) open issues & next steps": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "8-open-issues-next-steps"
+    }
+  ],
   "backlog catch-up and replay strategy (v1)": [
     {
       "path": "07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md",

@@ -1690,6 +1690,16 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+    "title": "Access & Secrets Inventory (Sprint 0)",
+    "section": "06_Security_Secrets",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 1379,
+    "approx_tokens": 1792,
+    "last_updated": "2025-12-29"
+  },
+  {
     "path": "07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md",
     "title": "Backlog Catch-up and Replay Strategy (v1)",
     "section": "07_Reliability_Scaling",
@@ -1875,8 +1885,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 409,
-    "approx_tokens": 531,
+    "word_count": 433,
+    "approx_tokens": 562,
     "last_updated": ""
   },
   {
@@ -1885,8 +1895,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 348,
-    "approx_tokens": 452,
+    "word_count": 395,
+    "approx_tokens": 513,
     "last_updated": "2025-12-29"
   },
   {
@@ -3775,8 +3785,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1208,
-    "approx_tokens": 1570,
+    "word_count": 1214,
+    "approx_tokens": 1578,
     "last_updated": "2025-12-29"
   },
   {
