@@ -1,6 +1,6 @@
 # Progress Log (Meta)
 
-Last updated: 2025-12-29 (Wave F13)
+Last updated: 2025-12-30 (Wave B00 — Build kickoff)
 
 This log tracks the progress of building the **documentation OS**.
 
@@ -58,4 +58,15 @@ This log tracks the progress of building the **documentation OS**.
 - Added canonical GitHub branch protection + merge settings guide.
 - Improved protected delete guard (local + CI).
 - Updated CI entrypoint to pass `--ci` to the protected delete check.
+
+## 2025-12-29 — Waves F13 → F15
+- F13: Integrated CR-001 scope (delivery estimate messaging + no tracking numbers). Updated plan docs accordingly.
+- F14: Re-scoped deferred discovery tasks and clarified assumptions + SLA enforcement.
+- F15: Hardened GitHub + CI for Cursor agents (branch protection strict mode, deterministic regen, tracked `config/.env.example`, CI runbook updates).
+
+## 2025-12-30 — Wave B00 (Build kickoff)
+- Flipped `REHYDRATION_PACK/MODE.yaml` to `mode: build`, wave = `WAVE_B00`.
+- Documented GitHub/CI readiness in `REHYDRATION_PACK/{FOUNDATION_STATUS,GITHUB_STATE,WAVE_SCHEDULE*}`.
+- Added PM quick-reference docs: `PM_STATUS.md`, `PM_DECISIONS.md`, `PM_NEXT_STEPS.md`.
+- Created sequential agent assignments for Build Mode and added Windows-friendly helper scripts (`scripts/ci.ps1`, `scripts/gh_ci_latest.ps1`).
 

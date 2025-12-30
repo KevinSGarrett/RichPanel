@@ -218,6 +218,10 @@ Legend:
 - ✅ [Webhook Authentication and Request Validation](06_Security_Privacy_Compliance/Webhook_Auth_and_Request_Validation.md)  (`06_Security_Privacy_Compliance/Webhook_Auth_and_Request_Validation.md`)
 - ✅ [Webhook Secret Rotation Runbook (No-downtime)](06_Security_Privacy_Compliance/Webhook_Secret_Rotation_Runbook.md)  (`06_Security_Privacy_Compliance/Webhook_Secret_Rotation_Runbook.md`)
 
+## 06_Security_Secrets
+
+- ✅ [Access & Secrets Inventory (Sprint 0)](06_Security_Secrets/Access_and_Secrets_Inventory.md)  (`06_Security_Secrets/Access_and_Secrets_Inventory.md`)
+
 ## 07_Reliability_Scaling
 
 - ✅ [Backlog Catch-up and Replay Strategy (v1)](07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md)  (`07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md`)

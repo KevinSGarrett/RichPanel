@@ -41,6 +41,12 @@ gh run list --limit 5
 gh run view <RUN_ID> --log
 ```
 
+> PowerShell note: avoid embedding `| jq someFilter` inside quoted strings. Use the built-in `--json` + `--jq` flags so the command stays shell-safe, e.g.:
+> ```
+> gh run list --limit 5 --json databaseId,headBranch,status --jq '.[] | {run_id:.databaseId, branch:.headBranch, status}'
+> ```
+> This works in PowerShell without needing jq pipes.
+
 Fallback:
 - open the Actions page in GitHub UI
 - copy/paste the failing log excerpt into the PM cycle notes

@@ -1,48 +1,40 @@
-# Foundation Status (Snapshot)
+# Foundation Status
 
-Last updated: 2025-12-29 — Wave F11
+Last updated: 2025-12-29 (Wave F15 exit → Build Mode WAVE_B00)
 
-This is a **token-efficient snapshot** of where we are in the documentation OS build.
+## Overall
+The **Foundation OS is complete** and the repo is **ready for Build Mode**.
 
-Mode:
-- `foundation` (see `REHYDRATION_PACK/MODE.yaml`)
+This means:
+- CI is in place and passing on `main`.
+- Regen outputs (doc registry, reference registry, plan checklist) are **deterministic** across Windows/Linux.
+- GitHub repo settings + branch protection are aligned for safe agent-driven PR flow.
 
-## Foundation completion criteria
-Foundation (documentation OS) is considered complete when these pass:
-- `python scripts/verify_rehydration_pack.py`
-- `python scripts/verify_plan_sync.py`
-- `python scripts/verify_doc_hygiene.py`
+## Readiness checklist
+- [x] Repo structure present: `docs/`, `policies/`, `scripts/`, `infra/`, `backend/`, `frontend/`.
+- [x] CI workflow present: `.github/workflows/ci.yml`.
+- [x] Deterministic regen scripts:
+  - `scripts/regen_doc_registry.py` uses canonical POSIX-path ordering.
+  - `scripts/regen_reference_registry.py` uses canonical POSIX-path ordering + newline-normalized `size_bytes` for UTF-8 text.
+  - `scripts/regen_plan_checklist.py` banner is deterministic (no date-based thrash).
+- [x] CI-required “living docs/files” are tracked (not ignored): `config/.env.example`.
+- [x] GitHub merge strategy set: **merge commits only**; **auto-delete branches on merge**.
+- [x] Branch protection enabled on `main`:
+  - required status check: `validate` (strict)
+  - enforce admins
+  - require conversation resolution
+  - no force pushes / deletions
 
-Definition of Done (canonical):
-- `docs/00_Project_Admin/Definition_of_Done__Foundation.md`
+## Validation snapshot
+- 2025-12-29: `python scripts/run_ci_checks.py` — PASS (local run regenerating doc/reference registries + plan checklist).
+- PRs must show GitHub Actions job **`validate`** green before merge (merge-commit only).
 
-## What is already in place
-- REHYDRATION_PACK is manifest-driven and mode-aware (foundation vs build).
-- Docs indexing/registries exist (`docs/_generated/*`) and regenerate deterministically.
-- Reference registry exists (`reference/_generated/*`) and regenerates deterministically.
-- Plan checklist extraction works (`docs/00_Project_Admin/To_Do/_generated/*`).
-- PM prompt helpers exist:
-  - `REHYDRATION_PACK/PM_INITIAL_PROMPT.md`
-  - `REHYDRATION_PACK/PM_REHYDRATION_PROMPT.md`
-- Build-mode run archive structure exists:
-  - `REHYDRATION_PACK/RUNS/` (+ `scripts/new_run_folder.py`)
+## Notes / constraints
+- CI-equivalent gate: `python scripts/run_ci_checks.py` (feeds GitHub Actions job **`validate`**; strict/up-to-date required).
+- Build work that touches external systems will still require **human-provided access** (AWS credentials, Richpanel access, etc.).
+- Recommended local working copy is the Git clone at `C:\RichPanel_GIT`.
+  - If you still have a legacy `C:\RichPanel` folder, keep it as backup or replace it once nothing is locking it.
 
-## What remains before build mode
-See the canonical checklist:
-- `docs/00_Project_Admin/Build_Mode_Activation_Checklist.md`
+## Next
+Proceed with **WAVE_B00 (Build Kickoff)** and let Cursor agents own the remaining work.
 
-High-level remaining steps:
-- [ ] Build-mode activation checklist complete
-- [ ] Switch `REHYDRATION_PACK/MODE.yaml` to `mode: build`
-- [ ] Create first run folder: `python scripts/new_run_folder.py --now`
-- [ ] Populate `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md`
-- [ ] First run set executed and required run artifacts filled in
-
-
-## GitHub ops readiness (build-mode prerequisite)
-- ✅ GitHub operations policy is explicit (`POL-GH-001`)
-- ✅ CI-equivalent script exists (`scripts/run_ci_checks.py`)
-- ✅ Protected delete guard exists (`scripts/check_protected_deletes.py` + approvals file)
-- ✅ Branch budget helper exists (`scripts/branch_budget_check.py`)
-- ✅ Run scaffolding includes `GIT_RUN_PLAN.md`
-- ✅ Pack includes `GITHUB_STATE.md` for PM visibility
