@@ -7,6 +7,12 @@ Use this file to capture the repo’s GitHub integration state so the PM and age
 
 ---
 
+## Repo identity
+- GitHub repo: https://github.com/KevinSGarrett/RichPanel
+- Default branch: main
+- Local working root (Cursor): C:\RichPanel_GIT
+
+
 ## Locked defaults (do not change without PM decision)
 - Main protection: enabled (PR required; required status checks)
 - Merge style: merge commit
