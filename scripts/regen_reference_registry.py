@@ -23,9 +23,8 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import date
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -38,6 +37,18 @@ WORD_SPLIT_RE = re.compile(r"[\s_\-–—]+")
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")
+
+
+def deterministic_size(path: Path) -> int:
+    """
+    Return a size that is stable across platforms by normalizing newline handling
+    for UTF-8 text files. Binary files fall back to the on-disk byte size.
+    """
+    try:
+        txt = path.read_text(encoding="utf-8")
+        return len(txt.encode("utf-8"))
+    except Exception:
+        return path.stat().st_size
 
 
 def title_guess_for(path: Path) -> str:
@@ -84,7 +95,10 @@ def scan_reference_files() -> List[Dict]:
     if not REF_ROOT.exists():
         return records
 
-    for path in sorted([p for p in REF_ROOT.rglob("*") if p.is_file()]):
+    for path in sorted(
+        [p for p in REF_ROOT.rglob("*") if p.is_file()],
+        key=lambda p: p.relative_to(REF_ROOT).as_posix(),
+    ):
         if any(part in IGNORE_DIRS for part in path.parts):
             continue
 
@@ -111,7 +125,7 @@ def scan_reference_files() -> List[Dict]:
                 "category": category,
                 "title_guess": title,
                 "type": path.suffix.lower().lstrip("."),
-                "size_bytes": path.stat().st_size,
+                "size_bytes": deterministic_size(path),
                 "tags": tags,
             }
         )
@@ -124,30 +138,46 @@ def write_json(path: Path, obj) -> None:
 
 
 def main() -> int:
-    today = date.today().isoformat()
     records = scan_reference_files()
 
     # Combined registry
     combined = {
-        "generated_at": today,
         "count": len(records),
         "records": records,
     }
     write_json(REF_ROOT / "_generated" / "reference_registry.json", combined)
     write_json(
         REF_ROOT / "_generated" / "reference_registry.compact.json",
-        [{"path": r["path"], "vendor": r["vendor"], "title": r["title_guess"], "type": r["type"], "tags": r["tags"]} for r in records],
+        [
+            {
+                "path": r["path"],
+                "vendor": r["vendor"],
+                "title": r["title_guess"],
+                "type": r["type"],
+                "tags": r["tags"],
+            }
+            for r in records
+        ],
     )
 
     # Vendor-specific: Richpanel (if present)
     rp_root = REF_ROOT / "richpanel"
     if rp_root.exists():
         rp_records = [r for r in records if r["vendor"] == "richpanel"]
-        rp_obj = {"generated_at": today, "count": len(rp_records), "records": rp_records}
+        rp_obj = {"count": len(rp_records), "records": rp_records}
         write_json(rp_root / "_generated" / "reference_registry.json", rp_obj)
         write_json(
             rp_root / "_generated" / "reference_registry.compact.json",
-            [{"path": r["path"], "title": r["title_guess"], "category": r.get("category", ""), "type": r["type"], "tags": r["tags"]} for r in rp_records],
+            [
+                {
+                    "path": r["path"],
+                    "title": r["title_guess"],
+                    "category": r.get("category", ""),
+                    "type": r["type"],
+                    "tags": r["tags"],
+                }
+                for r in rp_records
+            ],
         )
 
     print(f"OK: reference registry regenerated ({len(records)} files)")

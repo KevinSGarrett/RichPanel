@@ -1,6 +1,6 @@
 # PLAN CHECKLIST — Summary (Generated)
 
-Generated: 2025-12-29  
+Generated: (deterministic; see git history)  
 
 Counts by docs section:
 

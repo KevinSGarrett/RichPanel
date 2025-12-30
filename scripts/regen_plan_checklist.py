@@ -22,7 +22,6 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -155,7 +154,7 @@ def write_extracted_md(out_path: Path, tasks: List[Task]) -> None:
     md: List[str] = []
     md.append("# PLAN CHECKLIST — Extracted (Generated)")
     md.append("")
-    md.append(f"Generated: {date.today().isoformat()}  ")
+    md.append("Generated: (deterministic; see git history)  ")
     md.append("Source: markdown checkboxes across docs/ (excluding Agent Ops and To_Do outputs)")
     md.append("")
     md.append(f"Counts: total={total}, checked={checked}, unchecked={unchecked}")
@@ -198,7 +197,7 @@ def write_summary_md(out_path: Path, tasks: List[Task]) -> None:
     lines: List[str] = []
     lines.append("# PLAN CHECKLIST — Summary (Generated)")
     lines.append("")
-    lines.append(f"Generated: {date.today().isoformat()}  ")
+    lines.append("Generated: (deterministic; see git history)  ")
     lines.append("")
     lines.append("Counts by docs section:")
     lines.append("")
