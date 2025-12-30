@@ -21,6 +21,17 @@ Run:
 python scripts/run_ci_checks.py
 ```
 
+### PowerShell helper (Windows)
+Use the wrapper so you get consistent status output and argument handling:
+```powershell
+pwsh -File scripts/ci.ps1
+```
+or from an existing PowerShell session:
+```powershell
+.\scripts\ci.ps1 -- --ci
+```
+Everything after `--` is passed through to `python scripts/run_ci_checks.py`.
+
 This runs:
 - rehydration pack validation
 - docs/reference registry validation

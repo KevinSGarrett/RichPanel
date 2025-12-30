@@ -1,6 +1,38 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/richpanel-middleware.ts",
   "context": {
-    "@aws-cdk/core:checkSecretUsage": true
+    "@aws-cdk/core:checkSecretUsage": true,
+    "environments": {
+      "dev": {
+        "account": "111122223333",
+        "region": "us-east-2",
+        "owner": "middleware",
+        "costCenter": "eng-dev",
+        "tags": {
+          "service": "richpanel-middleware",
+          "tier": "dev"
+        }
+      },
+      "staging": {
+        "account": "444455556666",
+        "region": "us-east-2",
+        "owner": "middleware",
+        "costCenter": "eng-staging",
+        "tags": {
+          "service": "richpanel-middleware",
+          "tier": "staging"
+        }
+      },
+      "prod": {
+        "account": "777788889999",
+        "region": "us-east-2",
+        "owner": "middleware",
+        "costCenter": "eng-prod",
+        "tags": {
+          "service": "richpanel-middleware",
+          "tier": "prod"
+        }
+      }
+    }
   }
 }

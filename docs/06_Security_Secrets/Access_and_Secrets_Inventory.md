@@ -17,6 +17,7 @@ Owners: Security & Platform (Agent 2) / Eng Lead
 | OpenAI API key | LLM routing + FAQ automation (per [OpenAI env strategy](../09_Deployment_Operations/Environments.md#openai-environment-strategy)). | Unique per env; dev/staging use low-quota keys; prod isolated. | Secrets Manager `rp-mw/<env>/openai/api_key`. | Owner: Product/Leadership. **Pending:** request procurement + budget caps. |
 | ShipStation / marketplace credential set | Order lookup + shipment status for CR-001 (“no tracking numbers”) and FAQ templates. Stream B1 explicitly calls for this inventory. | Prod required; staging optional (can use sandbox). Dev uses stubs. | Secrets Manager: `rp-mw/<env>/shipstation/api_key`, `/shipstation/api_secret`, `/shipstation/api_base`. | Owner: Ops / Logistics. **Blocked:** need confirmation whether ShipStation vs Shopify native is authoritative ([Active workstreams](../REHYDRATION_PACK/03_ACTIVE_WORKSTREAMS.md#stream-b1--sprint-0-preflight-access--secrets-inventory)). |
 | Email provider / SMTP-forwarding login | Richpanel needs a connected support inbox, see vendor doc “[Connect your Support Email](../reference/richpanel/Non_Indexed_Library/Connect_your_Support_Email.txt)”. Also required to satisfy Stream B1 (“inventory required accounts/keys — AWS, Richpanel, email provider, shipping platform”). | Prod inbox mandatory; staging optional via forwarding; dev uses mocks. | Store OAuth app password / SMTP credentials in Secrets Manager `rp-mw/<env>/email/<provider>/*`. If AWS SES is used, also store SMTP user + DKIM keys. | Owner: CX / IT. **Pending:** need to confirm provider (Gmail vs O365 vs SES) and supply forwarding credentials. |
+| Runtime feature flags (`safe_mode`, `automation_enabled`) | Operator kill switches per [Kill Switch and Safe Mode](../06_Security_Privacy_Compliance/Kill_Switch_and_Safe_Mode.md). Flags must be editable without redeploy. | `dev`, `staging`, `prod` | AWS Systems Manager Parameter Store `/rp-mw/<env>/safe_mode` and `/rp-mw/<env>/automation_enabled` (created by CDK with defaults). | Owner: Engineering + Support Ops for toggles. **Pending:** finalize IAM guardrails for who can edit parameters + incident playbook linkage. |
 
 ---
 
@@ -90,10 +91,13 @@ Owners: Security & Platform (Agent 2) / Eng Lead
 ## 7) Secrets handling + variable mapping
 
 - All secrets live in AWS Secrets Manager (never in `.env`), per [Secrets and Key Management](../06_Security_Privacy_Compliance/Secrets_and_Key_Management.md#2-storage-location-required).
-- Non-secret environment variables (see `config/.env.example`) define *names* or toggles only:
-  - `RICH_PANEL_ENV`, `AWS_REGION`, feature flags (`SAFE_MODE`, `AUTOMATION_ENABLED`).
-  - Endpoint bases: `RICH_PANEL_API_BASE_URL`, `SHIPSTATION_API_BASE_URL`.
-  - Provider identifiers: `EMAIL_PROVIDER`.
+- Non-secret environment variables (see `config/.env.example`) define *names* or safe defaults only:
+  - `RICH_PANEL_ENV`, `AWS_REGION`, webhook path, API base URLs, provider identifiers.
+  - Secret-bearing keys remain as **blank placeholders** so developers know they must source from Secrets Manager.
+- Runtime feature flags now live in AWS Systems Manager Parameter Store (per CDK stack outputs):
+  - `/rp-mw/<env>/safe_mode` (default `false`)
+  - `/rp-mw/<env>/automation_enabled` (default `true`)
+  - Update flags via console/CLI per kill-switch runbook; do not add them to `.env`.
 - Deployment workflow: CI/CD injects secret values at deploy time by resolving Secrets Manager ARNs and setting Lambda environment variables or SSM parameters. Developers copy `.env.example` → `.env` locally and fill values from their personal AWS account (dev only).
 
 ---

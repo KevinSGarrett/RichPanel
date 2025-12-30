@@ -18,5 +18,10 @@ References:
 - `terraform/` — optional future alternative (not used in v1)
 - `sam/` — optional future alternative (not used in v1)
 
+### CDK multi-env scaffold
+- `infra/cdk` now materializes `dev`, `staging`, `prod` stacks from a single entrypoint.
+- Environment metadata (account/region/tags) is stored in `infra/cdk/cdk.json` and can be overridden via `-c env=<name>`.
+- Naming + parameters are centralized in `lib/environments.ts` to enforce `/rp-mw/<env>/...` prefixes for secrets, SSM parameters, logs, and metrics.
+
 ## Rule
 Pick **one** IaC tool for implementation to avoid drift. For this repo: CDK is canonical.
