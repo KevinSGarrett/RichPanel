@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import date
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -124,15 +123,13 @@ def write_json(path: Path, obj) -> None:
 
 
 def main() -> int:
-    today = date.today().isoformat()
     records = scan_reference_files()
 
     # Combined registry
-    combined = {
-        "generated_at": today,
-        "count": len(records),
-        "records": records,
-    }
+combined = {
+    "count": len(records),
+    "records": records,
+}
     write_json(REF_ROOT / "_generated" / "reference_registry.json", combined)
     write_json(
         REF_ROOT / "_generated" / "reference_registry.compact.json",
@@ -143,7 +140,7 @@ def main() -> int:
     rp_root = REF_ROOT / "richpanel"
     if rp_root.exists():
         rp_records = [r for r in records if r["vendor"] == "richpanel"]
-        rp_obj = {"generated_at": today, "count": len(rp_records), "records": rp_records}
+rp_obj = {"count": len(rp_records), "records": rp_records}
         write_json(rp_root / "_generated" / "reference_registry.json", rp_obj)
         write_json(
             rp_root / "_generated" / "reference_registry.compact.json",
