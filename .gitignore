@@ -44,3 +44,10 @@ runs/*
 *.zip
 RichPanel_BACKUP*
 RichPanel_BACKUP_FULL_*
+# Chat artifacts / backups
+*.zip
+RichPanel_BACKUP*
+RichPanel_BACKUP_FULL_*
+
+# Temporary extraction / generated scratch
+_tmp_plan_extract/
