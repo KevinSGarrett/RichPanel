@@ -10708,6 +10708,11 @@
         "anchor": "2-local-ci-equivalent-checks"
       },
       {
+        "level": 3,
+        "text": "PowerShell helper (Windows)",
+        "anchor": "powershell-helper-windows"
+      },
+      {
         "level": 2,
         "text": "3) When GitHub Actions fails (red status)",
         "anchor": "3-when-github-actions-fails-red-status"

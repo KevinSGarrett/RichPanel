@@ -11859,6 +11859,12 @@
       "anchor": "2-local-ci-equivalent-checks"
     }
   ],
+  "powershell helper (windows)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "powershell-helper-windows"
+    }
+  ],
   "3) when github actions fails (red status)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",

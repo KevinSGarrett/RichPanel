@@ -26,7 +26,8 @@ from pathlib import Path
 import shutil
 import sys
 
-RUN_ID_RE = re.compile(r"^RUN_\d{8}_\d{4}Z$")
+RUN_ID_PATTERN = r"^RUN_\d{8}_\d{4}Z$"
+RUN_ID_RE = re.compile(RUN_ID_PATTERN)
 
 TEMPLATE_MAP = {
     "Cursor_Run_Summary_TEMPLATE.md": "RUN_SUMMARY.md",
