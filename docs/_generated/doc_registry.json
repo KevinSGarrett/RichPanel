@@ -680,26 +680,6 @@
     "last_updated": ""
   },
   {
-    "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-    "title": "PLAN CHECKLIST — Extracted (Generated)",
-    "section": "00_Project_Admin",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 9859,
-    "approx_tokens": 12816,
-    "last_updated": ""
-  },
-  {
-    "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md",
-    "title": "PLAN CHECKLIST — Summary (Generated)",
-    "section": "00_Project_Admin",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 75,
-    "approx_tokens": 97,
-    "last_updated": ""
-  },
-  {
     "path": "00_Project_Admin/To_Do/BACKLOG.md",
     "title": "Backlog (Unprioritized)",
     "section": "00_Project_Admin",
@@ -747,6 +727,26 @@
     "in_index": true,
     "word_count": 149,
     "approx_tokens": 193,
+    "last_updated": ""
+  },
+  {
+    "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+    "title": "PLAN CHECKLIST — Extracted (Generated)",
+    "section": "00_Project_Admin",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 9859,
+    "approx_tokens": 12816,
+    "last_updated": ""
+  },
+  {
+    "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md",
+    "title": "PLAN CHECKLIST — Summary (Generated)",
+    "section": "00_Project_Admin",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 75,
+    "approx_tokens": 97,
     "last_updated": ""
   },
   {
@@ -820,16 +820,6 @@
     "last_updated": "2025-12-21"
   },
   {
-    "path": "02_System_Architecture/Architecture_Overview.md",
-    "title": "Architecture Overview",
-    "section": "02_System_Architecture",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 480,
-    "approx_tokens": 624,
-    "last_updated": "2025-12-21"
-  },
-  {
     "path": "02_System_Architecture/AWS_Organizations_Setup_Plan_No_Control_Tower.md",
     "title": "AWS Organizations Setup Plan (No Control Tower)",
     "section": "02_System_Architecture",
@@ -857,6 +847,16 @@
     "in_index": true,
     "word_count": 736,
     "approx_tokens": 956,
+    "last_updated": "2025-12-21"
+  },
+  {
+    "path": "02_System_Architecture/Architecture_Overview.md",
+    "title": "Architecture Overview",
+    "section": "02_System_Architecture",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 480,
+    "approx_tokens": 624,
     "last_updated": "2025-12-21"
   },
   {
@@ -1170,26 +1170,6 @@
     "last_updated": "2025-12-22"
   },
   {
-    "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-    "title": "Prompt: classification_routing_v1",
-    "section": "04_LLM_Design_Evaluation",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 545,
-    "approx_tokens": 708,
-    "last_updated": ""
-  },
-  {
-    "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-    "title": "Prompt: tier2_verifier_v1",
-    "section": "04_LLM_Design_Evaluation",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 220,
-    "approx_tokens": 286,
-    "last_updated": ""
-  },
-  {
     "path": "04_LLM_Design_Evaluation/Prototype_Validation_Notes.md",
     "title": "Prototype validation notes (Wave 04)",
     "section": "04_LLM_Design_Evaluation",
@@ -1228,6 +1208,26 @@
     "word_count": 204,
     "approx_tokens": 265,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+    "title": "Prompt: classification_routing_v1",
+    "section": "04_LLM_Design_Evaluation",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 545,
+    "approx_tokens": 708,
+    "last_updated": ""
+  },
+  {
+    "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+    "title": "Prompt: tier2_verifier_v1",
+    "section": "04_LLM_Design_Evaluation",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 220,
+    "approx_tokens": 286,
+    "last_updated": ""
   },
   {
     "path": "05_FAQ_Automation/00_Overview.md",
@@ -1800,16 +1800,6 @@
     "last_updated": "2025-12-22"
   },
   {
-    "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-    "title": "Service Quotas and Operational Limits (Checklist)",
-    "section": "07_Reliability_Scaling",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 369,
-    "approx_tokens": 479,
-    "last_updated": "2025-12-22"
-  },
-  {
     "path": "07_Reliability_Scaling/SQS_FIFO_Strategy_and_Limits.md",
     "title": "SQS FIFO Strategy and Limits",
     "section": "07_Reliability_Scaling",
@@ -1817,6 +1807,16 @@
     "in_index": true,
     "word_count": 494,
     "approx_tokens": 642,
+    "last_updated": "2025-12-22"
+  },
+  {
+    "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+    "title": "Service Quotas and Operational Limits (Checklist)",
+    "section": "07_Reliability_Scaling",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 369,
+    "approx_tokens": 479,
     "last_updated": "2025-12-22"
   },
   {
@@ -2250,16 +2250,6 @@
     "last_updated": "2025-12-29 — Wave F08"
   },
   {
-    "path": "10_Governance_Continuous_Improvement/Model_Update_Policy.md",
-    "title": "Model Update Policy",
-    "section": "10_Governance_Continuous_Improvement",
-    "status": "legacy",
-    "in_index": false,
-    "word_count": 58,
-    "approx_tokens": 75,
-    "last_updated": "2025-12-29 — Wave F08"
-  },
-  {
     "path": "10_Governance_Continuous_Improvement/MOVED.md",
     "title": "Moved (Legacy Folder)",
     "section": "10_Governance_Continuous_Improvement",
@@ -2267,6 +2257,16 @@
     "in_index": false,
     "word_count": 29,
     "approx_tokens": 37,
+    "last_updated": "2025-12-29 — Wave F08"
+  },
+  {
+    "path": "10_Governance_Continuous_Improvement/Model_Update_Policy.md",
+    "title": "Model Update Policy",
+    "section": "10_Governance_Continuous_Improvement",
+    "status": "legacy",
+    "in_index": false,
+    "word_count": 58,
+    "approx_tokens": 75,
     "last_updated": "2025-12-29 — Wave F08"
   },
   {
@@ -2327,6 +2327,26 @@
     "in_index": true,
     "word_count": 668,
     "approx_tokens": 868,
+    "last_updated": "2025-12-22"
+  },
+  {
+    "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+    "title": "Training guide for support teams",
+    "section": "10_Operations_Runbooks_Training",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 497,
+    "approx_tokens": 646,
+    "last_updated": "2025-12-22"
+  },
+  {
+    "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
+    "title": "Wave 10 definition of done checklist",
+    "section": "10_Operations_Runbooks_Training",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 210,
+    "approx_tokens": 273,
     "last_updated": "2025-12-22"
   },
   {
@@ -2457,26 +2477,6 @@
     "in_index": false,
     "word_count": 279,
     "approx_tokens": 362,
-    "last_updated": "2025-12-22"
-  },
-  {
-    "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-    "title": "Training guide for support teams",
-    "section": "10_Operations_Runbooks_Training",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 497,
-    "approx_tokens": 646,
-    "last_updated": "2025-12-22"
-  },
-  {
-    "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
-    "title": "Wave 10 definition of done checklist",
-    "section": "10_Operations_Runbooks_Training",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 210,
-    "approx_tokens": 273,
     "last_updated": "2025-12-22"
   },
   {
@@ -3440,16 +3440,6 @@
     "last_updated": "2025-12-21"
   },
   {
-    "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-    "title": "Agent Roles and Concurrency (A/B/C)",
-    "section": "98_Agent_Ops",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 286,
-    "approx_tokens": 371,
-    "last_updated": "2025-12-23"
-  },
-  {
     "path": "98_Agent_Ops/AI_Worker_Retrieval_Workflow.md",
     "title": "AI Worker Retrieval Workflow",
     "section": "98_Agent_Ops",
@@ -3458,6 +3448,16 @@
     "word_count": 461,
     "approx_tokens": 599,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+    "title": "Agent Roles and Concurrency (A/B/C)",
+    "section": "98_Agent_Ops",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 286,
+    "approx_tokens": 371,
+    "last_updated": "2025-12-23"
   },
   {
     "path": "98_Agent_Ops/Chunking_and_Indexing_Standard.md",

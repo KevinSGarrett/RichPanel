@@ -83,7 +83,10 @@ def scan_reference_files() -> List[Dict]:
     if not REF_ROOT.exists():
         return records
 
-    for path in sorted([p for p in REF_ROOT.rglob("*") if p.is_file()]):
+    for path in sorted(
+        [p for p in REF_ROOT.rglob("*") if p.is_file()],
+        key=lambda p: p.relative_to(REF_ROOT).as_posix(),
+    ):
         if any(part in IGNORE_DIRS for part in path.parts):
             continue
 

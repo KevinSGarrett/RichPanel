@@ -2833,22 +2833,6 @@
       ]
     },
     {
-      "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Handling API Errors.txt",
-      "vendor": "richpanel",
-      "category": "Non_Indexed_Library",
-      "title_guess": "Weak handling of \u201cnormal\u201d Richpanel API errors (not just rate limits)",
-      "type": "txt",
-      "size_bytes": 1244,
-      "tags": [
-        "api",
-        "common_issues",
-        "errors",
-        "handling",
-        "non_indexed_library",
-        "richpanel"
-      ]
-    },
-    {
       "path": "reference/richpanel/Non_Indexed_Library/Common Issues/HTTP Target fails retry.txt",
       "vendor": "richpanel",
       "category": "Non_Indexed_Library",
@@ -2863,6 +2847,22 @@
         "retry",
         "richpanel",
         "target"
+      ]
+    },
+    {
+      "path": "reference/richpanel/Non_Indexed_Library/Common Issues/Handling API Errors.txt",
+      "vendor": "richpanel",
+      "category": "Non_Indexed_Library",
+      "title_guess": "Weak handling of \u201cnormal\u201d Richpanel API errors (not just rate limits)",
+      "type": "txt",
+      "size_bytes": 1244,
+      "tags": [
+        "api",
+        "common_issues",
+        "errors",
+        "handling",
+        "non_indexed_library",
+        "richpanel"
       ]
     },
     {
@@ -3968,14 +3968,15 @@
       ]
     },
     {
-      "path": "reference/richpanel/Non_Indexed_Library/dev.txt",
+      "path": "reference/richpanel/Non_Indexed_Library/DRP/Richpanel IntegrationKeyQ&A.txt",
       "vendor": "richpanel",
       "category": "Non_Indexed_Library",
-      "title_guess": "dev",
+      "title_guess": "Richpanel Integration: Key Q&A for Middleware Development",
       "type": "txt",
-      "size_bytes": 6714,
+      "size_bytes": 55443,
       "tags": [
-        "dev",
+        "drp",
+        "integrationkeyq&a",
         "non_indexed_library",
         "richpanel"
       ]
@@ -4766,20 +4767,6 @@
       ]
     },
     {
-      "path": "reference/richpanel/Non_Indexed_Library/DRP/Richpanel IntegrationKeyQ&A.txt",
-      "vendor": "richpanel",
-      "category": "Non_Indexed_Library",
-      "title_guess": "Richpanel Integration: Key Q&A for Middleware Development",
-      "type": "txt",
-      "size_bytes": 55443,
-      "tags": [
-        "drp",
-        "integrationkeyq&a",
-        "non_indexed_library",
-        "richpanel"
-      ]
-    },
-    {
       "path": "reference/richpanel/Non_Indexed_Library/Importing_Your_Data_to_Richpanel.txt",
       "vendor": "richpanel",
       "category": "Non_Indexed_Library",
@@ -5413,23 +5400,6 @@
       ]
     },
     {
-      "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Routing in Live Chat.txt",
-      "vendor": "richpanel",
-      "category": "Non_Indexed_Library",
-      "title_guess": "Routing in Live Chat:",
-      "type": "txt",
-      "size_bytes": 1194,
-      "tags": [
-        "chat",
-        "live",
-        "non_indexed_library",
-        "richpanel",
-        "richpanel_integration",
-        "routing",
-        "routing_primitives_teams_(departments)_and_ticket_assignment"
-      ]
-    },
-    {
       "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Routing Ticket To The Right Queue.txt",
       "vendor": "richpanel",
       "category": "Non_Indexed_Library",
@@ -5445,6 +5415,23 @@
         "routing",
         "routing_primitives_teams_(departments)_and_ticket_assignment",
         "ticket"
+      ]
+    },
+    {
+      "path": "reference/richpanel/Non_Indexed_Library/Richpanel_Integration/Routing Primitives Teams (Departments) and Ticket Assignment/Routing in Live Chat.txt",
+      "vendor": "richpanel",
+      "category": "Non_Indexed_Library",
+      "title_guess": "Routing in Live Chat:",
+      "type": "txt",
+      "size_bytes": 1194,
+      "tags": [
+        "chat",
+        "live",
+        "non_indexed_library",
+        "richpanel",
+        "richpanel_integration",
+        "routing",
+        "routing_primitives_teams_(departments)_and_ticket_assignment"
       ]
     },
     {
@@ -6035,6 +6022,19 @@
         "richpanel",
         "subscription_event_structure",
         "user"
+      ]
+    },
+    {
+      "path": "reference/richpanel/Non_Indexed_Library/dev.txt",
+      "vendor": "richpanel",
+      "category": "Non_Indexed_Library",
+      "title_guess": "dev",
+      "type": "txt",
+      "size_bytes": 6714,
+      "tags": [
+        "dev",
+        "non_indexed_library",
+        "richpanel"
       ]
     },
     {

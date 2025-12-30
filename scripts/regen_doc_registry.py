@@ -165,7 +165,10 @@ def main() -> int:
     index_text = read_text(INDEX_FILE)
     index_links = set([p for p in parse_index_links(index_text) if p.endswith(".md")])
 
-    md_files = sorted([p for p in DOCS_ROOT.rglob("*.md") if p.is_file()])
+    md_files = sorted(
+        [p for p in DOCS_ROOT.rglob("*.md") if p.is_file()],
+        key=lambda p: p.relative_to(DOCS_ROOT).as_posix(),
+    )
 
     # Build registry records
     records: List[Dict[str, object]] = []

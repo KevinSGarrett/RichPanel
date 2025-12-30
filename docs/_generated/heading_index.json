@@ -2829,6 +2829,110 @@
       "anchor": "new-files-added"
     }
   ],
+  "backlog (unprioritized)": [
+    {
+      "path": "00_Project_Admin/To_Do/BACKLOG.md",
+      "anchor": "backlog-unprioritized"
+    }
+  ],
+  "items": [
+    {
+      "path": "00_Project_Admin/To_Do/BACKLOG.md",
+      "anchor": "items"
+    }
+  ],
+  "done log (major checklist items)": [
+    {
+      "path": "00_Project_Admin/To_Do/DONE_LOG.md",
+      "anchor": "done-log-major-checklist-items"
+    }
+  ],
+  "entries": [
+    {
+      "path": "00_Project_Admin/To_Do/DONE_LOG.md",
+      "anchor": "entries"
+    },
+    {
+      "path": "08_Testing_Quality/Test_Evidence_Log.md",
+      "anchor": "entries"
+    }
+  ],
+  "master checklist (epics / milestones)": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "master-checklist-epics-milestones"
+    }
+  ],
+  "plan checklist (traceable to plan docs)": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "plan-checklist-traceable-to-plan-docs"
+    }
+  ],
+  "how this works (ai-first)": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "how-this-works-ai-first"
+    }
+  ],
+  "source of truth": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "source-of-truth"
+    },
+    {
+      "path": "04_LLM_Design_Evaluation/Prompting_and_Output_Schemas.md",
+      "anchor": "source-of-truth"
+    },
+    {
+      "path": "05_FAQ_Automation/Templates_Library_v1.md",
+      "anchor": "source-of-truth"
+    },
+    {
+      "path": "09_Deployment_Operations/Environment_Config.md",
+      "anchor": "source-of-truth"
+    },
+    {
+      "path": "11_Governance_Continuous_Improvement/Prompt_Template_Schema_Versioning.md",
+      "anchor": "source-of-truth"
+    }
+  ],
+  "compiled view (generated)": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "compiled-view-generated"
+    }
+  ],
+  "how to use during build": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "how-to-use-during-build"
+    }
+  ],
+  "recommended tracking workflow": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "recommended-tracking-workflow"
+    }
+  ],
+  "to-do system (project checklist)": [
+    {
+      "path": "00_Project_Admin/To_Do/README.md",
+      "anchor": "to-do-system-project-checklist"
+    }
+  ],
+  "files (human-facing)": [
+    {
+      "path": "00_Project_Admin/To_Do/README.md",
+      "anchor": "files-human-facing"
+    }
+  ],
+  "generated outputs (do not hand-edit)": [
+    {
+      "path": "00_Project_Admin/To_Do/README.md",
+      "anchor": "generated-outputs-do-not-hand-edit"
+    }
+  ],
   "plan checklist — extracted (generated)": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
@@ -3313,110 +3417,6 @@
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md",
       "anchor": "plan-checklist-summary-generated"
-    }
-  ],
-  "backlog (unprioritized)": [
-    {
-      "path": "00_Project_Admin/To_Do/BACKLOG.md",
-      "anchor": "backlog-unprioritized"
-    }
-  ],
-  "items": [
-    {
-      "path": "00_Project_Admin/To_Do/BACKLOG.md",
-      "anchor": "items"
-    }
-  ],
-  "done log (major checklist items)": [
-    {
-      "path": "00_Project_Admin/To_Do/DONE_LOG.md",
-      "anchor": "done-log-major-checklist-items"
-    }
-  ],
-  "entries": [
-    {
-      "path": "00_Project_Admin/To_Do/DONE_LOG.md",
-      "anchor": "entries"
-    },
-    {
-      "path": "08_Testing_Quality/Test_Evidence_Log.md",
-      "anchor": "entries"
-    }
-  ],
-  "master checklist (epics / milestones)": [
-    {
-      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
-      "anchor": "master-checklist-epics-milestones"
-    }
-  ],
-  "plan checklist (traceable to plan docs)": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "plan-checklist-traceable-to-plan-docs"
-    }
-  ],
-  "how this works (ai-first)": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "how-this-works-ai-first"
-    }
-  ],
-  "source of truth": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "source-of-truth"
-    },
-    {
-      "path": "04_LLM_Design_Evaluation/Prompting_and_Output_Schemas.md",
-      "anchor": "source-of-truth"
-    },
-    {
-      "path": "05_FAQ_Automation/Templates_Library_v1.md",
-      "anchor": "source-of-truth"
-    },
-    {
-      "path": "09_Deployment_Operations/Environment_Config.md",
-      "anchor": "source-of-truth"
-    },
-    {
-      "path": "11_Governance_Continuous_Improvement/Prompt_Template_Schema_Versioning.md",
-      "anchor": "source-of-truth"
-    }
-  ],
-  "compiled view (generated)": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "compiled-view-generated"
-    }
-  ],
-  "how to use during build": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "how-to-use-during-build"
-    }
-  ],
-  "recommended tracking workflow": [
-    {
-      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
-      "anchor": "recommended-tracking-workflow"
-    }
-  ],
-  "to-do system (project checklist)": [
-    {
-      "path": "00_Project_Admin/To_Do/README.md",
-      "anchor": "to-do-system-project-checklist"
-    }
-  ],
-  "files (human-facing)": [
-    {
-      "path": "00_Project_Admin/To_Do/README.md",
-      "anchor": "files-human-facing"
-    }
-  ],
-  "generated outputs (do not hand-edit)": [
-    {
-      "path": "00_Project_Admin/To_Do/README.md",
-      "anchor": "generated-outputs-do-not-hand-edit"
     }
   ],
   "wave naming and mapping": [
@@ -4041,60 +4041,6 @@
       "anchor": "6-summary-diagram-high-level"
     }
   ],
-  "architecture overview": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "architecture-overview"
-    }
-  ],
-  "1) high-level reference architecture (recommended)": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "1-high-level-reference-architecture-recommended"
-    }
-  ],
-  "2) component responsibilities": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "2-component-responsibilities"
-    }
-  ],
-  "2.1 ingress / ack layer": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "21-ingress-ack-layer"
-    }
-  ],
-  "2.2 processing layer (routing + automation)": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "22-processing-layer-routing-automation"
-    }
-  ],
-  "2.3 data layer": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "23-data-layer"
-    }
-  ],
-  "3) design principles (production-grade)": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "3-design-principles-production-grade"
-    }
-  ],
-  "4) why sqs fifo (conversation-ordered processing)": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "4-why-sqs-fifo-conversation-ordered-processing"
-    }
-  ],
-  "5) “keep it simple” scope alignment": [
-    {
-      "path": "02_System_Architecture/Architecture_Overview.md",
-      "anchor": "5-keep-it-simple-scope-alignment"
-    }
-  ],
   "aws organizations setup plan (no control tower)": [
     {
       "path": "02_System_Architecture/AWS_Organizations_Setup_Plan_No_Control_Tower.md",
@@ -4375,6 +4321,60 @@
     {
       "path": "02_System_Architecture/AWS_Serverless_Reference_Architecture.md",
       "anchor": "6-when-to-add-ecsfargate-not-v1"
+    }
+  ],
+  "architecture overview": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "architecture-overview"
+    }
+  ],
+  "1) high-level reference architecture (recommended)": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "1-high-level-reference-architecture-recommended"
+    }
+  ],
+  "2) component responsibilities": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "2-component-responsibilities"
+    }
+  ],
+  "2.1 ingress / ack layer": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "21-ingress-ack-layer"
+    }
+  ],
+  "2.2 processing layer (routing + automation)": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "22-processing-layer-routing-automation"
+    }
+  ],
+  "2.3 data layer": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "23-data-layer"
+    }
+  ],
+  "3) design principles (production-grade)": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "3-design-principles-production-grade"
+    }
+  ],
+  "4) why sqs fifo (conversation-ordered processing)": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "4-why-sqs-fifo-conversation-ordered-processing"
+    }
+  ],
+  "5) “keep it simple” scope alignment": [
+    {
+      "path": "02_System_Architecture/Architecture_Overview.md",
+      "anchor": "5-keep-it-simple-scope-alignment"
     }
   ],
   "data flow and storage": [
@@ -7125,92 +7125,6 @@
       "anchor": "next-document-links"
     }
   ],
-  "prompt: classification_routing_v1": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "prompt-classificationroutingv1"
-    }
-  ],
-  "system message (recommended)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "system-message-recommended"
-    },
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-      "anchor": "system-message-recommended"
-    }
-  ],
-  "allowed intents (v1)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "allowed-intents-v1"
-    }
-  ],
-  "destination teams": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "destination-teams"
-    }
-  ],
-  "templates (allowlist)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "templates-allowlist"
-    }
-  ],
-  "clarifying question ids": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "clarifying-question-ids"
-    }
-  ],
-  "routing rules (defaults)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "routing-rules-defaults"
-    }
-  ],
-  "automation rules (defaults)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "automation-rules-defaults"
-    }
-  ],
-  "input format (suggested)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "input-format-suggested"
-    },
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-      "anchor": "input-format-suggested"
-    }
-  ],
-  "example (illustrative)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
-      "anchor": "example-illustrative"
-    }
-  ],
-  "prompt: tier2_verifier_v1": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-      "anchor": "prompt-tier2verifierv1"
-    }
-  ],
-  "example (tier 2 allowed)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-      "anchor": "example-tier-2-allowed"
-    }
-  ],
-  "example (tier 2 denied)": [
-    {
-      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
-      "anchor": "example-tier-2-denied"
-    }
-  ],
   "prototype validation notes (wave 04)": [
     {
       "path": "04_LLM_Design_Evaluation/Prototype_Validation_Notes.md",
@@ -7465,6 +7379,92 @@
     {
       "path": "11_Governance_Continuous_Improvement/Change_Management.md",
       "anchor": "change-management"
+    }
+  ],
+  "prompt: classification_routing_v1": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "prompt-classificationroutingv1"
+    }
+  ],
+  "system message (recommended)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "system-message-recommended"
+    },
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+      "anchor": "system-message-recommended"
+    }
+  ],
+  "allowed intents (v1)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "allowed-intents-v1"
+    }
+  ],
+  "destination teams": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "destination-teams"
+    }
+  ],
+  "templates (allowlist)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "templates-allowlist"
+    }
+  ],
+  "clarifying question ids": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "clarifying-question-ids"
+    }
+  ],
+  "routing rules (defaults)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "routing-rules-defaults"
+    }
+  ],
+  "automation rules (defaults)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "automation-rules-defaults"
+    }
+  ],
+  "input format (suggested)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "input-format-suggested"
+    },
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+      "anchor": "input-format-suggested"
+    }
+  ],
+  "example (illustrative)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/classification_routing_v1.md",
+      "anchor": "example-illustrative"
+    }
+  ],
+  "prompt: tier2_verifier_v1": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+      "anchor": "prompt-tier2verifierv1"
+    }
+  ],
+  "example (tier 2 allowed)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+      "anchor": "example-tier-2-allowed"
+    }
+  ],
+  "example (tier 2 denied)": [
+    {
+      "path": "04_LLM_Design_Evaluation/prompts/tier2_verifier_v1.md",
+      "anchor": "example-tier-2-denied"
     }
   ],
   "wave 05 — faq automation (copy, macros, and safe reply playbooks)": [
@@ -11417,54 +11417,6 @@
       "anchor": "5-recovery-objectives-draft"
     }
   ],
-  "service quotas and operational limits (checklist)": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "service-quotas-and-operational-limits-checklist"
-    }
-  ],
-  "1) aws lambda": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "1-aws-lambda"
-    }
-  ],
-  "2) api gateway (http api)": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "2-api-gateway-http-api"
-    }
-  ],
-  "3) sqs (fifo)": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "3-sqs-fifo"
-    }
-  ],
-  "4) dynamodb": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "4-dynamodb"
-    }
-  ],
-  "5) cloudwatch logs / metrics": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "5-cloudwatch-logs-metrics"
-    }
-  ],
-  "6) vendor/api limits (non-aws but critical)": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "6-vendorapi-limits-non-aws-but-critical"
-    }
-  ],
-  "7) definition of done (for this checklist)": [
-    {
-      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
-      "anchor": "7-definition-of-done-for-this-checklist"
-    }
-  ],
   "sqs fifo strategy and limits": [
     {
       "path": "07_Reliability_Scaling/SQS_FIFO_Strategy_and_Limits.md",
@@ -11535,6 +11487,54 @@
     {
       "path": "07_Reliability_Scaling/SQS_FIFO_Strategy_and_Limits.md",
       "anchor": "5-go-live-checklist-fifo-specific"
+    }
+  ],
+  "service quotas and operational limits (checklist)": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "service-quotas-and-operational-limits-checklist"
+    }
+  ],
+  "1) aws lambda": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "1-aws-lambda"
+    }
+  ],
+  "2) api gateway (http api)": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "2-api-gateway-http-api"
+    }
+  ],
+  "3) sqs (fifo)": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "3-sqs-fifo"
+    }
+  ],
+  "4) dynamodb": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "4-dynamodb"
+    }
+  ],
+  "5) cloudwatch logs / metrics": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "5-cloudwatch-logs-metrics"
+    }
+  ],
+  "6) vendor/api limits (non-aws but critical)": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "6-vendorapi-limits-non-aws-but-critical"
+    }
+  ],
+  "7) definition of done (for this checklist)": [
+    {
+      "path": "07_Reliability_Scaling/Service_Quotas_and_Operational_Limits.md",
+      "anchor": "7-definition-of-done-for-this-checklist"
     }
   ],
   "tuning playbook and degraded modes (v1)": [
@@ -14665,6 +14665,108 @@
       "anchor": "related-operational-references"
     }
   ],
+  "training guide for support teams": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "training-guide-for-support-teams"
+    }
+  ],
+  "what the middleware does (in plain english)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "what-the-middleware-does-in-plain-english"
+    }
+  ],
+  "what you will see in richpanel": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "what-you-will-see-in-richpanel"
+    }
+  ],
+  "routing tags (examples)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "routing-tags-examples"
+    }
+  ],
+  "how to interpret confidence": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "how-to-interpret-confidence"
+    }
+  ],
+  "automation messages": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "automation-messages"
+    }
+  ],
+  "how to override routing (agent actions)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "how-to-override-routing-agent-actions"
+    }
+  ],
+  "key workflows (v1)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "key-workflows-v1"
+    }
+  ],
+  "chargebacks / disputes": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "chargebacks-disputes"
+    }
+  ],
+  "shipping exceptions (missing/wrong/damaged/dnr)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "shipping-exceptions-missingwrongdamageddnr"
+    }
+  ],
+  "when to escalate (support ops / leadership)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "when-to-escalate-support-ops-leadership"
+    }
+  ],
+  "what not to do": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "what-not-to-do"
+    }
+  ],
+  "training checklist (recommended)": [
+    {
+      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
+      "anchor": "training-checklist-recommended"
+    }
+  ],
+  "wave 10 definition of done checklist": [
+    {
+      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
+      "anchor": "wave-10-definition-of-done-checklist"
+    }
+  ],
+  "documentation deliverables": [
+    {
+      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
+      "anchor": "documentation-deliverables"
+    }
+  ],
+  "cross-wave alignment checks": [
+    {
+      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
+      "anchor": "cross-wave-alignment-checks"
+    }
+  ],
+  "“ready for implementation” checks": [
+    {
+      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
+      "anchor": "ready-for-implementation-checks"
+    }
+  ],
   "r001 — webhook failures and duplicate storms": [
     {
       "path": "10_Operations_Runbooks_Training/runbooks/R001_Webhook_Failures_and_Duplicate_Storms.md",
@@ -15431,108 +15533,6 @@
     {
       "path": "10_Operations_Runbooks_Training/training/Richpanel_Agent_Override_and_Feedback.md",
       "anchor": "where-feedback-is-reviewed"
-    }
-  ],
-  "training guide for support teams": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "training-guide-for-support-teams"
-    }
-  ],
-  "what the middleware does (in plain english)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "what-the-middleware-does-in-plain-english"
-    }
-  ],
-  "what you will see in richpanel": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "what-you-will-see-in-richpanel"
-    }
-  ],
-  "routing tags (examples)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "routing-tags-examples"
-    }
-  ],
-  "how to interpret confidence": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "how-to-interpret-confidence"
-    }
-  ],
-  "automation messages": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "automation-messages"
-    }
-  ],
-  "how to override routing (agent actions)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "how-to-override-routing-agent-actions"
-    }
-  ],
-  "key workflows (v1)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "key-workflows-v1"
-    }
-  ],
-  "chargebacks / disputes": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "chargebacks-disputes"
-    }
-  ],
-  "shipping exceptions (missing/wrong/damaged/dnr)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "shipping-exceptions-missingwrongdamageddnr"
-    }
-  ],
-  "when to escalate (support ops / leadership)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "when-to-escalate-support-ops-leadership"
-    }
-  ],
-  "what not to do": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "what-not-to-do"
-    }
-  ],
-  "training checklist (recommended)": [
-    {
-      "path": "10_Operations_Runbooks_Training/Training_Guide_for_Support_Teams.md",
-      "anchor": "training-checklist-recommended"
-    }
-  ],
-  "wave 10 definition of done checklist": [
-    {
-      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
-      "anchor": "wave-10-definition-of-done-checklist"
-    }
-  ],
-  "documentation deliverables": [
-    {
-      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
-      "anchor": "documentation-deliverables"
-    }
-  ],
-  "cross-wave alignment checks": [
-    {
-      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
-      "anchor": "cross-wave-alignment-checks"
-    }
-  ],
-  "“ready for implementation” checks": [
-    {
-      "path": "10_Operations_Runbooks_Training/Wave10_Definition_of_Done_Checklist.md",
-      "anchor": "ready-for-implementation-checks"
     }
   ],
   "artifact ownership and raci": [
@@ -19071,66 +19071,6 @@
       "anchor": "threat-model-draft"
     }
   ],
-  "agent roles and concurrency (a/b/c)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "agent-roles-and-concurrency-abc"
-    }
-  ],
-  "1) roles": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "1-roles"
-    }
-  ],
-  "chatgpt (pm)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "chatgpt-pm"
-    }
-  ],
-  "agent a (builder)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "agent-a-builder"
-    }
-  ],
-  "agent b (builder)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "agent-b-builder"
-    }
-  ],
-  "agent c (builder)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "agent-c-builder"
-    }
-  ],
-  "2) concurrency model": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "2-concurrency-model"
-    }
-  ],
-  "3) merge discipline (conflict avoidance)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "3-merge-discipline-conflict-avoidance"
-    }
-  ],
-  "4) per-run required outputs": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "4-per-run-required-outputs"
-    }
-  ],
-  "5) “stop and ask pm” triggers (hard)": [
-    {
-      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
-      "anchor": "5-stop-and-ask-pm-triggers-hard"
-    }
-  ],
   "ai worker retrieval workflow": [
     {
       "path": "98_Agent_Ops/AI_Worker_Retrieval_Workflow.md",
@@ -19213,6 +19153,66 @@
     {
       "path": "98_Agent_Ops/AI_Worker_Retrieval_Workflow.md",
       "anchor": "5-updating-docs-without-drift"
+    }
+  ],
+  "agent roles and concurrency (a/b/c)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "agent-roles-and-concurrency-abc"
+    }
+  ],
+  "1) roles": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "1-roles"
+    }
+  ],
+  "chatgpt (pm)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "chatgpt-pm"
+    }
+  ],
+  "agent a (builder)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "agent-a-builder"
+    }
+  ],
+  "agent b (builder)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "agent-b-builder"
+    }
+  ],
+  "agent c (builder)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "agent-c-builder"
+    }
+  ],
+  "2) concurrency model": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "2-concurrency-model"
+    }
+  ],
+  "3) merge discipline (conflict avoidance)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "3-merge-discipline-conflict-avoidance"
+    }
+  ],
+  "4) per-run required outputs": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "4-per-run-required-outputs"
+    }
+  ],
+  "5) “stop and ask pm” triggers (hard)": [
+    {
+      "path": "98_Agent_Ops/Agent_Roles_and_Concurrency.md",
+      "anchor": "5-stop-and-ask-pm-triggers-hard"
     }
   ],
   "chunking and indexing standard (ai-first)": [
