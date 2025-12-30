@@ -51,3 +51,6 @@ RichPanel_BACKUP_FULL_*
 
 # Temporary extraction / generated scratch
 _tmp_plan_extract/
+# Ensure example env files can be committed
+!.env.example
+!config/.env.example
