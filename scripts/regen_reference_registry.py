@@ -39,6 +39,18 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
+def deterministic_size(path: Path) -> int:
+    """
+    Return a size that is stable across platforms by normalizing newline handling
+    for UTF-8 text files. Binary files fall back to the on-disk byte size.
+    """
+    try:
+        txt = path.read_text(encoding="utf-8")
+        return len(txt.encode("utf-8"))
+    except Exception:
+        return path.stat().st_size
+
+
 def title_guess_for(path: Path) -> str:
     stem = path.stem.replace("_", " ").replace("-", " ").strip()
     ext = path.suffix.lower()
@@ -113,7 +125,7 @@ def scan_reference_files() -> List[Dict]:
                 "category": category,
                 "title_guess": title,
                 "type": path.suffix.lower().lstrip("."),
-                "size_bytes": path.stat().st_size,
+                "size_bytes": deterministic_size(path),
                 "tags": tags,
             }
         )

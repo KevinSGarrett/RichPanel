@@ -7,7 +7,7 @@
       "category": "",
       "title_guess": "Reference Library",
       "type": "md",
-      "size_bytes": 658,
+      "size_bytes": 640,
       "tags": [
         "index"
       ]
@@ -18,7 +18,7 @@
       "category": "",
       "title_guess": "Richpanel Reference Library",
       "type": "md",
-      "size_bytes": 4480,
+      "size_bytes": 4398,
       "tags": [
         "index",
         "richpanel"
@@ -30,7 +30,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Introduction",
       "type": "txt",
-      "size_bytes": 2996,
+      "size_bytes": 2929,
       "tags": [
         "api",
         "introduction",
@@ -44,7 +44,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API Introduction",
       "type": "txt",
-      "size_bytes": 454,
+      "size_bytes": 451,
       "tags": [
         "002",
         "api",
@@ -59,7 +59,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Authentication",
       "type": "txt",
-      "size_bytes": 291,
+      "size_bytes": 288,
       "tags": [
         "api",
         "authentication",
@@ -73,7 +73,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fetch a Channel",
       "type": "txt",
-      "size_bytes": 407,
+      "size_bytes": 372,
       "tags": [
         "api",
         "channel",
@@ -89,7 +89,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fetch a Channel",
       "type": "txt",
-      "size_bytes": 2593,
+      "size_bytes": 2480,
       "tags": [
         "api",
         "channel",
@@ -107,7 +107,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Channels",
       "type": "txt",
-      "size_bytes": 2548,
+      "size_bytes": 2435,
       "tags": [
         "api",
         "channel",
@@ -126,7 +126,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Channels",
       "type": "txt",
-      "size_bytes": 384,
+      "size_bytes": 352,
       "tags": [
         "api",
         "channel",
@@ -143,7 +143,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 361,
+      "size_bytes": 331,
       "tags": [
         "add",
         "add_tags",
@@ -160,7 +160,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 233,
+      "size_bytes": 221,
       "tags": [
         "add_tags",
         "api",
@@ -177,7 +177,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 453,
+      "size_bytes": 436,
       "tags": [
         "add_tags",
         "api",
@@ -194,7 +194,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 428,
+      "size_bytes": 409,
       "tags": [
         "add_tags",
         "api",
@@ -211,7 +211,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 264,
+      "size_bytes": 253,
       "tags": [
         "add_tags",
         "api",
@@ -228,7 +228,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 434,
+      "size_bytes": 415,
       "tags": [
         "add_tags",
         "api",
@@ -245,7 +245,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 357,
+      "size_bytes": 347,
       "tags": [
         "add_tags",
         "api",
@@ -262,7 +262,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 362,
+      "size_bytes": 344,
       "tags": [
         "add_tags",
         "api",
@@ -279,7 +279,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 471,
+      "size_bytes": 451,
       "tags": [
         "add_tags",
         "api",
@@ -296,7 +296,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Add Tags",
       "type": "txt",
-      "size_bytes": 304,
+      "size_bytes": 294,
       "tags": [
         "add_tags",
         "api",
@@ -313,7 +313,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 452,
+      "size_bytes": 414,
       "tags": [
         "api",
         "attach",
@@ -330,7 +330,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 259,
+      "size_bytes": 247,
       "tags": [
         "api",
         "attach_order",
@@ -347,7 +347,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 459,
+      "size_bytes": 443,
       "tags": [
         "api",
         "attach_order",
@@ -364,7 +364,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 428,
+      "size_bytes": 413,
       "tags": [
         "api",
         "attach_order",
@@ -381,7 +381,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 350,
+      "size_bytes": 338,
       "tags": [
         "api",
         "attach_order",
@@ -398,7 +398,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 449,
+      "size_bytes": 430,
       "tags": [
         "api",
         "attach_order",
@@ -415,7 +415,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 365,
+      "size_bytes": 355,
       "tags": [
         "api",
         "attach_order",
@@ -432,7 +432,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 379,
+      "size_bytes": 361,
       "tags": [
         "api",
         "attach_order",
@@ -449,7 +449,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 483,
+      "size_bytes": 463,
       "tags": [
         "api",
         "attach_order",
@@ -466,7 +466,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attach Order",
       "type": "txt",
-      "size_bytes": 312,
+      "size_bytes": 302,
       "tags": [
         "api",
         "attach_order",
@@ -483,7 +483,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create a Conversation",
       "type": "txt",
-      "size_bytes": 1901,
+      "size_bytes": 1811,
       "tags": [
         "api",
         "conversation",
@@ -499,7 +499,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 304,
+      "size_bytes": 293,
       "tags": [
         "api",
         "conversation",
@@ -516,7 +516,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 636,
+      "size_bytes": 620,
       "tags": [
         "api",
         "conversation",
@@ -533,7 +533,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 544,
+      "size_bytes": 520,
       "tags": [
         "api",
         "conversation",
@@ -550,7 +550,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 353,
+      "size_bytes": 337,
       "tags": [
         "api",
         "conversation",
@@ -567,7 +567,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 501,
+      "size_bytes": 483,
       "tags": [
         "api",
         "conversation",
@@ -584,7 +584,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 497,
+      "size_bytes": 475,
       "tags": [
         "api",
         "conversation",
@@ -601,7 +601,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Conversation",
       "type": "txt",
-      "size_bytes": 560,
+      "size_bytes": 541,
       "tags": [
         "api",
         "conversation",
@@ -618,7 +618,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Language",
       "type": "txt",
-      "size_bytes": 497,
+      "size_bytes": 453,
       "tags": [
         "api",
         "conversation",
@@ -635,7 +635,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 242,
+      "size_bytes": 230,
       "tags": [
         "api",
         "conversation",
@@ -652,7 +652,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 462,
+      "size_bytes": 445,
       "tags": [
         "api",
         "conversation",
@@ -669,7 +669,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 429,
+      "size_bytes": 411,
       "tags": [
         "api",
         "conversation",
@@ -686,7 +686,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 273,
+      "size_bytes": 262,
       "tags": [
         "api",
         "conversation",
@@ -703,7 +703,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 443,
+      "size_bytes": 424,
       "tags": [
         "api",
         "conversation",
@@ -720,7 +720,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 371,
+      "size_bytes": 353,
       "tags": [
         "api",
         "conversation",
@@ -737,7 +737,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 371,
+      "size_bytes": 353,
       "tags": [
         "api",
         "conversation",
@@ -754,7 +754,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 480,
+      "size_bytes": 460,
       "tags": [
         "api",
         "conversation",
@@ -771,7 +771,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 315,
+      "size_bytes": 304,
       "tags": [
         "api",
         "conversation",
@@ -788,7 +788,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Remove Tags",
       "type": "txt",
-      "size_bytes": 371,
+      "size_bytes": 339,
       "tags": [
         "api",
         "conversation",
@@ -805,7 +805,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 373,
+      "size_bytes": 360,
       "tags": [
         "api",
         "conversation",
@@ -822,7 +822,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 346,
+      "size_bytes": 334,
       "tags": [
         "api",
         "conversation",
@@ -839,7 +839,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 263,
+      "size_bytes": 254,
       "tags": [
         "api",
         "conversation",
@@ -856,7 +856,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 367,
+      "size_bytes": 351,
       "tags": [
         "api",
         "conversation",
@@ -873,7 +873,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 297,
+      "size_bytes": 282,
       "tags": [
         "api",
         "conversation",
@@ -890,7 +890,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 444,
+      "size_bytes": 425,
       "tags": [
         "api",
         "conversation",
@@ -907,7 +907,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 234,
+      "size_bytes": 226,
       "tags": [
         "api",
         "conversation",
@@ -924,7 +924,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation",
       "type": "txt",
-      "size_bytes": 1096,
+      "size_bytes": 1002,
       "tags": [
         "api",
         "conversation",
@@ -940,7 +940,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 242,
+      "size_bytes": 231,
       "tags": [
         "api",
         "conversation",
@@ -958,7 +958,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 438,
+      "size_bytes": 423,
       "tags": [
         "api",
         "conversation",
@@ -976,7 +976,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 411,
+      "size_bytes": 397,
       "tags": [
         "api",
         "conversation",
@@ -994,7 +994,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 359,
+      "size_bytes": 348,
       "tags": [
         "api",
         "conversation",
@@ -1012,7 +1012,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 432,
+      "size_bytes": 414,
       "tags": [
         "api",
         "conversation",
@@ -1030,7 +1030,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 348,
+      "size_bytes": 339,
       "tags": [
         "api",
         "conversation",
@@ -1048,7 +1048,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 362,
+      "size_bytes": 345,
       "tags": [
         "api",
         "conversation",
@@ -1066,7 +1066,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 466,
+      "size_bytes": 447,
       "tags": [
         "api",
         "conversation",
@@ -1084,7 +1084,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 295,
+      "size_bytes": 286,
       "tags": [
         "api",
         "conversation",
@@ -1102,7 +1102,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 242,
+      "size_bytes": 231,
       "tags": [
         "api",
         "conversation",
@@ -1120,7 +1120,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 438,
+      "size_bytes": 423,
       "tags": [
         "api",
         "conversation",
@@ -1138,7 +1138,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 411,
+      "size_bytes": 397,
       "tags": [
         "api",
         "conversation",
@@ -1156,7 +1156,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 359,
+      "size_bytes": 348,
       "tags": [
         "api",
         "conversation",
@@ -1174,7 +1174,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 432,
+      "size_bytes": 414,
       "tags": [
         "api",
         "conversation",
@@ -1192,7 +1192,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 348,
+      "size_bytes": 339,
       "tags": [
         "api",
         "conversation",
@@ -1210,7 +1210,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 362,
+      "size_bytes": 345,
       "tags": [
         "api",
         "conversation",
@@ -1228,7 +1228,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 466,
+      "size_bytes": 447,
       "tags": [
         "api",
         "conversation",
@@ -1246,7 +1246,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 295,
+      "size_bytes": 286,
       "tags": [
         "api",
         "conversation",
@@ -1264,7 +1264,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve Conversations using Customer's Email or Phone",
       "type": "txt",
-      "size_bytes": 752,
+      "size_bytes": 712,
       "tags": [
         "api",
         "conversation",
@@ -1285,7 +1285,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 457,
+      "size_bytes": 442,
       "tags": [
         "api",
         "conversation",
@@ -1302,7 +1302,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 430,
+      "size_bytes": 416,
       "tags": [
         "api",
         "conversation",
@@ -1319,7 +1319,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 374,
+      "size_bytes": 363,
       "tags": [
         "api",
         "conversation",
@@ -1336,7 +1336,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 451,
+      "size_bytes": 433,
       "tags": [
         "api",
         "conversation",
@@ -1353,7 +1353,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 367,
+      "size_bytes": 358,
       "tags": [
         "api",
         "conversation",
@@ -1370,7 +1370,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 381,
+      "size_bytes": 364,
       "tags": [
         "api",
         "conversation",
@@ -1387,7 +1387,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 485,
+      "size_bytes": 466,
       "tags": [
         "api",
         "conversation",
@@ -1404,7 +1404,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 314,
+      "size_bytes": 305,
       "tags": [
         "api",
         "conversation",
@@ -1421,7 +1421,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Conversation with conversation number",
       "type": "txt",
-      "size_bytes": 1147,
+      "size_bytes": 1052,
       "tags": [
         "api",
         "conversation",
@@ -1438,7 +1438,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 640,
+      "size_bytes": 624,
       "tags": [
         "api",
         "conversation",
@@ -1455,7 +1455,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 548,
+      "size_bytes": 524,
       "tags": [
         "api",
         "conversation",
@@ -1472,7 +1472,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 368,
+      "size_bytes": 352,
       "tags": [
         "api",
         "conversation",
@@ -1489,7 +1489,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 505,
+      "size_bytes": 487,
       "tags": [
         "api",
         "conversation",
@@ -1506,7 +1506,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 501,
+      "size_bytes": 479,
       "tags": [
         "api",
         "conversation",
@@ -1523,7 +1523,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 564,
+      "size_bytes": 545,
       "tags": [
         "api",
         "conversation",
@@ -1540,7 +1540,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 449,
+      "size_bytes": 427,
       "tags": [
         "api",
         "conversation",
@@ -1557,7 +1557,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Update a Conversation",
       "type": "txt",
-      "size_bytes": 1071,
+      "size_bytes": 1000,
       "tags": [
         "api",
         "conversation",
@@ -1573,7 +1573,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 1117,
+      "size_bytes": 1028,
       "tags": [
         "api",
         "create",
@@ -1590,7 +1590,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 226,
+      "size_bytes": 214,
       "tags": [
         "api",
         "create_update_customer",
@@ -1607,7 +1607,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 444,
+      "size_bytes": 428,
       "tags": [
         "api",
         "create_update_customer",
@@ -1624,7 +1624,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 419,
+      "size_bytes": 401,
       "tags": [
         "api",
         "create_update_customer",
@@ -1641,7 +1641,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 264,
+      "size_bytes": 253,
       "tags": [
         "api",
         "create_update_customer",
@@ -1658,7 +1658,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 464,
+      "size_bytes": 442,
       "tags": [
         "api",
         "create_update_customer",
@@ -1675,7 +1675,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 350,
+      "size_bytes": 340,
       "tags": [
         "api",
         "create_update_customer",
@@ -1692,7 +1692,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 355,
+      "size_bytes": 337,
       "tags": [
         "api",
         "create_update_customer",
@@ -1709,7 +1709,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 464,
+      "size_bytes": 444,
       "tags": [
         "api",
         "create_update_customer",
@@ -1726,7 +1726,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/UpdateCustomer",
       "type": "txt",
-      "size_bytes": 297,
+      "size_bytes": 287,
       "tags": [
         "api",
         "create_update_customer",
@@ -1743,7 +1743,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 227,
+      "size_bytes": 216,
       "tags": [
         "api",
         "customer",
@@ -1760,7 +1760,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 423,
+      "size_bytes": 408,
       "tags": [
         "api",
         "customer",
@@ -1777,7 +1777,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 396,
+      "size_bytes": 382,
       "tags": [
         "api",
         "customer",
@@ -1794,7 +1794,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 329,
+      "size_bytes": 318,
       "tags": [
         "api",
         "customer",
@@ -1811,7 +1811,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 417,
+      "size_bytes": 399,
       "tags": [
         "api",
         "customer",
@@ -1828,7 +1828,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 333,
+      "size_bytes": 324,
       "tags": [
         "api",
         "customer",
@@ -1845,7 +1845,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 347,
+      "size_bytes": 330,
       "tags": [
         "api",
         "customer",
@@ -1862,7 +1862,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 451,
+      "size_bytes": 432,
       "tags": [
         "api",
         "customer",
@@ -1879,7 +1879,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 346,
+      "size_bytes": 329,
       "tags": [
         "api",
         "customer",
@@ -1896,7 +1896,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve a Customer with Email/Phone",
       "type": "txt",
-      "size_bytes": 690,
+      "size_bytes": 658,
       "tags": [
         "api",
         "customer",
@@ -1914,7 +1914,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Errors",
       "type": "txt",
-      "size_bytes": 1690,
+      "size_bytes": 1625,
       "tags": [
         "api",
         "errors",
@@ -1928,7 +1928,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Upload file",
       "type": "txt",
-      "size_bytes": 3016,
+      "size_bytes": 2891,
       "tags": [
         "api",
         "file",
@@ -1946,7 +1946,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Upload file",
       "type": "txt",
-      "size_bytes": 297,
+      "size_bytes": 274,
       "tags": [
         "api",
         "file",
@@ -1962,7 +1962,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Getting Started with Richpanel",
       "type": "txt",
-      "size_bytes": 8093,
+      "size_bytes": 7849,
       "tags": [
         "api",
         "getting",
@@ -1977,7 +1977,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Limitations",
       "type": "txt",
-      "size_bytes": 1343,
+      "size_bytes": 1318,
       "tags": [
         "api",
         "limitations",
@@ -1991,7 +1991,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 518,
+      "size_bytes": 484,
       "tags": [
         "api",
         "create",
@@ -2008,7 +2008,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 247,
+      "size_bytes": 234,
       "tags": [
         "api",
         "create_update_order",
@@ -2025,7 +2025,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 465,
+      "size_bytes": 448,
       "tags": [
         "api",
         "create_update_order",
@@ -2042,7 +2042,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 440,
+      "size_bytes": 421,
       "tags": [
         "api",
         "create_update_order",
@@ -2059,7 +2059,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 304,
+      "size_bytes": 292,
       "tags": [
         "api",
         "create_update_order",
@@ -2076,7 +2076,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 448,
+      "size_bytes": 428,
       "tags": [
         "api",
         "create_update_order",
@@ -2093,7 +2093,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 371,
+      "size_bytes": 360,
       "tags": [
         "api",
         "create_update_order",
@@ -2110,7 +2110,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 376,
+      "size_bytes": 357,
       "tags": [
         "api",
         "create_update_order",
@@ -2127,7 +2127,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 485,
+      "size_bytes": 464,
       "tags": [
         "api",
         "create_update_order",
@@ -2144,7 +2144,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update orders",
       "type": "txt",
-      "size_bytes": 318,
+      "size_bytes": 307,
       "tags": [
         "api",
         "create_update_order",
@@ -2161,7 +2161,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 228,
+      "size_bytes": 217,
       "tags": [
         "api",
         "http",
@@ -2178,7 +2178,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 424,
+      "size_bytes": 409,
       "tags": [
         "api",
         "java",
@@ -2195,7 +2195,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 397,
+      "size_bytes": 383,
       "tags": [
         "api",
         "javascript",
@@ -2212,7 +2212,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 332,
+      "size_bytes": 321,
       "tags": [
         "api",
         "language",
@@ -2229,7 +2229,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 418,
+      "size_bytes": 400,
       "tags": [
         "api",
         "language",
@@ -2246,7 +2246,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 334,
+      "size_bytes": 325,
       "tags": [
         "api",
         "language",
@@ -2263,7 +2263,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 348,
+      "size_bytes": 331,
       "tags": [
         "api",
         "language",
@@ -2280,7 +2280,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 452,
+      "size_bytes": 433,
       "tags": [
         "api",
         "language",
@@ -2297,7 +2297,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 347,
+      "size_bytes": 330,
       "tags": [
         "api",
         "language",
@@ -2314,7 +2314,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 554,
+      "size_bytes": 522,
       "tags": [
         "api",
         "non_indexed_library",
@@ -2330,7 +2330,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 221,
+      "size_bytes": 210,
       "tags": [
         "api",
         "http",
@@ -2347,7 +2347,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 417,
+      "size_bytes": 402,
       "tags": [
         "api",
         "java",
@@ -2364,7 +2364,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 390,
+      "size_bytes": 376,
       "tags": [
         "api",
         "javascript",
@@ -2381,7 +2381,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 334,
+      "size_bytes": 323,
       "tags": [
         "api",
         "language",
@@ -2398,7 +2398,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 411,
+      "size_bytes": 393,
       "tags": [
         "api",
         "language",
@@ -2415,7 +2415,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 327,
+      "size_bytes": 318,
       "tags": [
         "api",
         "language",
@@ -2432,7 +2432,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 445,
+      "size_bytes": 426,
       "tags": [
         "api",
         "language",
@@ -2449,7 +2449,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 274,
+      "size_bytes": 265,
       "tags": [
         "api",
         "language",
@@ -2466,7 +2466,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Retrieve an Order",
       "type": "txt",
-      "size_bytes": 348,
+      "size_bytes": 331,
       "tags": [
         "api",
         "conversation",
@@ -2484,7 +2484,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Pagination",
       "type": "txt",
-      "size_bytes": 704,
+      "size_bytes": 691,
       "tags": [
         "api",
         "non_indexed_library",
@@ -2498,7 +2498,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Requests",
       "type": "txt",
-      "size_bytes": 440,
+      "size_bytes": 434,
       "tags": [
         "api",
         "non_indexed_library",
@@ -2512,7 +2512,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update Subscriptions",
       "type": "txt",
-      "size_bytes": 594,
+      "size_bytes": 558,
       "tags": [
         "api",
         "create",
@@ -2529,7 +2529,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create/Update Subscriptions",
       "type": "txt",
-      "size_bytes": 3215,
+      "size_bytes": 3089,
       "tags": [
         "api",
         "create_update_subscription",
@@ -2546,7 +2546,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Tag",
       "type": "txt",
-      "size_bytes": 2944,
+      "size_bytes": 2819,
       "tags": [
         "api",
         "create",
@@ -2562,7 +2562,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Create Tag",
       "type": "txt",
-      "size_bytes": 2944,
+      "size_bytes": 2819,
       "tags": [
         "api",
         "create",
@@ -2580,7 +2580,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Tags",
       "type": "txt",
-      "size_bytes": 2510,
+      "size_bytes": 2397,
       "tags": [
         "api",
         "language",
@@ -2599,7 +2599,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Tags",
       "type": "txt",
-      "size_bytes": 389,
+      "size_bytes": 355,
       "tags": [
         "api",
         "list",
@@ -2615,7 +2615,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Teams",
       "type": "txt",
-      "size_bytes": 2478,
+      "size_bytes": 2367,
       "tags": [
         "api",
         "language",
@@ -2633,7 +2633,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Teams",
       "type": "txt",
-      "size_bytes": 371,
+      "size_bytes": 339,
       "tags": [
         "api",
         "list",
@@ -2649,7 +2649,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fetch a User",
       "type": "txt",
-      "size_bytes": 357,
+      "size_bytes": 332,
       "tags": [
         "api",
         "fetch",
@@ -2666,7 +2666,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fetch a User",
       "type": "txt",
-      "size_bytes": 2569,
+      "size_bytes": 2455,
       "tags": [
         "api",
         "fetch_a_user",
@@ -2683,7 +2683,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Users",
       "type": "txt",
-      "size_bytes": 2522,
+      "size_bytes": 2409,
       "tags": [
         "api",
         "language",
@@ -2701,7 +2701,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "List Users",
       "type": "txt",
-      "size_bytes": 309,
+      "size_bytes": 288,
       "tags": [
         "api",
         "list",
@@ -2718,7 +2718,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Authorizing User",
       "type": "txt",
-      "size_bytes": 1115,
+      "size_bytes": 1086,
       "tags": [
         "authorizing",
         "non_indexed_library",
@@ -2732,7 +2732,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cAttachment bursts\u201d \u2192 rate limit problems, retries storm, cascading failures",
       "type": "txt",
-      "size_bytes": 1256,
+      "size_bytes": 1204,
       "tags": [
         "attachment",
         "bursts",
@@ -2747,7 +2747,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attachments + non-text messages break classification and can cause \u201cpayload too large\u201d failures",
       "type": "txt",
-      "size_bytes": 1030,
+      "size_bytes": 998,
       "tags": [
         "attachments",
         "common_issues",
@@ -2761,7 +2761,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "1) Automation loops that spam customers or endlessly re-trigger your middleware",
       "type": "txt",
-      "size_bytes": 1175,
+      "size_bytes": 1147,
       "tags": [
         "automation",
         "common_issues",
@@ -2776,7 +2776,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Order status automation pitfalls (wrong order, missing order, privacy leaks) + safe fallback",
       "type": "txt",
-      "size_bytes": 1104,
+      "size_bytes": 1058,
       "tags": [
         "automation",
         "common_issues",
@@ -2791,7 +2791,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cWe send too much conversation context\u201d \u2192 LLM context overflow, slow classification, higher misroutes",
       "type": "txt",
-      "size_bytes": 1263,
+      "size_bytes": 1216,
       "tags": [
         "common_issues",
         "context",
@@ -2806,7 +2806,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Duplicate events and idempotency failures (double replies, double routing, double tagging)",
       "type": "txt",
-      "size_bytes": 849,
+      "size_bytes": 824,
       "tags": [
         "common_issues",
         "duplicate",
@@ -2822,7 +2822,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cWe can\u2019t fetch the attachment later\u201d \u2192 broken automation due to expiring URLs / auth / bad content-types",
       "type": "txt",
-      "size_bytes": 1040,
+      "size_bytes": 1001,
       "tags": [
         "attachment",
         "common_issues",
@@ -2838,7 +2838,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Assuming Richpanel will \u201cretry later\u201d if your HTTP Target fails",
       "type": "txt",
-      "size_bytes": 989,
+      "size_bytes": 953,
       "tags": [
         "common_issues",
         "fails",
@@ -2855,7 +2855,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Weak handling of \u201cnormal\u201d Richpanel API errors (not just rate limits)",
       "type": "txt",
-      "size_bytes": 1244,
+      "size_bytes": 1194,
       "tags": [
         "api",
         "common_issues",
@@ -2871,7 +2871,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cWe accidentally inline the attachment\u201d (base64 blobs or huge HTML) \u2192 requests blow up / 413 errors",
       "type": "txt",
-      "size_bytes": 1293,
+      "size_bytes": 1258,
       "tags": [
         "attachment",
         "common_issues",
@@ -2886,7 +2886,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "LLM classification failures (multi-intent, vague messages, and prompt-injection)",
       "type": "txt",
-      "size_bytes": 1067,
+      "size_bytes": 1033,
       "tags": [
         "classification",
         "common_issues",
@@ -2902,7 +2902,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Team/department mapping drift (your router sends tickets to the wrong place over time)",
       "type": "txt",
-      "size_bytes": 673,
+      "size_bytes": 650,
       "tags": [
         "common_issues",
         "drift",
@@ -2917,7 +2917,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Team/department mapping drift (your router sends tickets to the wrong place over time)",
       "type": "txt",
-      "size_bytes": 673,
+      "size_bytes": 650,
       "tags": [
         "common_issues",
         "non_indexed_library",
@@ -2933,7 +2933,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Pagination mistakes = missing teams/tags/users, which breaks routing in subtle ways",
       "type": "txt",
-      "size_bytes": 931,
+      "size_bytes": 903,
       "tags": [
         "common_issues",
         "mistakes",
@@ -2948,7 +2948,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "A practical dev checklist to prevent most of these at once",
       "type": "txt",
-      "size_bytes": 554,
+      "size_bytes": 542,
       "tags": [
         "checklist",
         "common_issues",
@@ -2964,7 +2964,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Hitting Richpanel (or OpenAI / Shopify) rate limits during traffic spikes",
       "type": "txt",
-      "size_bytes": 1026,
+      "size_bytes": 995,
       "tags": [
         "common_issues",
         "limits",
@@ -2979,7 +2979,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Webhook payload doesn\u2019t include the identifiers you need (so everything becomes ambiguous)",
       "type": "txt",
-      "size_bytes": 1136,
+      "size_bytes": 1100,
       "tags": [
         "common_issues",
         "non_indexed_library",
@@ -2995,7 +2995,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Webhook spoofing and unauthorized calls to your middleware endpoint",
       "type": "txt",
-      "size_bytes": 950,
+      "size_bytes": 914,
       "tags": [
         "common_issues",
         "non_indexed_library",
@@ -3010,7 +3010,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Webhook timeouts and lost events because your middleware is \u201cdoing too much\u201d synchronously",
       "type": "txt",
-      "size_bytes": 705,
+      "size_bytes": 677,
       "tags": [
         "common_issues",
         "non_indexed_library",
@@ -3025,7 +3025,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cNon-text-only messages provide zero intent\u201d \u2192 false positives on FAQs + unsafe automated replies",
       "type": "txt",
-      "size_bytes": 1579,
+      "size_bytes": 1518,
       "tags": [
         "common_issues",
         "intent",
@@ -3040,7 +3040,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Connect Your Ecommerce store to Richpanel",
       "type": "txt",
-      "size_bytes": 946,
+      "size_bytes": 926,
       "tags": [
         "connect",
         "ecommerce",
@@ -3055,7 +3055,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Connect your Support Email",
       "type": "txt",
-      "size_bytes": 1682,
+      "size_bytes": 1641,
       "tags": [
         "connect",
         "email",
@@ -3070,7 +3070,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Introduction",
       "type": "txt",
-      "size_bytes": 1501,
+      "size_bytes": 1479,
       "tags": [
         "connecting",
         "non_indexed_library",
@@ -3878,7 +3878,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Macros",
       "type": "csv",
-      "size_bytes": 158259,
+      "size_bytes": 155933,
       "tags": [
         "currentsetup",
         "macros",
@@ -3973,7 +3973,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Richpanel Integration: Key Q&A for Middleware Development",
       "type": "txt",
-      "size_bytes": 55443,
+      "size_bytes": 55156,
       "tags": [
         "drp",
         "integrationkeyq&a",
@@ -3987,7 +3987,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Don\u2019t Re-trigger on API Actions:",
       "type": "txt",
-      "size_bytes": 540,
+      "size_bytes": 538,
       "tags": [
         "actions",
         "api",
@@ -4005,7 +4005,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Don\u2019t Re-trigger on API Actions:",
       "type": "txt",
-      "size_bytes": 540,
+      "size_bytes": 538,
       "tags": [
         "actions",
         "api",
@@ -4023,7 +4023,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "External Loops:",
       "type": "txt",
-      "size_bytes": 646,
+      "size_bytes": 644,
       "tags": [
         "avoiding_automation_loops",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4039,7 +4039,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "One-way Trigger:",
       "type": "txt",
-      "size_bytes": 474,
+      "size_bytes": 472,
       "tags": [
         "avoiding_automation_loops",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4056,7 +4056,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Tag-Based Flags:",
       "type": "txt",
-      "size_bytes": 545,
+      "size_bytes": 543,
       "tags": [
         "avoiding_automation_loops",
         "based",
@@ -4073,7 +4073,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Avoid Sensitive Data:",
       "type": "txt",
-      "size_bytes": 597,
+      "size_bytes": 595,
       "tags": [
         "avoid",
         "crafting_the_webhook_payload_(outgoing_data)",
@@ -4090,7 +4090,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Include Unique Identifiers:",
       "type": "txt",
-      "size_bytes": 584,
+      "size_bytes": 582,
       "tags": [
         "crafting_the_webhook_payload_(outgoing_data)",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4107,7 +4107,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Introduction:",
       "type": "txt",
-      "size_bytes": 1286,
+      "size_bytes": 1273,
       "tags": [
         "crafting_the_webhook_payload_(outgoing_data)",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4122,7 +4122,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Integration Entry Points (Triggers) - Introduction:",
       "type": "txt",
-      "size_bytes": 823,
+      "size_bytes": 821,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "integration_entry_points_(triggers)",
@@ -4137,7 +4137,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Stability of Webhook Triggers:",
       "type": "txt",
-      "size_bytes": 603,
+      "size_bytes": 601,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "integration_entry_points_(triggers)",
@@ -4154,7 +4154,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Unified Triggers Across Channels:",
       "type": "txt",
-      "size_bytes": 467,
+      "size_bytes": 465,
       "tags": [
         "across",
         "channels",
@@ -4172,7 +4172,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Overview",
       "type": "txt",
-      "size_bytes": 597,
+      "size_bytes": 595,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4186,7 +4186,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Acknowledge Quickly:",
       "type": "txt",
-      "size_bytes": 604,
+      "size_bytes": 602,
       "tags": [
         "acknowledge",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4202,7 +4202,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Idempotency and Retries:",
       "type": "txt",
-      "size_bytes": 710,
+      "size_bytes": 708,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "idempotency",
@@ -4218,7 +4218,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Logging and Monitoring:",
       "type": "txt",
-      "size_bytes": 381,
+      "size_bytes": 379,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "logging",
@@ -4234,7 +4234,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Use HTTPS:",
       "type": "txt",
-      "size_bytes": 286,
+      "size_bytes": 282,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "https",
@@ -4250,7 +4250,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Verify the Source:",
       "type": "txt",
-      "size_bytes": 584,
+      "size_bytes": 582,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4266,7 +4266,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Horizontal Scaling:",
       "type": "txt",
-      "size_bytes": 487,
+      "size_bytes": 485,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "horizontal",
@@ -4282,7 +4282,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Middleware Failures:",
       "type": "txt",
-      "size_bytes": 539,
+      "size_bytes": 537,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "failures",
@@ -4298,7 +4298,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "No Automatic Retries (Richpanel Side):",
       "type": "txt",
-      "size_bytes": 602,
+      "size_bytes": 600,
       "tags": [
         "automatic",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4314,7 +4314,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Testing at Scale:",
       "type": "txt",
-      "size_bytes": 411,
+      "size_bytes": 409,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4330,7 +4330,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Throughput and Rate Limits:",
       "type": "txt",
-      "size_bytes": 596,
+      "size_bytes": 589,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "limits",
@@ -4347,7 +4347,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Assignment to Agents/Teams:",
       "type": "txt",
-      "size_bytes": 1390,
+      "size_bytes": 1377,
       "tags": [
         "agents",
         "assignment",
@@ -4364,7 +4364,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Attaching Related Records:",
       "type": "txt",
-      "size_bytes": 959,
+      "size_bytes": 957,
       "tags": [
         "attaching",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4381,7 +4381,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Changing Status:",
       "type": "txt",
-      "size_bytes": 622,
+      "size_bytes": 611,
       "tags": [
         "changing",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4397,7 +4397,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Internal Notes (Private Comments):",
       "type": "txt",
-      "size_bytes": 752,
+      "size_bytes": 737,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "internal",
@@ -4413,7 +4413,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Overview:",
       "type": "txt",
-      "size_bytes": 2277,
+      "size_bytes": 2256,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4428,7 +4428,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Posting Replies (Public Comments):",
       "type": "txt",
-      "size_bytes": 800,
+      "size_bytes": 784,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4444,7 +4444,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Tags and Metadata:",
       "type": "txt",
-      "size_bytes": 526,
+      "size_bytes": 524,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "metadata",
@@ -4460,7 +4460,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Audit Logging:",
       "type": "txt",
-      "size_bytes": 409,
+      "size_bytes": 407,
       "tags": [
         "audit",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4476,7 +4476,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "GDPR and Data Handling:",
       "type": "txt",
-      "size_bytes": 640,
+      "size_bytes": 638,
       "tags": [
         "data",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4493,7 +4493,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "IP Whitelisting (if applicable):",
       "type": "txt",
-      "size_bytes": 782,
+      "size_bytes": 778,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4508,7 +4508,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Long-Term Maintenance:",
       "type": "txt",
-      "size_bytes": 523,
+      "size_bytes": 521,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "long",
@@ -4525,7 +4525,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Principle of Least Privilege:",
       "type": "txt",
-      "size_bytes": 477,
+      "size_bytes": 475,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "least",
@@ -4542,7 +4542,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Secure Storage of Keys:",
       "type": "txt",
-      "size_bytes": 327,
+      "size_bytes": 325,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "keys",
@@ -4559,7 +4559,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Richpanel\u2019s Security Posture:",
       "type": "txt",
-      "size_bytes": 583,
+      "size_bytes": 577,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4575,7 +4575,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Orders:",
       "type": "txt",
-      "size_bytes": 709,
+      "size_bytes": 706,
       "tags": [
         "customer",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4591,7 +4591,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Linking Data to Customers:",
       "type": "txt",
-      "size_bytes": 514,
+      "size_bytes": 512,
       "tags": [
         "customers",
         "data",
@@ -4608,7 +4608,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "[Conversation]",
       "type": "txt",
-      "size_bytes": 722,
+      "size_bytes": 654,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4638,7 +4638,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Subscriptions and Other Data:",
       "type": "txt",
-      "size_bytes": 592,
+      "size_bytes": 590,
       "tags": [
         "data",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4655,7 +4655,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Using Segment (Optional):",
       "type": "txt",
-      "size_bytes": 696,
+      "size_bytes": 692,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "non_indexed_library",
@@ -4671,7 +4671,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Agent Training/Visibility:",
       "type": "txt",
-      "size_bytes": 503,
+      "size_bytes": 501,
       "tags": [
         "agent",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4688,7 +4688,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Dry Run Mode:",
       "type": "txt",
-      "size_bytes": 619,
+      "size_bytes": 617,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "dry",
@@ -4705,7 +4705,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Error Handling in Production:",
       "type": "txt",
-      "size_bytes": 443,
+      "size_bytes": 441,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "error",
@@ -4722,7 +4722,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Gradual Deployment:",
       "type": "txt",
-      "size_bytes": 450,
+      "size_bytes": 448,
       "tags": [
         "deployment",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4738,7 +4738,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Staging Environment:",
       "type": "txt",
-      "size_bytes": 476,
+      "size_bytes": 474,
       "tags": [
         "developing_middleware_for_richpanel_comprehensive_guide",
         "environment",
@@ -4754,7 +4754,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Use a Test Ticket/Customer:",
       "type": "txt",
-      "size_bytes": 568,
+      "size_bytes": 566,
       "tags": [
         "customer",
         "developing_middleware_for_richpanel_comprehensive_guide",
@@ -4772,7 +4772,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Importing Your Data to Richpanel",
       "type": "txt",
-      "size_bytes": 2792,
+      "size_bytes": 2737,
       "tags": [
         "data",
         "importing",
@@ -4786,7 +4786,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Migrating From Other Helpdesks",
       "type": "txt",
-      "size_bytes": 2875,
+      "size_bytes": 2823,
       "tags": [
         "helpdesks",
         "migrating",
@@ -4801,7 +4801,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Note:",
       "type": "txt",
-      "size_bytes": 72,
+      "size_bytes": 69,
       "tags": [
         "non_indexed_library",
         "notes",
@@ -4815,7 +4815,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Order Event",
       "type": "txt",
-      "size_bytes": 994,
+      "size_bytes": 945,
       "tags": [
         "event",
         "non_indexed_library",
@@ -4830,7 +4830,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Order Properties",
       "type": "txt",
-      "size_bytes": 6209,
+      "size_bytes": 5999,
       "tags": [
         "non_indexed_library",
         "order",
@@ -4845,7 +4845,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Sample Order Event",
       "type": "txt",
-      "size_bytes": 4240,
+      "size_bytes": 4091,
       "tags": [
         "event",
         "non_indexed_library",
@@ -4861,7 +4861,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "User Properties Object (userProeprties)",
       "type": "txt",
-      "size_bytes": 1141,
+      "size_bytes": 1070,
       "tags": [
         "non_indexed_library",
         "object",
@@ -4877,7 +4877,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Quick Start Guide",
       "type": "txt",
-      "size_bytes": 1534,
+      "size_bytes": 1503,
       "tags": [
         "guide",
         "non_indexed_library",
@@ -4892,7 +4892,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Richpanel AI Middleware \u2013 Integration and Onboarding Guide",
       "type": "txt",
-      "size_bytes": 34386,
+      "size_bytes": 34130,
       "tags": [
         "#u2013",
         "integration",
@@ -4908,7 +4908,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Richpanel AI Middleware \u2013 Integration and Onboarding Guide",
       "type": "txt",
-      "size_bytes": 34386,
+      "size_bytes": 34130,
       "tags": [
         "integration",
         "middleware",
@@ -4923,7 +4923,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Richpanel Middleware Documentation Gaps & Expansion Suggestions",
       "type": "txt",
-      "size_bytes": 20832,
+      "size_bytes": 20749,
       "tags": [
         "documentation",
         "middleware",
@@ -4938,7 +4938,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Distinguishing Bot Messages to Agents:",
       "type": "txt",
-      "size_bytes": 1808,
+      "size_bytes": 1804,
       "tags": [
         "agents",
         "automated_replies_public_vs_internal_notes",
@@ -4956,7 +4956,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Posting Public Replies via API:",
       "type": "txt",
-      "size_bytes": 2867,
+      "size_bytes": 2857,
       "tags": [
         "api",
         "automated_replies_public_vs_internal_notes",
@@ -4974,7 +4974,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary:",
       "type": "txt",
-      "size_bytes": 1112,
+      "size_bytes": 1106,
       "tags": [
         "automated_replies_public_vs_internal_notes",
         "non_indexed_library",
@@ -4989,7 +4989,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Avoid Triggering on Bot Actions:",
       "type": "txt",
-      "size_bytes": 543,
+      "size_bytes": 541,
       "tags": [
         "actions",
         "automation_rule_interactions_&_preventing_loops",
@@ -5007,7 +5007,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Introduction",
       "type": "txt",
-      "size_bytes": 288,
+      "size_bytes": 286,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "introduction",
@@ -5022,7 +5022,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "No Duplicate HTTP Calls:",
       "type": "txt",
-      "size_bytes": 535,
+      "size_bytes": 533,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "calls",
@@ -5039,7 +5039,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary:",
       "type": "txt",
-      "size_bytes": 545,
+      "size_bytes": 543,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "non_indexed_library",
@@ -5054,7 +5054,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Test in a Safe Environment:",
       "type": "txt",
-      "size_bytes": 620,
+      "size_bytes": 618,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "environment",
@@ -5071,7 +5071,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Trigger on Customer Messages Only:",
       "type": "txt",
-      "size_bytes": 1313,
+      "size_bytes": 1309,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "customer",
@@ -5089,7 +5089,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Use a \u201cProcessed\u201d Flag:",
       "type": "txt",
-      "size_bytes": 1103,
+      "size_bytes": 1101,
       "tags": [
         "automation_rule_interactions_&_preventing_loops",
         "flag",
@@ -5106,7 +5106,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Auth Headers for Security:",
       "type": "txt",
-      "size_bytes": 1180,
+      "size_bytes": 1176,
       "tags": [
         "auth",
         "headers",
@@ -5123,7 +5123,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Customizing the JSON Body:",
       "type": "txt",
-      "size_bytes": 1056,
+      "size_bytes": 1054,
       "tags": [
         "body",
         "customizing",
@@ -5140,7 +5140,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Default Payload Content:",
       "type": "txt",
-      "size_bytes": 1321,
+      "size_bytes": 1319,
       "tags": [
         "content",
         "default",
@@ -5157,7 +5157,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Including IDs and Deduplication Keys:",
       "type": "txt",
-      "size_bytes": 689,
+      "size_bytes": 687,
       "tags": [
         "deduplication",
         "http_target_payload_and_available_fields",
@@ -5175,7 +5175,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Payload Size and Timeouts:",
       "type": "txt",
-      "size_bytes": 798,
+      "size_bytes": 796,
       "tags": [
         "http_target_payload_and_available_fields",
         "non_indexed_library",
@@ -5192,7 +5192,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Helpdesk Tickets vs Live Chat:",
       "type": "txt",
-      "size_bytes": 725,
+      "size_bytes": 721,
       "tags": [
         "chat",
         "helpdesk",
@@ -5210,7 +5210,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Stability:",
       "type": "txt",
-      "size_bytes": 531,
+      "size_bytes": 526,
       "tags": [
         "non_indexed_library",
         "official_integration_entry_points",
@@ -5225,7 +5225,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Triggering External Services:",
       "type": "txt",
-      "size_bytes": 835,
+      "size_bytes": 829,
       "tags": [
         "external",
         "non_indexed_library",
@@ -5242,7 +5242,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API calls from your side to Richpanel :",
       "type": "txt",
-      "size_bytes": 589,
+      "size_bytes": 587,
       "tags": [
         "api",
         "calls",
@@ -5259,7 +5259,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Debugging:",
       "type": "txt",
-      "size_bytes": 634,
+      "size_bytes": 632,
       "tags": [
         "debugging",
         "non_indexed_library",
@@ -5274,7 +5274,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Delivery Guarantees for HTTP Targets:",
       "type": "txt",
-      "size_bytes": 948,
+      "size_bytes": 939,
       "tags": [
         "delivery",
         "guarantees",
@@ -5292,7 +5292,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Duplicate Calls:",
       "type": "txt",
-      "size_bytes": 812,
+      "size_bytes": 810,
       "tags": [
         "calls",
         "duplicate",
@@ -5308,7 +5308,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Failure Visibility:",
       "type": "txt",
-      "size_bytes": 826,
+      "size_bytes": 824,
       "tags": [
         "failure",
         "non_indexed_library",
@@ -5324,7 +5324,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Plan for failures:",
       "type": "txt",
-      "size_bytes": 618,
+      "size_bytes": 616,
       "tags": [
         "failures",
         "non_indexed_library",
@@ -5340,7 +5340,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary:",
       "type": "txt",
-      "size_bytes": 587,
+      "size_bytes": 585,
       "tags": [
         "non_indexed_library",
         "reliability_and_retries_of_http_targets_&_api_calls",
@@ -5355,7 +5355,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Timeouts and Success Codes:",
       "type": "txt",
-      "size_bytes": 805,
+      "size_bytes": 803,
       "tags": [
         "codes",
         "non_indexed_library",
@@ -5372,7 +5372,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Cleanest Routing Approach:",
       "type": "txt",
-      "size_bytes": 902,
+      "size_bytes": 898,
       "tags": [
         "approach",
         "cleanest",
@@ -5389,7 +5389,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "\u201cDepartment\u201d Concept in Richpanel:",
       "type": "txt",
-      "size_bytes": 907,
+      "size_bytes": 903,
       "tags": [
         "concept",
         "department",
@@ -5405,7 +5405,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Routing a Ticket to the Right Queue:",
       "type": "txt",
-      "size_bytes": 1006,
+      "size_bytes": 1002,
       "tags": [
         "non_indexed_library",
         "queue",
@@ -5423,7 +5423,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Routing in Live Chat:",
       "type": "txt",
-      "size_bytes": 1194,
+      "size_bytes": 1192,
       "tags": [
         "chat",
         "live",
@@ -5440,7 +5440,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary:",
       "type": "txt",
-      "size_bytes": 646,
+      "size_bytes": 642,
       "tags": [
         "non_indexed_library",
         "richpanel",
@@ -5455,7 +5455,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API Rate Limits:",
       "type": "txt",
-      "size_bytes": 1004,
+      "size_bytes": 995,
       "tags": [
         "api",
         "limits",
@@ -5472,7 +5472,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Can the limit be raised?",
       "type": "txt",
-      "size_bytes": 446,
+      "size_bytes": 444,
       "tags": [
         "can",
         "limit",
@@ -5489,7 +5489,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "High-Volume Considerations:",
       "type": "txt",
-      "size_bytes": 347,
+      "size_bytes": 345,
       "tags": [
         "considerations",
         "high",
@@ -5506,7 +5506,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Minimizing API Calls:",
       "type": "txt",
-      "size_bytes": 1218,
+      "size_bytes": 1212,
       "tags": [
         "api",
         "calls",
@@ -5523,7 +5523,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Other Limits:",
       "type": "txt",
-      "size_bytes": 693,
+      "size_bytes": 689,
       "tags": [
         "limits",
         "non_indexed_library",
@@ -5539,7 +5539,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Parallelism and Queueing:",
       "type": "txt",
-      "size_bytes": 583,
+      "size_bytes": 577,
       "tags": [
         "non_indexed_library",
         "parallelism",
@@ -5555,7 +5555,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Throughput for Inbound Messages:",
       "type": "txt",
-      "size_bytes": 835,
+      "size_bytes": 833,
       "tags": [
         "inbound",
         "messages",
@@ -5572,7 +5572,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API Authentication:",
       "type": "txt",
-      "size_bytes": 925,
+      "size_bytes": 921,
       "tags": [
         "api",
         "authentication",
@@ -5588,7 +5588,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API Versioning and Changes:",
       "type": "txt",
-      "size_bytes": 1124,
+      "size_bytes": 1120,
       "tags": [
         "api",
         "changes",
@@ -5605,7 +5605,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Compliance (DPA, SOC2, etc.):",
       "type": "txt",
-      "size_bytes": 1183,
+      "size_bytes": 1171,
       "tags": [
         "compliance",
         "non_indexed_library",
@@ -5620,7 +5620,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Data Residency and Retention:",
       "type": "txt",
-      "size_bytes": 469,
+      "size_bytes": 463,
       "tags": [
         "data",
         "non_indexed_library",
@@ -5637,7 +5637,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Future-Proofing:",
       "type": "txt",
-      "size_bytes": 649,
+      "size_bytes": 647,
       "tags": [
         "future",
         "non_indexed_library",
@@ -5653,7 +5653,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "IP Whitelisting:",
       "type": "txt",
-      "size_bytes": 783,
+      "size_bytes": 779,
       "tags": [
         "non_indexed_library",
         "richpanel",
@@ -5668,7 +5668,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Secure Webhook Calls:",
       "type": "txt",
-      "size_bytes": 1048,
+      "size_bytes": 1044,
       "tags": [
         "calls",
         "non_indexed_library",
@@ -5685,7 +5685,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Security Review:",
       "type": "txt",
-      "size_bytes": 736,
+      "size_bytes": 732,
       "tags": [
         "non_indexed_library",
         "review",
@@ -5701,7 +5701,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary (Security & Support):",
       "type": "txt",
-      "size_bytes": 906,
+      "size_bytes": 899,
       "tags": [
         "non_indexed_library",
         "richpanel",
@@ -5716,7 +5716,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Support for Developers:",
       "type": "txt",
-      "size_bytes": 851,
+      "size_bytes": 847,
       "tags": [
         "developers",
         "non_indexed_library",
@@ -5732,7 +5732,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "API Key Rotation:",
       "type": "txt",
-      "size_bytes": 527,
+      "size_bytes": 523,
       "tags": [
         "api",
         "key",
@@ -5749,7 +5749,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Rollout Plan \u2013 Shadow to Full: A recommended rollout would be:",
       "type": "txt",
-      "size_bytes": 1856,
+      "size_bytes": 1848,
       "tags": [
         "#u2013",
         "full",
@@ -5768,7 +5768,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Rollout Plan \u2013 Shadow to Full: A recommended rollout would be:",
       "type": "txt",
-      "size_bytes": 1856,
+      "size_bytes": 1848,
       "tags": [
         "full",
         "non_indexed_library",
@@ -5786,7 +5786,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Sandbox Environment:",
       "type": "txt",
-      "size_bytes": 1147,
+      "size_bytes": 1141,
       "tags": [
         "environment",
         "non_indexed_library",
@@ -5802,7 +5802,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Separate API Keys for Environments:",
       "type": "txt",
-      "size_bytes": 847,
+      "size_bytes": 841,
       "tags": [
         "api",
         "environments",
@@ -5820,7 +5820,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Separate Instances vs Production:",
       "type": "txt",
-      "size_bytes": 983,
+      "size_bytes": 979,
       "tags": [
         "instances",
         "non_indexed_library",
@@ -5837,7 +5837,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Summary:",
       "type": "txt",
-      "size_bytes": 392,
+      "size_bytes": 388,
       "tags": [
         "non_indexed_library",
         "richpanel",
@@ -5852,7 +5852,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Testing Flows Without Impacting Production:",
       "type": "txt",
-      "size_bytes": 944,
+      "size_bytes": 940,
       "tags": [
         "flows",
         "impacting",
@@ -5871,7 +5871,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fields You Can Update:",
       "type": "txt",
-      "size_bytes": 3484,
+      "size_bytes": 3457,
       "tags": [
         "can",
         "fields",
@@ -5889,7 +5889,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "updating multiple properties at once is allowed.",
       "type": "txt",
-      "size_bytes": 616,
+      "size_bytes": 613,
       "tags": [
         "multiple",
         "non_indexed_library",
@@ -5906,7 +5906,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Fields You Can Update:",
       "type": "txt",
-      "size_bytes": 3484,
+      "size_bytes": 3457,
       "tags": [
         "can",
         "fields",
@@ -5924,7 +5924,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "updating multiple properties at once is allowed.",
       "type": "txt",
-      "size_bytes": 616,
+      "size_bytes": 613,
       "tags": [
         "multiple",
         "non_indexed_library",
@@ -5941,7 +5941,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Send Message",
       "type": "txt",
-      "size_bytes": 2814,
+      "size_bytes": 2709,
       "tags": [
         "language",
         "non_indexed_library",
@@ -5955,7 +5955,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Send Message",
       "type": "txt",
-      "size_bytes": 466,
+      "size_bytes": 426,
       "tags": [
         "non_indexed_library",
         "richpanel",
@@ -5968,7 +5968,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Sample Order Event",
       "type": "txt",
-      "size_bytes": 2661,
+      "size_bytes": 2572,
       "tags": [
         "event",
         "non_indexed_library",
@@ -5984,7 +5984,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Subscription Event",
       "type": "txt",
-      "size_bytes": 1004,
+      "size_bytes": 956,
       "tags": [
         "event",
         "non_indexed_library",
@@ -5999,7 +5999,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "Subscription Properties",
       "type": "txt",
-      "size_bytes": 3085,
+      "size_bytes": 2985,
       "tags": [
         "non_indexed_library",
         "properties",
@@ -6014,7 +6014,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "User Properties Object (user_properties)",
       "type": "txt",
-      "size_bytes": 1149,
+      "size_bytes": 1078,
       "tags": [
         "non_indexed_library",
         "object",
@@ -6030,7 +6030,7 @@
       "category": "Non_Indexed_Library",
       "title_guess": "dev",
       "type": "txt",
-      "size_bytes": 6714,
+      "size_bytes": 6681,
       "tags": [
         "dev",
         "non_indexed_library",
@@ -6043,7 +6043,7 @@
       "category": "",
       "title_guess": "Richpanel Reference Library \u2014 Top 20 Docs",
       "type": "md",
-      "size_bytes": 4577,
+      "size_bytes": 4529,
       "tags": [
         "richpanel",
         "top"
