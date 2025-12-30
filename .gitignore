@@ -51,6 +51,9 @@ RichPanel_BACKUP_FULL_*
 
 # Temporary extraction / generated scratch
 _tmp_plan_extract/
+# Local branch protection scratch exports
+branch_protection_*.json
+_tmp_branch_protection_*.json
 # Ensure example env files can be committed
 !.env.example
 !config/.env.example

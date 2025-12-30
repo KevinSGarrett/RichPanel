@@ -20677,6 +20677,12 @@
       "anchor": "06securityprivacycompliance"
     }
   ],
+  "06_security_secrets": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "06securitysecrets"
+    }
+  ],
   "07_reliability_scaling": [
     {
       "path": "REGISTRY.md",

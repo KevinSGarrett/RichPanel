@@ -1,47 +1,39 @@
 # Active Workstreams
 
-Last updated: 2025-12-29 (Wave F13)
+Last updated: 2025-12-30 (Wave B00)
 
-**Current mode:** foundation (see `REHYDRATION_PACK/MODE.yaml`)  
-Focus is documentation OS readiness; implementation begins in build mode.
-
----
-
-## Stream F1 — Docs indexing + registries ✅ DONE
-- `docs/REGISTRY.md` + generated JSON indexes
-- heading-level lookup (`docs/_generated/heading_index.json`)
-- navigation hardened (`docs/INDEX.md`, `docs/CODEMAP.md`)
-
-## Stream F2 — Rehydration pack automation ✅ DONE
-- mode-aware manifest + verifier (`scripts/verify_rehydration_pack.py`)
-- pack templates ready for build mode
-
-## Stream F3 — Policy + template hardening ✅ DONE
-- agent policy overrides
-- living docs set defined
-- standardized templates for decisions/issues/tests
-
-## Stream F4 — Foundation readiness (Wave F06) ✅ DONE
-- build-mode activation checklist created
-- plan → checklist extraction added (generated views)
-- legacy redirect folders standardized
-
-## Stream F5 — Doc hygiene cleanup (Wave F08) ✅ DONE
-- Removed ambiguous placeholder markers (`...` and `…`) from INDEX-linked canonical docs
-- `python scripts/verify_doc_hygiene.py` now passes with no warnings
+**Current mode:** build (see `REHYDRATION_PACK/MODE.yaml`)  
+Focus has shifted from “docs OS readiness” → **implementation with Cursor agents**.
 
 ---
 
-## Current next focus — Build-mode activation
-- `REHYDRATION_PACK/FOUNDATION_STATUS.md`
-- `docs/00_Project_Admin/Build_Mode_Activation_Checklist.md`
-- `REHYDRATION_PACK/05_TASK_BOARD.md`
+## Recently completed (Foundation)
+- Docs indexing + registries (doc registry, heading index)
+- Rehydration pack automation + templates
+- Policy + template hardening
+- Doc hygiene cleanup
+- GitHub + CI hardening (branch protection + deterministic regen)
 
+---
 
-## Stream F6 — Schedule + phase clarity ✅ DONE
-- Foundation vs Build clarified in `REHYDRATION_PACK/WAVE_SCHEDULE_FULL.md`
-- Legacy wave mapping preserved in `docs/00_Project_Admin/Wave_Naming_and_Mapping.md`
+## Active (Build)
 
-## Stream F13 — CR-001 No-tracking delivery estimates (order status)
-- Spec + templates added (foundation)
-- Pending: data mapping confirmation (shipping method strings, preorder ETA source) + Richpanel resolve/reopen semantics
+### Stream B0 — Build kickoff + agent takeover (WAVE_B00)
+- Ensure build mode is active in `MODE.yaml`
+- Keep packs/status docs current
+- Runbook parity with real GitHub settings
+
+### Stream B1 — Sprint 0 Preflight (access + secrets inventory)
+- Inventory required accounts/keys (AWS, Richpanel, email provider, shipping platform)
+- Confirm “no tracking numbers” behavior (CR-001) and what fields are authoritative
+
+### Stream B2 — Sprint 1 Infra baseline (IaC scaffolding)
+- Stand up CDK project baseline + environments
+- Define core resources (SQS, DynamoDB, Lambda skeletons) without requiring production credentials
+
+---
+
+## Blocking inputs (human)
+- AWS account/credentials + target region(s)
+- Richpanel API access + sandbox/staging details
+- Shipping provider details (if ShipStation is used) and field mapping confirmations

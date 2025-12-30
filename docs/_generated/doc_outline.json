@@ -20489,6 +20489,11 @@
       },
       {
         "level": 2,
+        "text": "06_Security_Secrets",
+        "anchor": "06securitysecrets"
+      },
+      {
+        "level": 2,
         "text": "07_Reliability_Scaling",
         "anchor": "07reliabilityscaling"
       },

@@ -1,51 +1,30 @@
 # Wave Schedule (Quick)
 
-This is the **quick view** of the wave plan.
+Last updated: 2025-12-29 — Current wave: **WAVE_B00 (Build kickoff + Cursor agent takeover)**
 
-For full details (goals + “done looks like” for every wave), see:
-- `WAVE_SCHEDULE_FULL.md`
+This is the “at-a-glance” run order.
 
-Current repo mode (controls whether Cursor artifacts are required):
-- `MODE.yaml`
+## Foundation Waves (F00–F15)
+- WAVE_F00 — Repo skeleton + governance scaffolding
+- WAVE_F01 — Docs/policies scaffold + structure validation
+- WAVE_F02 — Plan + backlog scaffold
+- WAVE_F03 — API + data contracts draft
+- WAVE_F04 — Infra strategy draft
+- WAVE_F05 — Backend service blueprint
+- WAVE_F06 — Frontend/admin blueprint
+- WAVE_F07 — Security + secrets blueprint
+- WAVE_F08 — Multi-agent GitOps playbook
+- WAVE_F09 — QA/runbooks baseline
+- WAVE_F10 — Reference library integration
+- WAVE_F11 — Doc hygiene + plan sync tooling
+- WAVE_F12 — Final foundation validation
+- WAVE_F13 — **CR-001**: no tracking numbers + delivery estimate-only workflow (requirements updates)
+- WAVE_F14 — **CR-001 Defer Discovery**: re-scoped discovery tasks, clarified assumptions, updated plans
+- WAVE_F15 — GitHub + CI hardening: branch protection, deterministic regen, tracked `config/.env.example`, CI runbook updates
 
-Wave naming:
-- **Fxx** = Foundation (documentation OS)
-- **Bxx** = Build (implementation)
-- **Cxx** = Improvement (continuous optimization)
-
-Legacy “Wave 00–10” mapping:
-- `docs/00_Project_Admin/Wave_Naming_and_Mapping.md`
-
-**Important (foundation vs build)**
-- Phase **F** is the deliverable for *file/folder structure + documentation*.
-- Phase **B** (including **B00**) is a future plan for *implementation* and is **not required** to complete documentation.
-
----
-
-## Phase F — Foundation (mode: foundation)
-
-- **F00** Initial skeleton + baseline navigation ✅ Done
-- **F01** Foundation rules + mode separation ✅ Done
-- **F02** Docs indexing + navigation hardening ✅ Done
-- **F03** Rehydration pack automation hardening ✅ Done
-- **F04** Reference indexing + plan normalization ✅ Done
-- **F05** Policy + template hardening + living docs set ✅ Done
-- **F06** Foundation readiness + plan→checklist extraction ✅ Done
-- **F07** Doc hygiene cleanup ✅ Done
-- **F08** Registry sync + schedule clarity ✅ Done
-- **F09** Foundation DoD + schedule mapping ✅ Done
-- **F10** Build-mode readiness (PM prompts + run scaffolding + GitHub ops policy) ✅ Done
-- **F11** Multi-agent GitHub Ops hardening (branch budget + protected delete guard + CI entrypoint + git run plan) ✅ Done
-- **F12** GitHub defaults locked + branch protection settings ✅ Done
-
----
-
-## Phase B — Build (mode: build)
-
-Build waves begin only when you switch:
-- `REHYDRATION_PACK/MODE.yaml` → `mode: build`
-
-First build wave:
-- **B00** Build kickoff (first run set with A/B/C, run artifacts enforced)
-
-(Phase B is optional and begins only when you decide to start implementation.)
+## Build Waves (B00+)
+- WAVE_B00 — **Build kickoff + Cursor agent takeover** (activate build mode, start Sprint 0)
+- WAVE_B01 — Sprint 0/1 start: infra/app scaffolds + env wiring
+- WAVE_B02 — Eventing + persistence foundations
+- WAVE_B03 — Core automation pipeline skeleton
+- WAVE_B04+ — Follow `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md`

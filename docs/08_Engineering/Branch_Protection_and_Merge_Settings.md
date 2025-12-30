@@ -1,6 +1,6 @@
 # Branch Protection and Merge Settings
 
-Last verified: 2025-12-29 — Wave F12.
+Last verified: 2025-12-29 — Wave B00 (Build kickoff + Cursor agent takeover).
 Status: Canonical
 
 This document defines the **required GitHub repository settings** that make this project safe to run with:
@@ -23,12 +23,10 @@ Related:
 ## 1) Required repo settings (Settings → General → Pull Requests)
 
 ### Merge methods
-**Required**
-- ✅ **Allow merge commits** (we preserve the run boundary)
-
-Recommended
-- ⛔ Disable **squash merging** (optional)
-- ⛔ Disable **rebase merging** (optional)
+**Required (current state)**
+- ✅ **Allow merge commits** — the only enabled merge strategy
+- ⛔ **Squash merging** — disabled
+- ⛔ **Rebase merging** — disabled
 
 Rationale:
 - Merge commits keep a clear audit trail per `RUN_ID`.
@@ -49,22 +47,22 @@ Path: **Settings → Branches → Branch protection rules → Add rule**
 ### Rule target
 - Branch name pattern: `main`
 
-### Pull request requirement
-**Required**
-- ✅ Require a pull request before merging
-- ✅ Require approvals: **1** (or more if your org requires)
+> Source of truth for the rule snapshot: `branch_protection_main.json`
 
-Recommended
+### Pull request requirement
+**Required (current state)**
+- ✅ Require a pull request before merging
+- ✅ Require approvals: **0** (automation-friendly; CI + conversation resolution act as the guardrails)
 - ✅ Dismiss stale pull request approvals when new commits are pushed
 - ✅ Require conversation resolution before merging
 
 ### Status checks
 **Required**
 - ✅ Require status checks to pass before merging
-- ✅ Required checks must include the repo CI workflow
+- ✅ Required checks must include the repo CI workflow/job
 
-This repo’s baseline workflow:
-- `.github/workflows/ci.yml` → workflow name: `CI`, job: `validate`
+This repo’s baseline workflow + job:
+- `.github/workflows/ci.yml` → workflow name: `CI`, job: **`validate`** (strict/up-to-date = **true**)
 
 Important:
 - GitHub only lets you select required checks after the workflow has run at least once.

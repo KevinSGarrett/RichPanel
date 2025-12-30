@@ -1,25 +1,45 @@
-# REHYDRATION_PACK operational mode
-# - foundation: we are still building the documentation OS + repo structure
-# - build: Cursor agents run and produce RUN artifacts
+# REHYDRATION PACK MODE
+#
+# - foundation: maintain docs/policies/repo structure and keep CI + registries healthy
+# - build: active implementation work; Cursor agents produce RUN artifacts and PRs
+#
+# NOTE: This file is intended to be lightweight and human-editable.
+#       Scripts may read it, but do not depend on custom keys beyond the core fields.
 
-mode: foundation
-current_wave: WAVE_F12
+mode: build
+current_wave: WAVE_B00
+last_updated: 2025-12-29
 
-notes: |
-  Foundation mode: focus is repo structure, documentation architecture, indexing,
-  chunking standards, policy/template hardening, and build-readiness criteria.
-  No Cursor run outputs are required in this phase.
+repo:
+  # Canonical local working copy (git clone). If you later rename, update this path.
+  local_root: C:\RichPanel_GIT
+  github_url: https://github.com/KevinSGarrett/RichPanel
+  default_branch: main
 
-  Clarifier: Build wave B00 is not required to complete Foundation (documentation OS).
-  It is only used when implementation begins.
+# Snapshot of GitHub repo settings / expectations.
+# (Informational: used by humans + agents for quick orientation.)
+github:
+  merge_strategy:
+    allow_merge_commit: true
+    allow_squash_merge: false
+    allow_rebase_merge: false
+    delete_branch_on_merge: true
+  branch_protection_main:
+    enabled: true
+    enforce_admins: true
+    required_conversation_resolution: true
+    required_status_checks:
+      strict: true
+      contexts:
+        - validate
+    required_pull_request_reviews:
+      enabled: true
+      required_approving_review_count: 0
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: false
+    allow_force_pushes: false
+    allow_deletions: false
 
-transition_to_build_mode: |
-  1) Complete `docs/00_Project_Admin/Build_Mode_Activation_Checklist.md`
-  2) Update this file:
-     - set `mode: build`
-     - set `current_wave: WAVE_B00`
-  3) Create a run folder skeleton:
-     - `python scripts/new_run_folder.py --now`
-  4) Populate `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md` with the first run set prompts
-  5) In build mode, validate strictly:
-     - `python scripts/verify_rehydration_pack.py --strict`
+notes:
+  - "Legacy non-git workspace (backup only): C:\\RichPanel"
+  - "CI gate: python scripts/run_ci_checks.py (maps to GitHub Actions job `validate`)"
