@@ -1,0 +1,37 @@
+﻿name: OIDC Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  oidc-smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: dev
+            role_arn: arn:aws:iam::151124909266:role/rp-ci-deploy
+            region: us-east-2
+          - env: staging
+            role_arn: arn:aws:iam::260475105304:role/rp-ci-deploy
+            region: us-east-2
+          - env: prod
+            role_arn: arn:aws:iam::878145708918:role/rp-ci-deploy
+            region: us-east-2
+
+    steps:
+      - name: Configure AWS credentials via OIDC (${{ matrix.env }})
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ matrix.role_arn }}
+          aws-region: ${{ matrix.region }}
+
+      - name: Verify identity
+        run: aws sts get-caller-identity
