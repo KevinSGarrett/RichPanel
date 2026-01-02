@@ -40,5 +40,11 @@ Environment metadata (account, region, owner, tags) lives inside `cdk.json > con
 These match the paths documented in `docs/06_Security_Secrets/Access_and_Secrets_Inventory.md`
 and `docs/07_Reliability_Scaling/parameter_defaults_v1.yaml`.
 
+## Pre-provisioned config
+Some foundations packs create SSM parameters and Secrets Manager placeholders ahead of CDK.
+
+- The stack now *imports* `/rp-mw/<env>/safe_mode` and `/rp-mw/<env>/automation_enabled` instead of re-creating them, preventing `ParameterAlreadyExists` failures.
+- Secrets such as `rp-mw/<env>/richpanel/api_key`, `.../richpanel/webhook_token`, and `.../openai/api_key` are referenced via `Secret.fromSecretNameV2`, so CDK can read them without owning their lifecycle.
+
 ## Status
 This is a **scaffold**. Later waves will add actual resources incrementally.

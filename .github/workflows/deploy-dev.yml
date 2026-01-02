@@ -1,0 +1,64 @@
+name: Deploy Dev Stack
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+  STACK_NAME: RichpanelMiddleware-dev
+  CDK_ENV: dev
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::151124909266:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-deploy-dev
+
+      - name: Install dependencies
+        working-directory: infra/cdk
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Deploy dev stack
+        working-directory: infra/cdk
+        env:
+          STACK_NAME: ${{ env.STACK_NAME }}
+          CDK_ENV: ${{ env.CDK_ENV }}
+        run: |
+          npx cdk deploy "${STACK_NAME}" \
+            --require-approval never \
+            -c env="${CDK_ENV}"
+
+      - name: Print CloudFormation outputs
+        env:
+          STACK_NAME: ${{ env.STACK_NAME }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --region "${AWS_REGION}" \
+            --query "Stacks[0].Outputs" \
+            --output table
+

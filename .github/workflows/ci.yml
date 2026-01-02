@@ -19,6 +19,28 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install infra dependencies
+        working-directory: infra/cdk
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build infra TypeScript
+        working-directory: infra/cdk
+        run: npm run build
+
+      - name: CDK synth
+        working-directory: infra/cdk
+        run: npx cdk synth
+
       - name: Run repo validations
         run: |
           python scripts/run_ci_checks.py --ci
