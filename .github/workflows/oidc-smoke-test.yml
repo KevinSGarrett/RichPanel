@@ -18,20 +18,30 @@ jobs:
         include:
           - env: dev
             role_arn: arn:aws:iam::151124909266:role/rp-ci-deploy
+            account_id: "151124909266"
             region: us-east-2
           - env: staging
             role_arn: arn:aws:iam::260475105304:role/rp-ci-deploy
+            account_id: "260475105304"
             region: us-east-2
           - env: prod
             role_arn: arn:aws:iam::878145708918:role/rp-ci-deploy
+            account_id: "878145708918"
             region: us-east-2
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials via OIDC (${{ matrix.env }})
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ matrix.role_arn }}
           aws-region: ${{ matrix.region }}
 
-      - name: Verify identity
-        run: aws sts get-caller-identity
+      - name: Run AWS smoke test (${{ matrix.env }})
+        run: >
+          python scripts/aws_oidc_smoke_test.py
+          --env ${{ matrix.env }}
+          --region ${{ matrix.region }}
+          --expected-account ${{ matrix.account_id }}

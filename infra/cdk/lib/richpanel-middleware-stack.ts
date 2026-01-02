@@ -1,5 +1,6 @@
 import { CfnOutput, Stack, StackProps, Tags } from "aws-cdk-lib";
-import { StringParameter } from "aws-cdk-lib/aws-ssm";
+import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { IStringParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
 import { Construct } from "constructs";
 import {
   EnvironmentConfig,
@@ -8,6 +9,17 @@ import {
 
 export interface RichpanelMiddlewareStackProps extends StackProps {
   readonly environment: EnvironmentConfig;
+}
+
+export interface RuntimeFlagParameters {
+  readonly safeMode: IStringParameter;
+  readonly automationEnabled: IStringParameter;
+}
+
+export interface SecretReferences {
+  readonly richpanelApiKey: ISecret;
+  readonly richpanelWebhookToken: ISecret;
+  readonly openaiApiKey: ISecret;
 }
 
 /**
@@ -23,6 +35,8 @@ export interface RichpanelMiddlewareStackProps extends StackProps {
  */
 export class RichpanelMiddlewareStack extends Stack {
   public readonly naming: MwNaming;
+  public readonly runtimeFlags: RuntimeFlagParameters;
+  public readonly secrets: SecretReferences;
 
   constructor(
     scope: Construct,
@@ -32,28 +46,52 @@ export class RichpanelMiddlewareStack extends Stack {
     super(scope, id, props);
 
     this.naming = new MwNaming(props.environment.name);
+    this.runtimeFlags = this.importRuntimeFlagParameters();
+    this.secrets = this.importSecretReferences();
 
     this.applyStandardTags(props.environment);
-    this.createRuntimeFlagParameters();
     this.exposeNamingOutputs();
 
     // TODO(Wave 04+): add resources per architecture docs.
   }
 
-  private createRuntimeFlagParameters(): void {
-    new StringParameter(this, "SafeModeFlagParameter", {
-      parameterName: this.naming.ssmParameter("safe_mode"),
-      stringValue: "false",
-      description:
-        "Route-only kill switch; default false per Kill Switch and Safe Mode runbook.",
-    });
+  private importRuntimeFlagParameters(): RuntimeFlagParameters {
+    return {
+      safeMode: StringParameter.fromStringParameterAttributes(
+        this,
+        "SafeModeFlagParameter",
+        {
+          parameterName: this.naming.ssmParameter("safe_mode"),
+        }
+      ),
+      automationEnabled: StringParameter.fromStringParameterAttributes(
+        this,
+        "AutomationEnabledFlagParameter",
+        {
+          parameterName: this.naming.ssmParameter("automation_enabled"),
+        }
+      ),
+    };
+  }
 
-    new StringParameter(this, "AutomationEnabledFlagParameter", {
-      parameterName: this.naming.ssmParameter("automation_enabled"),
-      stringValue: "true",
-      description:
-        "Global automation kill switch; default true so automation is enabled until toggled.",
-    });
+  private importSecretReferences(): SecretReferences {
+    return {
+      richpanelApiKey: Secret.fromSecretNameV2(
+        this,
+        "RichpanelApiKeySecret",
+        this.naming.secretPath("richpanel", "api_key")
+      ),
+      richpanelWebhookToken: Secret.fromSecretNameV2(
+        this,
+        "RichpanelWebhookTokenSecret",
+        this.naming.secretPath("richpanel", "webhook_token")
+      ),
+      openaiApiKey: Secret.fromSecretNameV2(
+        this,
+        "OpenAiApiKeySecret",
+        this.naming.secretPath("openai", "api_key")
+      ),
+    };
   }
 
   private applyStandardTags(environment: EnvironmentConfig): void {
