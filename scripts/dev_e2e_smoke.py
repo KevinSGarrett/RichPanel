@@ -148,12 +148,21 @@ def derive_ingress_endpoint(
         print(f"[WARN] Unable to describe stack resources for '{stack_name}': {exc}")
         resources = {}
 
-    for resource in resources.get("StackResources", []):
+    stack_resources = resources.get("StackResources", [])
+
+    for resource in stack_resources:
         logical_id = resource.get("LogicalResourceId", "")
         resource_type = resource.get("ResourceType", "")
         if logical_id == "IngressHttpApi" or resource_type == "AWS::ApiGatewayV2::Api":
             api_id = resource.get("PhysicalResourceId")
             if api_id:
+                return build_http_api_endpoint(api_id, region)
+
+    for resource in stack_resources:
+        if resource.get("ResourceType") == "AWS::ApiGatewayV2::Stage":
+            stage_id = resource.get("PhysicalResourceId", "")
+            if stage_id and "/" in stage_id:
+                api_id = stage_id.split("/", 1)[0]
                 return build_http_api_endpoint(api_id, region)
 
     target_name = f"rp-mw-{env_name}-ingress"
