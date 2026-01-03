@@ -26,7 +26,7 @@ from richpanel_middleware.integrations.openai import (  # noqa: E402
     TransportResponse,
 )
 
-FIXTURES = ROOT / "backend" / "tests" / "fixtures" / "order_status_samples.json"
+FIXTURES = ROOT / "scripts" / "fixtures" / "order_status_samples.json"
 
 
 class _FailingTransport:

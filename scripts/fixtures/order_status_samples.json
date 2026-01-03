@@ -1,0 +1,17 @@
+[
+  {
+    "name": "order_status_shipped_example",
+    "conversation_id": "conv-001",
+    "customer_message": "Hey, where is my order?",
+    "customer_profile": {
+      "name": "Ava",
+      "email": "ava@example.com"
+    },
+    "order_summary": {
+      "id": "ord-001",
+      "status": "shipped",
+      "eta": "2024-12-01"
+    }
+  }
+]
+
