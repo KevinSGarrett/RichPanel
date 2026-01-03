@@ -623,6 +623,34 @@
       "anchor": "wave-11-governance-and-continuous-improvement"
     }
   ],
+  "2025-12-29 — github merge + auto-merge policy": [
+    {
+      "path": "00_Project_Admin/Decision_Log.md",
+      "anchor": "2025-12-29-github-merge-auto-merge-policy"
+    }
+  ],
+  "2025-12-30 — dev/staging deploy workflows": [
+    {
+      "path": "00_Project_Admin/Decision_Log.md",
+      "anchor": "2025-12-30-devstaging-deploy-workflows"
+    }
+  ],
+  "2026-01-02 — e2e smoke workflows": [
+    {
+      "path": "00_Project_Admin/Decision_Log.md",
+      "anchor": "2026-01-02-e2e-smoke-workflows"
+    }
+  ],
+  "2026-01-03 — docs heartbeat + anti-drift enforcement": [
+    {
+      "path": "00_Project_Admin/Decision_Log.md",
+      "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+    },
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+    }
+  ],
   "definition of done — build mode readiness": [
     {
       "path": "00_Project_Admin/Definition_of_Done__Build_Mode_Readiness.md",
@@ -1517,6 +1545,30 @@
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "timeline"
+    }
+  ],
+  "2026-01-02 — run_20260102_2148z (build mode)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-02-run202601022148z-build-mode"
+    }
+  ],
+  "2025-12-30 — run_20251230_1444z (build mode kickoff)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2025-12-30-run202512301444z-build-mode-kickoff"
+    }
+  ],
+  "2025-12-29 — wave f13 (cr-001 no-tracking delivery estimates)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2025-12-29-wave-f13-cr-001-no-tracking-delivery-estimates"
+    }
+  ],
+  "2025-12-29 — wave f12 (github defaults + branch protection)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2025-12-29-wave-f12-github-defaults-branch-protection"
     }
   ],
   "2025-12-29 — wave f07": [

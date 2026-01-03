@@ -491,6 +491,26 @@
         "level": 2,
         "text": "Wave 11 — Governance and continuous improvement",
         "anchor": "wave-11-governance-and-continuous-improvement"
+      },
+      {
+        "level": 2,
+        "text": "2025-12-29 — GitHub Merge + Auto-merge Policy",
+        "anchor": "2025-12-29-github-merge-auto-merge-policy"
+      },
+      {
+        "level": 2,
+        "text": "2025-12-30 — Dev/Staging Deploy Workflows",
+        "anchor": "2025-12-30-devstaging-deploy-workflows"
+      },
+      {
+        "level": 2,
+        "text": "2026-01-02 — E2E Smoke Workflows",
+        "anchor": "2026-01-02-e2e-smoke-workflows"
+      },
+      {
+        "level": 2,
+        "text": "2026-01-03 — Docs Heartbeat + Anti-drift Enforcement",
+        "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
       }
     ]
   },
@@ -1271,6 +1291,31 @@
         "level": 2,
         "text": "Timeline",
         "anchor": "timeline"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-03 — Docs heartbeat + anti-drift enforcement",
+        "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-02 — RUN_20260102_2148Z (Build mode)",
+        "anchor": "2026-01-02-run202601022148z-build-mode"
+      },
+      {
+        "level": 3,
+        "text": "2025-12-30 — RUN_20251230_1444Z (Build mode kickoff)",
+        "anchor": "2025-12-30-run202512301444z-build-mode-kickoff"
+      },
+      {
+        "level": 3,
+        "text": "2025-12-29 — Wave F13 (CR-001 No-tracking delivery estimates)",
+        "anchor": "2025-12-29-wave-f13-cr-001-no-tracking-delivery-estimates"
+      },
+      {
+        "level": 3,
+        "text": "2025-12-29 — Wave F12 (GitHub defaults + branch protection)",
+        "anchor": "2025-12-29-wave-f12-github-defaults-branch-protection"
       },
       {
         "level": 3,
