@@ -569,86 +569,10 @@
       "anchor": "rules"
     }
   ],
-  "decision log": [
+  "decision log\\n\\nlast updated: 2026-01-03\\nlast verified: 2026-01-03 - run_20260103_2300z.\\n\\nuse this file to record decisions that impac...": [
     {
       "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "decision-log"
-    }
-  ],
-  "2025-12-22 — wave 06 (update 2)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-06-update-2"
-    }
-  ],
-  "2025-12-22 — wave 07 (update 1)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-07-update-1"
-    }
-  ],
-  "2025-12-22 — wave 07 (update 2 / closeout)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-07-update-2-closeout"
-    }
-  ],
-  "2025-12-22 — wave 08 (update 1)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-08-update-1"
-    }
-  ],
-  "2025-12-22 — wave 09 (update 1)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-09-update-1"
-    }
-  ],
-  "2025-12-22 — wave 09 (update 2 closeout)": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-22-wave-09-update-2-closeout"
-    }
-  ],
-  "wave 10 — operations and runbooks": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "wave-10-operations-and-runbooks"
-    }
-  ],
-  "wave 11 — governance and continuous improvement": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "wave-11-governance-and-continuous-improvement"
-    }
-  ],
-  "2025-12-29 — github merge + auto-merge policy": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-29-github-merge-auto-merge-policy"
-    }
-  ],
-  "2025-12-30 — dev/staging deploy workflows": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2025-12-30-devstaging-deploy-workflows"
-    }
-  ],
-  "2026-01-02 — e2e smoke workflows": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2026-01-02-e2e-smoke-workflows"
-    }
-  ],
-  "2026-01-03 — docs heartbeat + anti-drift enforcement": [
-    {
-      "path": "00_Project_Admin/Decision_Log.md",
-      "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
-    },
-    {
-      "path": "00_Project_Admin/Progress_Log.md",
-      "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+      "anchor": "decision-lognnlast-updated-2026-01-03nlast-verified-2026-01-03-run202601032300znnuse-this-file-to-record-decisions-that-impac"
     }
   ],
   "definition of done — build mode readiness": [
@@ -1547,67 +1471,85 @@
       "anchor": "timeline"
     }
   ],
-  "2026-01-02 — run_20260102_2148z (build mode)": [
+  "2026-01-03 - run_20260103_2300z (e2e evidence hardening + prod readiness checklist)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
+    }
+  ],
+  "2026-01-03 - run_20260103_1640z (persistence validation hardening)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-03-run202601031640z-persistence-validation-hardening"
+    }
+  ],
+  "2026-01-03 - docs heartbeat + anti-drift enforcement": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+    }
+  ],
+  "2026-01-02 - run_20260102_2148z (build mode)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2026-01-02-run202601022148z-build-mode"
     }
   ],
-  "2025-12-30 — run_20251230_1444z (build mode kickoff)": [
+  "2025-12-30 - run_20251230_1444z (build mode kickoff)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-30-run202512301444z-build-mode-kickoff"
     }
   ],
-  "2025-12-29 — wave f13 (cr-001 no-tracking delivery estimates)": [
+  "2025-12-29 - wave f13 (cr-001 no-tracking delivery estimates)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f13-cr-001-no-tracking-delivery-estimates"
     }
   ],
-  "2025-12-29 — wave f12 (github defaults + branch protection)": [
+  "2025-12-29 - wave f12 (github defaults + branch protection)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f12-github-defaults-branch-protection"
     }
   ],
-  "2025-12-29 — wave f07": [
+  "2025-12-29 - wave f07": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f07"
     }
   ],
-  "2025-12-29 — wave f06": [
+  "2025-12-29 - wave f06": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f06"
     }
   ],
-  "2025-12-29 — wave f05": [
+  "2025-12-29 - wave f05": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f05"
     }
   ],
-  "2025-12-29 — wave f04": [
+  "2025-12-29 - wave f04": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f04"
     }
   ],
-  "2025-12-29 — wave f03": [
+  "2025-12-29 - wave f03": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f03"
     }
   ],
-  "2025-12-29 — wave f02": [
+  "2025-12-29 - wave f02": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f02"
     }
   ],
-  "2025-12-29 — wave f01c": [
+  "2025-12-29 - wave f01c": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
       "anchor": "2025-12-29-wave-f01c"
@@ -4555,16 +4497,16 @@
       "anchor": "table-a-rpmwidempotency-required"
     }
   ],
-  "table b — `rp_mw_conversation_state` (recommended)": [
+  "table b — `rp_mw_conversation_state` (recommended; now provisioned)": [
     {
       "path": "02_System_Architecture/DynamoDB_State_and_Idempotency_Schema.md",
-      "anchor": "table-b-rpmwconversationstate-recommended"
+      "anchor": "table-b-rpmwconversationstate-recommended-now-provisioned"
     }
   ],
-  "table c — `rp_mw_audit_actions` (optional; **deferred in v1**)": [
+  "table c — `rp_mw_audit_actions` (lightweight audit; provisioned)": [
     {
       "path": "02_System_Architecture/DynamoDB_State_and_Idempotency_Schema.md",
-      "anchor": "table-c-rpmwauditactions-optional-deferred-in-v1"
+      "anchor": "table-c-rpmwauditactions-lightweight-audit-provisioned"
     }
   ],
   "2) data retention and minimization rules (v1)": [
@@ -12007,16 +11949,34 @@
       "anchor": "5-staging-e2e-smoke-workflow"
     }
   ],
-  "6) common causes (initial list)": [
+  "6) prod promotion checklist (no prod deploy without explicit go/no-go)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "6-common-causes-initial-list"
+      "anchor": "6-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
     }
   ],
-  "7) if you cannot fix quickly": [
+  "checklist": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "7-if-you-cannot-fix-quickly"
+      "anchor": "checklist"
+    }
+  ],
+  "powershell-safe commands": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "powershell-safe-commands"
+    }
+  ],
+  "7) common causes (initial list)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "7-common-causes-initial-list"
+    }
+  ],
+  "8) if you cannot fix quickly": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "8-if-you-cannot-fix-quickly"
     }
   ],
   "developer guide": [
@@ -12627,6 +12587,12 @@
     {
       "path": "08_Observability_Analytics/Event_Taxonomy_and_Log_Schema.md",
       "anchor": "event-taxonomy-and-log-schema-wave-08"
+    }
+  ],
+  "0) runtime logging defaults (lambda)": [
+    {
+      "path": "08_Observability_Analytics/Event_Taxonomy_and_Log_Schema.md",
+      "anchor": "0-runtime-logging-defaults-lambda"
     }
   ],
   "1) canonical event naming": [
@@ -14523,6 +14489,12 @@
     {
       "path": "09_Deployment_Operations/Runbooks.md",
       "anchor": "1-runbook-catalog"
+    }
+  ],
+  "1a) operator playbook (first five minutes)": [
+    {
+      "path": "09_Deployment_Operations/Runbooks.md",
+      "anchor": "1a-operator-playbook-first-five-minutes"
     }
   ],
   "2) runbook structure standard": [

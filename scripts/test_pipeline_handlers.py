@@ -1,152 +1,167 @@
-#!/usr/bin/env python3
-"""
-Minimal integration tests for the middleware ingress + worker Lambdas.
-
-This script runs entirely offline with stubbed AWS clients so it can execute in CI.
-"""
-
 from __future__ import annotations
 
-import json
 import os
 import sys
-from dataclasses import dataclass, field
+import time
+import unittest
 from pathlib import Path
-from typing import Any, Dict, List
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "backend" / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+# Ensure required env vars exist for imports that expect them.
+os.environ.setdefault("IDEMPOTENCY_TABLE_NAME", "local-idempotency")
+os.environ.setdefault("SAFE_MODE_PARAM", "/rp-mw/local/safe_mode")
+os.environ.setdefault("AUTOMATION_ENABLED_PARAM", "/rp-mw/local/automation_enabled")
+os.environ.setdefault("CONVERSATION_STATE_TABLE_NAME", "local-conversation-state")
+os.environ.setdefault("AUDIT_TRAIL_TABLE_NAME", "local-audit-trail")
+os.environ.setdefault("CONVERSATION_STATE_TTL_SECONDS", "3600")
+os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
+
+from richpanel_middleware.automation.pipeline import (  # noqa: E402
+    execute_plan,
+    normalize_event,
+    plan_actions,
+)
+from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
+from lambda_handlers.worker import handler as worker  # noqa: E402
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-BACKEND_SRC = REPO_ROOT / "backend" / "src"
-sys.path.insert(0, str(BACKEND_SRC))
+class PipelineTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # Reset worker caches so each test is deterministic and offline-safe.
+        worker.boto3 = None  # type: ignore
+        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._TABLE_CACHE.clear()
+        worker._DDB_RESOURCE = None
+        worker._SSM_CLIENT = None
 
-# Ensure Lambda modules see deterministic environment values at import time.
-os.environ.setdefault("QUEUE_URL", "https://sqs.us-east-2.amazonaws.com/123456789012/rp-mw-dev-events.fifo")
-os.environ.setdefault("WEBHOOK_SECRET_ARN", "arn:aws:secretsmanager:us-east-2:123456789012:secret:rp-mw/dev/richpanel/webhook_token")
-os.environ.setdefault("DEFAULT_MESSAGE_GROUP_ID", "rp-mw-dev-default")
-os.environ.setdefault("EVENT_SOURCE", "richpanel_http_target")
-os.environ.setdefault("IDEMPOTENCY_TABLE_NAME", "rp_mw_dev_idempotency")
-os.environ.setdefault("SAFE_MODE_PARAM", "/rp-mw/dev/safe_mode")
-os.environ.setdefault("AUTOMATION_ENABLED_PARAM", "/rp-mw/dev/automation_enabled")
+    def test_normalize_event_populates_defaults(self) -> None:
+        envelope = normalize_event({"payload": {"ticket_id": "t-123", "message_id": "m-1"}})
 
-from lambda_handlers.ingress import handler as ingress_handler  # noqa: E402
-from lambda_handlers.worker import handler as worker_handler  # noqa: E402
+        self.assertEqual(envelope.conversation_id, "t-123")
+        self.assertEqual(envelope.dedupe_id, "m-1")
+        self.assertTrue(envelope.event_id.startswith("evt:"))
+        self.assertTrue(envelope.received_at)
 
+    def test_plan_respects_safe_mode(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-456"})
+        plan = plan_actions(envelope, safe_mode=True, automation_enabled=True)
 
-@dataclass
-class StubSecretsClient:
-    token: str
-    calls: int = 0
+        self.assertEqual(plan.mode, "route_only")
+        self.assertIn("safe_mode", plan.reasons)
+        self.assertEqual(plan.actions[0]["type"], "route_only")
 
-    def get_secret_value(self, SecretId: str) -> Dict[str, Any]:  # noqa: N802 (AWS casing)
-        self.calls += 1
-        return {"SecretString": self.token}
+    def test_plan_allows_automation_candidate(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-789"})
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
+        self.assertEqual(plan.mode, "automation_candidate")
+        self.assertEqual(plan.actions[0]["type"], "analyze")
 
-@dataclass
-class StubSqsClient:
-    messages: List[Dict[str, Any]] = field(default_factory=list)
+    def test_execute_plan_dry_run_records(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-000"})
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
 
-    def send_message(
-        self,
-        QueueUrl: str,
-        MessageBody: str,
-        MessageGroupId: str,
-        MessageDeduplicationId: str,
-    ) -> Dict[str, Any]:
-        self.messages.append(
-            {
-                "QueueUrl": QueueUrl,
-                "Body": MessageBody,
-                "GroupId": MessageGroupId,
-                "DedupId": MessageDeduplicationId,
-            }
+        captured_state = []
+        captured_audit = []
+
+        def state_writer(record):
+            captured_state.append(record)
+
+        def audit_writer(record):
+            captured_audit.append(record)
+
+        result = execute_plan(
+            envelope,
+            plan,
+            dry_run=True,
+            state_writer=state_writer,
+            audit_writer=audit_writer,
         )
-        return {"MessageId": "stubbed"}
 
+        self.assertTrue(result.dry_run)
+        self.assertEqual(result.state_record["event_id"], envelope.event_id)
+        self.assertEqual(result.state_record["mode"], plan.mode)
+        self.assertEqual(result.audit_record["mode"], plan.mode)
+        self.assertEqual(len(captured_state), 1)
+        self.assertEqual(len(captured_audit), 1)
 
-@dataclass
-class StubSsmClient:
-    safe_mode: str = "false"
-    automation_enabled: str = "true"
+    def test_build_event_envelope_truncates_and_sanitizes(self) -> None:
+        long_message_id = "m-" + ("x" * 200)
+        envelope = build_event_envelope(
+            {"ticket_id": "t-999", "message_id": long_message_id, "group_id": "team alpha"}
+        )
 
-    def get_parameters(self, Names: List[str], WithDecryption: bool = False) -> Dict[str, Any]:  # noqa: N802
-        params = []
-        for name in Names:
-            if name.endswith("safe_mode"):
-                params.append({"Name": name, "Value": self.safe_mode})
-            elif name.endswith("automation_enabled"):
-                params.append({"Name": name, "Value": self.automation_enabled})
-        return {"Parameters": params, "InvalidParameters": []}
+        self.assertEqual(envelope.conversation_id, "t-999")
+        self.assertLessEqual(len(envelope.dedupe_id), 128)
+        self.assertEqual(envelope.group_id, "team-alpha")
+        self.assertTrue(envelope.event_id.startswith("evt:"))
 
+    def test_kill_switch_cache_is_respected(self) -> None:
+        now = time.time()
+        worker._FLAG_CACHE.update(
+            {"safe_mode": False, "automation_enabled": True, "expires_at": now + 60}
+        )
 
-@dataclass
-class StubDynamoTable:
-    items: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+        safe_mode, automation_enabled = worker._load_kill_switches()
 
-    def put_item(self, Item: Dict[str, Any], ConditionExpression: str | None = None) -> Dict[str, Any]:
-        event_id = Item["event_id"]
-        if ConditionExpression == "attribute_not_exists(event_id)" and event_id in self.items:
-            raise RuntimeError("Duplicate event")
-        self.items[event_id] = Item
-        return {"ResponseMetadata": {"HTTPStatusCode": 200}}
+        self.assertFalse(safe_mode)
+        self.assertTrue(automation_enabled)
+        self.assertGreater(worker._FLAG_CACHE["expires_at"], now)
 
+    def test_idempotency_write_persists_expected_fields(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-321", "message_id": "m-321"})
+        plan = plan_actions(envelope, safe_mode=True, automation_enabled=False)
 
-def run_ingress_test(secret_token: str) -> Dict[str, Any]:
-    ingress_handler._SECRETS_CLIENT = StubSecretsClient(secret_token)  # type: ignore[attr-defined]
-    stub_sqs = StubSqsClient()
-    ingress_handler._SQS_CLIENT = stub_sqs  # type: ignore[attr-defined]
+        worker._persist_idempotency(envelope, plan)
+        table = worker._table(os.environ["IDEMPOTENCY_TABLE_NAME"])
+        self.assertEqual(len(table.items), 1)
 
-    event_body = {
-        "event_id": "evt:test-123",
-        "conversation_id": "conv-1",
-        "message_id": "msg-1",
-        "payload_value": "hello",
-    }
-    event = {
-        "headers": {"X-Richpanel-Webhook-Token": secret_token},
-        "body": json.dumps(event_body),
-        "isBase64Encoded": False,
-    }
+        item = table.items[0]
+        for field in [
+            "event_id",
+            "conversation_id",
+            "mode",
+            "status",
+            "payload_excerpt",
+            "safe_mode",
+            "automation_enabled",
+            "expires_at",
+        ]:
+            self.assertIn(field, item)
+        self.assertEqual(item["status"], "processed")
+        self.assertEqual(item["mode"], plan.mode)
 
-    response = ingress_handler.lambda_handler(event, None)
-    assert response["statusCode"] == 200, "Ingress handler did not return 200."
-    assert stub_sqs.messages, "Ingress handler did not enqueue message."
+    def test_execute_and_record_writes_state_and_audit_tables(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-555", "message_id": "m-555"})
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
 
-    message_body = json.loads(stub_sqs.messages[0]["Body"])
-    assert message_body["event_id"] == event_body["event_id"]
-    assert message_body["payload"]["payload_value"] == "hello"
+        worker._persist_idempotency(envelope, plan)
+        worker._execute_and_record(envelope, plan)
 
-    return {"sqs": stub_sqs, "message_body": message_body}
+        state_table = worker._table(os.environ["CONVERSATION_STATE_TABLE_NAME"])
+        audit_table = worker._table(os.environ["AUDIT_TRAIL_TABLE_NAME"])
 
+        self.assertEqual(len(state_table.items), 1)
+        self.assertEqual(len(audit_table.items), 1)
 
-def run_worker_test(message_body: Dict[str, Any]) -> None:
-    worker_handler._IDEMPOTENCY_TABLE = StubDynamoTable()  # type: ignore[attr-defined]
-    worker_handler._SSM_CLIENT = StubSsmClient(safe_mode="false", automation_enabled="true")  # type: ignore[attr-defined]
-    worker_handler._FLAG_CACHE["expires_at"] = 0  # type: ignore[attr-defined]
+        state_item = state_table.items[0]
+        audit_item = audit_table.items[0]
 
-    sqs_event = {
-        "Records": [
-            {
-                "body": json.dumps(message_body),
-                "messageId": "msg-1",
-            }
-        ]
-    }
-
-    response = worker_handler.lambda_handler(sqs_event, None)
-    assert response["batchItemFailures"] == [], "Worker reported unexpected failures."
-    table: StubDynamoTable = worker_handler._IDEMPOTENCY_TABLE  # type: ignore
-    assert message_body["event_id"] in table.items, "Worker did not persist idempotency record."
+        self.assertEqual(state_item["event_id"], envelope.event_id)
+        self.assertIn("expires_at", state_item)
+        self.assertIn("ts_action_id", audit_item)
+        self.assertEqual(audit_item["event_id"], envelope.event_id)
 
 
 def main() -> int:
-    secret = "test-token"
-    ingress_result = run_ingress_test(secret)
-    run_worker_test(ingress_result["message_body"])
-    print("[OK] Pipeline handler smoke tests passed.")
-    return 0
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    return 0 if result.wasSuccessful() else 1
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

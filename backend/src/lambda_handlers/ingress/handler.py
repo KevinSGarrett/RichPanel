@@ -18,6 +18,8 @@ except ImportError:  # pragma: no cover
 
     BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
 
+from richpanel_middleware.ingest.envelope import build_event_envelope
+
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
@@ -51,27 +53,30 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
         return _error_response(401, "invalid_token")
 
     payload = _parse_payload(event)
-    message_envelope = _build_message_envelope(payload)
+    message_envelope = build_event_envelope(
+        payload, default_group_id=DEFAULT_MESSAGE_GROUP_ID, source=EVENT_SOURCE
+    )
 
     try:
         _sqs_client().send_message(
             QueueUrl=QUEUE_URL,
-            MessageBody=json.dumps(message_envelope),
-            MessageGroupId=message_envelope["group_id"],
-            MessageDeduplicationId=message_envelope["dedupe_id"],
+            MessageBody=json.dumps(message_envelope.to_message()),
+            MessageGroupId=message_envelope.group_id,
+            MessageDeduplicationId=message_envelope.dedupe_id,
         )
     except (BotoCoreError, ClientError):
         LOGGER.exception(
             "ingress.enqueue_failed",
-            extra={"event_id": message_envelope["event_id"]},
+            extra={"event_id": message_envelope.event_id},
         )
         return _error_response(500, "enqueue_failed")
 
     LOGGER.info(
         "ingress.accepted",
         extra={
-            "event_id": message_envelope["event_id"],
-            "group_id": message_envelope["group_id"],
+            "event_id": message_envelope.event_id,
+            "group_id": message_envelope.group_id,
+            "conversation_id": message_envelope.conversation_id,
         },
     )
 
@@ -81,7 +86,7 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
         "body": json.dumps(
             {
                 "status": "accepted",
-                "event_id": message_envelope["event_id"],
+                "event_id": message_envelope.event_id,
             }
         ),
     }
@@ -119,38 +124,6 @@ def _parse_payload(event: Dict[str, Any]) -> Dict[str, Any]:
         payload = {"raw_body": body}
 
     return payload if isinstance(payload, dict) else {"data": payload}
-
-
-def _build_message_envelope(payload: Dict[str, Any]) -> Dict[str, Any]:
-    event_id = str(payload.get("event_id") or f"evt:{uuid.uuid4()}")
-    conversation_id = str(
-        payload.get("conversation_id")
-        or payload.get("ticket_id")
-        or DEFAULT_MESSAGE_GROUP_ID
-    )
-    group_id = _sanitize_group_id(conversation_id)
-    dedupe_id = str(
-        payload.get("message_id") or payload.get("dedupe_id") or event_id
-    )
-
-    received_at = datetime.now(timezone.utc).isoformat()
-
-    return {
-        "event_id": event_id,
-        "received_at": received_at,
-        "group_id": group_id,
-        "dedupe_id": dedupe_id[:128],
-        "payload": payload,
-        "source": EVENT_SOURCE,
-    }
-
-
-def _sanitize_group_id(value: str) -> str:
-    cleaned = value.strip() or DEFAULT_MESSAGE_GROUP_ID
-    cleaned = cleaned.replace(" ", "-")
-    if len(cleaned) > 128:
-        cleaned = cleaned[:128]
-    return cleaned
 
 
 def _extract_token(headers: Dict[str, Any]) -> str | None:

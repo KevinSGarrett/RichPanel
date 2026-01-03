@@ -32,6 +32,15 @@ Canonical runbooks live here:
 
 ---
 
+## 1A) Operator playbook (first five minutes)
+- Alerts to expect: `rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`.
+- First look: CloudWatch Dashboard `${rp-mw-<env>-ops}` (added by CDK) — check DLQ depth, worker errors/throttles, ingress errors.
+- Logs: CloudWatch Logs Insights on `/aws/lambda/rp-mw-<env>-ingress` or `/aws/lambda/rp-mw-<env>-worker`; filter on `event` and `event_id` fields (structured logging envelope).
+- Contain: if errors persist, set `/rp-mw/<env>/safe_mode=true` or `/rp-mw/<env>/automation_enabled=false` (SSM parameters) to force route-only.
+- Then pivot to the specific runbook: DLQ/backlog → `R005`; ingress auth/schema issues → `R001`; vendor/routing errors → `R004`/`R003` as applicable.
+
+---
+
 ## 2) Runbook structure standard
 
 Every runbook should include:

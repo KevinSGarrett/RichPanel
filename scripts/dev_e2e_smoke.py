@@ -9,7 +9,8 @@ High-level flow:
 2. Fetch the webhook authentication token from Secrets Manager.
 3. Send a synthetic webhook payload to the ingress endpoint.
 4. Wait for the worker Lambda to persist the event in the DynamoDB idempotency table.
-5. Emit evidence URLs (API endpoint, SQS queue, DynamoDB table, CloudWatch log group).
+5. Verify the conversation state + audit trail records were written.
+6. Emit evidence URLs (API endpoint, SQS queue, DynamoDB tables, CloudWatch log group).
 
 Design constraints:
 - Only prints derived identifiers (event_id, queue URL, etc.); never prints secret values.
@@ -31,6 +32,7 @@ from urllib.request import Request, urlopen
 
 try:
     import boto3  # type: ignore
+    from boto3.dynamodb.conditions import Key  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
 except ImportError as exc:  # pragma: no cover - enforced in CI
     raise SystemExit(
@@ -47,6 +49,9 @@ class StackArtifacts:
     endpoint_url: str
     queue_url: str
     secrets_namespace: str
+    idempotency_table: str
+    conversation_state_table: Optional[str] = None
+    audit_trail_table: Optional[str] = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -106,6 +111,9 @@ def load_stack_artifacts(
     endpoint = outputs.get("IngressEndpointUrl")
     queue_url = outputs.get("EventsQueueUrl")
     secrets_namespace = outputs.get("SecretsNamespace")
+    idempotency_table = outputs.get("IdempotencyTableName")
+    conversation_state_table = outputs.get("ConversationStateTableName")
+    audit_trail_table = outputs.get("AuditTrailTableName")
 
     missing_outputs: List[str] = []
 
@@ -122,6 +130,9 @@ def load_stack_artifacts(
     if not secrets_namespace:
         secrets_namespace = infer_secrets_namespace(env_name)
         missing_outputs.append("SecretsNamespace")
+    if not idempotency_table:
+        idempotency_table = f"rp_mw_{env_name}_idempotency"
+        missing_outputs.append("IdempotencyTableName")
 
     if missing_outputs:
         print(
@@ -132,7 +143,14 @@ def load_stack_artifacts(
     if endpoint:
         endpoint = endpoint.rstrip("/")
 
-    return StackArtifacts(endpoint_url=endpoint, queue_url=queue_url, secrets_namespace=secrets_namespace)
+    return StackArtifacts(
+        endpoint_url=endpoint,
+        queue_url=queue_url,
+        secrets_namespace=secrets_namespace,
+        idempotency_table=idempotency_table,
+        conversation_state_table=conversation_state_table,
+        audit_trail_table=audit_trail_table,
+    )
 
 
 def build_http_api_endpoint(api_id: str, region: str) -> str:
@@ -302,6 +320,77 @@ def wait_for_dynamodb_record(
     )
 
 
+def validate_idempotency_item(item: Dict[str, Any]) -> None:
+    required = ["event_id", "mode", "safe_mode", "automation_enabled", "payload_excerpt", "status"]
+    missing = [key for key in required if key not in item]
+    if missing:
+        raise SmokeFailure(f"Idempotency item missing required fields: {', '.join(missing)}")
+    if not str(item.get("payload_excerpt", "")):
+        raise SmokeFailure("Idempotency item payload_excerpt was empty.")
+
+
+def wait_for_conversation_state_record(
+    ddb_resource,
+    table_name: str,
+    conversation_id: str,
+    timeout_seconds: int,
+    poll_interval: int = 5,
+) -> Dict[str, Any]:
+    table = ddb_resource.Table(table_name)
+    deadline = time.time() + timeout_seconds
+
+    while time.time() < deadline:
+        try:
+            response = table.get_item(Key={"conversation_id": conversation_id})
+        except (BotoCoreError, ClientError) as exc:
+            raise SmokeFailure(
+                f"Failed to query conversation state table '{table_name}': {exc}"
+            ) from exc
+
+        item = response.get("Item")
+        if item:
+            return item
+
+        time.sleep(poll_interval)
+
+    raise SmokeFailure(
+        f"Conversation '{conversation_id}' was not observed in table '{table_name}' within {timeout_seconds}s."
+    )
+
+
+def wait_for_audit_record(
+    ddb_resource,
+    table_name: str,
+    conversation_id: str,
+    event_id: str,
+    timeout_seconds: int,
+    poll_interval: int = 5,
+) -> Dict[str, Any]:
+    table = ddb_resource.Table(table_name)
+    deadline = time.time() + timeout_seconds
+
+    while time.time() < deadline:
+        try:
+            response = table.query(
+                KeyConditionExpression=Key("conversation_id").eq(conversation_id),
+                Limit=5,
+                ScanIndexForward=False,
+            )
+        except (BotoCoreError, ClientError) as exc:
+            raise SmokeFailure(f"Failed to query audit table '{table_name}': {exc}") from exc
+
+        items = response.get("Items") or []
+        for item in items:
+            if item.get("event_id") == event_id:
+                return item
+
+        time.sleep(poll_interval)
+
+    raise SmokeFailure(
+        f"Audit record for event '{event_id}' was not observed in table '{table_name}' within {timeout_seconds}s."
+    )
+
+
 def build_payload(event_id: Optional[str]) -> Dict[str, Any]:
     return {
         "event_id": event_id or f"evt:{uuid.uuid4()}",
@@ -326,33 +415,81 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
         f"- Event ID: `{data['event_id']}`",
         f"- Endpoint: {data['endpoint']}/webhook",
         f"- Queue URL: {data['queue_url']}",
-        f"- DynamoDB table: `{data['ddb_table']}`",
-        f"- Dynamo console: {data['ddb_console_url']}",
+        f"- Idempotency record observed in `{data['ddb_table']}` "
+        f"(mode={data['idempotency_mode']}, status={data['idempotency_status']})",
+        f"- Idempotency table: `{data['ddb_table']}`",
+        f"- Idempotency console: {data['ddb_console_url']}",
+        f"- Log group: `{data['logs_group']}`",
         f"- CloudWatch logs: {data['logs_console_url']}",
     ]
+    if data.get("conversation_state_table"):
+        lines.append(
+            "- Conversation state record observed for "
+            f"`{data['conversation_id']}` in `{data['conversation_state_table']}`"
+        )
+        lines.append(f"- Conversation state console: {data['conversation_state_console']}")
+    if data.get("audit_trail_table"):
+        audit_sort_key = data.get("audit_sort_key") or "n/a"
+        lines.append(
+            "- Audit record observed for "
+            f"`{data['conversation_id']}` (sort_key={audit_sort_key}) "
+            f"in `{data['audit_trail_table']}`"
+        )
+        lines.append(f"- Audit console: {data['audit_console']}")
+    lines.append(f"- CloudWatch dashboard: `{data['dashboard_name']}`")
+    alarms = data.get("alarm_names") or []
+    if alarms:
+        lines.append(f"- CloudWatch alarms: {', '.join(f'`{name}`' for name in alarms)}")
+    else:
+        lines.append("- CloudWatch alarms: none surfaced")
     with open(path, "a", encoding="utf-8") as handle:
         handle.write("\n".join(lines))
         handle.write("\n")
 
 
-def build_console_links(*, region: str, table_name: str, env_name: str) -> Dict[str, str]:
+def build_console_links(
+    *,
+    region: str,
+    idempotency_table: str,
+    env_name: str,
+    conversation_state_table: Optional[str] = None,
+    audit_trail_table: Optional[str] = None,
+) -> Dict[str, str]:
     ddb_console = (
         f"https://{region}.console.aws.amazon.com/dynamodbv2/home"
-        f"?region={region}#item-explorer?initialTagKey=&initialTagValue=&table={table_name}"
+        f"?region={region}#item-explorer?initialTagKey=&initialTagValue=&table={idempotency_table}"
     )
+    conversation_console = None
+    audit_console = None
+    if conversation_state_table:
+        conversation_console = (
+            f"https://{region}.console.aws.amazon.com/dynamodbv2/home"
+            f"?region={region}#item-explorer?initialTagKey=&initialTagValue=&table={conversation_state_table}"
+        )
+    if audit_trail_table:
+        audit_console = (
+            f"https://{region}.console.aws.amazon.com/dynamodbv2/home"
+            f"?region={region}#item-explorer?initialTagKey=&initialTagValue=&table={audit_trail_table}"
+        )
     logs_group = f"/aws/lambda/rp-mw-{env_name}-worker"
     logs_console = (
         f"https://{region}.console.aws.amazon.com/cloudwatch/home"
         f"?region={region}#logsV2:log-groups/log-group/{logs_group.replace('/', '$252F')}"
     )
-    return {"ddb": ddb_console, "logs": logs_console, "log_group": logs_group}
+    return {
+        "ddb": ddb_console,
+        "logs": logs_console,
+        "log_group": logs_group,
+        "conversation_ddb": conversation_console,
+        "audit_ddb": audit_console,
+    }
 
 
 def main() -> int:
     args = parse_args()
     region = args.region
     env_name = args.env
-    dynamo_table = args.idempotency_table or f"rp_mw_{env_name}_idempotency"
+    default_idempotency_table = f"rp_mw_{env_name}_idempotency"
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
 
@@ -371,7 +508,19 @@ def main() -> int:
         env_name,
         region,
     )
-    console_links = build_console_links(region=region, table_name=dynamo_table, env_name=env_name)
+    dynamo_table = args.idempotency_table or artifacts.idempotency_table or default_idempotency_table
+    if not artifacts.conversation_state_table:
+        raise SmokeFailure("ConversationStateTableName output was missing from the stack.")
+    if not artifacts.audit_trail_table:
+        raise SmokeFailure("AuditTrailTableName output was missing from the stack.")
+
+    console_links = build_console_links(
+        region=region,
+        idempotency_table=dynamo_table,
+        env_name=env_name,
+        conversation_state_table=artifacts.conversation_state_table,
+        audit_trail_table=artifacts.audit_trail_table,
+    )
 
     print(f"[INFO] Ingress endpoint: {artifacts.endpoint_url}/webhook")
     print(f"[INFO] Events queue URL: {artifacts.queue_url}")
@@ -397,12 +546,44 @@ def main() -> int:
         event_id=event_id,
         timeout_seconds=args.wait_seconds,
     )
-
+    validate_idempotency_item(item)
     mode = item.get("mode")
     print(f"[OK] Event '{event_id}' observed in table '{dynamo_table}' (mode={mode}).")
     print(f"[INFO] DynamoDB console: {console_links['ddb']}")
+    conversation_id = item.get("conversation_id") or payload["conversation_id"]
+
+    state_item = wait_for_conversation_state_record(
+        ddb_resource,
+        table_name=artifacts.conversation_state_table,
+        conversation_id=conversation_id,
+        timeout_seconds=args.wait_seconds,
+    )
+    print(
+        f"[OK] Conversation state written for '{conversation_id}' "
+        f"in '{artifacts.conversation_state_table}'."
+    )
+
+    audit_item = wait_for_audit_record(
+        ddb_resource,
+        table_name=artifacts.audit_trail_table,
+        conversation_id=conversation_id,
+        event_id=event_id,
+        timeout_seconds=args.wait_seconds,
+    )
+    print(
+        f"[OK] Audit record written for '{conversation_id}' "
+        f"in '{artifacts.audit_trail_table}'."
+    )
     print(f"[INFO] CloudWatch logs group: {console_links['log_group']}")
     print(f"[INFO] Logs console: {console_links['logs']}")
+
+    dashboard_name = f"rp-mw-{env_name}-ops"
+    alarm_names = [
+        f"rp-mw-{env_name}-dlq-depth",
+        f"rp-mw-{env_name}-worker-errors",
+        f"rp-mw-{env_name}-worker-throttles",
+        f"rp-mw-{env_name}-ingress-errors",
+    ]
 
     summary_data = {
         "event_id": event_id,
@@ -411,6 +592,17 @@ def main() -> int:
         "ddb_table": dynamo_table,
         "ddb_console_url": console_links["ddb"],
         "logs_console_url": console_links["logs"],
+        "logs_group": console_links["log_group"],
+        "conversation_state_table": artifacts.conversation_state_table,
+        "conversation_state_console": console_links["conversation_ddb"],
+        "audit_trail_table": artifacts.audit_trail_table,
+        "audit_console": console_links["audit_ddb"],
+        "conversation_id": conversation_id,
+        "idempotency_status": item.get("status", "observed"),
+        "idempotency_mode": mode or "unknown",
+        "audit_sort_key": audit_item.get("ts_action_id"),
+        "dashboard_name": dashboard_name,
+        "alarm_names": alarm_names,
     }
     if args.summary_path:
         append_summary(args.summary_path, env_name=env_name, data=summary_data)

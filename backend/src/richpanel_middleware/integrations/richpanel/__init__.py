@@ -1,4 +1,4 @@
-from .richpanel import (
+from .client import (
     HttpTransport,
     RichpanelExecutor,
     RichpanelClient,
@@ -7,14 +7,6 @@ from .richpanel import (
     SecretLoadError,
     Transport,
     TransportError,
-)
-from .openai import (
-    ChatCompletionRequest,
-    ChatCompletionResponse,
-    ChatMessage,
-    OpenAIClient,
-    OpenAIConfigError,
-    OpenAIRequestError,
 )
 
 __all__ = [
@@ -26,10 +18,5 @@ __all__ = [
     "Transport",
     "TransportError",
     "HttpTransport",
-    "OpenAIClient",
-    "OpenAIConfigError",
-    "OpenAIRequestError",
-    "ChatCompletionRequest",
-    "ChatCompletionResponse",
-    "ChatMessage",
 ]
+

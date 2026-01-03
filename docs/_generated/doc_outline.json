@@ -449,68 +449,8 @@
     "outline": [
       {
         "level": 1,
-        "text": "Decision Log",
-        "anchor": "decision-log"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 06 (Update 2)",
-        "anchor": "2025-12-22-wave-06-update-2"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 07 (Update 1)",
-        "anchor": "2025-12-22-wave-07-update-1"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 07 (Update 2 / Closeout)",
-        "anchor": "2025-12-22-wave-07-update-2-closeout"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 08 (Update 1)",
-        "anchor": "2025-12-22-wave-08-update-1"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 09 (Update 1)",
-        "anchor": "2025-12-22-wave-09-update-1"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-22 — Wave 09 (Update 2 closeout)",
-        "anchor": "2025-12-22-wave-09-update-2-closeout"
-      },
-      {
-        "level": 2,
-        "text": "Wave 10 — Operations and runbooks",
-        "anchor": "wave-10-operations-and-runbooks"
-      },
-      {
-        "level": 2,
-        "text": "Wave 11 — Governance and continuous improvement",
-        "anchor": "wave-11-governance-and-continuous-improvement"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-29 — GitHub Merge + Auto-merge Policy",
-        "anchor": "2025-12-29-github-merge-auto-merge-policy"
-      },
-      {
-        "level": 2,
-        "text": "2025-12-30 — Dev/Staging Deploy Workflows",
-        "anchor": "2025-12-30-devstaging-deploy-workflows"
-      },
-      {
-        "level": 2,
-        "text": "2026-01-02 — E2E Smoke Workflows",
-        "anchor": "2026-01-02-e2e-smoke-workflows"
-      },
-      {
-        "level": 2,
-        "text": "2026-01-03 — Docs Heartbeat + Anti-drift Enforcement",
-        "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
+        "text": "Decision Log\\n\\nLast updated: 2026-01-03\\nLast verified: 2026-01-03 - RUN_20260103_2300Z.\\n\\nUse this file to record decisions that impac...",
+        "anchor": "decision-lognnlast-updated-2026-01-03nlast-verified-2026-01-03-run202601032300znnuse-this-file-to-record-decisions-that-impac"
       }
     ]
   },
@@ -1294,62 +1234,72 @@
       },
       {
         "level": 3,
-        "text": "2026-01-03 — Docs heartbeat + anti-drift enforcement",
+        "text": "2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)",
+        "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-03 - RUN_20260103_1640Z (Persistence validation hardening)",
+        "anchor": "2026-01-03-run202601031640z-persistence-validation-hardening"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-03 - Docs heartbeat + anti-drift enforcement",
         "anchor": "2026-01-03-docs-heartbeat-anti-drift-enforcement"
       },
       {
         "level": 3,
-        "text": "2026-01-02 — RUN_20260102_2148Z (Build mode)",
+        "text": "2026-01-02 - RUN_20260102_2148Z (Build mode)",
         "anchor": "2026-01-02-run202601022148z-build-mode"
       },
       {
         "level": 3,
-        "text": "2025-12-30 — RUN_20251230_1444Z (Build mode kickoff)",
+        "text": "2025-12-30 - RUN_20251230_1444Z (Build mode kickoff)",
         "anchor": "2025-12-30-run202512301444z-build-mode-kickoff"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F13 (CR-001 No-tracking delivery estimates)",
+        "text": "2025-12-29 - Wave F13 (CR-001 No-tracking delivery estimates)",
         "anchor": "2025-12-29-wave-f13-cr-001-no-tracking-delivery-estimates"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F12 (GitHub defaults + branch protection)",
+        "text": "2025-12-29 - Wave F12 (GitHub defaults + branch protection)",
         "anchor": "2025-12-29-wave-f12-github-defaults-branch-protection"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F07",
+        "text": "2025-12-29 - Wave F07",
         "anchor": "2025-12-29-wave-f07"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F06",
+        "text": "2025-12-29 - Wave F06",
         "anchor": "2025-12-29-wave-f06"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F05",
+        "text": "2025-12-29 - Wave F05",
         "anchor": "2025-12-29-wave-f05"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F04",
+        "text": "2025-12-29 - Wave F04",
         "anchor": "2025-12-29-wave-f04"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F03",
+        "text": "2025-12-29 - Wave F03",
         "anchor": "2025-12-29-wave-f03"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F02",
+        "text": "2025-12-29 - Wave F02",
         "anchor": "2025-12-29-wave-f02"
       },
       {
         "level": 3,
-        "text": "2025-12-29 — Wave F01c",
+        "text": "2025-12-29 - Wave F01c",
         "anchor": "2025-12-29-wave-f01c"
       }
     ]
@@ -4164,13 +4114,13 @@
       },
       {
         "level": 3,
-        "text": "Table B — `rp_mw_conversation_state` (recommended)",
-        "anchor": "table-b-rpmwconversationstate-recommended"
+        "text": "Table B — `rp_mw_conversation_state` (recommended; now provisioned)",
+        "anchor": "table-b-rpmwconversationstate-recommended-now-provisioned"
       },
       {
         "level": 3,
-        "text": "Table C — `rp_mw_audit_actions` (optional; **deferred in v1**)",
-        "anchor": "table-c-rpmwauditactions-optional-deferred-in-v1"
+        "text": "Table C — `rp_mw_audit_actions` (lightweight audit; provisioned)",
+        "anchor": "table-c-rpmwauditactions-lightweight-audit-provisioned"
       },
       {
         "level": 2,
@@ -10839,13 +10789,28 @@
       },
       {
         "level": 2,
-        "text": "6) Common causes (initial list)",
-        "anchor": "6-common-causes-initial-list"
+        "text": "6) Prod promotion checklist (no prod deploy without explicit go/no-go)",
+        "anchor": "6-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+      },
+      {
+        "level": 3,
+        "text": "Checklist",
+        "anchor": "checklist"
+      },
+      {
+        "level": 3,
+        "text": "PowerShell-safe commands",
+        "anchor": "powershell-safe-commands"
       },
       {
         "level": 2,
-        "text": "7) If you cannot fix quickly",
-        "anchor": "7-if-you-cannot-fix-quickly"
+        "text": "7) Common causes (initial list)",
+        "anchor": "7-common-causes-initial-list"
+      },
+      {
+        "level": 2,
+        "text": "8) If you cannot fix quickly",
+        "anchor": "8-if-you-cannot-fix-quickly"
       }
     ]
   },
@@ -11401,6 +11366,11 @@
         "level": 1,
         "text": "Event Taxonomy and Log Schema (Wave 08)",
         "anchor": "event-taxonomy-and-log-schema-wave-08"
+      },
+      {
+        "level": 2,
+        "text": "0) Runtime logging defaults (Lambda)",
+        "anchor": "0-runtime-logging-defaults-lambda"
       },
       {
         "level": 2,
@@ -13161,6 +13131,11 @@
         "level": 2,
         "text": "1) Runbook catalog",
         "anchor": "1-runbook-catalog"
+      },
+      {
+        "level": 2,
+        "text": "1A) Operator playbook (first five minutes)",
+        "anchor": "1a-operator-playbook-first-five-minutes"
       },
       {
         "level": 2,

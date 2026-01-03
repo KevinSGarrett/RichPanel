@@ -14,6 +14,12 @@ Security constraints:
 - Never log webhook secrets, API keys, or auth headers.
 - Follow: `docs/06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md`
 
+## 0) Runtime logging defaults (Lambda)
+- **Structured logs are required**. Use the envelope below for both ingress and worker Lambdas; keep the `event` field aligned to the canonical taxonomy.
+- Log groups are `/aws/lambda/rp-mw-<env>-ingress` and `/aws/lambda/rp-mw-<env>-worker`.
+- **Retention is 30 days** (enforced via CDK); do not increase without privacy review.
+ - Prefer `Logger.info("<event>", extra={"event_id": "evt_123"})`-style key/value logging so CloudWatch Logs Insights can filter on `event` and IDs.
+
 ---
 
 ## 1) Canonical event naming

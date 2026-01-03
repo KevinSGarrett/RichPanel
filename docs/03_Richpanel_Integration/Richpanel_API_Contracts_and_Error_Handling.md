@@ -17,8 +17,10 @@ Richpanel API calls use an API key sent via header:
 
 Key management requirements:
 - store the key in **AWS Secrets Manager** (per environment)
+- `<env>` is chosen from `RICH_PANEL_ENV` / `RICHPANEL_ENV` / `MW_ENV` (default `local`), yielding `rp-mw/<env>/richpanel/api_key`.
 - rotate keys periodically
 - never log the key
+- middleware client wrapper: `richpanel_middleware.integrations.richpanel.client.RichpanelClient` (and `RichpanelExecutor`) loads the key from `rp-mw/<env>/richpanel/api_key` (Secrets Manager) and defaults to **dry-run** to avoid outbound calls until we intentionally enable them. Set `RICHPANEL_OUTBOUND_ENABLED=1` (and provide `RICHPANEL_API_KEY_SECRET_ARN`) to allow real requests once wiring is ready.
 
 ---
 

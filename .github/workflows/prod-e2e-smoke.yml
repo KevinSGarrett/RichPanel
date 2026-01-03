@@ -1,0 +1,60 @@
+name: Prod E2E Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      event-id:
+        description: "Optional event_id override for correlation"
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+
+jobs:
+  prod-e2e-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure AWS credentials (prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::878145708918:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-prod-e2e-smoke
+
+      - name: Install smoke test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Run Prod E2E smoke test
+        env:
+          STEP_EVENT_ID: ${{ inputs.event-id }}
+        run: |
+          if [ -n "${STEP_EVENT_ID}" ]; then
+            EVENT_ARGS=(--event-id "${STEP_EVENT_ID}")
+          else
+            EVENT_ARGS=()
+          fi
+
+          python scripts/dev_e2e_smoke.py \
+            --env prod \
+            --region "${AWS_REGION}" \
+            --stack-name RichpanelMiddleware-prod \
+            --idempotency-table rp_mw_prod_idempotency \
+            --wait-seconds 150 \
+            --summary-path "${GITHUB_STEP_SUMMARY}" \
+            "${EVENT_ARGS[@]}"
+
