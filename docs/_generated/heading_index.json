@@ -11853,6 +11853,12 @@
       "anchor": "1-ci-contract"
     }
   ],
+  "what runs in ci (ci.yml)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "what-runs-in-ci-ciyml"
+    }
+  ],
   "2) local ci-equivalent checks": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -11907,16 +11913,58 @@
       "anchor": "step-6-push-and-verify-green"
     }
   ],
-  "4) common causes (initial list)": [
+  "4) dev e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "4-common-causes-initial-list"
+      "anchor": "4-dev-e2e-smoke-workflow"
     }
   ],
-  "5) if you cannot fix quickly": [
+  "when to run it": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "5-if-you-cannot-fix-quickly"
+      "anchor": "when-to-run-it"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "when-to-run-it"
+    }
+  ],
+  "how to run (powershell-safe)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
+    }
+  ],
+  "evidence expectations": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "evidence-expectations"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "evidence-expectations"
+    }
+  ],
+  "5) staging e2e smoke workflow": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "5-staging-e2e-smoke-workflow"
+    }
+  ],
+  "6) common causes (initial list)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "6-common-causes-initial-list"
+    }
+  ],
+  "7) if you cannot fix quickly": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "7-if-you-cannot-fix-quickly"
     }
   ],
   "developer guide": [

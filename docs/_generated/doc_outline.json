@@ -10703,6 +10703,11 @@
         "anchor": "1-ci-contract"
       },
       {
+        "level": 3,
+        "text": "What runs in CI (ci.yml)",
+        "anchor": "what-runs-in-ci-ciyml"
+      },
+      {
         "level": 2,
         "text": "2) Local CI-equivalent checks",
         "anchor": "2-local-ci-equivalent-checks"
@@ -10749,13 +10754,53 @@
       },
       {
         "level": 2,
-        "text": "4) Common causes (initial list)",
-        "anchor": "4-common-causes-initial-list"
+        "text": "4) Dev E2E smoke workflow",
+        "anchor": "4-dev-e2e-smoke-workflow"
+      },
+      {
+        "level": 3,
+        "text": "When to run it",
+        "anchor": "when-to-run-it"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "Evidence expectations",
+        "anchor": "evidence-expectations"
       },
       {
         "level": 2,
-        "text": "5) If you cannot fix quickly",
-        "anchor": "5-if-you-cannot-fix-quickly"
+        "text": "5) Staging E2E smoke workflow",
+        "anchor": "5-staging-e2e-smoke-workflow"
+      },
+      {
+        "level": 3,
+        "text": "When to run it",
+        "anchor": "when-to-run-it"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "Evidence expectations",
+        "anchor": "evidence-expectations"
+      },
+      {
+        "level": 2,
+        "text": "6) Common causes (initial list)",
+        "anchor": "6-common-causes-initial-list"
+      },
+      {
+        "level": 2,
+        "text": "7) If you cannot fix quickly",
+        "anchor": "7-if-you-cannot-fix-quickly"
       }
     ]
   },
