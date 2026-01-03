@@ -1,11 +1,15 @@
-import { CfnOutput, Stack, StackProps, Tags } from "aws-cdk-lib";
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Tags } from "aws-cdk-lib";
+import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IStringParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
-import {
-  EnvironmentConfig,
-  MwNaming,
-} from "./environments";
+import { join } from "path";
+import { EnvironmentConfig, MwNaming } from "./environments";
+import { existsSync } from "fs";
 
 export interface RichpanelMiddlewareStackProps extends StackProps {
   readonly environment: EnvironmentConfig;
@@ -22,16 +26,22 @@ export interface SecretReferences {
   readonly openaiApiKey: ISecret;
 }
 
+interface EventPipelineResources {
+  readonly eventsQueue: sqs.Queue;
+  readonly httpApiEndpoint: string;
+}
+
 /**
- * RichpanelMiddlewareStack (scaffold)
+ * RichpanelMiddlewareStack
  *
- * Later waves will add:
- * - API Gateway (webhook ingress)
- * - Lambda (ingress ACK-fast)
- * - SQS FIFO + DLQ
- * - Lambda workers
- * - DynamoDB tables (idempotency + minimal state + audit)
- * - Alarms + log retention + dashboards
+ * Wave B2 delivers the first runnable pipeline:
+ * - HTTP API Gateway ingress endpoint (public)
+ * - Ingress Lambda (token validation + enqueue)
+ * - SQS FIFO queue (+ DLQ) for serialized events
+ * - Worker Lambda subscribed to the queue
+ * - DynamoDB idempotency table
+ *
+ * Later waves will extend observability, alarms, storage, and automation logic.
  */
 export class RichpanelMiddlewareStack extends Stack {
   public readonly naming: MwNaming;
@@ -50,9 +60,9 @@ export class RichpanelMiddlewareStack extends Stack {
     this.secrets = this.importSecretReferences();
 
     this.applyStandardTags(props.environment);
+    const pipeline = this.buildEventPipeline();
     this.exposeNamingOutputs();
-
-    // TODO(Wave 04+): add resources per architecture docs.
+    this.exposePipelineOutputs(pipeline);
   }
 
   private importRuntimeFlagParameters(): RuntimeFlagParameters {
@@ -108,6 +118,167 @@ export class RichpanelMiddlewareStack extends Stack {
         Tags.of(this).add(key, value);
       }
     });
+  }
+
+  private buildEventPipeline(): EventPipelineResources {
+    const lambdaSourceRoot = this.resolveRepoPath(
+      "backend",
+      "src",
+      "lambda_handlers"
+    );
+
+    const deadLetterQueue = new sqs.Queue(this, "EventsDlq", {
+      queueName: this.naming.queueName("events-dlq", { fifo: true }),
+      fifo: true,
+      contentBasedDeduplication: true,
+      retentionPeriod: Duration.days(4),
+    });
+
+    const eventsQueue = new sqs.Queue(this, "EventsQueue", {
+      queueName: this.naming.queueName("events", { fifo: true }),
+      fifo: true,
+      contentBasedDeduplication: true,
+      visibilityTimeout: Duration.seconds(90),
+      deadLetterQueue: {
+        queue: deadLetterQueue,
+        maxReceiveCount: 5,
+      },
+    });
+
+    const idempotencyTable = new dynamodb.Table(this, "IdempotencyTable", {
+      tableName: this.naming.tableName("idempotency"),
+      partitionKey: {
+        name: "event_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+    });
+
+    const ingressFunction = new lambda.Function(this, "IngressLambda", {
+      functionName: this.naming.lambdaFunctionName("ingress"),
+      runtime: lambda.Runtime.PYTHON_3_11,
+      handler: "handler.lambda_handler",
+      description: "Richpanel webhook ingress handler (token validation + enqueue).",
+      timeout: Duration.seconds(5),
+      memorySize: 256,
+      environment: {
+        EVENT_SOURCE: "richpanel_http_target",
+        QUEUE_URL: eventsQueue.queueUrl,
+        WEBHOOK_SECRET_ARN: this.secrets.richpanelWebhookToken.secretArn,
+        DEFAULT_MESSAGE_GROUP_ID: `${this.naming.resourcePrefix()}-default`,
+      },
+      code: lambda.Code.fromAsset(join(lambdaSourceRoot, "ingress")),
+    });
+
+    eventsQueue.grantSendMessages(ingressFunction);
+    this.secrets.richpanelWebhookToken.grantRead(ingressFunction);
+
+    const workerFunction = new lambda.Function(this, "WorkerLambda", {
+      functionName: this.naming.lambdaFunctionName("worker"),
+      runtime: lambda.Runtime.PYTHON_3_11,
+      handler: "handler.lambda_handler",
+      description:
+        "SQS worker that logs events, enforces kill switches, and writes idempotency records.",
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      environment: {
+        IDEMPOTENCY_TABLE_NAME: idempotencyTable.tableName,
+        SAFE_MODE_PARAM: this.runtimeFlags.safeMode.parameterName,
+        AUTOMATION_ENABLED_PARAM: this.runtimeFlags.automationEnabled.parameterName,
+      },
+      code: lambda.Code.fromAsset(join(lambdaSourceRoot, "worker")),
+    });
+
+    idempotencyTable.grantReadWriteData(workerFunction);
+    this.runtimeFlags.safeMode.grantRead(workerFunction);
+    this.runtimeFlags.automationEnabled.grantRead(workerFunction);
+
+    workerFunction.addEventSource(
+      new SqsEventSource(eventsQueue, {
+        batchSize: 1,
+        reportBatchItemFailures: true,
+      })
+    );
+
+    const httpApi = this.createHttpApi(ingressFunction);
+
+    return {
+      eventsQueue,
+      httpApiEndpoint: httpApi.attrApiEndpoint,
+    };
+  }
+
+  private createHttpApi(ingressFunction: lambda.Function): apigwv2.CfnApi {
+    const api = new apigwv2.CfnApi(this, "IngressHttpApi", {
+      name: this.naming.apiName("ingress"),
+      protocolType: "HTTP",
+      corsConfiguration: {
+        allowHeaders: ["content-type", "x-richpanel-webhook-token"],
+        allowMethods: ["OPTIONS", "POST"],
+        allowOrigins: ["*"],
+        maxAge: 600,
+      },
+    });
+
+    const integration = new apigwv2.CfnIntegration(this, "IngressIntegration", {
+      apiId: api.ref,
+      integrationType: "AWS_PROXY",
+      integrationUri: ingressFunction.functionArn,
+      payloadFormatVersion: "2.0",
+      integrationMethod: "POST",
+      timeoutInMillis: 10000,
+    });
+
+    new apigwv2.CfnRoute(this, "IngressRoute", {
+      apiId: api.ref,
+      routeKey: "POST /webhook",
+      target: `integrations/${integration.ref}`,
+    });
+
+    new apigwv2.CfnStage(this, "IngressStage", {
+      apiId: api.ref,
+      autoDeploy: true,
+      stageName: "$default",
+    });
+
+    new lambda.CfnPermission(this, "IngressInvokePermission", {
+      action: "lambda:InvokeFunction",
+      principal: "apigateway.amazonaws.com",
+      functionName: ingressFunction.functionArn,
+      sourceArn: `arn:aws:execute-api:${Stack.of(this).region}:${Stack.of(this).account}:${api.ref}/*/*/*`,
+    });
+
+    return api;
+  }
+
+  private exposePipelineOutputs(pipeline: EventPipelineResources): void {
+    new CfnOutput(this, "IngressEndpointUrl", {
+      value: pipeline.httpApiEndpoint,
+      description: "Public HTTP API endpoint for webhook ingress.",
+    });
+
+    new CfnOutput(this, "EventsQueueName", {
+      value: pipeline.eventsQueue.queueName,
+      description: "Primary FIFO queue that decouples ingress and worker lambdas.",
+    });
+
+    new CfnOutput(this, "EventsQueueUrl", {
+      value: pipeline.eventsQueue.queueUrl,
+      description: "Queue URL for diagnostics and smoke tests.",
+    });
+  }
+
+  private resolveRepoPath(...segments: string[]): string {
+    const fromSource = join(__dirname, "..", "..", "..", ...segments);
+    if (existsSync(fromSource)) {
+      return fromSource;
+    }
+
+    return join(__dirname, "..", "..", "..", "..", ...segments);
   }
 
   private exposeNamingOutputs(): void {

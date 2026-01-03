@@ -47,4 +47,23 @@ Some foundations packs create SSM parameters and Secrets Manager placeholders ah
 - Secrets such as `rp-mw/<env>/richpanel/api_key`, `.../richpanel/webhook_token`, and `.../openai/api_key` are referenced via `Secret.fromSecretNameV2`, so CDK can read them without owning their lifecycle.
 
 ## Status
-This is a **scaffold**. Later waves will add actual resources incrementally.
+Wave B2 delivers the first end-to-end pipeline that we can deploy in dev/staging:
+
+- HTTP API Gateway endpoint (`POST /webhook`) with Lambda proxy integration.
+- Ingress Lambda (`rp-mw-<env>-ingress`) that validates the Richpanel webhook token from Secrets Manager and enqueues events onto a FIFO queue.
+- SQS FIFO queue (`rp-mw-<env>-events.fifo`) backed by a FIFO DLQ.
+- Worker Lambda (`rp-mw-<env>-worker`) subscribed to the queue. It logs every event, enforces `/rp-mw/<env>/safe_mode` and `/rp-mw/<env>/automation_enabled`, and writes idempotency records.
+- DynamoDB table (`rp_mw_<env>_idempotency`) that stores the worker’s idempotency state.
+
+Later waves will extend the worker logic, add observability/alarms, and introduce downstream integrations.
+
+## CloudFormation outputs
+Synth/deploy now emits helper outputs:
+
+- `IngressEndpointUrl` — HTTP API invoke URL (public).
+- `EventsQueueName` / `EventsQueueUrl` — FIFO queue identifiers for smoke tests and emergency tooling.
+- Existing naming outputs (`NamespacePrefix`, `SafeModeParamPath`, etc.) remain unchanged.
+
+## Local smoke test
+`python scripts/test_pipeline_handlers.py` exercises both Lambda handlers with stubbed AWS clients.  
+This script runs automatically via `python scripts/run_ci_checks.py` and in GitHub Actions, so keep it green when making changes.
