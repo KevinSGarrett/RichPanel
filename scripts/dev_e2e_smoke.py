@@ -168,10 +168,12 @@ def derive_ingress_endpoint(
                     return build_http_api_endpoint(api_id, region)
 
     target_name = f"rp-mw-{env_name}-ingress"
+    available_api_names: List[str] = []
     try:
         paginator = apigwv2_client.get_paginator("get_apis")
         for page in paginator.paginate():
             for api in page.get("Items", []):
+                available_api_names.append(api.get("Name", "<unnamed>"))
                 name = (api.get("Name") or "").lower()
                 canonical_target = target_name.lower()
                 if (
@@ -187,6 +189,20 @@ def derive_ingress_endpoint(
                         return build_http_api_endpoint(api_id, region)
     except ClientError as exc:
         raise SmokeFailure(f"Unable to enumerate HTTP APIs in region {region}: {exc}") from exc
+
+    resource_summary = ", ".join(
+        f"{res.get('LogicalResourceId','<unknown>')} ({res.get('ResourceType','?')})"
+        for res in stack_resources
+    )
+    print(
+        f"[WARN] Unable to discover ingress API in stack '{stack_name}'. "
+        f"Resources inspected: {resource_summary or 'none'}."
+    )
+    if available_api_names:
+        print(
+            "[WARN] HTTP APIs visible via apigatewayv2: "
+            + ", ".join(available_api_names)
+        )
 
     raise SmokeFailure(
         "IngressEndpointUrl output missing and HTTP API could not be discovered via CloudFormation or API Gateway."
