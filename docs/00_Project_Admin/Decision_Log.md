@@ -604,7 +604,58 @@ Use this file to record decisions that impact design, scope, or risk.
   **Decision:** Use Sprint 0–5 sequence for implementation; classify tickets as P0/P1/P2 and V1 vs POST_V1.  
   **Why:** Balances delivery speed with safety gates (route-only first, then limited automation).  
   **Status:** ✅ Decided
-- **2025-12-23** — Jira import approach: two-pass (create epics first, then tasks after epic keys exist).  
-  **Decision:** Provide `jira_epics_import_v1.csv` and `jira_stories_import_v1.csv` with placeholders for Epic Link.  
-  **Why:** Jira CSV import needs Epic keys; prevents broken links.  
+- **2025-12-23** — Jira import approach: two-pass (create epics first, then tasks after epic keys exist).
+  **Decision:** Provide `jira_epics_import_v1.csv` and `jira_stories_import_v1.csv` with placeholders for Epic Link.
+  **Why:** Jira CSV import needs Epic keys; prevents broken links.
   **Status:** ✅ Decided
+
+---
+
+## 2025-12-29 — GitHub Merge + Auto-merge Policy
+
+- **2025-12-29** — PR merge strategy: **merge commits only** (squash and rebase disabled).
+  **Status:** ✅ Decided
+  - Rationale: Merge commits preserve per-RUN audit trail for Cursor agent work.
+  - Owner: Engineering
+
+- **2025-12-29** — Auto-delete head branches after merge: **enabled**.
+  **Status:** ✅ Decided
+  - Rationale: Prevents branch explosion (50+ stale run branches).
+  - Owner: Engineering
+
+- **2025-12-29** — Branch protection for `main`: require PR, require `CI/validate` green, require conversations resolved.
+  **Status:** ✅ Decided
+  - Rationale: Prevents bypassing CI and ensures all agents follow the same safety gates.
+  - Owner: Engineering
+
+---
+
+## 2025-12-30 — Dev/Staging Deploy Workflows
+
+- **2025-12-30** — Add GitHub Actions workflows for dev and staging CDK deploys via OIDC.
+  **Status:** ✅ Decided
+  - Rationale: Enables repeatable, auditable deploys without storing long-lived AWS credentials.
+  - Owner: Engineering
+
+---
+
+## 2026-01-02 — E2E Smoke Workflows
+
+- **2026-01-02** — Add Dev E2E smoke test workflow (`dev-e2e-smoke.yml`) and script (`dev_e2e_smoke.py`).
+  **Status:** ✅ Decided
+  - Rationale: Validates end-to-end flow (webhook → queue → worker → DynamoDB) before promoting to staging.
+  - Owner: Engineering
+
+- **2026-01-02** — Add Staging E2E smoke test workflow (`staging-e2e-smoke.yml`).
+  **Status:** ✅ Decided
+  - Rationale: Validates staging environment before promoting to prod.
+  - Owner: Engineering
+
+---
+
+## 2026-01-03 — Docs Heartbeat + Anti-drift Enforcement
+
+- **2026-01-03** — Add CI gate (`scripts/verify_admin_logs_sync.py`) to enforce that latest RUN_ID is referenced in Progress_Log.md.
+  **Status:** ✅ Decided
+  - Rationale: Prevents "docs look stale" problem permanently by making progress logs auditable and enforced in CI.
+  - Owner: Engineering

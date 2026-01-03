@@ -1,6 +1,6 @@
 # Issue Log
 
-Last verified: 2025-12-29 — Wave F05 (issue tracking scaffolded).
+Last verified: 2026-01-03 — RUN_20260102_2148Z.
 
 This is the **canonical index** of issues found during development/build.
 
@@ -21,7 +21,7 @@ and this file remains a navigable index.
 
 | Issue ID | Status | Area | Summary | Affected files | Fix PR/Commit | Evidence |
 |---|---|---|---|---|---|---|
-| (none yet) |  |  |  |  |  |  |
+| ISSUE-20260103-001 | Open | Docs | Progress_Log stale — latest RUN_ID not referenced | `docs/00_Project_Admin/Progress_Log.md` | This PR | CI gate added |
 
 ## Add a new issue
 1. Copy: `docs/00_Project_Admin/Issues/ISSUE_TEMPLATE.md`
