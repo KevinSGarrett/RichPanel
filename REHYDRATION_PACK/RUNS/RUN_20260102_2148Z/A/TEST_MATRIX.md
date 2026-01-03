@@ -13,7 +13,8 @@ List the tests you ran (or explicitly note none).
 | CI checks | `python scripts/run_ci_checks.py` | pass | local log |
 | Deploy Staging Stack (main) | `gh workflow run deploy-staging.yml --ref main` | pass | [Actions run #20673604749](https://github.com/KevinSGarrett/RichPanel/actions/runs/20673604749) |
 | Staging E2E Smoke (main) | `gh workflow run staging-e2e-smoke.yml --ref main -f event-id=evt:20260103003757` | pass | [Actions run #20673641283](https://github.com/KevinSGarrett/RichPanel/actions/runs/20673641283) |
-| Deploy Prod Stack (main) | `gh workflow list --limit 200` (confirm `Deploy Prod Stack` exists) | not run (prod deploy on-demand) | `.github/workflows/deploy-prod.yml` added; release will trigger `workflow_dispatch` on main |
+| Deploy Prod Stack (main) | `gh workflow run deploy-prod.yml --ref main` | not run (prod deploy requires go/no-go) | pending (gated) |
+| Prod E2E Smoke (main) | `gh workflow run prod-e2e-smoke.yml --ref main -f event-id=<TBD>` | not run (prod validation requires go/no-go) | pending (gated) |
 
 ## Notes
 - First deploy attempt on `main` failed while still using placeholder bootstrap account (run `20670461957`); reran on feature branch after updating IDs to prove fix.  

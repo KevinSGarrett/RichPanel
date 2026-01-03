@@ -1,6 +1,6 @@
 # DynamoDB State + Idempotency Schema (Recommended)
 
-Last updated: 2025-12-21
+Last updated: 2026-01-03
 
 This document defines the **minimal DynamoDB data model** to make the middleware:
 - **idempotent** (no double replies / double routing)
@@ -43,21 +43,24 @@ Purpose:
 - prevent duplicate **side effects** (auto-replies, tag updates, assignments)
 
 **Primary key**
-- Partition key: `pk` (string) — the idempotency key
+- Partition key: `event_id` (string) — canonical event identifier
 
 **Required attributes**
 - `created_at` (ISO timestamp)
+- `last_processed_at` (ISO timestamp)
+- `received_at` (ISO timestamp, from ingress payload if provided)
 - `expires_at` (epoch seconds) — TTL attribute
-- `type` (string) — `event` | `action`
-- `status` (string) — `received` | `processing` | `done` | `failed`
+- `status` (string) — `processed` (route-only in v1)
+- `mode` (string) — `route_only` | `automation_candidate`
 - `conversation_id` (string)
+- `safe_mode` (bool)
+- `automation_enabled` (bool)
 - `source_message_id` (string, optional if missing)
-- `payload_hash` (string, optional) — hash of normalized input (no raw content)
-- `result_summary` (string, optional) — e.g., `routed:sales`, `auto_reply:order_status`
-- `error_code` / `error_summary` (optional)
+- `payload_excerpt` (string, redacted/truncated; max 2k chars)
+- `intent` (string, optional placeholder)
 
 **Recommended TTL**
-- 30 days (tunable)
+- 30 days (tunable; enforced via `expires_at` and Lambda default of 30 days)
 
 #### A.1 Idempotency key formats (recommended)
 We use distinct namespaces so we can track both *event idempotency* and *action idempotency*.
@@ -78,17 +81,14 @@ Action keys:
 > Do not use values that can change (like “current tags list”).
 
 #### A.2 Write patterns (DynamoDB conditional writes)
-On ingest/worker start:
-- `PutItem(pk=idempotency_key)` with condition: `attribute_not_exists(pk)`
+Worker stage:
+- `PutItem(event_id=<canonical_id>)` with condition: `attribute_not_exists(event_id)`
   - if succeeds → first time seen → proceed
   - if fails → already processed/processing → short-circuit safely
 
-Status transitions:
-- `UpdateItem` with condition on current `status` to avoid race issues.
-
 ---
 
-### Table B — `rp_mw_conversation_state` (recommended)
+### Table B — `rp_mw_conversation_state` (recommended; now provisioned)
 Purpose:
 - maintain minimal state needed for multi-step flows and safe throttling
 - prevent repeated auto-replies (e.g., do not send “order status” response 5 times)
@@ -113,7 +113,7 @@ Purpose:
   - example: `{ "type": "order_status", "sent_at": "<ISO_TIMESTAMP>", "source_message_id": "<MESSAGE_ID>" }`
 
 **Recommended TTL**
-- 90 days for general conversation state
+- 90 days for general conversation state (configured as `expires_at` TTL in CDK)
 - For `pending_flow` content that includes sensitive identifiers (e.g., order number):
   - store only if necessary
   - store minimal (last-4 or hashed)
@@ -132,9 +132,8 @@ However, we still recommend storing a `version` integer for optimistic concurren
 
 ---
 
-### Table C — `rp_mw_audit_actions` (optional; **deferred in v1**)
+### Table C — `rp_mw_audit_actions` (lightweight audit; provisioned)
 
-> **Decision (v1):** Skip Table C and rely on structured logs + metrics for troubleshooting.
 Purpose:
 - lightweight audit trail of what the middleware did (without storing raw text)
 - helpful for incident response and “why was this routed here?”
@@ -150,9 +149,9 @@ Purpose:
 - `result` (success/fail + reason)
 
 **TTL**
-- 30–90 days
+- 60 days by default (TTL attribute `expires_at`; adjustable per environment)
 
-> v2 option: If we need durable audit for compliance/process reasons, enable Table C (encrypted, minimal payload).
+> v2 option: If we need durable audit for compliance/process reasons, extend retention or export to an encrypted store with stricter access controls.
 
 ---
 
@@ -178,20 +177,20 @@ Mask:
 1) Ingress Lambda:
    - normalize payload
    - compute `event_idempotency_key`
-   - store idempotency record (Table A)
-   - enqueue to SQS FIFO
+   - enqueue to SQS FIFO (no DynamoDB writes at ingress; storage happens in worker)
    - ACK 200 fast
 
 2) Worker Lambda:
-   - compute decision (route / FAQ assist / verified auto-reply)
-   - update conversation state (Table B)
-   - execute side effects with **action idempotency keys** (Table A or Table C)
+   - load kill switches (safe_mode + automation_enabled)
+   - write idempotency record (Table A, conditional put)
+   - emit state (Table B) + audit (Table C) with TTL
+   - (future) compute decision (route / FAQ assist / verified auto-reply) and action idempotency keys
    - on 429/timeouts → retry policy (see `docs/07_Reliability_Scaling/Rate_Limiting_and_Backpressure.md`)
 
 ---
 
 ## 4) Open design choices (tracked, not blocking)
-- ✅ v1 audit approach decided: **logs-only** (Table C deferred).
+- ✅ v1 audit table provisioned (Table C) with TTL; usage optional per environment.
 - Whether to implement a distributed rate limiter using DynamoDB (likely unnecessary at current volumes).
 - Whether to add an encrypted S3 replay archive (useful, but increases governance burden).
 

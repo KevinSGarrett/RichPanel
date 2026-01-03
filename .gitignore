@@ -29,6 +29,12 @@ secrets/
 .DS_Store
 .idea/
 .vscode/
+/.cursor/
+
+# Root-only local artifacts (do not ignore infra/cdk/package-lock.json)
+/package-lock.json
+/trust-*.json
+/trust-ci-*.json
 
 # Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
 artifacts/*

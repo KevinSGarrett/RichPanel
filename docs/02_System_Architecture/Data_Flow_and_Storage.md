@@ -1,7 +1,7 @@
 # Data Flow and Storage
 
-Last updated: 2025-12-21
-Last verified: 2025-12-21 — Aligned storage rules with DynamoDB schema + PII minimization.
+Last updated: 2026-01-03
+Last verified: 2026-01-03 — RUN_20260103_1640Z (pipeline persistence + audit alignment).
 
 This document defines:
 - what data the middleware touches
@@ -25,21 +25,16 @@ Related docs:
 
 3) **Ingress Lambda**
    - validates request (auth/signature if available)
-   - normalizes payload into our internal schema
-   - computes an **event idempotency key**
-   - persists idempotency record (DynamoDB conditional write)
-   - enqueues event to SQS FIFO
+   - normalizes payload into our internal schema and computes an **event idempotency key**
+   - enqueues event to SQS FIFO (no DynamoDB writes at ingress; persistence happens in worker)
    - returns **200 OK quickly** (ACK-fast)
 
 4) **Worker Lambda**
    - consumes SQS event
-   - runs classification + entity extraction (OpenAI)
-   - optionally queries order details (Richpanel Order APIs and/or Shopify fallback)
-   - decides next actions:
-     - route to department (tags/assignment)
-     - send safe-assist message
-     - send verified order status/tracking reply (only when deterministic match)
-     - escalate (chargeback/dispute → Chargebacks team)
+   - loads kill-switch flags (safe_mode + automation_enabled) with a short cache
+   - writes idempotency record (Table A) via conditional put
+   - emits dry-run state to **conversation_state** (Table B) + **audit_trail** (Table C) with TTL
+   - (future) runs classification + side effects (routing/automation) when automation is enabled
 
 5) **Middleware → Richpanel**
    - applies routing tags / assignment
@@ -86,7 +81,8 @@ We store:
 - short result summary
 
 TTL:
-- ~30 days
+- ~30 days (`expires_at` TTL enabled in CDK)
+- Table name: `rp_mw_<env>_idempotency` (PITR on, retain on delete)
 
 ### 3.2 DynamoDB — conversation state (minimal)
 We store only what we need to:
@@ -95,14 +91,16 @@ We store only what we need to:
 - maintain last routing decision
 
 TTL:
-- ~90 days (tunable)
+- ~90 days (tunable; `expires_at` TTL enabled in CDK)
 - sensitive pending-flow fields should have shorter TTL or be hashed/redacted
+- Table name: `rp_mw_<env>_conversation_state` (PITR on, retain on delete)
 
 ### 3.3 Optional durable audit (Table C)
-If we enable:
+Provisioned as `rp_mw_<env>_audit_trail` with TTL attribute `expires_at` (default 60 days).  
+Use for:
 - action audit records with redacted payloads
-- TTL 30–90 days
-
+- troubleshooting “why was this routed here?”
+Usage is optional per environment; extend/export only if compliance requires longer retention.
 (Details in `DynamoDB_State_and_Idempotency_Schema.md`.)
 
 ---

@@ -17,10 +17,13 @@ Design goal: retain the *minimum* necessary for reliability and incident respons
 | Data store | What it contains | Default retention | Why |
 |---|---|---:|---|
 | DynamoDB idempotency table | event/action keys (no message text) | 30 days (TTL) | prevents duplicates + supports investigations |
-| DynamoDB conversation state table | minimal workflow state | 7 days (TTL) | supports short-lived flows |
+| DynamoDB conversation state table | minimal workflow state | 90 days (TTL) | supports per-conversation automation history |
+| DynamoDB audit trail table | redacted action audit records | 60 days (TTL) | lightweight audit for investigations |
 | SQS DLQ | failed events | 14 days (SQS max) | debugging + replay |
 | CloudWatch logs | metadata logs (redacted) | 30 days | incident response + debugging |
 | Metrics (CloudWatch) | aggregated metrics | 15 months (AWS default) | trend analysis (no PII) |
+
+**Implementation note:** All DynamoDB tables use `expires_at` TTL. Lambda log groups for ingress and worker are explicitly set to 30-day retention in CDK to avoid “never expire” drift.
 
 ### 1.2 Evaluation artifacts (non-production)
 | Data store | What it contains | Default retention | Notes |
