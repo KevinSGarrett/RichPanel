@@ -317,9 +317,12 @@ def build_payload(event_id: Optional[str]) -> Dict[str, Any]:
     }
 
 
-def append_summary(path: str, *, data: Dict[str, Any]) -> None:
+def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
+    env_label = env_name.strip() or "dev"
+    # Title-case the environment label without mutating characters like hyphens.
+    env_heading = env_label.replace("_", " ").title()
     lines = [
-        "## Dev E2E Smoke",
+        f"## {env_heading} E2E Smoke",
         f"- Event ID: `{data['event_id']}`",
         f"- Endpoint: {data['endpoint']}/webhook",
         f"- Queue URL: {data['queue_url']}",
@@ -410,7 +413,7 @@ def main() -> int:
         "logs_console_url": console_links["logs"],
     }
     if args.summary_path:
-        append_summary(args.summary_path, data=summary_data)
+        append_summary(args.summary_path, env_name=env_name, data=summary_data)
 
     return 0
 
