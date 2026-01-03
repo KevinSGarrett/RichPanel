@@ -25,7 +25,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -84,7 +84,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_stack_artifacts(cfn_client, stack_name: str) -> StackArtifacts:
+def load_stack_artifacts(
+    cfn_client,
+    sqs_client,
+    apigwv2_client,
+    stack_name: str,
+    env_name: str,
+    region: str,
+) -> StackArtifacts:
     try:
         response = cfn_client.describe_stacks(StackName=stack_name)
     except ClientError as exc:
@@ -96,16 +103,91 @@ def load_stack_artifacts(cfn_client, stack_name: str) -> StackArtifacts:
 
     outputs = {item["OutputKey"]: item["OutputValue"] for item in stacks[0].get("Outputs", [])}
 
-    try:
-        endpoint = outputs["IngressEndpointUrl"].rstrip("/")
-        queue_url = outputs["EventsQueueUrl"]
-        secrets_namespace = outputs["SecretsNamespace"]
-    except KeyError as missing:
-        raise SmokeFailure(
-            f"Required stack output {missing.args[0]} is missing on stack '{stack_name}'."
-        ) from missing
+    endpoint = outputs.get("IngressEndpointUrl")
+    queue_url = outputs.get("EventsQueueUrl")
+    secrets_namespace = outputs.get("SecretsNamespace")
+
+    missing_outputs: List[str] = []
+
+    if not endpoint:
+        endpoint = derive_ingress_endpoint(
+            cfn_client, apigwv2_client, stack_name, env_name, region
+        )
+        missing_outputs.append("IngressEndpointUrl")
+
+    if not queue_url:
+        queue_url = derive_queue_url(sqs_client, env_name)
+        missing_outputs.append("EventsQueueUrl")
+
+    if not secrets_namespace:
+        secrets_namespace = infer_secrets_namespace(env_name)
+        missing_outputs.append("SecretsNamespace")
+
+    if missing_outputs:
+        print(
+            "[WARN] Missing stack outputs: "
+            f"{', '.join(missing_outputs)}; derived fallback values were used."
+        )
+
+    if endpoint:
+        endpoint = endpoint.rstrip("/")
 
     return StackArtifacts(endpoint_url=endpoint, queue_url=queue_url, secrets_namespace=secrets_namespace)
+
+
+def build_http_api_endpoint(api_id: str, region: str) -> str:
+    return f"https://{api_id}.execute-api.{region}.amazonaws.com"
+
+
+def derive_ingress_endpoint(
+    cfn_client, apigwv2_client, stack_name: str, env_name: str, region: str
+) -> str:
+    try:
+        resources = cfn_client.describe_stack_resources(StackName=stack_name)
+    except ClientError as exc:
+        print(f"[WARN] Unable to describe stack resources for '{stack_name}': {exc}")
+        resources = {}
+
+    for resource in resources.get("StackResources", []):
+        if resource.get("LogicalResourceId") == "IngressHttpApi":
+            api_id = resource.get("PhysicalResourceId")
+            if api_id:
+                return build_http_api_endpoint(api_id, region)
+
+    target_name = f"rp-mw-{env_name}-ingress"
+    try:
+        paginator = apigwv2_client.get_paginator("get_apis")
+        for page in paginator.paginate():
+            for api in page.get("Items", []):
+                if api.get("Name") == target_name:
+                    endpoint = api.get("ApiEndpoint")
+                    if endpoint:
+                        return endpoint.rstrip("/")
+                    api_id = api.get("ApiId")
+                    if api_id:
+                        return build_http_api_endpoint(api_id, region)
+    except ClientError as exc:
+        raise SmokeFailure(f"Unable to enumerate HTTP APIs in region {region}: {exc}") from exc
+
+    raise SmokeFailure(
+        "IngressEndpointUrl output missing and HTTP API could not be discovered via CloudFormation or API Gateway."
+    )
+
+
+def derive_queue_url(sqs_client, env_name: str) -> str:
+    queue_name = f"rp-mw-{env_name}-events.fifo"
+    try:
+        response = sqs_client.get_queue_url(QueueName=queue_name)
+    except ClientError as exc:
+        raise SmokeFailure(
+            f"Could not resolve queue URL for '{queue_name}': {exc}"
+        ) from exc
+
+    return response["QueueUrl"]
+
+
+def infer_secrets_namespace(env_name: str) -> str:
+    return f"rp-mw/{env_name}"
 
 
 def load_webhook_token(secrets_client, namespace: str) -> str:
@@ -238,10 +320,19 @@ def main() -> int:
 
     session = boto3.session.Session(region_name=region)
     cfn_client = session.client("cloudformation")
+    sqs_client = session.client("sqs")
+    apigwv2_client = session.client("apigatewayv2")
     secrets_client = session.client("secretsmanager")
     ddb_resource = session.resource("dynamodb")
 
-    artifacts = load_stack_artifacts(cfn_client, args.stack_name)
+    artifacts = load_stack_artifacts(
+        cfn_client,
+        sqs_client,
+        apigwv2_client,
+        args.stack_name,
+        env_name,
+        region,
+    )
     console_links = build_console_links(region=region, table_name=dynamo_table, env_name=env_name)
 
     print(f"[INFO] Ingress endpoint: {artifacts.endpoint_url}/webhook")
