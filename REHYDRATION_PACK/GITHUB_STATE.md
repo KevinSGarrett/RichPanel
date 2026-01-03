@@ -40,6 +40,11 @@ gh api repos/KevinSGarrett/RichPanel/branches/main/protection --jq '{required_st
 gh run list -L 5 --workflow CI --json databaseId,conclusion,event,headBranch,displayTitle --jq '.[] | "\(.databaseId) | \(.conclusion) | \(.event) | \(.headBranch) | \(.displayTitle)"'
 ```
 
+## PR merge process (non-negotiable)
+- Always use `gh pr merge --auto --merge --delete-branch`.
+- Wait for `validate` to pass; auto-merge queues the merge commit and deletes the branch on success.
+- Manual merges in the UI or CLI are disallowed because they bypass the hardened loop.
+
 ## Notes
 - The required status check name is **`validate`** (the job name), not `CI`.
 - If running `python scripts/run_ci_checks.py --ci` locally, keep the tree clean (or ensure scratch files are ignored).
