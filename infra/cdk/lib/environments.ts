@@ -29,21 +29,21 @@ export const DEFAULT_ENVIRONMENTS: Record<
   EnvironmentSettings
 > = {
   dev: {
-    account: "111122223333",
+    account: "151124909266",
     region: "us-east-2",
     owner: "middleware",
     costCenter: "eng-dev",
     tags: { ...SHARED_TAGS, tier: "dev" },
   },
   staging: {
-    account: "444455556666",
+    account: "260475105304",
     region: "us-east-2",
     owner: "middleware",
     costCenter: "eng-staging",
     tags: { ...SHARED_TAGS, tier: "staging" },
   },
   prod: {
-    account: "777788889999",
+    account: "878145708918",
     region: "us-east-2",
     owner: "middleware",
     costCenter: "eng-prod",
