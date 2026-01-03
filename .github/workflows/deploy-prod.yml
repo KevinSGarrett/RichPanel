@@ -1,0 +1,59 @@
+name: Deploy Prod Stack
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+  STACK_NAME: RichpanelMiddleware-prod
+  CDK_ENV: prod
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::878145708918:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-deploy-prod
+
+      - name: Install dependencies
+        working-directory: infra/cdk
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Deploy prod stack
+        working-directory: infra/cdk
+        run: npx cdk deploy "RichpanelMiddleware-prod" --require-approval never -c env="prod"
+
+      - name: Print CloudFormation outputs
+        env:
+          STACK_NAME: ${{ env.STACK_NAME }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --region "${AWS_REGION}" \
+            --query "Stacks[0].Outputs" \
+            --output table
+
+
