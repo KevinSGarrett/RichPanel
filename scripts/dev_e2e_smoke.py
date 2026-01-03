@@ -149,7 +149,9 @@ def derive_ingress_endpoint(
         resources = {}
 
     for resource in resources.get("StackResources", []):
-        if resource.get("LogicalResourceId") == "IngressHttpApi":
+        logical_id = resource.get("LogicalResourceId", "")
+        resource_type = resource.get("ResourceType", "")
+        if logical_id == "IngressHttpApi" or resource_type == "AWS::ApiGatewayV2::Api":
             api_id = resource.get("PhysicalResourceId")
             if api_id:
                 return build_http_api_endpoint(api_id, region)
@@ -159,7 +161,8 @@ def derive_ingress_endpoint(
         paginator = apigwv2_client.get_paginator("get_apis")
         for page in paginator.paginate():
             for api in page.get("Items", []):
-                if api.get("Name") == target_name:
+                name = api.get("Name", "")
+                if name == target_name or (name.startswith(f"rp-mw-{env_name}") and "ingress" in name):
                     endpoint = api.get("ApiEndpoint")
                     if endpoint:
                         return endpoint.rstrip("/")
