@@ -161,17 +161,24 @@ def derive_ingress_endpoint(
     for resource in stack_resources:
         if resource.get("ResourceType") == "AWS::ApiGatewayV2::Stage":
             stage_id = resource.get("PhysicalResourceId", "")
-            if stage_id and "/" in stage_id:
-                api_id = stage_id.split("/", 1)[0]
-                return build_http_api_endpoint(api_id, region)
+            if stage_id:
+                delimiter = "/" if "/" in stage_id else ":"
+                api_id = stage_id.split(delimiter, 1)[0]
+                if api_id:
+                    return build_http_api_endpoint(api_id, region)
 
     target_name = f"rp-mw-{env_name}-ingress"
     try:
         paginator = apigwv2_client.get_paginator("get_apis")
         for page in paginator.paginate():
             for api in page.get("Items", []):
-                name = api.get("Name", "")
-                if name == target_name or (name.startswith(f"rp-mw-{env_name}") and "ingress" in name):
+                name = (api.get("Name") or "").lower()
+                canonical_target = target_name.lower()
+                if (
+                    name == canonical_target
+                    or (name.startswith(f"rp-mw-{env_name}") and "ingress" in name)
+                    or ("rp-mw" in name and env_name in name and "ingress" in name)
+                ):
                     endpoint = api.get("ApiEndpoint")
                     if endpoint:
                         return endpoint.rstrip("/")
