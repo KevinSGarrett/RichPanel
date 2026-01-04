@@ -1,1 +1,1 @@
-Last rehydrated: 2025-12-29 (Wave B00 — Build kickoff + Cursor agent takeover; GitHub + CI aligned)
+Last rehydrated: 2026-01-03 (Wave B06 — Pack snapshot refresh; dev+staging green; prod gated)

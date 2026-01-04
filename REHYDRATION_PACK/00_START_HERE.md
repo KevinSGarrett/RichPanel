@@ -1,6 +1,6 @@
 # Rehydration Pack — Start Here
 
-Last verified: 2025-12-29 — Wave F13.
+Last verified: 2026-01-03 — Dev + staging deployed; smoke tests green; prod gated.
 
 This folder is the **token-efficient control panel** for the ChatGPT browser-window project manager.
 
@@ -45,19 +45,18 @@ Modes:
 
 ---
 
-## Read order (foundation mode — current)
-1. `MODE.yaml` — confirm we are in **foundation** mode
-2. `FOUNDATION_STATUS.md` — readiness snapshot + what remains before build mode
-3. `LAST_REHYDRATED.md` — last wave applied
-4. `02_CURRENT_STATE.md` — snapshot of “what is true right now”
-5. `05_TASK_BOARD.md` — what to do next
-6. `03_ACTIVE_WORKSTREAMS.md` — active focus areas
-7. `04_DECISIONS_SNAPSHOT.md` — key decisions
+## Read order (build mode — current)
+1. `MODE.yaml` — confirm we are in **build** mode
+2. `LAST_REHYDRATED.md` — last snapshot refresh / wave applied
+3. `02_CURRENT_STATE.md` — snapshot of “what is true right now” (**includes completion %**)
+4. `05_TASK_BOARD.md` — what to do next (source of truth)
+5. `03_ACTIVE_WORKSTREAMS.md` — active focus areas + blockers
+6. `04_DECISIONS_SNAPSHOT.md` — key decisions
+7. `GITHUB_STATE.md` — GitHub/CI merge constraints + how to verify
 8. `CORE_LIVING_DOCS.md` — pointers to the “always-update” documentation set
-9. `WAVE_SCHEDULE.md` and `WAVE_SCHEDULE_FULL.md` — plan for all waves
-10. `PM_GUARDRAILS.md` — guardrails for PM behavior
-11. `POLICIES_SUMMARY.md` — condensed agent policies
-12. `OPEN_QUESTIONS.md` — unresolved decisions/questions
+9. `PM_GUARDRAILS.md` — guardrails for PM behavior
+10. `POLICIES_SUMMARY.md` — condensed agent policies
+11. `OPEN_QUESTIONS.md` — unresolved decisions/questions
 
 Canonical deep navigation:
 - `docs/INDEX.md`
@@ -66,8 +65,8 @@ Canonical deep navigation:
 
 ---
 
-## Build mode (later)
-When you begin implementation with Cursor agents:
+## Build mode
+Implementation is active. Cursor agents should store per-run artifacts under `REHYDRATION_PACK/RUNS/`.
 
 1) Complete `docs/00_Project_Admin/Build_Mode_Activation_Checklist.md`  
 2) Switch `REHYDRATION_PACK/MODE.yaml` to:

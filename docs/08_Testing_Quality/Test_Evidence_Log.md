@@ -25,3 +25,12 @@ Store large raw outputs in:
 
 ### 2025-12-29 — Wave F05 (foundation)
 - Evidence: N/A (no implementation tests yet; structure-only wave)
+
+### 2026-01-03 — Dev/Staging deploy + E2E smoke (GitHub Actions)
+- Scope: baseline deployment + smoke verification (dev + staging); prod gated
+- Evidence (run URLs):
+  - Dev deploy ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671603896`
+  - Dev E2E smoke ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671633587`
+  - Staging deploy ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673604749`
+  - Staging E2E smoke ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673641283`
+- Environment: CI (GitHub Actions)

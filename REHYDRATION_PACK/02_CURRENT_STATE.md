@@ -1,56 +1,55 @@
 # Current State (Truth)
 
-**As of:** 2025-12-30 (Wave B00)  
+**As of:** 2026-01-03  
 **Mode:** build (see `REHYDRATION_PACK/MODE.yaml`)  
-**Stage:** build kickoff — Cursor agents take over implementation + GitOps
+**Stage:** dev + staging deployed; smoke tests green; prod gated  
+**Estimated overall completion:** ~65%
 
 ---
 
-## What exists now
+## What exists now (shipped in `main`)
 
-### GitHub + CI are live
+### Deployments + smoke tests (dev/staging)
+- Dev deploy: ✅ green  
+  - Evidence: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671603896`
+- Dev E2E smoke: ✅ green  
+  - Evidence: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671633587`
+- Staging deploy: ✅ green  
+  - Evidence: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673604749`
+- Staging E2E smoke: ✅ green  
+  - Evidence: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673641283`
+
+### Runtime pipeline exists (end-to-end)
+- Runtime path: **API → ingress → SQS → worker → DynamoDB**
+- Ingress enqueues events to SQS; worker processes, plans, and persists state/audit records.
+
+### Safety gates are in place (conservative defaults)
+- Kill switches: `safe_mode` + `automation_enabled`
+- Execution defaults to **dry-run** (no side effects unless explicitly enabled)
+
+### Docs anti-drift gate exists
+- CI runs `python scripts/verify_admin_logs_sync.py` to prevent “admin docs vs reality” drift.
+
+### GitHub + CI baseline is stable
 - Repo is hosted on GitHub (`KevinSGarrett/RichPanel`).
-- CI workflow runs repo validations (`python scripts/run_ci_checks.py --ci`).
 - `main` is protected with required status check **`validate`**.
-
-### Deterministic regen system
-- `regen_doc_registry.py` uses a canonical POSIX-path sort key.
-- `regen_reference_registry.py` uses canonical sorting and normalizes newline handling for stable `size_bytes`.
-- `regen_plan_checklist.py` emits a deterministic banner so markdown outputs stop thrashing.
-
-### Canonical plan + doc library
-- Canonical documentation library under `docs/`.
-- Curated navigation:
-  - `docs/INDEX.md`
-  - `docs/CODEMAP.md`
-  - `docs/ROADMAP.md`
-
-### Change Requests
-- CR-001 (No tracking / Delivery estimates) is scoped and integrated into the plan docs.
-
-### Operational packs
-- Rehydration pack:
-  - `REHYDRATION_PACK/` (this folder)
-  - validated by `python scripts/verify_rehydration_pack.py`
-- PM meta pack:
-  - `PM_REHYDRATION_PACK/`
+- Merge policy is constrained (merge-commit only; delete branch on merge).
 
 ---
 
-## What does NOT exist yet (still expected)
-- Full production implementation (automation runners, integrations, end-to-end tests).
-- Non-empty run history under `REHYDRATION_PACK/RUNS/` (will start in build mode).
+## Prod status (gated)
+- Prod workflows exist (`Deploy Prod Stack`, `Prod E2E Smoke`) but are **not yet green in recent runs**.
+- Promotion to prod is **explicitly human-gated** (go/no-go + evidence capture).
 
 ---
 
-## Next focus
-- Execute **WAVE_B00** assignments in `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md`.
-- Begin Sprint 0 preflight + Sprint 1 scaffolding per:
-  - `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md`
-  - `docs/12_Cursor_Agent_Work_Packages/01_Sprint_0_Preflight/`
+## What’s next (highest leverage)
+- Shopify / ShipStation integration work (data + credentials + mapping).
+- Richpanel UI configuration + operational controls (confirm how/where operators configure and toggle behavior).
 
 ---
 
-## GitHub ops
-- Branch protection + merge settings are documented in:
-  - `docs/08_Engineering/Branch_Protection_and_Merge_Settings.md`
+## Notes
+- This file is a snapshot. Evidence and GitHub ops details live in:
+  - `REHYDRATION_PACK/GITHUB_STATE.md`
+  - `docs/08_Testing_Quality/Test_Evidence_Log.md`

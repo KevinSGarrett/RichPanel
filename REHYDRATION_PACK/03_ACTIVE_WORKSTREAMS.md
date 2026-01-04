@@ -1,9 +1,9 @@
 # Active Workstreams
 
-Last updated: 2025-12-30 (Wave B00)
+Last updated: 2026-01-03 (Wave B06)
 
 **Current mode:** build (see `REHYDRATION_PACK/MODE.yaml`)  
-Focus has shifted from “docs OS readiness” → **implementation with Cursor agents**.
+Focus is on **shipping functionality safely** (dev/staging green; prod gated).
 
 ---
 
@@ -18,18 +18,19 @@ Focus has shifted from “docs OS readiness” → **implementation with Cursor 
 
 ## Active (Build)
 
-### Stream B0 — Build kickoff + agent takeover (WAVE_B00)
-- Ensure build mode is active in `MODE.yaml`
-- Keep packs/status docs current
-- Runbook parity with real GitHub settings
+### Stream B0 — Release discipline + evidence
+- Keep rehydration/PM snapshots aligned to shipped reality (avoid “stale prompts”)
+- Keep test evidence links current (dev/staging deploy + smoke)
+- Maintain doc anti-drift (`verify_admin_logs_sync`)
 
-### Stream B1 — Sprint 0 Preflight (access + secrets inventory)
-- Inventory required accounts/keys (AWS, Richpanel, email provider, shipping platform)
-- Confirm “no tracking numbers” behavior (CR-001) and what fields are authoritative
+### Stream B1 — Integrations (next)
+- Shopify integration work (credentials, mapping, fallbacks)
+- ShipStation integration work (if used) + field mapping confirmations
+- Align integration behavior to CR-001 (delivery estimate only; no tracking)
 
-### Stream B2 — Sprint 1 Infra baseline (IaC scaffolding)
-- Stand up CDK project baseline + environments
-- Define core resources (SQS, DynamoDB, Lambda skeletons) without requiring production credentials
+### Stream B2 — Richpanel configuration + operator UX
+- Document and implement the Richpanel-side configuration needed for stable operation
+- Ensure operators can validate and safely toggle behavior (safe_mode / automation_enabled)
 
 ---
 

@@ -1,7 +1,9 @@
 # PM Status
 
-Date: 2025-12-30
-Wave: B00 (Build kickoff) — **Ready to enter Build Mode**
+Date: 2026-01-03
+Wave: B06 (Pack snapshot refresh) — **Dev + Staging green; Prod gated**
+
+Estimated overall completion: ~65%
 
 ## Current state
 - Repo is on GitHub: `KevinSGarrett/RichPanel`.
@@ -9,6 +11,15 @@ Wave: B00 (Build kickoff) — **Ready to enter Build Mode**
 - Regen outputs are **deterministic** across Windows/Linux (doc registry, reference registry, plan checklist).
 - `main` is protected (required check: `validate`), and repo settings are constrained to **merge commits only**.
 - Change Request CR-001 (no tracking numbers; delivery estimate only) is integrated into the plan and docs.
+
+## Deployed / verified (green)
+- Dev deploy ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671603896`
+- Dev E2E smoke ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671633587`
+- Staging deploy ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673604749`
+- Staging E2E smoke ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20673641283`
+
+## Prod (gated)
+- Prod promotion is intentionally human-gated (go/no-go + captured evidence).
 
 ## What this means
 We can stop doing one-off manual GitOps work. Cursor agents can now:
@@ -23,4 +34,4 @@ Even in Build Mode, some things require human input:
 - Approving any browser-based auth flows (e.g., `gh auth login` device flow) if needed again
 
 ## Immediate next action
-Run **WAVE_B00** using Cursor agents (see `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md`).
+Proceed with the next build work (integrations + Richpanel UI configuration), using the task board as the source of truth.

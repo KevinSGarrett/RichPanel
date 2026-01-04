@@ -12611,6 +12611,11 @@
         "level": 3,
         "text": "2025-12-29 — Wave F05 (foundation)",
         "anchor": "2025-12-29-wave-f05-foundation"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-03 — Dev/Staging deploy + E2E smoke (GitHub Actions)",
+        "anchor": "2026-01-03-devstaging-deploy-e2e-smoke-github-actions"
       }
     ]
   },
