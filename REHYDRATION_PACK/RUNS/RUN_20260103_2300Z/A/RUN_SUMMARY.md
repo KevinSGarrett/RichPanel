@@ -21,8 +21,8 @@ Add Secrets Manager-backed OpenAI key loading while keeping offline-first defaul
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260103_2300Z
-- PR: pending
-- CI status at end of run: green (python scripts/run_ci_checks.py)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/29 (auto-merge on)
+- CI status at end of run: green locally (`python scripts/run_ci_checks.py`); GitHub `validate` pending/queued for auto-merge
 - Main updated: no
 - Branch cleanup done: no
 
