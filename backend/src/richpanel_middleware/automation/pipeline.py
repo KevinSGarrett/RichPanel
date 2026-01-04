@@ -4,6 +4,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
+from richpanel_middleware.commerce.order_lookup import lookup_order_summary
+from richpanel_middleware.automation.prompts import (
+    OrderStatusPromptInput,
+    build_order_status_contract,
+    prompt_fingerprint,
+)
 from richpanel_middleware.ingest.envelope import EventEnvelope, normalize_envelope
 
 
@@ -73,6 +79,36 @@ def plan_actions(
             }
         )
 
+        order_summary = lookup_order_summary(
+            envelope,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            allow_network=False,
+        )
+        prompt_input = OrderStatusPromptInput(
+            name="order_status_draft_reply",
+            conversation_id=envelope.conversation_id,
+            customer_message=_extract_customer_message(envelope.payload),
+            order_summary=order_summary,
+            customer_profile=envelope.payload.get("customer_profile") if isinstance(envelope.payload, dict) else None,
+        )
+        contract = build_order_status_contract(prompt_input)
+
+        actions.append(
+            {
+                "type": "order_status_draft_reply",
+                "conversation_id": envelope.conversation_id,
+                "note": "order status draft reply (dry-run)",
+                "enabled": False,
+                "dry_run": True,
+                "parameters": {
+                    "order_summary": order_summary,
+                    "prompt_fingerprint": prompt_fingerprint(contract),
+                },
+                "reasons": reasons,
+            }
+        )
+
     return ActionPlan(
         event_id=envelope.event_id,
         mode=mode,
@@ -81,6 +117,23 @@ def plan_actions(
         actions=actions,
         reasons=reasons,
     )
+
+
+def _extract_customer_message(payload: Dict[str, Any]) -> str:
+    if not isinstance(payload, dict):
+        return "Order status request"
+
+    for key in ("customer_message", "message", "body", "text", "customer_note"):
+        value = payload.get(key)
+        if value is not None:
+            try:
+                text = str(value).strip()
+                if text:
+                    return text
+            except Exception:
+                continue
+
+    return "Order status request"
 
 
 def execute_plan(

@@ -1,0 +1,269 @@
+from __future__ import annotations
+
+from typing import Any, Dict, Optional
+
+from richpanel_middleware.ingest.envelope import EventEnvelope
+from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
+
+OrderSummary = Dict[str, Any]
+
+
+def lookup_order_summary(
+    envelope: EventEnvelope,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool = False,
+    shopify_client: Optional[ShopifyClient] = None,
+    shipstation_client: Optional[ShipStationClient] = None,
+) -> OrderSummary:
+    """
+    Best-effort order lookup that stays deterministic offline.
+
+    - Uses Shopify + ShipStation clients behind dry-run gates (network disabled by default).
+    - Returns a stable OrderSummary dict even when outbound calls are skipped.
+    """
+    summary = _baseline_summary(envelope)
+    order_id = summary["order_id"]
+
+    try:
+        summary = _merge_summary(
+            summary,
+            _lookup_shopify(
+                order_id,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                client=shopify_client,
+            ),
+        )
+    except Exception:
+        # Stay deterministic; fall back to the baseline summary.
+        pass
+
+    try:
+        summary = _merge_summary(
+            summary,
+            _lookup_shipstation(
+                order_id,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                client=shipstation_client,
+            ),
+        )
+    except Exception:
+        pass
+
+    return summary
+
+
+def _lookup_shopify(
+    order_id: str,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool,
+    client: Optional[ShopifyClient],
+) -> OrderSummary:
+    client = client or ShopifyClient(allow_network=allow_network)
+    response = client.request(
+        "GET",
+        f"/orders/{order_id}.json",
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        dry_run=not allow_network,
+    )
+    data = response.json() or {}
+    payload: Dict[str, Any] = {}
+    if isinstance(data, dict):
+        if isinstance(data.get("order"), dict):
+            payload = data["order"]
+        elif isinstance(data.get("orders"), list) and data["orders"]:
+            first = data["orders"][0]
+            if isinstance(first, dict):
+                payload = first
+        else:
+            payload = data
+    return _extract_shopify_fields(payload)
+
+
+def _lookup_shipstation(
+    order_id: str,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool,
+    client: Optional[ShipStationClient],
+) -> OrderSummary:
+    client = client or ShipStationClient(allow_network=allow_network)
+    response = client.request(
+        "GET",
+        f"/orders/{order_id}",
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        dry_run=not allow_network,
+    )
+    data = response.json() or {}
+    payload = data if isinstance(data, dict) else {}
+    return _extract_shipstation_fields(payload)
+
+
+def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
+    payload = envelope.payload or {}
+    order_id = _extract_order_id(payload, envelope.conversation_id)
+    status = _coerce_str(
+        payload.get("status")
+        or payload.get("fulfillment_status")
+        or payload.get("order_status")
+    ) or "unknown"
+    carrier = _coerce_str(payload.get("carrier") or payload.get("shipping_carrier")) or ""
+    tracking = (
+        _coerce_str(payload.get("tracking_number"))
+        or _coerce_str(payload.get("trackingNumber"))
+        or _coerce_str(payload.get("tracking"))
+        or ""
+    )
+    updated_at = _coerce_str(payload.get("updated_at") or payload.get("fulfillment_updated_at")) or envelope.received_at
+    items_count = (
+        _coerce_int(payload.get("items_count") or payload.get("itemsCount"))
+        or (len(payload.get("items")) if isinstance(payload.get("items"), list) else None)
+        or 0
+    )
+    total_price = _coerce_price(payload.get("total_price") or payload.get("amount") or payload.get("price"))
+
+    return {
+        "order_id": order_id,
+        "id": order_id,
+        "status": status,
+        "carrier": carrier,
+        "tracking_number": tracking,
+        "updated_at": updated_at,
+        "items_count": items_count,
+        "total_price": total_price,
+    }
+
+
+def _extract_order_id(payload: Dict[str, Any], conversation_id: str) -> str:
+    for key in ("order_id", "orderId", "order_number", "orderNumber", "id"):
+        value = _coerce_str(payload.get(key))
+        if value:
+            return value
+    return conversation_id or "unknown"
+
+
+def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
+    if not isinstance(payload, dict):
+        return {}
+
+    status = _coerce_str(
+        payload.get("fulfillment_status")
+        or payload.get("financial_status")
+        or payload.get("status")
+    )
+    updated_at = _coerce_str(payload.get("updated_at"))
+    total_price = _coerce_price(payload.get("total_price") or payload.get("current_total_price"))
+
+    tracking_number = ""
+    carrier = ""
+    fulfillments = payload.get("fulfillments")
+    if isinstance(fulfillments, list) and fulfillments:
+        first = fulfillments[0]
+        if isinstance(first, dict):
+            carrier = _coerce_str(first.get("tracking_company")) or carrier
+            tracking_number = (
+                _first_str(first.get("tracking_numbers"))
+                or _coerce_str(first.get("tracking_number"))
+                or tracking_number
+            )
+
+    items_count = (
+        _coerce_int(payload.get("line_items_count"))
+        or (len(payload.get("line_items")) if isinstance(payload.get("line_items"), list) else None)
+    )
+
+    summary: OrderSummary = {}
+    if status:
+        summary["status"] = status
+    if updated_at:
+        summary["updated_at"] = updated_at
+    if carrier:
+        summary["carrier"] = carrier
+    if tracking_number:
+        summary["tracking_number"] = tracking_number
+    if items_count is not None:
+        summary["items_count"] = items_count
+    if total_price is not None:
+        summary["total_price"] = total_price
+    return summary
+
+
+def _extract_shipstation_fields(payload: Dict[str, Any]) -> OrderSummary:
+    if not isinstance(payload, dict):
+        return {}
+
+    status = _coerce_str(payload.get("orderStatus") or payload.get("orderStatusName") or payload.get("status"))
+    tracking = _coerce_str(payload.get("trackingNumber") or payload.get("tracking_number"))
+    carrier = _coerce_str(payload.get("carrierCode") or payload.get("serviceCode") or payload.get("carrier"))
+    updated_at = _coerce_str(payload.get("modifiedAt") or payload.get("updateDate"))
+    items = payload.get("items")
+    items_count = len(items) if isinstance(items, list) else _coerce_int(payload.get("items_count"))
+    total_price = _coerce_price(payload.get("orderTotal") or payload.get("amountPaid"))
+
+    summary: OrderSummary = {}
+    if status:
+        summary["status"] = status
+    if tracking:
+        summary["tracking_number"] = tracking
+    if carrier:
+        summary["carrier"] = carrier
+    if updated_at:
+        summary["updated_at"] = updated_at
+    if items_count is not None:
+        summary["items_count"] = items_count
+    if total_price is not None:
+        summary["total_price"] = total_price
+    return summary
+
+
+def _merge_summary(base: OrderSummary, updates: OrderSummary) -> OrderSummary:
+    merged = dict(base)
+    for key, value in updates.items():
+        if value is not None:
+            merged[key] = value
+    return merged
+
+
+def _coerce_str(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    try:
+        return str(value)
+    except Exception:
+        return None
+
+
+def _coerce_int(value: Any) -> Optional[int]:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except Exception:
+        return None
+
+
+def _coerce_price(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    try:
+        number = float(str(value))
+        return f"{number:.2f}"
+    except Exception:
+        return _coerce_str(value)
+
+
+def _first_str(values: Any) -> Optional[str]:
+    if isinstance(values, list) and values:
+        return _coerce_str(values[0])
+    return _coerce_str(values)
+

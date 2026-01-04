@@ -55,11 +55,19 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(plan.actions[0]["type"], "route_only")
 
     def test_plan_allows_automation_candidate(self) -> None:
-        envelope = build_event_envelope({"ticket_id": "t-789"})
+        envelope = build_event_envelope({"ticket_id": "t-789", "order_id": "ord-789"})
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
         self.assertEqual(plan.mode, "automation_candidate")
         self.assertEqual(plan.actions[0]["type"], "analyze")
+        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        self.assertEqual(len(order_actions), 1)
+        order_action = order_actions[0]
+        self.assertFalse(order_action["enabled"])
+        self.assertTrue(order_action["dry_run"])
+        self.assertIn("order_summary", order_action["parameters"])
+        self.assertIn("prompt_fingerprint", order_action["parameters"])
+        self.assertEqual(order_action["parameters"]["order_summary"]["order_id"], "ord-789")
 
     def test_execute_plan_dry_run_records(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-000"})
@@ -155,6 +163,24 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("expires_at", state_item)
         self.assertIn("ts_action_id", audit_item)
         self.assertEqual(audit_item["event_id"], envelope.event_id)
+
+    def test_plan_skips_order_status_when_safety_blocks(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-safe"})
+        scenarios = [
+            {"safe_mode": True, "automation_enabled": True},
+            {"safe_mode": False, "automation_enabled": False},
+        ]
+
+        for scenario in scenarios:
+            plan = plan_actions(
+                envelope,
+                safe_mode=scenario["safe_mode"],
+                automation_enabled=scenario["automation_enabled"],
+            )
+            action_types = [action["type"] for action in plan.actions]
+            self.assertNotIn("order_status_draft_reply", action_types)
+            if scenario["safe_mode"]:
+                self.assertEqual(plan.mode, "route_only")
 
 
 def main() -> int:
