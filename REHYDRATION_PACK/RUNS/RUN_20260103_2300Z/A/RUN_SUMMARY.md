@@ -21,10 +21,10 @@ Add Secrets Manager-backed OpenAI key loading while keeping offline-first defaul
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260103_2300Z
-- PR: #29 merged; #30 (run summary follow-up) auto-merge enabled
-- CI status at end of run: validate passed for #29; #30 validate running (auto-merge)
+- PR: #29 merged; #30 (run summary follow-up) merged
+- CI status at end of run: validate passed for #29 and #30
 - Main updated: yes (via #29)
-- Branch cleanup done: pending auto-delete after #30
+- Branch cleanup done: yes (remote branch deleted after follow-up merge)
 
 ## Tests and evidence
 - Tests run: python scripts/run_ci_checks.py
