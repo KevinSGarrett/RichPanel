@@ -65,8 +65,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 5351,
-    "approx_tokens": 6956,
+    "word_count": 5350,
+    "approx_tokens": 6955,
     "last_updated": ""
   },
   {
@@ -2455,8 +2455,8 @@
     "section": "10_Operations_Runbooks_Training",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 376,
-    "approx_tokens": 488,
+    "word_count": 449,
+    "approx_tokens": 583,
     "last_updated": "2025-12-22"
   },
   {

@@ -15505,6 +15505,12 @@
       "anchor": "r010-prompt-or-template-change-release"
     }
   ],
+  "dev/staging e2e smoke (github actions) — how to run + evidence": [
+    {
+      "path": "10_Operations_Runbooks_Training/runbooks/R010_Prompt_or_Template_Change_Release.md",
+      "anchor": "devstaging-e2e-smoke-github-actions-how-to-run-evidence"
+    }
+  ],
   "incident communications templates": [
     {
       "path": "10_Operations_Runbooks_Training/templates/Incident_Comms_Templates.md",

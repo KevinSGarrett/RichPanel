@@ -13,7 +13,7 @@ Usage:
   python scripts/new_run_folder.py --now --force
 
 Notes:
-- RUN_ID must match: ^RUN_\d{8}_\d{4}Z$
+- RUN_ID must match: ^RUN_\\d{8}_\\d{4}Z$
 - Standard library only.
 """
 
