@@ -13941,6 +13941,12 @@
       "anchor": "2025-12-29-wave-f05-foundation"
     }
   ],
+  "2026-01-03 — dev/staging deploy + e2e smoke (github actions)": [
+    {
+      "path": "08_Testing_Quality/Test_Evidence_Log.md",
+      "anchor": "2026-01-03-devstaging-deploy-e2e-smoke-github-actions"
+    }
+  ],
   "test strategy and matrix": [
     {
       "path": "08_Testing_Quality/Test_Strategy_and_Matrix.md",
