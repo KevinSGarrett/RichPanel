@@ -4920,6 +4920,16 @@
     ]
   },
   {
+    "path": "03_Richpanel_Integration/Shopify_Integration_Skeleton.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Shopify integration skeleton",
+        "anchor": "shopify-integration-skeleton"
+      }
+    ]
+  },
+  {
     "path": "03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md",
     "outline": [
       {

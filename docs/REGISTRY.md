@@ -133,6 +133,7 @@ Legend:
 - 📎 [Queues and Routing Primitives (Richpanel)](03_Richpanel_Integration/Queues_and_Routing_Primitives.md)  (`03_Richpanel_Integration/Queues_and_Routing_Primitives.md`)
 - ✅ [Richpanel API Contracts and Error Handling](03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md)  (`03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md`)
 - 📎 [Richpanel Config Changes (v1 Target State)](03_Richpanel_Integration/Richpanel_Config_Changes_v1.md)  (`03_Richpanel_Integration/Richpanel_Config_Changes_v1.md`)
+- 📎 [Shopify integration skeleton](03_Richpanel_Integration/Shopify_Integration_Skeleton.md)  (`03_Richpanel_Integration/Shopify_Integration_Skeleton.md`)
 - ✅ [Team/Tag Mapping and Drift Management](03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md)  (`03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md`)
 - 📎 [Tenant Capabilities Clarifications](03_Richpanel_Integration/Tenant_Capabilities_Clarifications.md)  (`03_Richpanel_Integration/Tenant_Capabilities_Clarifications.md`)
 - ✅ [Vendor Doc Crosswalk — Richpanel](03_Richpanel_Integration/Vendor_Doc_Crosswalk.md)  (`03_Richpanel_Integration/Vendor_Doc_Crosswalk.md`)
