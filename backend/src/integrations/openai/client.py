@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import os
@@ -10,6 +11,17 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
+
+try:
+    import boto3  # type: ignore
+    from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
+except ImportError:  # pragma: no cover
+    boto3 = None  # type: ignore
+
+    class _FallbackBotoError(Exception):
+        """Placeholder exception to allow offline testing without boto3."""
+
+    BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -22,6 +34,23 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
+
+
+def _resolve_env_name() -> str:
+    """
+    Choose an environment name for secret lookup; defaults to 'local'.
+    Mirrors other integrations (Shopify, Richpanel) to stay consistent.
+    """
+
+    raw = (
+        os.environ.get("RICHPANEL_ENV")
+        or os.environ.get("RICH_PANEL_ENV")
+        or os.environ.get("MW_ENV")
+        or os.environ.get("ENVIRONMENT")
+        or "local"
+    )
+    value = str(raw).strip().lower() or "local"
+    return value
 
 
 @dataclass
@@ -131,6 +160,8 @@ class OpenAIClient:
     - Short-circuits when safe_mode is True or automation_enabled is False.
     - Retries 429/5xx and transport errors with jittered backoff.
     - Redacts Authorization headers in logs.
+    - API key is loaded from AWS Secrets Manager by default
+      (rp-mw/<env>/openai/api_key); env var override remains supported.
     """
 
     def __init__(
@@ -138,6 +169,7 @@ class OpenAIClient:
         *,
         base_url: Optional[str] = None,
         api_key: Optional[str] = None,
+        api_key_secret_id: Optional[str] = None,
         allow_network: Optional[bool] = None,
         timeout_seconds: Optional[float] = None,
         max_attempts: int = 3,
@@ -147,10 +179,18 @@ class OpenAIClient:
         logger: Optional[logging.Logger] = None,
         sleeper: Optional[Callable[[float], None]] = None,
         rng: Optional[Callable[[], float]] = None,
+        secrets_client: Optional[Any] = None,
     ) -> None:
+        self.environment = _resolve_env_name()
         self.base_url = (base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip(
             "/"
         )
+        self.api_key_secret_id = (
+            api_key_secret_id
+            or os.environ.get("OPENAI_API_KEY_SECRET_ID")
+            or f"rp-mw/{self.environment}/openai/api_key"
+        )
+        # Explicit value or env var override; Secrets Manager is used if absent.
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
         self.allow_network = (
             _to_bool(os.environ.get("OPENAI_ALLOW_NETWORK"), default=False)
@@ -165,6 +205,7 @@ class OpenAIClient:
         self._logger = logger or logging.getLogger(__name__)
         self._sleeper = sleeper or time.sleep
         self._rng = rng or random.random
+        self._secrets_client_obj = secrets_client
 
     def chat_completion(
         self,
@@ -187,10 +228,21 @@ class OpenAIClient:
                 reason=reason,
             )
 
-        if not self.api_key:
-            raise OpenAIConfigError(
-                "OPENAI_API_KEY is required when network calls are allowed; "
-                "keep allow_network disabled for offline evaluation."
+        api_key, load_reason = self._load_api_key()
+        if not api_key:
+            reason = load_reason or "missing_api_key"
+            self._logger.warning(
+                "openai.missing_api_key",
+                extra={"url": url, "reason": reason, "secret_id": self.api_key_secret_id},
+            )
+            return ChatCompletionResponse(
+                model=request.model,
+                message=None,
+                status_code=0,
+                url=url,
+                raw={"reason": reason},
+                dry_run=True,
+                reason=reason,
             )
 
         payload = self._encode_body(request)
@@ -258,6 +310,41 @@ class OpenAIClient:
         if not self.allow_network:
             return "network_blocked"
         return None
+
+    def _load_api_key(self) -> Tuple[Optional[str], Optional[str]]:
+        if self.api_key:
+            return self.api_key, None
+
+        client = self._secrets_client_obj
+        if client is None and boto3 is None:
+            return None, "boto3_unavailable"
+        if client is None:
+            client = self._secrets_client()
+
+        try:
+            response = client.get_secret_value(SecretId=self.api_key_secret_id)  # type: ignore[attr-defined]
+        except (BotoCoreError, ClientError, Exception):
+            return None, "secret_lookup_failed"
+
+        secret_value = response.get("SecretString")
+        if secret_value is None and response.get("SecretBinary") is not None:
+            try:
+                secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+            except Exception:
+                return None, "secret_decode_failed"
+
+        if not secret_value:
+            return None, "missing_api_key"
+
+        self.api_key = secret_value
+        return self.api_key, None
+
+    def _secrets_client(self):
+        if self._secrets_client_obj is None:
+            if boto3 is None:
+                raise OpenAIConfigError("boto3 is required to create a secretsmanager client.")
+            self._secrets_client_obj = boto3.client("secretsmanager")
+        return self._secrets_client_obj
 
     def _build_headers(self, *, has_body: bool) -> Dict[str, str]:
         headers = {"authorization": f"Bearer {self.api_key}", "accept": "application/json"}
