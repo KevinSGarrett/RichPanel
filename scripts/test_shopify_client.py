@@ -53,6 +53,19 @@ class _StubSecretsClient:
         return self.response
 
 
+class _SelectiveStubSecretsClient:
+    def __init__(self, responses):
+        self.responses = responses
+        self.calls = []
+
+    def get_secret_value(self, SecretId):
+        self.calls.append(SecretId)
+        response = self.responses.get(SecretId, {})
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+
 class ShopifyClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # Ensure defaults do not inherit host environment flags.
@@ -129,7 +142,41 @@ class ShopifyClientTests(unittest.TestCase):
         client = ShopifyClient(access_token="test-token")
 
         self.assertEqual(client.environment, "staging")
-        self.assertEqual(client.access_token_secret_id, "rp-mw/staging/shopify/access_token")
+        self.assertEqual(client.access_token_secret_id, "rp-mw/staging/shopify/admin_api_token")
+        self.assertIn("rp-mw/staging/shopify/access_token", client._secret_id_candidates)
+
+    def test_falls_back_to_legacy_secret_when_canonical_missing(self) -> None:
+        canonical = "rp-mw/local/shopify/admin_api_token"
+        legacy = "rp-mw/local/shopify/access_token"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                canonical: {},
+                legacy: {"SecretString": "legacy-token"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(client.access_token_secret_id, legacy)
+        self.assertEqual(secrets.calls, [canonical, legacy])
+        self.assertEqual(transport.requests[0].headers["x-shopify-access-token"], "legacy-token")
 
     def test_missing_secret_short_circuits(self) -> None:
         transport = _FailingTransport()

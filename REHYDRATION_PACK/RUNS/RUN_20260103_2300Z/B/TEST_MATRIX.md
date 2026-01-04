@@ -1,15 +1,15 @@
 # Test Matrix
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260103_2300Z`  
+**Agent:** B  
+**Date:** 2026-01-04
 
 List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| CI checks | python scripts/run_ci_checks.py | pass | console output |
+| Shopify client unit tests | python scripts/test_shopify_client.py | pass | console output |
 
 ## Notes
-<FILL_ME>
+CI script includes doc/reference regen and all integration client unit suites.

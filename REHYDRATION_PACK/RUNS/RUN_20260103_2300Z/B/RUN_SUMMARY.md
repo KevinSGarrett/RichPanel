@@ -1,33 +1,35 @@
 # Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260103_2300Z`  
+**Agent:** B  
+**Date:** 2026-01-04
 
 ## Objective
-<FILL_ME>
+Align Shopify secret path to canonical `admin_api_token` while keeping legacy `access_token` compatibility; update docs/tests accordingly.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- Updated Shopify client to prefer `rp-mw/<env>/shopify/admin_api_token` with automatic fallback to `.../access_token`.
+- Added unit coverage for legacy fallback behavior and adjusted env path expectation to canonical secret.
+- Refreshed Shopify integration doc to show canonical secret id and compatibility fallback.
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- `backend/src/integrations/shopify/client.py`
+- `scripts/test_shopify_client.py`
+- `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Working branch: main (local)
+- PR: none (not created in this session)
+- CI status at end of run: green (`python scripts/run_ci_checks.py`)
+- Main updated: no
+- Branch cleanup done: n/a
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: `python scripts/run_ci_checks.py` (includes `scripts/test_shopify_client.py`)
+- Evidence path/link: console output (local run)
 
 ## Decisions made
-- <NONE or list>
+- Canonical secret path set to `admin_api_token` with automatic fallback to legacy `access_token`.
 
 ## Issues / follow-ups
-- <NONE or list>
+- Need PR creation and merge once changes are finalized.
