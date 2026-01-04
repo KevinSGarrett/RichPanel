@@ -21,6 +21,12 @@ from .shopify import (
     ShopifyRequestError,
     ShopifyResponse,
 )
+from .shipstation import (
+    ShipStationClient,
+    ShipStationExecutor,
+    ShipStationRequestError,
+    ShipStationResponse,
+)
 
 __all__ = [
     "RichpanelClient",
@@ -40,4 +46,8 @@ __all__ = [
     "ShopifyClient",
     "ShopifyRequestError",
     "ShopifyResponse",
+    "ShipStationClient",
+    "ShipStationExecutor",
+    "ShipStationRequestError",
+    "ShipStationResponse",
 ]

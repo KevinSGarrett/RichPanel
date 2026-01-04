@@ -4920,6 +4920,16 @@
     ]
   },
   {
+    "path": "03_Richpanel_Integration/ShipStation_Integration_Skeleton.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "ShipStation integration skeleton",
+        "anchor": "shipstation-integration-skeleton"
+      }
+    ]
+  },
+  {
     "path": "03_Richpanel_Integration/Shopify_Integration_Skeleton.md",
     "outline": [
       {
