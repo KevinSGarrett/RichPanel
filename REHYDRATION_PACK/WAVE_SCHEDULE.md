@@ -1,6 +1,6 @@
 # Wave Schedule (Quick)
 
-Last updated: 2025-12-29 — Current wave: **WAVE_B00 (Build kickoff + Cursor agent takeover)**
+Last updated: 2026-01-04 — Current wave: **WAVE_B07 (in progress)**
 
 This is the “at-a-glance” run order.
 
@@ -27,4 +27,8 @@ This is the “at-a-glance” run order.
 - WAVE_B01 — Sprint 0/1 start: infra/app scaffolds + env wiring
 - WAVE_B02 — Eventing + persistence foundations
 - WAVE_B03 — Core automation pipeline skeleton
-- WAVE_B04+ — Follow `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md`
+- WAVE_B04 — Completed
+- WAVE_B05 — Completed
+- WAVE_B06 — Completed
+- WAVE_B07 — In progress
+- WAVE_B08+ — Follow `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md`

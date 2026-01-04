@@ -1,6 +1,6 @@
 # Current State (Truth)
 
-**As of:** 2026-01-03  
+**As of:** 2026-01-04  
 **Mode:** build (see `REHYDRATION_PACK/MODE.yaml`)  
 **Stage:** dev + staging deployed; smoke tests green; prod gated  
 **Estimated overall completion:** ~65%
@@ -22,6 +22,7 @@
 ### Runtime pipeline exists (end-to-end)
 - Runtime path: **API → ingress → SQS → worker → DynamoDB**
 - Ingress enqueues events to SQS; worker processes, plans, and persists state/audit records.
+- Automation candidates now include an order lookup (Shopify + ShipStation behind dry-run gates) and plan an `order_status_draft_reply` action with prompt fingerprints; outbound remains blocked by default.
 
 ### Safety gates are in place (conservative defaults)
 - Kill switches: `safe_mode` + `automation_enabled`
