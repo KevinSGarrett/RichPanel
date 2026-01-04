@@ -10,7 +10,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Protocol, Tuple
+from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
 try:
     import boto3  # type: ignore
@@ -133,7 +133,8 @@ class ShopifyClient:
     - Retries 429/5xx and transport errors with jittered backoff.
     - Redacts Authorization headers in logs.
     - Access token is sourced from AWS Secrets Manager at
-      rp-mw/<env>/shopify/access_token.
+      rp-mw/<env>/shopify/admin_api_token (canonical, with a compatibility
+      fallback to rp-mw/<env>/shopify/access_token).
     """
 
     def __init__(
@@ -159,11 +160,16 @@ class ShopifyClient:
         self.shop_domain = (shop_domain or os.environ.get("SHOPIFY_SHOP_DOMAIN") or "example.myshopify.com").rstrip("/")
         version = (api_version or os.environ.get("SHOPIFY_API_VERSION") or "2024-01").strip("/")
         self.base_url = (base_url or f"https://{self.shop_domain}/admin/api/{version}").rstrip("/")
-        self.access_token_secret_id = (
-            access_token_secret_id
-            or os.environ.get("SHOPIFY_ACCESS_TOKEN_SECRET_ID")
-            or f"rp-mw/{self.environment}/shopify/access_token"
-        )
+        canonical_secret = f"rp-mw/{self.environment}/shopify/admin_api_token"
+        legacy_secret = f"rp-mw/{self.environment}/shopify/access_token"
+        primary_secret = access_token_secret_id or os.environ.get("SHOPIFY_ACCESS_TOKEN_SECRET_ID") or canonical_secret
+        candidates = [primary_secret]
+        for secret_id in (canonical_secret, legacy_secret):
+            if secret_id not in candidates:
+                candidates.append(secret_id)
+
+        self.access_token_secret_id = primary_secret
+        self._secret_id_candidates: List[str] = candidates
         self.allow_network = (
             _to_bool(os.environ.get("SHOPIFY_OUTBOUND_ENABLED"), default=False)
             if allow_network is None
@@ -332,20 +338,28 @@ class ShopifyClient:
         if client is None:
             client = self._secrets_client()
 
-        try:
-            response = client.get_secret_value(SecretId=self.access_token_secret_id)  # type: ignore[attr-defined]
-        except (BotoCoreError, ClientError, Exception):
-            return None, "secret_lookup_failed"
+        last_reason: Optional[str] = None
 
-        secret_value = response.get("SecretString")
-        if secret_value is None and response.get("SecretBinary") is not None:
-            secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+        for secret_id in self._secret_id_candidates:
+            try:
+                response = client.get_secret_value(SecretId=secret_id)  # type: ignore[attr-defined]
+            except (BotoCoreError, ClientError, Exception):
+                last_reason = "secret_lookup_failed"
+                continue
 
-        if not secret_value:
-            return None, "missing_access_token"
+            secret_value = response.get("SecretString")
+            if secret_value is None and response.get("SecretBinary") is not None:
+                secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
 
-        self._access_token = secret_value
-        return self._access_token, None
+            if not secret_value:
+                last_reason = "missing_access_token"
+                continue
+
+            self._access_token = secret_value
+            self.access_token_secret_id = secret_id
+            return self._access_token, None
+
+        return None, last_reason or "missing_access_token"
 
     def _secrets_client(self):
         if self._secrets_client_obj is None:
