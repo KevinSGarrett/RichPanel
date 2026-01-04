@@ -18,11 +18,11 @@ Align Shopify secret path to canonical `admin_api_token` while keeping legacy `a
 - `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
 
 ## Git/GitHub status (required)
-- Working branch: `run/RUN_20260103_2300Z-B`
-- PR: https://github.com/KevinSGarrett/RichPanel/pull/32 (auto-merge enabled)
-- CI status at end of run: green locally (`python scripts/run_ci_checks.py`); GitHub Actions pending
-- Main updated: no
-- Branch cleanup done: pending auto-merge
+- Working branch: `run/RUN_20260103_2300Z-B` (merged to `main`)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/32 (merged)
+- CI status at end of run: green locally (`python scripts/run_ci_checks.py`); GitHub Actions ✅
+- Main updated: yes (via PR 32)
+- Branch cleanup done: yes (remote branch deleted)
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py` (includes `scripts/test_shopify_client.py`)
