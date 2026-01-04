@@ -113,6 +113,20 @@ Minimum set for this runbook:
 - Minimum subset: ST-001..ST-005, ST-010, ST-040..ST-041, ST-060, ST-070..ST-071
 - Recommended: run full Smoke_Test_Pack_v1.md
 
+### Dev/Staging E2E smoke (GitHub Actions) — how to run + evidence
+Canonical instructions live in:
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` (sections “Dev E2E smoke workflow” + “Staging E2E smoke workflow”)
+
+Evidence requirements (minimum):
+- Capture the GitHub Actions run URL
+- Capture the job Summary block showing:
+  - idempotency write confirmation
+  - conversation_state write confirmation
+  - audit record write confirmation
+  - CloudWatch dashboard + alarm names when present
+- Record these in the active run’s evidence table:
+  - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`
+
 
 ## Related docs
 - [Go/no-go checklist](../../09_Deployment_Operations/Go_No_Go_Checklist.md)

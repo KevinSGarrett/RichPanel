@@ -1,94 +1,52 @@
-# Cursor Agent Assignments
+# Current Cursor Agent Prompts (build mode)
 
-Wave: **WAVE_B00 — Build Kickoff (Cursor takeover)**
+## Prompt — Agent A (not assigned in this cycle)
+```text
+RUN_ID: RUN_20260103_2300Z
+Agent: A
 
-Owner intent: **minimize manual work**. From this point forward:
-- Cursor agents do the GitOps (branches/commits/PRs/merges) and repo changes.
-- The human only supplies required external inputs (credentials, business decisions) and runs Cursor.
+No tasks assigned in this cycle. Do not make changes.
+```
 
-## Global rules (all agents)
-- **Never push directly to `main`.** Always use a PR.
-- Create branches as: `run/<SHORT>_<YYYYMMDD_HHMM>` (example: `run/B00_PACKSYNC_20251230_1040`).
-- Before pushing: run `python scripts/run_ci_checks.py`.
-- Merge via standard path; if checks are pending, use auto-merge:
-  - `gh pr merge --auto --merge --delete-branch`
-- If `run_ci_checks.py --ci` reports dirty generated files, commit the regen outputs.
+## Prompt — Agent B (not assigned in this cycle)
+```text
+RUN_ID: RUN_20260103_2300Z
+Agent: B
 
-## Sequence
-To avoid merge conflicts, run agents **sequentially** in this order:
-1. Agent 1 → merge PR
-2. Agent 2 → merge PR
-3. Agent 3 → merge PR
+No tasks assigned in this cycle. Do not make changes.
+```
 
----
+## Prompt — Agent C (Evidence/runbook alignment + prompt hygiene; no drift)
+```text
+RUN_ID: RUN_20260103_2300Z
+Agent: C
 
-## Agent 1 — Pack Sync + GitHub Settings Documentation
+Objective
+- Keep us aligned and prevent prompt drift:
+  - Ensure REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md contains ONLY current prompts (archive elsewhere)
+  - Ensure admin docs are updated and scripts/verify_admin_logs_sync.py passes
+  - Ensure runbooks clearly describe how to run Dev/Staging smoke and capture evidence
+  - Optional: fix any doc-hygiene warnings that are safe to fix (for example replace unicode ellipsis characters)
 
-### Goal
-Bring “living docs” and rehydration packs into alignment with the now-stable GitHub + CI state and mark the repo as build-ready.
+Idempotency check (pre-step)
+- If CI is already green and admin logs are current, do not create a no-op PR. Only act if drift is detected.
 
-### Tasks
-1. Update:
-   - `REHYDRATION_PACK/MODE.yaml` (mode/build + current wave)
-   - `REHYDRATION_PACK/GITHUB_STATE.md`
-   - `REHYDRATION_PACK/FOUNDATION_STATUS.md`
-   - `REHYDRATION_PACK/WAVE_SCHEDULE*.md`
-   - `REHYDRATION_PACK/LAST_*.md`
-2. Update `docs/08_Engineering/Branch_Protection_and_Merge_Settings.md` so it matches the actual GitHub configuration (required check is `validate`, merge-commit-only, delete-branch-on-merge, etc.).
-3. Run `python scripts/run_ci_checks.py` and commit regen outputs.
-4. PR + merge.
+Scope (allowed)
+- REHYDRATION_PACK/*
+- docs/00_Project_Admin/*
+- docs/08_Engineering/*
+- docs/10_Operations_Runbooks_Training/runbooks/*
+- scripts/* (only if required for the above)
 
-### Acceptance criteria
-- `python scripts/run_ci_checks.py` passes locally.
-- GitHub Actions `validate` is green on the PR.
+Do not touch (locked)
+- backend/src/**
+- infra/cdk/**
 
----
+Required validations
+- python scripts/verify_admin_logs_sync.py
+- python scripts/run_ci_checks.py
 
-## Agent 2 — Sprint 0: Access + Secrets Inventory
-
-### Goal
-Unblock Build Mode by capturing the *minimum required* external access/credentials needed for upcoming sprints.
-
-### Tasks
-1. Create or update a single source of truth doc (suggested):
-   - `docs/06_Security_Secrets/Access_and_Secrets_Inventory.md`
-2. Include:
-   - AWS account/role requirements (dev/prod separation assumptions)
-   - Richpanel API key(s) + where stored
-   - ShipStation / marketplace credentials
-   - Email provider (SES/SMTP/etc.)
-   - Any webhook endpoints + signing secrets
-3. Update `config/.env.example` **only** with safe, non-secret variables (leave secrets empty).
-4. Run `python scripts/run_ci_checks.py` and commit.
-5. PR + merge.
-
-### Acceptance criteria
-- No secrets committed.
-- The new doc is referenced from `docs/INDEX.md` if appropriate.
-- `python scripts/run_ci_checks.py` passes.
-
----
-
-## Agent 3 — Developer Ergonomics for Build Mode
-
-### Goal
-Make Build Mode runs “one command” and PowerShell-friendly, reducing manual friction for operators.
-
-### Tasks (choose the smallest that helps)
-1. Add a PowerShell helper: `scripts/ci.ps1` that runs `python scripts/run_ci_checks.py` and prints the git status on failure.
-2. Add a PowerShell helper: `scripts/gh_ci_latest.ps1` that prints the latest CI run id + conclusion using `gh run list --json ... --jq ...` (no fragile quoting).
-3. Ensure `.gitignore` covers local scratch artifacts (e.g., `branch_protection_*.json`, `_tmp_branch_protection_*.json`) so CI cleanliness checks aren’t tripped.
-4. Run `python scripts/run_ci_checks.py` and commit.
-5. PR + merge.
-
-### Acceptance criteria
-- Helpers run on Windows PowerShell.
-- `python scripts/run_ci_checks.py` passes.
-
----
-
-## Human inputs needed soon (not for agents)
-- AWS account/role setup (or confirm you want local-only scaffolding first)
-- Richpanel API key(s)
-- Marketplace/ShipStation credentials
-- Confirm whether `C:\RichPanel_GIT` becomes the canonical workspace path
+Deliverables
+- Any needed doc updates committed
+- Archived prior prompts if you rewrote REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md
+```

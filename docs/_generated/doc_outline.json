@@ -14288,6 +14288,11 @@
         "anchor": "smoke-tests-to-validate-the-fix"
       },
       {
+        "level": 3,
+        "text": "Dev/Staging E2E smoke (GitHub Actions) — how to run + evidence",
+        "anchor": "devstaging-e2e-smoke-github-actions-how-to-run-evidence"
+      },
+      {
         "level": 2,
         "text": "Related docs",
         "anchor": "related-docs"
