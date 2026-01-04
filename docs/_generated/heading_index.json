@@ -10493,6 +10493,12 @@
       "anchor": "5-shipstation-marketplace-credentials"
     }
   ],
+  "shopify admin api token (if shopify is used for commerce reads)": [
+    {
+      "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
+      "anchor": "shopify-admin-api-token-if-shopify-is-used-for-commerce-reads"
+    }
+  ],
   "6) email provider / inbox credentials": [
     {
       "path": "06_Security_Secrets/Access_and_Secrets_Inventory.md",
