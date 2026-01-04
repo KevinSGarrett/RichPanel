@@ -16,6 +16,11 @@ from .openai import (
     OpenAIConfigError,
     OpenAIRequestError,
 )
+from .shopify import (
+    ShopifyClient,
+    ShopifyRequestError,
+    ShopifyResponse,
+)
 
 __all__ = [
     "RichpanelClient",
@@ -32,4 +37,7 @@ __all__ = [
     "ChatCompletionRequest",
     "ChatCompletionResponse",
     "ChatMessage",
+    "ShopifyClient",
+    "ShopifyRequestError",
+    "ShopifyResponse",
 ]

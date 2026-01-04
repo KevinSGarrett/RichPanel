@@ -1000,6 +1000,16 @@
     "last_updated": "2025-12-29"
   },
   {
+    "path": "03_Richpanel_Integration/Shopify_Integration_Skeleton.md",
+    "title": "Shopify integration skeleton",
+    "section": "03_Richpanel_Integration",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 188,
+    "approx_tokens": 244,
+    "last_updated": ""
+  },
+  {
     "path": "03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md",
     "title": "Team/Tag Mapping and Drift Management",
     "section": "03_Richpanel_Integration",
@@ -3795,8 +3805,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10624,
-    "approx_tokens": 13811,
+    "word_count": 10633,
+    "approx_tokens": 13822,
     "last_updated": ""
   },
   {
