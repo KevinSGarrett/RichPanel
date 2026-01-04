@@ -1,6 +1,6 @@
 # Access & Secrets Inventory (Sprint 0)
 
-Last updated: 2025-12-29  
+Last updated: 2026-01-04  
 Owners: Security & Platform (Agent 2) / Eng Lead
 
 > Scope: capture the minimum external access required to unblock Build Mode Stream B1 (“Sprint 0 preflight”) before infrastructure work proceeds. Source: [Active workstreams](../REHYDRATION_PACK/03_ACTIVE_WORKSTREAMS.md#stream-b1--sprint-0-preflight-access--secrets-inventory).
@@ -11,11 +11,12 @@ Owners: Security & Platform (Agent 2) / Eng Lead
 
 | Access / Secret | Why we need it | Environments | Storage / location | Status & owner |
 | --- | --- | --- | --- | --- |
-| AWS Organizations + IAM roles | Host middleware in separate accounts per [AWS serverless reference](../02_System_Architecture/AWS_Serverless_Reference_Architecture.md) and enforce least privilege ([IAM design](../06_Security_Privacy_Compliance/IAM_Least_Privilege.md)). | `dev`, `staging`, `prod` (separate accounts + `us-east-2` region) | AWS Organizations, IAM Identity Center/SSO, roles: `rp-mw-ingress`, `rp-mw-worker`, `ci-deploy`, `prod-breakglass`. | Owner: Engineering (Kevin). **Blocked:** org + account creation still pending (pre-req for Sprint 1 infra). |
+| AWS accounts + GitHub OIDC deploy role | Host middleware in separate accounts per [AWS serverless reference](../02_System_Architecture/AWS_Serverless_Reference_Architecture.md) and enforce least privilege ([IAM design](../06_Security_Privacy_Compliance/IAM_Least_Privilege.md)). | `dev`, `staging`, `prod` (separate accounts + `us-east-2` region) | AWS accounts (below), GitHub Actions OIDC provider (`token.actions.githubusercontent.com`), deploy role: `rp-ci-deploy` (assumed by `.github/workflows/deploy-*.yml` + `*-e2e-smoke.yml`). | Owner: Engineering (Kevin). **Status:** accounts created + OIDC deploy role active. |
 | Richpanel API key (`x-richpanel-key`) | Server-to-server reads/writes and reconciliation sweeps per [webhook + API plan](../03_Richpanel_Integration/Webhooks_and_Event_Handling.md). | Unique per env (staging may share prod workspace per [env strategy](../09_Deployment_Operations/Environments.md#richpanel-environment-strategy)). | AWS Secrets Manager `rp-mw/<env>/richpanel/api_key`. Inject at deploy via Lambda env vars. | Owner: CX Ops / Workspace admin. **Pending:** need tenant admin to mint non-prod + prod keys. |
 | Richpanel webhook token (`X-Middleware-Token`) | Validates inbound `POST /richpanel/inbound` requests (shared-secret header, per webhook doc §4.1/§6.1). | Unique per env (dev/staging tokens can live in sandbox workspace). | Secrets Manager `rp-mw/<env>/richpanel/webhook_token` + configured inside Richpanel HTTP Target. | Owner: Integration + CX Ops. **Pending:** HTTP Target not created yet; token must exist before enabling trigger. |
 | OpenAI API key | LLM routing + FAQ automation (per [OpenAI env strategy](../09_Deployment_Operations/Environments.md#openai-environment-strategy)). | Unique per env; dev/staging use low-quota keys; prod isolated. | Secrets Manager `rp-mw/<env>/openai/api_key`. | Owner: Product/Leadership. **Pending:** request procurement + budget caps. |
-| ShipStation / marketplace credential set | Order lookup + shipment status for CR-001 (“no tracking numbers”) and FAQ templates. Stream B1 explicitly calls for this inventory. | Prod required; staging optional (can use sandbox). Dev uses stubs. | Secrets Manager: `rp-mw/<env>/shipstation/api_key`, `/shipstation/api_secret`, `/shipstation/api_base`. | Owner: Ops / Logistics. **Blocked:** need confirmation whether ShipStation vs Shopify native is authoritative ([Active workstreams](../REHYDRATION_PACK/03_ACTIVE_WORKSTREAMS.md#stream-b1--sprint-0-preflight-access--secrets-inventory)). |
+| Shopify Admin API token | Commerce reads (order lookup + reconciliation) when Shopify is the system of record. | Prod required; staging optional; dev uses stubs/mocks. | Secrets Manager (canonical): `rp-mw/<env>/shopify/admin_api_token` (legacy fallback: `rp-mw/<env>/shopify/access_token`). | Owner: Ops / Ecom admin. **Pending:** confirm store(s) + mint token (least scope). |
+| ShipStation credential set | Shipment lookup + status for CR-001 (“no tracking numbers”) and FAQ templates. Stream B1 explicitly calls for this inventory. | Prod required; staging optional (can use sandbox). Dev uses stubs. | Secrets Manager: `rp-mw/<env>/shipstation/api_key`, `rp-mw/<env>/shipstation/api_secret`, `rp-mw/<env>/shipstation/api_base`. | Owner: Ops / Logistics. **Blocked:** need confirmation whether ShipStation vs Shopify native is authoritative ([Active workstreams](../REHYDRATION_PACK/03_ACTIVE_WORKSTREAMS.md#stream-b1--sprint-0-preflight-access--secrets-inventory)). |
 | Email provider / SMTP-forwarding login | Richpanel needs a connected support inbox, see vendor doc “[Connect your Support Email](../reference/richpanel/Non_Indexed_Library/Connect_your_Support_Email.txt)”. Also required to satisfy Stream B1 (“inventory required accounts/keys — AWS, Richpanel, email provider, shipping platform”). | Prod inbox mandatory; staging optional via forwarding; dev uses mocks. | Store OAuth app password / SMTP credentials in Secrets Manager `rp-mw/<env>/email/<provider>/*`. If AWS SES is used, also store SMTP user + DKIM keys. | Owner: CX / IT. **Pending:** need to confirm provider (Gmail vs O365 vs SES) and supply forwarding credentials. |
 | Runtime feature flags (`safe_mode`, `automation_enabled`) | Operator kill switches per [Kill Switch and Safe Mode](../06_Security_Privacy_Compliance/Kill_Switch_and_Safe_Mode.md). Flags must be editable without redeploy. | `dev`, `staging`, `prod` | AWS Systems Manager Parameter Store `/rp-mw/<env>/safe_mode` and `/rp-mw/<env>/automation_enabled` (created by CDK with defaults). | Owner: Engineering + Support Ops for toggles. **Pending:** finalize IAM guardrails for who can edit parameters + incident playbook linkage. |
 
@@ -23,14 +24,17 @@ Owners: Security & Platform (Agent 2) / Eng Lead
 
 ## 2) AWS account + role requirements
 
-- **Accounts:** Follow the separated-account guidance in [AWS Serverless Reference Architecture §0](../02_System_Architecture/AWS_Serverless_Reference_Architecture.md#0-region-and-environment-defaults) and [Environments doc](../09_Deployment_Operations/Environments.md). Required accounts: `dev`, `staging`, `prod`. All targeting `us-east-2` initially, with optional DR in `us-west-2`.
-- **Roles:** Minimum runtime roles per [IAM Least Privilege](../06_Security_Privacy_Compliance/IAM_Least_Privilege.md):
-  - `rp-mw-ingress` → API Gateway Lambda (write to SQS, DynamoDB, read webhook secret).
-  - `rp-mw-worker` → worker Lambda (read SQS/DynamoDB, call Secrets Manager for vendor keys).
-  - `ci-deploy` → used by CDK/CI to provision infra (no direct prod deploys from human identities).
-  - `prod-breakglass-admin` → emergency role defined in [IAM access review & break-glass](../06_Security_Privacy_Compliance/IAM_Access_Review_and_Break_Glass.md).
+- **Accounts (created):** per `infra/cdk/lib/environments.ts`:
+  - `dev`: `151124909266` (`us-east-2`)
+  - `staging`: `260475105304` (`us-east-2`)
+  - `prod`: `878145708918` (`us-east-2`)
+- **CI/CD (OIDC deploy role exists):**
+  - GitHub Actions uses the OIDC provider `token.actions.githubusercontent.com` in each account.
+  - Deploy workflows assume: `arn:aws:iam::<account_id>:role/rp-ci-deploy` (see `.github/workflows/deploy-*.yml`).
+  - Trust policy allows `sts:AssumeRoleWithWebIdentity` for `repo:KevinSGarrett/RichPanel:*` with audience `sts.amazonaws.com` (see `trust-ci-*.json`).
+- **Runtime execution roles:** Lambda execution roles are created by CDK per stack/function (not manually named). Access is constrained via least-privilege policies attached by the stack.
 - **Human access:** Prefer IAM Identity Center/SSO with MFA; monthly access reviews must verify who can read prod secrets (see break-glass doc §1–§3).
-- **Action items:** create AWS Organization, carve accounts, enable CloudTrail + basic guardrails, and register SSO groups (ReadOnly, Deployer, Security). Without this, Sprint 1 IaC work cannot run `cdk bootstrap`.
+- **Action items:** ensure CloudTrail + baseline guardrails are enabled in all accounts and keep OIDC trust conditions tight (repo + branch/tag constraints where appropriate).
 
 ---
 
@@ -69,10 +73,18 @@ Owners: Security & Platform (Agent 2) / Eng Lead
   2. API secret / client secret.
   3. Base URL and version (e.g., `https://ssapi.shipstation.com`).
   4. Webhook or event callback URLs (if we subscribe to fulfilment events later).
-- Storage plan: Secrets Manager `rp-mw/<env>/shipstation/api_key`, `/api_secret`, `/base_url`. Non-prod can use sandbox keys or mock services if vendor does not offer test tenants (fallback noted in [Environments §Shopify](../09_Deployment_Operations/Environments.md#shopify-environment-strategy)).
+- Storage plan: Secrets Manager `rp-mw/<env>/shipstation/api_key`, `rp-mw/<env>/shipstation/api_secret`, `rp-mw/<env>/shipstation/api_base`. Non-prod can use sandbox keys or mock services if vendor does not offer test tenants (fallback noted in [Environments §Shopify](../09_Deployment_Operations/Environments.md#shopify-environment-strategy)).
 - Outstanding decisions:
   - Confirm whether ShipStation or Shopify is the source of truth for shipment data (ties into CR-001 “no tracking numbers” guardrails).
   - Identify human owner (likely Operations) and ensure they can rotate credentials without involving engineering.
+
+### Shopify Admin API token (if Shopify is used for commerce reads)
+
+- Canonical secret name (Shopify Admin API token): `rp-mw/<env>/shopify/admin_api_token`
+- Legacy/fallback secret name (supported by client for compatibility): `rp-mw/<env>/shopify/access_token`
+- Notes:
+  - Keep scope minimal (read-only where possible).
+  - Prefer creating a dedicated non-prod token for `dev`/`staging` if the store supports it.
 
 ---
 

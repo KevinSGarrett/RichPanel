@@ -1715,9 +1715,9 @@
     "section": "06_Security_Secrets",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1497,
-    "approx_tokens": 1946,
-    "last_updated": "2025-12-29"
+    "word_count": 1610,
+    "approx_tokens": 2093,
+    "last_updated": "2026-01-04"
   },
   {
     "path": "07_Reliability_Scaling/Backlog_Catchup_and_Replay_Strategy.md",

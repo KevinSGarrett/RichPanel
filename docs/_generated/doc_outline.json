@@ -9468,6 +9468,11 @@
         "anchor": "5-shipstation-marketplace-credentials"
       },
       {
+        "level": 3,
+        "text": "Shopify Admin API token (if Shopify is used for commerce reads)",
+        "anchor": "shopify-admin-api-token-if-shopify-is-used-for-commerce-reads"
+      },
+      {
         "level": 2,
         "text": "6) Email provider / inbox credentials",
         "anchor": "6-email-provider-inbox-credentials"
