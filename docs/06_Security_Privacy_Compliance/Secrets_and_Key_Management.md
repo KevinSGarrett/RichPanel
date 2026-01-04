@@ -33,6 +33,10 @@ Related:
 **Pattern:**
 - Lambda reads secret values at startup (cached) or via AWS Parameter Store with secure string.
 
+**OpenAI key loading**
+- Stored at `rp-mw/<env>/openai/api_key` in Secrets Manager (env resolved via `RICHPANEL_ENV` → `RICH_PANEL_ENV` → `MW_ENV` → `ENVIRONMENT` → `local`, then lowercased).
+- Runtime loads from Secrets Manager first; `OPENAI_API_KEY` stays as an optional override for local/offline runs (network stays disabled by default).
+
 ---
 
 ## 3) Environment separation (required)

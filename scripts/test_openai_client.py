@@ -4,6 +4,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -48,12 +49,30 @@ class _RecordingTransport:
         return self.response
 
 
+class _StubSecretsClient:
+    def __init__(self, response: Optional[dict] = None, exc: Optional[Exception] = None):
+        self.calls = 0
+        self.response = response or {}
+        self.exc = exc
+
+    def get_secret_value(self, SecretId: str) -> dict:
+        self.calls += 1
+        if self.exc:
+            raise self.exc
+        return self.response
+
+
 class OpenAIClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # Ensure host env flags do not leak into tests.
         os.environ.pop("OPENAI_ALLOW_NETWORK", None)
         os.environ.pop("OPENAI_API_KEY", None)
+        os.environ.pop("OPENAI_API_KEY_SECRET_ID", None)
         os.environ.pop("OPENAI_MODEL", None)
+        os.environ.pop("RICHPANEL_ENV", None)
+        os.environ.pop("RICH_PANEL_ENV", None)
+        os.environ.pop("MW_ENV", None)
+        os.environ.pop("ENVIRONMENT", None)
 
     def test_safe_mode_short_circuits_transport(self) -> None:
         transport = _FailingTransport()
@@ -129,19 +148,48 @@ class OpenAIClientTests(unittest.TestCase):
         self.assertEqual(response.reason, "network_blocked")
         self.assertEqual(transport.calls, 0)
 
+    def test_secret_path_uses_lowercased_env(self) -> None:
+        os.environ["RICHPANEL_ENV"] = "Staging"
+
+        client = OpenAIClient()
+
+        self.assertEqual(client.environment, "staging")
+        self.assertEqual(client.api_key_secret_id, "rp-mw/staging/openai/api_key")
+
+    def test_missing_secret_short_circuits_to_dry_run(self) -> None:
+        secrets_client = _StubSecretsClient(response={})
+        transport = _FailingTransport()
+        client = OpenAIClient(allow_network=True, transport=transport, secrets_client=secrets_client)
+
+        request = ChatCompletionRequest(
+            model="gpt-4o-mini",
+            messages=[ChatMessage(role="user", content="hello")],
+        )
+        response = client.chat_completion(request, safe_mode=False, automation_enabled=True)
+
+        self.assertTrue(response.dry_run)
+        self.assertEqual(response.reason, "missing_api_key")
+        self.assertEqual(transport.calls, 0)
+        self.assertEqual(secrets_client.calls, 1)
+
     def test_header_redaction_masks_sensitive_keys(self) -> None:
         headers = {
             "Authorization": "Bearer secret",
+            "authorization": "Bearer secret-two",
+            "api-key": "abc456",
             "x-api-key": "abc123",
             "other": "ok",
         }
         redacted = OpenAIClient.redact_headers(headers)
 
         self.assertEqual(redacted["Authorization"], "***")
+        self.assertEqual(redacted["authorization"], "***")
         self.assertEqual(redacted["x-api-key"], "***")
+        self.assertEqual(redacted["api-key"], "***")
         self.assertEqual(redacted["other"], "ok")
         # Ensure original dict is unchanged.
         self.assertEqual(headers["Authorization"], "Bearer secret")
+        self.assertEqual(headers["authorization"], "Bearer secret-two")
 
     def test_integrations_namespace_alias(self) -> None:
         self.assertIs(OpenAIClient, BoundaryOpenAIClient)
