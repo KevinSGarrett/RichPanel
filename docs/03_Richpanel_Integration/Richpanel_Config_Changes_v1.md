@@ -1,15 +1,121 @@
-# Richpanel Config Changes (v1 Target State)
+# Richpanel UI Configuration Changes (v1) — Runbook (NO UI changes by automation)
 
-Last updated: 2025-12-29
-Last verified: 2025-12-29 — Updated with safer middleware-trigger placement (Tagging Rules first) and payload robustness notes.
+Last updated: 2026-01-05  
+Last verified: 2026-01-05 — Updated to match shipped ingress (`POST /webhook` + `x-richpanel-webhook-token`), added doc-only prep vs gated UI split, and refreshed canonical secret ID paths (no values).
 
 This document defines the **exact Richpanel configuration changes** required to support the middleware safely.
 
 It is written so Support Ops / Admins can implement changes in the Richpanel UI without guessing, and Engineering can implement middleware expectations without relying on undocumented behavior.
 
+**Important:** this runbook includes both (a) doc-only prep steps and (b) **human Richpanel UI steps**. The UI steps are explicitly **gated**; do not execute them until the environment is deployed and the required gates/secrets are in place.
+
 ---
 
-## 0) Guiding principles (v1)
+## 0) Runbook split (read this first)
+
+### 0.1 Doc-only prep (NO Richpanel UI changes)
+Do these steps first. They are safe to execute without touching the Richpanel UI:
+- Pull the **ingress endpoint** from CloudFormation outputs.
+- Pull the **secrets namespace** from CloudFormation outputs.
+- Confirm required **Secrets Manager IDs** exist (do not write values into this doc).
+- Confirm operator **kill switches / gating flags** are understood (`safe_mode`, `automation_enabled`, `OPENAI_OUTBOUND_ENABLED`, `RICHPANEL_OUTBOUND_ENABLED`).
+- Capture workflow evidence links (GitHub Actions run summary URLs).
+
+### 0.2 Human UI execution (gated)
+These steps require a Richpanel workspace admin and should only be executed after doc-only prep is complete:
+- Create Teams + Tags
+- Create/modify Automation rules (HTTP Target trigger + assignment rules)
+- Create/verify the Richpanel HTTP Target that calls middleware ingress
+
+---
+
+## 1) Doc-only prep (NO Richpanel UI changes)
+
+### 1.1 Choose environment + stack name
+- **Environment**: `dev`, `staging`, or `prod`
+- **CloudFormation stack name** (CDK default): `RichpanelMiddleware-<env>` (example: `RichpanelMiddleware-dev`)
+- **Ingress route (shipped)**: `POST /webhook`
+- **Ingress auth header (shipped)**: `x-richpanel-webhook-token` (case-insensitive HTTP header; set this in Richpanel)
+
+### 1.2 PowerShell-safe: fetch ingress endpoint URL (CloudFormation output)
+
+```powershell
+$EnvName = "dev"  # dev | staging | prod
+$StackName = "RichpanelMiddleware-" + $EnvName
+
+# CloudFormation output: IngressEndpointUrl (base URL)
+$IngressBase = aws cloudformation describe-stacks `
+  --stack-name $StackName `
+  --query "Stacks[0].Outputs[?OutputKey=='IngressEndpointUrl'].OutputValue | [0]" `
+  --output text
+
+# Richpanel HTTP Target URL (shipped route)
+$IngressWebhookUrl = "$IngressBase/webhook"
+$IngressWebhookUrl
+```
+
+### 1.3 PowerShell-safe: fetch secrets namespace (CloudFormation output)
+
+```powershell
+$EnvName = "dev"  # dev | staging | prod
+$StackName = "RichpanelMiddleware-" + $EnvName
+
+$SecretsNamespace = aws cloudformation describe-stacks `
+  --stack-name $StackName `
+  --query "Stacks[0].Outputs[?OutputKey=='SecretsNamespace'].OutputValue | [0]" `
+  --output text
+
+$SecretsNamespace
+```
+
+### 1.4 Canonical secret IDs (defaults; DO NOT put values in this doc)
+These are the shipped default secret names used by middleware clients. Do not change naming unless you also update code.
+
+- **Richpanel**
+  - Webhook token (ingress shared secret): `rp-mw/<env>/richpanel/webhook_token`
+  - API key (Richpanel API): `rp-mw/<env>/richpanel/api_key`
+- **OpenAI**
+  - API key: `rp-mw/<env>/openai/api_key`
+- **Shopify (Admin API token)**
+  - Canonical: `rp-mw/<env>/shopify/admin_api_token`
+  - Legacy fallback (supported for compatibility): `rp-mw/<env>/shopify/access_token`
+- **ShipStation**
+  - API key: `rp-mw/<env>/shipstation/api_key`
+  - API secret: `rp-mw/<env>/shipstation/api_secret`
+  - API base URL (optional; defaults to vendor base if absent): `rp-mw/<env>/shipstation/api_base`
+
+> `<env>` is `dev`, `staging`, or `prod`.
+
+### 1.5 Gating flags / operator levers (align with shipped terminology)
+Middleware behavior is intentionally gated so we can deploy safely before enabling outbound side effects:
+
+- **Kill switches (runtime, SSM Parameter Store)**
+  - `safe_mode`: when `true`, forces route-only and disables automation.
+  - `automation_enabled`: when `false`, disables automated replies/side effects.
+- **Outbound network gates (Lambda env vars)**
+  - `OPENAI_OUTBOUND_ENABLED`: must be `true` to allow OpenAI outbound calls.
+  - `RICHPANEL_OUTBOUND_ENABLED`: must be `true` to allow Richpanel API outbound calls.
+
+> Recommended early rollout posture: keep `safe_mode=true` and `automation_enabled=false` until ingress and routing are verified. Only enable outbound flags intentionally (one vendor at a time) once wiring and monitoring are confirmed.
+
+### 1.6 Where to find workflow evidence (Actions run summary)
+Capture evidence links after you run automation workflows (seed secrets / deploy / CI):
+
+- **GitHub UI**: open the relevant GitHub Actions run → copy the run URL → attach to ticket/PR notes.
+- **PowerShell-safe via `gh` (URLs only; no secrets):**
+
+```powershell
+# Example: get the most recent run URL for a workflow file (adjust name as needed).
+$Workflow = "seed-secrets.yml"  # or deploy-dev.yml, deploy-staging.yml, etc.
+$RunId = gh run list --workflow $Workflow --branch main --limit 1 --json databaseId --jq '.[0].databaseId'
+gh run view $RunId --json url,conclusion --jq '.url'
+```
+
+---
+
+## 2) Human UI execution (gated) — Richpanel admin steps
+
+### 2.1 Guiding principles (v1)
 1) **Inbound-only triggers**: middleware should run only on customer messages (not agent replies).
 2) **No auto-close**: middleware will never close; Richpanel should not auto-close customer issues in v1 unless explicitly approved (spam/system-notifs only).
 3) **Tag-driven routing**: middleware applies `route-*` tags; Richpanel assignment rules map tags → Teams.
@@ -19,7 +125,7 @@ It is written so Support Ops / Admins can implement changes in the Richpanel UI 
 
 ---
 
-## 1) Configuration change summary (what to change)
+### 2.2 Configuration change summary (what to change)
 
 | Area | Change | Why | Owner |
 |---|---|---|---|
@@ -34,7 +140,7 @@ It is written so Support Ops / Admins can implement changes in the Richpanel UI 
 
 ---
 
-## 2) Teams (target state)
+### 2.3 Teams (target state)
 
 ### 2.1 Create: Chargebacks / Disputes
 - **Name:** `Chargebacks / Disputes`
@@ -44,7 +150,7 @@ It is written so Support Ops / Admins can implement changes in the Richpanel UI 
 
 ---
 
-## 3) Tags (target state)
+### 2.4 Tags (target state)
 
 ### 3.1 Naming conventions
 - `route-*` = routing destination decision (set by middleware)
@@ -79,7 +185,7 @@ Create these tags:
 
 ---
 
-## 4) Automation rules (target state)
+### 2.5 Automation rules (target state)
 
 ### 4.1 New: Middleware inbound trigger rule (required)
 Create a rule:
@@ -169,21 +275,21 @@ From the current snapshot, these rules auto-close based on subject matching:
 
 ---
 
-## 5) HTTP Target (Richpanel → Middleware)
+### 2.6 HTTP Target (Richpanel → Middleware)
 
-### 5.1 Destination
-POST to API Gateway endpoint (per environment):
-- Dev: `https://<dev>/richpanel/inbound`
-- Staging: `https://<staging>/richpanel/inbound`
-- Prod: `https://<prod>/richpanel/inbound`
+#### 2.6.1 Destination (shipped)
+POST to the deployed API Gateway **ingress webhook route**:
+- URL: `<IngressEndpointUrl>/webhook`
 
-### 5.2 Required security header (anti-spoof)
-Add a static secret header in Richpanel HTTP Target configuration:
-- `X-Middleware-Token: <random 32+ char secret per environment>`
+> Use the doc-only prep step to retrieve `IngressEndpointUrl` from CloudFormation, then append `/webhook`.
+
+#### 2.6.2 Required security header (anti-spoof) (shipped)
+Add a static shared-secret header in Richpanel HTTP Target configuration:
+- `x-richpanel-webhook-token: <secret per environment>`
 
 Store the secret in AWS Secrets Manager; rotate if leaked.
 
-### 5.3 Payload strategy (v1)
+#### 2.6.3 Payload strategy (v1)
 **Recommended (v1): minimal payload**
 
 Rationale:
@@ -205,44 +311,79 @@ If the tenant’s JSON template escapes values correctly (test with quotes + new
 
 ---
 
-## 6) Rollout stages (recommended)
+### 2.7 Rollout stages (recommended)
 
-### Stage 0 — Shadow (no customer impact)
+#### Stage 0 — Shadow (no customer impact)
 - Middleware ingests events + logs predictions
 - No tags applied (or apply `mw-shadow` only)
 
-### Stage 1 — Tag-only
+#### Stage 1 — Tag-only
 - Middleware applies `route-*` + `mw-routing-applied`
 - Richpanel legacy assignment rules are guarded (or reviewed) to prevent routing fights
 - Ops reviews routing accuracy via views
 
-### Stage 2 — Full routing
+#### Stage 2 — Full routing
 - Enable assignment rules: `route-*` → Team
 - Middleware allowed to send Tier 1/2 auto-replies (FAQ order status only)
 
-### Stage 3 — Optimization
+#### Stage 3 — Optimization
 - Calibrate confidence thresholds
 - Expand FAQ automation set carefully
 
 ---
 
-## 7) Acceptance checklist (definition of done for config)
+### 2.8 Acceptance checklist (definition of done for config)
 
-### 7.1 Security & stability
-- [ ] HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `X-Middleware-Token`)
+#### 2.8.1 Security & stability
+- [ ] HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `x-richpanel-webhook-token`)
 - [ ] Middleware ACKs in < 500ms p95 (ingress path)
 - [ ] Duplicate deliveries do not cause duplicate tags or replies
 
-### 7.2 Trigger reliability
+#### 2.8.2 Trigger reliability
 - [ ] `Middleware — Inbound Trigger` exists and has **Skip all subsequent rules = OFF**
 - [ ] Preferred: trigger lives in **Tagging Rules** (or equivalent) and is at the top of that category
 - [ ] Fallback: if in Assignment Rules, it is the first rule
 
-### 7.3 Routing correctness
+#### 2.8.3 Routing correctness
 - [ ] Adding `route-*` tag triggers correct team assignment
 - [ ] Legacy rules do not override middleware routing (no routing fights)
 - [ ] Chargeback subjects route to Chargebacks / Disputes team (and do not auto-close)
 
-### 7.4 Visibility
+#### 2.8.4 Visibility
 - [ ] Saved views exist for `route-*` tags (optional but recommended)
 - [ ] `mw-*` tags present for debugging in a sample ticket
+
+---
+
+## 3) UI execution checklist (human follow-along; no secrets)
+
+### 3.1 Preflight (must be true before touching Richpanel UI)
+- [ ] You know the target **environment** (`dev` / `staging` / `prod`).
+- [ ] CloudFormation stack `RichpanelMiddleware-<env>` exists.
+- [ ] You retrieved `<IngressEndpointUrl>/webhook` from CloudFormation outputs.
+- [ ] You retrieved `SecretsNamespace` from CloudFormation outputs.
+- [ ] Secrets exist (IDs only; do not paste values):
+  - [ ] `rp-mw/<env>/richpanel/webhook_token`
+  - [ ] `rp-mw/<env>/richpanel/api_key`
+  - [ ] `rp-mw/<env>/openai/api_key` (only required before enabling OpenAI outbound)
+  - [ ] `rp-mw/<env>/shopify/admin_api_token` (optional; only if Shopify fallback is used)
+  - [ ] `rp-mw/<env>/shipstation/api_key` / `api_secret` (optional; only if ShipStation is used)
+
+### 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)
+- [ ] Create Team: `Chargebacks / Disputes`
+- [ ] Create required tags:
+  - [ ] All `route-*` tags (11)
+  - [ ] All `mw-*` tags
+- [ ] Create automation rule: `Middleware — Inbound Trigger`
+  - [ ] Customer message triggers only
+  - [ ] Action: HTTP Target → `<IngressEndpointUrl>/webhook`
+  - [ ] Header: `x-richpanel-webhook-token: <value from Secrets Manager rp-mw/<env>/richpanel/webhook_token>`
+  - [ ] **Skip all subsequent rules = OFF**
+- [ ] Create assignment rules: `route-*` → Team mapping
+- [ ] Guard/de-conflict legacy auto-assign rules to prevent “routing fights”
+- [ ] Disable/replace chargeback auto-close rules (do not auto-close in v1)
+
+### 3.3 Post-change verification (minimal)
+- [ ] Send a test customer message; verify the HTTP Target fires.
+- [ ] Verify middleware ingress returns `200 accepted` (CloudWatch logs for `rp-mw-<env>-ingress` show `ingress.accepted`).
+- [ ] Verify the conversation receives `mw-processed` and (in Stage 1+) `mw-routing-applied` / `route-*` tags as expected.
