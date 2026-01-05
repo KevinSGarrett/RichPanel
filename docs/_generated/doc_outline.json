@@ -10739,8 +10739,28 @@
       },
       {
         "level": 2,
-        "text": "3) When GitHub Actions fails (red status)",
-        "anchor": "3-when-github-actions-fails-red-status"
+        "text": "3) Bugbot PR review (Cursor)",
+        "anchor": "3-bugbot-pr-review-cursor"
+      },
+      {
+        "level": 3,
+        "text": "How to trigger a review (mention-only mode)",
+        "anchor": "how-to-trigger-a-review-mention-only-mode"
+      },
+      {
+        "level": 3,
+        "text": "PowerShell-safe `gh` examples",
+        "anchor": "powershell-safe-gh-examples"
+      },
+      {
+        "level": 3,
+        "text": "Merge policy (auditability)",
+        "anchor": "merge-policy-auditability"
+      },
+      {
+        "level": 2,
+        "text": "4) When GitHub Actions fails (red status)",
+        "anchor": "4-when-github-actions-fails-red-status"
       },
       {
         "level": 3,
@@ -10774,8 +10794,8 @@
       },
       {
         "level": 2,
-        "text": "4) Dev E2E smoke workflow",
-        "anchor": "4-dev-e2e-smoke-workflow"
+        "text": "5) Dev E2E smoke workflow",
+        "anchor": "5-dev-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10794,8 +10814,8 @@
       },
       {
         "level": 2,
-        "text": "5) Staging E2E smoke workflow",
-        "anchor": "5-staging-e2e-smoke-workflow"
+        "text": "6) Staging E2E smoke workflow",
+        "anchor": "6-staging-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10814,8 +10834,8 @@
       },
       {
         "level": 2,
-        "text": "6) Prod promotion checklist (no prod deploy without explicit go/no-go)",
-        "anchor": "6-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+        "text": "7) Prod promotion checklist (no prod deploy without explicit go/no-go)",
+        "anchor": "7-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
       },
       {
         "level": 3,
@@ -10829,13 +10849,33 @@
       },
       {
         "level": 2,
-        "text": "7) Common causes (initial list)",
-        "anchor": "7-common-causes-initial-list"
+        "text": "8) Common causes (initial list)",
+        "anchor": "8-common-causes-initial-list"
       },
       {
         "level": 2,
-        "text": "8) If you cannot fix quickly",
-        "anchor": "8-if-you-cannot-fix-quickly"
+        "text": "9) If you cannot fix quickly",
+        "anchor": "9-if-you-cannot-fix-quickly"
+      },
+      {
+        "level": 2,
+        "text": "10) Seed Secrets Manager (dev/staging)",
+        "anchor": "10-seed-secrets-manager-devstaging"
+      },
+      {
+        "level": 3,
+        "text": "GitHub secrets required (repo Settings → Secrets and variables → Actions)",
+        "anchor": "github-secrets-required-repo-settings-secrets-and-variables-actions"
+      },
+      {
+        "level": 3,
+        "text": "AWS secret IDs written (when the matching GitHub secret is present)",
+        "anchor": "aws-secret-ids-written-when-the-matching-github-secret-is-present"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
       }
     ]
   },

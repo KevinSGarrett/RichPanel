@@ -53,7 +53,44 @@ If this fails locally, **fix before pushing**.
 
 ---
 
-## 3) When GitHub Actions fails (red status)
+## 3) Bugbot PR review (Cursor)
+Bugbot is a **standard part of our hardened PR loop**, but it is **not a hard CI blocker yet**. Treat it as required human process: run it, read it, and address findings (or explicitly document why not) before merging.
+
+### How to trigger a review (mention-only mode)
+If Bugbot is configured to only run on mention, trigger it by adding one of these PR comments:
+- `bugbot run`
+- `@cursor review`
+
+### PowerShell-safe `gh` examples
+Post the trigger comment:
+```powershell
+# Trigger Bugbot on a specific PR number
+gh pr comment 123 -b 'bugbot run'
+# or
+gh pr comment 123 -b '@cursor review'
+```
+
+Then view PR comments (including Bugbot output):
+```powershell
+gh pr view 123 --comments
+```
+
+Tip: if you’re already on the PR branch, you can let `gh` infer the PR:
+```powershell
+$pr = gh pr view --json number --jq '.number'
+gh pr comment $pr -b 'bugbot run'
+gh pr view $pr --comments
+```
+
+### Merge policy (auditability)
+We require **merge commits only** for auditability and traceability.
+- Use **auto-merge** and the merge-commit method:
+  - `gh pr merge --auto --merge --delete-branch`
+- **Do not squash merge**. Squash merging is intentionally disabled to preserve per-commit history and support evidence/audit workflows.
+
+---
+
+## 4) When GitHub Actions fails (red status)
 
 ### Step 1 — Identify the failing job
 Preferred (if GitHub CLI is available and authenticated):
@@ -106,7 +143,7 @@ Fallback:
 
 ---
 
-## 4) Dev E2E smoke workflow
+## 5) Dev E2E smoke workflow
 
 The “Dev E2E Smoke” workflow (`.github/workflows/dev-e2e-smoke.yml`) continuously validates the dev stack by sending a synthetic webhook and confirming the worker Lambda writes idempotency, conversation state, and audit records to DynamoDB.
 
@@ -133,7 +170,7 @@ Notes:
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state “no dashboards/alarms surfaced”.
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 
-## 5) Staging E2E smoke workflow
+## 6) Staging E2E smoke workflow
 
 The “Staging E2E Smoke” workflow (`.github/workflows/staging-e2e-smoke.yml`) validates the staging stack end-to-end using the same script as dev, but under the staging deploy role.
 
@@ -162,7 +199,7 @@ Guidance:
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if none appear, state “no dashboards/alarms surfaced”.
 - If discovery falls back (missing CloudFormation outputs), capture the warning lines so reviewers can see which derived values were used, but never paste raw secret material.
 
-## 6) Prod promotion checklist (no prod deploy without explicit go/no-go)
+## 7) Prod promotion checklist (no prod deploy without explicit go/no-go)
 
 Only promote to prod with PM/lead approval recorded in the notes. Stop immediately if staging evidence is missing or stale.
 
@@ -196,7 +233,7 @@ Notes:
 - Keep both run URLs plus the `${GITHUB_STEP_SUMMARY}` contents in the rehydration pack evidence tables.
 - If prod deploy is intentionally deferred, record the decision and skip the commands.
 
-## 7) Common causes (initial list)
+## 8) Common causes (initial list)
 - stale generated registries not committed
 - accidental placeholder left in an INDEX-linked doc (doc hygiene)
 - broken markdown link in `docs/INDEX.md`
@@ -205,7 +242,7 @@ Notes:
 
 ---
 
-## 8) If you cannot fix quickly
+## 9) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -213,3 +250,39 @@ and include:
 - suspected cause
 - attempted fixes
 - proposed next actions
+
+## 10) Seed Secrets Manager (dev/staging)
+Optional workflow to upsert Secrets Manager entries without using the console.
+
+- Workflow: `.github/workflows/seed-secrets.yml`
+- Role: `rp-ci-deploy` via OIDC (dev=151124909266, staging=260475105304)
+- Region: `us-east-2`
+
+### GitHub secrets required (repo Settings → Secrets and variables → Actions)
+- `DEV_RICHPANEL_WEBHOOK_TOKEN`
+- `DEV_RICHPANEL_API_KEY`
+- `DEV_OPENAI_API_KEY`
+- `STAGING_RICHPANEL_WEBHOOK_TOKEN`
+- `STAGING_RICHPANEL_API_KEY`
+- `STAGING_OPENAI_API_KEY`
+
+### AWS secret IDs written (when the matching GitHub secret is present)
+- `rp-mw/<env>/richpanel/webhook_token`
+- `rp-mw/<env>/richpanel/api_key`
+- `rp-mw/<env>/openai/api_key`
+
+### How to run (PowerShell-safe)
+```powershell
+# dev
+$null = gh workflow run seed-secrets.yml --ref main -f environment=dev
+gh run watch --exit-status
+gh run view --json url --jq '.url'
+
+# staging
+$null = gh workflow run seed-secrets.yml --ref main -f environment=staging
+gh run watch --exit-status
+gh run view --json url --jq '.url'
+```
+Notes:
+- The script only writes secrets when the corresponding GitHub secret exists; missing inputs show as “skipped” in the job + step summary.
+- Secret values are never echoed; only secret IDs and env var names appear in logs.
