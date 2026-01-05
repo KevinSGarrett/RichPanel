@@ -1,0 +1,6 @@
+# RichPanel Bugbot Review Rules
+- Security & secrets: no secrets in code or logs; prefer env/config; verify new flows keep secrets encrypted at rest/in transit and scrubbed from telemetry.
+- PII hygiene: do not log, persist, or export PII without existing approved paths; ensure redaction/anonymization on any diagnostic output.
+- Offline-first gating: changes must keep gating logic safe when offline; fail closed, use cached/queued behavior, and avoid introducing new online-only blockers.
+- Workers/pipelines/integrations: any logic changes require tests (unit/integration/mocks) covering happy-path, retries, idempotency, and external error handling.
+- Generated docs: avoid churn in generated docs; only regenerate when required and document why in the PR if touched.
