@@ -1,6 +1,6 @@
 # CI and GitHub Actions Runbook (for Cursor Agents)
 
-Last updated: 2026-01-03  
+Last updated: 2026-01-05  
 Status: Canonical
 
 This runbook defines how agents must keep CI green and how to self-fix when GitHub Actions fails.
@@ -80,6 +80,23 @@ Tip: if you’re already on the PR branch, you can let `gh` infer the PR:
 $pr = gh pr view --json number --jq '.number'
 gh pr comment $pr -b 'bugbot run'
 gh pr view $pr --comments
+```
+
+### Alternative trigger: workflow dispatch (Actions tab)
+If you can’t (or don’t want to) comment from the UI/`gh`, you can trigger Bugbot via an on-demand workflow that **posts the comment for you**:
+
+- Workflow: `.github/workflows/bugbot-review.yml`
+- Inputs:
+  - `pr_number` (required)
+  - `comment_body` (optional; defaults to `@cursor review`)
+
+PowerShell-safe examples:
+```powershell
+# Posts the default comment body (@cursor review)
+gh workflow run bugbot-review.yml -f pr_number=123
+
+# Override the posted comment body if needed
+gh workflow run bugbot-review.yml -f pr_number=123 -f comment_body='bugbot run'
 ```
 
 ### Merge policy (auditability)
@@ -255,6 +272,7 @@ and include:
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
+- Helper: `scripts/seed_secrets.py` (stdlib + AWS CLI; writes table to `$GITHUB_STEP_SUMMARY`)
 - Role: `rp-ci-deploy` via OIDC (dev=151124909266, staging=260475105304)
 - Region: `us-east-2`
 
