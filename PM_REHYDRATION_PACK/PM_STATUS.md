@@ -1,6 +1,6 @@
 # PM Status
 
-Date: 2026-01-03
+Date: 2026-01-05
 Wave: B06 (Pack snapshot refresh) — **Dev + Staging green; Prod gated**
 
 Estimated overall completion: ~65%
@@ -11,6 +11,7 @@ Estimated overall completion: ~65%
 - Regen outputs are **deterministic** across Windows/Linux (doc registry, reference registry, plan checklist).
 - `main` is protected (required check: `validate`), and repo settings are constrained to **merge commits only**.
 - Change Request CR-001 (no tracking numbers; delivery estimate only) is integrated into the plan and docs.
+- Bugbot review is part of the PR loop (trigger via `@cursor review`); treat as required process even though it is not a hard CI blocker yet.
 
 ## Deployed / verified (green)
 - Dev deploy ✅: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20671603896`
