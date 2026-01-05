@@ -4779,23 +4779,78 @@
     "outline": [
       {
         "level": 1,
-        "text": "Richpanel Config Changes (v1 Target State)",
-        "anchor": "richpanel-config-changes-v1-target-state"
+        "text": "Richpanel UI Configuration Changes (v1) — Runbook (NO UI changes by automation)",
+        "anchor": "richpanel-ui-configuration-changes-v1-runbook-no-ui-changes-by-automation"
       },
       {
         "level": 2,
-        "text": "0) Guiding principles (v1)",
-        "anchor": "0-guiding-principles-v1"
+        "text": "0) Runbook split (read this first)",
+        "anchor": "0-runbook-split-read-this-first"
+      },
+      {
+        "level": 3,
+        "text": "0.1 Doc-only prep (NO Richpanel UI changes)",
+        "anchor": "01-doc-only-prep-no-richpanel-ui-changes"
+      },
+      {
+        "level": 3,
+        "text": "0.2 Human UI execution (gated)",
+        "anchor": "02-human-ui-execution-gated"
       },
       {
         "level": 2,
-        "text": "1) Configuration change summary (what to change)",
-        "anchor": "1-configuration-change-summary-what-to-change"
+        "text": "1) Doc-only prep (NO Richpanel UI changes)",
+        "anchor": "1-doc-only-prep-no-richpanel-ui-changes"
+      },
+      {
+        "level": 3,
+        "text": "1.1 Choose environment + stack name",
+        "anchor": "11-choose-environment-stack-name"
+      },
+      {
+        "level": 3,
+        "text": "1.2 PowerShell-safe: fetch ingress endpoint URL (CloudFormation output)",
+        "anchor": "12-powershell-safe-fetch-ingress-endpoint-url-cloudformation-output"
+      },
+      {
+        "level": 3,
+        "text": "1.3 PowerShell-safe: fetch secrets namespace (CloudFormation output)",
+        "anchor": "13-powershell-safe-fetch-secrets-namespace-cloudformation-output"
+      },
+      {
+        "level": 3,
+        "text": "1.4 Canonical secret IDs (defaults; DO NOT put values in this doc)",
+        "anchor": "14-canonical-secret-ids-defaults-do-not-put-values-in-this-doc"
+      },
+      {
+        "level": 3,
+        "text": "1.5 Gating flags / operator levers (align with shipped terminology)",
+        "anchor": "15-gating-flags-operator-levers-align-with-shipped-terminology"
+      },
+      {
+        "level": 3,
+        "text": "1.6 Where to find workflow evidence (Actions run summary)",
+        "anchor": "16-where-to-find-workflow-evidence-actions-run-summary"
       },
       {
         "level": 2,
-        "text": "2) Teams (target state)",
-        "anchor": "2-teams-target-state"
+        "text": "2) Human UI execution (gated) — Richpanel admin steps",
+        "anchor": "2-human-ui-execution-gated-richpanel-admin-steps"
+      },
+      {
+        "level": 3,
+        "text": "2.1 Guiding principles (v1)",
+        "anchor": "21-guiding-principles-v1"
+      },
+      {
+        "level": 3,
+        "text": "2.2 Configuration change summary (what to change)",
+        "anchor": "22-configuration-change-summary-what-to-change"
+      },
+      {
+        "level": 3,
+        "text": "2.3 Teams (target state)",
+        "anchor": "23-teams-target-state"
       },
       {
         "level": 3,
@@ -4803,9 +4858,9 @@
         "anchor": "21-create-chargebacks-disputes"
       },
       {
-        "level": 2,
-        "text": "3) Tags (target state)",
-        "anchor": "3-tags-target-state"
+        "level": 3,
+        "text": "2.4 Tags (target state)",
+        "anchor": "24-tags-target-state"
       },
       {
         "level": 3,
@@ -4823,9 +4878,9 @@
         "anchor": "33-required-middleware-control-tags-v1"
       },
       {
-        "level": 2,
-        "text": "4) Automation rules (target state)",
-        "anchor": "4-automation-rules-target-state"
+        "level": 3,
+        "text": "2.5 Automation rules (target state)",
+        "anchor": "25-automation-rules-target-state"
       },
       {
         "level": 3,
@@ -4848,74 +4903,39 @@
         "anchor": "44-disablereplace-chargeback-auto-close-rules-required"
       },
       {
-        "level": 2,
-        "text": "5) HTTP Target (Richpanel → Middleware)",
-        "anchor": "5-http-target-richpanel-middleware"
+        "level": 3,
+        "text": "2.6 HTTP Target (Richpanel → Middleware)",
+        "anchor": "26-http-target-richpanel-middleware"
       },
       {
         "level": 3,
-        "text": "5.1 Destination",
-        "anchor": "51-destination"
+        "text": "2.7 Rollout stages (recommended)",
+        "anchor": "27-rollout-stages-recommended"
       },
       {
         "level": 3,
-        "text": "5.2 Required security header (anti-spoof)",
-        "anchor": "52-required-security-header-anti-spoof"
-      },
-      {
-        "level": 3,
-        "text": "5.3 Payload strategy (v1)",
-        "anchor": "53-payload-strategy-v1"
+        "text": "2.8 Acceptance checklist (definition of done for config)",
+        "anchor": "28-acceptance-checklist-definition-of-done-for-config"
       },
       {
         "level": 2,
-        "text": "6) Rollout stages (recommended)",
-        "anchor": "6-rollout-stages-recommended"
+        "text": "3) UI execution checklist (human follow-along; no secrets)",
+        "anchor": "3-ui-execution-checklist-human-follow-along-no-secrets"
       },
       {
         "level": 3,
-        "text": "Stage 0 — Shadow (no customer impact)",
-        "anchor": "stage-0-shadow-no-customer-impact"
+        "text": "3.1 Preflight (must be true before touching Richpanel UI)",
+        "anchor": "31-preflight-must-be-true-before-touching-richpanel-ui"
       },
       {
         "level": 3,
-        "text": "Stage 1 — Tag-only",
-        "anchor": "stage-1-tag-only"
+        "text": "3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+        "anchor": "32-richpanel-ui-changes-execute-in-order-stop-if-anything-is-unclear"
       },
       {
         "level": 3,
-        "text": "Stage 2 — Full routing",
-        "anchor": "stage-2-full-routing"
-      },
-      {
-        "level": 3,
-        "text": "Stage 3 — Optimization",
-        "anchor": "stage-3-optimization"
-      },
-      {
-        "level": 2,
-        "text": "7) Acceptance checklist (definition of done for config)",
-        "anchor": "7-acceptance-checklist-definition-of-done-for-config"
-      },
-      {
-        "level": 3,
-        "text": "7.1 Security & stability",
-        "anchor": "71-security-stability"
-      },
-      {
-        "level": 3,
-        "text": "7.2 Trigger reliability",
-        "anchor": "72-trigger-reliability"
-      },
-      {
-        "level": 3,
-        "text": "7.3 Routing correctness",
-        "anchor": "73-routing-correctness"
-      },
-      {
-        "level": 3,
-        "text": "7.4 Visibility",
-        "anchor": "74-visibility"
+        "text": "3.3 Post-change verification (minimal)",
+        "anchor": "33-post-change-verification-minimal"
       }
     ]
   },
