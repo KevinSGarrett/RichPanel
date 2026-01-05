@@ -74,6 +74,7 @@ def main() -> int:
 
     # 2) Validate
     checks = [
+        ["python", "scripts/verify_agent_prompts_fresh.py"],
         ["python", "scripts/verify_rehydration_pack.py"],
         ["python", "scripts/verify_doc_hygiene.py"],
         ["python", "scripts/verify_plan_sync.py"],

@@ -106,6 +106,9 @@ Agents must run before pushing:
 ```bash
 python scripts/run_ci_checks.py
 ```
+- This run now enforces that `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md` differs from
+  the latest `RUN_*/C/AGENT_PROMPTS_ARCHIVE*.md` unless you add `Prompt-Repeat-Override: true`
+  to confirm intentional reuse.
 
 ### “Extensions are not CLI” (VS Code/Cursor)
 Do not rely on editor extensions as enforcement mechanisms.
