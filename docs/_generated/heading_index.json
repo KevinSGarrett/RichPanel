@@ -12317,6 +12317,12 @@
       "anchor": "diffs"
     }
   ],
+  "formatting": [
+    {
+      "path": "08_Engineering/Repository_Conventions.md",
+      "anchor": "formatting"
+    }
+  ],
   "source-of-truth rules": [
     {
       "path": "08_Engineering/Repository_Conventions.md",
