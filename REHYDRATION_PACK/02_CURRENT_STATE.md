@@ -1,6 +1,6 @@
 # Current State (Truth)
 
-**As of:** 2026-01-04  
+**As of:** 2026-01-05  
 **Mode:** build (see `REHYDRATION_PACK/MODE.yaml`)  
 **Stage:** dev + staging deployed; smoke tests green; prod gated  
 **Estimated overall completion:** ~65%
@@ -21,7 +21,8 @@
 
 ### Runtime pipeline exists (end-to-end)
 - Runtime path: **API → ingress → SQS → worker → DynamoDB**
-- Ingress enqueues events to SQS; worker processes, plans, and persists state/audit records.
+- Ingress enqueues events to SQS; worker processes, plans, and persists **idempotency** records.  
+  - Worker code supports optional **conversation state + audit trail** persistence when tables are configured.
 - Automation candidates now include an order lookup (Shopify + ShipStation behind dry-run gates) and plan an `order_status_draft_reply` action with prompt fingerprints; outbound remains blocked by default.
 
 ### Safety gates are in place (conservative defaults)
@@ -35,6 +36,7 @@
 - Repo is hosted on GitHub (`KevinSGarrett/RichPanel`).
 - `main` is protected with required status check **`validate`**.
 - Merge policy is constrained (merge-commit only; delete branch on merge).
+- Bugbot review is part of the PR loop (trigger via `@cursor review`; see `docs/08_Engineering/CI_and_Actions_Runbook.md`).
 
 ---
 

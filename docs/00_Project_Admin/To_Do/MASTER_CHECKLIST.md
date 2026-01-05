@@ -14,10 +14,12 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 | CHK-005 | CI gates: CI-equivalent checks + admin anti-drift enforcement | ✅ Done | PM | `scripts/run_ci_checks.py`, `scripts/verify_admin_logs_sync.py` |
 | CHK-006 | Dev/Staging deploy workflows (GitHub Actions) | ✅ Done | Agent A | `.github/workflows/deploy-dev.yml`, `.github/workflows/deploy-staging.yml` |
 | CHK-007 | Dev/Staging E2E smoke tests (GitHub Actions) | ✅ Done | Agent A | `.github/workflows/dev-e2e-smoke.yml`, `.github/workflows/staging-e2e-smoke.yml` |
-| CHK-010 | Build: Ingest + ACK-fast + enqueue | Not started | Agent A | `docs/03_Richpanel_Integration/Webhooks_and_Event_Handling.md` |
+| CHK-008 | Build: Offline-first integration skeletons (Richpanel/OpenAI/Shopify/ShipStation) | ✅ Done (skeleton) | Agent A | `backend/src/richpanel_middleware/integrations/`, `backend/src/integrations/` |
+| CHK-009 | Process: Bugbot in PR loop (trigger + runbook) | ✅ Done | PM | `docs/08_Engineering/CI_and_Actions_Runbook.md` |
+| CHK-010 | Build: Ingest + persist (idempotency + state + audit) + ACK-fast + enqueue | 🚧 In progress | Agent A | `backend/src/lambda_handlers/ingress/handler.py`, `backend/src/lambda_handlers/worker/handler.py`, `scripts/dev_e2e_smoke.py`, `docs/03_Richpanel_Integration/Webhooks_and_Event_Handling.md` |
 | CHK-011 | Build: Router MVP (intent → dept) | Not started | Agent B | `docs/04_LLM_Design_Evaluation/` |
 | CHK-012 | Build: Automation MVP (FAQ / order status) | Not started | Agent C | `docs/05_FAQ_Automation/` |
-| CHK-013 | Build: Observability + audit trail | Not started | Agent C | `docs/08_Observability_Analytics/` |
+| CHK-013 | Build: Observability + audit trail | 🚧 In progress | Agent C | `scripts/dev_e2e_smoke.py`, `docs/08_Observability_Analytics/` |
 | CHK-014 | Build: Security controls + compliance readiness | Not started | Agent A | `docs/06_Security_Privacy_Compliance/` |
 | CHK-015 | Build: Richpanel UI configuration (teams/tags/macros/automation triggers) | ⏳ Pending | Ops + PM | `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md` |
 | CHK-016 | Build: Production go-live (human go/no-go + prod promotion checklist + enablement) | ⏳ Pending | PM + Ops | `docs/00_Project_Admin/Progress_Log.md`, `.github/workflows/deploy-prod.yml`, `.github/workflows/prod-e2e-smoke.yml` |
