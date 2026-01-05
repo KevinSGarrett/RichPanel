@@ -76,6 +76,15 @@ Implementation is active. Cursor agents should store per-run artifacts under `RE
    python scripts/new_run_folder.py --now
    ```
 
+### Windows note: PowerShell 5.x does **not** support `&&`
+If you see examples that chain commands with `&&` (common in bash/zsh), they will fail in **Windows PowerShell 5.x**.
+
+Use **separate lines** or `;` instead:
+```powershell
+python scripts/new_run_folder.py --now
+python scripts/run_ci_checks.py
+```
+
 ### What must exist for each run
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/RUN_META.md`
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/GIT_RUN_PLAN.md` (**required**; prevents merge conflicts + branch explosion)
@@ -97,6 +106,13 @@ Agents must run before pushing:
 ```bash
 python scripts/run_ci_checks.py
 ```
+
+### “Extensions are not CLI” (VS Code/Cursor)
+Do not rely on editor extensions as enforcement mechanisms.
+
+- **Extensions can’t be triggered from CLI/CI** in a dependable way.
+- **Enforcement is CI + scripts**: treat `python scripts/run_ci_checks.py` and GitHub Actions as the source of truth.
+- **GitHub-side automation (e.g., review bots)** is triggered via PR comments or Actions, not a local extension button.
 
 Policy for Git/GitHub operations:
 - `docs/98_Agent_Ops/Policies/POL-GH-001__GitHub_and_Repo_Operations_Policy.md`
