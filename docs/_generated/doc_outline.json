@@ -10754,6 +10754,11 @@
       },
       {
         "level": 3,
+        "text": "Alternative trigger: workflow dispatch (Actions tab)",
+        "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+      },
+      {
+        "level": 3,
         "text": "Merge policy (auditability)",
         "anchor": "merge-policy-auditability"
       },

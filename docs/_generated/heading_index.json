@@ -11901,6 +11901,12 @@
       "anchor": "powershell-safe-gh-examples"
     }
   ],
+  "alternative trigger: workflow dispatch (actions tab)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+    }
+  ],
   "merge policy (auditability)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
