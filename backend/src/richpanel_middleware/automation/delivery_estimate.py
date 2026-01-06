@@ -181,6 +181,53 @@ def compute_delivery_estimate(
         "is_late": is_late,
     }
 
+def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Construct a deterministic draft reply for tracking-present order status cases.
+    Returns None if no tracking signal is present.
+    """
+    tracking_number = (
+        order_summary.get("tracking_number")
+        or order_summary.get("tracking")
+        or order_summary.get("tracking_no")
+        or order_summary.get("trackingCode")
+    )
+    tracking_url = (
+        order_summary.get("tracking_url")
+        or order_summary.get("tracking_link")
+        or order_summary.get("status_url")
+        or order_summary.get("trackingUrl")
+    )
+    carrier = (
+        order_summary.get("carrier")
+        or order_summary.get("shipping_carrier")
+        or order_summary.get("carrier_name")
+        or order_summary.get("carrierName")
+    )
+
+    # Require at least one tracking signal; don't fabricate.
+    if not tracking_number and not tracking_url and not carrier:
+        return None
+
+    tn = tracking_number or "(not available)"
+    cr = carrier or "(not available)"
+    link = tracking_url or "(not available)"
+
+    body = (
+        "Thanks for reaching out — here’s the latest tracking information for your order:\n\n"
+        f"- Carrier: {cr}\n"
+        f"- Tracking number: {tn}\n"
+        f"- Tracking link: {link}\n\n"
+        "If the link doesn’t show updates yet, please try again in a few hours — carrier scans can take time to appear."
+    )
+
+    return {
+        "body": body.strip(),
+        "tracking_number": tracking_number,
+        "tracking_url": tracking_url,
+        "carrier": carrier,
+    }
+
 
 def build_no_tracking_reply(
     order_summary: Dict[str, Any],
@@ -225,10 +272,12 @@ def build_no_tracking_reply(
 
 __all__ = [
     "add_business_days",
+    "build_tracking_reply",
     "build_no_tracking_reply",
     "business_days_between",
     "compute_delivery_estimate",
     "format_eta_window",
     "normalize_shipping_method",
 ]
+
 
