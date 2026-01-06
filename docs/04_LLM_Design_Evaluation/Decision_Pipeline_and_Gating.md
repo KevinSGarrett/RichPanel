@@ -183,3 +183,4 @@ Implementation should:
 - validate schema strictly
 - never trust model output without allowlist checks
 - make gates auditable (structured “gate report” in logs)
+- order lookup enrichment (Shopify + ShipStation) runs only when an order_id exists and `allow_network=True`, `safe_mode=False`, `automation_enabled=True`; otherwise the baseline offline summary is returned

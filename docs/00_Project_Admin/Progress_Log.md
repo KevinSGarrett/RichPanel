@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-03 - RUN_20260103_2300Z.
+Last verified: 2026-01-05 - RUN_20260105_2221Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z
+- Added repo-root `mypy.ini` that scopes checking to `backend/src` + `scripts` and excludes generated CDK assets and archives to stop Cursor/mypy from scanning `asset.<hash>` folders.
+- Documented the asset error and cleanup step (`infra/cdk/cdk.out` deletion) in the CI runbook.
 
 ### 2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)
 - Dev/Staging smoke job summaries now include explicit confirmations for idempotency, conversation state, and audit records, plus derived CloudWatch dashboard/alarm names.

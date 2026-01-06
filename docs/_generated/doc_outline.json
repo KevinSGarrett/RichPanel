@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
+        "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+      },
+      {
+        "level": 3,
         "text": "2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)",
         "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
       },
@@ -10736,6 +10741,11 @@
         "level": 3,
         "text": "PowerShell helper (Windows)",
         "anchor": "powershell-helper-windows"
+      },
+      {
+        "level": 3,
+        "text": "Mypy “asset.\\* not a valid package name” (CDK outputs)",
+        "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
       },
       {
         "level": 2,

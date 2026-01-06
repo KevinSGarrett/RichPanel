@@ -72,7 +72,7 @@ For each department in:
 - Returns Admin
 - LiveChat Support
 - Leadership Team
-- SocialMedia Team
+- Social Media Team
 - Email Support Team
 
 Use stubbed model outputs that choose intents mapped to each destination.

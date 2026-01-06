@@ -4,6 +4,17 @@
 **Agent:** Agent A | Agent B | Agent C  
 **Task ID(s):** `<TASK-###, TASK-###>`
 
+---
+
+## Model + MAX mode + Cycle (REQUIRED)
+- **Model used:** `<model-name>` (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
+- **MAX mode:** ON | OFF
+- **Cycle:** 1× | 2×
+
+**Note:** Always check Cursor's model picker for the current model list. If you can't find the exact model name, pick the closest family (see catalog).
+
+---
+
 ## Context (read first)
 - Current goal: <FILL_ME>
 - Relevant docs/paths:

@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+    }
+  ],
   "2026-01-03 - run_20260103_2300z (e2e evidence hardening + prod readiness checklist)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -11881,6 +11887,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "powershell-helper-windows"
+    }
+  ],
+  "mypy “asset.\\* not a valid package name” (cdk outputs)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
     }
   ],
   "3) bugbot pr review (cursor)": [

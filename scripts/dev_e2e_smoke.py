@@ -320,13 +320,78 @@ def wait_for_dynamodb_record(
     )
 
 
-def validate_idempotency_item(item: Dict[str, Any]) -> None:
+def validate_idempotency_item(item: Dict[str, Any]) -> str:
     required = ["event_id", "mode", "safe_mode", "automation_enabled", "payload_excerpt", "status"]
     missing = [key for key in required if key not in item]
     if missing:
         raise SmokeFailure(f"Idempotency item missing required fields: {', '.join(missing)}")
-    if not str(item.get("payload_excerpt", "")):
+
+    excerpt = item.get("payload_excerpt")
+    if not isinstance(excerpt, str):
+        raise SmokeFailure("Idempotency item payload_excerpt was not a string.")
+    excerpt = excerpt.strip()
+    if not excerpt:
         raise SmokeFailure("Idempotency item payload_excerpt was empty.")
+    if len(excerpt) > 2000:
+        raise SmokeFailure("Idempotency item payload_excerpt exceeded 2000 characters.")
+
+    return excerpt
+
+
+def _normalize_tags(value: Any) -> List[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(tag) for tag in value if str(tag)]
+    if isinstance(value, str) and value.strip():
+        return [value.strip()]
+    return []
+
+
+def validate_routing(record: Dict[str, Any], *, label: str) -> Dict[str, Any]:
+    routing = record.get("routing")
+    if not isinstance(routing, dict):
+        raise SmokeFailure(f"{label} record did not include routing metadata.")
+
+    category = routing.get("category")
+    tags = _normalize_tags(routing.get("tags"))
+    reason = routing.get("reason") or routing.get("reasons")
+
+    if not category:
+        raise SmokeFailure(f"{label} routing.category was missing or empty.")
+    if not tags:
+        raise SmokeFailure(f"{label} routing.tags was missing or empty.")
+    if not reason:
+        raise SmokeFailure(f"{label} routing.reason was missing or empty.")
+
+    return {"category": str(category), "tags": tags, "reason": reason}
+
+
+def has_order_status_draft_action(actions: Any) -> bool:
+    if not isinstance(actions, list):
+        return False
+    for action in actions:
+        if isinstance(action, dict) and action.get("type") == "order_status_draft_reply":
+            return True
+    return False
+
+
+def extract_draft_replies(record: Dict[str, Any], *, label: str) -> List[Dict[str, Any]]:
+    replies = record.get("draft_replies")
+    if replies is None:
+        return []
+    if not isinstance(replies, list):
+        raise SmokeFailure(f"{label} draft_replies was not a list.")
+    for reply in replies:
+        if not isinstance(reply, dict):
+            raise SmokeFailure(f"{label} draft_replies contained a non-dict entry.")
+    return replies
+
+
+def sanitize_draft_replies(replies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    allowed_fields = ("reason", "prompt_fingerprint", "dry_run")
+    sanitized: List[Dict[str, Any]] = []
+    for reply in replies:
+        sanitized.append({field: reply.get(field) for field in allowed_fields if field in reply})
+    return sanitized
 
 
 def wait_for_conversation_state_record(
@@ -419,9 +484,20 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
         f"(mode={data['idempotency_mode']}, status={data['idempotency_status']})",
         f"- Idempotency table: `{data['ddb_table']}`",
         f"- Idempotency console: {data['ddb_console_url']}",
+        f"- Routing: category=`{data['routing_category']}`; tags={', '.join(data['routing_tags'])}",
+        f"- Draft action: order_status_draft_reply={'yes' if data['draft_action_present'] else 'no'}; "
+        f"draft_replies={data['draft_reply_count']}",
         f"- Log group: `{data['logs_group']}`",
         f"- CloudWatch logs: {data['logs_console_url']}",
     ]
+    if data.get("draft_reply_count"):
+        safe_drafts = data.get("draft_replies_safe") or []
+        formatted_drafts = "; ".join(
+            f"reason={entry.get('reason', '?')}, prompt_fingerprint={entry.get('prompt_fingerprint', '?')}, "
+            f"dry_run={entry.get('dry_run')}"
+            for entry in safe_drafts
+        ) or "none"
+        lines.append(f"- Draft replies (safe fields): {formatted_drafts}")
     if data.get("conversation_state_table"):
         lines.append(
             "- Conversation state record observed for "
@@ -546,9 +622,13 @@ def main() -> int:
         event_id=event_id,
         timeout_seconds=args.wait_seconds,
     )
-    validate_idempotency_item(item)
+    payload_excerpt = validate_idempotency_item(item)
     mode = item.get("mode")
     print(f"[OK] Event '{event_id}' observed in table '{dynamo_table}' (mode={mode}).")
+    print(
+        "[OK] Idempotency payload_excerpt is present and bounded "
+        f"({len(payload_excerpt)} chars, max 2000)."
+    )
     print(f"[INFO] DynamoDB console: {console_links['ddb']}")
     conversation_id = item.get("conversation_id") or payload["conversation_id"]
 
@@ -573,6 +653,40 @@ def main() -> int:
     print(
         f"[OK] Audit record written for '{conversation_id}' "
         f"in '{artifacts.audit_trail_table}'."
+    )
+    routing_state = validate_routing(state_item, label="Conversation state")
+    routing_audit = validate_routing(audit_item, label="Audit trail")
+
+    combined_actions: List[Dict[str, Any]] = []
+    for action_list in (state_item.get("actions"), audit_item.get("actions")):
+        if isinstance(action_list, list):
+            combined_actions.extend([action for action in action_list if isinstance(action, dict)])
+
+    draft_action_present = has_order_status_draft_action(combined_actions)
+    draft_replies = extract_draft_replies(
+        state_item, label="Conversation state"
+    ) or extract_draft_replies(audit_item, label="Audit trail")
+
+    if draft_action_present and not draft_replies:
+        raise SmokeFailure(
+            "order_status_draft_reply action was recorded but no draft_replies were persisted."
+        )
+
+    safe_draft_replies = sanitize_draft_replies(draft_replies)
+
+    print(
+        f"[OK] Routing recorded in state and audit (category={routing_state['category']}, "
+        f"tags={routing_state['tags']})."
+    )
+    print(
+        f"[INFO] order_status_draft_reply action observed={draft_action_present}; "
+        f"draft_replies_count={len(draft_replies)}"
+    )
+    if safe_draft_replies:
+        print(f"[INFO] Draft replies persisted (safe fields): {safe_draft_replies}")
+    print(
+        f"[OK] Routing recorded in audit (category={routing_audit['category']}, "
+        f"tags={routing_audit['tags']})."
     )
     print(f"[INFO] CloudWatch logs group: {console_links['log_group']}")
     print(f"[INFO] Logs console: {console_links['logs']}")
@@ -603,6 +717,12 @@ def main() -> int:
         "audit_sort_key": audit_item.get("ts_action_id"),
         "dashboard_name": dashboard_name,
         "alarm_names": alarm_names,
+        "routing_category": routing_state["category"],
+        "routing_tags": routing_state["tags"],
+        "routing_reason": routing_state["reason"],
+        "draft_action_present": draft_action_present,
+        "draft_reply_count": len(draft_replies),
+        "draft_replies_safe": safe_draft_replies,
     }
     if args.summary_path:
         append_summary(args.summary_path, env_name=env_name, data=summary_data)

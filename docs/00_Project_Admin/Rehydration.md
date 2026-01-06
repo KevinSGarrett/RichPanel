@@ -135,7 +135,7 @@ This is a **“best-suggested”** design approach:
 6. Returns Admin  
 7. LiveChat Support  
 8. Leadership Team  
-9. SocialMedia Team  
+9. Social Media Team
 10. Email Support Team  
 11. Chargebacks / Disputes (new dedicated queue)
 
