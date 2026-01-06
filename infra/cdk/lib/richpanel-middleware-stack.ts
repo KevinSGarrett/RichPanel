@@ -1,3 +1,5 @@
+// infra/cdk/lib/richpanel-middleware-stack.ts
+
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Tags } from "aws-cdk-lib";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -29,6 +31,10 @@ export interface SecretReferences {
 interface EventPipelineResources {
   readonly eventsQueue: sqs.Queue;
   readonly httpApiEndpoint: string;
+
+  readonly idempotencyTable: dynamodb.Table;
+  readonly conversationStateTable: dynamodb.Table;
+  readonly auditTrailTable: dynamodb.Table;
 }
 
 /**
@@ -48,11 +54,7 @@ export class RichpanelMiddlewareStack extends Stack {
   public readonly runtimeFlags: RuntimeFlagParameters;
   public readonly secrets: SecretReferences;
 
-  constructor(
-    scope: Construct,
-    id: string,
-    props: RichpanelMiddlewareStackProps
-  ) {
+  constructor(scope: Construct, id: string, props: RichpanelMiddlewareStackProps) {
     super(scope, id, props);
 
     this.naming = new MwNaming(props.environment.name);
@@ -67,13 +69,9 @@ export class RichpanelMiddlewareStack extends Stack {
 
   private importRuntimeFlagParameters(): RuntimeFlagParameters {
     return {
-      safeMode: StringParameter.fromStringParameterAttributes(
-        this,
-        "SafeModeFlagParameter",
-        {
-          parameterName: this.naming.ssmParameter("safe_mode"),
-        }
-      ),
+      safeMode: StringParameter.fromStringParameterAttributes(this, "SafeModeFlagParameter", {
+        parameterName: this.naming.ssmParameter("safe_mode"),
+      }),
       automationEnabled: StringParameter.fromStringParameterAttributes(
         this,
         "AutomationEnabledFlagParameter",
@@ -121,11 +119,7 @@ export class RichpanelMiddlewareStack extends Stack {
   }
 
   private buildEventPipeline(): EventPipelineResources {
-    const lambdaSourceRoot = this.resolveRepoPath(
-      "backend",
-      "src",
-      "lambda_handlers"
-    );
+    const lambdaSourceRoot = this.resolveRepoPath("backend", "src", "lambda_handlers");
 
     const deadLetterQueue = new sqs.Queue(this, "EventsDlq", {
       queueName: this.naming.queueName("events-dlq", { fifo: true }),
@@ -158,6 +152,40 @@ export class RichpanelMiddlewareStack extends Stack {
       },
     });
 
+    // NEW: conversation state table (required by dev_e2e_smoke.py)
+    const conversationStateTable = new dynamodb.Table(this, "ConversationStateTable", {
+      tableName: this.naming.tableName("conversation_state"),
+      partitionKey: {
+        name: "conversation_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+      timeToLiveAttribute: "expires_at",
+    });
+
+    // NEW: audit trail table (required by dev_e2e_smoke.py / run evidence)
+    const auditTrailTable = new dynamodb.Table(this, "AuditTrailTable", {
+      tableName: this.naming.tableName("audit_trail"),
+      partitionKey: {
+        name: "conversation_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "ts_action_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+      timeToLiveAttribute: "expires_at",
+    });
+
     const ingressFunction = new lambda.Function(this, "IngressLambda", {
       functionName: this.naming.lambdaFunctionName("ingress"),
       runtime: lambda.Runtime.PYTHON_3_11,
@@ -187,6 +215,9 @@ export class RichpanelMiddlewareStack extends Stack {
       memorySize: 512,
       environment: {
         IDEMPOTENCY_TABLE_NAME: idempotencyTable.tableName,
+        CONVERSATION_STATE_TABLE_NAME: conversationStateTable.tableName,
+        AUDIT_TRAIL_TABLE_NAME: auditTrailTable.tableName,
+
         SAFE_MODE_PARAM: this.runtimeFlags.safeMode.parameterName,
         AUTOMATION_ENABLED_PARAM: this.runtimeFlags.automationEnabled.parameterName,
       },
@@ -194,6 +225,9 @@ export class RichpanelMiddlewareStack extends Stack {
     });
 
     idempotencyTable.grantReadWriteData(workerFunction);
+    conversationStateTable.grantReadWriteData(workerFunction);
+    auditTrailTable.grantReadWriteData(workerFunction);
+
     this.runtimeFlags.safeMode.grantRead(workerFunction);
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
 
@@ -209,6 +243,9 @@ export class RichpanelMiddlewareStack extends Stack {
     return {
       eventsQueue,
       httpApiEndpoint: httpApi.attrApiEndpoint,
+      idempotencyTable,
+      conversationStateTable,
+      auditTrailTable,
     };
   }
 
@@ -270,6 +307,22 @@ export class RichpanelMiddlewareStack extends Stack {
       value: pipeline.eventsQueue.queueUrl,
       description: "Queue URL for diagnostics and smoke tests.",
     });
+
+    // NEW: outputs required by dev_e2e_smoke.py
+    new CfnOutput(this, "IdempotencyTableName", {
+      value: pipeline.idempotencyTable.tableName,
+      description: "DynamoDB table name for idempotency records.",
+    });
+
+    new CfnOutput(this, "ConversationStateTableName", {
+      value: pipeline.conversationStateTable.tableName,
+      description: "DynamoDB table name for conversation state snapshots.",
+    });
+
+    new CfnOutput(this, "AuditTrailTableName", {
+      value: pipeline.auditTrailTable.tableName,
+      description: "DynamoDB table name for audit trail records.",
+    });
   }
 
   private resolveRepoPath(...segments: string[]): string {
@@ -299,8 +352,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
     new CfnOutput(this, "AutomationEnabledParamPath", {
       value: this.naming.ssmParameter("automation_enabled"),
-      description:
-        "SSM parameter path for the automation_enabled feature flag.",
+      description: "SSM parameter path for the automation_enabled feature flag.",
     });
   }
 }
