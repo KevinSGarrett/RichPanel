@@ -17,7 +17,7 @@ The current list of departments are:
 6. Returns Admin
 7. LiveChat Support
 8. Leadership Team
-9. SocialMedia Team
+9. Social Media Team
 10. Email Support Team
 
 In order to help you quickly reference documentation, instructions, and details related to richpanel i have compiled a documentation/instruction library for you to more easily reference. Although you should also be performing your own research as well, this attachment is here to help in case it is needed for further understanding of richpanel and the middleware development with richpanel. It contains most of the information from richpanel's documentation site along with deep research for other helpful information related to middleware development for richpanel. 

@@ -24,7 +24,7 @@ We will keep a canonical list of destinations in code/config:
 - Returns Admin
 - LiveChat Support
 - Leadership Team
-- SocialMedia Team
+- Social Media Team
 - Email Support Team
 - Chargebacks / Disputes
 
