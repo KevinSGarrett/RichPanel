@@ -19,6 +19,8 @@ except ImportError:  # pragma: no cover
 from richpanel_middleware.automation.pipeline import (
     ActionPlan,
     ExecutionResult,
+    execute_order_status_reply,
+    execute_routing_tags,
     execute_plan,
     normalize_event,
     plan_actions,
@@ -53,6 +55,8 @@ _TABLE_CACHE: Dict[str, Any] = {}
 def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
     failures: List[Dict[str, str]] = []
     safe_mode, automation_enabled = _load_kill_switches()
+    outbound_enabled = _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False)
+    allow_network = bool(outbound_enabled)
 
     for record in event.get("Records", []):
         message_id = record.get("messageId", "unknown")
@@ -68,6 +72,14 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
             plan = plan_actions(envelope, safe_mode=safe_mode, automation_enabled=automation_enabled)
             persisted = _persist_idempotency(envelope, plan)
             execution = _execute_and_record(envelope, plan)
+            outbound_result = _maybe_execute_outbound_reply(
+                envelope,
+                plan,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                outbound_enabled=outbound_enabled,
+            )
             LOGGER.info(
                 "worker.processed",
                 extra={
@@ -78,6 +90,8 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
                     "mode": plan.mode,
                     "actions": [a.get("type") for a in plan.actions],
                     "dry_run": execution.dry_run,
+                    "outbound_sent": outbound_result.get("sent"),
+                    "outbound_reason": outbound_result.get("reason"),
                 },
             )
         except ClientError as exc:
@@ -107,6 +121,43 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
             failures.append({"itemIdentifier": message_id})
 
     return {"batchItemFailures": failures}
+
+
+def _maybe_execute_outbound_reply(
+    envelope: EventEnvelope,
+    plan: ActionPlan,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool,
+    outbound_enabled: bool,
+) -> Dict[str, Any]:
+    try:
+        routing_result = execute_routing_tags(
+            envelope,
+            plan,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            allow_network=allow_network,
+            outbound_enabled=outbound_enabled,
+        )
+        reply_result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            allow_network=allow_network,
+            outbound_enabled=outbound_enabled,
+        )
+        combined = dict(reply_result)
+        combined["routing_tags"] = routing_result
+        return combined
+    except Exception:
+        LOGGER.exception(
+            "worker.outbound_unexpected_failure",
+            extra={"event_id": envelope.event_id, "conversation_id": envelope.conversation_id},
+        )
+        return {"sent": False, "reason": "exception"}
 
 
 def _persist_idempotency(

@@ -95,6 +95,47 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(response.headers.get("x-dry-run"), "1")
         self.assertFalse(transport.called)
 
+    def test_get_order_builds_expected_path_and_query(self) -> None:
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+        client = ShopifyClient(
+            access_token="test-token",
+            allow_network=True,
+            transport=transport,
+        )
+
+        response = client.get_order(
+            "order 123",
+            fields=["name", "id"],
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(len(transport.requests), 1)
+        request = transport.requests[0]
+        self.assertEqual(request.method, "GET")
+        self.assertEqual(
+            request.url,
+            "https://example.myshopify.com/admin/api/2024-01/orders/order%20123.json?fields=id%2Cname",
+        )
+
+    def test_get_order_respects_network_blocked_gate(self) -> None:
+        transport = _FailingTransport()
+        client = ShopifyClient(
+            access_token="test-token",
+            transport=transport,
+        )
+
+        response = client.get_order("123")
+
+        self.assertTrue(response.dry_run)
+        self.assertEqual(response.reason, "network_disabled")
+        self.assertFalse(transport.called)
+
     def test_retries_on_429_and_honors_retry_after(self) -> None:
         sleeps = []
         transport = _RecordingTransport(

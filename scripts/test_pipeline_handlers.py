@@ -5,6 +5,7 @@ import sys
 import time
 import unittest
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -21,12 +22,15 @@ os.environ.setdefault("CONVERSATION_STATE_TTL_SECONDS", "3600")
 os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
+    execute_order_status_reply,
+    execute_routing_tags,
     execute_plan,
     normalize_event,
     plan_actions,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 from lambda_handlers.worker import handler as worker  # noqa: E402
+from richpanel_middleware.integrations.richpanel.client import RichpanelResponse  # noqa: E402
 
 
 class PipelineTests(unittest.TestCase):
@@ -55,7 +59,9 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(plan.actions[0]["type"], "route_only")
 
     def test_plan_allows_automation_candidate(self) -> None:
-        envelope = build_event_envelope({"ticket_id": "t-789", "order_id": "ord-789"})
+        envelope = build_event_envelope(
+            {"ticket_id": "t-789", "order_id": "ord-789", "message": "Where is my order?"}
+        )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
         self.assertEqual(plan.mode, "automation_candidate")
@@ -68,6 +74,49 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("order_summary", order_action["parameters"])
         self.assertIn("prompt_fingerprint", order_action["parameters"])
         self.assertEqual(order_action["parameters"]["order_summary"]["order_id"], "ord-789")
+        self.assertEqual(plan.routing.intent, "order_status_tracking")
+        self.assertEqual(plan.routing.department, "Email Support Team")
+
+
+    def test_plan_generates_tracking_present_draft_reply(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-track",
+                "order_id": "ord-321",
+                "tracking_number": "1Z999",
+                "carrier": "UPS",
+                "message": "Where is my order?",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        self.assertEqual(len(order_actions), 1)
+        draft_reply = order_actions[0]["parameters"].get("draft_reply", {})
+        self.assertIn("body", draft_reply)
+        self.assertIn("1Z999", draft_reply["body"])
+        self.assertIn("UPS", draft_reply["body"])
+        self.assertIn("Tracking link:", draft_reply["body"])
+        self.assertNotIn("We'll send tracking as soon as it ships.", draft_reply["body"])
+
+    def test_routing_classifies_returns(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "t-return", "message": "I need a refund or exchange this order"}
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
+
+        self.assertEqual(plan.routing.category, "returns")
+        self.assertEqual(plan.routing.department, "Returns Admin")
+        self.assertIn(plan.routing.intent, {"refund_request", "exchange_request"})
+        self.assertIn(f"mw-intent-{plan.routing.intent}", plan.routing.tags)
+
+    def test_routing_fallback_when_message_missing(self) -> None:
+        envelope = build_event_envelope({"ticket_id": "t-nomsg"})
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
+
+        self.assertEqual(plan.routing.intent, "unknown")
+        self.assertEqual(plan.routing.department, "Email Support Team")
+        self.assertEqual(plan.routing.category, "general")
 
     def test_execute_plan_dry_run_records(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-000"})
@@ -94,6 +143,9 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.state_record["event_id"], envelope.event_id)
         self.assertEqual(result.state_record["mode"], plan.mode)
         self.assertEqual(result.audit_record["mode"], plan.mode)
+        self.assertIn("routing", result.state_record)
+        self.assertEqual(result.state_record["routing"]["department"], plan.routing.department)
+        self.assertEqual(result.audit_record["routing"]["intent"], plan.routing.intent)
         self.assertEqual(len(captured_state), 1)
         self.assertEqual(len(captured_audit), 1)
 
@@ -163,6 +215,9 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("expires_at", state_item)
         self.assertIn("ts_action_id", audit_item)
         self.assertEqual(audit_item["event_id"], envelope.event_id)
+        self.assertIn("routing", state_item)
+        self.assertEqual(state_item["routing"]["department"], "Email Support Team")
+        self.assertEqual(audit_item["routing"]["intent"], "unknown")
 
     def test_plan_skips_order_status_when_safety_blocks(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-safe"})
@@ -183,8 +238,176 @@ class PipelineTests(unittest.TestCase):
                 self.assertEqual(plan.mode, "route_only")
 
 
+class OutboundOrderStatusTests(unittest.TestCase):
+    def setUp(self) -> None:
+        worker.boto3 = None  # type: ignore
+        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._TABLE_CACHE.clear()
+        worker._DDB_RESOURCE = None
+        worker._SSM_CLIENT = None
+        os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
+
+    def _build_order_status_plan(self) -> tuple[Any, Any]:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-outbound",
+                "order_id": "ord-123",
+                "shipping_method": "2 business days",
+                "created_at": "2024-12-20T00:00:00Z",
+                "message": "Where is my order?",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+        return envelope, plan
+
+    def test_outbound_skip_when_disabled(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor()
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            richpanel_executor=executor,
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(len(executor.calls), 0)
+
+    def test_outbound_executes_when_enabled(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor()
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=executor,
+        )
+
+        self.assertTrue(result["sent"])
+        self.assertEqual(len(executor.calls), 2)
+
+        tag_call = executor.calls[0]
+        self.assertEqual(tag_call["method"], "PUT")
+        self.assertIn("/add-tags", tag_call["path"])
+        self.assertEqual(tag_call["kwargs"]["json_body"]["tags"], ["mw-auto-replied"])
+        self.assertFalse(tag_call["kwargs"]["dry_run"])
+
+        reply_call = executor.calls[1]
+        self.assertEqual(reply_call["kwargs"]["json_body"]["status"], "resolved")
+        self.assertIn("comment", reply_call["kwargs"]["json_body"])
+        self.assertEqual(reply_call["kwargs"]["json_body"]["comment"]["type"], "public")
+        self.assertFalse(reply_call["kwargs"]["dry_run"])
+
+    def test_outbound_logging_does_not_emit_reply_body(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor()
+
+        # Extract the draft reply text for assertion.
+        action = [action for action in plan.actions if action.get("type") == "order_status_draft_reply"][0]
+        reply_body = action["parameters"].get("draft_reply", {}).get("body", "")
+
+        with self.assertLogs("richpanel_middleware.automation.pipeline", level="INFO") as captured:
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
+
+        combined_logs = " ".join(captured.output)
+        self.assertNotIn(reply_body, combined_logs)
+
+
+class _RecordingExecutor:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+        self.calls.append({"method": method, "path": path, "kwargs": kwargs})
+        return RichpanelResponse(
+            status_code=202,
+            headers={},
+            body=b"",
+            url=path,
+            dry_run=kwargs.get("dry_run", False),
+        )
+
+
+
+class OutboundRoutingTagsTests(unittest.TestCase):
+    def setUp(self) -> None:
+        worker.boto3 = None  # type: ignore
+        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._TABLE_CACHE.clear()
+        worker._DDB_RESOURCE = None
+        worker._SSM_CLIENT = None
+        os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
+
+    def _build_routing_plan(self) -> tuple[Any, Any]:
+        envelope = build_event_envelope(
+            {"ticket_id": "t-route", "message": "I need a refund for my order"}
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+        return envelope, plan
+
+    def test_routing_tags_skip_when_outbound_disabled(self) -> None:
+        envelope, plan = self._build_routing_plan()
+        executor = _RecordingExecutor()
+
+        result = execute_routing_tags(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            richpanel_executor=executor,
+        )
+
+        self.assertFalse(result["applied"])
+        self.assertEqual(len(executor.calls), 0)
+
+    def test_routing_tags_executes_when_enabled(self) -> None:
+        envelope, plan = self._build_routing_plan()
+        executor = _RecordingExecutor()
+
+        result = execute_routing_tags(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=executor,
+        )
+
+        self.assertTrue(result["applied"])
+        self.assertEqual(len(executor.calls), 1)
+
+        call = executor.calls[0]
+        self.assertEqual(call["method"], "PUT")
+        self.assertIn("/add-tags", call["path"])
+        tags = call["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-routing-applied", tags)
+        self.assertTrue(any(str(tag).startswith("mw-intent-") for tag in tags))
+        self.assertFalse(call["kwargs"]["dry_run"])
+
+
 def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
