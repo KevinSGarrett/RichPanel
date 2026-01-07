@@ -110,6 +110,25 @@ class PipelineTests(unittest.TestCase):
         self.assertIn(plan.routing.intent, {"refund_request", "exchange_request"})
         self.assertIn(f"mw-intent-{plan.routing.intent}", plan.routing.tags)
 
+    def test_routing_chargeback_and_fraud_are_separated(self) -> None:
+        chargeback_envelope = build_event_envelope(
+            {"ticket_id": "t-chargeback", "message": "bank reversed chargeback dispute"}
+        )
+        chargeback_plan = plan_actions(chargeback_envelope, safe_mode=False, automation_enabled=False)
+
+        self.assertEqual(chargeback_plan.routing.intent, "chargeback_dispute")
+        self.assertEqual(chargeback_plan.routing.department, "Chargebacks / Disputes Team")
+        self.assertIn("mw-intent-chargeback_dispute", chargeback_plan.routing.tags)
+
+        fraud_envelope = build_event_envelope(
+            {"ticket_id": "t-fraud", "message": "This looks like a scam or fraud attempt"}
+        )
+        fraud_plan = plan_actions(fraud_envelope, safe_mode=False, automation_enabled=False)
+
+        self.assertEqual(fraud_plan.routing.intent, "fraud_suspected")
+        self.assertEqual(fraud_plan.routing.department, "Leadership Team")
+        self.assertIn("mw-intent-fraud_suspected", fraud_plan.routing.tags)
+
     def test_routing_fallback_when_message_missing(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-nomsg"})
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)

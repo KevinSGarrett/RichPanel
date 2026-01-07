@@ -6,6 +6,7 @@ import sys
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -138,9 +139,19 @@ class OrderLookupTests(unittest.TestCase):
         self.assertEqual(summary["carrier"], "UPS")
         self.assertEqual(summary["items_count"], 2)
         self.assertEqual(summary["total_price"], "39.98")
+        self.assertEqual(summary["created_at"], "2024-01-01T12:00:00Z")
+        self.assertEqual(summary["processed_at"], "2024-01-02T12:00:00Z")
+        self.assertEqual(summary["shipping_method"], "Standard Shipping")
+        self.assertEqual(summary["shipping_method_name"], "Standard Shipping")
         self.assertEqual(len(transport.requests), 1)
         request: ShopifyTransportRequest = transport.requests[0]
         self.assertIn("/orders/A-100.json", request.url)
+        parsed = urlparse(request.url)
+        query = parse_qs(parsed.query)
+        self.assertIn("fields", query)
+        field_values = query["fields"][0].split(",")
+        for required in ("created_at", "processed_at", "shipping_lines"):
+            self.assertIn(required, field_values)
         self.assertFalse(shipstation_client.called)
 
     def test_shipstation_enrichment_fills_tracking_when_shopify_missing(self) -> None:

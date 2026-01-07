@@ -7,6 +7,20 @@ from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
 
 OrderSummary = Dict[str, Any]
 
+SHOPIFY_ORDER_FIELDS: list[str] = [
+    "created_at",
+    "current_total_price",
+    "financial_status",
+    "fulfillment_status",
+    "fulfillments",
+    "line_items",
+    "line_items_count",
+    "processed_at",
+    "shipping_lines",
+    "status",
+    "total_price",
+    "updated_at",
+]
 
 def lookup_order_summary(
     envelope: EventEnvelope,
@@ -84,17 +98,7 @@ def _lookup_shopify(
     client = client or ShopifyClient(allow_network=allow_network)
     response = client.get_order(
         order_id,
-        fields=[
-            "fulfillment_status",
-            "financial_status",
-            "status",
-            "updated_at",
-            "current_total_price",
-            "total_price",
-            "line_items_count",
-            "line_items",
-            "fulfillments",
-        ],
+        fields=SHOPIFY_ORDER_FIELDS,
         safe_mode=safe_mode,
         automation_enabled=automation_enabled,
         dry_run=not allow_network,
@@ -164,6 +168,7 @@ def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
         or payload.get("ordered_at")
         or payload.get("order_date")
     )
+    processed_at = _coerce_str(payload.get("processed_at") or payload.get("order_processed_at"))
     shipping_method = _coerce_str(
         payload.get("shipping_method")
         or payload.get("shipping_method_name")
@@ -183,6 +188,8 @@ def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
     }
     if created_at:
         summary["created_at"] = created_at
+    if processed_at:
+        summary["processed_at"] = processed_at
     if shipping_method:
         summary["shipping_method"] = shipping_method
         summary["shipping_method_name"] = shipping_method
@@ -206,7 +213,8 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
         or payload.get("financial_status")
         or payload.get("status")
     )
-    created_at = _coerce_str(payload.get("created_at") or payload.get("processed_at"))
+    processed_at = _coerce_str(payload.get("processed_at"))
+    created_at = _coerce_str(payload.get("created_at") or processed_at)
     updated_at = _coerce_str(payload.get("updated_at"))
     total_price = _coerce_price(payload.get("total_price") or payload.get("current_total_price"))
 
@@ -244,6 +252,8 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
         summary["status"] = status
     if created_at:
         summary["created_at"] = created_at
+    if processed_at:
+        summary["processed_at"] = processed_at
     if updated_at:
         summary["updated_at"] = updated_at
     if carrier:
