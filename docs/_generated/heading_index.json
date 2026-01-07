@@ -11921,6 +11921,12 @@
       "anchor": "2-local-ci-equivalent-checks"
     }
   ],
+  "windows note: powershell 5.x does **not** support `&&`": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "windows-note-powershell-5x-does-not-support"
+    }
+  ],
   "powershell helper (windows)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -11937,6 +11943,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "3-bugbot-pr-review-cursor"
+    }
+  ],
+  "“extensions are not cli” (cursor/vs code)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "extensions-are-not-cli-cursorvs-code"
     }
   ],
   "how to trigger a review (mention-only mode)": [

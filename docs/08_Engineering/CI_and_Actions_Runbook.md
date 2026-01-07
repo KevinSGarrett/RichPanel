@@ -31,6 +31,22 @@ Run:
 python scripts/run_ci_checks.py
 ```
 
+### Windows note: PowerShell 5.x does **not** support `&&`
+If you copy/paste examples that use `&&` (common in bash/zsh), they will fail in **Windows PowerShell 5.x**.
+
+Use **separate lines** or `;` instead:
+```powershell
+# ✅ PowerShell-safe: separate lines
+python scripts/run_ci_checks.py
+git status
+
+# ✅ PowerShell-safe: same line with ;
+python scripts/run_ci_checks.py; git status
+
+# ❌ NOT supported in Windows PowerShell 5.x
+python scripts/run_ci_checks.py && git status
+```
+
 ### PowerShell helper (Windows)
 Use the wrapper so you get consistent status output and argument handling:
 ```powershell
@@ -59,6 +75,13 @@ If this fails locally, **fix before pushing**.
 
 ## 3) Bugbot PR review (Cursor)
 Bugbot is a **standard part of our hardened PR loop**, but it is **not a hard CI blocker yet**. Treat it as required human process: run it, read it, and address findings (or explicitly document why not) before merging.
+
+### “Extensions are not CLI” (Cursor/VS Code)
+Do not assume a VS Code/Cursor extension can be triggered from the terminal.
+
+- **Extensions are UI/editor integrations**: you can’t reliably “run” them via CLI in CI or scripts.
+- **Enforcement lives in CI + scripts**: rely on `python scripts/run_ci_checks.py` and GitHub Actions as the source of truth.
+- **Bugbot is triggered via GitHub PR comments** (UI or `gh`), not by a local extension command.
 
 ### How to trigger a review (mention-only mode)
 If Bugbot is configured to only run on mention, trigger it by adding one of these PR comments:
