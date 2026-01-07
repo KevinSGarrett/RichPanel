@@ -7,7 +7,7 @@ Counts by docs section:
 | Docs section | Total | Checked | Unchecked |
 |---|---:|---:|---:|
 | `00_Project_Admin` | 49 | 6 | 43 |
-| `03_Richpanel_Integration` | 28 | 0 | 28 |
+| `03_Richpanel_Integration` | 56 | 0 | 56 |
 | `05_FAQ_Automation` | 19 | 0 | 19 |
 | `06_Security_Privacy_Compliance` | 165 | 0 | 165 |
 | `07_Reliability_Scaling` | 24 | 24 | 0 |

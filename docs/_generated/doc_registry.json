@@ -991,13 +991,13 @@
   },
   {
     "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "title": "Richpanel Config Changes (v1 Target State)",
+    "title": "Richpanel Configuration Runbook (v1)",
     "section": "03_Richpanel_Integration",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 1374,
-    "approx_tokens": 1786,
-    "last_updated": "2025-12-29"
+    "word_count": 2102,
+    "approx_tokens": 2732,
+    "last_updated": ""
   },
   {
     "path": "03_Richpanel_Integration/ShipStation_Integration_Skeleton.md",
@@ -1915,9 +1915,9 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1799,
-    "approx_tokens": 2338,
-    "last_updated": "2026-01-03"
+    "word_count": 2040,
+    "approx_tokens": 2652,
+    "last_updated": "2026-01-05"
   },
   {
     "path": "08_Engineering/Developer_Guide.md",

@@ -457,91 +457,315 @@
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.1 Security & stability",
-    "id": "PLN-37A9A23CB7",
-    "line": 232,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-108E65ADA8",
+    "line": 258,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `X-Middleware-Token`)"
+    "text": "All 11 `route-*` tags created"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.1 Security & stability",
-    "id": "PLN-3BA65B41C7",
-    "line": 233,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-1DA53E8A9C",
+    "line": 260,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware ACKs in < 500ms p95 (ingress path)"
+    "text": "`Chargebacks / Disputes` team created"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.1 Security & stability",
-    "id": "PLN-CA0D778DA3",
-    "line": 234,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-2B97C9CC32",
+    "line": 252,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Duplicate deliveries do not cause duplicate tags or replies"
+    "text": "CloudFormation stack deployed successfully (staging)"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.2 Trigger reliability",
-    "id": "PLN-1CD7ED93E6",
-    "line": 238,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-42491EFB89",
+    "line": 253,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Preferred: trigger lives in **Tagging Rules** (or equivalent) and is at the top of that category"
+    "text": "Secrets exist in AWS Secrets Manager:"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.2 Trigger reliability",
-    "id": "PLN-770A1AD110",
-    "line": 237,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-44D7CCD6A2",
+    "line": 256,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`Middleware \u2014 Inbound Trigger` exists and has **Skip all subsequent rules = OFF**"
+    "text": "Webhook configured in Richpanel (staging) with correct URL and header"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.2 Trigger reliability",
-    "id": "PLN-D65488FD36",
-    "line": 239,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-7FFFC2F3D3",
+    "line": 254,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Fallback: if in Assignment Rules, it is the first rule"
+    "text": "`rp-mw/stage/richpanel/webhook_token`"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.3 Routing correctness",
-    "id": "PLN-6066D4ED9C",
-    "line": 242,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-909FA7A93B",
+    "line": 259,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Adding `route-*` tag triggers correct team assignment"
+    "text": "All 4 `mw-*` tags created"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.3 Routing correctness",
-    "id": "PLN-6AB9DAB54A",
-    "line": 243,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-933AD4258D",
+    "line": 257,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`Middleware \u2014 Inbound Trigger` rule exists and is enabled"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+    "id": "PLN-DE99594E2C",
+    "line": 255,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/stage/richpanel/api_key`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-0F4D5A56F6",
+    "line": 274,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware applies `mw-processed` tag"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-23F5CEFB81",
+    "line": 292,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "No duplicate processing or replies"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-29B2E2A3B8",
+    "line": 275,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware applies `mw-routing-applied` tag"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-2AA60F2B88",
+    "line": 269,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware ACKs with HTTP 200 in < 500ms"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-6DFAEC0914",
+    "line": 276,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware applies correct `route-*` tag based on message classification"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-72223788D1",
+    "line": 281,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "No routing fights (legacy rules don't override middleware routing)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-7C2F4B8841",
+    "line": 268,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Webhook contains expected fields: `ticket_id`, `ticket_url`, `trigger`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-D444C89D32",
+    "line": 280,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Conversation is assigned to the correct team (based on `route-*` tag)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-DAB0D15F2F",
+    "line": 267,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware receives the webhook (check CloudWatch Logs for ingress function)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-DAD18F0598",
+    "line": 286,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware returns HTTP 401 Unauthorized"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+    "id": "PLN-F5DD2783EA",
+    "line": 291,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Tags are applied only once"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-18F8DC6643",
+    "line": 323,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Evidence captured and reviewed (C.3)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-38DE2A09A7",
+    "line": 324,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "No errors in CloudWatch Logs (past 24 hours)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-6C23F34688",
+    "line": 322,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "All validation tests (C.2) passed in staging"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-A39D5F442D",
+    "line": 325,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "No errors in CloudWatch Metrics (past 24 hours)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-A642E3F6F9",
+    "line": 326,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Team lead / PM has approved staging results"
+  },
+  {
+    "checked": false,
+    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+    "id": "PLN-EC44A0131F",
+    "line": 327,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Runbook reviewed and approved for production"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
+    "id": "PLN-070486C2D7",
+    "line": 439,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
     "text": "Legacy rules do not override middleware routing (no routing fights)"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.3 Routing correctness",
-    "id": "PLN-9AE1047E7A",
-    "line": 244,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
+    "id": "PLN-2766A79FF7",
+    "line": 438,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Adding `route-*` tag triggers correct team assignment"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
+    "id": "PLN-9B06BC7867",
+    "line": 440,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
     "text": "Chargeback subjects route to Chargebacks / Disputes team (and do not auto-close)"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.4 Visibility",
-    "id": "PLN-0923B09C2D",
-    "line": 247,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
+    "id": "PLN-75DC1BA80E",
+    "line": 427,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Saved views exist for `route-*` tags (optional but recommended)"
+    "text": "HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `x-richpanel-webhook-token`)"
   },
   {
     "checked": false,
-    "heading_path": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.4 Visibility",
-    "id": "PLN-5CC3638AC8",
-    "line": 248,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
+    "id": "PLN-C949567888",
+    "line": 430,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`mw-*` tags present for debugging in a sample ticket"
+    "text": "Secrets stored in AWS Secrets Manager (never in code/logs/docs)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
+    "id": "PLN-E3E7B0ABAF",
+    "line": 429,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Duplicate deliveries do not cause duplicate tags or replies"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
+    "id": "PLN-EE37179DCF",
+    "line": 428,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware ACKs in < 500ms p95 (ingress path)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
+    "id": "PLN-2244030D80",
+    "line": 444,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Evidence captured and reviewed"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
+    "id": "PLN-587B1849C3",
+    "line": 443,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "All tests passed in staging before production rollout"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
+    "id": "PLN-FF7A92D1FD",
+    "line": 445,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Team lead / PM sign-off obtained"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
+    "id": "PLN-062CC10A49",
+    "line": 435,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Fallback: if in Assignment Rules, it is the first rule"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
+    "id": "PLN-304148935F",
+    "line": 434,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Preferred: trigger lives in **Tagging Rules** (or equivalent) and is at the top of that category"
+  },
+  {
+    "checked": false,
+    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
+    "id": "PLN-9FD6F5F9A5",
+    "line": 433,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`Middleware \u2014 Inbound Trigger` exists and has **Skip all subsequent rules = OFF**"
   },
   {
     "checked": false,

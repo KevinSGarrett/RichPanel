@@ -5225,172 +5225,226 @@
       "anchor": "sources-for-engineers"
     }
   ],
-  "richpanel config changes (v1 target state)": [
+  "richpanel configuration runbook (v1)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "richpanel-config-changes-v1-target-state"
+      "anchor": "richpanel-configuration-runbook-v1"
     }
   ],
-  "0) guiding principles (v1)": [
+  "guiding principles (v1)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "0-guiding-principles-v1"
+      "anchor": "guiding-principles-v1"
     }
   ],
-  "1) configuration change summary (what to change)": [
+  "section a: doc-only prep (safe, no ui changes)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "1-configuration-change-summary-what-to-change"
+      "anchor": "section-a-doc-only-prep-safe-no-ui-changes"
     }
   ],
-  "2) teams (target state)": [
+  "a.1 fetch cloudformation outputs (powershell)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "2-teams-target-state"
+      "anchor": "a1-fetch-cloudformation-outputs-powershell"
     }
   ],
-  "2.1 create: chargebacks / disputes": [
+  "a.2 verify secrets exist (powershell)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "21-create-chargebacks-disputes"
+      "anchor": "a2-verify-secrets-exist-powershell"
     }
   ],
-  "3) tags (target state)": [
+  "a.3 canonical secret ids (reference)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "3-tags-target-state"
+      "anchor": "a3-canonical-secret-ids-reference"
     }
   ],
-  "3.1 naming conventions": [
+  "a.4 required tags (reference)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "31-naming-conventions"
+      "anchor": "a4-required-tags-reference"
     }
   ],
-  "3.2 required routing tags (v1)": [
+  "a.5 required team (reference)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "32-required-routing-tags-v1"
+      "anchor": "a5-required-team-reference"
     }
   ],
-  "3.3 required middleware control tags (v1)": [
+  "section b: human ui steps (gated — requires approval)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "33-required-middleware-control-tags-v1"
+      "anchor": "section-b-human-ui-steps-gated-requires-approval"
     }
   ],
-  "4) automation rules (target state)": [
+  "b.1 create tags in richpanel ui": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "4-automation-rules-target-state"
+      "anchor": "b1-create-tags-in-richpanel-ui"
     }
   ],
-  "4.1 new: middleware inbound trigger rule (required)": [
+  "b.2 create team in richpanel ui": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "41-new-middleware-inbound-trigger-rule-required"
+      "anchor": "b2-create-team-in-richpanel-ui"
     }
   ],
-  "4.2 assignment rules: routing tag → team (required)": [
+  "b.3 configure http target webhook": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "42-assignment-rules-routing-tag-team-required"
+      "anchor": "b3-configure-http-target-webhook"
     }
   ],
-  "4.3 de-conflict legacy assignment rules (required to prevent routing fights)": [
+  "b.4 create automation rule: middleware inbound trigger": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "43-de-conflict-legacy-assignment-rules-required-to-prevent-routing-fights"
+      "anchor": "b4-create-automation-rule-middleware-inbound-trigger"
     }
   ],
-  "4.4 disable/replace chargeback auto-close rules (required)": [
+  "b.5 create assignment rules: routing tag → team": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "44-disablereplace-chargeback-auto-close-rules-required"
+      "anchor": "b5-create-assignment-rules-routing-tag-team"
     }
   ],
-  "5) http target (richpanel → middleware)": [
+  "b.6 de-conflict legacy assignment rules": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "5-http-target-richpanel-middleware"
+      "anchor": "b6-de-conflict-legacy-assignment-rules"
     }
   ],
-  "5.1 destination": [
+  "b.7 disable/replace chargeback auto-close rules": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "51-destination"
+      "anchor": "b7-disablereplace-chargeback-auto-close-rules"
     }
   ],
-  "5.2 required security header (anti-spoof)": [
+  "section c: validation / evidence (staging first)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "52-required-security-header-anti-spoof"
+      "anchor": "section-c-validation-evidence-staging-first"
     }
   ],
-  "5.3 payload strategy (v1)": [
+  "c.1 pre-deployment validation checklist": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "53-payload-strategy-v1"
+      "anchor": "c1-pre-deployment-validation-checklist"
     }
   ],
-  "6) rollout stages (recommended)": [
+  "c.2 functional validation (staging)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "6-rollout-stages-recommended"
+      "anchor": "c2-functional-validation-staging"
     }
   ],
-  "stage 0 — shadow (no customer impact)": [
+  "c.3 evidence capture (staging)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "stage-0-shadow-no-customer-impact"
+      "anchor": "c3-evidence-capture-staging"
     }
   ],
-  "stage 1 — tag-only": [
+  "c.4 staging sign-off checklist": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "stage-1-tag-only"
+      "anchor": "c4-staging-sign-off-checklist"
     }
   ],
-  "stage 2 — full routing": [
+  "c.5 production rollout (only after staging sign-off)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "stage-2-full-routing"
+      "anchor": "c5-production-rollout-only-after-staging-sign-off"
     }
   ],
-  "stage 3 — optimization": [
+  "c.6 rollback plan": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "stage-3-optimization"
+      "anchor": "c6-rollback-plan"
     }
   ],
-  "7) acceptance checklist (definition of done for config)": [
+  "reference: shipped middleware behavior": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "7-acceptance-checklist-definition-of-done-for-config"
+      "anchor": "reference-shipped-middleware-behavior"
     }
   ],
-  "7.1 security & stability": [
+  "webhook endpoint": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "71-security-stability"
+      "anchor": "webhook-endpoint"
     }
   ],
-  "7.2 trigger reliability": [
+  "authentication header": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "72-trigger-reliability"
+      "anchor": "authentication-header"
     }
   ],
-  "7.3 routing correctness": [
+  "secret ids": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "73-routing-correctness"
+      "anchor": "secret-ids"
     }
   ],
-  "7.4 visibility": [
+  "payload expectations": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "74-visibility"
+      "anchor": "payload-expectations"
+    }
+  ],
+  "appendix: powershell helpers": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "appendix-powershell-helpers"
+    }
+  ],
+  "find github actions run urls": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "find-github-actions-run-urls"
+    }
+  ],
+  "verify cloudformation stack status": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "verify-cloudformation-stack-status"
+    }
+  ],
+  "check cloudwatch logs (recent errors)": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "check-cloudwatch-logs-recent-errors"
+    }
+  ],
+  "acceptance criteria (definition of done)": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "acceptance-criteria-definition-of-done"
+    }
+  ],
+  "security & stability": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "security-stability"
+    }
+  ],
+  "trigger reliability": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "trigger-reliability"
+    }
+  ],
+  "routing correctness": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "routing-correctness"
+    }
+  ],
+  "staging-first validation": [
+    {
+      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+      "anchor": "staging-first-validation"
     }
   ],
   "shipstation integration skeleton": [
@@ -11877,6 +11931,12 @@
       "anchor": "2-local-ci-equivalent-checks"
     }
   ],
+  "windows note: powershell 5.x does **not** support `&&`": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "windows-note-powershell-5x-does-not-support"
+    }
+  ],
   "powershell helper (windows)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -11889,6 +11949,12 @@
       "anchor": "3-bugbot-pr-review-cursor"
     }
   ],
+  "“extensions are not cli” (cursor/vs code)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "extensions-are-not-cli-cursorvs-code"
+    }
+  ],
   "how to trigger a review (mention-only mode)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -11899,6 +11965,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "powershell-safe-gh-examples"
+    }
+  ],
+  "alternative trigger: workflow dispatch (actions tab)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
     }
   ],
   "merge policy (auditability)": [

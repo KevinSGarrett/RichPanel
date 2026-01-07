@@ -4779,143 +4779,188 @@
     "outline": [
       {
         "level": 1,
-        "text": "Richpanel Config Changes (v1 Target State)",
-        "anchor": "richpanel-config-changes-v1-target-state"
+        "text": "Richpanel Configuration Runbook (v1)",
+        "anchor": "richpanel-configuration-runbook-v1"
       },
       {
         "level": 2,
-        "text": "0) Guiding principles (v1)",
-        "anchor": "0-guiding-principles-v1"
+        "text": "Guiding Principles (v1)",
+        "anchor": "guiding-principles-v1"
       },
       {
         "level": 2,
-        "text": "1) Configuration change summary (what to change)",
-        "anchor": "1-configuration-change-summary-what-to-change"
+        "text": "Section A: Doc-Only Prep (Safe, No UI Changes)",
+        "anchor": "section-a-doc-only-prep-safe-no-ui-changes"
+      },
+      {
+        "level": 3,
+        "text": "A.1 Fetch CloudFormation outputs (PowerShell)",
+        "anchor": "a1-fetch-cloudformation-outputs-powershell"
+      },
+      {
+        "level": 3,
+        "text": "A.2 Verify secrets exist (PowerShell)",
+        "anchor": "a2-verify-secrets-exist-powershell"
+      },
+      {
+        "level": 3,
+        "text": "A.3 Canonical secret IDs (reference)",
+        "anchor": "a3-canonical-secret-ids-reference"
+      },
+      {
+        "level": 3,
+        "text": "A.4 Required tags (reference)",
+        "anchor": "a4-required-tags-reference"
+      },
+      {
+        "level": 3,
+        "text": "A.5 Required team (reference)",
+        "anchor": "a5-required-team-reference"
       },
       {
         "level": 2,
-        "text": "2) Teams (target state)",
-        "anchor": "2-teams-target-state"
+        "text": "Section B: Human UI Steps (Gated — Requires Approval)",
+        "anchor": "section-b-human-ui-steps-gated-requires-approval"
       },
       {
         "level": 3,
-        "text": "2.1 Create: Chargebacks / Disputes",
-        "anchor": "21-create-chargebacks-disputes"
+        "text": "B.1 Create tags in Richpanel UI",
+        "anchor": "b1-create-tags-in-richpanel-ui"
+      },
+      {
+        "level": 3,
+        "text": "B.2 Create team in Richpanel UI",
+        "anchor": "b2-create-team-in-richpanel-ui"
+      },
+      {
+        "level": 3,
+        "text": "B.3 Configure HTTP Target webhook",
+        "anchor": "b3-configure-http-target-webhook"
+      },
+      {
+        "level": 3,
+        "text": "B.4 Create automation rule: Middleware inbound trigger",
+        "anchor": "b4-create-automation-rule-middleware-inbound-trigger"
+      },
+      {
+        "level": 3,
+        "text": "B.5 Create assignment rules: routing tag → team",
+        "anchor": "b5-create-assignment-rules-routing-tag-team"
+      },
+      {
+        "level": 3,
+        "text": "B.6 De-conflict legacy assignment rules",
+        "anchor": "b6-de-conflict-legacy-assignment-rules"
+      },
+      {
+        "level": 3,
+        "text": "B.7 Disable/replace chargeback auto-close rules",
+        "anchor": "b7-disablereplace-chargeback-auto-close-rules"
       },
       {
         "level": 2,
-        "text": "3) Tags (target state)",
-        "anchor": "3-tags-target-state"
+        "text": "Section C: Validation / Evidence (Staging First)",
+        "anchor": "section-c-validation-evidence-staging-first"
       },
       {
         "level": 3,
-        "text": "3.1 Naming conventions",
-        "anchor": "31-naming-conventions"
+        "text": "C.1 Pre-deployment validation checklist",
+        "anchor": "c1-pre-deployment-validation-checklist"
       },
       {
         "level": 3,
-        "text": "3.2 Required routing tags (v1)",
-        "anchor": "32-required-routing-tags-v1"
+        "text": "C.2 Functional validation (staging)",
+        "anchor": "c2-functional-validation-staging"
       },
       {
         "level": 3,
-        "text": "3.3 Required middleware control tags (v1)",
-        "anchor": "33-required-middleware-control-tags-v1"
+        "text": "C.3 Evidence capture (staging)",
+        "anchor": "c3-evidence-capture-staging"
+      },
+      {
+        "level": 3,
+        "text": "C.4 Staging sign-off checklist",
+        "anchor": "c4-staging-sign-off-checklist"
+      },
+      {
+        "level": 3,
+        "text": "C.5 Production rollout (only after staging sign-off)",
+        "anchor": "c5-production-rollout-only-after-staging-sign-off"
+      },
+      {
+        "level": 3,
+        "text": "C.6 Rollback plan",
+        "anchor": "c6-rollback-plan"
       },
       {
         "level": 2,
-        "text": "4) Automation rules (target state)",
-        "anchor": "4-automation-rules-target-state"
+        "text": "Reference: Shipped Middleware Behavior",
+        "anchor": "reference-shipped-middleware-behavior"
       },
       {
         "level": 3,
-        "text": "4.1 New: Middleware inbound trigger rule (required)",
-        "anchor": "41-new-middleware-inbound-trigger-rule-required"
+        "text": "Webhook endpoint",
+        "anchor": "webhook-endpoint"
       },
       {
         "level": 3,
-        "text": "4.2 Assignment rules: routing tag → team (required)",
-        "anchor": "42-assignment-rules-routing-tag-team-required"
+        "text": "Authentication header",
+        "anchor": "authentication-header"
       },
       {
         "level": 3,
-        "text": "4.3 De-conflict legacy assignment rules (required to prevent routing fights)",
-        "anchor": "43-de-conflict-legacy-assignment-rules-required-to-prevent-routing-fights"
+        "text": "Secret IDs",
+        "anchor": "secret-ids"
       },
       {
         "level": 3,
-        "text": "4.4 Disable/replace chargeback auto-close rules (required)",
-        "anchor": "44-disablereplace-chargeback-auto-close-rules-required"
+        "text": "Payload expectations",
+        "anchor": "payload-expectations"
       },
       {
         "level": 2,
-        "text": "5) HTTP Target (Richpanel → Middleware)",
-        "anchor": "5-http-target-richpanel-middleware"
+        "text": "Appendix: PowerShell Helpers",
+        "anchor": "appendix-powershell-helpers"
       },
       {
         "level": 3,
-        "text": "5.1 Destination",
-        "anchor": "51-destination"
+        "text": "Find GitHub Actions run URLs",
+        "anchor": "find-github-actions-run-urls"
       },
       {
         "level": 3,
-        "text": "5.2 Required security header (anti-spoof)",
-        "anchor": "52-required-security-header-anti-spoof"
+        "text": "Verify CloudFormation stack status",
+        "anchor": "verify-cloudformation-stack-status"
       },
       {
         "level": 3,
-        "text": "5.3 Payload strategy (v1)",
-        "anchor": "53-payload-strategy-v1"
+        "text": "Check CloudWatch Logs (recent errors)",
+        "anchor": "check-cloudwatch-logs-recent-errors"
       },
       {
         "level": 2,
-        "text": "6) Rollout stages (recommended)",
-        "anchor": "6-rollout-stages-recommended"
+        "text": "Acceptance Criteria (Definition of Done)",
+        "anchor": "acceptance-criteria-definition-of-done"
       },
       {
         "level": 3,
-        "text": "Stage 0 — Shadow (no customer impact)",
-        "anchor": "stage-0-shadow-no-customer-impact"
+        "text": "Security & stability",
+        "anchor": "security-stability"
       },
       {
         "level": 3,
-        "text": "Stage 1 — Tag-only",
-        "anchor": "stage-1-tag-only"
+        "text": "Trigger reliability",
+        "anchor": "trigger-reliability"
       },
       {
         "level": 3,
-        "text": "Stage 2 — Full routing",
-        "anchor": "stage-2-full-routing"
+        "text": "Routing correctness",
+        "anchor": "routing-correctness"
       },
       {
         "level": 3,
-        "text": "Stage 3 — Optimization",
-        "anchor": "stage-3-optimization"
-      },
-      {
-        "level": 2,
-        "text": "7) Acceptance checklist (definition of done for config)",
-        "anchor": "7-acceptance-checklist-definition-of-done-for-config"
-      },
-      {
-        "level": 3,
-        "text": "7.1 Security & stability",
-        "anchor": "71-security-stability"
-      },
-      {
-        "level": 3,
-        "text": "7.2 Trigger reliability",
-        "anchor": "72-trigger-reliability"
-      },
-      {
-        "level": 3,
-        "text": "7.3 Routing correctness",
-        "anchor": "73-routing-correctness"
-      },
-      {
-        "level": 3,
-        "text": "7.4 Visibility",
-        "anchor": "74-visibility"
+        "text": "Staging-first validation",
+        "anchor": "staging-first-validation"
       }
     ]
   },
@@ -10734,6 +10779,11 @@
       },
       {
         "level": 3,
+        "text": "Windows note: PowerShell 5.x does **not** support `&&`",
+        "anchor": "windows-note-powershell-5x-does-not-support"
+      },
+      {
+        "level": 3,
         "text": "PowerShell helper (Windows)",
         "anchor": "powershell-helper-windows"
       },
@@ -10744,6 +10794,11 @@
       },
       {
         "level": 3,
+        "text": "“Extensions are not CLI” (Cursor/VS Code)",
+        "anchor": "extensions-are-not-cli-cursorvs-code"
+      },
+      {
+        "level": 3,
         "text": "How to trigger a review (mention-only mode)",
         "anchor": "how-to-trigger-a-review-mention-only-mode"
       },
@@ -10751,6 +10806,11 @@
         "level": 3,
         "text": "PowerShell-safe `gh` examples",
         "anchor": "powershell-safe-gh-examples"
+      },
+      {
+        "level": 3,
+        "text": "Alternative trigger: workflow dispatch (Actions tab)",
+        "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
       },
       {
         "level": 3,

@@ -132,7 +132,7 @@ Legend:
 - 📎 [Macros and Template Alignment (Richpanel ↔ Middleware)](03_Richpanel_Integration/Macros_and_Template_Alignment.md)  (`03_Richpanel_Integration/Macros_and_Template_Alignment.md`)
 - 📎 [Queues and Routing Primitives (Richpanel)](03_Richpanel_Integration/Queues_and_Routing_Primitives.md)  (`03_Richpanel_Integration/Queues_and_Routing_Primitives.md`)
 - ✅ [Richpanel API Contracts and Error Handling](03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md)  (`03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md`)
-- 📎 [Richpanel Config Changes (v1 Target State)](03_Richpanel_Integration/Richpanel_Config_Changes_v1.md)  (`03_Richpanel_Integration/Richpanel_Config_Changes_v1.md`)
+- 📎 [Richpanel Configuration Runbook (v1)](03_Richpanel_Integration/Richpanel_Config_Changes_v1.md)  (`03_Richpanel_Integration/Richpanel_Config_Changes_v1.md`)
 - 📎 [ShipStation integration skeleton](03_Richpanel_Integration/ShipStation_Integration_Skeleton.md)  (`03_Richpanel_Integration/ShipStation_Integration_Skeleton.md`)
 - 📎 [Shopify integration skeleton](03_Richpanel_Integration/Shopify_Integration_Skeleton.md)  (`03_Richpanel_Integration/Shopify_Integration_Skeleton.md`)
 - ✅ [Team/Tag Mapping and Drift Management](03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md)  (`03_Richpanel_Integration/Team_Tag_Mapping_and_Drift.md`)
