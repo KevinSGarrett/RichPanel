@@ -1,0 +1,76 @@
+name: Set Runtime Flags
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev|staging|prod)"
+        required: true
+        type: choice
+        options: [dev, staging, prod]
+      safe_mode:
+        description: "true|false"
+        required: true
+        type: choice
+        options: ["true", "false"]
+      automation_enabled:
+        description: "true|false"
+        required: true
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+
+jobs:
+  set-flags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select account id
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV="${{ inputs.environment }}"
+          if [ "$ENV" = "dev" ]; then
+            echo "AWS_ACCOUNT_ID=151124909266" >> "$GITHUB_ENV"
+          elif [ "$ENV" = "staging" ]; then
+            echo "AWS_ACCOUNT_ID=260475105304" >> "$GITHUB_ENV"
+          elif [ "$ENV" = "prod" ]; then
+            echo "AWS_ACCOUNT_ID=878145708918" >> "$GITHUB_ENV"
+          else
+            echo "Unknown env: $ENV" && exit 1
+          fi
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-set-flags
+
+      - name: Set SSM parameters
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV="${{ inputs.environment }}"
+          SAFE="${{ inputs.safe_mode }}"
+          AUTO="${{ inputs.automation_enabled }}"
+
+          aws ssm put-parameter \
+            --name "/rp-mw/$ENV/safe_mode" \
+            --type "String" \
+            --value "$SAFE" \
+            --overwrite
+
+          aws ssm put-parameter \
+            --name "/rp-mw/$ENV/automation_enabled" \
+            --type "String" \
+            --value "$AUTO" \
+            --overwrite
+
+          echo "[OK] Set /rp-mw/$ENV/safe_mode=$SAFE"
+          echo "[OK] Set /rp-mw/$ENV/automation_enabled=$AUTO"

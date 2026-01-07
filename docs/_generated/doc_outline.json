@@ -5559,6 +5559,11 @@
       },
       {
         "level": 2,
+        "text": "Implementation status (shipped vs roadmap)",
+        "anchor": "implementation-status-shipped-vs-roadmap"
+      },
+      {
+        "level": 2,
         "text": "Core principle",
         "anchor": "core-principle"
       },
@@ -5566,6 +5571,16 @@
         "level": 2,
         "text": "High-level pipeline",
         "anchor": "high-level-pipeline"
+      },
+      {
+        "level": 3,
+        "text": "Shipped v1 worker pipeline (current)",
+        "anchor": "shipped-v1-worker-pipeline-current"
+      },
+      {
+        "level": 3,
+        "text": "Target pipeline (roadmap design; not fully implemented in the worker)",
+        "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
       },
       {
         "level": 2,
@@ -5589,13 +5604,13 @@
       },
       {
         "level": 3,
-        "text": "Step 4 — LLM classifier (structured output)",
-        "anchor": "step-4-llm-classifier-structured-output"
+        "text": "Step 4 — LLM classifier (structured output) (roadmap)",
+        "anchor": "step-4-llm-classifier-structured-output-roadmap"
       },
       {
         "level": 3,
-        "text": "Step 4.5 — Canonicalize intents (multi-intent priority)",
-        "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+        "text": "Step 4.5 — Canonicalize intents (multi-intent priority) (roadmap)",
+        "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
       },
       {
         "level": 3,
@@ -5604,8 +5619,8 @@
       },
       {
         "level": 3,
-        "text": "Step 6 — Tier 2 verifier (conditional)",
-        "anchor": "step-6-tier-2-verifier-conditional"
+        "text": "Step 6 — Tier 2 verifier (conditional) (roadmap)",
+        "anchor": "step-6-tier-2-verifier-conditional-roadmap"
       },
       {
         "level": 3,
