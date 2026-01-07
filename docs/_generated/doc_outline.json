@@ -2954,23 +2954,38 @@
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.1 Security & stability",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-71-security-stability"
+        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
+        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c1-pre-deployment-validation-checklist"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.2 Trigger reliability",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-72-trigger-reliability"
+        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
+        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c2-functional-validation-staging"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.3 Routing correctness",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-73-routing-correctness"
+        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
+        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c4-staging-sign-off-checklist"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.4 Visibility",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-74-visibility"
+        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
+        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-routing-correctness"
+      },
+      {
+        "level": 3,
+        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
+        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-security-stability"
+      },
+      {
+        "level": 3,
+        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
+        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-staging-first-validation"
+      },
+      {
+        "level": 3,
+        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
+        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-trigger-reliability"
       },
       {
         "level": 2,
@@ -3236,21 +3251,6 @@
         "level": 3,
         "text": "Wave 07 Definition of Done Checklist > B) Concurrency and throughput",
         "anchor": "wave-07-definition-of-done-checklist-b-concurrency-and-throughput"
-      },
-      {
-        "level": 3,
-        "text": "Wave 07 Definition of Done Checklist > C) Queueing and idempotency",
-        "anchor": "wave-07-definition-of-done-checklist-c-queueing-and-idempotency"
-      },
-      {
-        "level": 3,
-        "text": "Wave 07 Definition of Done Checklist > Closeout verification",
-        "anchor": "wave-07-definition-of-done-checklist-closeout-verification"
-      },
-      {
-        "level": 3,
-        "text": "Wave 07 Definition of Done Checklist > D) Resilience and degradation",
-        "anchor": "wave-07-definition-of-done-checklist-d-resilience-and-degradation"
       }
     ]
   },

@@ -3047,28 +3047,46 @@
       "anchor": "docs03richpanelintegrationrichpanelconfigchangesv1md"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.1 security & stability": [
+  "check webhook token secrets > section c: validation / evidence (staging first) > c.1 pre-deployment validation checklist": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-71-security-stability"
+      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c1-pre-deployment-validation-checklist"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.2 trigger reliability": [
+  "check webhook token secrets > section c: validation / evidence (staging first) > c.2 functional validation (staging)": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-72-trigger-reliability"
+      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c2-functional-validation-staging"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.3 routing correctness": [
+  "check webhook token secrets > section c: validation / evidence (staging first) > c.4 staging sign-off checklist": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-73-routing-correctness"
+      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c4-staging-sign-off-checklist"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.4 visibility": [
+  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > routing correctness": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-74-visibility"
+      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-routing-correctness"
+    }
+  ],
+  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > security & stability": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-security-stability"
+    }
+  ],
+  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > staging-first validation": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-staging-first-validation"
+    }
+  ],
+  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > trigger reliability": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-trigger-reliability"
     }
   ],
   "docs/03_richpanel_integration/tenant_capabilities_clarifications.md": [
@@ -3387,24 +3405,6 @@
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
       "anchor": "wave-07-definition-of-done-checklist-b-concurrency-and-throughput"
-    }
-  ],
-  "wave 07 definition of done checklist > c) queueing and idempotency": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "wave-07-definition-of-done-checklist-c-queueing-and-idempotency"
-    }
-  ],
-  "wave 07 definition of done checklist > closeout verification": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "wave-07-definition-of-done-checklist-closeout-verification"
-    }
-  ],
-  "wave 07 definition of done checklist > d) resilience and degradation": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "wave-07-definition-of-done-checklist-d-resilience-and-degradation"
     }
   ],
   "plan checklist — summary (generated)": [
