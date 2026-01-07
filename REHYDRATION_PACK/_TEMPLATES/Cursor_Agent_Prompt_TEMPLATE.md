@@ -9,7 +9,7 @@
 ## Model + MAX mode + Cycle (REQUIRED)
 - **Model used:** `<model-name>` (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
 - **MAX mode:** ON | OFF
-- **Cycle:** 1× | 2×
+- **Cycle:** 1× | 2× | 3× | 4×
 
 **Note:** Always check Cursor's model picker for the current model list. If you can't find the exact model name, pick the closest family (see catalog).
 
@@ -61,6 +61,14 @@ Optional:
 
 When completing work, the agent **must** provide a structured summary to enable seamless handoff and prevent "already done" loops.
 
+### Prompt set fingerprint (REQUIRED)
+
+Agents must include the **prompt set fingerprint** in their summary.
+
+Source:
+- Run `python scripts/verify_agent_prompts_fresh.py` (or `python scripts/run_ci_checks.py`) and copy the line:
+  - `[INFO] Prompt set fingerprint: <sha256>`
+
 ### Required sections
 
 **1. Work completed**
@@ -74,6 +82,7 @@ When completing work, the agent **must** provide a structured summary to enable 
 - PR number (if created)
 - PR status (open/merged/closed)
 - Last commit SHA on this branch
+- Prompt set fingerprint (from `verify_agent_prompts_fresh.py` / CI output)
 
 **3. What's NOT done (if applicable)**
 - Tasks explicitly deferred
@@ -101,6 +110,7 @@ When completing work, the agent **must** provide a structured summary to enable 
 - Worktree: `<pwd-output>`
 - PR: #<number> (<open|merged|closed>)
 - Last commit: `<sha>`
+- Prompt set fingerprint: `<sha256>`
 
 ### Not done
 - <item-1>
