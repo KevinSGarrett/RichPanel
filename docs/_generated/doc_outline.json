@@ -10734,6 +10734,11 @@
       },
       {
         "level": 3,
+        "text": "Windows note: PowerShell 5.x does **not** support `&&`",
+        "anchor": "windows-note-powershell-5x-does-not-support"
+      },
+      {
+        "level": 3,
         "text": "PowerShell helper (Windows)",
         "anchor": "powershell-helper-windows"
       },
@@ -10741,6 +10746,11 @@
         "level": 2,
         "text": "3) Bugbot PR review (Cursor)",
         "anchor": "3-bugbot-pr-review-cursor"
+      },
+      {
+        "level": 3,
+        "text": "“Extensions are not CLI” (Cursor/VS Code)",
+        "anchor": "extensions-are-not-cli-cursorvs-code"
       },
       {
         "level": 3,
