@@ -2915,6 +2915,12 @@
       "anchor": "recommended-tracking-workflow"
     }
   ],
+  "important: checkbox counts ≠ shipped progress": [
+    {
+      "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
+      "anchor": "important-checkbox-counts-shipped-progress"
+    }
+  ],
   "to-do system (project checklist)": [
     {
       "path": "00_Project_Admin/To_Do/README.md",
@@ -11889,7 +11895,7 @@
       "anchor": "powershell-helper-windows"
     }
   ],
-  "mypy “asset.\\* not a valid package name” (cdk outputs)": [
+  "mypy \"asset.\\* not a valid package name\" (cdk outputs)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"

@@ -73,3 +73,6 @@ _tmp_branch_protection_*.json
 RichPanel_API.txt
 RichPanel_API*.txt
 
+# DynamoDB test/scratch files (local AWS CLI inputs)
+ddb_*.json
+

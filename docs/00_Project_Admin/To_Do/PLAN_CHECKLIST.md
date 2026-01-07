@@ -50,3 +50,20 @@ When an agent completes work:
 - Use `BACKLOG.md` for unscheduled ideas
 - Use `DONE_LOG.md` for major completions
 
+---
+
+## Important: Checkbox counts ≠ shipped progress
+
+The checkbox extraction counts (e.g., "19.97% checked") represent **planned documentation tasks**, not actual shipped implementation. Key distinctions:
+
+- **Checkbox extraction:** Counts how many `- [x]` vs `- [ ]` boxes exist in plan docs
+- **Shipped progress:** What's actually deployed and verified in dev/staging/prod
+
+To understand real progress:
+1. Check `MASTER_CHECKLIST.md` for epic-level status (✅ Done, 🚧 In progress, etc.)
+2. Review `REHYDRATION_PACK/02_CURRENT_STATE.md` for deployed state
+3. Look at GitHub Actions evidence (dev-e2e-smoke, staging-e2e-smoke runs)
+4. Review PR history and merge commits for implementation work
+
+**Bottom line:** A high checkbox percentage does NOT mean the system is ready to ship. Use the master checklist and current state docs for accurate progress signals.
+

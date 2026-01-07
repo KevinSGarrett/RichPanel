@@ -2826,6 +2826,11 @@
         "level": 2,
         "text": "Recommended tracking workflow",
         "anchor": "recommended-tracking-workflow"
+      },
+      {
+        "level": 2,
+        "text": "Important: Checkbox counts ≠ shipped progress",
+        "anchor": "important-checkbox-counts-shipped-progress"
       }
     ]
   },
@@ -10744,7 +10749,7 @@
       },
       {
         "level": 3,
-        "text": "Mypy “asset.\\* not a valid package name” (CDK outputs)",
+        "text": "Mypy \"asset.\\* not a valid package name\" (CDK outputs)",
         "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
       },
       {
