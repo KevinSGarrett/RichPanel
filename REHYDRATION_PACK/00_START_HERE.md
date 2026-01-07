@@ -101,6 +101,13 @@ python scripts/run_ci_checks.py
 ```
 - Prompt freshness guard compares current prompts against the last 5 archives.
 
+### Windows note: PowerShell 5.x does **not** support `&&`
+If you see examples that chain commands with `&&` (common in bash/zsh), they will fail in **Windows PowerShell 5.x**.
+Prefer:
+- separate lines, or
+- `;` as the statement separator (PowerShell), or
+- `cmd /c "a && b"` when you explicitly want cmd-style chaining.
+
 Policy for Git/GitHub operations:
 - `docs/98_Agent_Ops/Policies/POL-GH-001__GitHub_and_Repo_Operations_Policy.md`
 
