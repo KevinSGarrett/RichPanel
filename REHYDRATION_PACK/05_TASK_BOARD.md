@@ -2,7 +2,7 @@
 
 > This is the **single most important** file for “what to do next”.
 
-Last updated: 2026-01-04 (Wave B06)
+Last updated: 2026-01-05 (Docs alignment pass)
 
 **Current mode:** build (implementation active).  
 Dev + staging are deployed and smoke tests are green; prod promotion is gated.
@@ -12,7 +12,7 @@ Dev + staging are deployed and smoke tests are green; prod promotion is gated.
 ## P0 — Integrations + configuration (do next)
 - [ ] Shopify integration: confirm credentials + data availability + fallback behavior
 - [ ] ShipStation integration (if used): confirm credentials + field mapping
-- [x] Order lookup planning in worker (Shopify + ShipStation, dry-run only)
+- [ ] Shopify/ShipStation order lookup implementation (gated enrichment + tests) — In progress
 - [ ] Richpanel UI configuration: document required settings and validation steps
 - [ ] Confirm order-status semantics and CR-001 behavior in real Richpanel flows (staging first)
 
@@ -28,6 +28,8 @@ Goal: stay safe while shipping.
 
 ## Done (build baseline)
 
+- ✅ **TASK-251:** Bugbot PR loop documented (trigger via `@cursor review` / `bugbot run`) (Runbook)
+- ✅ **TASK-250:** Offline-first integration skeletons present (Richpanel/OpenAI/Shopify/ShipStation) (skeletons)
 - ✅ **TASK-240:** Added PM prompts, RUN scaffolding script, and GitHub ops policy (Wave F10)
 
 - ✅ **TASK-230:** Clarified Foundation vs Build and mapped legacy Wave 00–10 schedule (Wave F10)

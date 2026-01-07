@@ -19,6 +19,10 @@ See: `docs/00_Project_Admin/Canonical_vs_Legacy_Documentation_Paths.md`
 - Prefer small, targeted changes.
 - Avoid reformatting unrelated sections.
 
+## Formatting
+- `.editorconfig` at the repo root is the canonical source for charset/whitespace defaults.
+- Use an EditorConfig-aware editor and avoid repo-wide reformatting outside intended scope.
+
 ## Source-of-truth rules
 - API surface → `docs/04_API_Contracts/openapi.yaml`
 - Decisions → `docs/00_Project_Admin/Decision_Log.md`

@@ -1,0 +1,29 @@
+{
+  "order": {
+    "id": 1001,
+    "name": "#1001",
+    "fulfillment_status": "fulfilled",
+    "updated_at": "2024-01-10T12:00:00Z",
+    "total_price": "39.98",
+    "line_items": [
+      {
+        "id": 1,
+        "name": "Widget A"
+      },
+      {
+        "id": 2,
+        "name": "Widget B"
+      }
+    ],
+    "fulfillments": [
+      {
+        "tracking_company": "UPS",
+        "tracking_number": "1Z999",
+        "tracking_numbers": [
+          "1Z999"
+        ]
+      }
+    ]
+  }
+}
+

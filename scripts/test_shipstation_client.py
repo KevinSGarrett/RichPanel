@@ -80,6 +80,49 @@ class ShipStationClientTests(unittest.TestCase):
         self.assertEqual(response.headers.get("x-dry-run"), "1")
         self.assertFalse(transport.called)
 
+    def test_list_shipments_builds_expected_path_and_sorted_query(self) -> None:
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b"{}")]
+        )
+        client = ShipStationClient(
+            api_key="key",
+            api_secret="secret",
+            allow_network=True,
+            transport=transport,
+        )
+
+        response = client.list_shipments(
+            params={"b": "2", "a": "1"},
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 1)
+        request = transport.requests[0]
+        self.assertEqual(request.method, "GET")
+        self.assertTrue(request.url.endswith("/shipments?a=1&b=2"))
+
+    def test_list_shipments_respects_network_blocked_gate(self) -> None:
+        transport = _FailingTransport()
+        client = ShipStationClient(
+            api_key="key",
+            api_secret="secret",
+            allow_network=False,
+            transport=transport,
+        )
+
+        response = client.list_shipments(
+            params={"page": "1"},
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertTrue(response.dry_run)
+        self.assertEqual(response.reason, "network_disabled")
+        self.assertFalse(transport.called)
+
     def test_missing_credentials_short_circuits(self) -> None:
         transport = _FailingTransport()
         secrets_client = _StubSecretsClient({})

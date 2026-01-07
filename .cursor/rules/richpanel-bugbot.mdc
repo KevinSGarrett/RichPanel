@@ -1,0 +1,34 @@
+---
+description: RichPanel Bugbot review rules (triggered via PR comment or workflow dispatch)
+globs:
+  - "**/*"
+---
+
+# RichPanel Bugbot review rules
+
+When asked to review a PR in this repo (e.g. via `@cursor review` / `bugbot run`), produce a **PR comment** that is:
+
+- **Actionable**: call out concrete issues with file paths + what to change.
+- **Risk-ranked**: prioritize correctness, security, data integrity, and prod safety.
+- **Repo-aware**: align with our CI contract and documented conventions.
+
+## Hard requirements to check
+
+- **CI contract**: changes should keep `python scripts/run_ci_checks.py` passing.
+- **Secrets hygiene**: no secrets committed; no secret values echoed in logs.
+- **Security & secrets**: prefer env/config; ensure new flows keep secrets encrypted at rest/in transit; scrub secret material from telemetry.
+- **PII hygiene**: do not log, persist, or export PII without existing approved paths; ensure redaction/anonymization on any diagnostic output.
+- **Offline-first gating**: keep gating logic safe when offline; fail closed; prefer cached/queued behavior; avoid new online-only blockers.
+- **Idempotency & retries** (backend/Lambda/workers): safe replays; no double-writes; robust error handling.
+- **Shopify/OpenAI integrations**: validate auth, timeouts, retries, and PII handling.
+- **Infra/CDK**: no breaking deploy changes without clear migration notes; least-privilege IAM.
+- **Docs & runbooks**: if you change workflows or process, update the relevant docs.
+- **Workers/pipelines/integrations**: ensure tests cover happy-path, retries, idempotency, and external error handling.
+- **Generated docs**: avoid churn; only regenerate when required and document why in the PR if touched.
+
+## Review output format
+
+1) **Summary** (2-5 bullets)
+2) **Blocking issues** (must-fix)
+3) **Non-blocking improvements** (nice-to-have)
+4) **Questions / assumptions** (if anything is unclear)

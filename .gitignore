@@ -29,7 +29,11 @@ secrets/
 .DS_Store
 .idea/
 .vscode/
-/.cursor/
+/.cursor/*
+!/.cursor/rules/
+# Allow repo-tracked Bugbot rules while keeping other Cursor artifacts local
+/.cursor/rules/*
+!/.cursor/rules/*.mdc
 
 # Root-only local artifacts (do not ignore infra/cdk/package-lock.json)
 /package-lock.json
@@ -64,3 +68,8 @@ _tmp_branch_protection_*.json
 # Ensure example env files can be committed
 !.env.example
 !config/.env.example
+
+# Local vendor keys (never commit)
+RichPanel_API.txt
+RichPanel_API*.txt
+

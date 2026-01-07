@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+    }
+  ],
   "2026-01-03 - run_20260103_2300z (e2e evidence hardening + prod readiness checklist)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -6357,6 +6363,12 @@
       "anchor": "objective"
     }
   ],
+  "implementation status (shipped vs roadmap)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "implementation-status-shipped-vs-roadmap"
+    }
+  ],
   "core principle": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
@@ -6367,6 +6379,18 @@
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
       "anchor": "high-level-pipeline"
+    }
+  ],
+  "shipped v1 worker pipeline (current)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "shipped-v1-worker-pipeline-current"
+    }
+  ],
+  "target pipeline (roadmap design; not fully implemented in the worker)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
     }
   ],
   "step-by-step with gates": [
@@ -6393,16 +6417,16 @@
       "anchor": "step-3-tier-0-pre-checks-fast-allowlist-rules"
     }
   ],
-  "step 4 — llm classifier (structured output)": [
+  "step 4 — llm classifier (structured output) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-4-llm-classifier-structured-output"
+      "anchor": "step-4-llm-classifier-structured-output-roadmap"
     }
   ],
-  "step 4.5 — canonicalize intents (multi-intent priority)": [
+  "step 4.5 — canonicalize intents (multi-intent priority) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+      "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
     }
   ],
   "step 5 — application-layer policy enforcement (hard gates)": [
@@ -6411,10 +6435,10 @@
       "anchor": "step-5-application-layer-policy-enforcement-hard-gates"
     }
   ],
-  "step 6 — tier 2 verifier (conditional)": [
+  "step 6 — tier 2 verifier (conditional) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-6-tier-2-verifier-conditional"
+      "anchor": "step-6-tier-2-verifier-conditional-roadmap"
     }
   ],
   "step 7 — execute allowlisted actions": [
@@ -11903,10 +11927,46 @@
       "anchor": "powershell-helper-windows"
     }
   ],
-  "3) when github actions fails (red status)": [
+  "mypy “asset.\\* not a valid package name” (cdk outputs)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "3-when-github-actions-fails-red-status"
+      "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
+    }
+  ],
+  "3) bugbot pr review (cursor)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "3-bugbot-pr-review-cursor"
+    }
+  ],
+  "how to trigger a review (mention-only mode)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "how-to-trigger-a-review-mention-only-mode"
+    }
+  ],
+  "powershell-safe `gh` examples": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "powershell-safe-gh-examples"
+    }
+  ],
+  "alternative trigger: workflow dispatch (actions tab)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+    }
+  ],
+  "merge policy (auditability)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "merge-policy-auditability"
+    }
+  ],
+  "4) when github actions fails (red status)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "4-when-github-actions-fails-red-status"
     }
   ],
   "step 1 — identify the failing job": [
@@ -11945,10 +12005,10 @@
       "anchor": "step-6-push-and-verify-green"
     }
   ],
-  "4) dev e2e smoke workflow": [
+  "5) dev e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "4-dev-e2e-smoke-workflow"
+      "anchor": "5-dev-e2e-smoke-workflow"
     }
   ],
   "when to run it": [
@@ -11969,6 +12029,10 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "how-to-run-powershell-safe"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
     }
   ],
   "evidence expectations": [
@@ -11981,16 +12045,16 @@
       "anchor": "evidence-expectations"
     }
   ],
-  "5) staging e2e smoke workflow": [
+  "6) staging e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "5-staging-e2e-smoke-workflow"
+      "anchor": "6-staging-e2e-smoke-workflow"
     }
   ],
-  "6) prod promotion checklist (no prod deploy without explicit go/no-go)": [
+  "7) prod promotion checklist (no prod deploy without explicit go/no-go)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "6-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+      "anchor": "7-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
     }
   ],
   "checklist": [
@@ -12005,16 +12069,34 @@
       "anchor": "powershell-safe-commands"
     }
   ],
-  "7) common causes (initial list)": [
+  "8) common causes (initial list)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "7-common-causes-initial-list"
+      "anchor": "8-common-causes-initial-list"
     }
   ],
-  "8) if you cannot fix quickly": [
+  "9) if you cannot fix quickly": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "8-if-you-cannot-fix-quickly"
+      "anchor": "9-if-you-cannot-fix-quickly"
+    }
+  ],
+  "10) seed secrets manager (dev/staging)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "10-seed-secrets-manager-devstaging"
+    }
+  ],
+  "github secrets required (repo settings → secrets and variables → actions)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "github-secrets-required-repo-settings-secrets-and-variables-actions"
+    }
+  ],
+  "aws secret ids written (when the matching github secret is present)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "aws-secret-ids-written-when-the-matching-github-secret-is-present"
     }
   ],
   "developer guide": [
@@ -12289,6 +12371,12 @@
     {
       "path": "08_Engineering/Repository_Conventions.md",
       "anchor": "diffs"
+    }
+  ],
+  "formatting": [
+    {
+      "path": "08_Engineering/Repository_Conventions.md",
+      "anchor": "formatting"
     }
   ],
   "source-of-truth rules": [

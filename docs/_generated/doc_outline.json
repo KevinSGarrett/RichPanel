@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
+        "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+      },
+      {
+        "level": 3,
         "text": "2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)",
         "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
       },
@@ -5574,6 +5579,11 @@
       },
       {
         "level": 2,
+        "text": "Implementation status (shipped vs roadmap)",
+        "anchor": "implementation-status-shipped-vs-roadmap"
+      },
+      {
+        "level": 2,
         "text": "Core principle",
         "anchor": "core-principle"
       },
@@ -5581,6 +5591,16 @@
         "level": 2,
         "text": "High-level pipeline",
         "anchor": "high-level-pipeline"
+      },
+      {
+        "level": 3,
+        "text": "Shipped v1 worker pipeline (current)",
+        "anchor": "shipped-v1-worker-pipeline-current"
+      },
+      {
+        "level": 3,
+        "text": "Target pipeline (roadmap design; not fully implemented in the worker)",
+        "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
       },
       {
         "level": 2,
@@ -5604,13 +5624,13 @@
       },
       {
         "level": 3,
-        "text": "Step 4 — LLM classifier (structured output)",
-        "anchor": "step-4-llm-classifier-structured-output"
+        "text": "Step 4 — LLM classifier (structured output) (roadmap)",
+        "anchor": "step-4-llm-classifier-structured-output-roadmap"
       },
       {
         "level": 3,
-        "text": "Step 4.5 — Canonicalize intents (multi-intent priority)",
-        "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+        "text": "Step 4.5 — Canonicalize intents (multi-intent priority) (roadmap)",
+        "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
       },
       {
         "level": 3,
@@ -5619,8 +5639,8 @@
       },
       {
         "level": 3,
-        "text": "Step 6 — Tier 2 verifier (conditional)",
-        "anchor": "step-6-tier-2-verifier-conditional"
+        "text": "Step 6 — Tier 2 verifier (conditional) (roadmap)",
+        "anchor": "step-6-tier-2-verifier-conditional-roadmap"
       },
       {
         "level": 3,
@@ -10758,9 +10778,39 @@
         "anchor": "powershell-helper-windows"
       },
       {
+        "level": 3,
+        "text": "Mypy “asset.\\* not a valid package name” (CDK outputs)",
+        "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
+      },
+      {
         "level": 2,
-        "text": "3) When GitHub Actions fails (red status)",
-        "anchor": "3-when-github-actions-fails-red-status"
+        "text": "3) Bugbot PR review (Cursor)",
+        "anchor": "3-bugbot-pr-review-cursor"
+      },
+      {
+        "level": 3,
+        "text": "How to trigger a review (mention-only mode)",
+        "anchor": "how-to-trigger-a-review-mention-only-mode"
+      },
+      {
+        "level": 3,
+        "text": "PowerShell-safe `gh` examples",
+        "anchor": "powershell-safe-gh-examples"
+      },
+      {
+        "level": 3,
+        "text": "Alternative trigger: workflow dispatch (Actions tab)",
+        "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+      },
+      {
+        "level": 3,
+        "text": "Merge policy (auditability)",
+        "anchor": "merge-policy-auditability"
+      },
+      {
+        "level": 2,
+        "text": "4) When GitHub Actions fails (red status)",
+        "anchor": "4-when-github-actions-fails-red-status"
       },
       {
         "level": 3,
@@ -10794,8 +10844,8 @@
       },
       {
         "level": 2,
-        "text": "4) Dev E2E smoke workflow",
-        "anchor": "4-dev-e2e-smoke-workflow"
+        "text": "5) Dev E2E smoke workflow",
+        "anchor": "5-dev-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10814,8 +10864,8 @@
       },
       {
         "level": 2,
-        "text": "5) Staging E2E smoke workflow",
-        "anchor": "5-staging-e2e-smoke-workflow"
+        "text": "6) Staging E2E smoke workflow",
+        "anchor": "6-staging-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10834,8 +10884,8 @@
       },
       {
         "level": 2,
-        "text": "6) Prod promotion checklist (no prod deploy without explicit go/no-go)",
-        "anchor": "6-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+        "text": "7) Prod promotion checklist (no prod deploy without explicit go/no-go)",
+        "anchor": "7-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
       },
       {
         "level": 3,
@@ -10849,13 +10899,33 @@
       },
       {
         "level": 2,
-        "text": "7) Common causes (initial list)",
-        "anchor": "7-common-causes-initial-list"
+        "text": "8) Common causes (initial list)",
+        "anchor": "8-common-causes-initial-list"
       },
       {
         "level": 2,
-        "text": "8) If you cannot fix quickly",
-        "anchor": "8-if-you-cannot-fix-quickly"
+        "text": "9) If you cannot fix quickly",
+        "anchor": "9-if-you-cannot-fix-quickly"
+      },
+      {
+        "level": 2,
+        "text": "10) Seed Secrets Manager (dev/staging)",
+        "anchor": "10-seed-secrets-manager-devstaging"
+      },
+      {
+        "level": 3,
+        "text": "GitHub secrets required (repo Settings → Secrets and variables → Actions)",
+        "anchor": "github-secrets-required-repo-settings-secrets-and-variables-actions"
+      },
+      {
+        "level": 3,
+        "text": "AWS secret IDs written (when the matching GitHub secret is present)",
+        "anchor": "aws-secret-ids-written-when-the-matching-github-secret-is-present"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
       }
     ]
   },
@@ -11106,6 +11176,11 @@
         "level": 2,
         "text": "Diffs",
         "anchor": "diffs"
+      },
+      {
+        "level": 2,
+        "text": "Formatting",
+        "anchor": "formatting"
       },
       {
         "level": 2,

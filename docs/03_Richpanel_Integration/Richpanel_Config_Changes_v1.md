@@ -234,7 +234,7 @@ Mapping:
 | `route-returns-admin` | Returns Admin |
 | `route-livechat-support` | LiveChat Support |
 | `route-leadership-team` | Leadership Team |
-| `route-socialmedia-team` | SocialMedia Team |
+| `route-socialmedia-team` | Social Media Team |
 | `route-email-support-team` | Email Support Team |
 | `route-chargebacks-disputes` | Chargebacks / Disputes |
 

@@ -53,7 +53,7 @@ Use exactly one of:
 - Returns Admin
 - LiveChat Support
 - Leadership Team
-- SocialMedia Team
+- Social Media Team
 - Email Support Team
 - Chargebacks / Disputes Team
 
@@ -98,14 +98,11 @@ Use at most 3:
 - technical_support → Technical Support Team
 - phone_support_request → Phone Support Team
 - tiktok_support_request → TikTok Support
-- social_media_support_request → SocialMedia Team
+- social_media_support_request → Social Media Team
 - pre_purchase_question, promo_discount_issue → Sales Team (fallback to Email Support Team if Sales is not staffed)
-- influencer_marketing_inquiry → SocialMedia Team
+- influencer_marketing_inquiry → Social Media Team
 - order status/shipping delay/cancel/edit/subscription/billing → Email Support Team
-- unknown_other → channel default:
-  - livechat → LiveChat Support
-  - email → Email Support Team
-  - social/tiktok → corresponding channel teams
+- unknown_other → Email Support Team (channel-specific reassignment can be handled by downstream Richpanel rules if configured)
 
 ## Automation rules (defaults)
 - Tier 0:
