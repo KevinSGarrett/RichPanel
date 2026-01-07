@@ -68,3 +68,8 @@ _tmp_branch_protection_*.json
 # Ensure example env files can be committed
 !.env.example
 !config/.env.example
+
+# Local vendor keys (never commit)
+RichPanel_API.txt
+RichPanel_API*.txt
+

@@ -1,6 +1,6 @@
 # CI and GitHub Actions Runbook (for Cursor Agents)
 
-Last updated: 2026-01-03  
+Last updated: 2026-01-05  
 Status: Canonical
 
 This runbook defines how agents must keep CI green and how to self-fix when GitHub Actions fails.
@@ -67,6 +67,10 @@ This runs:
 
 If this fails locally, **fix before pushing**.
 
+### Mypy “asset.\* not a valid package name” (CDK outputs)
+- Cause: `cdk synth` writes `infra/cdk/cdk.out/asset.<hash>` folders; mypy treats the dotted folder name as a package and errors.
+- Fix: use the repo-root `mypy.ini` (limits checks to `backend/src` + `scripts` and excludes generated trees) and delete any local `infra/cdk/cdk.out` leftovers before re-running mypy.
+
 ---
 
 ## 3) Bugbot PR review (Cursor)
@@ -103,6 +107,23 @@ Tip: if you’re already on the PR branch, you can let `gh` infer the PR:
 $pr = gh pr view --json number --jq '.number'
 gh pr comment $pr -b 'bugbot run'
 gh pr view $pr --comments
+```
+
+### Alternative trigger: workflow dispatch (Actions tab)
+If you can’t (or don’t want to) comment from the UI/`gh`, you can trigger Bugbot via an on-demand workflow that **posts the comment for you**:
+
+- Workflow: `.github/workflows/bugbot-review.yml`
+- Inputs:
+  - `pr_number` (required)
+  - `comment_body` (optional; defaults to `@cursor review`)
+
+PowerShell-safe examples:
+```powershell
+# Posts the default comment body (@cursor review)
+gh workflow run bugbot-review.yml -f pr_number=123
+
+# Override the posted comment body if needed
+gh workflow run bugbot-review.yml -f pr_number=123 -f comment_body='bugbot run'
 ```
 
 ### Merge policy (auditability)
@@ -191,6 +212,7 @@ Notes:
 - Copy the GitHub Actions run URL and the job summary block (ingress URL, queue URL, DynamoDB tables, log group, CloudWatch Logs) into `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`.
 - Record the explicit confirmations from the summary that idempotency, conversation state, and audit records were written (event_id + conversation_id observed) and link the DynamoDB consoles for each table.
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state “no dashboards/alarms surfaced”.
+- Paste the smoke summary lines that confirm routing category/tags and the order_status_draft_reply plan + draft_replies count (safe fields only; no message bodies).
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 
 ## 6) Staging E2E smoke workflow
@@ -220,6 +242,7 @@ Guidance:
 - Open the job’s **Summary** tab once it succeeds. The Python script writes ingress URL, queue URL, DynamoDB idempotency/conversation_state/audit tables, log group, and CloudWatch Logs console deep links to `${GITHUB_STEP_SUMMARY}`—these are safe to paste because they’re derived identifiers, not secrets.
 - Record the GitHub Actions run URL + pass/fail disposition in `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md` alongside the summary confirmations that idempotency, conversation state, and audit records were observed (event_id + conversation_id). Paste the DynamoDB console links for each table.
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if none appear, state “no dashboards/alarms surfaced”.
+- Paste the routing + draft confirmation lines from the smoke summary (routing category/tags plus order_status_draft_reply presence and draft_replies count with safe fields only).
 - If discovery falls back (missing CloudFormation outputs), capture the warning lines so reviewers can see which derived values were used, but never paste raw secret material.
 
 ## 7) Prod promotion checklist (no prod deploy without explicit go/no-go)
@@ -278,6 +301,7 @@ and include:
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
+- Helper: `scripts/seed_secrets.py` (stdlib + AWS CLI; writes table to `$GITHUB_STEP_SUMMARY`)
 - Role: `rp-ci-deploy` via OIDC (dev=151124909266, staging=260475105304)
 - Region: `us-east-2`
 

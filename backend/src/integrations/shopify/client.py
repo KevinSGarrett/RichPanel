@@ -294,6 +294,33 @@ class ShopifyClient:
             response=last_response,
         )
 
+    def get_order(
+        self,
+        order_id: str,
+        *,
+        fields: Optional[List[str]] = None,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShopifyResponse:
+        """
+        Fetch a single order with optional field selection.
+        Uses the primary request() entrypoint so all safety gates apply.
+        """
+        safe_order_id = urllib.parse.quote(str(order_id), safe="")
+        params = None
+        if fields:
+            params = {"fields": ",".join(sorted(map(str, fields)))}
+
+        return self.request(
+            "GET",
+            f"orders/{safe_order_id}.json",
+            params=params,
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
     def _to_response(self, transport_response: TransportResponse, url: str) -> ShopifyResponse:
         return ShopifyResponse(
             status_code=transport_response.status_code,

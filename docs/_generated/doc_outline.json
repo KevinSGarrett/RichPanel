@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
+        "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+      },
+      {
+        "level": 3,
         "text": "2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)",
         "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
       },
@@ -5554,6 +5559,11 @@
       },
       {
         "level": 2,
+        "text": "Implementation status (shipped vs roadmap)",
+        "anchor": "implementation-status-shipped-vs-roadmap"
+      },
+      {
+        "level": 2,
         "text": "Core principle",
         "anchor": "core-principle"
       },
@@ -5561,6 +5571,16 @@
         "level": 2,
         "text": "High-level pipeline",
         "anchor": "high-level-pipeline"
+      },
+      {
+        "level": 3,
+        "text": "Shipped v1 worker pipeline (current)",
+        "anchor": "shipped-v1-worker-pipeline-current"
+      },
+      {
+        "level": 3,
+        "text": "Target pipeline (roadmap design; not fully implemented in the worker)",
+        "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
       },
       {
         "level": 2,
@@ -5584,13 +5604,13 @@
       },
       {
         "level": 3,
-        "text": "Step 4 — LLM classifier (structured output)",
-        "anchor": "step-4-llm-classifier-structured-output"
+        "text": "Step 4 — LLM classifier (structured output) (roadmap)",
+        "anchor": "step-4-llm-classifier-structured-output-roadmap"
       },
       {
         "level": 3,
-        "text": "Step 4.5 — Canonicalize intents (multi-intent priority)",
-        "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+        "text": "Step 4.5 — Canonicalize intents (multi-intent priority) (roadmap)",
+        "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
       },
       {
         "level": 3,
@@ -5599,8 +5619,8 @@
       },
       {
         "level": 3,
-        "text": "Step 6 — Tier 2 verifier (conditional)",
-        "anchor": "step-6-tier-2-verifier-conditional"
+        "text": "Step 6 — Tier 2 verifier (conditional) (roadmap)",
+        "anchor": "step-6-tier-2-verifier-conditional-roadmap"
       },
       {
         "level": 3,
@@ -10743,6 +10763,11 @@
         "anchor": "powershell-helper-windows"
       },
       {
+        "level": 3,
+        "text": "Mypy “asset.\\* not a valid package name” (CDK outputs)",
+        "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
+      },
+      {
         "level": 2,
         "text": "3) Bugbot PR review (Cursor)",
         "anchor": "3-bugbot-pr-review-cursor"
@@ -10761,6 +10786,11 @@
         "level": 3,
         "text": "PowerShell-safe `gh` examples",
         "anchor": "powershell-safe-gh-examples"
+      },
+      {
+        "level": 3,
+        "text": "Alternative trigger: workflow dispatch (Actions tab)",
+        "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
       },
       {
         "level": 3,

@@ -33,7 +33,7 @@ Current department list (given):
 6. Returns Admin  
 7. LiveChat Support  
 8. Leadership Team  
-9. SocialMedia Team  
+9. Social Media Team  
 10. Email Support Team  
 
 Additional routing target (approved earlier):
@@ -133,7 +133,7 @@ from:
    - Tier policy: Tier 1 allowed (general info only); avoid over-promising
 13) `influencer_marketing_inquiry`
    - “Influencer inquiry”, partnerships, collaborations
-   - Default destination: **SocialMedia Team** (or Leadership if your org prefers)
+   - Default destination: **Social Media Team** (or Leadership if your org prefers)
    - Tier policy: route-only (no automation)
 
 ### D) Returns / refunds / exchanges
@@ -165,7 +165,7 @@ from:
    - Default destination: **TikTok Support**
 20) `social_media_support_request`
    - Instagram/FB/other social channel support request
-   - Default destination: **SocialMedia Team**
+   - Default destination: **Social Media Team**
 
 ### G) High risk / escalations (Tier 0)
 21) `chargeback_dispute`
@@ -188,10 +188,7 @@ from:
 ### H) Unknown / fallback
 25) `unknown_other`
    - Not enough signal / unclear
-   - Default destination depends on channel:
-     - LiveChat → LiveChat Support
-     - Email → Email Support Team
-     - TikTok/Social → corresponding channel teams
+   - Default destination: **Email Support Team** (current middleware behavior; channel-specific routing can be layered via Richpanel assignment rules)
    - Tier policy: route-only
 
 ---

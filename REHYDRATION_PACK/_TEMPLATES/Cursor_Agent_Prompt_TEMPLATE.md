@@ -4,6 +4,17 @@
 **Agent:** Agent A | Agent B | Agent C  
 **Task ID(s):** `<TASK-###, TASK-###>`
 
+---
+
+## Model + MAX mode + Cycle (REQUIRED)
+- **Model used:** `<model-name>` (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
+- **MAX mode:** ON | OFF
+- **Cycle:** 1× | 2×
+
+**Note:** Always check Cursor's model picker for the current model list. If you can't find the exact model name, pick the closest family (see catalog).
+
+---
+
 ## Context (read first)
 - Current goal: <FILL_ME>
 - Relevant docs/paths:
@@ -43,3 +54,86 @@ Optional:
 3) Run the planned tests and record evidence.
 4) Update docs/maps/registry if needed.
 5) Fill out the required run artifacts.
+
+---
+
+## Agent summary schema (REQUIRED for rehydration)
+
+When completing work, the agent **must** provide a structured summary to enable seamless handoff and prevent "already done" loops.
+
+### Required sections
+
+**1. Work completed**
+- List of files changed (with brief descriptions)
+- Tests run and results
+- Evidence artifacts created
+
+**2. Merge state**
+- Current branch name
+- Worktree location (verify with `pwd`)
+- PR number (if created)
+- PR status (open/merged/closed)
+- Last commit SHA on this branch
+
+**3. What's NOT done (if applicable)**
+- Tasks explicitly deferred
+- Known issues or limitations
+- Follow-up tasks needed
+
+**4. Handoff notes**
+- Anything the next agent/PM needs to know
+- Where to find key artifacts
+- Any blockers or dependencies
+
+### Format
+
+```markdown
+## Agent Summary
+
+### Work completed
+- Changed `<file1>`: <description>
+- Changed `<file2>`: <description>
+- Ran: `<test-command>` → <result>
+- Evidence: `<path-to-artifact>`
+
+### Merge state
+- Branch: `<branch-name>`
+- Worktree: `<pwd-output>`
+- PR: #<number> (<open|merged|closed>)
+- Last commit: `<sha>`
+
+### Not done
+- <item-1>
+- <item-2>
+
+### Handoff notes
+- <note-1>
+- <note-2>
+```
+
+### Why this matters
+
+Without this summary:
+- Next agent may redo completed work ("already done" loop)
+- PM may lose track of merge state
+- CI failures are hard to debug (wrong worktree, wrong branch)
+- Rehydration takes longer and wastes tokens
+
+With this summary:
+- Clear handoff between agents
+- No ambiguity about what's merged vs. what's pending
+- Easy to recover from interruptions
+- Fast rehydration from summaries
+
+---
+
+## Pre-commit checklist
+
+Before pushing your branch:
+
+- [ ] Verified `pwd` shows the correct worktree (usually `C:\RichPanel_GIT`)
+- [ ] Verified `git branch --show-current` shows the correct branch
+- [ ] Ran `python scripts/run_ci_checks.py` locally (CI-equivalent checks)
+- [ ] Updated `REHYDRATION_PACK/GITHUB_STATE.md` if creating/merging PRs
+- [ ] Filled out required run artifacts in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
+- [ ] Wrote agent summary (see schema above)

@@ -85,6 +85,7 @@ def main() -> int:
         ["python", "scripts/test_openai_client.py"],
         ["python", "scripts/test_shopify_client.py"],
         ["python", "scripts/test_shipstation_client.py"],
+        ["python", "scripts/test_order_lookup.py"],
         ["python", "scripts/check_protected_deletes.py"] + (["--ci"] if args.ci else []),
     ]
     for cmd in checks:

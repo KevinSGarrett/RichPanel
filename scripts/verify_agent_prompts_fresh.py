@@ -1,61 +1,73 @@
 #!/usr/bin/env python3
 """
-verify_agent_prompts_fresh.py
+Ensure current agent prompts are not a repeat of recent archives.
 
-Ensures the active Agent C assignments differ from the latest archived prompts.
-Prevents accidental re-use of the previous prompt set unless explicitly overridden.
+This script compares `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md` against the
+most recent prompt archives and fails if an exact (whitespace-insensitive)
+match is found. Use `Prompt-Repeat-Override: true` in the current file to
+explicitly bypass the guard when needed.
 """
-
 from __future__ import annotations
 
-import sys
+import re
 from pathlib import Path
 
-ASSIGNMENTS_PATH = Path("REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md")
-ARCHIVE_PATTERN = "RUN_*/C/AGENT_PROMPTS_ARCHIVE*.md"
-OVERRIDE_TOKEN = "Prompt-Repeat-Override: true"
+ARCHIVE_DEPTH = 5
+ROOT = Path(__file__).resolve().parents[1]
+CURRENT_PROMPTS_PATH = ROOT / "REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md"
+ARCHIVE_GLOB = "REHYDRATION_PACK/RUNS/RUN_*/C/AGENT_PROMPTS_ARCHIVE*.md"
+OVERRIDE_TOKEN = "prompt-repeat-override: true"
 
 
-def normalize(text: str) -> str:
-    """Collapse all whitespace so comparisons ignore spacing differences."""
-    return "".join(text.split())
+def normalize(content: str) -> str:
+    # Remove all whitespace so formatting differences do not matter.
+    return re.sub(r"\s+", "", content)
 
 
-def find_latest_archive(runs_dir: Path) -> Path | None:
-    archive_paths = sorted(runs_dir.glob(ARCHIVE_PATTERN))
-    if not archive_paths:
-        return None
-    return archive_paths[-1]
+def archive_sort_key(path: Path) -> tuple[str, float]:
+    # Sort primarily by run folder name, then by file mtime as a fallback.
+    run_dir = path.parent.parent.name
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        mtime = 0.0
+    return (run_dir, mtime)
+
+
+def ordinal_label(idx: int) -> str:
+    labels = ["newest", "2nd newest", "3rd newest", "4th newest", "5th newest"]
+    if idx < len(labels):
+        return labels[idx]
+    return f"{idx + 1}th newest"
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[1]
-    assignments_file = root / ASSIGNMENTS_PATH
-    if not assignments_file.exists():
-        print(f"[WARN] Missing {ASSIGNMENTS_PATH}; skipping prompt freshness guard.")
-        return 0
-
-    current_text = assignments_file.read_text(encoding="utf-8")
-    if OVERRIDE_TOKEN in current_text:
-        print("[WARN] Prompt repeat override token detected; skipping freshness guard.")
-        return 0
-
-    runs_dir = root / "REHYDRATION_PACK" / "RUNS"
-    latest_archive = find_latest_archive(runs_dir)
-    if latest_archive is None:
-        print("[WARN] No archived Agent C prompts found; skipping freshness guard.")
-        return 0
-
-    archive_text = latest_archive.read_text(encoding="utf-8")
-    if normalize(current_text) == normalize(archive_text):
-        print(
-            "[FAIL] REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md matches the latest archived "
-            f"Agent C prompts ({latest_archive.relative_to(root)}).\n"
-            "Update the assignments or add 'Prompt-Repeat-Override: true' if reuse is intentional."
-        )
+    if not CURRENT_PROMPTS_PATH.exists():
+        print(f"[FAIL] Missing prompts file: {CURRENT_PROMPTS_PATH}")
         return 1
 
-    print("[OK] Agent prompt assignments differ from the latest archive.")
+    current_raw = CURRENT_PROMPTS_PATH.read_text(encoding="utf-8")
+    if OVERRIDE_TOKEN in current_raw.lower():
+        print("[OK] Prompt-Repeat-Override present; skipping repeat guard.")
+        return 0
+
+    normalized_current = normalize(current_raw)
+    archive_paths = sorted(ROOT.glob(ARCHIVE_GLOB), key=archive_sort_key, reverse=True)
+
+    if not archive_paths:
+        print("[OK] No prompt archives found; nothing to compare.")
+        return 0
+
+    archives_to_check = archive_paths[:ARCHIVE_DEPTH]
+    for idx, archive in enumerate(archives_to_check):
+        archive_raw = archive.read_text(encoding="utf-8")
+        if normalize(archive_raw) == normalized_current:
+            label = ordinal_label(idx)
+            rel_path = archive.relative_to(ROOT)
+            print(f"[FAIL] Current prompts match the {label} archive: {rel_path}")
+            return 1
+
+    print(f"[OK] Current prompts differ from the last {len(archives_to_check)} archive(s).")
     return 0
 
 

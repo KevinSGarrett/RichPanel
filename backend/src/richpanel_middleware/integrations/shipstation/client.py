@@ -291,6 +291,23 @@ class ShipStationClient:
             response=last_response,
         )
 
+    def list_shipments(
+        self,
+        *,
+        params: Optional[Dict[str, str]] = None,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShipStationResponse:
+        return self.request(
+            "GET",
+            "/shipments",
+            params=params,
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
     def _dry_run_response(self, url: str, reason: str) -> ShipStationResponse:
         return ShipStationResponse(
             status_code=0,
@@ -371,7 +388,10 @@ class ShipStationClient:
         if client is None and boto3 is None:
             return None, "boto3_unavailable"
         if client is None:
-            client = self._secrets_client()
+            try:
+                client = self._secrets_client()
+            except Exception:
+                return None, "secret_lookup_failed"
         try:
             response = client.get_secret_value(SecretId=secret_id)  # type: ignore[attr-defined]
         except (BotoCoreError, ClientError, Exception):
