@@ -6343,6 +6343,12 @@
       "anchor": "objective"
     }
   ],
+  "implementation status (shipped vs roadmap)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "implementation-status-shipped-vs-roadmap"
+    }
+  ],
   "core principle": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
@@ -6353,6 +6359,18 @@
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
       "anchor": "high-level-pipeline"
+    }
+  ],
+  "shipped v1 worker pipeline (current)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "shipped-v1-worker-pipeline-current"
+    }
+  ],
+  "target pipeline (roadmap design; not fully implemented in the worker)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
     }
   ],
   "step-by-step with gates": [
@@ -6379,16 +6397,16 @@
       "anchor": "step-3-tier-0-pre-checks-fast-allowlist-rules"
     }
   ],
-  "step 4 — llm classifier (structured output)": [
+  "step 4 — llm classifier (structured output) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-4-llm-classifier-structured-output"
+      "anchor": "step-4-llm-classifier-structured-output-roadmap"
     }
   ],
-  "step 4.5 — canonicalize intents (multi-intent priority)": [
+  "step 4.5 — canonicalize intents (multi-intent priority) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+      "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
     }
   ],
   "step 5 — application-layer policy enforcement (hard gates)": [
@@ -6397,10 +6415,10 @@
       "anchor": "step-5-application-layer-policy-enforcement-hard-gates"
     }
   ],
-  "step 6 — tier 2 verifier (conditional)": [
+  "step 6 — tier 2 verifier (conditional) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-6-tier-2-verifier-conditional"
+      "anchor": "step-6-tier-2-verifier-conditional-roadmap"
     }
   ],
   "step 7 — execute allowlisted actions": [
