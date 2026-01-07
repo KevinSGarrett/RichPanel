@@ -1,6 +1,6 @@
 # GitHub State
 
-Last updated: 2025-12-29 (Wave B00 — Build kickoff + Cursor agent takeover)
+Last updated: 2026-01-06 (Wave B21 — Worktree + summary protocol)
 
 ## Repo
 - GitHub repo: `KevinSGarrett/RichPanel`
@@ -8,8 +8,28 @@ Last updated: 2025-12-29 (Wave B00 — Build kickoff + Cursor agent takeover)
 - Default branch: `main`
 
 ## Local workspace
-- Preferred local root: `C:\RichPanel_GIT`
+- Preferred local root: `C:\RichPanel_GIT` (main worktree)
 - Legacy/non-git folder observed earlier: `C:\RichPanel` (treat as backup; avoid doing work there)
+
+### Worktree awareness
+Git worktrees allow multiple branches to be checked out simultaneously in different directories.
+
+**Main worktree:**
+- Path: `C:\RichPanel_GIT`
+- Purpose: Primary workspace for all normal work
+
+**Linked worktrees (Cursor-managed):**
+- Path pattern: `C:\Users\kevin\.cursor\worktrees\RichPanel_GIT\<id>`
+- Purpose: Cursor creates these automatically; **avoid working in these**
+- Risk: Easy to edit files in main worktree but commit from wrong worktree → "No changes detected"
+
+**Always verify before committing:**
+```powershell
+pwd  # Should be C:\RichPanel_GIT
+git branch --show-current  # Should match your intended branch
+```
+
+See `REHYDRATION_PACK/WORKTREE_GUIDE.md` for detailed guidance.
 
 ## Merge settings (repo-level)
 Configured so history is consistent and PRs stay bounded per run:
@@ -45,6 +65,34 @@ gh run list -L 5 --workflow CI --json databaseId,conclusion,event,headBranch,dis
 - Wait for `validate` to pass; auto-merge queues the merge commit and deletes the branch on success.
 - Manual merges in the UI or CLI are disallowed because they bypass the hardened loop.
 
+## Active PRs (as of 2026-01-06)
+
+| PR # | Title | Branch | State | Worktree (if known) |
+|------|-------|--------|-------|---------------------|
+| #51 | B21: Align checklist with reality + mypy/Cursor noise hardening | `run/B21_checklist_alignment_20260106` | OPEN | `C:/RichPanel_GIT` (main) |
+| #50 | feat(automation): OpenAI routing classifier in advisory mode | `run/B21_openai_routing_advisory_20260106` | OPEN | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/qvi` (linked) |
+| #49 | Fix fraud routing and Shopify order fields | `run/B21_bugbot_fixes_20260106` | OPEN | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/rav` (linked) |
+
+### Recent merged PRs
+| PR # | Title | Branch | Merged date |
+|------|-------|--------|-------------|
+| #48 | fix(routing): Correct fraud vs chargeback routing + add Shopify fields for delivery estimates | `run/B21_bugbot_fixes_184913` | 2026-01-06 |
+| #47 | fix/lambda packaging | `fix/lambda-packaging` | ~2026-01-05 |
+| #46 | ci: add seed-secrets workflow | `add/seed-secrets-workflow` | ~2026-01-05 |
+
+**How to refresh this table:**
+```powershell
+# List recent PRs with state
+gh pr list --state all --limit 10 --json number,title,state,headRefName
+
+# Check worktree state
+git worktree list
+```
+
+---
+
 ## Notes
 - The required status check name is **`validate`** (the job name), not `CI`.
 - If running `python scripts/run_ci_checks.py --ci` locally, keep the tree clean (or ensure scratch files are ignored).
+- **Before committing:** Always verify you're in the correct worktree with `pwd` and on the correct branch with `git branch --show-current`.
+- See `REHYDRATION_PACK/WORKTREE_GUIDE.md` for troubleshooting "No changes detected" issues.

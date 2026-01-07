@@ -1,4 +1,13 @@
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Tags } from "aws-cdk-lib";
+// infra/cdk/lib/richpanel-middleware-stack.ts
+
+import {
+  CfnOutput,
+  Duration,
+  RemovalPolicy,
+  Stack,
+  StackProps,
+  Tags,
+} from "aws-cdk-lib";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -29,6 +38,10 @@ export interface SecretReferences {
 interface EventPipelineResources {
   readonly eventsQueue: sqs.Queue;
   readonly httpApiEndpoint: string;
+
+  readonly idempotencyTable: dynamodb.Table;
+  readonly conversationStateTable: dynamodb.Table;
+  readonly auditTrailTable: dynamodb.Table;
 }
 
 /**
@@ -40,6 +53,7 @@ interface EventPipelineResources {
  * - SQS FIFO queue (+ DLQ) for serialized events
  * - Worker Lambda subscribed to the queue
  * - DynamoDB idempotency table
+ * - DynamoDB conversation state + audit trail tables (for smoke tests + run evidence)
  *
  * Later waves will extend observability, alarms, storage, and automation logic.
  */
@@ -121,11 +135,17 @@ export class RichpanelMiddlewareStack extends Stack {
   }
 
   private buildEventPipeline(): EventPipelineResources {
-    const lambdaSourceRoot = this.resolveRepoPath(
-      "backend",
-      "src",
-      "lambda_handlers"
-    );
+    /**
+     * IMPORTANT PACKAGING NOTE:
+     * We package backend/src so that Lambda has BOTH:
+     * - lambda_handlers/* (entrypoints)
+     * - richpanel_middleware/* and integrations/* (imports used by handlers)
+     *
+     * If we package only lambda_handlers/ingress or lambda_handlers/worker,
+     * imports like `from richpanel_middleware...` will fail at init time and
+     * API Gateway will return generic 500s.
+     */
+    const lambdaSourceRoot = this.resolveRepoPath("backend", "src");
 
     const deadLetterQueue = new sqs.Queue(this, "EventsDlq", {
       queueName: this.naming.queueName("events-dlq", { fifo: true }),
@@ -158,20 +178,67 @@ export class RichpanelMiddlewareStack extends Stack {
       },
     });
 
+    const conversationStateTable = new dynamodb.Table(
+      this,
+      "ConversationStateTable",
+      {
+        tableName: this.naming.tableName("conversation_state"),
+        partitionKey: {
+          name: "conversation_id",
+          type: dynamodb.AttributeType.STRING,
+        },
+        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        removalPolicy: RemovalPolicy.RETAIN,
+        pointInTimeRecoverySpecification: {
+          pointInTimeRecoveryEnabled: true,
+        },
+        timeToLiveAttribute: "expires_at",
+      }
+    );
+
+    const auditTrailTable = new dynamodb.Table(this, "AuditTrailTable", {
+      tableName: this.naming.tableName("audit_trail"),
+      partitionKey: {
+        name: "conversation_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "ts_action_id",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+      },
+      timeToLiveAttribute: "expires_at",
+    });
+
     const ingressFunction = new lambda.Function(this, "IngressLambda", {
       functionName: this.naming.lambdaFunctionName("ingress"),
       runtime: lambda.Runtime.PYTHON_3_11,
-      handler: "handler.lambda_handler",
+
+      // NOTE: entrypoint is inside backend/src/lambda_handlers/ingress/handler.py
+      handler: "lambda_handlers.ingress.handler.lambda_handler",
+
       description: "Richpanel webhook ingress handler (token validation + enqueue).",
       timeout: Duration.seconds(5),
       memorySize: 256,
       environment: {
         EVENT_SOURCE: "richpanel_http_target",
         QUEUE_URL: eventsQueue.queueUrl,
-        WEBHOOK_SECRET_ARN: this.secrets.richpanelWebhookToken.secretArn,
+
+        /**
+         * Handler expects a Secret identifier it can resolve via Secrets Manager.
+         * Passing the SECRET NAME/path is the safest across accounts.
+         */
+        WEBHOOK_SECRET_ARN: this.naming.secretPath("richpanel", "webhook_token"),
+
         DEFAULT_MESSAGE_GROUP_ID: `${this.naming.resourcePrefix()}-default`,
       },
-      code: lambda.Code.fromAsset(join(lambdaSourceRoot, "ingress")),
+
+      // IMPORTANT: package backend/src (not just the ingress folder)
+      code: lambda.Code.fromAsset(lambdaSourceRoot),
     });
 
     eventsQueue.grantSendMessages(ingressFunction);
@@ -180,20 +247,31 @@ export class RichpanelMiddlewareStack extends Stack {
     const workerFunction = new lambda.Function(this, "WorkerLambda", {
       functionName: this.naming.lambdaFunctionName("worker"),
       runtime: lambda.Runtime.PYTHON_3_11,
-      handler: "handler.lambda_handler",
+
+      // NOTE: entrypoint is inside backend/src/lambda_handlers/worker/handler.py
+      handler: "lambda_handlers.worker.handler.lambda_handler",
+
       description:
         "SQS worker that logs events, enforces kill switches, and writes idempotency records.",
       timeout: Duration.seconds(30),
       memorySize: 512,
       environment: {
         IDEMPOTENCY_TABLE_NAME: idempotencyTable.tableName,
+        CONVERSATION_STATE_TABLE_NAME: conversationStateTable.tableName,
+        AUDIT_TRAIL_TABLE_NAME: auditTrailTable.tableName,
+
         SAFE_MODE_PARAM: this.runtimeFlags.safeMode.parameterName,
         AUTOMATION_ENABLED_PARAM: this.runtimeFlags.automationEnabled.parameterName,
       },
-      code: lambda.Code.fromAsset(join(lambdaSourceRoot, "worker")),
+
+      // IMPORTANT: package backend/src (not just the worker folder)
+      code: lambda.Code.fromAsset(lambdaSourceRoot),
     });
 
     idempotencyTable.grantReadWriteData(workerFunction);
+    conversationStateTable.grantReadWriteData(workerFunction);
+    auditTrailTable.grantReadWriteData(workerFunction);
+
     this.runtimeFlags.safeMode.grantRead(workerFunction);
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
 
@@ -209,6 +287,9 @@ export class RichpanelMiddlewareStack extends Stack {
     return {
       eventsQueue,
       httpApiEndpoint: httpApi.attrApiEndpoint,
+      idempotencyTable,
+      conversationStateTable,
+      auditTrailTable,
     };
   }
 
@@ -249,7 +330,9 @@ export class RichpanelMiddlewareStack extends Stack {
       action: "lambda:InvokeFunction",
       principal: "apigateway.amazonaws.com",
       functionName: ingressFunction.functionArn,
-      sourceArn: `arn:aws:execute-api:${Stack.of(this).region}:${Stack.of(this).account}:${api.ref}/*/*/*`,
+      sourceArn: `arn:aws:execute-api:${Stack.of(this).region}:${
+        Stack.of(this).account
+      }:${api.ref}/*/*/*`,
     });
 
     return api;
@@ -269,6 +352,21 @@ export class RichpanelMiddlewareStack extends Stack {
     new CfnOutput(this, "EventsQueueUrl", {
       value: pipeline.eventsQueue.queueUrl,
       description: "Queue URL for diagnostics and smoke tests.",
+    });
+
+    new CfnOutput(this, "IdempotencyTableName", {
+      value: pipeline.idempotencyTable.tableName,
+      description: "DynamoDB table name for idempotency records.",
+    });
+
+    new CfnOutput(this, "ConversationStateTableName", {
+      value: pipeline.conversationStateTable.tableName,
+      description: "DynamoDB table name for conversation state snapshots.",
+    });
+
+    new CfnOutput(this, "AuditTrailTableName", {
+      value: pipeline.auditTrailTable.tableName,
+      description: "DynamoDB table name for audit trail records.",
     });
   }
 
@@ -299,8 +397,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
     new CfnOutput(this, "AutomationEnabledParamPath", {
       value: this.naming.ssmParameter("automation_enabled"),
-      description:
-        "SSM parameter path for the automation_enabled feature flag.",
+      description: "SSM parameter path for the automation_enabled feature flag.",
     });
   }
 }

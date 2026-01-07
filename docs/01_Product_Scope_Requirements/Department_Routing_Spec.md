@@ -26,7 +26,7 @@ User-provided departments:
 6. Returns Admin
 7. LiveChat Support
 8. Leadership Team
-9. SocialMedia Team
+9. Social Media Team
 10. Email Support Team
 
 Additional recommended queue:

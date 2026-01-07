@@ -457,315 +457,291 @@
   },
   {
     "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-108E65ADA8",
-    "line": 258,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "All 11 `route-*` tags created"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-1DA53E8A9C",
-    "line": 260,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`Chargebacks / Disputes` team created"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-2B97C9CC32",
-    "line": 252,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "CloudFormation stack deployed successfully (staging)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-42491EFB89",
-    "line": 253,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Secrets exist in AWS Secrets Manager:"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-44D7CCD6A2",
-    "line": 256,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Webhook configured in Richpanel (staging) with correct URL and header"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-7FFFC2F3D3",
-    "line": 254,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`rp-mw/stage/richpanel/webhook_token`"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-909FA7A93B",
-    "line": 259,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "All 4 `mw-*` tags created"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-933AD4258D",
-    "line": 257,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`Middleware \u2014 Inbound Trigger` rule exists and is enabled"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-    "id": "PLN-DE99594E2C",
-    "line": 255,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "`rp-mw/stage/richpanel/api_key`"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-0F4D5A56F6",
-    "line": 274,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware applies `mw-processed` tag"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-23F5CEFB81",
-    "line": 292,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "No duplicate processing or replies"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-29B2E2A3B8",
-    "line": 275,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware applies `mw-routing-applied` tag"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-2AA60F2B88",
-    "line": 269,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware ACKs with HTTP 200 in < 500ms"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-6DFAEC0914",
-    "line": 276,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware applies correct `route-*` tag based on message classification"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-72223788D1",
-    "line": 281,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "No routing fights (legacy rules don't override middleware routing)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-7C2F4B8841",
-    "line": 268,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Webhook contains expected fields: `ticket_id`, `ticket_url`, `trigger`"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-D444C89D32",
-    "line": 280,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Conversation is assigned to the correct team (based on `route-*` tag)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-DAB0D15F2F",
-    "line": 267,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware receives the webhook (check CloudWatch Logs for ingress function)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-DAD18F0598",
-    "line": 286,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware returns HTTP 401 Unauthorized"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-    "id": "PLN-F5DD2783EA",
-    "line": 291,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Tags are applied only once"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-18F8DC6643",
-    "line": 323,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Evidence captured and reviewed (C.3)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-38DE2A09A7",
-    "line": 324,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "No errors in CloudWatch Logs (past 24 hours)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-6C23F34688",
-    "line": 322,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "All validation tests (C.2) passed in staging"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-A39D5F442D",
-    "line": 325,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "No errors in CloudWatch Metrics (past 24 hours)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-A642E3F6F9",
-    "line": 326,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Team lead / PM has approved staging results"
-  },
-  {
-    "checked": false,
-    "heading_path": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-    "id": "PLN-EC44A0131F",
-    "line": 327,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Runbook reviewed and approved for production"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
-    "id": "PLN-070486C2D7",
-    "line": 439,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Legacy rules do not override middleware routing (no routing fights)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
-    "id": "PLN-2766A79FF7",
-    "line": 438,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Adding `route-*` tag triggers correct team assignment"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
-    "id": "PLN-9B06BC7867",
-    "line": 440,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Chargeback subjects route to Chargebacks / Disputes team (and do not auto-close)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
-    "id": "PLN-75DC1BA80E",
-    "line": 427,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `x-richpanel-webhook-token`)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
-    "id": "PLN-C949567888",
-    "line": 430,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Secrets stored in AWS Secrets Manager (never in code/logs/docs)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
-    "id": "PLN-E3E7B0ABAF",
-    "line": 429,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Duplicate deliveries do not cause duplicate tags or replies"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
-    "id": "PLN-EE37179DCF",
-    "line": 428,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Middleware ACKs in < 500ms p95 (ingress path)"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
-    "id": "PLN-2244030D80",
-    "line": 444,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Evidence captured and reviewed"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
-    "id": "PLN-587B1849C3",
-    "line": 443,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "All tests passed in staging before production rollout"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
-    "id": "PLN-FF7A92D1FD",
-    "line": 445,
-    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "text": "Team lead / PM sign-off obtained"
-  },
-  {
-    "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
-    "id": "PLN-062CC10A49",
-    "line": 435,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-02F83F5A73",
+    "line": 345,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
     "text": "Fallback: if in Assignment Rules, it is the first rule"
   },
   {
     "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
-    "id": "PLN-304148935F",
-    "line": 434,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-04624745BF",
+    "line": 353,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Saved views exist for `route-*` tags (optional but recommended)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-1A11580CC7",
+    "line": 350,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Chargeback subjects route to Chargebacks / Disputes team (and do not auto-close)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-1F71227242",
+    "line": 340,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Duplicate deliveries do not cause duplicate tags or replies"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-1F7A96D506",
+    "line": 344,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
     "text": "Preferred: trigger lives in **Tagging Rules** (or equivalent) and is at the top of that category"
   },
   {
     "checked": false,
-    "heading_path": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
-    "id": "PLN-9FD6F5F9A5",
-    "line": 433,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-3194C5385F",
+    "line": 349,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Legacy rules do not override middleware routing (no routing fights)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-3735966E1E",
+    "line": 343,
     "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
     "text": "`Middleware \u2014 Inbound Trigger` exists and has **Skip all subsequent rules = OFF**"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-57072329BB",
+    "line": 348,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Adding `route-*` tag triggers correct team assignment"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-647115BC1E",
+    "line": 338,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "HTTP Target rejects spoof requests (middleware returns 401 if missing/incorrect `x-richpanel-webhook-token`)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-7A9672C4CD",
+    "line": 339,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Middleware ACKs in < 500ms p95 (ingress path)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) \u2014 Richpanel admin steps > 2.8 Acceptance checklist (definition of done for config)",
+    "id": "PLN-F96DEB99A5",
+    "line": 354,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`mw-*` tags present for debugging in a sample ticket"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-0CDAEEF02F",
+    "line": 365,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Secrets exist (IDs only; do not paste values):"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-1BC0EB9544",
+    "line": 363,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "You retrieved `<IngressEndpointUrl>/webhook` from CloudFormation outputs."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-1DF8D083EF",
+    "line": 362,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "CloudFormation stack `RichpanelMiddleware-<env>` exists."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-3366B58D53",
+    "line": 370,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/<env>/shipstation/api_key` / `api_secret` (optional; only if ShipStation is used)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-4A376E5969",
+    "line": 366,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/<env>/richpanel/webhook_token`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-BD25C0A641",
+    "line": 361,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "You know the target **environment** (`dev` / `staging` / `prod`)."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-C0B16B315D",
+    "line": 369,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/<env>/shopify/admin_api_token` (optional; only if Shopify fallback is used)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-D2B4249362",
+    "line": 367,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/<env>/richpanel/api_key`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-D2BDA92CB7",
+    "line": 364,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "You retrieved `SecretsNamespace` from CloudFormation outputs."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.1 Preflight (must be true before touching Richpanel UI)",
+    "id": "PLN-FEE1995F84",
+    "line": 368,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "`rp-mw/<env>/openai/api_key` (only required before enabling OpenAI outbound)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-02BEF98189",
+    "line": 380,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Header: `x-richpanel-webhook-token: <value from Secrets Manager rp-mw/<env>/richpanel/webhook_token>`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-0D460AC535",
+    "line": 378,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Customer message triggers only"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-0F0426AD65",
+    "line": 374,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Create required tags:"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-175E8D6B81",
+    "line": 384,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Disable/replace chargeback auto-close rules (do not auto-close in v1)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-20E72D5BAC",
+    "line": 382,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Create assignment rules: `route-*` \u2192 Team mapping"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-57BFBBABDE",
+    "line": 373,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Create Team: `Chargebacks / Disputes`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-5D69C3A2FD",
+    "line": 383,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Guard/de-conflict legacy auto-assign rules to prevent \u201crouting fights\u201d"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-8982B04C25",
+    "line": 375,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "All `route-*` tags (11)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-8B00E79916",
+    "line": 377,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Create automation rule: `Middleware \u2014 Inbound Trigger`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-A9C2DC61D1",
+    "line": 381,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "**Skip all subsequent rules = OFF**"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-B7F06DCC3C",
+    "line": 379,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Action: HTTP Target \u2192 `<IngressEndpointUrl>/webhook`"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+    "id": "PLN-B89C869866",
+    "line": 376,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "All `mw-*` tags"
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.3 Post-change verification (minimal)",
+    "id": "PLN-5B41E44A04",
+    "line": 389,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Verify the conversation receives `mw-processed` and (in Stage 1+) `mw-routing-applied` / `route-*` tags as expected."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.3 Post-change verification (minimal)",
+    "id": "PLN-A714603C51",
+    "line": 387,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Send a test customer message; verify the HTTP Target fires."
+  },
+  {
+    "checked": false,
+    "heading_path": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no secrets) > 3.3 Post-change verification (minimal)",
+    "id": "PLN-FE7897A076",
+    "line": 388,
+    "source_path": "docs/03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
+    "text": "Verify middleware ingress returns `200 accepted` (CloudWatch logs for `rp-mw-<env>-ingress` show `ingress.accepted`)."
   },
   {
     "checked": false,

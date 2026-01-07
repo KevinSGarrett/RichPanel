@@ -48,15 +48,17 @@ Modes:
 ## Read order (build mode — current)
 1. `MODE.yaml` — confirm we are in **build** mode
 2. `LAST_REHYDRATED.md` — last snapshot refresh / wave applied
-3. `02_CURRENT_STATE.md` — snapshot of “what is true right now” (**includes completion %**)
+3. `02_CURRENT_STATE.md` — snapshot of "what is true right now" (**includes completion %**)
 4. `05_TASK_BOARD.md` — what to do next (source of truth)
 5. `03_ACTIVE_WORKSTREAMS.md` — active focus areas + blockers
 6. `04_DECISIONS_SNAPSHOT.md` — key decisions
-7. `GITHUB_STATE.md` — GitHub/CI merge constraints + how to verify
-8. `CORE_LIVING_DOCS.md` — pointers to the “always-update” documentation set
-9. `PM_GUARDRAILS.md` — guardrails for PM behavior
-10. `POLICIES_SUMMARY.md` — condensed agent policies
-11. `OPEN_QUESTIONS.md` — unresolved decisions/questions
+7. `06_AGENT_ASSIGNMENTS.md` — current agent prompts (**must include Model + MAX mode + Cycle**)
+8. `07_CURSOR_MODEL_CATALOG.md` — available models + guidance (source of truth for model selection)
+9. `GITHUB_STATE.md` — GitHub/CI merge constraints + how to verify
+10. `CORE_LIVING_DOCS.md` — pointers to the "always-update" documentation set
+11. `PM_GUARDRAILS.md` — guardrails for PM behavior
+12. `POLICIES_SUMMARY.md` — condensed agent policies
+13. `OPEN_QUESTIONS.md` — unresolved decisions/questions
 
 Canonical deep navigation:
 - `docs/INDEX.md`
@@ -75,15 +77,6 @@ Implementation is active. Cursor agents should store per-run artifacts under `RE
    ```bash
    python scripts/new_run_folder.py --now
    ```
-
-### Windows note: PowerShell 5.x does **not** support `&&`
-If you see examples that chain commands with `&&` (common in bash/zsh), they will fail in **Windows PowerShell 5.x**.
-
-Use **separate lines** or `;` instead:
-```powershell
-python scripts/new_run_folder.py --now
-python scripts/run_ci_checks.py
-```
 
 ### What must exist for each run
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/RUN_META.md`
@@ -106,16 +99,7 @@ Agents must run before pushing:
 ```bash
 python scripts/run_ci_checks.py
 ```
-- This run now enforces that `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md` differs from
-  the latest `RUN_*/C/AGENT_PROMPTS_ARCHIVE*.md` unless you add `Prompt-Repeat-Override: true`
-  to confirm intentional reuse.
-
-### “Extensions are not CLI” (VS Code/Cursor)
-Do not rely on editor extensions as enforcement mechanisms.
-
-- **Extensions can’t be triggered from CLI/CI** in a dependable way.
-- **Enforcement is CI + scripts**: treat `python scripts/run_ci_checks.py` and GitHub Actions as the source of truth.
-- **GitHub-side automation (e.g., review bots)** is triggered via PR comments or Actions, not a local extension button.
+- Prompt freshness guard compares current prompts against the last 5 archives.
 
 Policy for Git/GitHub operations:
 - `docs/98_Agent_Ops/Policies/POL-GH-001__GitHub_and_Repo_Operations_Policy.md`

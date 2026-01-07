@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+    }
+  ],
   "2026-01-03 - run_20260103_2300z (e2e evidence hardening + prod readiness checklist)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -3047,46 +3053,24 @@
       "anchor": "docs03richpanelintegrationrichpanelconfigchangesv1md"
     }
   ],
-  "check webhook token secrets > section c: validation / evidence (staging first) > c.1 pre-deployment validation checklist": [
+  "example: get the most recent run url for a workflow file (adjust name as needed). > 2) human ui execution (gated) — richpanel admin steps...": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c1-pre-deployment-validation-checklist"
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-2-human-ui-execution-gated-richpanel-admin-steps"
     }
   ],
-  "check webhook token secrets > section c: validation / evidence (staging first) > c.2 functional validation (staging)": [
+  "example: get the most recent run url for a workflow file (adjust name as needed). > 3) ui execution checklist (human follow-along; no sec...": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c2-functional-validation-staging"
-    }
-  ],
-  "check webhook token secrets > section c: validation / evidence (staging first) > c.4 staging sign-off checklist": [
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
+    },
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c4-staging-sign-off-checklist"
-    }
-  ],
-  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > routing correctness": [
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
+    },
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-routing-correctness"
-    }
-  ],
-  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > security & stability": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-security-stability"
-    }
-  ],
-  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > staging-first validation": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-staging-first-validation"
-    }
-  ],
-  "tail recent logs (last 1 hour) > acceptance criteria (definition of done) > trigger reliability": [
-    {
-      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-trigger-reliability"
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
     }
   ],
   "docs/03_richpanel_integration/tenant_capabilities_clarifications.md": [
@@ -3405,6 +3389,24 @@
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
       "anchor": "wave-07-definition-of-done-checklist-b-concurrency-and-throughput"
+    }
+  ],
+  "wave 07 definition of done checklist > c) queueing and idempotency": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "wave-07-definition-of-done-checklist-c-queueing-and-idempotency"
+    }
+  ],
+  "wave 07 definition of done checklist > closeout verification": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "wave-07-definition-of-done-checklist-closeout-verification"
+    }
+  ],
+  "wave 07 definition of done checklist > d) resilience and degradation": [
+    {
+      "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
+      "anchor": "wave-07-definition-of-done-checklist-d-resilience-and-degradation"
     }
   ],
   "plan checklist — summary (generated)": [
@@ -5225,226 +5227,196 @@
       "anchor": "sources-for-engineers"
     }
   ],
-  "richpanel configuration runbook (v1)": [
+  "richpanel ui configuration changes (v1) — runbook (no ui changes by automation)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "richpanel-configuration-runbook-v1"
+      "anchor": "richpanel-ui-configuration-changes-v1-runbook-no-ui-changes-by-automation"
     }
   ],
-  "guiding principles (v1)": [
+  "0) runbook split (read this first)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "guiding-principles-v1"
+      "anchor": "0-runbook-split-read-this-first"
     }
   ],
-  "section a: doc-only prep (safe, no ui changes)": [
+  "0.1 doc-only prep (no richpanel ui changes)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "section-a-doc-only-prep-safe-no-ui-changes"
+      "anchor": "01-doc-only-prep-no-richpanel-ui-changes"
     }
   ],
-  "a.1 fetch cloudformation outputs (powershell)": [
+  "0.2 human ui execution (gated)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "a1-fetch-cloudformation-outputs-powershell"
+      "anchor": "02-human-ui-execution-gated"
     }
   ],
-  "a.2 verify secrets exist (powershell)": [
+  "1) doc-only prep (no richpanel ui changes)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "a2-verify-secrets-exist-powershell"
+      "anchor": "1-doc-only-prep-no-richpanel-ui-changes"
     }
   ],
-  "a.3 canonical secret ids (reference)": [
+  "1.1 choose environment + stack name": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "a3-canonical-secret-ids-reference"
+      "anchor": "11-choose-environment-stack-name"
     }
   ],
-  "a.4 required tags (reference)": [
+  "1.2 powershell-safe: fetch ingress endpoint url (cloudformation output)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "a4-required-tags-reference"
+      "anchor": "12-powershell-safe-fetch-ingress-endpoint-url-cloudformation-output"
     }
   ],
-  "a.5 required team (reference)": [
+  "1.3 powershell-safe: fetch secrets namespace (cloudformation output)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "a5-required-team-reference"
+      "anchor": "13-powershell-safe-fetch-secrets-namespace-cloudformation-output"
     }
   ],
-  "section b: human ui steps (gated — requires approval)": [
+  "1.4 canonical secret ids (defaults; do not put values in this doc)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "section-b-human-ui-steps-gated-requires-approval"
+      "anchor": "14-canonical-secret-ids-defaults-do-not-put-values-in-this-doc"
     }
   ],
-  "b.1 create tags in richpanel ui": [
+  "1.5 gating flags / operator levers (align with shipped terminology)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b1-create-tags-in-richpanel-ui"
+      "anchor": "15-gating-flags-operator-levers-align-with-shipped-terminology"
     }
   ],
-  "b.2 create team in richpanel ui": [
+  "1.6 where to find workflow evidence (actions run summary)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b2-create-team-in-richpanel-ui"
+      "anchor": "16-where-to-find-workflow-evidence-actions-run-summary"
     }
   ],
-  "b.3 configure http target webhook": [
+  "2) human ui execution (gated) — richpanel admin steps": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b3-configure-http-target-webhook"
+      "anchor": "2-human-ui-execution-gated-richpanel-admin-steps"
     }
   ],
-  "b.4 create automation rule: middleware inbound trigger": [
+  "2.1 guiding principles (v1)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b4-create-automation-rule-middleware-inbound-trigger"
+      "anchor": "21-guiding-principles-v1"
     }
   ],
-  "b.5 create assignment rules: routing tag → team": [
+  "2.2 configuration change summary (what to change)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b5-create-assignment-rules-routing-tag-team"
+      "anchor": "22-configuration-change-summary-what-to-change"
     }
   ],
-  "b.6 de-conflict legacy assignment rules": [
+  "2.3 teams (target state)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b6-de-conflict-legacy-assignment-rules"
+      "anchor": "23-teams-target-state"
     }
   ],
-  "b.7 disable/replace chargeback auto-close rules": [
+  "2.1 create: chargebacks / disputes": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "b7-disablereplace-chargeback-auto-close-rules"
+      "anchor": "21-create-chargebacks-disputes"
     }
   ],
-  "section c: validation / evidence (staging first)": [
+  "2.4 tags (target state)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "section-c-validation-evidence-staging-first"
+      "anchor": "24-tags-target-state"
     }
   ],
-  "c.1 pre-deployment validation checklist": [
+  "3.1 naming conventions": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c1-pre-deployment-validation-checklist"
+      "anchor": "31-naming-conventions"
     }
   ],
-  "c.2 functional validation (staging)": [
+  "3.2 required routing tags (v1)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c2-functional-validation-staging"
+      "anchor": "32-required-routing-tags-v1"
     }
   ],
-  "c.3 evidence capture (staging)": [
+  "3.3 required middleware control tags (v1)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c3-evidence-capture-staging"
+      "anchor": "33-required-middleware-control-tags-v1"
     }
   ],
-  "c.4 staging sign-off checklist": [
+  "2.5 automation rules (target state)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c4-staging-sign-off-checklist"
+      "anchor": "25-automation-rules-target-state"
     }
   ],
-  "c.5 production rollout (only after staging sign-off)": [
+  "4.1 new: middleware inbound trigger rule (required)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c5-production-rollout-only-after-staging-sign-off"
+      "anchor": "41-new-middleware-inbound-trigger-rule-required"
     }
   ],
-  "c.6 rollback plan": [
+  "4.2 assignment rules: routing tag → team (required)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "c6-rollback-plan"
+      "anchor": "42-assignment-rules-routing-tag-team-required"
     }
   ],
-  "reference: shipped middleware behavior": [
+  "4.3 de-conflict legacy assignment rules (required to prevent routing fights)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "reference-shipped-middleware-behavior"
+      "anchor": "43-de-conflict-legacy-assignment-rules-required-to-prevent-routing-fights"
     }
   ],
-  "webhook endpoint": [
+  "4.4 disable/replace chargeback auto-close rules (required)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "webhook-endpoint"
+      "anchor": "44-disablereplace-chargeback-auto-close-rules-required"
     }
   ],
-  "authentication header": [
+  "2.6 http target (richpanel → middleware)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "authentication-header"
+      "anchor": "26-http-target-richpanel-middleware"
     }
   ],
-  "secret ids": [
+  "2.7 rollout stages (recommended)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "secret-ids"
+      "anchor": "27-rollout-stages-recommended"
     }
   ],
-  "payload expectations": [
+  "2.8 acceptance checklist (definition of done for config)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "payload-expectations"
+      "anchor": "28-acceptance-checklist-definition-of-done-for-config"
     }
   ],
-  "appendix: powershell helpers": [
+  "3) ui execution checklist (human follow-along; no secrets)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "appendix-powershell-helpers"
+      "anchor": "3-ui-execution-checklist-human-follow-along-no-secrets"
     }
   ],
-  "find github actions run urls": [
+  "3.1 preflight (must be true before touching richpanel ui)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "find-github-actions-run-urls"
+      "anchor": "31-preflight-must-be-true-before-touching-richpanel-ui"
     }
   ],
-  "verify cloudformation stack status": [
+  "3.2 richpanel ui changes (execute in order; stop if anything is unclear)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "verify-cloudformation-stack-status"
+      "anchor": "32-richpanel-ui-changes-execute-in-order-stop-if-anything-is-unclear"
     }
   ],
-  "check cloudwatch logs (recent errors)": [
+  "3.3 post-change verification (minimal)": [
     {
       "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "check-cloudwatch-logs-recent-errors"
-    }
-  ],
-  "acceptance criteria (definition of done)": [
-    {
-      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "acceptance-criteria-definition-of-done"
-    }
-  ],
-  "security & stability": [
-    {
-      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "security-stability"
-    }
-  ],
-  "trigger reliability": [
-    {
-      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "trigger-reliability"
-    }
-  ],
-  "routing correctness": [
-    {
-      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "routing-correctness"
-    }
-  ],
-  "staging-first validation": [
-    {
-      "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-      "anchor": "staging-first-validation"
+      "anchor": "33-post-change-verification-minimal"
     }
   ],
   "shipstation integration skeleton": [
@@ -6391,6 +6363,12 @@
       "anchor": "objective"
     }
   ],
+  "implementation status (shipped vs roadmap)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "implementation-status-shipped-vs-roadmap"
+    }
+  ],
   "core principle": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
@@ -6401,6 +6379,18 @@
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
       "anchor": "high-level-pipeline"
+    }
+  ],
+  "shipped v1 worker pipeline (current)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "shipped-v1-worker-pipeline-current"
+    }
+  ],
+  "target pipeline (roadmap design; not fully implemented in the worker)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
+      "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
     }
   ],
   "step-by-step with gates": [
@@ -6427,16 +6417,16 @@
       "anchor": "step-3-tier-0-pre-checks-fast-allowlist-rules"
     }
   ],
-  "step 4 — llm classifier (structured output)": [
+  "step 4 — llm classifier (structured output) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-4-llm-classifier-structured-output"
+      "anchor": "step-4-llm-classifier-structured-output-roadmap"
     }
   ],
-  "step 4.5 — canonicalize intents (multi-intent priority)": [
+  "step 4.5 — canonicalize intents (multi-intent priority) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+      "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
     }
   ],
   "step 5 — application-layer policy enforcement (hard gates)": [
@@ -6445,10 +6435,10 @@
       "anchor": "step-5-application-layer-policy-enforcement-hard-gates"
     }
   ],
-  "step 6 — tier 2 verifier (conditional)": [
+  "step 6 — tier 2 verifier (conditional) (roadmap)": [
     {
       "path": "04_LLM_Design_Evaluation/Decision_Pipeline_and_Gating.md",
-      "anchor": "step-6-tier-2-verifier-conditional"
+      "anchor": "step-6-tier-2-verifier-conditional-roadmap"
     }
   ],
   "step 7 — execute allowlisted actions": [
@@ -11931,28 +11921,22 @@
       "anchor": "2-local-ci-equivalent-checks"
     }
   ],
-  "windows note: powershell 5.x does **not** support `&&`": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "windows-note-powershell-5x-does-not-support"
-    }
-  ],
   "powershell helper (windows)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "powershell-helper-windows"
     }
   ],
+  "mypy “asset.\\* not a valid package name” (cdk outputs)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
+    }
+  ],
   "3) bugbot pr review (cursor)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "3-bugbot-pr-review-cursor"
-    }
-  ],
-  "“extensions are not cli” (cursor/vs code)": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "extensions-are-not-cli-cursorvs-code"
     }
   ],
   "how to trigger a review (mention-only mode)": [

@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
+        "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
+      },
+      {
+        "level": 3,
         "text": "2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)",
         "anchor": "2026-01-03-run202601032300z-e2e-evidence-hardening-prod-readiness-checklist"
       },
@@ -2954,38 +2959,23 @@
       },
       {
         "level": 3,
-        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.1 Pre-deployment validation checklist",
-        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c1-pre-deployment-validation-checklist"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) — Richpanel admin steps...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-2-human-ui-execution-gated-richpanel-admin-steps"
       },
       {
         "level": 3,
-        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.2 Functional validation (staging)",
-        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c2-functional-validation-staging"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 3,
-        "text": "Check webhook token secrets > Section C: Validation / Evidence (Staging First) > C.4 Staging sign-off checklist",
-        "anchor": "check-webhook-token-secrets-section-c-validation-evidence-staging-first-c4-staging-sign-off-checklist"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 3,
-        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Routing correctness",
-        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-routing-correctness"
-      },
-      {
-        "level": 3,
-        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Security & stability",
-        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-security-stability"
-      },
-      {
-        "level": 3,
-        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Staging-first validation",
-        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-staging-first-validation"
-      },
-      {
-        "level": 3,
-        "text": "Tail recent logs (last 1 hour) > Acceptance Criteria (Definition of Done) > Trigger reliability",
-        "anchor": "tail-recent-logs-last-1-hour-acceptance-criteria-definition-of-done-trigger-reliability"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 2,
@@ -3251,6 +3241,21 @@
         "level": 3,
         "text": "Wave 07 Definition of Done Checklist > B) Concurrency and throughput",
         "anchor": "wave-07-definition-of-done-checklist-b-concurrency-and-throughput"
+      },
+      {
+        "level": 3,
+        "text": "Wave 07 Definition of Done Checklist > C) Queueing and idempotency",
+        "anchor": "wave-07-definition-of-done-checklist-c-queueing-and-idempotency"
+      },
+      {
+        "level": 3,
+        "text": "Wave 07 Definition of Done Checklist > Closeout verification",
+        "anchor": "wave-07-definition-of-done-checklist-closeout-verification"
+      },
+      {
+        "level": 3,
+        "text": "Wave 07 Definition of Done Checklist > D) Resilience and degradation",
+        "anchor": "wave-07-definition-of-done-checklist-d-resilience-and-degradation"
       }
     ]
   },
@@ -4779,188 +4784,163 @@
     "outline": [
       {
         "level": 1,
-        "text": "Richpanel Configuration Runbook (v1)",
-        "anchor": "richpanel-configuration-runbook-v1"
+        "text": "Richpanel UI Configuration Changes (v1) — Runbook (NO UI changes by automation)",
+        "anchor": "richpanel-ui-configuration-changes-v1-runbook-no-ui-changes-by-automation"
       },
       {
         "level": 2,
-        "text": "Guiding Principles (v1)",
-        "anchor": "guiding-principles-v1"
+        "text": "0) Runbook split (read this first)",
+        "anchor": "0-runbook-split-read-this-first"
+      },
+      {
+        "level": 3,
+        "text": "0.1 Doc-only prep (NO Richpanel UI changes)",
+        "anchor": "01-doc-only-prep-no-richpanel-ui-changes"
+      },
+      {
+        "level": 3,
+        "text": "0.2 Human UI execution (gated)",
+        "anchor": "02-human-ui-execution-gated"
       },
       {
         "level": 2,
-        "text": "Section A: Doc-Only Prep (Safe, No UI Changes)",
-        "anchor": "section-a-doc-only-prep-safe-no-ui-changes"
+        "text": "1) Doc-only prep (NO Richpanel UI changes)",
+        "anchor": "1-doc-only-prep-no-richpanel-ui-changes"
       },
       {
         "level": 3,
-        "text": "A.1 Fetch CloudFormation outputs (PowerShell)",
-        "anchor": "a1-fetch-cloudformation-outputs-powershell"
+        "text": "1.1 Choose environment + stack name",
+        "anchor": "11-choose-environment-stack-name"
       },
       {
         "level": 3,
-        "text": "A.2 Verify secrets exist (PowerShell)",
-        "anchor": "a2-verify-secrets-exist-powershell"
+        "text": "1.2 PowerShell-safe: fetch ingress endpoint URL (CloudFormation output)",
+        "anchor": "12-powershell-safe-fetch-ingress-endpoint-url-cloudformation-output"
       },
       {
         "level": 3,
-        "text": "A.3 Canonical secret IDs (reference)",
-        "anchor": "a3-canonical-secret-ids-reference"
+        "text": "1.3 PowerShell-safe: fetch secrets namespace (CloudFormation output)",
+        "anchor": "13-powershell-safe-fetch-secrets-namespace-cloudformation-output"
       },
       {
         "level": 3,
-        "text": "A.4 Required tags (reference)",
-        "anchor": "a4-required-tags-reference"
+        "text": "1.4 Canonical secret IDs (defaults; DO NOT put values in this doc)",
+        "anchor": "14-canonical-secret-ids-defaults-do-not-put-values-in-this-doc"
       },
       {
         "level": 3,
-        "text": "A.5 Required team (reference)",
-        "anchor": "a5-required-team-reference"
+        "text": "1.5 Gating flags / operator levers (align with shipped terminology)",
+        "anchor": "15-gating-flags-operator-levers-align-with-shipped-terminology"
+      },
+      {
+        "level": 3,
+        "text": "1.6 Where to find workflow evidence (Actions run summary)",
+        "anchor": "16-where-to-find-workflow-evidence-actions-run-summary"
       },
       {
         "level": 2,
-        "text": "Section B: Human UI Steps (Gated — Requires Approval)",
-        "anchor": "section-b-human-ui-steps-gated-requires-approval"
+        "text": "2) Human UI execution (gated) — Richpanel admin steps",
+        "anchor": "2-human-ui-execution-gated-richpanel-admin-steps"
       },
       {
         "level": 3,
-        "text": "B.1 Create tags in Richpanel UI",
-        "anchor": "b1-create-tags-in-richpanel-ui"
+        "text": "2.1 Guiding principles (v1)",
+        "anchor": "21-guiding-principles-v1"
       },
       {
         "level": 3,
-        "text": "B.2 Create team in Richpanel UI",
-        "anchor": "b2-create-team-in-richpanel-ui"
+        "text": "2.2 Configuration change summary (what to change)",
+        "anchor": "22-configuration-change-summary-what-to-change"
       },
       {
         "level": 3,
-        "text": "B.3 Configure HTTP Target webhook",
-        "anchor": "b3-configure-http-target-webhook"
+        "text": "2.3 Teams (target state)",
+        "anchor": "23-teams-target-state"
       },
       {
         "level": 3,
-        "text": "B.4 Create automation rule: Middleware inbound trigger",
-        "anchor": "b4-create-automation-rule-middleware-inbound-trigger"
+        "text": "2.1 Create: Chargebacks / Disputes",
+        "anchor": "21-create-chargebacks-disputes"
       },
       {
         "level": 3,
-        "text": "B.5 Create assignment rules: routing tag → team",
-        "anchor": "b5-create-assignment-rules-routing-tag-team"
+        "text": "2.4 Tags (target state)",
+        "anchor": "24-tags-target-state"
       },
       {
         "level": 3,
-        "text": "B.6 De-conflict legacy assignment rules",
-        "anchor": "b6-de-conflict-legacy-assignment-rules"
+        "text": "3.1 Naming conventions",
+        "anchor": "31-naming-conventions"
       },
       {
         "level": 3,
-        "text": "B.7 Disable/replace chargeback auto-close rules",
-        "anchor": "b7-disablereplace-chargeback-auto-close-rules"
+        "text": "3.2 Required routing tags (v1)",
+        "anchor": "32-required-routing-tags-v1"
+      },
+      {
+        "level": 3,
+        "text": "3.3 Required middleware control tags (v1)",
+        "anchor": "33-required-middleware-control-tags-v1"
+      },
+      {
+        "level": 3,
+        "text": "2.5 Automation rules (target state)",
+        "anchor": "25-automation-rules-target-state"
+      },
+      {
+        "level": 3,
+        "text": "4.1 New: Middleware inbound trigger rule (required)",
+        "anchor": "41-new-middleware-inbound-trigger-rule-required"
+      },
+      {
+        "level": 3,
+        "text": "4.2 Assignment rules: routing tag → team (required)",
+        "anchor": "42-assignment-rules-routing-tag-team-required"
+      },
+      {
+        "level": 3,
+        "text": "4.3 De-conflict legacy assignment rules (required to prevent routing fights)",
+        "anchor": "43-de-conflict-legacy-assignment-rules-required-to-prevent-routing-fights"
+      },
+      {
+        "level": 3,
+        "text": "4.4 Disable/replace chargeback auto-close rules (required)",
+        "anchor": "44-disablereplace-chargeback-auto-close-rules-required"
+      },
+      {
+        "level": 3,
+        "text": "2.6 HTTP Target (Richpanel → Middleware)",
+        "anchor": "26-http-target-richpanel-middleware"
+      },
+      {
+        "level": 3,
+        "text": "2.7 Rollout stages (recommended)",
+        "anchor": "27-rollout-stages-recommended"
+      },
+      {
+        "level": 3,
+        "text": "2.8 Acceptance checklist (definition of done for config)",
+        "anchor": "28-acceptance-checklist-definition-of-done-for-config"
       },
       {
         "level": 2,
-        "text": "Section C: Validation / Evidence (Staging First)",
-        "anchor": "section-c-validation-evidence-staging-first"
+        "text": "3) UI execution checklist (human follow-along; no secrets)",
+        "anchor": "3-ui-execution-checklist-human-follow-along-no-secrets"
       },
       {
         "level": 3,
-        "text": "C.1 Pre-deployment validation checklist",
-        "anchor": "c1-pre-deployment-validation-checklist"
+        "text": "3.1 Preflight (must be true before touching Richpanel UI)",
+        "anchor": "31-preflight-must-be-true-before-touching-richpanel-ui"
       },
       {
         "level": 3,
-        "text": "C.2 Functional validation (staging)",
-        "anchor": "c2-functional-validation-staging"
+        "text": "3.2 Richpanel UI changes (execute in order; stop if anything is unclear)",
+        "anchor": "32-richpanel-ui-changes-execute-in-order-stop-if-anything-is-unclear"
       },
       {
         "level": 3,
-        "text": "C.3 Evidence capture (staging)",
-        "anchor": "c3-evidence-capture-staging"
-      },
-      {
-        "level": 3,
-        "text": "C.4 Staging sign-off checklist",
-        "anchor": "c4-staging-sign-off-checklist"
-      },
-      {
-        "level": 3,
-        "text": "C.5 Production rollout (only after staging sign-off)",
-        "anchor": "c5-production-rollout-only-after-staging-sign-off"
-      },
-      {
-        "level": 3,
-        "text": "C.6 Rollback plan",
-        "anchor": "c6-rollback-plan"
-      },
-      {
-        "level": 2,
-        "text": "Reference: Shipped Middleware Behavior",
-        "anchor": "reference-shipped-middleware-behavior"
-      },
-      {
-        "level": 3,
-        "text": "Webhook endpoint",
-        "anchor": "webhook-endpoint"
-      },
-      {
-        "level": 3,
-        "text": "Authentication header",
-        "anchor": "authentication-header"
-      },
-      {
-        "level": 3,
-        "text": "Secret IDs",
-        "anchor": "secret-ids"
-      },
-      {
-        "level": 3,
-        "text": "Payload expectations",
-        "anchor": "payload-expectations"
-      },
-      {
-        "level": 2,
-        "text": "Appendix: PowerShell Helpers",
-        "anchor": "appendix-powershell-helpers"
-      },
-      {
-        "level": 3,
-        "text": "Find GitHub Actions run URLs",
-        "anchor": "find-github-actions-run-urls"
-      },
-      {
-        "level": 3,
-        "text": "Verify CloudFormation stack status",
-        "anchor": "verify-cloudformation-stack-status"
-      },
-      {
-        "level": 3,
-        "text": "Check CloudWatch Logs (recent errors)",
-        "anchor": "check-cloudwatch-logs-recent-errors"
-      },
-      {
-        "level": 2,
-        "text": "Acceptance Criteria (Definition of Done)",
-        "anchor": "acceptance-criteria-definition-of-done"
-      },
-      {
-        "level": 3,
-        "text": "Security & stability",
-        "anchor": "security-stability"
-      },
-      {
-        "level": 3,
-        "text": "Trigger reliability",
-        "anchor": "trigger-reliability"
-      },
-      {
-        "level": 3,
-        "text": "Routing correctness",
-        "anchor": "routing-correctness"
-      },
-      {
-        "level": 3,
-        "text": "Staging-first validation",
-        "anchor": "staging-first-validation"
+        "text": "3.3 Post-change verification (minimal)",
+        "anchor": "33-post-change-verification-minimal"
       }
     ]
   },
@@ -5599,6 +5579,11 @@
       },
       {
         "level": 2,
+        "text": "Implementation status (shipped vs roadmap)",
+        "anchor": "implementation-status-shipped-vs-roadmap"
+      },
+      {
+        "level": 2,
         "text": "Core principle",
         "anchor": "core-principle"
       },
@@ -5606,6 +5591,16 @@
         "level": 2,
         "text": "High-level pipeline",
         "anchor": "high-level-pipeline"
+      },
+      {
+        "level": 3,
+        "text": "Shipped v1 worker pipeline (current)",
+        "anchor": "shipped-v1-worker-pipeline-current"
+      },
+      {
+        "level": 3,
+        "text": "Target pipeline (roadmap design; not fully implemented in the worker)",
+        "anchor": "target-pipeline-roadmap-design-not-fully-implemented-in-the-worker"
       },
       {
         "level": 2,
@@ -5629,13 +5624,13 @@
       },
       {
         "level": 3,
-        "text": "Step 4 — LLM classifier (structured output)",
-        "anchor": "step-4-llm-classifier-structured-output"
+        "text": "Step 4 — LLM classifier (structured output) (roadmap)",
+        "anchor": "step-4-llm-classifier-structured-output-roadmap"
       },
       {
         "level": 3,
-        "text": "Step 4.5 — Canonicalize intents (multi-intent priority)",
-        "anchor": "step-45-canonicalize-intents-multi-intent-priority"
+        "text": "Step 4.5 — Canonicalize intents (multi-intent priority) (roadmap)",
+        "anchor": "step-45-canonicalize-intents-multi-intent-priority-roadmap"
       },
       {
         "level": 3,
@@ -5644,8 +5639,8 @@
       },
       {
         "level": 3,
-        "text": "Step 6 — Tier 2 verifier (conditional)",
-        "anchor": "step-6-tier-2-verifier-conditional"
+        "text": "Step 6 — Tier 2 verifier (conditional) (roadmap)",
+        "anchor": "step-6-tier-2-verifier-conditional-roadmap"
       },
       {
         "level": 3,
@@ -10779,23 +10774,18 @@
       },
       {
         "level": 3,
-        "text": "Windows note: PowerShell 5.x does **not** support `&&`",
-        "anchor": "windows-note-powershell-5x-does-not-support"
+        "text": "PowerShell helper (Windows)",
+        "anchor": "powershell-helper-windows"
       },
       {
         "level": 3,
-        "text": "PowerShell helper (Windows)",
-        "anchor": "powershell-helper-windows"
+        "text": "Mypy “asset.\\* not a valid package name” (CDK outputs)",
+        "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
       },
       {
         "level": 2,
         "text": "3) Bugbot PR review (Cursor)",
         "anchor": "3-bugbot-pr-review-cursor"
-      },
-      {
-        "level": 3,
-        "text": "“Extensions are not CLI” (Cursor/VS Code)",
-        "anchor": "extensions-are-not-cli-cursorvs-code"
       },
       {
         "level": 3,

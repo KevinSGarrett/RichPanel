@@ -1,0 +1,22 @@
+{
+  "shipments": [
+    {
+      "orderId": 5001,
+      "orderKey": "A-100",
+      "orderNumber": "A-100",
+      "trackingNumber": "TRACK-123",
+      "carrierCode": "fedex",
+      "serviceCode": "fedex_ground",
+      "shipDate": "2024-01-11T12:00:00Z",
+      "items": [
+        {
+          "sku": "SKU-1"
+        },
+        {
+          "sku": "SKU-2"
+        }
+      ]
+    }
+  ]
+}
+

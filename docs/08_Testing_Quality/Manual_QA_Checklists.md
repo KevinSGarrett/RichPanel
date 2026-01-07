@@ -32,7 +32,7 @@ Test one message per department category:
 - Tech bug / app not working → Technical Support Team
 - Returns / refund → Returns Admin
 - Chargeback/dispute → Chargebacks/Disputes queue
-- Social complaint → SocialMedia Team
+- Social complaint → Social Media Team
 
 Expect:
 - correct team/tag routing

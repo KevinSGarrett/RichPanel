@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 575,
-    "approx_tokens": 747,
+    "word_count": 633,
+    "approx_tokens": 822,
     "last_updated": ""
   },
   {
@@ -305,8 +305,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1505,
-    "approx_tokens": 1956,
+    "word_count": 1506,
+    "approx_tokens": 1957,
     "last_updated": "2025-12-23"
   },
   {
@@ -735,8 +735,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 10216,
-    "approx_tokens": 13280,
+    "word_count": 10246,
+    "approx_tokens": 13319,
     "last_updated": ""
   },
   {
@@ -775,8 +775,8 @@
     "section": "01_Product_Scope_Requirements",
     "status": "canonical",
     "in_index": true,
-    "word_count": 776,
-    "approx_tokens": 1008,
+    "word_count": 777,
+    "approx_tokens": 1010,
     "last_updated": "2025-12-29"
   },
   {
@@ -991,13 +991,13 @@
   },
   {
     "path": "03_Richpanel_Integration/Richpanel_Config_Changes_v1.md",
-    "title": "Richpanel Configuration Runbook (v1)",
+    "title": "Richpanel UI Configuration Changes (v1) — Runbook (NO UI changes by automation)",
     "section": "03_Richpanel_Integration",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2102,
-    "approx_tokens": 2732,
-    "last_updated": ""
+    "word_count": 2282,
+    "approx_tokens": 2966,
+    "last_updated": "2026-01-05"
   },
   {
     "path": "03_Richpanel_Integration/ShipStation_Integration_Skeleton.md",
@@ -1005,8 +1005,8 @@
     "section": "03_Richpanel_Integration",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 191,
-    "approx_tokens": 248,
+    "word_count": 223,
+    "approx_tokens": 289,
     "last_updated": ""
   },
   {
@@ -1015,8 +1015,8 @@
     "section": "03_Richpanel_Integration",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 201,
-    "approx_tokens": 261,
+    "word_count": 234,
+    "approx_tokens": 304,
     "last_updated": ""
   },
   {
@@ -1025,8 +1025,8 @@
     "section": "03_Richpanel_Integration",
     "status": "canonical",
     "in_index": true,
-    "word_count": 420,
-    "approx_tokens": 546,
+    "word_count": 421,
+    "approx_tokens": 547,
     "last_updated": "2025-12-21"
   },
   {
@@ -1115,8 +1115,8 @@
     "section": "04_LLM_Design_Evaluation",
     "status": "canonical",
     "in_index": true,
-    "word_count": 810,
-    "approx_tokens": 1053,
+    "word_count": 1248,
+    "approx_tokens": 1622,
     "last_updated": "2025-12-29"
   },
   {
@@ -1135,8 +1135,8 @@
     "section": "04_LLM_Design_Evaluation",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1180,
-    "approx_tokens": 1534,
+    "word_count": 1184,
+    "approx_tokens": 1539,
     "last_updated": "2025-12-22"
   },
   {
@@ -1235,8 +1235,8 @@
     "section": "04_LLM_Design_Evaluation",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 545,
-    "approx_tokens": 708,
+    "word_count": 549,
+    "approx_tokens": 713,
     "last_updated": ""
   },
   {
@@ -1915,8 +1915,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2040,
-    "approx_tokens": 2652,
+    "word_count": 2006,
+    "approx_tokens": 2607,
     "last_updated": "2026-01-05"
   },
   {
@@ -2105,8 +2105,8 @@
     "section": "08_Testing_Quality",
     "status": "canonical",
     "in_index": true,
-    "word_count": 747,
-    "approx_tokens": 971,
+    "word_count": 748,
+    "approx_tokens": 972,
     "last_updated": "2025-12-22"
   },
   {
@@ -2145,8 +2145,8 @@
     "section": "08_Testing_Quality",
     "status": "canonical",
     "in_index": true,
-    "word_count": 454,
-    "approx_tokens": 590,
+    "word_count": 455,
+    "approx_tokens": 591,
     "last_updated": "2025-12-22"
   },
   {
@@ -3815,8 +3815,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10640,
-    "approx_tokens": 13832,
+    "word_count": 10647,
+    "approx_tokens": 13841,
     "last_updated": ""
   },
   {
