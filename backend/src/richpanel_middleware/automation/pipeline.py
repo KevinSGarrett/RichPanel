@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import logging
 from dataclasses import asdict, dataclass, field
@@ -9,10 +9,6 @@ from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
     compute_delivery_estimate,
-)
-from richpanel_middleware.automation.llm_routing import (
-    LLMRoutingArtifact,
-    compute_llm_routing_artifact,
 )
 from richpanel_middleware.automation.router import (
     RoutingDecision,
@@ -49,7 +45,6 @@ class ActionPlan:
     actions: List[Dict[str, Any]] = field(default_factory=list)
     reasons: List[str] = field(default_factory=list)
     routing: RoutingDecision | None = None
-    llm_routing_artifact: LLMRoutingArtifact | None = None
 
 
 @dataclass
@@ -71,22 +66,13 @@ def normalize_event(raw_event: Dict[str, Any]) -> EventEnvelope:
 
 
 def plan_actions(
-    envelope: EventEnvelope,
-    *,
-    safe_mode: bool,
-    automation_enabled: bool,
-    allow_network: bool = False,
+    envelope: EventEnvelope, *, safe_mode: bool, automation_enabled: bool
 ) -> ActionPlan:
     """
     Build a minimal action plan from the normalized envelope.
 
     In v1 the plan is intentionally conservative and dry-run only.
-
-    The deterministic router is the operational default.
-    LLM routing suggestion is computed in advisory mode and persisted
-    for audit/comparison (bridge from deterministic -> LLM-primary later).
     """
-    # 1. Compute baseline deterministic route (operational)
     routing = classify_routing(envelope.payload)
     payload = envelope.payload if isinstance(envelope.payload, dict) else {}
     effective_automation = automation_enabled and not safe_mode
@@ -98,15 +84,6 @@ def plan_actions(
     if not automation_enabled:
         reasons.append("automation_disabled")
     reasons.append(routing.reason)
-
-    # 2. Compute LLM routing suggestion (advisory only)
-    # This is gated and will return a dry-run artifact if gates are not satisfied
-    llm_routing_artifact = compute_llm_routing_artifact(
-        payload,
-        safe_mode=safe_mode,
-        automation_enabled=automation_enabled,
-        allow_network=allow_network,
-    )
 
     actions: List[Dict[str, Any]] = []
     routing_payload = asdict(routing) if routing else None
@@ -207,7 +184,6 @@ def plan_actions(
         actions=actions,
         reasons=reasons,
         routing=routing,
-        llm_routing_artifact=llm_routing_artifact,
     )
 
 
@@ -250,13 +226,6 @@ def execute_plan(
         routing_dict = asdict(plan.routing)
         state_record["routing"] = routing_dict
         audit_record["routing"] = routing_dict
-
-    # Persist LLM routing artifact (advisory mode)
-    # This enables comparison between deterministic and LLM routing
-    if plan.llm_routing_artifact:
-        llm_artifact_dict = plan.llm_routing_artifact.to_dict()
-        state_record["llm_routing_advisory"] = llm_artifact_dict
-        audit_record["llm_routing_advisory"] = llm_artifact_dict
 
     if state_writer:
         state_writer(state_record)
@@ -555,5 +524,4 @@ def execute_routing_tags(
             },
         )
         return {"applied": False, "reason": "exception"}
-
 
