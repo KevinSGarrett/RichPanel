@@ -244,29 +244,42 @@ def build_no_tracking_reply(
         inquiry_date,
     )
 
-    if not estimate:
-        return None
-
     order_id = str(order_summary.get("order_id") or order_summary.get("id") or "your order")
-    order_date_human = estimate["order_created_date"]
-    method_label = estimate["normalized_method"] or estimate["raw_method"]
 
-    if estimate["is_late"]:
-        eta_sentence = "It is already beyond the expected window, so it should arrive any day now."
-    else:
-        eta_sentence = f"It should arrive in about {estimate['eta_human']}."
+    if estimate:
+        order_date_human = estimate["order_created_date"]
+        method_label = estimate["normalized_method"] or estimate["raw_method"]
 
-    body = (
-        f"Thanks for your patience. Order {order_id} was placed on {order_date_human}. "
-        f"With {method_label} shipping, {eta_sentence} "
-        "We'll send tracking as soon as it ships."
+        if estimate["is_late"]:
+            eta_sentence = "It is already beyond the expected window, so it should arrive any day now."
+        else:
+            eta_sentence = f"It should arrive in about {estimate['eta_human']}."
+
+        body = (
+            f"Thanks for your patience. Order {order_id} was placed on {order_date_human}. "
+            f"With {method_label} shipping, {eta_sentence} "
+            "We'll send tracking as soon as it ships."
+        )
+
+        return {
+            "body": body.strip(),
+            "eta_human": estimate["eta_human"],
+            "bucket": estimate["bucket"],
+            "is_late": estimate["is_late"],
+        }
+
+    fallback_body = (
+        f"Thanks for your patience. We have order {order_id} on file, "
+        "but we don't have tracking updates to share yet. We're checking on it and will send "
+        "tracking details as soon as they're ready. If you need to update the shipping address "
+        "or have a specific concern, reply here and we'll help."
     )
 
     return {
-        "body": body.strip(),
-        "eta_human": estimate["eta_human"],
-        "bucket": estimate["bucket"],
-        "is_late": estimate["is_late"],
+        "body": fallback_body.strip(),
+        "eta_human": None,
+        "bucket": None,
+        "is_late": None,
     }
 
 

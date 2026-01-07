@@ -5,7 +5,7 @@ import sys
 import time
 import unittest
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -28,9 +28,13 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     normalize_event,
     plan_actions,
 )
+from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 from lambda_handlers.worker import handler as worker  # noqa: E402
-from richpanel_middleware.integrations.richpanel.client import RichpanelResponse  # noqa: E402
+from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
+    RichpanelExecutor,
+    RichpanelResponse,
+)
 
 
 class PipelineTests(unittest.TestCase):
@@ -74,8 +78,11 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("order_summary", order_action["parameters"])
         self.assertIn("prompt_fingerprint", order_action["parameters"])
         self.assertEqual(order_action["parameters"]["order_summary"]["order_id"], "ord-789")
-        self.assertEqual(plan.routing.intent, "order_status_tracking")
-        self.assertEqual(plan.routing.department, "Email Support Team")
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(routing.intent, "order_status_tracking")
+        self.assertEqual(routing.department, "Email Support Team")
 
 
     def test_plan_generates_tracking_present_draft_reply(self) -> None:
@@ -99,24 +106,51 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Tracking link:", draft_reply["body"])
         self.assertNotIn("We'll send tracking as soon as it ships.", draft_reply["body"])
 
+    def test_plan_generates_fallback_when_eta_missing(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-noeta",
+                "order_id": "ord-noeta",
+                "message": "Where is my order?",
+                # No tracking number, shipping method, or order dates to compute ETA.
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        self.assertEqual(len(order_actions), 1)
+        draft_reply = order_actions[0]["parameters"].get("draft_reply")
+
+        self.assertIsNotNone(draft_reply)
+        assert isinstance(draft_reply, dict)
+        self.assertTrue(draft_reply.get("body"))
+        self.assertNotIn("business day", draft_reply["body"].lower())
+        self.assertNotIn("None", draft_reply["body"])
+
     def test_routing_classifies_returns(self) -> None:
         envelope = build_event_envelope(
             {"ticket_id": "t-return", "message": "I need a refund or exchange this order"}
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
 
-        self.assertEqual(plan.routing.category, "returns")
-        self.assertEqual(plan.routing.department, "Returns Admin")
-        self.assertIn(plan.routing.intent, {"refund_request", "exchange_request"})
-        self.assertIn(f"mw-intent-{plan.routing.intent}", plan.routing.tags)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(routing.category, "returns")
+        self.assertEqual(routing.department, "Returns Admin")
+        self.assertIn(routing.intent, {"refund_request", "exchange_request"})
+        self.assertIn(f"mw-intent-{routing.intent}", routing.tags)
 
     def test_routing_fallback_when_message_missing(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-nomsg"})
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
 
-        self.assertEqual(plan.routing.intent, "unknown")
-        self.assertEqual(plan.routing.department, "Email Support Team")
-        self.assertEqual(plan.routing.category, "general")
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(routing.intent, "unknown")
+        self.assertEqual(routing.department, "Email Support Team")
+        self.assertEqual(routing.category, "general")
 
     def test_execute_plan_dry_run_records(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-000"})
@@ -144,8 +178,11 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.state_record["mode"], plan.mode)
         self.assertEqual(result.audit_record["mode"], plan.mode)
         self.assertIn("routing", result.state_record)
-        self.assertEqual(result.state_record["routing"]["department"], plan.routing.department)
-        self.assertEqual(result.audit_record["routing"]["intent"], plan.routing.intent)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(result.state_record["routing"]["department"], routing.department)
+        self.assertEqual(result.audit_record["routing"]["intent"], routing.intent)
         self.assertEqual(len(captured_state), 1)
         self.assertEqual(len(captured_audit), 1)
 
@@ -271,7 +308,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=False,
-            richpanel_executor=executor,
+            richpanel_executor=cast(RichpanelExecutor, executor),
         )
 
         self.assertFalse(result["sent"])
@@ -288,7 +325,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            richpanel_executor=executor,
+            richpanel_executor=cast(RichpanelExecutor, executor),
         )
 
         self.assertTrue(result["sent"])
@@ -322,7 +359,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
                 automation_enabled=True,
                 allow_network=True,
                 outbound_enabled=True,
-                richpanel_executor=executor,
+                richpanel_executor=cast(RichpanelExecutor, executor),
             )
 
         combined_logs = " ".join(captured.output)
@@ -372,7 +409,7 @@ class OutboundRoutingTagsTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=False,
-            richpanel_executor=executor,
+            richpanel_executor=cast(RichpanelExecutor, executor),
         )
 
         self.assertFalse(result["applied"])
@@ -389,7 +426,7 @@ class OutboundRoutingTagsTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            richpanel_executor=executor,
+            richpanel_executor=cast(RichpanelExecutor, executor),
         )
 
         self.assertTrue(result["applied"])
