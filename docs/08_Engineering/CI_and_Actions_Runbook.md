@@ -51,9 +51,31 @@ This runs:
 
 If this fails locally, **fix before pushing**.
 
-### Mypy “asset.\* not a valid package name” (CDK outputs)
-- Cause: `cdk synth` writes `infra/cdk/cdk.out/asset.<hash>` folders; mypy treats the dotted folder name as a package and errors.
-- Fix: use the repo-root `mypy.ini` (limits checks to `backend/src` + `scripts` and excludes generated trees) and delete any local `infra/cdk/cdk.out` leftovers before re-running mypy.
+### Mypy "asset.\* not a valid package name" (CDK outputs)
+**Cause:** `cdk synth` writes `infra/cdk/cdk.out/asset.<hash>` folders; mypy treats the dotted folder name as a package and errors.
+
+**Fix (automatic):** The repo-root `mypy.ini` already excludes these patterns:
+- `infra/cdk/cdk.out/` (entire CDK output directory)
+- `asset\.[^\\/]+` (any asset.* folder anywhere in the tree)
+- Also limits type checking to `backend/src` and `scripts` only
+
+**If you still see the error:**
+1. Verify Cursor is using the repo-root `mypy.ini` (not a local override)
+2. Delete `infra/cdk/cdk.out/` and re-run mypy:
+   ```powershell
+   Remove-Item -Recurse -Force infra/cdk/cdk.out -ErrorAction SilentlyContinue
+   python -m mypy backend/src scripts
+   ```
+3. If the error persists, check for stray `asset.*` folders outside `cdk.out`:
+   ```powershell
+   Get-ChildItem -Recurse -Directory -Filter "asset.*" | Select-Object FullName
+   ```
+4. If Cursor still shows the error in the Problems panel, try reloading the window (Ctrl+Shift+P → "Developer: Reload Window")
+
+**Prevention:**
+- Always run `cdk synth` from `infra/cdk/` (not repo root)
+- Add `infra/cdk/cdk.out/` to `.gitignore` (already present)
+- Avoid manually creating folders starting with `asset.`
 
 ---
 
