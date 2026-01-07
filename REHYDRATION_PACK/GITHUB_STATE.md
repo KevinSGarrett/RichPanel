@@ -1,6 +1,6 @@
 # GitHub State
 
-Last updated: 2026-01-06 (Wave B21 — Worktree + summary protocol)
+Last updated: 2026-01-07 (Merge hygiene + single source of truth status refresh)
 
 ## Repo
 - GitHub repo: `KevinSGarrett/RichPanel`
@@ -65,20 +65,24 @@ gh run list -L 5 --workflow CI --json databaseId,conclusion,event,headBranch,dis
 - Wait for `validate` to pass; auto-merge queues the merge commit and deletes the branch on success.
 - Manual merges in the UI or CLI are disallowed because they bypass the hardened loop.
 
-## Active PRs (as of 2026-01-06)
+## Active PRs (as of 2026-01-07)
 
-| PR # | Title | Branch | State | Worktree (if known) |
-|------|-------|--------|-------|---------------------|
-| #51 | B21: Align checklist with reality + mypy/Cursor noise hardening | `run/B21_checklist_alignment_20260106` | OPEN | `C:/RichPanel_GIT` (main) |
-| #50 | feat(automation): OpenAI routing classifier in advisory mode | `run/B21_openai_routing_advisory_20260106` | OPEN | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/qvi` (linked) |
-| #49 | Fix fraud routing and Shopify order fields | `run/B21_bugbot_fixes_20260106` | OPEN | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/rav` (linked) |
+| PR # | Title | Branch | State | CI (validate) | Worktree (if known) | Notes |
+|------|-------|--------|-------|---------------|---------------------|-------|
+| #51 | B21: Align checklist with reality + mypy/Cursor noise hardening | `run/B21_checklist_alignment_20260106` | OPEN | ✅ pass | Unknown | Validate run: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20769206306` |
+| #50 | feat(automation): OpenAI routing classifier in advisory mode | `run/B21_openai_routing_advisory_20260106` | OPEN | ✅ pass | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/qvi` (linked) | Validate run: `https://github.com/KevinSGarrett/RichPanel/actions/runs/20770618716` |
+| #49 | Fix fraud routing and Shopify order fields | `run/B21_bugbot_fixes_20260106` | OPEN | ⚠️ missing | `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/rav` (linked; local head diverged) / `C:/Users/kevin/.cursor/worktrees/RichPanel_GIT/zbl` (linked; contains PR head `07ec6d4`) | No `validate` run is recorded on the PR (only Bugbot). PR head is `07ec6d4` (`origin/run/B21_bugbot_fixes_20260106`), but local `run/B21_bugbot_fixes_20260106` is currently at `23f097d` (diverged). If you need CI, push a no-op commit to `run/B21_bugbot_fixes_20260106` to trigger CI on this branch. |
 
 ### Recent merged PRs
 | PR # | Title | Branch | Merged date |
 |------|-------|--------|-------------|
-| #48 | fix(routing): Correct fraud vs chargeback routing + add Shopify fields for delivery estimates | `run/B21_bugbot_fixes_184913` | 2026-01-06 |
-| #47 | fix/lambda packaging | `fix/lambda-packaging` | ~2026-01-05 |
-| #46 | ci: add seed-secrets workflow | `add/seed-secrets-workflow` | ~2026-01-05 |
+| #54 | Fix order status fallback draft reply | `fix/missing-draft-reply` | 2026-01-07 |
+| #53 | ops/set runtime flags | `ops/set-runtime-flags` | 2026-01-07 |
+| #41 | docs: refresh Richpanel UI configuration runbook | `docs/richpanel-runbook-refresh` | 2026-01-07 |
+| #40 | docs: PowerShell-safe ops + extensions not CLI | `agent3-ps-safe-ops` | 2026-01-07 |
+| #35 | Docs: refresh Richpanel config runbook (no UI changes) | `docs/richpanel-config-runbook` | 2026-01-07 |
+| #52 | docs: Worktree guide + agent summary protocol (Agent 2) | `docs/worktree-summary-protocol-20260106` | 2026-01-07 |
+| #48 | fix(routing): Correct fraud vs chargeback routing + add Shopify fields for delivery estimates | `run/B21_bugbot_fixes_184913` | 2026-01-07 |
 
 **How to refresh this table:**
 ```powershell
