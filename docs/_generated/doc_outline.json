@@ -2954,23 +2954,23 @@
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.1 Security & stability",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-71-security-stability"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 2) Human UI execution (gated) — Richpanel admin steps...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-2-human-ui-execution-gated-richpanel-admin-steps"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.2 Trigger reliability",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-72-trigger-reliability"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.3 Routing correctness",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-73-routing-correctness"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 3,
-        "text": "Richpanel Config Changes (v1 Target State) > 7) Acceptance checklist (definition of done for config) > 7.4 Visibility",
-        "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-74-visibility"
+        "text": "Example: get the most recent run URL for a workflow file (adjust name as needed). > 3) UI execution checklist (human follow-along; no sec...",
+        "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
       },
       {
         "level": 2,

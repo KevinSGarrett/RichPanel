@@ -3047,28 +3047,24 @@
       "anchor": "docs03richpanelintegrationrichpanelconfigchangesv1md"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.1 security & stability": [
+  "example: get the most recent run url for a workflow file (adjust name as needed). > 2) human ui execution (gated) — richpanel admin steps...": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-71-security-stability"
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-2-human-ui-execution-gated-richpanel-admin-steps"
     }
   ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.2 trigger reliability": [
+  "example: get the most recent run url for a workflow file (adjust name as needed). > 3) ui execution checklist (human follow-along; no sec...": [
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-72-trigger-reliability"
-    }
-  ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.3 routing correctness": [
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
+    },
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-73-routing-correctness"
-    }
-  ],
-  "richpanel config changes (v1 target state) > 7) acceptance checklist (definition of done for config) > 7.4 visibility": [
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
+    },
     {
       "path": "00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md",
-      "anchor": "richpanel-config-changes-v1-target-state-7-acceptance-checklist-definition-of-done-for-config-74-visibility"
+      "anchor": "example-get-the-most-recent-run-url-for-a-workflow-file-adjust-name-as-needed-3-ui-execution-checklist-human-follow-along-no-sec"
     }
   ],
   "docs/03_richpanel_integration/tenant_capabilities_clarifications.md": [
