@@ -14,7 +14,7 @@ This file must contain **only the currently active prompts** for the current run
 ## Model + MAX mode + Cycle
 - **Model used:** <model-name> (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
 - **MAX mode:** ON | OFF
-- **Cycle:** 1× | 2×
+- **Cycle:** 1× | 2× | 3× | 4×
 ```
 
 **Why this matters:**
