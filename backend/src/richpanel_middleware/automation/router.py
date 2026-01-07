@@ -82,7 +82,9 @@ TECHNICAL_KEYWORDS = (
     "not working",
     "error",
 )
-CHARGEBACK_KEYWORDS = ("chargeback", "dispute", "bank reversed", "fraud", "scam")
+CHARGEBACK_KEYWORDS = ("chargeback", "dispute", "bank reversed", "scam")
+
+FRAUD_KEYWORDS = ("fraud",)
 
 
 @dataclass
@@ -147,17 +149,19 @@ def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
 
     lowered = text.lower()
 
+    # Check fraud BEFORE chargeback to ensure correct routing
+    if _contains_any(lowered, FRAUD_KEYWORDS):
+        return _build_decision(
+            "fraud_suspected",
+            category="escalation",
+            reason="matched fraud indicator language",
+        )
+
     if _contains_any(lowered, CHARGEBACK_KEYWORDS):
         return _build_decision(
             "chargeback_dispute",
             category="escalation",
             reason="matched chargeback or dispute language",
-        )
-    if "fraud" in lowered:
-        return _build_decision(
-            "fraud_suspected",
-            category="escalation",
-            reason="matched fraud indicator language",
         )
 
     if _contains_any(lowered, TECHNICAL_KEYWORDS):

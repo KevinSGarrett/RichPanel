@@ -7,6 +7,22 @@ from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
 
 OrderSummary = Dict[str, Any]
 
+# Fields required for complete order summary extraction including delivery estimates
+SHOPIFY_ORDER_FIELDS = [
+    "fulfillment_status",
+    "financial_status",
+    "status",
+    "created_at",
+    "processed_at",
+    "updated_at",
+    "current_total_price",
+    "total_price",
+    "line_items_count",
+    "line_items",
+    "fulfillments",
+    "shipping_lines",
+]
+
 
 def lookup_order_summary(
     envelope: EventEnvelope,
@@ -84,17 +100,7 @@ def _lookup_shopify(
     client = client or ShopifyClient(allow_network=allow_network)
     response = client.get_order(
         order_id,
-        fields=[
-            "fulfillment_status",
-            "financial_status",
-            "status",
-            "updated_at",
-            "current_total_price",
-            "total_price",
-            "line_items_count",
-            "line_items",
-            "fulfillments",
-        ],
+        fields=SHOPIFY_ORDER_FIELDS,
         safe_mode=safe_mode,
         automation_enabled=automation_enabled,
         dry_run=not allow_network,
