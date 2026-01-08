@@ -335,10 +335,16 @@ def _load_kill_switches_from_env_override() -> Optional[tuple[bool, bool]]:
         return None
 
     safe_mode = _to_bool(safe_mode_raw, default=True)
-    automation_enabled = _to_bool(automation_enabled_raw, default=False)
+    automation_enabled_raw = _to_bool(automation_enabled_raw, default=False)
+    # Enforce the same safety constraint used by _load_kill_switches so logs match effective behavior.
+    automation_enabled = False if safe_mode else automation_enabled_raw
     LOGGER.info(
         "worker.flags_env_override_active",
-        extra={"safe_mode": safe_mode, "automation_enabled": automation_enabled},
+        extra={
+            "safe_mode": safe_mode,
+            "automation_enabled": automation_enabled,
+            "automation_enabled_raw": automation_enabled_raw,
+        },
     )
     return safe_mode, automation_enabled
 
