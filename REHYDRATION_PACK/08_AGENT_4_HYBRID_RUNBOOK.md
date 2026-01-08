@@ -62,6 +62,17 @@ for the proof run.
 Preferred: use GitHub Actions **Set Runtime Flags** workflow (OIDC role).
 If the workflow fails due to SCP/permissions, open a task to add an **env-var fallback** (Cursor code change) so Agent 4 can toggle via Lambda environment variables.
 
+Env-var fallback (DEV-only contingency; OFF by default):
+- Only active when `MW_ALLOW_ENV_FLAG_OVERRIDE=true`
+- Requires BOTH env vars to be set:
+  - `MW_SAFE_MODE_OVERRIDE` (`true|false`)
+  - `MW_AUTOMATION_ENABLED_OVERRIDE` (`true|false`)
+- Precedence:
+  - If override is enabled AND both override env vars are set → use env values
+  - Else → read SSM (current behavior)
+  - If SSM read fails → fail closed (safe_mode=true, automation_enabled=false)
+- Logging: worker logs `worker.flags_env_override_active` when env overrides are in use (no secrets).
+
 ### 0.3 Ensure outbound prerequisites are in place
 For outbound order-status reply+resolve we need:
 - secrets readable by the worker (Secrets Manager permissions)

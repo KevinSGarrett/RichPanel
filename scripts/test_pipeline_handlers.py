@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import unittest
+from unittest import mock
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, cast
@@ -242,6 +243,61 @@ class PipelineTests(unittest.TestCase):
         self.assertFalse(safe_mode)
         self.assertTrue(automation_enabled)
         self.assertGreater(worker._FLAG_CACHE["expires_at"], now)
+
+    def test_kill_switch_env_override_takes_precedence_and_skips_ssm(self) -> None:
+        class _FakeSSM:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def get_parameters(self, Names, WithDecryption=False):  # type: ignore[no-untyped-def]
+                self.calls += 1
+                return {
+                    "Parameters": [
+                        {"Name": os.environ["SAFE_MODE_PARAM"], "Value": "true"},
+                        {"Name": os.environ["AUTOMATION_ENABLED_PARAM"], "Value": "true"},
+                    ]
+                }
+
+        fake_ssm = _FakeSSM()
+        worker.boto3 = object()  # type: ignore
+        worker._SSM_CLIENT = fake_ssm  # type: ignore
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_ALLOW_ENV_FLAG_OVERRIDE": "true",
+                "MW_SAFE_MODE_OVERRIDE": "false",
+                "MW_AUTOMATION_ENABLED_OVERRIDE": "false",
+            },
+            clear=False,
+        ):
+            safe_mode, automation_enabled = worker._load_kill_switches()
+
+        self.assertFalse(safe_mode)
+        self.assertFalse(automation_enabled)
+        self.assertEqual(fake_ssm.calls, 0)
+
+    def test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error(self) -> None:
+        class _FailingSSM:
+            def get_parameters(self, Names, WithDecryption=False):  # type: ignore[no-untyped-def]
+                raise RuntimeError("ssm read blocked")
+
+        worker.boto3 = object()  # type: ignore
+        worker._SSM_CLIENT = _FailingSSM()  # type: ignore
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_ALLOW_ENV_FLAG_OVERRIDE": "true",
+                # Intentionally omit MW_SAFE_MODE_OVERRIDE to prove partial overrides don't apply.
+                "MW_AUTOMATION_ENABLED_OVERRIDE": "true",
+            },
+            clear=False,
+        ):
+            safe_mode, automation_enabled = worker._load_kill_switches()
+
+        self.assertTrue(safe_mode)
+        self.assertFalse(automation_enabled)
 
     def test_idempotency_write_persists_expected_fields(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-321", "message_id": "m-321"})
