@@ -15,6 +15,11 @@ from richpanel_middleware.automation.router import (
     classify_routing,
     extract_customer_message,
 )
+from richpanel_middleware.automation.llm_routing import (
+    RoutingArtifact,
+    compute_dual_routing,
+    get_openai_routing_primary,
+)
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary
 from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
@@ -45,6 +50,7 @@ class ActionPlan:
     actions: List[Dict[str, Any]] = field(default_factory=list)
     reasons: List[str] = field(default_factory=list)
     routing: RoutingDecision | None = None
+    routing_artifact: RoutingArtifact | None = None
 
 
 @dataclass
@@ -66,15 +72,37 @@ def normalize_event(raw_event: Dict[str, Any]) -> EventEnvelope:
 
 
 def plan_actions(
-    envelope: EventEnvelope, *, safe_mode: bool, automation_enabled: bool
+    envelope: EventEnvelope,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool = False,
+    outbound_enabled: bool = False,
 ) -> ActionPlan:
     """
     Build a minimal action plan from the normalized envelope.
 
     In v1 the plan is intentionally conservative and dry-run only.
+
+    Advisory LLM routing:
+    - Always computes deterministic routing as baseline
+    - Computes LLM routing suggestion (dry-run artifact if gated)
+    - Persists both into routing_artifact for audit/analysis
+    - Uses OPENAI_ROUTING_PRIMARY flag to determine final routing source
     """
-    routing = classify_routing(envelope.payload)
     payload = envelope.payload if isinstance(envelope.payload, dict) else {}
+
+    # Compute dual routing (deterministic + LLM advisory)
+    routing, routing_artifact = compute_dual_routing(
+        payload,
+        conversation_id=envelope.conversation_id,
+        event_id=envelope.event_id,
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        allow_network=allow_network,
+        outbound_enabled=outbound_enabled,
+    )
+
     effective_automation = automation_enabled and not safe_mode
     mode = "automation_candidate" if effective_automation else "route_only"
 
@@ -184,6 +212,7 @@ def plan_actions(
         actions=actions,
         reasons=reasons,
         routing=routing,
+        routing_artifact=routing_artifact,
     )
 
 
@@ -226,6 +255,15 @@ def execute_plan(
         routing_dict = asdict(plan.routing)
         state_record["routing"] = routing_dict
         audit_record["routing"] = routing_dict
+
+    # Persist routing artifact for dual routing analysis
+    if plan.routing_artifact:
+        routing_artifact_dict = plan.routing_artifact.to_dict()
+        state_record["routing_artifact"] = routing_artifact_dict
+        audit_record["routing_artifact"] = routing_artifact_dict
+        # Add primary_source to top level for easy querying
+        state_record["routing_primary_source"] = plan.routing_artifact.primary_source
+        audit_record["routing_primary_source"] = plan.routing_artifact.primary_source
 
     if state_writer:
         state_writer(state_record)
