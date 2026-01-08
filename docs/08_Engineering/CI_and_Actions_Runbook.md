@@ -286,6 +286,19 @@ Notes:
 - missing required rehydration pack file (manifest mismatch)
 - accidental rename/delete in protected paths
 
+### DynamoDB: `TypeError: Float types are not supported`
+- **Symptom**: Worker (or local tests) fail with `TypeError: Float types are not supported`.
+- **Root cause**: The boto3 DynamoDB serializer rejects Python `float` values (DynamoDB numbers must be serialized as `Decimal`).
+- **Fix**: The worker sanitizes all records before `put_item`, recursively converting floats to `Decimal` (and stripping `NaN/Inf` to `None`).
+- **How to verify in DEV/local**: run CI-equivalent checks (this includes the pipeline handler tests that validate float→Decimal sanitization):
+
+```powershell
+# Pick the correct region for your dev account/env (example uses us-east-2)
+$env:AWS_REGION = "us-east-2"
+$env:AWS_DEFAULT_REGION = $env:AWS_REGION
+python scripts/run_ci_checks.py
+```
+
 ---
 
 ## 9) If you cannot fix quickly
