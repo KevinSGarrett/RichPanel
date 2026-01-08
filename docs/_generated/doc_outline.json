@@ -10913,6 +10913,11 @@
         "anchor": "8-common-causes-initial-list"
       },
       {
+        "level": 3,
+        "text": "DynamoDB: `TypeError: Float types are not supported`",
+        "anchor": "dynamodb-typeerror-float-types-are-not-supported"
+      },
+      {
         "level": 2,
         "text": "9) If you cannot fix quickly",
         "anchor": "9-if-you-cannot-fix-quickly"

@@ -12087,6 +12087,12 @@
       "anchor": "8-common-causes-initial-list"
     }
   ],
+  "dynamodb: `typeerror: float types are not supported`": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "dynamodb-typeerror-float-types-are-not-supported"
+    }
+  ],
   "9) if you cannot fix quickly": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
