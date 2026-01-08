@@ -97,12 +97,24 @@ jobs:
 
           UPDATED_ENV=$(env ENV_VARS_JSON="$ENV_VARS_JSON" SAFE="$SAFE" AUTO="$AUTO" python - <<'PY'
 import json, os
-env = json.loads(os.environ.get("ENV_VARS_JSON") or "{}")
-env.update({
-    "MW_ALLOW_ENV_FLAG_OVERRIDE": "true",
-    "MW_SAFE_MODE_OVERRIDE": os.environ["SAFE"],
-    "MW_AUTOMATION_ENABLED_OVERRIDE": os.environ["AUTO"],
-})
+
+raw = os.environ.get("ENV_VARS_JSON") or "{}"
+try:
+    env = json.loads(raw)
+except Exception:
+    env = {}
+
+if env is None or not isinstance(env, dict):
+    env = {}
+
+env.update(
+    {
+        "MW_ALLOW_ENV_FLAG_OVERRIDE": "true",
+        "MW_SAFE_MODE_OVERRIDE": os.environ["SAFE"],
+        "MW_AUTOMATION_ENABLED_OVERRIDE": os.environ["AUTO"],
+    }
+)
+
 print(json.dumps({"Variables": env}))
 PY
 )
