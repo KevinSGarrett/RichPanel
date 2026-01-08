@@ -51,6 +51,10 @@ CONVERSATION_STATE_TTL_SECONDS = int(
 AUDIT_TRAIL_TABLE_NAME = os.environ.get("AUDIT_TRAIL_TABLE_NAME")
 AUDIT_TRAIL_TTL_SECONDS = int(os.environ.get("AUDIT_TRAIL_TTL_SECONDS", str(60 * 24 * 60 * 60)))
 
+MW_ALLOW_ENV_FLAG_OVERRIDE = "MW_ALLOW_ENV_FLAG_OVERRIDE"
+MW_SAFE_MODE_OVERRIDE = "MW_SAFE_MODE_OVERRIDE"
+MW_AUTOMATION_ENABLED_OVERRIDE = "MW_AUTOMATION_ENABLED_OVERRIDE"
+
 _SSM_CLIENT: BaseClient | None = None
 _DDB_RESOURCE: ServiceResource | None = None
 _FLAG_CACHE: Dict[str, Any] = {
@@ -260,6 +264,13 @@ def _now_epoch_seconds() -> int:
 
 
 def _load_kill_switches() -> tuple[bool, bool]:
+    override = _load_kill_switches_from_env_override()
+    if override is not None:
+        safe_mode, automation_enabled = override
+        if safe_mode:
+            automation_enabled = False
+        return safe_mode, automation_enabled
+
     now = time.time()
     if now < _FLAG_CACHE.get("expires_at", 0):
         return _FLAG_CACHE["safe_mode"], _FLAG_CACHE["automation_enabled"]
@@ -304,6 +315,31 @@ def _load_kill_switches() -> tuple[bool, bool]:
         }
     )
 
+    return safe_mode, automation_enabled
+
+
+def _load_kill_switches_from_env_override() -> Optional[tuple[bool, bool]]:
+    """
+    DEV-only contingency: allow explicit env-var override of kill switches.
+
+    OFF by default. Only active when MW_ALLOW_ENV_FLAG_OVERRIDE=true AND both override vars are set.
+    """
+
+    if not _to_bool(os.environ.get(MW_ALLOW_ENV_FLAG_OVERRIDE), default=False):
+        return None
+
+    safe_mode_raw = os.environ.get(MW_SAFE_MODE_OVERRIDE)
+    automation_enabled_raw = os.environ.get(MW_AUTOMATION_ENABLED_OVERRIDE)
+    if safe_mode_raw is None or automation_enabled_raw is None:
+        # Guard against partial overrides accidentally changing behavior.
+        return None
+
+    safe_mode = _to_bool(safe_mode_raw, default=True)
+    automation_enabled = _to_bool(automation_enabled_raw, default=False)
+    LOGGER.info(
+        "worker.flags_env_override_active",
+        extra={"safe_mode": safe_mode, "automation_enabled": automation_enabled},
+    )
     return safe_mode, automation_enabled
 
 
