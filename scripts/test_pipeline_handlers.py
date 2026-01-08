@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import unittest
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, cast
 
@@ -35,6 +36,16 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
     RichpanelResponse,
 )
+
+
+def _contains_float(value: Any) -> bool:
+    if isinstance(value, float):
+        return True
+    if isinstance(value, dict):
+        return any(_contains_float(v) for v in value.values())
+    if isinstance(value, (list, tuple, set)):
+        return any(_contains_float(v) for v in value)
+    return False
 
 
 class PipelineTests(unittest.TestCase):
@@ -185,6 +196,29 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.audit_record["routing"]["intent"], routing.intent)
         self.assertEqual(len(captured_state), 1)
         self.assertEqual(len(captured_audit), 1)
+
+    def test_ddb_sanitize_converts_floats_to_decimals_and_strips_nan(self) -> None:
+        source = {
+            "score": 0.25,
+            "nested": {
+                "values": [1.1, {"inner": float("inf")}],
+                "tuple": (2.5, {"nan": float("nan")}),
+            },
+            "set": {3.3, "keep"},
+        }
+
+        sanitized = worker._ddb_sanitize(source)
+
+        self.assertIsInstance(sanitized["score"], Decimal)
+        self.assertEqual(sanitized["score"], Decimal("0.25"))
+        nested_values = sanitized["nested"]["values"]
+        self.assertIsInstance(nested_values[0], Decimal)
+        self.assertIsNone(nested_values[1]["inner"])
+        tuple_values = sanitized["nested"]["tuple"]
+        self.assertIsInstance(tuple_values[0], Decimal)
+        self.assertIsNone(tuple_values[1]["nan"])
+        self.assertIn(Decimal("3.3"), sanitized["set"])
+        self.assertFalse(_contains_float(sanitized))
 
     def test_build_event_envelope_truncates_and_sanitizes(self) -> None:
         long_message_id = "m-" + ("x" * 200)

@@ -1,9 +1,11 @@
 import json
 import logging
+import math
 import os
 import time
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional
+from decimal import Decimal
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
 try:
     import boto3  # type: ignore
@@ -15,6 +17,13 @@ except ImportError:  # pragma: no cover
         """Minimal stand-in so offline tests can run without boto3/botocore."""
 
     BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
+
+if TYPE_CHECKING:
+    from botocore.client import BaseClient
+    from boto3.resources.base import ServiceResource
+else:  # pragma: no cover
+    BaseClient = Any
+    ServiceResource = Any
 
 from richpanel_middleware.automation.pipeline import (
     ActionPlan,
@@ -42,8 +51,8 @@ CONVERSATION_STATE_TTL_SECONDS = int(
 AUDIT_TRAIL_TABLE_NAME = os.environ.get("AUDIT_TRAIL_TABLE_NAME")
 AUDIT_TRAIL_TTL_SECONDS = int(os.environ.get("AUDIT_TRAIL_TTL_SECONDS", str(60 * 24 * 60 * 60)))
 
-_SSM_CLIENT = None
-_DDB_RESOURCE = None
+_SSM_CLIENT: BaseClient | None = None
+_DDB_RESOURCE: ServiceResource | None = None
 _FLAG_CACHE: Dict[str, Any] = {
     "safe_mode": True,
     "automation_enabled": False,
@@ -192,6 +201,7 @@ def _persist_idempotency(
     if intent:
         item["intent"] = str(intent)
 
+    item = _ddb_sanitize(item)
     _table(IDEMPOTENCY_TABLE_NAME).put_item(
         Item=item,
         ConditionExpression="attribute_not_exists(event_id)",
@@ -206,6 +216,7 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
             return
         item = dict(record)
         item["expires_at"] = _now_epoch_seconds() + max(CONVERSATION_STATE_TTL_SECONDS, 0)
+        item = _ddb_sanitize(item)
         _table(CONVERSATION_STATE_TABLE_NAME).put_item(Item=item)
 
     def _audit_writer(record: Dict[str, Any]) -> None:
@@ -216,6 +227,7 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
         event_id = str(record.get("event_id") or envelope.event_id)
         item["ts_action_id"] = f"{recorded_at}#{event_id}"
         item["expires_at"] = _now_epoch_seconds() + max(AUDIT_TRAIL_TTL_SECONDS, 0)
+        item = _ddb_sanitize(item)
         _table(AUDIT_TRAIL_TABLE_NAME).put_item(Item=item)
 
     return execute_plan(
@@ -299,6 +311,22 @@ def _to_bool(value: Any, default: bool) -> bool:
     if value is None:
         return default
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _ddb_sanitize(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _ddb_sanitize(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_ddb_sanitize(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(_ddb_sanitize(v) for v in value)
+    if isinstance(value, set):
+        return {_ddb_sanitize(v) for v in value}
+    if isinstance(value, float):
+        if math.isnan(value) or math.isinf(value):
+            return None
+        return Decimal(str(value))
+    return value
 
 
 def _table(name: str):
