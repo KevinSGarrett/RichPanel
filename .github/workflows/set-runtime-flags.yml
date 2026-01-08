@@ -78,6 +78,51 @@ jobs:
           set -e
 
           if [ "$SSM_STATUS_1" -eq 0 ] && [ "$SSM_STATUS_2" -eq 0 ]; then
+            # If a previous fallback set dev env overrides, clear them so SSM values take effect.
+            if [ "$ENV" = "dev" ]; then
+              FUNC="rp-mw-${ENV}-worker"
+              ENV_VARS_JSON=$(aws lambda get-function-configuration \
+                --function-name "$FUNC" \
+                --query 'Environment.Variables' \
+                --output json)
+
+              UPDATED_ENV=$(env ENV_VARS_JSON="$ENV_VARS_JSON" python - <<'PY'
+import json, os
+
+raw = os.environ.get("ENV_VARS_JSON") or "{}"
+try:
+    env = json.loads(raw)
+except Exception:
+    env = {}
+
+if env is None or not isinstance(env, dict):
+    env = {}
+
+dirty = False
+for key in [
+    "MW_ALLOW_ENV_FLAG_OVERRIDE",
+    "MW_SAFE_MODE_OVERRIDE",
+    "MW_AUTOMATION_ENABLED_OVERRIDE",
+]:
+    if key in env:
+        env.pop(key, None)
+        dirty = True
+
+if dirty:
+    print(json.dumps({"Variables": env}))
+else:
+    print("")
+PY
+)
+
+              if [ -n "$UPDATED_ENV" ]; then
+                aws lambda update-function-configuration \
+                  --function-name "$FUNC" \
+                  --environment "$UPDATED_ENV"
+                echo "[OK] Cleared DEV env override on $FUNC"
+              fi
+            fi
+
             echo "[OK] Set /rp-mw/$ENV/safe_mode=$SAFE"
             echo "[OK] Set /rp-mw/$ENV/automation_enabled=$AUTO"
             exit 0
