@@ -21,15 +21,17 @@ from __future__ import annotations
 
 import argparse
 import re
-from datetime import datetime, timezone
-from pathlib import Path
 import shutil
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
 
 RUN_ID_PATTERN = r"^RUN_\d{8}_\d{4}Z$"
 RUN_ID_RE = re.compile(RUN_ID_PATTERN)
 
 TEMPLATE_MAP = {
+    "Agent_Run_Report_TEMPLATE.md": "RUN_REPORT.md",
     "Cursor_Run_Summary_TEMPLATE.md": "RUN_SUMMARY.md",
     "Git_Run_Plan_TEMPLATE.md": "GIT_RUN_PLAN.md",
     "Structure_Report_TEMPLATE.md": "STRUCTURE_REPORT.md",
@@ -70,10 +72,12 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parents[1]
     pack = repo_root / "REHYDRATION_PACK"
     runs_dir = pack / "RUNS"
-    templates_dir = pack / "_TEMPLATES"
 
-    if not templates_dir.exists():
-        print(f"ERROR: templates dir missing: {templates_dir}", file=sys.stderr)
+    # Prefer TEMPLATES/ if present, but keep backwards compatibility with _TEMPLATES/.
+    templates_dirs = [pack / "TEMPLATES", pack / "_TEMPLATES"]
+    if not any(d.exists() for d in templates_dirs):
+        joined = ", ".join(str(d) for d in templates_dirs)
+        print(f"ERROR: templates dir missing (looked in): {joined}", file=sys.stderr)
         return 2
 
     run_root = runs_dir / run_id
@@ -88,15 +92,37 @@ def main() -> int:
     for aid in AGENT_IDS:
         (run_root / aid).mkdir(parents=True, exist_ok=True)
 
+    def find_template(src_name: str) -> Optional[Path]:
+        for d in templates_dirs:
+            candidate = d / src_name
+            if candidate.exists():
+                return candidate
+        return None
+
     # Copy templates into each agent folder
     for aid in AGENT_IDS:
         agent_dir = run_root / aid
         for src_name, dst_name in TEMPLATE_MAP.items():
-            src = templates_dir / src_name
-            if not src.exists():
-                print(f"WARN: template missing: {src}", file=sys.stderr)
+            src = find_template(src_name)
+            if src is None:
+                looked = ", ".join(str(d) for d in templates_dirs)
+                print(f"WARN: template missing: {src_name} (looked in: {looked})", file=sys.stderr)
                 continue
             shutil.copyfile(src, agent_dir / dst_name)
+
+    # Prompt archive enforcement: create a C/ prompt archive by copying current assignments.
+    current_prompts = pack / "06_AGENT_ASSIGNMENTS.md"
+    archive_dst = run_root / "C" / "AGENT_PROMPTS_ARCHIVE.md"
+    if current_prompts.exists():
+        archived = (
+            "# Agent Prompts Archive\n\n"
+            f"Archived as part of `{run_id}`.\n\n"
+            "---\n\n"
+        )
+        archived += current_prompts.read_text(encoding="utf-8", errors="replace")
+        archive_dst.write_text(archived, encoding="utf-8")
+    else:
+        print(f"WARN: missing current prompts file; cannot archive: {current_prompts}", file=sys.stderr)
 
     # Create a simple run meta file at the run root
     meta = run_root / "RUN_META.md"
@@ -108,7 +134,8 @@ def main() -> int:
         "- Stop conditions: <FILL_ME>\n\n"
         "## Notes\n"
         "- Each agent writes to its folder: A/, B/, C/\n"
-        "- Required deliverables are enforced by: `python scripts/verify_rehydration_pack.py` (build mode)\n",
+        "- Required deliverables are enforced by: `python scripts/verify_rehydration_pack.py` (build mode)\n"
+        "- Prompt archives are stored under: `C/AGENT_PROMPTS_ARCHIVE.md`\n",
         encoding="utf-8",
     )
 

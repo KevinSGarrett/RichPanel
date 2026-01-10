@@ -12,12 +12,14 @@ from __future__ import annotations
 import hashlib
 import re
 from pathlib import Path
+from typing import Optional
 
 ARCHIVE_DEPTH = 5
 ROOT = Path(__file__).resolve().parents[1]
 CURRENT_PROMPTS_PATH = ROOT / "REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md"
 ARCHIVE_GLOB = "REHYDRATION_PACK/RUNS/RUN_*/C/AGENT_PROMPTS_ARCHIVE*.md"
 OVERRIDE_TOKEN = "prompt-repeat-override: true"
+RUN_ID_PATTERN = r"^RUN_\d{8}_\d{4}Z$"
 
 
 _FENCE_RE = re.compile(r"```[^\n]*\n(.*?)\n```", re.DOTALL)
@@ -128,6 +130,26 @@ def ordinal_label(idx: int) -> str:
     return f"{idx + 1}th newest"
 
 
+
+def latest_run_id() -> Optional[str]:
+    """
+    Determine the latest RUN_* folder (lexicographic by RUN_YYYYMMDD_HHMMZ).
+
+    The prompt repeat guard should compare the current prompts against *previous* runs,
+    not against the current run's own archive.
+    """
+    runs_dir = ROOT / "REHYDRATION_PACK/RUNS"
+    if not runs_dir.exists():
+        return None
+
+    run_re = re.compile(RUN_ID_PATTERN)
+    run_dirs = [p for p in runs_dir.iterdir() if p.is_dir() and run_re.match(p.name)]
+    if not run_dirs:
+        return None
+
+    return sorted(run_dirs, key=lambda p: p.name)[-1].name
+
+
 def main() -> int:
     if not CURRENT_PROMPTS_PATH.exists():
         print(f"[FAIL] Missing prompts file: {CURRENT_PROMPTS_PATH}")
@@ -143,6 +165,16 @@ def main() -> int:
 
     if not archive_paths:
         print("[OK] No prompt archives found; nothing to compare.")
+        print(f"[INFO] Prompt set fingerprint: {current_fp}")
+        return 0
+
+    # Exclude the latest run's own prompt archive(s) (current run).
+    latest = latest_run_id()
+    if latest:
+        archive_paths = [p for p in archive_paths if p.parent.parent.name != latest]
+
+    if not archive_paths:
+        print("[OK] Only current-run prompt archives exist; nothing to compare yet.")
         print(f"[INFO] Prompt set fingerprint: {current_fp}")
         return 0
 

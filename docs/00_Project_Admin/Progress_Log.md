@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-10 - RUN_20260110_0019Z.
+Last verified: 2026-01-10 - RUN_20260110_0244Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -13,12 +13,18 @@ This is the canonical **long-lived** progress record for the project.
 
 ## Timeline
 
+### 2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0244Z
+- CI now fails in build mode if the latest run is missing or under-reported (RUN_REPORT.md required + min non-empty line counts).
+- scripts/new_run_folder.py now generates RUN_REPORT.md for A/B/C and creates C/AGENT_PROMPTS_ARCHIVE.md by copying REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md.
+- Updated RUNS README and refreshed Task Board + Master Checklist with shipped vs roadmap labels and a progress dashboard (no unverified env claims).
 
 ### 2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260110_0019Z
 - Implemented outbound read-before-write ticket status check + reply-after-close skip (route to Email Support when already closed).
 - Implemented follow-up policy: if ticket already has `mw-auto-replied`, skip auto-reply and apply `route-email-support-team`.
 - Added unit tests + docs update; added run report artifacts.
+
 
 ### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z
