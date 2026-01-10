@@ -12,6 +12,7 @@ import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IStringParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
 import * as sqs from "aws-cdk-lib/aws-sqs";
@@ -61,6 +62,7 @@ export class RichpanelMiddlewareStack extends Stack {
   public readonly naming: MwNaming;
   public readonly runtimeFlags: RuntimeFlagParameters;
   public readonly secrets: SecretReferences;
+  public readonly mwEnvironment: EnvironmentConfig;
 
   constructor(
     scope: Construct,
@@ -69,6 +71,7 @@ export class RichpanelMiddlewareStack extends Stack {
   ) {
     super(scope, id, props);
 
+    this.mwEnvironment = props.environment;
     this.naming = new MwNaming(props.environment.name);
     this.runtimeFlags = this.importRuntimeFlagParameters();
     this.secrets = this.importSecretReferences();
@@ -176,6 +179,7 @@ export class RichpanelMiddlewareStack extends Stack {
       pointInTimeRecoverySpecification: {
         pointInTimeRecoveryEnabled: true,
       },
+      timeToLiveAttribute: "expires_at",
     });
 
     const conversationStateTable = new dynamodb.Table(
@@ -239,6 +243,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
       // IMPORTANT: package backend/src (not just the ingress folder)
       code: lambda.Code.fromAsset(lambdaSourceRoot),
+      logRetention: logs.RetentionDays.ONE_MONTH,
     });
 
     eventsQueue.grantSendMessages(ingressFunction);
@@ -262,10 +267,12 @@ export class RichpanelMiddlewareStack extends Stack {
 
         SAFE_MODE_PARAM: this.runtimeFlags.safeMode.parameterName,
         AUTOMATION_ENABLED_PARAM: this.runtimeFlags.automationEnabled.parameterName,
+        MW_ENV: this.mwEnvironment.name,
       },
 
       // IMPORTANT: package backend/src (not just the worker folder)
       code: lambda.Code.fromAsset(lambdaSourceRoot),
+      logRetention: logs.RetentionDays.ONE_MONTH,
     });
 
     idempotencyTable.grantReadWriteData(workerFunction);
@@ -274,6 +281,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
     this.runtimeFlags.safeMode.grantRead(workerFunction);
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
+    this.secrets.richpanelApiKey.grantRead(workerFunction);
 
     workerFunction.addEventSource(
       new SqsEventSource(eventsQueue, {

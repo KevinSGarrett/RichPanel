@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import math
@@ -82,7 +83,13 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
 
         try:
             envelope = normalize_event(body)
-            plan = plan_actions(envelope, safe_mode=safe_mode, automation_enabled=automation_enabled)
+            plan = plan_actions(
+                envelope,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                outbound_enabled=outbound_enabled,
+            )
             persisted = _persist_idempotency(envelope, plan)
             execution = _execute_and_record(envelope, plan)
             outbound_result = _maybe_execute_outbound_reply(
@@ -179,7 +186,7 @@ def _persist_idempotency(
     event_id = str(envelope.event_id or f"evt:{int(time.time() * 1000)}")
     received_at = envelope.received_at or datetime.now(timezone.utc).isoformat()
     payload = envelope.payload or {}
-    payload_excerpt = _truncate_payload(payload)
+    payload_fingerprint = _payload_fingerprint(payload)
     conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
     source_message_id = _safe_str(envelope.message_id or envelope.dedupe_id)
     expires_at = _now_epoch_seconds() + max(IDEMPOTENCY_TTL_SECONDS, 0)
@@ -194,7 +201,8 @@ def _persist_idempotency(
         "automation_enabled": plan.automation_enabled,
         "mode": plan.mode,
         "source": envelope.source or "richpanel_http_target",
-        "payload_excerpt": payload_excerpt,
+        "payload_sha256": payload_fingerprint["payload_sha256"],
+        "payload_bytes": payload_fingerprint["payload_bytes"],
         "expires_at": expires_at,
         "status": "processed",
     }
@@ -243,14 +251,23 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
     )
 
 
-def _truncate_payload(value: Any) -> str:
-    serialized = value
-    if not isinstance(value, str):
-        try:
-            serialized = json.dumps(value)
-        except (TypeError, ValueError):
-            serialized = str(value)
-    return (serialized or "")[:2000]
+def _payload_fingerprint(value: Any) -> Dict[str, Any]:
+    try:
+        if isinstance(value, (bytes, bytearray)):
+            payload_bytes = bytes(value)
+        elif isinstance(value, str):
+            payload_bytes = value.encode("utf-8", errors="replace")
+        else:
+            payload_bytes = json.dumps(value, separators=(",", ":"), sort_keys=True).encode(
+                "utf-8", errors="replace"
+            )
+    except Exception:
+        payload_bytes = str(value or "").encode("utf-8", errors="replace")
+
+    return {
+        "payload_sha256": hashlib.sha256(payload_bytes).hexdigest(),
+        "payload_bytes": len(payload_bytes),
+    }
 
 
 def _safe_str(value: Optional[Any]) -> Optional[str]:

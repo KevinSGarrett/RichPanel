@@ -313,7 +313,8 @@ class PipelineTests(unittest.TestCase):
             "conversation_id",
             "mode",
             "status",
-            "payload_excerpt",
+            "payload_sha256",
+            "payload_bytes",
             "safe_mode",
             "automation_enabled",
             "expires_at",
@@ -321,6 +322,11 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(field, item)
         self.assertEqual(item["status"], "processed")
         self.assertEqual(item["mode"], plan.mode)
+        self.assertIsInstance(item["payload_sha256"], str)
+        self.assertEqual(len(item["payload_sha256"]), 64)
+        self.assertIsInstance(item["payload_bytes"], int)
+        self.assertGreaterEqual(item["payload_bytes"], 0)
+        self.assertNotIn("payload_excerpt", item)
 
     def test_execute_and_record_writes_state_and_audit_tables(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-555", "message_id": "m-555"})

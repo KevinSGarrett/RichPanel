@@ -2800,6 +2800,10 @@
     ]
   },
   {
+    "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+    "outline": []
+  },
+  {
     "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
     "outline": [
       {
@@ -11931,6 +11935,11 @@
         "level": 2,
         "text": "5) Operator cadence (recommended)",
         "anchor": "5-operator-cadence-recommended"
+      },
+      {
+        "level": 2,
+        "text": "6) DEV proof window (Richpanel middleware)",
+        "anchor": "6-dev-proof-window-richpanel-middleware"
       }
     ]
   },

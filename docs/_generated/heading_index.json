@@ -13225,6 +13225,12 @@
       "anchor": "5-operator-cadence-recommended"
     }
   ],
+  "6) dev proof window (richpanel middleware)": [
+    {
+      "path": "08_Observability_Analytics/Operator_Quick_Start_Runbook.md",
+      "anchor": "6-dev-proof-window-richpanel-middleware"
+    }
+  ],
   "quality monitoring and drift detection (wave 08)": [
     {
       "path": "08_Observability_Analytics/Quality_Monitoring_and_Drift_Detection.md",

@@ -221,3 +221,14 @@ Weekly:
 
 Monthly:
 - calibration review (thresholds, taxonomy drift, new-intent candidates)
+
+
+---
+
+## 6) DEV proof window (Richpanel middleware)
+- Secret prerequisite: AWS Secrets Manager must contain `/rp-mw/dev/richpanel/api_key` (default lookup uses `MW_ENV=dev`).
+- Enable outbound for the proof window: set `RICHPANEL_OUTBOUND_ENABLED=true` on the worker. Keep `safe_mode` / `automation_enabled` aligned with the proof scope.
+- If SSM writes are blocked: set `MW_ALLOW_ENV_FLAG_OVERRIDE=true` plus `MW_SAFE_MODE_OVERRIDE=false` and `MW_AUTOMATION_ENABLED_OVERRIDE=true` for the window; remove afterward.
+- Evidence capture (CLI-friendly):
+  - DynamoDB: query `rp_mw_dev_idempotency` by `event_id` for `status`, `payload_sha256`, and `payload_bytes` (no payload bodies stored).
+  - CloudWatch Logs: filter `/aws/lambda/rp-mw-dev-worker` (and ingress) on `event_id` with markers like `worker.processed`, `automation.routing_tags.applied`, `automation.order_status_reply.sent` to bound the proof window.

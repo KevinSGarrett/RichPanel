@@ -56,7 +56,8 @@ Purpose:
 - `safe_mode` (bool)
 - `automation_enabled` (bool)
 - `source_message_id` (string, optional if missing)
-- `payload_excerpt` (string, redacted/truncated; max 2k chars)
+- `payload_sha256` (string) - hex digest of the normalized payload (no body stored)
+- `payload_bytes` (number) - size of the normalized payload in bytes
 - `intent` (string, optional placeholder)
 
 **Recommended TTL**
@@ -193,4 +194,3 @@ Mask:
 - ✅ v1 audit table provisioned (Table C) with TTL; usage optional per environment.
 - Whether to implement a distributed rate limiter using DynamoDB (likely unnecessary at current volumes).
 - Whether to add an encrypted S3 replay archive (useful, but increases governance burden).
-
