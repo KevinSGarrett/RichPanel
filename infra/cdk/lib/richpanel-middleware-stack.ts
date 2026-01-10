@@ -61,6 +61,7 @@ export class RichpanelMiddlewareStack extends Stack {
   public readonly naming: MwNaming;
   public readonly runtimeFlags: RuntimeFlagParameters;
   public readonly secrets: SecretReferences;
+  private readonly environmentConfig: EnvironmentConfig;
 
   constructor(
     scope: Construct,
@@ -69,11 +70,12 @@ export class RichpanelMiddlewareStack extends Stack {
   ) {
     super(scope, id, props);
 
-    this.naming = new MwNaming(props.environment.name);
+    this.environmentConfig = props.environment;
+    this.naming = new MwNaming(this.environmentConfig.name);
     this.runtimeFlags = this.importRuntimeFlagParameters();
     this.secrets = this.importSecretReferences();
 
-    this.applyStandardTags(props.environment);
+    this.applyStandardTags(this.environmentConfig);
     const pipeline = this.buildEventPipeline();
     this.exposeNamingOutputs();
     this.exposePipelineOutputs(pipeline);
@@ -262,6 +264,9 @@ export class RichpanelMiddlewareStack extends Stack {
 
         SAFE_MODE_PARAM: this.runtimeFlags.safeMode.parameterName,
         AUTOMATION_ENABLED_PARAM: this.runtimeFlags.automationEnabled.parameterName,
+        MW_ENV: this.environmentConfig.name,
+        MW_ALLOW_ENV_FLAG_OVERRIDE: this.environmentConfig.name === "dev" ? "true" : "false",
+        RICHPANEL_API_KEY_SECRET_ARN: this.secrets.richpanelApiKey.secretArn,
       },
 
       // IMPORTANT: package backend/src (not just the worker folder)
@@ -274,6 +279,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
     this.runtimeFlags.safeMode.grantRead(workerFunction);
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
+    this.secrets.richpanelApiKey.grantRead(workerFunction);
 
     workerFunction.addEventSource(
       new SqsEventSource(eventsQueue, {

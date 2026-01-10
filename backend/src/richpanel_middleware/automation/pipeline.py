@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -25,7 +27,6 @@ from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
     RichpanelRequestError,
     SecretLoadError,
-    TicketMetadata,
     TransportError,
 )
 from richpanel_middleware.automation.prompts import (
@@ -39,6 +40,18 @@ LOGGER = logging.getLogger(__name__)
 LOOP_PREVENTION_TAG = "mw-auto-replied"
 ROUTING_APPLIED_TAG = "mw-routing-applied"
 EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
+ESCALATION_TAG = "mw-escalated-human"
+SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
+SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
+SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
+_ESCALATION_REASONS = {"followup_after_auto_reply"}
+_SKIP_REASON_TAGS = {
+    "already_resolved": SKIP_RESOLVED_TAG,
+    "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
+    "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
+}
+
+
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -48,6 +61,14 @@ def _is_closed_status(value: Optional[str]) -> bool:
     return normalized in {"resolved", "closed", "solved"}
 
 
+
+
+@dataclass
+class TicketMetadata:
+    status: Optional[str]
+    tags: set[str]
+    status_code: Optional[int] = None
+    dry_run: Optional[bool] = None
 
 
 @dataclass
@@ -80,6 +101,78 @@ class ExecutionResult:
 def normalize_event(raw_event: Dict[str, Any]) -> EventEnvelope:
     """Normalize raw event payload into the canonical envelope."""
     return normalize_envelope(raw_event)
+
+
+def _fingerprint(obj: Any, *, length: int = 12) -> str:
+    try:
+        serialized = json.dumps(obj, sort_keys=True, default=str)
+    except Exception:
+        serialized = str(obj)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
+
+
+def _redact_actions_for_storage(actions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Strip reply bodies and payloads from actions before persisting to Dynamo.
+    """
+    sanitized: List[Dict[str, Any]] = []
+    for action in actions or []:
+        safe_action: Dict[str, Any] = {
+            "type": action.get("type"),
+            "note": action.get("note"),
+            "enabled": action.get("enabled"),
+            "dry_run": action.get("dry_run"),
+            "reasons": action.get("reasons"),
+        }
+        params = action.get("parameters") or {}
+        redacted_params: Dict[str, Any] = {}
+        if "prompt_fingerprint" in params:
+            redacted_params["prompt_fingerprint"] = params.get("prompt_fingerprint")
+        if "order_summary" in params:
+            redacted_params["order_summary_fingerprint"] = _fingerprint(params.get("order_summary"))
+        if "draft_reply" in params:
+            redacted_params["draft_reply_fingerprint"] = _fingerprint(params.get("draft_reply"))
+            redacted_params["has_draft_reply"] = bool(params.get("draft_reply"))
+        if "delivery_estimate" in params:
+            redacted_params["delivery_estimate_present"] = bool(params.get("delivery_estimate"))
+        if redacted_params:
+            safe_action["parameters"] = redacted_params
+        sanitized.append({k: v for k, v in safe_action.items() if v is not None})
+    return sanitized
+
+
+def _safe_ticket_metadata_fetch(
+    conversation_id: str,
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> Optional[TicketMetadata]:
+    """
+    Fetch ticket status + tags without logging the ticket body.
+    """
+    try:
+        ticket_response = executor.execute(
+            "GET",
+            f"/v1/tickets/{conversation_id}",
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+        ticket_payload = ticket_response.json() or {}
+        if not isinstance(ticket_payload, dict):
+            ticket_payload = {}
+    except (RichpanelRequestError, SecretLoadError, TransportError):
+        return None
+
+    raw_status = ticket_payload.get("status") or ticket_payload.get("state")
+    ticket_status = str(raw_status).strip() if raw_status else None
+    ticket_tags = set(_dedupe_tags(ticket_payload.get("tags")))
+    return TicketMetadata(
+        status=ticket_status,
+        tags=ticket_tags,
+        status_code=ticket_response.status_code,
+        dry_run=ticket_response.dry_run,
+    )
+
 
 
 def plan_actions(
@@ -242,11 +335,14 @@ def execute_plan(
     persist state (e.g., DynamoDB) when desired.
     """
     timestamp = datetime.now(timezone.utc).isoformat()
+    actions_for_storage = _redact_actions_for_storage(plan.actions)
+
     state_record: Dict[str, Any] = {
         "conversation_id": envelope.conversation_id,
         "event_id": envelope.event_id,
         "mode": plan.mode,
-        "actions": plan.actions,
+        "actions": actions_for_storage,
+        "action_count": len(actions_for_storage),
         "safe_mode": plan.safe_mode,
         "automation_enabled": plan.automation_enabled,
         "dry_run": dry_run,
@@ -257,7 +353,7 @@ def execute_plan(
         "conversation_id": envelope.conversation_id,
         "recorded_at": timestamp,
         "mode": plan.mode,
-        "actions": plan.actions,
+        "actions": actions_for_storage,
         "reasons": plan.reasons,
         "dry_run": dry_run,
         "source": envelope.source,
@@ -285,7 +381,7 @@ def execute_plan(
         event_id=envelope.event_id,
         mode=plan.mode,
         dry_run=dry_run,
-        actions=plan.actions,
+        actions=actions_for_storage,
         routing=plan.routing
         if plan.routing
         else RoutingDecision(
@@ -391,64 +487,19 @@ def execute_order_status_reply(
 
     responses: List[Dict[str, Any]] = []
     try:
-        # Read-before-write safety gate:
-        # - If ticket is already resolved/closed, do not auto-reply (avoid reply-after-close loops).
-        # - If ticket was previously auto-replied (mw-auto-replied tag present), treat this as a follow-up and route to Email Support.
-        try:
-            ticket: TicketMetadata
-            if hasattr(executor, "get_ticket_metadata"):
-                ticket = executor.get_ticket_metadata(  # type: ignore[attr-defined]
-                    envelope.conversation_id, dry_run=not allow_network
-                )
-            else:
-                # Fallback for test stubs: best-effort GET and parse only the minimal fields.
-                ticket_resp = executor.execute(
-                    "GET",
-                    f"/v1/tickets/{envelope.conversation_id}",
-                    dry_run=not allow_network,
-                )
-                ticket_json = ticket_resp.json()
-                if not isinstance(ticket_json, dict):
-                    raise RichpanelRequestError(
-                        "Richpanel ticket metadata fetch returned non-JSON body",
-                        response=ticket_resp,
-                    )
-                ticket = TicketMetadata(
-                    ticket_id=envelope.conversation_id,
-                    status=str(ticket_json.get("status") or ticket_json.get("state") or "").strip() or None,
-                    tags=_dedupe_tags(ticket_json.get("tags")),
-                )
-        except (RichpanelRequestError, SecretLoadError, TransportError):
-            # Fail-closed: don't send an outbound reply if we can't confirm ticket state.
-            route_response = executor.execute(
-                "PUT",
-                f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
-                dry_run=not allow_network,
-            )
-            responses.append(
-                {
-                    "action": "route_email_support",
-                    "status": route_response.status_code,
-                    "dry_run": route_response.dry_run,
-                }
-            )
-            LOGGER.info(
-                "automation.order_status_reply.skip",
-                extra={
-                    "event_id": envelope.event_id,
-                    "conversation_id": envelope.conversation_id,
-                    "reason": "status_read_failed",
-                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
-                },
-            )
-            return {"sent": False, "reason": "status_read_failed", "responses": responses}
+        def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
+            route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
+            skip_tag = _SKIP_REASON_TAGS.get(reason)
+            if skip_tag:
+                route_tags.append(skip_tag)
+            if reason in _ESCALATION_REASONS:
+                route_tags.append(ESCALATION_TAG)
+            route_tags = _dedupe_tags(route_tags)
 
-        if _is_closed_status(ticket.status):
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                json_body={"tags": route_tags},
                 dry_run=not allow_network,
             )
             responses.append(
@@ -456,6 +507,7 @@ def execute_order_status_reply(
                     "action": "route_email_support",
                     "status": route_response.status_code,
                     "dry_run": route_response.dry_run,
+                    "tags": route_tags,
                 }
             )
             LOGGER.info(
@@ -463,46 +515,35 @@ def execute_order_status_reply(
                 extra={
                     "event_id": envelope.event_id,
                     "conversation_id": envelope.conversation_id,
-                    "reason": "already_resolved",
-                    "ticket_status": ticket.status,
-                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
+                    "reason": reason,
+                    "ticket_status": ticket_status,
+                    "route_tags": route_tags,
                 },
             )
             return {
                 "sent": False,
-                "reason": "already_resolved",
-                "ticket_status": ticket.status,
+                "reason": reason,
+                "ticket_status": ticket_status,
                 "responses": responses,
             }
 
-        if loop_prevention_tag in set(ticket.tags or []):
-            route_response = executor.execute(
-                "PUT",
-                f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
-                dry_run=not allow_network,
-            )
-            responses.append(
-                {
-                    "action": "route_email_support",
-                    "status": route_response.status_code,
-                    "dry_run": route_response.dry_run,
-                }
-            )
-            LOGGER.info(
-                "automation.order_status_reply.skip",
-                extra={
-                    "event_id": envelope.event_id,
-                    "conversation_id": envelope.conversation_id,
-                    "reason": "followup_after_auto_reply",
-                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
-                },
-            )
-            return {
-                "sent": False,
-                "reason": "followup_after_auto_reply",
-                "responses": responses,
-            }
+        ticket_metadata = _safe_ticket_metadata_fetch(
+            envelope.conversation_id,
+            executor=executor,
+            allow_network=allow_network,
+        )
+        if ticket_metadata is None:
+            return _route_email_support("status_read_failed")
+
+        ticket_status = ticket_metadata.status
+        ticket_tags = ticket_metadata.tags
+
+        if _is_closed_status(ticket_status):
+            return _route_email_support("already_resolved", ticket_status=ticket_status)
+
+        if loop_prevention_tag in set(ticket_tags or []):
+            return _route_email_support("followup_after_auto_reply", ticket_status=ticket_status)
+
         tag_response = executor.execute(
             "PUT",
             f"/v1/tickets/{envelope.conversation_id}/add-tags",
@@ -555,7 +596,6 @@ def execute_order_status_reply(
             },
         )
         return {"sent": False, "reason": "exception"}
-
 
 def _dedupe_tags(raw_tags: Any) -> List[str]:
     tags: List[str] = []
