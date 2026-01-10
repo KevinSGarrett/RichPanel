@@ -95,6 +95,7 @@ Legend:
 - 📎 [Backlog (Unprioritized)](00_Project_Admin/To_Do/BACKLOG.md)  (`00_Project_Admin/To_Do/BACKLOG.md`)
 - 📎 [Done Log (Major Checklist Items)](00_Project_Admin/To_Do/DONE_LOG.md)  (`00_Project_Admin/To_Do/DONE_LOG.md`)
 - 📎 [MASTER CHECKLIST (Epics / Milestones)](00_Project_Admin/To_Do/MASTER_CHECKLIST.md)  (`00_Project_Admin/To_Do/MASTER_CHECKLIST.md`)
+- 📎 [Midpoint Audit Checklist (WaveAudit ??? Repo Tasks)](00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md)  (`00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`)
 - 📎 [PLAN CHECKLIST (Traceable to Plan Docs)](00_Project_Admin/To_Do/PLAN_CHECKLIST.md)  (`00_Project_Admin/To_Do/PLAN_CHECKLIST.md`)
 - ✅ [To-Do System (Project Checklist)](00_Project_Admin/To_Do/README.md)  (`00_Project_Admin/To_Do/README.md`)
 - 📎 [PLAN CHECKLIST — Extracted (Generated)](00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md)  (`00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`)

@@ -352,6 +352,38 @@ def _count_non_empty_lines(text: str) -> int:
     return sum(1 for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n") if line.strip())
 
 
+def _run_report_missing_required_sections(run_report_text: str) -> List[str]:
+    """
+    Check that RUN_REPORT.md contains human-scannable section headings.
+
+    This is intentionally pragmatic: we look for a heading-like line (markdown heading or bold heading)
+    that contains the required keywords (case-insensitive).
+    """
+    normalized = run_report_text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [ln.strip() for ln in normalized.split("\n") if ln.strip()]
+
+    # Treat markdown headings (## ...) and bold headings (**Heading**) as "section headings".
+    heading_like = [
+        ln
+        for ln in lines
+        if ln.startswith("#") or (ln.startswith("**") and ln.endswith("**") and len(ln) >= 4)
+    ]
+
+    required = {
+        "Diffstat": re.compile(r"diff\s*stat", flags=re.IGNORECASE),
+        "Commands Run": re.compile(r"\bcommands\b", flags=re.IGNORECASE),
+        "Tests / Proof": re.compile(r"\b(tests?|proof|evidence)\b", flags=re.IGNORECASE),
+        "Files Changed": re.compile(r"\bfiles?\b.*\b(changed|modified|touched)\b", flags=re.IGNORECASE),
+    }
+
+    missing: List[str] = []
+    for section_name, pat in required.items():
+        if not any(pat.search(ln) for ln in heading_like):
+            missing.append(section_name)
+
+    return missing
+
+
 def _latest_run_dir(runs_dir: Path, run_id_re) -> Optional[Path]:
     candidates = [p for p in runs_dir.iterdir() if p.is_dir() and run_id_re.match(p.name)]
     if not candidates:
@@ -370,7 +402,7 @@ def check_latest_run_populated(
     - REHYDRATION_PACK/RUNS/ contains at least one RUN_* directory
     - latest run contains A/, B/, C/
     - each agent folder contains populated required docs:
-        - RUN_REPORT.md (>= 25 non-empty lines)
+        - RUN_REPORT.md (>= 25 non-empty lines; must include required headings)
         - RUN_SUMMARY.md (>= 10 non-empty lines)
         - STRUCTURE_REPORT.md (>= 10 non-empty lines)
         - DOCS_IMPACT_MAP.md (>= 10 non-empty lines)
@@ -437,6 +469,16 @@ def check_latest_run_populated(
                     f"{non_empty} non-empty lines (min {min_lines})"
                 )
                 (warnings if allow_partial else errors).append(msg)
+
+            if fn == "RUN_REPORT.md":
+                missing_sections = _run_report_missing_required_sections(content)
+                if missing_sections:
+                    msg = (
+                        f"{latest.name}/{aid}: RUN_REPORT.md missing required section heading(s): "
+                        f"{', '.join(missing_sections)}. "
+                        "Add headings like: '## Diffstat', '## Commands Run', '## Tests / Proof', '## Files Changed'."
+                    )
+                    (warnings if allow_partial else errors).append(msg)
 
     if strict and warnings:
         errors.extend([f"(strict) {w}" for w in warnings])

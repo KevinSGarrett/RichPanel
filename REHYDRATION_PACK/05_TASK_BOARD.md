@@ -2,7 +2,7 @@
 
 > This is the **single most important** file for "what to do next".
 
-Last updated: 2026-01-10 (Run-report enforcement + prompt archive + checklist hygiene)
+Last updated: 2026-01-10 (WaveAudit midpoint audit checklist + prompt template drift fixes)
 
 **Current mode:** build (implementation active).
 **Environment status:** Do not claim dev/staging/prod state unless verified and linked in the latest `REHYDRATION_PACK/RUNS/<RUN_ID>/*/RUN_REPORT.md` or `REHYDRATION_PACK/GITHUB_STATE.md`.
@@ -31,6 +31,11 @@ Goal: stay safe while shipping.
 - [ ] Maintain doc anti-drift gate (`verify_admin_logs_sync`)
 - [ ] Keep smoke evidence recorded (links in test evidence log)
 - [ ] Prod remains gated until explicit human go/no-go + evidence capture
+
+## Midpoint Audit (WaveAudit)
+- Checklist: `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
+- Rule: treat each checkbox as ???not done??? until evidence is captured (commands + outputs + links/screenshots as applicable).
+
 
 ---
 
