@@ -6,6 +6,7 @@ Create a build-mode RUN folder skeleton under:
   REHYDRATION_PACK/RUNS/<RUN_ID>/{A,B,C}/
 
 It copies the required per-agent templates so Cursor agents can fill them in.
+It also snapshots the current prompt set to enable dedup checks.
 
 Usage:
   python scripts/new_run_folder.py RUN_20251229_2315Z
@@ -25,11 +26,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 import shutil
 import sys
+from typing import Optional
 
 RUN_ID_PATTERN = r"^RUN_\d{8}_\d{4}Z$"
 RUN_ID_RE = re.compile(RUN_ID_PATTERN)
 
 TEMPLATE_MAP = {
+    "Agent_Run_Report_TEMPLATE.md": "RUN_REPORT.md",
     "Cursor_Run_Summary_TEMPLATE.md": "RUN_SUMMARY.md",
     "Git_Run_Plan_TEMPLATE.md": "GIT_RUN_PLAN.md",
     "Structure_Report_TEMPLATE.md": "STRUCTURE_REPORT.md",
@@ -40,6 +43,16 @@ TEMPLATE_MAP = {
 }
 
 AGENT_IDS = ["A", "B", "C"]
+PROMPTS_SOURCE = "06_AGENT_ASSIGNMENTS.md"
+PROMPTS_ARCHIVE_NAME = "AGENT_PROMPTS_ARCHIVE.md"
+
+
+def resolve_template(templates_dirs: list[Path], template_name: str) -> Optional[Path]:
+    for d in templates_dirs:
+        p = d / template_name
+        if p.exists():
+            return p
+    return None
 
 
 def utc_run_id_now() -> str:
@@ -70,10 +83,13 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parents[1]
     pack = repo_root / "REHYDRATION_PACK"
     runs_dir = pack / "RUNS"
-    templates_dir = pack / "_TEMPLATES"
-
-    if not templates_dir.exists():
-        print(f"ERROR: templates dir missing: {templates_dir}", file=sys.stderr)
+    templates_dirs = [pack / "TEMPLATES", pack / "_TEMPLATES"]
+    templates_dirs = [d for d in templates_dirs if d.exists()]
+    if not templates_dirs:
+        print(
+            "ERROR: templates dir missing (expected REHYDRATION_PACK/TEMPLATES or REHYDRATION_PACK/_TEMPLATES)",
+            file=sys.stderr,
+        )
         return 2
 
     run_root = runs_dir / run_id
@@ -92,11 +108,32 @@ def main() -> int:
     for aid in AGENT_IDS:
         agent_dir = run_root / aid
         for src_name, dst_name in TEMPLATE_MAP.items():
-            src = templates_dir / src_name
-            if not src.exists():
-                print(f"WARN: template missing: {src}", file=sys.stderr)
+            src = resolve_template(templates_dirs, src_name)
+            if not src:
+                print(
+                    f"WARN: template missing in {', '.join(str(d) for d in templates_dirs)}: {src_name}",
+                    file=sys.stderr,
+                )
                 continue
             shutil.copyfile(src, agent_dir / dst_name)
+
+    # Snapshot current prompts for dedup checks (C only)
+    prompts_src = pack / PROMPTS_SOURCE
+    prompts_dst = run_root / "C" / PROMPTS_ARCHIVE_NAME
+    try:
+        prompts_text = prompts_src.read_text(encoding="utf-8", errors="replace") if prompts_src.exists() else ""
+    except Exception as e:
+        prompts_text = f"[ERROR] Could not read {prompts_src}: {e}\n"
+    prompts_dst.write_text(
+        "# Archive — snapshot of `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md`\n"
+        "\n"
+        f"Archived at run creation for `{run_id}`.\n"
+        "\n"
+        "---\n"
+        "\n"
+        f"{prompts_text.rstrip()}\n",
+        encoding="utf-8",
+    )
 
     # Create a simple run meta file at the run root
     meta = run_root / "RUN_META.md"
@@ -108,7 +145,9 @@ def main() -> int:
         "- Stop conditions: <FILL_ME>\n\n"
         "## Notes\n"
         "- Each agent writes to its folder: A/, B/, C/\n"
-        "- Required deliverables are enforced by: `python scripts/verify_rehydration_pack.py` (build mode)\n",
+        "- Required deliverables are enforced by: `python scripts/verify_rehydration_pack.py` (build mode)\n"
+        "- Latest-run reports must include: RUN_REPORT.md, RUN_SUMMARY.md, STRUCTURE_REPORT.md, DOCS_IMPACT_MAP.md, TEST_MATRIX.md\n"
+        "- Prompt archive snapshot is created at: C/AGENT_PROMPTS_ARCHIVE.md\n",
         encoding="utf-8",
     )
 

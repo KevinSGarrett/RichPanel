@@ -37,6 +37,11 @@ PACK = REPO_ROOT / "REHYDRATION_PACK"
 MODE_FILE = PACK / "MODE.yaml"
 MANIFEST_FILE = PACK / "MANIFEST.yaml"
 
+# CI-hard build-mode reporting invariants (latest run only)
+LATEST_RUN_REQUIRED_RUN_REPORT = "RUN_REPORT.md"
+MIN_NONEMPTY_LINES_RUN_REPORT = 25
+MIN_NONEMPTY_LINES_OTHER_REQUIRED_DOCS = 10
+
 
 # Baseline invariants: these MUST be declared in the manifest.
 # (The manifest can include more, but must not omit these.)
@@ -255,6 +260,76 @@ def check_manifest_completeness(entries: List[ManifestEntry]) -> List[str]:
     return missing
 
 
+def count_non_empty_lines(text: str) -> int:
+    return sum(1 for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n") if line.strip())
+
+
+def check_file_min_lines(path: Path, min_non_empty_lines: int) -> Tuple[Optional[str], int]:
+    """
+    Returns (error_message_or_none, non_empty_line_count).
+    """
+    if not path.exists():
+        return (f"Missing required file: {path}", 0)
+    if not path.is_file():
+        return (f"Expected file but found dir: {path}", 0)
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        return (f"Could not read file {path}: {e}", 0)
+    non_empty = count_non_empty_lines(text)
+    if non_empty < min_non_empty_lines:
+        return (
+            f"File not populated enough: {path} has {non_empty} non-empty lines (need >= {min_non_empty_lines})",
+            non_empty,
+        )
+    return (None, non_empty)
+
+
+def check_latest_run_reporting(
+    latest_run: Path,
+    run_spec: RunArtifactSpec,
+    *,
+    allow_partial: bool,
+) -> Tuple[List[str], List[str]]:
+    """
+    CI-hard requirements (build mode):
+    - Latest run exists
+    - Latest run has A/B/C subfolders
+    - Each agent folder contains populated files:
+      - RUN_REPORT.md (>= 25 non-empty lines)
+      - RUN_SUMMARY.md, STRUCTURE_REPORT.md, DOCS_IMPACT_MAP.md, TEST_MATRIX.md (>= 10 non-empty lines each)
+    """
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    required_files = [LATEST_RUN_REQUIRED_RUN_REPORT] + list(run_spec.required_files_per_agent or [])
+
+    for aid in run_spec.agent_ids or ["A", "B", "C"]:
+        agent_dir = latest_run / aid
+        if not agent_dir.exists():
+            msg = f"{latest_run.name}: missing agent folder {aid}/ (required for latest-run reporting)"
+            (warnings if allow_partial else errors).append(msg)
+            continue
+        if not agent_dir.is_dir():
+            msg = f"{latest_run.name}: expected dir but found file: {agent_dir}"
+            (warnings if allow_partial else errors).append(msg)
+            continue
+
+        for fn in required_files:
+            f = agent_dir / fn
+            min_lines = (
+                MIN_NONEMPTY_LINES_RUN_REPORT
+                if fn == LATEST_RUN_REQUIRED_RUN_REPORT
+                else MIN_NONEMPTY_LINES_OTHER_REQUIRED_DOCS
+            )
+            err, _count = check_file_min_lines(f, min_non_empty_lines=min_lines)
+            if err:
+                msg = f"{latest_run.name}/{aid}: {err}"
+                (warnings if allow_partial else errors).append(msg)
+
+    return errors, warnings
+
+
 def check_paths(entries: List[ManifestEntry], mode: str, strict: bool) -> Tuple[List[str], List[str]]:
     """
     Returns (errors, warnings)
@@ -309,10 +384,18 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
     run_id_re = re.compile(run_spec.run_id_regex)
 
     run_folders = [p for p in runs_dir.iterdir() if p.is_dir()]
-    if not run_folders:
+    matching_runs = [p for p in run_folders if run_id_re.match(p.name)]
+    if not matching_runs:
         if mode == "build":
-            warnings.append("RUNS/ is empty (no RUN_* folders found yet).")
-        return (errors if not strict else errors + [f"(strict) {w}" for w in warnings], [] if strict else warnings)
+            errors.append("RUNS/ must contain at least one RUN_* directory in build mode.")
+        else:
+            warnings.append("RUNS/ is empty (ok in foundation mode).")
+        if strict and warnings:
+            errors.extend([f"(strict) {w}" for w in warnings])
+            warnings = []
+        return errors, warnings
+
+    latest_run = max(matching_runs, key=lambda p: p.name)
 
     for run in sorted(run_folders, key=lambda p: p.name):
         if not run_id_re.match(run.name):
@@ -340,6 +423,12 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
                         warnings.append(msg)
 
             # optional files: no issue if missing
+
+    # Latest-run reporting invariants (CI-hard in build mode)
+    if mode == "build" and latest_run:
+        lr_errors, lr_warnings = check_latest_run_reporting(latest_run, run_spec, allow_partial=allow_partial)
+        errors.extend(lr_errors)
+        warnings.extend(lr_warnings)
 
     if strict and warnings:
         errors.extend([f"(strict) {w}" for w in warnings])

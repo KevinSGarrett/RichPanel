@@ -2863,6 +2863,12 @@
       "anchor": "master-checklist-epics-milestones"
     }
   ],
+  "progress dashboard (repo-shipped vs roadmap)": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "progress-dashboard-repo-shipped-vs-roadmap"
+    }
+  ],
   "plan checklist (traceable to plan docs)": [
     {
       "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",

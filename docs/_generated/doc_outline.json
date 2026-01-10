@@ -2791,6 +2791,11 @@
         "level": 1,
         "text": "MASTER CHECKLIST (Epics / Milestones)",
         "anchor": "master-checklist-epics-milestones"
+      },
+      {
+        "level": 2,
+        "text": "Progress dashboard (repo-shipped vs roadmap)",
+        "anchor": "progress-dashboard-repo-shipped-vs-roadmap"
       }
     ]
   },

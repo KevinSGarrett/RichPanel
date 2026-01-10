@@ -2,12 +2,25 @@
 
 > This is the **single most important** file for “what to do next”.
 
-Last updated: 2026-01-05 (Docs alignment pass)
+Last updated: 2026-01-10 (Run reporting + prompt archive + checklist hygiene)
 
 **Current mode:** build (implementation active).  
-Dev + staging are deployed and smoke tests are green; prod promotion is gated.
+Environment state (dev/staging/prod) is **not asserted** here unless explicitly linked to evidence. Prod promotion remains gated.
 
 ---
+
+## Progress dashboard (repo-shipped vs roadmap)
+
+Status definitions:
+- **Shipped**: merged into the repo (code/docs/workflows exist)
+- **In progress**: actively being implemented in the repo
+- **Roadmap**: planned/pending (not shipped yet)
+
+Based on `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md` (CHK-001..017):
+- Total epics: 17
+- Shipped: 9 (52.9%)
+- In progress: 2 (11.8%)
+- Roadmap: 6 (35.3%)
 
 ## P0 — Integrations + configuration (do next)
 - [ ] Shopify integration: confirm credentials + data availability + fallback behavior
@@ -26,7 +39,7 @@ Goal: stay safe while shipping.
 
 ---
 
-## Done (build baseline)
+## Done (Shipped in repo)
 
 - ✅ **TASK-251:** Bugbot PR loop documented (trigger via `@cursor review` / `bugbot run`) (Runbook)
 - ✅ **TASK-250:** Offline-first integration skeletons present (Richpanel/OpenAI/Shopify/ShipStation) (skeletons)
