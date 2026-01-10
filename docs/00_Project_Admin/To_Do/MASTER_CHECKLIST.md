@@ -1,17 +1,17 @@
 # MASTER CHECKLIST (Epics / Milestones)
 
-Last verified: 2026-01-10 - RUN_20260110_0244Z
+Last verified: 2026-01-10 - RUN_20260110_1445Z
 
 This checklist is the **high-level map** of work required to complete the project.
 It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and generated outputs).
 
 ## Progress dashboard (snapshot)
 
-- Total epics: 17
-- Done: 9 (52.9%)
-- In progress: 2 (11.8%)
-- Not started: 3 (17.6%)
-- Pending: 3 (17.6%)
+- Total epics: 18
+- Done: 9 (50.0%)
+- In progress: 2 (11.1%)
+- Not started: 4 (22.2%)
+- Pending: 3 (16.7%)
 
 > Note: "Done" can include "Done (skeleton)" where only scaffolding exists.
 
@@ -41,6 +41,7 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 | CHK-015 | Build: Richpanel UI configuration (teams/tags/macros/automation triggers) | Pending | Ops + PM | `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md` |
 | CHK-016 | Build: Production go-live (human go/no-go + prod promotion checklist + enablement) | Pending | PM + Ops | `docs/00_Project_Admin/Progress_Log.md`, `.github/workflows/deploy-prod.yml`, `.github/workflows/prod-e2e-smoke.yml` |
 | CHK-017 | Build: Real outbound automation (email/SMS/notifications) | Pending | Agent C | `docs/07_Notifications_Outbound/` |
+| CHK-018 | Midpoint audit: WaveAudit checklist + evidence gates | Not started | PM | `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md` |
 
 Notes:
 - Build owners can be adjusted as build mode progresses.

@@ -2893,6 +2893,66 @@
       "anchor": "roadmap-remaining"
     }
   ],
+  "midpoint audit checklist (waveaudit ??? repo tasks)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "midpoint-audit-checklist-waveaudit-repo-tasks"
+    }
+  ],
+  "owners (a/b/c)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "owners-abc"
+    }
+  ],
+  "evidence rules (per checkbox)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "evidence-rules-per-checkbox"
+    }
+  ],
+  "0) alignment: personalization strategy (mismatch resolution)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "0-alignment-personalization-strategy-mismatch-resolution"
+    }
+  ],
+  "1) documentation updates (waveaudit remediation)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "1-documentation-updates-waveaudit-remediation"
+    }
+  ],
+  "2) richpanel configuration (ops)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "2-richpanel-configuration-ops"
+    }
+  ],
+  "3) testing & validation (waveaudit requirements)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "3-testing-validation-waveaudit-requirements"
+    }
+  ],
+  "4) implementation (middleware + behavior)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "4-implementation-middleware-behavior"
+    }
+  ],
+  "5) observability / monitoring / alerting": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "5-observability-monitoring-alerting"
+    }
+  ],
+  "6) training, comms, and log hygiene": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "6-training-comms-and-log-hygiene"
+    }
+  ],
   "plan checklist (traceable to plan docs)": [
     {
       "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",

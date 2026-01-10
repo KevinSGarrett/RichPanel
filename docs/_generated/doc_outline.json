@@ -2820,6 +2820,61 @@
     ]
   },
   {
+    "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Midpoint Audit Checklist (WaveAudit ??? Repo Tasks)",
+        "anchor": "midpoint-audit-checklist-waveaudit-repo-tasks"
+      },
+      {
+        "level": 2,
+        "text": "Owners (A/B/C)",
+        "anchor": "owners-abc"
+      },
+      {
+        "level": 2,
+        "text": "Evidence rules (per checkbox)",
+        "anchor": "evidence-rules-per-checkbox"
+      },
+      {
+        "level": 2,
+        "text": "0) Alignment: personalization strategy (mismatch resolution)",
+        "anchor": "0-alignment-personalization-strategy-mismatch-resolution"
+      },
+      {
+        "level": 2,
+        "text": "1) Documentation updates (WaveAudit remediation)",
+        "anchor": "1-documentation-updates-waveaudit-remediation"
+      },
+      {
+        "level": 2,
+        "text": "2) Richpanel configuration (ops)",
+        "anchor": "2-richpanel-configuration-ops"
+      },
+      {
+        "level": 2,
+        "text": "3) Testing & validation (WaveAudit requirements)",
+        "anchor": "3-testing-validation-waveaudit-requirements"
+      },
+      {
+        "level": 2,
+        "text": "4) Implementation (middleware + behavior)",
+        "anchor": "4-implementation-middleware-behavior"
+      },
+      {
+        "level": 2,
+        "text": "5) Observability / monitoring / alerting",
+        "anchor": "5-observability-monitoring-alerting"
+      },
+      {
+        "level": 2,
+        "text": "6) Training, comms, and log hygiene",
+        "anchor": "6-training-comms-and-log-hygiene"
+      }
+    ]
+  },
+  {
     "path": "00_Project_Admin/To_Do/PLAN_CHECKLIST.md",
     "outline": [
       {

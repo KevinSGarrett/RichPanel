@@ -35,11 +35,16 @@
 - Evidence location:
   - `qa/test_evidence/<RUN_ID>/` (or CI link)
 
+**CI note:** In build mode, CI enforces minimum-populated run artifacts and expects **evidence**:
+- Include **commands + outputs** in `RUN_REPORT.md` (not just ???ran tests???).
+- CI also enforces **minimum non-empty line counts** for the latest run???s artifacts (see `python scripts/verify_rehydration_pack.py`).
+
 ## Required run artifacts (write to your agent folder)
 Write to:
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
 
 Required files:
+- `RUN_REPORT.md` (commands + outputs + proof; CI-enforced)
 - `RUN_SUMMARY.md`
 - `STRUCTURE_REPORT.md`
 - `DOCS_IMPACT_MAP.md`
@@ -53,7 +58,7 @@ Optional:
 2) Make the changes.
 3) Run the planned tests and record evidence.
 4) Update docs/maps/registry if needed.
-5) Fill out the required run artifacts.
+5) Fill out the required run artifacts (especially `RUN_REPORT.md` with commands + outputs).
 
 ---
 
@@ -145,5 +150,5 @@ Before pushing your branch:
 - [ ] Verified `git branch --show-current` shows the correct branch
 - [ ] Ran `python scripts/run_ci_checks.py` locally (CI-equivalent checks)
 - [ ] Updated `REHYDRATION_PACK/GITHUB_STATE.md` if creating/merging PRs
-- [ ] Filled out required run artifacts in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
+- [ ] Filled out required run artifacts in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/` (including `RUN_REPORT.md`)
 - [ ] Wrote agent summary (see schema above)
