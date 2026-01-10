@@ -38,6 +38,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
     RichpanelResponse,
     RichpanelRequestError,
+    TransportError,
 )
 
 
@@ -570,7 +571,7 @@ class _RecordingExecutor:
 
         if method.upper() == "GET" and path.startswith("/v1/tickets/") and "/add-tags" not in path:
             if self.raise_on_get:
-                raise RichpanelRequestError("simulated ticket read failure")
+                raise TransportError("simulated ticket read failure")
             body = json.dumps({"status": self.ticket_status, "tags": self.ticket_tags}).encode("utf-8")
             return RichpanelResponse(
                 status_code=200,

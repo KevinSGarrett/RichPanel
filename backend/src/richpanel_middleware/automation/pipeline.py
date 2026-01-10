@@ -29,6 +29,11 @@ from richpanel_middleware.integrations.richpanel.client import (
     SecretLoadError,
     TransportError,
 )
+from richpanel_middleware.integrations.richpanel.tickets import (
+    TicketMetadata,
+    dedupe_tags,
+    get_ticket_metadata,
+)
 from richpanel_middleware.automation.prompts import (
     OrderStatusPromptInput,
     build_order_status_contract,
@@ -151,27 +156,9 @@ def _safe_ticket_metadata_fetch(
     Fetch ticket status + tags without logging the ticket body.
     """
     try:
-        ticket_response = executor.execute(
-            "GET",
-            f"/v1/tickets/{conversation_id}",
-            dry_run=not allow_network,
-            log_body_excerpt=False,
-        )
-        ticket_payload = ticket_response.json() or {}
-        if not isinstance(ticket_payload, dict):
-            ticket_payload = {}
+        return get_ticket_metadata(conversation_id, executor, allow_network=allow_network)
     except (RichpanelRequestError, SecretLoadError, TransportError):
         return None
-
-    raw_status = ticket_payload.get("status") or ticket_payload.get("state")
-    ticket_status = str(raw_status).strip() if raw_status else None
-    ticket_tags = set(_dedupe_tags(ticket_payload.get("tags")))
-    return TicketMetadata(
-        status=ticket_status,
-        tags=ticket_tags,
-        status_code=ticket_response.status_code,
-        dry_run=ticket_response.dry_run,
-    )
 
 
 
@@ -494,7 +481,7 @@ def execute_order_status_reply(
                 route_tags.append(skip_tag)
             if reason in _ESCALATION_REASONS:
                 route_tags.append(ESCALATION_TAG)
-            route_tags = _dedupe_tags(route_tags)
+            route_tags = list(dedupe_tags(route_tags))
 
             route_response = executor.execute(
                 "PUT",
@@ -597,28 +584,6 @@ def execute_order_status_reply(
         )
         return {"sent": False, "reason": "exception"}
 
-def _dedupe_tags(raw_tags: Any) -> List[str]:
-    tags: List[str] = []
-    if isinstance(raw_tags, list):
-        candidates = raw_tags
-    elif raw_tags is None:
-        candidates = []
-    else:
-        candidates = [raw_tags]
-
-    seen: set[str] = set()
-    for candidate in candidates:
-        try:
-            value = str(candidate).strip()
-        except Exception:
-            continue
-        if not value or value in seen:
-            continue
-        tags.append(value)
-        seen.add(value)
-    return tags
-
-
 def _routing_tags_block_reason(
     *,
     outbound_enabled: bool,
@@ -663,7 +628,7 @@ def execute_routing_tags(
     - uses the known Richpanel add-tags endpoint (no department assignment endpoints)
     """
     routing = plan.routing
-    tags = _dedupe_tags(getattr(routing, "tags", None) if routing else None)
+    tags = list(dedupe_tags(getattr(routing, "tags", None) if routing else None))
     if routing_applied_tag and routing_applied_tag not in tags:
         tags.insert(0, routing_applied_tag)
 
