@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)",
+        "anchor": "2026-01-10-run202601101638z-waveaudit-reply-after-close-semantics-escalation-tags"
+      },
+      {
+        "level": 3,
         "text": "2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)",
         "anchor": "2026-01-10-run202601100244z-run-report-enforcement-prompt-archive-checklist-hygiene"
       },
