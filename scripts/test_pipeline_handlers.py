@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
@@ -53,13 +54,17 @@ class PipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         # Reset worker caches so each test is deterministic and offline-safe.
         worker.boto3 = None  # type: ignore
-        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._FLAG_CACHE.update(
+            {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}
+        )
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
 
     def test_normalize_event_populates_defaults(self) -> None:
-        envelope = normalize_event({"payload": {"ticket_id": "t-123", "message_id": "m-1"}})
+        envelope = normalize_event(
+            {"payload": {"ticket_id": "t-123", "message_id": "m-1"}}
+        )
 
         self.assertEqual(envelope.conversation_id, "t-123")
         self.assertEqual(envelope.dedupe_id, "m-1")
@@ -76,26 +81,35 @@ class PipelineTests(unittest.TestCase):
 
     def test_plan_allows_automation_candidate(self) -> None:
         envelope = build_event_envelope(
-            {"ticket_id": "t-789", "order_id": "ord-789", "message": "Where is my order?"}
+            {
+                "ticket_id": "t-789",
+                "order_id": "ord-789",
+                "message": "Where is my order?",
+            }
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
         self.assertEqual(plan.mode, "automation_candidate")
         self.assertEqual(plan.actions[0]["type"], "analyze")
-        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        order_actions = [
+            action
+            for action in plan.actions
+            if action["type"] == "order_status_draft_reply"
+        ]
         self.assertEqual(len(order_actions), 1)
         order_action = order_actions[0]
         self.assertFalse(order_action["enabled"])
         self.assertTrue(order_action["dry_run"])
         self.assertIn("order_summary", order_action["parameters"])
         self.assertIn("prompt_fingerprint", order_action["parameters"])
-        self.assertEqual(order_action["parameters"]["order_summary"]["order_id"], "ord-789")
+        self.assertEqual(
+            order_action["parameters"]["order_summary"]["order_id"], "ord-789"
+        )
         routing = cast(RoutingDecision, plan.routing)
         self.assertIsNotNone(routing)
         assert routing is not None
         self.assertEqual(routing.intent, "order_status_tracking")
         self.assertEqual(routing.department, "Email Support Team")
-
 
     def test_plan_generates_tracking_present_draft_reply(self) -> None:
         envelope = build_event_envelope(
@@ -109,14 +123,20 @@ class PipelineTests(unittest.TestCase):
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
-        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        order_actions = [
+            action
+            for action in plan.actions
+            if action["type"] == "order_status_draft_reply"
+        ]
         self.assertEqual(len(order_actions), 1)
         draft_reply = order_actions[0]["parameters"].get("draft_reply", {})
         self.assertIn("body", draft_reply)
         self.assertIn("1Z999", draft_reply["body"])
         self.assertIn("UPS", draft_reply["body"])
         self.assertIn("Tracking link:", draft_reply["body"])
-        self.assertNotIn("We'll send tracking as soon as it ships.", draft_reply["body"])
+        self.assertNotIn(
+            "We'll send tracking as soon as it ships.", draft_reply["body"]
+        )
 
     def test_plan_generates_fallback_when_eta_missing(self) -> None:
         envelope = build_event_envelope(
@@ -129,7 +149,11 @@ class PipelineTests(unittest.TestCase):
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
-        order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
+        order_actions = [
+            action
+            for action in plan.actions
+            if action["type"] == "order_status_draft_reply"
+        ]
         self.assertEqual(len(order_actions), 1)
         draft_reply = order_actions[0]["parameters"].get("draft_reply")
 
@@ -141,7 +165,10 @@ class PipelineTests(unittest.TestCase):
 
     def test_routing_classifies_returns(self) -> None:
         envelope = build_event_envelope(
-            {"ticket_id": "t-return", "message": "I need a refund or exchange this order"}
+            {
+                "ticket_id": "t-return",
+                "message": "I need a refund or exchange this order",
+            }
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
 
@@ -193,7 +220,9 @@ class PipelineTests(unittest.TestCase):
         routing = cast(RoutingDecision, plan.routing)
         self.assertIsNotNone(routing)
         assert routing is not None
-        self.assertEqual(result.state_record["routing"]["department"], routing.department)
+        self.assertEqual(
+            result.state_record["routing"]["department"], routing.department
+        )
         self.assertEqual(result.audit_record["routing"]["intent"], routing.intent)
         self.assertEqual(len(captured_state), 1)
         self.assertEqual(len(captured_audit), 1)
@@ -224,7 +253,11 @@ class PipelineTests(unittest.TestCase):
     def test_build_event_envelope_truncates_and_sanitizes(self) -> None:
         long_message_id = "m-" + ("x" * 200)
         envelope = build_event_envelope(
-            {"ticket_id": "t-999", "message_id": long_message_id, "group_id": "team alpha"}
+            {
+                "ticket_id": "t-999",
+                "message_id": long_message_id,
+                "group_id": "team alpha",
+            }
         )
 
         self.assertEqual(envelope.conversation_id, "t-999")
@@ -254,7 +287,10 @@ class PipelineTests(unittest.TestCase):
                 return {
                     "Parameters": [
                         {"Name": os.environ["SAFE_MODE_PARAM"], "Value": "true"},
-                        {"Name": os.environ["AUTOMATION_ENABLED_PARAM"], "Value": "true"},
+                        {
+                            "Name": os.environ["AUTOMATION_ENABLED_PARAM"],
+                            "Value": "true",
+                        },
                     ]
                 }
 
@@ -277,7 +313,9 @@ class PipelineTests(unittest.TestCase):
         self.assertFalse(automation_enabled)
         self.assertEqual(fake_ssm.calls, 0)
 
-    def test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error(self) -> None:
+    def test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error(
+        self,
+    ) -> None:
         class _FailingSSM:
             def get_parameters(self, Names, WithDecryption=False):  # type: ignore[no-untyped-def]
                 raise RuntimeError("ssm read blocked")
@@ -368,7 +406,9 @@ class PipelineTests(unittest.TestCase):
 class OutboundOrderStatusTests(unittest.TestCase):
     def setUp(self) -> None:
         worker.boto3 = None  # type: ignore
-        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._FLAG_CACHE.update(
+            {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}
+        )
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
@@ -419,29 +459,92 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(len(executor.calls), 3)
 
-        tag_call = executor.calls[0]
+        get_call = executor.calls[0]
+        self.assertEqual(get_call["method"], "GET")
+        self.assertIn("/v1/tickets/", get_call["path"])
+        self.assertNotIn("/add-tags", get_call["path"])
+
+        tag_call = executor.calls[1]
         self.assertEqual(tag_call["method"], "PUT")
         self.assertIn("/add-tags", tag_call["path"])
         self.assertEqual(tag_call["kwargs"]["json_body"]["tags"], ["mw-auto-replied"])
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
-        reply_call = executor.calls[1]
+        reply_call = executor.calls[2]
         self.assertEqual(reply_call["kwargs"]["json_body"]["status"], "resolved")
         self.assertIn("comment", reply_call["kwargs"]["json_body"])
         self.assertEqual(reply_call["kwargs"]["json_body"]["comment"]["type"], "public")
         self.assertFalse(reply_call["kwargs"]["dry_run"])
+
+    def test_outbound_skips_when_ticket_already_resolved(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_status="resolved")
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "already_resolved")
+        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(executor.calls[0]["method"], "GET")
+        route_call = executor.calls[1]
+        self.assertEqual(route_call["method"], "PUT")
+        self.assertIn("/add-tags", route_call["path"])
+        self.assertEqual(
+            route_call["kwargs"]["json_body"]["tags"], ["route-email-support-team"]
+        )
+
+    def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_status="open", ticket_tags=["mw-auto-replied"]
+        )
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "followup_after_auto_reply")
+        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(executor.calls[0]["method"], "GET")
+        route_call = executor.calls[1]
+        self.assertEqual(route_call["method"], "PUT")
+        self.assertIn("/add-tags", route_call["path"])
+        self.assertEqual(
+            route_call["kwargs"]["json_body"]["tags"], ["route-email-support-team"]
+        )
 
     def test_outbound_logging_does_not_emit_reply_body(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor()
 
         # Extract the draft reply text for assertion.
-        action = [action for action in plan.actions if action.get("type") == "order_status_draft_reply"][0]
+        action = [
+            action
+            for action in plan.actions
+            if action.get("type") == "order_status_draft_reply"
+        ][0]
         reply_body = action["parameters"].get("draft_reply", {}).get("body", "")
 
-        with self.assertLogs("richpanel_middleware.automation.pipeline", level="INFO") as captured:
+        with self.assertLogs(
+            "richpanel_middleware.automation.pipeline", level="INFO"
+        ) as captured:
             execute_order_status_reply(
                 envelope,
                 plan,
@@ -457,11 +560,32 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
 
 class _RecordingExecutor:
-    def __init__(self) -> None:
+    def __init__(
+        self, *, ticket_status: str = "open", ticket_tags: list[str] | None = None
+    ) -> None:
         self.calls: list[dict[str, Any]] = []
+        self.ticket_status = ticket_status
+        self.ticket_tags = ticket_tags or []
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
+
+        if (
+            method.upper() == "GET"
+            and path.startswith("/v1/tickets/")
+            and "/add-tags" not in path
+        ):
+            body = json.dumps(
+                {"status": self.ticket_status, "tags": self.ticket_tags}
+            ).encode("utf-8")
+            return RichpanelResponse(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                body=body,
+                url=path,
+                dry_run=kwargs.get("dry_run", False),
+            )
+
         return RichpanelResponse(
             status_code=202,
             headers={},
@@ -471,11 +595,12 @@ class _RecordingExecutor:
         )
 
 
-
 class OutboundRoutingTagsTests(unittest.TestCase):
     def setUp(self) -> None:
         worker.boto3 = None  # type: ignore
-        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._FLAG_CACHE.update(
+            {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}
+        )
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
@@ -533,8 +658,12 @@ class OutboundRoutingTagsTests(unittest.TestCase):
 
 def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests))
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests)
+    )
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-05 - RUN_20260105_2221Z.
+Last verified: 2026-01-10 - RUN_20260110_2005Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,35 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-10 - RUN_20260110_2005Z (Agent C: reply-after-close guard + PII-safe state)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_2005Z
+- Added a ticket metadata helper with read-before-write guard; closed/resolved and mw-auto-replied follow-ups now escalate with route + skip-reason tags to Email Support.
+- Redacted Dynamo idempotency/state/audit payloads to fingerprints only and wired worker MW_ENV + Richpanel API key secret access for dev-proof runs.
+
+### 2026-01-10 - RUN_20260110_1900Z (CI/security stack hardening)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_1900Z
+- CI validate gate now enforces ruff, black, and mypy alongside infra build/CDK synth and scripts/run_ci_checks.py --ci; coverage + Codecov upload run in advisory mode with documentation that private repos must provide the CODECOV_TOKEN repo secret.
+- Added dedicated CodeQL, Gitleaks, and IaC (Checkov) workflows plus Dependabot updates for GitHub Actions, npm (infra/cdk), and pip to keep security tooling current.
+
+### 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z
+- Added Richpanel `get_ticket()` helper and enforced read-before-write on outbound replies.
+- Reply-after-close and follow-up cases now route to Email Support with `mw-followup-escalation`, `mw-route-email-support`, and skip-reason tags (no duplicate auto-replies).
+- Updated tests, docs, and changelog; CI run/report captured for the run.
+
+### 2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0244Z
+- CI now fails in build mode if the latest run is missing or under-reported (RUN_REPORT.md required + min non-empty line counts).
+- scripts/new_run_folder.py now generates RUN_REPORT.md for A/B/C and creates C/AGENT_PROMPTS_ARCHIVE.md by copying REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md.
+- Updated RUNS README and refreshed Task Board + Master Checklist with shipped vs roadmap labels and a progress dashboard (no unverified env claims).
+
+### 2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0019Z
+- Implemented outbound read-before-write ticket status check + reply-after-close skip (route to Email Support when already closed).
+- Implemented follow-up policy: if ticket already has `mw-auto-replied`, skip auto-reply and apply `route-email-support-team`.
+- Added unit tests + docs update; added run report artifacts.
+
 
 ### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z
