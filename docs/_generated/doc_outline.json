@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)",
+        "anchor": "2026-01-10-run202601100244z-run-report-enforcement-prompt-archive-checklist-hygiene"
+      },
+      {
+        "level": 3,
         "text": "2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)",
         "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
       },
@@ -2796,6 +2801,21 @@
         "level": 1,
         "text": "MASTER CHECKLIST (Epics / Milestones)",
         "anchor": "master-checklist-epics-milestones"
+      },
+      {
+        "level": 2,
+        "text": "Progress dashboard (snapshot)",
+        "anchor": "progress-dashboard-snapshot"
+      },
+      {
+        "level": 2,
+        "text": "Shipped (completed)",
+        "anchor": "shipped-completed"
+      },
+      {
+        "level": 2,
+        "text": "Roadmap (remaining)",
+        "anchor": "roadmap-remaining"
       }
     ]
   },
