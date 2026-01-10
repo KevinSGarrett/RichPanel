@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)",
+        "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
+      },
+      {
+        "level": 3,
         "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
         "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
       },
@@ -7331,6 +7336,16 @@
         "level": 2,
         "text": "Non-negotiable safety constraints",
         "anchor": "non-negotiable-safety-constraints"
+      },
+      {
+        "level": 2,
+        "text": "Shipped semantics (v1)",
+        "anchor": "shipped-semantics-v1"
+      },
+      {
+        "level": 3,
+        "text": "Roadmap (not yet shipped)",
+        "anchor": "roadmap-not-yet-shipped"
       },
       {
         "level": 2,
