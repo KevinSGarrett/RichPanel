@@ -86,34 +86,10 @@ jobs:
                 --query 'Environment.Variables' \
                 --output json)
 
-              UPDATED_ENV=$(env ENV_VARS_JSON="$ENV_VARS_JSON" python - <<'PY'
-import json, os
-
-raw = os.environ.get("ENV_VARS_JSON") or "{}"
-try:
-    env = json.loads(raw)
-except Exception:
-    env = {}
-
-if env is None or not isinstance(env, dict):
-    env = {}
-
-dirty = False
-for key in [
-    "MW_ALLOW_ENV_FLAG_OVERRIDE",
-    "MW_SAFE_MODE_OVERRIDE",
-    "MW_AUTOMATION_ENABLED_OVERRIDE",
-]:
-    if key in env:
-        env.pop(key, None)
-        dirty = True
-
-if dirty:
-    print(json.dumps({"Variables": env}))
-else:
-    print("")
-PY
-)
+              UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" python -c "import json,os; raw=os.environ.get('ENV_VARS_JSON') or '{}'; 
+try: env=json.loads(raw)
+except Exception: env={} ; env = env if isinstance(env, dict) else {}; dirty=False; 
+for k in ['MW_ALLOW_ENV_FLAG_OVERRIDE','MW_SAFE_MODE_OVERRIDE','MW_AUTOMATION_ENABLED_OVERRIDE']:  dirty = dirty or (k in env); env.pop(k, None) ; print(json.dumps({'Variables': env}) if dirty else '')" )
 
               if [ -n "$UPDATED_ENV" ]; then
                 aws lambda update-function-configuration \
@@ -140,29 +116,9 @@ PY
             --query 'Environment.Variables' \
             --output json)
 
-          UPDATED_ENV=$(env ENV_VARS_JSON="$ENV_VARS_JSON" SAFE="$SAFE" AUTO="$AUTO" python - <<'PY'
-import json, os
-
-raw = os.environ.get("ENV_VARS_JSON") or "{}"
-try:
-    env = json.loads(raw)
-except Exception:
-    env = {}
-
-if env is None or not isinstance(env, dict):
-    env = {}
-
-env.update(
-    {
-        "MW_ALLOW_ENV_FLAG_OVERRIDE": "true",
-        "MW_SAFE_MODE_OVERRIDE": os.environ["SAFE"],
-        "MW_AUTOMATION_ENABLED_OVERRIDE": os.environ["AUTO"],
-    }
-)
-
-print(json.dumps({"Variables": env}))
-PY
-)
+          UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" SAFE="$SAFE" AUTO="$AUTO" python -c "import json,os; raw=os.environ.get('ENV_VARS_JSON') or '{}'; 
+try: env=json.loads(raw)
+except Exception: env={} ; env = env if isinstance(env, dict) else {}; ; env.update({'MW_ALLOW_ENV_FLAG_OVERRIDE':'true','MW_SAFE_MODE_OVERRIDE':os.environ.get('SAFE',''),'MW_AUTOMATION_ENABLED_OVERRIDE':os.environ.get('AUTO','')}); ; print(json.dumps({'Variables': env}))" )
 
           aws lambda update-function-configuration \
             --function-name "$FUNC" \
