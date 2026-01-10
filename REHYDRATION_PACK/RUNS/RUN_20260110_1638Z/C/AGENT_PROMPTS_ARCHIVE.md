@@ -1,8 +1,12 @@
+# Agent Prompts Archive
+
+Archived as part of `RUN_20260110_1445Z`.
+
+---
+
 # Current Cursor Agent Prompts (build mode)
 
 This file must contain **only the currently active prompts** for the current run/cycle.
-
-prompt-repeat-override: true
 
 **⚠️ REQUIRED IN EVERY PROMPT:** Model + MAX mode + Cycle metadata (see below)
 
@@ -56,7 +60,7 @@ python scripts/new_run_folder.py --now
 ```markdown
 # Cursor Agent Prompt
 
-**Run ID:** `RUN_20260110_1638Z`  
+**Run ID:** `RUN_20260110_1445Z`  
 **Agent:** Agent A  
 **Task ID(s):** WaveAudit midpoint audit checklist + template drift + verifier enforcement
 
@@ -81,13 +85,13 @@ Convert WaveAudit findings into a repo-native midpoint audit checklist and ensur
 - [ ] Midpoint audit checklist created and wired into PM docs.
 - [ ] Cursor agent prompt template requires: RUN_REPORT.md + RUN_SUMMARY.md + STRUCTURE_REPORT.md + DOCS_IMPACT_MAP.md + TEST_MATRIX.md.
 - [ ] `scripts/verify_rehydration_pack.py` enforces required RUN_REPORT sections (Diffstat / Commands Run / Tests / Proof / Files Changed).
-- [ ] `python scripts/run_ci_checks.py` passes and output is captured in `REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/A/RUN_REPORT.md`.
+- [ ] `python scripts/run_ci_checks.py` passes and output is captured in `REHYDRATION_PACK/RUNS/RUN_20260110_1445Z/A/RUN_REPORT.md`.
 - [ ] PR opened; auto-merge enabled (merge commit); Bugbot triggered with `@cursor review`.
 
 ## Tests / evidence required
 - Tests to run: `python scripts/run_ci_checks.py`
 - Evidence location:
-  - `REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/A/RUN_REPORT.md` (commands + outputs)
+  - `REHYDRATION_PACK/RUNS/RUN_20260110_1445Z/A/RUN_REPORT.md` (commands + outputs)
 ```
 
 ---
@@ -97,7 +101,7 @@ Convert WaveAudit findings into a repo-native midpoint audit checklist and ensur
 ```markdown
 # Cursor Agent Prompt
 
-**Run ID:** `RUN_20260110_1638Z`  
+**Run ID:** `RUN_20260110_1445Z`  
 **Agent:** Agent B  
 **Task ID(s):** Midpoint audit review (routing + personalization)
 
@@ -127,7 +131,7 @@ Review the Midpoint Audit checklist for routing/personalization correctness (inc
 ```markdown
 # Cursor Agent Prompt
 
-**Run ID:** `RUN_20260110_1638Z`  
+**Run ID:** `RUN_20260110_1445Z`  
 **Agent:** Agent C  
 **Task ID(s):** Midpoint audit review (QA + Richpanel ops)
 

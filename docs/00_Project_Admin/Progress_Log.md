@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-10 - RUN_20260110_1445Z.
+Last verified: 2026-01-10 - RUN_20260110_1638Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z
+- Added Richpanel `get_ticket()` helper and enforced read-before-write on outbound replies.
+- Reply-after-close and follow-up cases now route to Email Support with `mw-followup-escalation`, `mw-route-email-support`, and skip-reason tags (no duplicate auto-replies).
+- Updated tests, docs, and changelog; CI run/report captured for the run.
 
 ### 2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260110_0244Z
