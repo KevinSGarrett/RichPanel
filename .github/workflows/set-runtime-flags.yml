@@ -86,11 +86,7 @@ jobs:
                 --query 'Environment.Variables' \
                 --output json)
 
-              UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" python -c "import json,os; raw=os.environ.get('ENV_VARS_JSON') or '{}'; 
-try: env=json.loads(raw)
-except Exception: env={} ; env = env if isinstance(env, dict) else {}; dirty=False; 
-for k in ['MW_ALLOW_ENV_FLAG_OVERRIDE','MW_SAFE_MODE_OVERRIDE','MW_AUTOMATION_ENABLED_OVERRIDE']:  dirty = dirty or (k in env); env.pop(k, None) ; print(json.dumps({'Variables': env}) if dirty else '')" )
-
+              UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" python -c 'import json,os; env=json.loads(os.environ.get("ENV_VARS_JSON") or "{}"); env=env if isinstance(env, dict) else {}; keys=["MW_ALLOW_ENV_FLAG_OVERRIDE","MW_SAFE_MODE_OVERRIDE","MW_AUTOMATION_ENABLED_OVERRIDE"]; dirty=any(k in env for k in keys); [env.pop(k,None) for k in keys]; print(json.dumps({"Variables": env}) if dirty else "")')
               if [ -n "$UPDATED_ENV" ]; then
                 aws lambda update-function-configuration \
                   --function-name "$FUNC" \
@@ -116,10 +112,7 @@ for k in ['MW_ALLOW_ENV_FLAG_OVERRIDE','MW_SAFE_MODE_OVERRIDE','MW_AUTOMATION_EN
             --query 'Environment.Variables' \
             --output json)
 
-          UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" SAFE="$SAFE" AUTO="$AUTO" python -c "import json,os; raw=os.environ.get('ENV_VARS_JSON') or '{}'; 
-try: env=json.loads(raw)
-except Exception: env={} ; env = env if isinstance(env, dict) else {}; ; env.update({'MW_ALLOW_ENV_FLAG_OVERRIDE':'true','MW_SAFE_MODE_OVERRIDE':os.environ.get('SAFE',''),'MW_AUTOMATION_ENABLED_OVERRIDE':os.environ.get('AUTO','')}); ; print(json.dumps({'Variables': env}))" )
-
+          UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" SAFE="$SAFE" AUTO="$AUTO" python -c 'import json,os; env=json.loads(os.environ.get("ENV_VARS_JSON") or "{}"); env=env if isinstance(env, dict) else {}; env.update({"MW_ALLOW_ENV_FLAG_OVERRIDE":"true","MW_SAFE_MODE_OVERRIDE":os.environ.get("SAFE",""),"MW_AUTOMATION_ENABLED_OVERRIDE":os.environ.get("AUTO","")}); print(json.dumps({"Variables": env}))')
           aws lambda update-function-configuration \
             --function-name "$FUNC" \
             --environment "$UPDATED_ENV"
