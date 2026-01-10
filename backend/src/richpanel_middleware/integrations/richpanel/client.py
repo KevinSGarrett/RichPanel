@@ -10,7 +10,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Protocol, Tuple
+from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
 try:
     import boto3  # type: ignore
@@ -79,6 +79,52 @@ class RichpanelResponse:
             return json.loads(payload)
         except Exception:
             return None
+
+
+def _coerce_str(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    try:
+        text = str(value).strip()
+    except Exception:
+        return None
+    return text or None
+
+
+def _normalize_tag_list(value: Any) -> List[str]:
+    if value is None:
+        candidates: List[Any] = []
+    elif isinstance(value, list):
+        candidates = value
+    else:
+        candidates = [value]
+
+    tags: List[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        tag = _coerce_str(candidate)
+        if not tag or tag in seen:
+            continue
+        tags.append(tag)
+        seen.add(tag)
+    return tags
+
+
+@dataclass
+class TicketMetadata:
+    """
+    Minimal, PII-safe ticket metadata used for safety gates.
+
+    NOTE: Do not store or log full ticket payloads (customer profile, messages, etc.).
+    """
+
+    ticket_id: str
+    status: Optional[str] = None
+    tags: List[str] = None  # type: ignore[assignment]
+
+    def __post_init__(self) -> None:
+        if self.tags is None:
+            self.tags = []
 
 
 class TransportError(Exception):
@@ -265,6 +311,35 @@ class RichpanelClient:
             response=last_response,
         )
 
+    def get_ticket_metadata(self, ticket_id: str, *, dry_run: Optional[bool] = None) -> TicketMetadata:
+        """
+        Fetch PII-safe ticket metadata for safety checks.
+
+        Uses: GET /v1/tickets/{id}
+        Returns only: status + tags (no messages/customer profile).
+        """
+        resp = self.request("GET", f"/v1/tickets/{ticket_id}", dry_run=dry_run)
+        if resp.dry_run:
+            return TicketMetadata(ticket_id=str(ticket_id), status=None, tags=[])
+
+        if resp.status_code < 200 or resp.status_code >= 300:
+            # Fail-closed: callers should treat this as an error and avoid outbound replies.
+            raise RichpanelRequestError(
+                f"Richpanel ticket metadata fetch failed with status {resp.status_code}",
+                response=resp,
+            )
+
+        data = resp.json()
+        if not isinstance(data, dict):
+            raise RichpanelRequestError(
+                "Richpanel ticket metadata fetch returned non-JSON body",
+                response=resp,
+            )
+
+        status = _coerce_str(data.get("status") or data.get("state"))
+        tags = _normalize_tag_list(data.get("tags"))
+        return TicketMetadata(ticket_id=str(ticket_id), status=status, tags=tags)
+
     def _to_response(self, transport_response: TransportResponse, url: str) -> RichpanelResponse:
         return RichpanelResponse(
             status_code=transport_response.status_code,
@@ -431,6 +506,13 @@ class RichpanelExecutor:
         )
         return self._client.request(method, path, dry_run=effective_dry_run, **kwargs)
 
+    def get_ticket_metadata(self, ticket_id: str, *, dry_run: Optional[bool] = None) -> TicketMetadata:
+        requested_dry_run = dry_run
+        effective_dry_run = (
+            not self._outbound_enabled if requested_dry_run is None else bool(requested_dry_run)
+        )
+        return self._client.get_ticket_metadata(ticket_id, dry_run=effective_dry_run)
+
     def _resolve_outbound_enabled(self, override: Optional[bool]) -> bool:
         if override is not None:
             return bool(override)
@@ -441,6 +523,7 @@ __all__ = [
     "RichpanelClient",
     "RichpanelExecutor",
     "RichpanelResponse",
+    "TicketMetadata",
     "Transport",
     "TransportRequest",
     "TransportResponse",
