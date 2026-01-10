@@ -1471,10 +1471,10 @@
       "anchor": "timeline"
     }
   ],
-  "2026-01-10 - run_20260110_0244z (run-report enforcement + prompt archive + checklist hygiene)": [
+  "2026-01-10 - run_20260110_0019z (audit remediation: reply-after-close + status read-before-write)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
-      "anchor": "2026-01-10-run202601100244z-run-report-enforcement-prompt-archive-checklist-hygiene"
+      "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
     }
   ],
   "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
@@ -2867,24 +2867,6 @@
     {
       "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
       "anchor": "master-checklist-epics-milestones"
-    }
-  ],
-  "progress dashboard (snapshot)": [
-    {
-      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
-      "anchor": "progress-dashboard-snapshot"
-    }
-  ],
-  "shipped (completed)": [
-    {
-      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
-      "anchor": "shipped-completed"
-    }
-  ],
-  "roadmap (remaining)": [
-    {
-      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
-      "anchor": "roadmap-remaining"
     }
   ],
   "plan checklist (traceable to plan docs)": [
@@ -8243,6 +8225,18 @@
     {
       "path": "05_FAQ_Automation/Order_Status_Automation.md",
       "anchor": "non-negotiable-safety-constraints"
+    }
+  ],
+  "shipped semantics (v1)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "shipped-semantics-v1"
+    }
+  ],
+  "roadmap (not yet shipped)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "roadmap-not-yet-shipped"
     }
   ],
   "deterministic match": [

@@ -25,6 +25,7 @@ from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
     RichpanelRequestError,
     SecretLoadError,
+    TicketMetadata,
     TransportError,
 )
 from richpanel_middleware.automation.prompts import (
@@ -37,6 +38,16 @@ from richpanel_middleware.ingest.envelope import EventEnvelope, normalize_envelo
 LOGGER = logging.getLogger(__name__)
 LOOP_PREVENTION_TAG = "mw-auto-replied"
 ROUTING_APPLIED_TAG = "mw-routing-applied"
+EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
+
+
+def _is_closed_status(value: Optional[str]) -> bool:
+    if value is None:
+        return False
+    normalized = str(value).strip().lower()
+    return normalized in {"resolved", "closed", "solved"}
+
+
 
 
 @dataclass
@@ -380,6 +391,118 @@ def execute_order_status_reply(
 
     responses: List[Dict[str, Any]] = []
     try:
+        # Read-before-write safety gate:
+        # - If ticket is already resolved/closed, do not auto-reply (avoid reply-after-close loops).
+        # - If ticket was previously auto-replied (mw-auto-replied tag present), treat this as a follow-up and route to Email Support.
+        try:
+            ticket: TicketMetadata
+            if hasattr(executor, "get_ticket_metadata"):
+                ticket = executor.get_ticket_metadata(  # type: ignore[attr-defined]
+                    envelope.conversation_id, dry_run=not allow_network
+                )
+            else:
+                # Fallback for test stubs: best-effort GET and parse only the minimal fields.
+                ticket_resp = executor.execute(
+                    "GET",
+                    f"/v1/tickets/{envelope.conversation_id}",
+                    dry_run=not allow_network,
+                )
+                ticket_json = ticket_resp.json()
+                if not isinstance(ticket_json, dict):
+                    raise RichpanelRequestError(
+                        "Richpanel ticket metadata fetch returned non-JSON body",
+                        response=ticket_resp,
+                    )
+                ticket = TicketMetadata(
+                    ticket_id=envelope.conversation_id,
+                    status=str(ticket_json.get("status") or ticket_json.get("state") or "").strip() or None,
+                    tags=_dedupe_tags(ticket_json.get("tags")),
+                )
+        except (RichpanelRequestError, SecretLoadError, TransportError):
+            # Fail-closed: don't send an outbound reply if we can't confirm ticket state.
+            route_response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{envelope.conversation_id}/add-tags",
+                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                dry_run=not allow_network,
+            )
+            responses.append(
+                {
+                    "action": "route_email_support",
+                    "status": route_response.status_code,
+                    "dry_run": route_response.dry_run,
+                }
+            )
+            LOGGER.info(
+                "automation.order_status_reply.skip",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "status_read_failed",
+                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
+                },
+            )
+            return {"sent": False, "reason": "status_read_failed", "responses": responses}
+
+        if _is_closed_status(ticket.status):
+            route_response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{envelope.conversation_id}/add-tags",
+                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                dry_run=not allow_network,
+            )
+            responses.append(
+                {
+                    "action": "route_email_support",
+                    "status": route_response.status_code,
+                    "dry_run": route_response.dry_run,
+                }
+            )
+            LOGGER.info(
+                "automation.order_status_reply.skip",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "already_resolved",
+                    "ticket_status": ticket.status,
+                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
+                },
+            )
+            return {
+                "sent": False,
+                "reason": "already_resolved",
+                "ticket_status": ticket.status,
+                "responses": responses,
+            }
+
+        if loop_prevention_tag in set(ticket.tags or []):
+            route_response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{envelope.conversation_id}/add-tags",
+                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                dry_run=not allow_network,
+            )
+            responses.append(
+                {
+                    "action": "route_email_support",
+                    "status": route_response.status_code,
+                    "dry_run": route_response.dry_run,
+                }
+            )
+            LOGGER.info(
+                "automation.order_status_reply.skip",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "followup_after_auto_reply",
+                    "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
+                },
+            )
+            return {
+                "sent": False,
+                "reason": "followup_after_auto_reply",
+                "responses": responses,
+            }
         tag_response = executor.execute(
             "PUT",
             f"/v1/tickets/{envelope.conversation_id}/add-tags",

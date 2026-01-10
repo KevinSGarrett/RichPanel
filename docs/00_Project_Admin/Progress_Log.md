@@ -19,6 +19,13 @@ This is the canonical **long-lived** progress record for the project.
 - scripts/new_run_folder.py now generates RUN_REPORT.md for A/B/C and creates C/AGENT_PROMPTS_ARCHIVE.md by copying REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md.
 - Updated RUNS README and refreshed Task Board + Master Checklist with shipped vs roadmap labels and a progress dashboard (no unverified env claims).
 
+### 2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0019Z
+- Implemented outbound read-before-write ticket status check + reply-after-close skip (route to Email Support when already closed).
+- Implemented follow-up policy: if ticket already has `mw-auto-replied`, skip auto-reply and apply `route-email-support-team`.
+- Added unit tests + docs update; added run report artifacts.
+
+
 ### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z
 - Added repo-root `mypy.ini` that scopes checking to `backend/src` + `scripts` and excludes generated CDK assets and archives to stop Cursor/mypy from scanning `asset.<hash>` folders.
