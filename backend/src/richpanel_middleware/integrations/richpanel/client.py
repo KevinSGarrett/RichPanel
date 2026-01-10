@@ -450,7 +450,7 @@ class RichpanelClient:
             "latency_ms": latency_ms,
             "attempt": attempt,
             "dry_run": response.dry_run,
-            "body_excerpt": _truncate(self._excerpt_body(response.body), 256),
+            "body_len": len(response.body or b""),
         }
         if retry_in is not None:
             extra["retry_in"] = retry_in
