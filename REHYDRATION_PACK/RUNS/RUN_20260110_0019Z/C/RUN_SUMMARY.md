@@ -24,8 +24,8 @@ Close WaveAudit core semantics gaps blocking safe automation:
 - REHYDRATION_PACK/RUNS/RUN_20260110_0019Z/**
 
 ## Git/GitHub status (required)
-- Working branch: <TBD>
-- PR: <TBD>
+- Working branch: run/RUN_20260110_0019Z-C
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/64
 - CI status at end of run: not run (local unit tests only)
 - Main updated: no
 - Branch cleanup done: no
@@ -39,3 +39,4 @@ Close WaveAudit core semantics gaps blocking safe automation:
 
 ## Issues / follow-ups
 - Create PR and enable auto-merge once CI passes.
+
