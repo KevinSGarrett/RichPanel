@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-05 - RUN_20260105_2221Z.
+Last verified: 2026-01-10 - RUN_20260110_0019Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+
+### 2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0019Z
+- Implemented outbound read-before-write ticket status check + reply-after-close skip (route to Email Support when already closed).
+- Implemented follow-up policy: if ticket already has `mw-auto-replied`, skip auto-reply and apply `route-email-support-team`.
+- Added unit tests + docs update; added run report artifacts.
 
 ### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z

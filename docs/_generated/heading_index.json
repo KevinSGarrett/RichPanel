@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-10 - run_20260110_0019z (audit remediation: reply-after-close + status read-before-write)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
+    }
+  ],
   "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -8219,6 +8225,18 @@
     {
       "path": "05_FAQ_Automation/Order_Status_Automation.md",
       "anchor": "non-negotiable-safety-constraints"
+    }
+  ],
+  "shipped semantics (v1)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "shipped-semantics-v1"
+    }
+  ],
+  "roadmap (not yet shipped)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "roadmap-not-yet-shipped"
     }
   ],
   "deterministic match": [

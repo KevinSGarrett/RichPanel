@@ -1,0 +1,36 @@
+test_build_event_envelope_truncates_and_sanitizes (__main__.PipelineTests.test_build_event_envelope_truncates_and_sanitizes) ... ok
+test_ddb_sanitize_converts_floats_to_decimals_and_strips_nan (__main__.PipelineTests.test_ddb_sanitize_converts_floats_to_decimals_and_strips_nan) ... ok
+test_execute_and_record_writes_state_and_audit_tables (__main__.PipelineTests.test_execute_and_record_writes_state_and_audit_tables) ... ok
+test_execute_plan_dry_run_records (__main__.PipelineTests.test_execute_plan_dry_run_records) ... ok
+test_idempotency_write_persists_expected_fields (__main__.PipelineTests.test_idempotency_write_persists_expected_fields) ... ok
+test_kill_switch_cache_is_respected (__main__.PipelineTests.test_kill_switch_cache_is_respected) ... ok
+test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error (__main__.PipelineTests.test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error) ... worker.flag_load_failed
+Traceback (most recent call last):
+  File "C:\Users\kevin\.cursor\worktrees\RichPanel_GIT\qst\backend\src\lambda_handlers\worker\handler.py", line 290, in _load_kill_switches
+    response = _ssm_client().get_parameters(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kevin\.cursor\worktrees\RichPanel_GIT\qst\scripts\test_pipeline_handlers.py", line 284, in get_parameters
+    raise RuntimeError("ssm read blocked")
+RuntimeError: ssm read blocked
+ok
+test_kill_switch_env_override_takes_precedence_and_skips_ssm (__main__.PipelineTests.test_kill_switch_env_override_takes_precedence_and_skips_ssm) ... ok
+test_normalize_event_populates_defaults (__main__.PipelineTests.test_normalize_event_populates_defaults) ... ok
+test_plan_allows_automation_candidate (__main__.PipelineTests.test_plan_allows_automation_candidate) ... ok
+test_plan_generates_fallback_when_eta_missing (__main__.PipelineTests.test_plan_generates_fallback_when_eta_missing) ... ok
+test_plan_generates_tracking_present_draft_reply (__main__.PipelineTests.test_plan_generates_tracking_present_draft_reply) ... ok
+test_plan_respects_safe_mode (__main__.PipelineTests.test_plan_respects_safe_mode) ... ok
+test_plan_skips_order_status_when_safety_blocks (__main__.PipelineTests.test_plan_skips_order_status_when_safety_blocks) ... ok
+test_routing_classifies_returns (__main__.PipelineTests.test_routing_classifies_returns) ... ok
+test_routing_fallback_when_message_missing (__main__.PipelineTests.test_routing_fallback_when_message_missing) ... ok
+test_outbound_executes_when_enabled (__main__.OutboundOrderStatusTests.test_outbound_executes_when_enabled) ... ok
+test_outbound_followup_after_auto_reply_routes_to_email_support (__main__.OutboundOrderStatusTests.test_outbound_followup_after_auto_reply_routes_to_email_support) ... ok
+test_outbound_logging_does_not_emit_reply_body (__main__.OutboundOrderStatusTests.test_outbound_logging_does_not_emit_reply_body) ... ok
+test_outbound_skip_when_disabled (__main__.OutboundOrderStatusTests.test_outbound_skip_when_disabled) ... ok
+test_outbound_skips_when_ticket_already_resolved (__main__.OutboundOrderStatusTests.test_outbound_skips_when_ticket_already_resolved) ... ok
+test_routing_tags_executes_when_enabled (__main__.OutboundRoutingTagsTests.test_routing_tags_executes_when_enabled) ... ok
+test_routing_tags_skip_when_outbound_disabled (__main__.OutboundRoutingTagsTests.test_routing_tags_skip_when_outbound_disabled) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.007s
+
+OK
