@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics)
+- Added Richpanel client/executor get_ticket() helper to enforce read-before-write before outbound replies.
+- Order-status automation now routes closed/follow-up tickets to Email Support with escalation + skip-reason tags instead of auto-replying.
+- Updated docs/tests/progress log/run artifacts for the new safety semantics.
 
 ## 2025-12-29 — Wave F13 (CR-001 No-tracking delivery estimates)
 - Added CR-001 change request and FAQ spec for SLA-based delivery estimates when tracking does not exist yet.
