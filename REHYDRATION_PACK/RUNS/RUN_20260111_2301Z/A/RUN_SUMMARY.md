@@ -1,33 +1,32 @@
 # Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260111_2301Z`  
+**Agent:** A  
+**Date:** 2026-01-11
 
 ## Objective
-<FILL_ME>
+Agent A inactive; placeholder compliance only.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- No work performed.
+- Artifact kept for completeness.
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- None.
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
+- Working branch: run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof
+- PR: #78
+- CI status at end of run: green (run by Agent B)
 - Main updated: <yes/no> (Integrator only)
 - Branch cleanup done: <yes/no> (Integrator only)
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: none (Agent A idle)
+- Evidence path/link: n/a
 
 ## Decisions made
-- <NONE or list>
+- None.
 
 ## Issues / follow-ups
-- <NONE or list>
+- None.

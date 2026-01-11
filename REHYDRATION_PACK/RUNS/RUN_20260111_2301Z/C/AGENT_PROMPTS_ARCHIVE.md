@@ -45,7 +45,7 @@ python scripts/new_run_folder.py --now
 ```
 2) Paste the active prompts here (Agent A/B/C), including the **Model + MAX mode + Cycle** section for each agent
 3) Run agents sequentially to avoid merge conflicts
-4) When the cycle ends, archive the prior prompt text under `REHYDRATION_PACK/RUNS/<RUN_ID>/C/`
+4) When the cycle ends, archive the prior prompt text under `REHYDRATION_PACK/RUNS/RUN_20260111_2301Z/C/`
 
 ---
 

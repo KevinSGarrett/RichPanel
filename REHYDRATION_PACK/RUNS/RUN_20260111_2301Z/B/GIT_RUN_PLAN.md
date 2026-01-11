@@ -16,13 +16,7 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ## Branch plan
 ### Sequential (default)
-- All agents use: `run/<RUN_ID>`
-
-### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+- All agents use: `run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof`
 
 ---
 
@@ -30,9 +24,9 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - none (idle)
 - Locked paths (do not edit):
-  - <path patterns>
+  - all
 
 ### Agent B
 - Allowed paths:
@@ -43,9 +37,9 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - none (idle)
 - Locked paths:
-  - <path patterns>
+  - all
 
 ---
 
