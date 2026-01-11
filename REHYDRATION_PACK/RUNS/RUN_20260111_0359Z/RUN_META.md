@@ -2,8 +2,8 @@
 
 - RUN_ID: `RUN_20260111_0359Z`
 - Mode: build
-- Objective: <FILL_ME>
-- Stop conditions: <FILL_ME>
+- Objective: stabilize CI coverage + Codecov flow for PR #74
+- Stop conditions: CI workflow updated, run evidence captured, PR ready for CI run
 
 ## Notes
 - Each agent writes to its folder: A/, B/, C/

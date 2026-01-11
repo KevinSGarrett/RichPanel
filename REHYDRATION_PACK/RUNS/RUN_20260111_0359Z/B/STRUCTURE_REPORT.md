@@ -1,27 +1,27 @@
 # Structure Report
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260111_0359Z`  
+**Agent:** B  
+**Date:** 2026-01-10
 
 ## Summary
-- <ONE_SENTENCE_SUMMARY>
+- Added run evidence folder for B and updated CI workflow + runbook structure.
 
 ## New files/folders added
-- <PATH_1>
-- <PATH_2>
+- `REHYDRATION_PACK/RUNS/RUN_20260111_0359Z/B/*`
+- `REHYDRATION_PACK/RUNS/RUN_20260111_0359Z/RUN_META.md`
 
 ## Files/folders modified
-- <PATH_1>
-- <PATH_2>
+- `.github/workflows/ci.yml`
+- `docs/08_Engineering/CI_and_Actions_Runbook.md`
 
 ## Files/folders removed
-- <NONE or list>
+- none
 
 ## Rationale (why this structure change was needed)
-<FILL_ME>
+- Capture run evidence and document CI/coverage changes alongside workflow edits.
 
 ## Navigation updates performed
-- `docs/INDEX.md` updated: yes/no
-- `docs/CODEMAP.md` updated: yes/no
-- registries regenerated: yes/no
+- `docs/INDEX.md` updated: no
+- `docs/CODEMAP.md` updated: no
+- registries regenerated: no

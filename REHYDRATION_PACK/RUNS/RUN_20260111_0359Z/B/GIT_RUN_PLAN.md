@@ -2,10 +2,10 @@
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
-**Mode:** sequential (default)  
+**RUN_ID:** RUN_20260111_0359Z  
+**Mode:** sequential  
 **Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
+**Target branch:** `run/RUN_20260110_1622Z_github_ci_security_stack`  
 **Merge strategy:** merge commit (locked)  
 **Branch cleanup:** yes (required)  
 
@@ -30,29 +30,31 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - n/a (not used in this run)
 - Locked paths (do not edit):
-  - <path patterns>
+  - all
 
 ### Agent B
 - Allowed paths:
-  - <path patterns>
+  - `.github/workflows/ci.yml`
+  - `docs/08_Engineering/CI_and_Actions_Runbook.md`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0359Z/**`
 - Locked paths:
-  - <path patterns>
+  - backend/, infra/, other REHYDRATION_PACK run folders
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - integration only (enable auto-merge, branch cleanup)
 - Locked paths:
-  - <path patterns>
+  - same as B unless integration requires otherwise
 
 ---
 
 ## Integration checklist (Integrator)
-- [ ] Pull latest `main`
-- [ ] Merge agent branches (if parallel) into `run/<RUN_ID>`
-- [ ] Run: `python scripts/run_ci_checks.py`
-- [ ] Merge `run/<RUN_ID>` → `main` (PR preferred)
+- [x] Pull latest `main` (merged via `git merge -X ours origin/main`)
+- [ ] Merge agent branches (if parallel) into `run/RUN_20260110_1622Z_github_ci_security_stack`
+- [x] Run: `python scripts/run_ci_checks.py --ci` (local)
+- [ ] Merge `run/RUN_20260110_1622Z_github_ci_security_stack` → `main` (PR preferred)
 - [ ] Confirm Actions are green (or document failure + fix)
 - [ ] Delete run branches + agent branches
 - [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md`

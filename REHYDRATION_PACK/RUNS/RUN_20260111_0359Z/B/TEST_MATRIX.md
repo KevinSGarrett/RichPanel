@@ -1,15 +1,15 @@
 # Test Matrix
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260111_0359Z`  
+**Agent:** B  
+**Date:** 2026-01-10
 
 List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| CI-equivalent | `python scripts/run_ci_checks.py --ci` | pass | local console output (all checks green) |
+| Coverage unit tests | `coverage run -m unittest discover -s scripts -p "test_*.py"` | pass | local console output; `coverage xml` generated |
 
 ## Notes
-<FILL_ME>
+- GitHub Actions run with Codecov upload will be linked once the branch is pushed and CI completes.
