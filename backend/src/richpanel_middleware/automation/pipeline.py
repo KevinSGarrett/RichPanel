@@ -15,6 +15,10 @@ from richpanel_middleware.automation.router import (
     classify_routing,
     extract_customer_message,
 )
+from richpanel_middleware.automation.llm_reply_rewriter import (
+    RewriteResult,
+    rewrite_order_status_reply,
+)
 from richpanel_middleware.automation.llm_routing import (
     RoutingArtifact,
     compute_dual_routing,
@@ -39,6 +43,10 @@ LOGGER = logging.getLogger(__name__)
 LOOP_PREVENTION_TAG = "mw-auto-replied"
 ROUTING_APPLIED_TAG = "mw-routing-applied"
 EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
+ESCALATION_TAG = "mw-escalated-human"
+SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
+SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
+SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -398,6 +406,27 @@ def execute_order_status_reply(
         )
         return {"sent": False, "reason": "missing_draft_reply"}
 
+    rewrite_result: RewriteResult = rewrite_order_status_reply(
+        draft_reply,
+        parameters.get("order_summary") or {},
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        allow_network=allow_network,
+        outbound_enabled=outbound_enabled,
+    )
+    LOGGER.info(
+        "automation.order_status_reply.rewrite",
+        extra={
+            "event_id": envelope.event_id,
+            "conversation_id": envelope.conversation_id,
+            **rewrite_result.log_record(),
+        },
+    )
+    draft_reply = rewrite_result.reply or {}
+    reply_body = draft_reply.get("body")
+    if not reply_body:
+        return {"sent": False, "reason": "missing_draft_reply"}
+
     executor = richpanel_executor or RichpanelExecutor(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
@@ -416,7 +445,7 @@ def execute_order_status_reply(
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG, SKIP_STATUS_READ_FAILED_TAG]},
                 dry_run=not allow_network,
             )
             responses.append(
@@ -444,7 +473,7 @@ def execute_order_status_reply(
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG, SKIP_RESOLVED_TAG]},
                 dry_run=not allow_network,
             )
             responses.append(
@@ -475,7 +504,13 @@ def execute_order_status_reply(
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
-                json_body={"tags": [EMAIL_SUPPORT_ROUTE_TAG]},
+                json_body={
+                    "tags": [
+                        EMAIL_SUPPORT_ROUTE_TAG,
+                        SKIP_FOLLOWUP_TAG,
+                        ESCALATION_TAG,
+                    ]
+                },
                 dry_run=not allow_network,
             )
             responses.append(
