@@ -25,9 +25,9 @@ from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
     RichpanelRequestError,
     SecretLoadError,
-    TicketMetadata,
     TransportError,
 )
+from richpanel_middleware.integrations.richpanel.tickets import TicketMetadata, get_ticket_metadata
 from richpanel_middleware.automation.prompts import (
     OrderStatusPromptInput,
     build_order_status_contract,
@@ -46,6 +46,19 @@ def _is_closed_status(value: Optional[str]) -> bool:
         return False
     normalized = str(value).strip().lower()
     return normalized in {"resolved", "closed", "solved"}
+
+
+def _safe_ticket_metadata_fetch(
+    conversation_id: str,
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> Optional[TicketMetadata]:
+    """Fetch ticket status + tags without logging bodies or raising upstream errors."""
+    try:
+        return get_ticket_metadata(conversation_id, executor, allow_network=allow_network)
+    except (RichpanelRequestError, SecretLoadError, TransportError):
+        return None
 
 
 
@@ -394,32 +407,12 @@ def execute_order_status_reply(
         # Read-before-write safety gate:
         # - If ticket is already resolved/closed, do not auto-reply (avoid reply-after-close loops).
         # - If ticket was previously auto-replied (mw-auto-replied tag present), treat this as a follow-up and route to Email Support.
-        try:
-            ticket: TicketMetadata
-            if hasattr(executor, "get_ticket_metadata"):
-                ticket = executor.get_ticket_metadata(  # type: ignore[attr-defined]
-                    envelope.conversation_id, dry_run=not allow_network
-                )
-            else:
-                # Fallback for test stubs: best-effort GET and parse only the minimal fields.
-                ticket_resp = executor.execute(
-                    "GET",
-                    f"/v1/tickets/{envelope.conversation_id}",
-                    dry_run=not allow_network,
-                )
-                ticket_json = ticket_resp.json()
-                if not isinstance(ticket_json, dict):
-                    raise RichpanelRequestError(
-                        "Richpanel ticket metadata fetch returned non-JSON body",
-                        response=ticket_resp,
-                    )
-                ticket = TicketMetadata(
-                    ticket_id=envelope.conversation_id,
-                    status=str(ticket_json.get("status") or ticket_json.get("state") or "").strip() or None,
-                    tags=_dedupe_tags(ticket_json.get("tags")),
-                )
-        except (RichpanelRequestError, SecretLoadError, TransportError):
-            # Fail-closed: don't send an outbound reply if we can't confirm ticket state.
+        ticket_metadata = _safe_ticket_metadata_fetch(
+            envelope.conversation_id,
+            executor=executor,
+            allow_network=allow_network,
+        )
+        if ticket_metadata is None:
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
@@ -444,7 +437,10 @@ def execute_order_status_reply(
             )
             return {"sent": False, "reason": "status_read_failed", "responses": responses}
 
-        if _is_closed_status(ticket.status):
+        ticket_status = ticket_metadata.status
+        ticket_tags = ticket_metadata.tags
+
+        if _is_closed_status(ticket_status):
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
@@ -464,18 +460,18 @@ def execute_order_status_reply(
                     "event_id": envelope.event_id,
                     "conversation_id": envelope.conversation_id,
                     "reason": "already_resolved",
-                    "ticket_status": ticket.status,
+                    "ticket_status": ticket_status,
                     "route_tag": EMAIL_SUPPORT_ROUTE_TAG,
                 },
             )
             return {
                 "sent": False,
                 "reason": "already_resolved",
-                "ticket_status": ticket.status,
+                "ticket_status": ticket_status,
                 "responses": responses,
             }
 
-        if loop_prevention_tag in set(ticket.tags or []):
+        if loop_prevention_tag in set(ticket_tags or []):
             route_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{envelope.conversation_id}/add-tags",
