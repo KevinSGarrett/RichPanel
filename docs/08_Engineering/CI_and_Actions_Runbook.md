@@ -301,7 +301,93 @@ python scripts/run_ci_checks.py
 
 ---
 
-## 9) If you cannot fix quickly
+## 9) Codecov coverage reporting and gating
+
+### Current state (2026-01-11)
+With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is automatically uploaded on every CI run.
+
+**Coverage workflow:**
+1. CI runs `coverage run -m unittest discover -s scripts -p "test_*.py"` followed by `coverage xml`
+2. `coverage.xml` is uploaded to Codecov using `codecov/codecov-action@v4` (advisory; does not block CI)
+3. `coverage.xml` is also uploaded as a GitHub Actions artifact (`coverage-report`) with 30-day retention for debugging
+
+**Status checks configured in codecov.yml:**
+- **Project status**: requires coverage not to drop by more than 5% compared to base branch
+- **Patch status**: requires at least 50% coverage on new/changed lines (±10% threshold)
+- Both checks use `target: auto` and generous thresholds to avoid breaking PRs on day 1
+
+### Operational plan (phased rollout)
+
+**Phase 1: Observation (current)**
+- Codecov uploads on every PR but does not block merges
+- CI step uses `fail_ci_if_error: false`
+- Monitor Codecov PR comments and status checks for 2-3 PRs to validate behavior
+
+**Phase 2: Soft enforcement (after 2-3 green runs)**
+- Once Codecov is reliably uploading and posting comments without false positives:
+  1. Change `fail_ci_if_error: false` to `fail_ci_if_error: true`
+  2. Add `codecov/patch` and optionally `codecov/project` as **required status checks** in branch protection rules
+- This makes coverage gating a hard requirement without breaking existing PRs
+
+**Phase 3: Tighten targets (incremental)**
+- After Phase 2 is stable, gradually increase coverage targets in `codecov.yml`:
+  - Patch target: 50% → 60% → 70%
+  - Project threshold: 5% → 3% → 1%
+- Make changes incrementally and observe impact before tightening further
+
+### Codecov verification (per-PR)
+
+Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to verify Codecov behavior on a PR:
+
+1. Identify the latest `CI` workflow run for the PR branch and copy its URL
+2. In the `CI` run, confirm the **"Upload coverage to Codecov"** step completed without error
+3. On the PR's **Checks** surface, confirm Codecov statuses appear (e.g., `codecov/project`, `codecov/patch`)
+
+### Troubleshooting Codecov failures
+
+**Coverage upload fails (401/403)**
+- Verify `CODECOV_TOKEN` is set in GitHub repository secrets
+
+**Coverage.xml missing or empty**
+- Verify `coverage run -m unittest discover -s scripts -p "test_*.py"` succeeded in CI logs
+- Check that `coverage xml` ran without errors
+- Download the `coverage-report` artifact from GitHub Actions to inspect the raw XML
+
+---
+
+## 10) Lint/Type enforcement roadmap
+
+### Current state (2026-01-11)
+Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisory). They do **not** block PR merges.
+
+**Lint status snapshot:**
+- **Ruff**: ~4 issues (line length E501, unused imports F401, unused variables F841)
+- **Black**: ~30+ files would be reformatted
+- **Mypy**: 11 errors in 3 files (union-attr, arg-type, return-value)
+
+### Operational plan (phased enforcement)
+
+**Phase 1: Advisory (current)**
+- All lint steps run but do not block CI
+- Developers can see lint warnings in CI logs and optionally fix
+
+**Phase 2: Fix + enforce (target: after 2-3 green PRs)**
+- Dedicated PR to auto-fix black formatting: `black backend/src scripts`
+- Dedicated PR to fix ruff issues: `ruff check --fix backend/src scripts`
+- Once both pass cleanly, remove `continue-on-error: true` from those steps to make them blocking
+
+**Phase 3: Mypy enforcement (incremental)**
+- Address mypy errors file-by-file (envelope.py, client.py, order_lookup.py)
+- Once mypy passes, remove `continue-on-error: true` to make it blocking
+- Consider adding mypy to pre-commit hooks
+
+### Tracking
+- When Phase 2 is complete, update this section and `ci.yml` to reflect blocking status
+- File issues for any recurring lint failures that block progress
+
+---
+
+## 11) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -310,7 +396,7 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 10) Seed Secrets Manager (dev/staging)
+## 12) Seed Secrets Manager (dev/staging)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
