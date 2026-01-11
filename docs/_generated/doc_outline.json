@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_0357Z (CI coverage + lint enforcement docs)",
+        "anchor": "2026-01-11-run202601110357z-ci-coverage-lint-enforcement-docs"
+      },
+      {
+        "level": 3,
         "text": "2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)",
         "anchor": "2026-01-10-run202601101638z-waveaudit-reply-after-close-semantics-escalation-tags"
       },
@@ -11014,13 +11019,58 @@
       },
       {
         "level": 2,
-        "text": "9) If you cannot fix quickly",
-        "anchor": "9-if-you-cannot-fix-quickly"
+        "text": "9) Codecov coverage reporting and gating",
+        "anchor": "9-codecov-coverage-reporting-and-gating"
+      },
+      {
+        "level": 3,
+        "text": "Current state (2026-01-11)",
+        "anchor": "current-state-2026-01-11"
+      },
+      {
+        "level": 3,
+        "text": "Operational plan (phased rollout)",
+        "anchor": "operational-plan-phased-rollout"
+      },
+      {
+        "level": 3,
+        "text": "Codecov verification (per-PR)",
+        "anchor": "codecov-verification-per-pr"
+      },
+      {
+        "level": 3,
+        "text": "Troubleshooting Codecov failures",
+        "anchor": "troubleshooting-codecov-failures"
       },
       {
         "level": 2,
-        "text": "10) Seed Secrets Manager (dev/staging)",
-        "anchor": "10-seed-secrets-manager-devstaging"
+        "text": "10) Lint/Type enforcement roadmap",
+        "anchor": "10-linttype-enforcement-roadmap"
+      },
+      {
+        "level": 3,
+        "text": "Current state (2026-01-11)",
+        "anchor": "current-state-2026-01-11"
+      },
+      {
+        "level": 3,
+        "text": "Operational plan (phased enforcement)",
+        "anchor": "operational-plan-phased-enforcement"
+      },
+      {
+        "level": 3,
+        "text": "Tracking",
+        "anchor": "tracking"
+      },
+      {
+        "level": 2,
+        "text": "11) If you cannot fix quickly",
+        "anchor": "11-if-you-cannot-fix-quickly"
+      },
+      {
+        "level": 2,
+        "text": "12) Seed Secrets Manager (dev/staging)",
+        "anchor": "12-seed-secrets-manager-devstaging"
       },
       {
         "level": 3,
