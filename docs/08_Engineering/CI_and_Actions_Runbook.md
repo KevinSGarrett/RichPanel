@@ -1,6 +1,6 @@
 # CI and GitHub Actions Runbook (for Cursor Agents)
 
-Last updated: 2026-01-05  
+Last updated: 2026-01-10  
 Status: Canonical
 
 This runbook defines how agents must keep CI green and how to self-fix when GitHub Actions fails.
@@ -14,14 +14,38 @@ A change is not considered “done” until:
 - GitHub Actions checks are green (unless explicitly waived by PM)
 
 ### What runs in CI (ci.yml)
-Every PR automatically runs:
+The blocking `validate` job runs on every push/PR:
 
-1. `npm install` / `npm ci` for `infra/cdk`
-2. `npm run build` for the CDK package
-3. `npx cdk synth` to confirm the stack renders cleanly
+1. Set up Python 3.11 + install tooling (`black`, `ruff`, `mypy`, `coverage`)
+2. Set up Node.js 20 with npm cache for `infra/cdk`
+3. `npm ci`, `npm run build`, and `npm run synth` in `infra/cdk`
 4. `python scripts/run_ci_checks.py --ci` for repo-wide policy + hygiene validation
+5. `ruff check backend/src scripts`
+6. `black --check backend/src scripts`
+7. `mypy --config-file mypy.ini`
+8. `coverage run -m unittest discover -s scripts -p "test_*.py"` + `coverage xml` (upload to Codecov with `fail_ci_if_error=false`)
+9. Upload `coverage-report` artifact (for debugging)
 
-No steps are optional; your change must keep this pipeline green.
+Steps 1-8 gate the validate job; Codecov upload and the coverage artifact are non-blocking.
+
+Advisory/non-blocking scheduled workflows:
+- `codeql.yml` (weekly + PR/push; continue-on-error)
+- `gitleaks.yml` (weekly + PR/push; soft-fail secret scan)
+- `iac_scan.yml` (weekly + PR/push; CDK synth + Checkov + Trivy, soft-fail)
+- Dependabot (weekly): pip at repo root + `infra/cdk` npm.
+
+Local mirror for the validate job:
+```powershell
+npm ci --prefix infra/cdk
+npm run build --prefix infra/cdk
+npm run synth --prefix infra/cdk
+python scripts/run_ci_checks.py --ci
+ruff check backend/src scripts
+black --check backend/src scripts
+mypy --config-file mypy.ini
+coverage run -m unittest discover -s scripts -p "test_*.py"
+coverage xml
+```
 
 ---
 
@@ -301,7 +325,70 @@ python scripts/run_ci_checks.py
 
 ---
 
-## 9) If you cannot fix quickly
+## 9) Codecov coverage reporting and gating
+
+### Current state (2026-01-10)
+With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is collected from the Python unit tests in `scripts/` and uploaded on every CI run.
+
+**Coverage workflow:**
+1. CI runs `coverage run -m unittest discover -s scripts -p "test_*.py"` followed by `coverage xml`
+2. `coverage.xml` is uploaded to Codecov using `codecov/codecov-action@v4` (`fail_ci_if_error=false`)
+3. `coverage.xml` is also uploaded as a GitHub Actions artifact (`coverage-report`) with 30-day retention for debugging
+
+**Status checks configured in codecov.yml:**
+- **Project status**: requires coverage not to drop by more than 5% compared to base branch
+- **Patch status**: requires at least 50% coverage on new/changed lines (±10% threshold)
+- Both checks use `target: auto` and generous thresholds to avoid breaking PRs on day 1
+
+### Operational plan (phased rollout)
+
+**Phase 1: Blocking collection, soft upload (current)**
+- Coverage collection is **blocking** in CI (no `continue-on-error`)
+- Codecov upload uses `fail_ci_if_error=false`; step should succeed but won’t fail CI if the service is unavailable
+- Monitor Codecov PR comments and status checks for 2–3 PRs to validate behavior
+
+**Phase 2: Harder enforcement (after stable uploads)**
+- Flip the Codecov upload to `fail_ci_if_error=true`
+- Add `codecov/patch` (and optionally `codecov/project`) as required status checks once data is consistent
+
+**Phase 3: Tighten targets (incremental)**
+- After Phase 2 is stable, gradually increase coverage targets in `codecov.yml`:
+  - Patch target: 50% → 60% → 70%
+  - Project threshold: 5% → 3% → 1%
+- Make changes incrementally and observe impact before tightening further
+
+### Codecov verification (per-PR)
+
+Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to verify Codecov behavior on a PR:
+
+1. Identify the latest `CI` workflow run for the PR branch and copy its URL:
+   - UI: open the PR → **Checks** tab → click the `CI` run → copy the browser URL.
+   - CLI: `gh run list --branch <branch> --workflow ci.yml --limit 1 --json databaseId,url --jq '.[0].url'`
+   - Record this URL in `REHYDRATION_PACK/RUNS/<RUN_ID>/A/TEST_MATRIX.md` under the Codecov row.
+2. In the `CI` run, confirm the **“Upload coverage to Codecov”** step completed without error and (when successful) printed a Codecov link.
+3. On the PR’s **Checks** surface, confirm Codecov statuses appear (e.g., `codecov/project`, `codecov/patch`).
+   - CLI alternative: `gh pr view <number> --json statusCheckRollup --jq '.statusCheckRollup'`.
+4. If statuses are missing or stuck in “pending”, treat it as an observation-only defect in Phase 1: capture the PR link, CI run URL, and a 1–2 line note in the rehydration pack, then follow the troubleshooting steps below.
+
+### Troubleshooting Codecov failures
+
+**Coverage upload fails (401/403)**
+- Verify `CODECOV_TOKEN` is set in GitHub repository secrets (Settings → Secrets and variables → Actions)
+- Check Codecov dashboard for repository activation status
+
+**False positive on patch coverage**
+- Review the Codecov PR comment to identify which lines are flagged
+- Add targeted tests or adjust `codecov.yml` thresholds if the flagged code is legitimately untestable
+- For generated code or test utilities, add paths to the `ignore` section in `codecov.yml`
+
+**Coverage.xml missing or empty**
+- Verify `coverage run -m unittest discover -s scripts -p "test_*.py"` succeeded in CI logs
+- Check that `coverage xml` ran without errors
+- Download the `coverage-report` artifact from GitHub Actions to inspect the raw XML
+
+---
+
+## 10) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -310,7 +397,9 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 10) Seed Secrets Manager (dev/staging)
+---
+
+## 11) Seed Secrets Manager (dev/staging)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
