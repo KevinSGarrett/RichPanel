@@ -45,7 +45,7 @@ LOGGER = logging.getLogger(__name__)
 # Configuration (environment-based, fail-closed defaults)
 # ============================================================================
 
-DEFAULT_ROUTING_MODEL = "gpt-4o-mini"
+DEFAULT_ROUTING_MODEL = "gpt-5.2-chat-latest"
 DEFAULT_ROUTING_TEMPERATURE = 0.0
 DEFAULT_ROUTING_MAX_TOKENS = 256
 DEFAULT_CONFIDENCE_THRESHOLD = 0.85
