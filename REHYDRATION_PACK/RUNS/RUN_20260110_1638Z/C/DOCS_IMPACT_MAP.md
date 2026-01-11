@@ -1,23 +1,22 @@
-# Docs Impact Map
+﻿# Docs Impact Map
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** C  
+**Date:** 2026-01-10
 
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- <DOC_PATH_1> — <WHAT_CHANGED>
-- <DOC_PATH_2> — <WHAT_CHANGED>
+- None
 
 ## Docs that should be updated next (if any)
-- <DOC_PATH> — <WHY>
+- Release note/changelog entry to communicate GPT-5.2 default for OpenAI usage â€” to inform ops/cost owners.
 
 ## Index/registry updates
-- `docs/INDEX.md` updated: yes/no
-- `docs/CODEMAP.md` updated: yes/no
-- `docs/_generated/*` regenerated: yes/no
-- `reference/_generated/*` regenerated: yes/no
+- `docs/INDEX.md` updated: no
+- `docs/CODEMAP.md` updated: no
+- `docs/_generated/*` regenerated: no (CI regen only, not committed)
+- `reference/_generated/*` regenerated: no (CI regen only, not committed)
 
 ## Notes
-<FILL_ME>
+- CI regen commands ran as part of `scripts/run_ci_checks.py`; no generated outputs were checked in.

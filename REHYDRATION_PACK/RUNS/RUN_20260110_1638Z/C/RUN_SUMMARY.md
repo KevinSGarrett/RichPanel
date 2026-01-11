@@ -1,33 +1,36 @@
-# Run Summary
+﻿# Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** C  
+**Date:** 2026-01-10
 
 ## Objective
-<FILL_ME>
+Resolve the TicketMetadata shadowing concern, move middleware OpenAI defaults to GPT-5.2 across routing/prompt/test/env, and ship with CI evidence for PR prep.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- Verified `automation/pipeline.py` uses the imported `TicketMetadata` (no local class shadowing).
+- Updated default OpenAI model to `gpt-5.2-chat-latest` in routing config, prompt config, env example, and OpenAI tests.
+- Ran full `scripts/run_ci_checks.py` and saved output to the run folder.
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- backend/src/richpanel_middleware/automation/llm_routing.py
+- backend/src/richpanel_middleware/automation/prompts.py
+- scripts/test_openai_client.py
+- config/.env.example
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Working branch: run/B33_ticketmetadata_shadow_fix_and_gpt5_models
+- PR: none yet (to create)
+- CI status at end of run: green (`python scripts/run_ci_checks.py`)
+- Main updated: no
+- Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py
+- Evidence path/link: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/C/ci_checks_output.txt
 
 ## Decisions made
-- <NONE or list>
+- Kept OPENAI_MODEL env override to mitigate cost/latency risk from GPT-5.2 default.
 
 ## Issues / follow-ups
-- <NONE or list>
+- Need to push branch, open PR, and enable auto-merge with branch deletion.

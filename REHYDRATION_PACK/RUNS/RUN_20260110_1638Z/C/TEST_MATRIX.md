@@ -1,15 +1,14 @@
-# Test Matrix
+﻿# Test Matrix
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** C  
+**Date:** 2026-01-10
 
 List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| CI suite | AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py | pass | REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/C/ci_checks_output.txt |
 
 ## Notes
-<FILL_ME>
+- Full CI-equivalent stack executed; included doc/registry validations and all service client/unit tests.
