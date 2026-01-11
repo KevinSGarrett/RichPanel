@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-11 - run_20260111_2301z (richpanel outbound smoke proof)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601112301z-richpanel-outbound-smoke-proof"
+    }
+  ],
   "2026-01-11 - run_20260111_0532z (llm rewriter rebase + gpt-5 defaults)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
