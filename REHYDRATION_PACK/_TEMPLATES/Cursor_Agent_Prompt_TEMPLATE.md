@@ -40,13 +40,16 @@ Write to:
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
 
 Required files:
-- `RUN_SUMMARY.md`
-- `STRUCTURE_REPORT.md`
-- `DOCS_IMPACT_MAP.md`
-- `TEST_MATRIX.md`
+- `RUN_REPORT.md` — **MUST replace all placeholders** (commands + outputs, tests, diffstat, files changed)
+- `RUN_SUMMARY.md` — **MUST replace all placeholders**
+- `STRUCTURE_REPORT.md` — **MUST replace all placeholders**
+- `DOCS_IMPACT_MAP.md` — **MUST replace all placeholders**
+- `TEST_MATRIX.md` — **MUST replace all placeholders**
 
 Optional:
 - `FIX_REPORT.md` (only if needed)
+
+**CRITICAL**: CI will fail if your run artifacts contain template placeholders like `<FILL_ME>`, `RUN_<YYYYMMDD>_<HHMMZ>`, `<PATH_1>`, etc. All placeholders MUST be replaced with actual values before completing the run.
 
 ## Step-by-step
 1) Read the referenced docs/paths.

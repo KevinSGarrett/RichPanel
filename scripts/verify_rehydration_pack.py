@@ -26,21 +26,15 @@ from __future__ import annotations
 import argparse
 import ast
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACK = REPO_ROOT / "REHYDRATION_PACK"
 MODE_FILE = PACK / "MODE.yaml"
 MANIFEST_FILE = PACK / "MANIFEST.yaml"
-
-# CI-hard build-mode reporting invariants (latest run only)
-LATEST_RUN_REQUIRED_RUN_REPORT = "RUN_REPORT.md"
-MIN_NONEMPTY_LINES_RUN_REPORT = 25
-MIN_NONEMPTY_LINES_OTHER_REQUIRED_DOCS = 10
 
 
 # Baseline invariants: these MUST be declared in the manifest.
@@ -87,7 +81,9 @@ class RunArtifactSpec:
 
 def _strip_quotes(s: str) -> str:
     s = s.strip()
-    if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
+    if (s.startswith("'") and s.endswith("'")) or (
+        s.startswith('"') and s.endswith('"')
+    ):
         return s[1:-1]
     return s
 
@@ -123,7 +119,12 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
     run_spec = RunArtifactSpec(
         run_id_regex=r"^RUN_\d{8}_\d{4}Z$",
         agent_ids=["A", "B", "C"],
-        required_files_per_agent=["RUN_SUMMARY.md", "STRUCTURE_REPORT.md", "DOCS_IMPACT_MAP.md", "TEST_MATRIX.md"],
+        required_files_per_agent=[
+            "RUN_SUMMARY.md",
+            "STRUCTURE_REPORT.md",
+            "DOCS_IMPACT_MAP.md",
+            "TEST_MATRIX.md",
+        ],
         optional_files_per_agent=["FIX_REPORT.md"],
     )
 
@@ -175,9 +176,11 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
                 current.when = m.group(1).strip()
                 continue
 
-            m = re.match(r"^required:\s*(true|false)\s*$", stripped, flags=re.IGNORECASE)
+            m = re.match(
+                r"^required:\s*(true|false)\s*$", stripped, flags=re.IGNORECASE
+            )
             if m:
-                current.required = (m.group(1).lower() == "true")
+                current.required = m.group(1).lower() == "true"
                 continue
 
             m = re.match(r"^role:\s*(.+?)\s*$", stripped)
@@ -218,7 +221,9 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
                     # Accept YAML-ish inline list: ['A', 'B', 'C']
                     try:
                         parsed = ast.literal_eval(value)
-                        if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
+                        if isinstance(parsed, list) and all(
+                            isinstance(x, str) for x in parsed
+                        ):
                             run_spec.agent_ids = parsed
                     except Exception:
                         pass
@@ -260,77 +265,9 @@ def check_manifest_completeness(entries: List[ManifestEntry]) -> List[str]:
     return missing
 
 
-def count_non_empty_lines(text: str) -> int:
-    return sum(1 for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n") if line.strip())
-
-
-def check_file_min_lines(path: Path, min_non_empty_lines: int) -> Tuple[Optional[str], int]:
-    """
-    Returns (error_message_or_none, non_empty_line_count).
-    """
-    if not path.exists():
-        return (f"Missing required file: {path}", 0)
-    if not path.is_file():
-        return (f"Expected file but found dir: {path}", 0)
-    try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except Exception as e:
-        return (f"Could not read file {path}: {e}", 0)
-    non_empty = count_non_empty_lines(text)
-    if non_empty < min_non_empty_lines:
-        return (
-            f"File not populated enough: {path} has {non_empty} non-empty lines (need >= {min_non_empty_lines})",
-            non_empty,
-        )
-    return (None, non_empty)
-
-
-def check_latest_run_reporting(
-    latest_run: Path,
-    run_spec: RunArtifactSpec,
-    *,
-    allow_partial: bool,
+def check_paths(
+    entries: List[ManifestEntry], mode: str, strict: bool
 ) -> Tuple[List[str], List[str]]:
-    """
-    CI-hard requirements (build mode):
-    - Latest run exists
-    - Latest run has A/B/C subfolders
-    - Each agent folder contains populated files:
-      - RUN_REPORT.md (>= 25 non-empty lines)
-      - RUN_SUMMARY.md, STRUCTURE_REPORT.md, DOCS_IMPACT_MAP.md, TEST_MATRIX.md (>= 10 non-empty lines each)
-    """
-    errors: List[str] = []
-    warnings: List[str] = []
-
-    required_files = [LATEST_RUN_REQUIRED_RUN_REPORT] + list(run_spec.required_files_per_agent or [])
-
-    for aid in run_spec.agent_ids or ["A", "B", "C"]:
-        agent_dir = latest_run / aid
-        if not agent_dir.exists():
-            msg = f"{latest_run.name}: missing agent folder {aid}/ (required for latest-run reporting)"
-            (warnings if allow_partial else errors).append(msg)
-            continue
-        if not agent_dir.is_dir():
-            msg = f"{latest_run.name}: expected dir but found file: {agent_dir}"
-            (warnings if allow_partial else errors).append(msg)
-            continue
-
-        for fn in required_files:
-            f = agent_dir / fn
-            min_lines = (
-                MIN_NONEMPTY_LINES_RUN_REPORT
-                if fn == LATEST_RUN_REQUIRED_RUN_REPORT
-                else MIN_NONEMPTY_LINES_OTHER_REQUIRED_DOCS
-            )
-            err, _count = check_file_min_lines(f, min_non_empty_lines=min_lines)
-            if err:
-                msg = f"{latest_run.name}/{aid}: {err}"
-                (warnings if allow_partial else errors).append(msg)
-
-    return errors, warnings
-
-
-def check_paths(entries: List[ManifestEntry], mode: str, strict: bool) -> Tuple[List[str], List[str]]:
     """
     Returns (errors, warnings)
     """
@@ -364,7 +301,9 @@ def check_paths(entries: List[ManifestEntry], mode: str, strict: bool) -> Tuple[
     return errors, warnings
 
 
-def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool) -> Tuple[List[str], List[str]]:
+def check_runs(
+    run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool
+) -> Tuple[List[str], List[str]]:
     """
     Validate RUNS structure.
     - build mode: strict by default, unless allow_partial is enabled.
@@ -384,23 +323,24 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
     run_id_re = re.compile(run_spec.run_id_regex)
 
     run_folders = [p for p in runs_dir.iterdir() if p.is_dir()]
-    matching_runs = [p for p in run_folders if run_id_re.match(p.name)]
-    if not matching_runs:
+    if not run_folders:
         if mode == "build":
-            errors.append("RUNS/ must contain at least one RUN_* directory in build mode.")
-        else:
-            warnings.append("RUNS/ is empty (ok in foundation mode).")
-        if strict and warnings:
-            errors.extend([f"(strict) {w}" for w in warnings])
-            warnings = []
-        return errors, warnings
-
-    latest_run = max(matching_runs, key=lambda p: p.name)
+            errors.append(
+                "RUNS/ is empty (no RUN_* folders found yet). In build mode, at least one RUN_* folder is required."
+            )
+        return (
+            errors if not strict else errors + [f"(strict) {w}" for w in warnings],
+            [] if strict else warnings,
+        )
 
     for run in sorted(run_folders, key=lambda p: p.name):
         if not run_id_re.match(run.name):
             msg = f"Run folder name does not match run_id_regex ({run_spec.run_id_regex}): {run.name}"
-            (errors if (mode == "build" and not allow_partial) or strict else warnings).append(msg)
+            (
+                errors
+                if (mode == "build" and not allow_partial) or strict
+                else warnings
+            ).append(msg)
 
         # agent folders
         for aid in run_spec.agent_ids:
@@ -424,11 +364,258 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
 
             # optional files: no issue if missing
 
-    # Latest-run reporting invariants (CI-hard in build mode)
-    if mode == "build" and latest_run:
-        lr_errors, lr_warnings = check_latest_run_reporting(latest_run, run_spec, allow_partial=allow_partial)
-        errors.extend(lr_errors)
-        warnings.extend(lr_warnings)
+    if strict and warnings:
+        errors.extend([f"(strict) {w}" for w in warnings])
+        warnings = []
+
+    return errors, warnings
+
+
+def _count_non_empty_lines(text: str) -> int:
+    return sum(
+        1
+        for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+        if line.strip()
+    )
+
+
+def _run_report_missing_required_sections(run_report_text: str) -> List[str]:
+    """
+    Check that RUN_REPORT.md contains human-scannable section headings.
+
+    This is intentionally pragmatic: we look for a heading-like line (markdown heading or bold heading)
+    that contains the required keywords (case-insensitive).
+    """
+    normalized = run_report_text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [ln.strip() for ln in normalized.split("\n") if ln.strip()]
+
+    # Treat markdown headings (## ...) and bold headings (**Heading**) as "section headings".
+    heading_like = [
+        ln
+        for ln in lines
+        if ln.startswith("#")
+        or (ln.startswith("**") and ln.endswith("**") and len(ln) >= 4)
+    ]
+
+    required = {
+        "Diffstat": re.compile(r"diff\s*stat", flags=re.IGNORECASE),
+        "Commands Run": re.compile(r"\bcommands\b", flags=re.IGNORECASE),
+        "Tests / Proof": re.compile(
+            r"\b(tests?|proof|evidence)\b", flags=re.IGNORECASE
+        ),
+        "Files Changed": re.compile(
+            r"\bfiles?\b.*\b(changed|modified|touched)\b", flags=re.IGNORECASE
+        ),
+    }
+
+    missing: List[str] = []
+    for section_name, pat in required.items():
+        if not any(pat.search(ln) for ln in heading_like):
+            missing.append(section_name)
+
+    return missing
+
+
+def _latest_run_dir(runs_dir: Path, run_id_re) -> Optional[Path]:
+    candidates = [
+        p for p in runs_dir.iterdir() if p.is_dir() and run_id_re.match(p.name)
+    ]
+    if not candidates:
+        return None
+    # Run IDs are lexicographically sortable due to RUN_YYYYMMDD_HHMMZ format.
+    return sorted(candidates, key=lambda p: p.name)[-1]
+
+
+# Placeholder patterns that MUST NOT appear in finalized run artifacts
+FORBIDDEN_PLACEHOLDERS = [
+    r"<FILL_ME>",
+    r"RUN_<YYYYMMDD>_<HHMMZ>",
+    r"<REPO_COMMIT_SHA>",
+    r"<BRANCH_NAME>",
+    r"<WORKTREE_PATH>",
+    r"<PATH_\d+>",
+    r"<PATH_1>",
+    r"<PATH_2>",
+    r"<PATH_3>",
+    r"<ABSOLUTE_PATH_TO_WORKTREE>",
+    r"<YYYYMMDD>",
+    r"<HHMMZ>",
+    r"<TASK-###",
+    r"<DELIVERABLE_\d+>",
+    r"<ITEM_\d+>",
+    r"<BULLET_\d+>",
+    r"<COMMAND_\d+>",
+    r"<TEST_COMMAND_\d+>",
+    r"YYYY-MM-DD",
+]
+
+
+def _check_placeholders_in_file(fpath: Path) -> List[str]:
+    """
+    Scan a file for forbidden placeholder patterns.
+    Returns a list of detected patterns with line numbers.
+    """
+    try:
+        content = fpath.read_text(encoding="utf-8", errors="replace")
+    except Exception as exc:
+        return [f"Could not read file: {exc}"]
+    
+    violations = []
+    lines = content.split("\n")
+    
+    for pattern_str in FORBIDDEN_PLACEHOLDERS:
+        pattern = re.compile(pattern_str)
+        for line_num, line in enumerate(lines, start=1):
+            if pattern.search(line):
+                violations.append(
+                    f"Line {line_num}: found placeholder '{pattern_str}' in: {line.strip()[:80]}"
+                )
+    
+    return violations
+
+
+def check_latest_run_no_placeholders(
+    run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool
+) -> Tuple[List[str], List[str]]:
+    """
+    Enforce that the latest run's artifacts contain no template placeholders.
+    
+    Requirements (MODE=build):
+    - Latest run's agent folders (A/, B/, C/) must not contain placeholder tokens
+    - Templates under REHYDRATION_PACK/_TEMPLATES/ are exempt (they should keep placeholders)
+    """
+    errors: List[str] = []
+    warnings: List[str] = []
+    
+    if mode != "build":
+        return errors, warnings
+    
+    runs_dir = PACK / "RUNS"
+    if not runs_dir.exists():
+        # Already caught by other checks
+        return errors, warnings
+    
+    run_id_re = re.compile(run_spec.run_id_regex)
+    latest = _latest_run_dir(runs_dir, run_id_re)
+    if latest is None:
+        # Already caught by other checks
+        return errors, warnings
+    
+    for aid in run_spec.agent_ids:
+        agent_dir = latest / aid
+        if not agent_dir.exists() or not agent_dir.is_dir():
+            # Already caught by check_latest_run_populated
+            continue
+        
+        # Check all markdown files in this agent folder
+        for md_file in agent_dir.glob("*.md"):
+            violations = _check_placeholders_in_file(md_file)
+            if violations:
+                rel_path = md_file.relative_to(PACK)
+                msg = f"{rel_path}: contains template placeholders (must be replaced):\n"
+                for v in violations[:5]:  # Limit to first 5 violations per file
+                    msg += f"    - {v}\n"
+                if len(violations) > 5:
+                    msg += f"    ... and {len(violations) - 5} more"
+                
+                (warnings if allow_partial else errors).append(msg.rstrip())
+    
+    if strict and warnings:
+        errors.extend([f"(strict) {w}" for w in warnings])
+        warnings = []
+    
+    return errors, warnings
+
+
+def check_latest_run_populated(
+    run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool
+) -> Tuple[List[str], List[str]]:
+    """
+    Enforce that the latest run is fully reported (build mode).
+
+    Requirements (MODE=build):
+    - REHYDRATION_PACK/RUNS/ contains at least one RUN_* directory
+    - latest run contains A/, B/, C/
+    - each agent folder contains populated required docs:
+        - RUN_REPORT.md (>= 25 non-empty lines; must include required headings)
+        - RUN_SUMMARY.md (>= 10 non-empty lines)
+        - STRUCTURE_REPORT.md (>= 10 non-empty lines)
+        - DOCS_IMPACT_MAP.md (>= 10 non-empty lines)
+        - TEST_MATRIX.md (>= 10 non-empty lines)
+    """
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    if mode != "build":
+        return errors, warnings
+
+    runs_dir = PACK / "RUNS"
+    if not runs_dir.exists():
+        errors.append("RUNS/ is missing in build mode.")
+        return errors, warnings
+
+    run_id_re = re.compile(run_spec.run_id_regex)
+    latest = _latest_run_dir(runs_dir, run_id_re)
+    if latest is None:
+        errors.append(
+            f"RUNS/ must contain at least one run folder matching: {run_spec.run_id_regex}"
+        )
+        return errors, warnings
+
+    required_with_min_lines = {
+        "RUN_REPORT.md": 25,
+        "RUN_SUMMARY.md": 10,
+        "STRUCTURE_REPORT.md": 10,
+        "DOCS_IMPACT_MAP.md": 10,
+        "TEST_MATRIX.md": 10,
+    }
+
+    for aid in run_spec.agent_ids:
+        agent_dir = latest / aid
+        if not agent_dir.exists():
+            msg = f"{latest.name}: missing agent folder {aid}/ (latest run requirement)"
+            (warnings if allow_partial else errors).append(msg)
+            continue
+        if not agent_dir.is_dir():
+            msg = f"{latest.name}: expected {aid}/ to be a directory (latest run requirement)"
+            (warnings if allow_partial else errors).append(msg)
+            continue
+
+        for fn, min_lines in required_with_min_lines.items():
+            fpath = agent_dir / fn
+            if not fpath.exists():
+                msg = f"{latest.name}/{aid}: missing required file {fn} (latest run requirement)"
+                (warnings if allow_partial else errors).append(msg)
+                continue
+            if not fpath.is_file():
+                msg = f"{latest.name}/{aid}: expected file but found directory: {fn} (latest run requirement)"
+                (warnings if allow_partial else errors).append(msg)
+                continue
+
+            try:
+                content = fpath.read_text(encoding="utf-8", errors="replace")
+            except Exception as exc:
+                msg = f"{latest.name}/{aid}: could not read {fn}: {exc}"
+                (warnings if allow_partial else errors).append(msg)
+                continue
+
+            non_empty = _count_non_empty_lines(content)
+            if non_empty < min_lines:
+                msg = (
+                    f"{latest.name}/{aid}: {fn} not populated: "
+                    f"{non_empty} non-empty lines (min {min_lines})"
+                )
+                (warnings if allow_partial else errors).append(msg)
+
+            if fn == "RUN_REPORT.md":
+                missing_sections = _run_report_missing_required_sections(content)
+                if missing_sections:
+                    msg = (
+                        f"{latest.name}/{aid}: RUN_REPORT.md missing required section heading(s): "
+                        f"{', '.join(missing_sections)}. "
+                        "Add headings like: '## Diffstat', '## Commands Run', '## Tests / Proof', '## Files Changed'."
+                    )
+                    (warnings if allow_partial else errors).append(msg)
 
     if strict and warnings:
         errors.extend([f"(strict) {w}" for w in warnings])
@@ -439,7 +626,11 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as failures (useful for CI).")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Treat warnings as failures (useful for CI).",
+    )
     parser.add_argument(
         "--allow-partial",
         action="store_true",
@@ -461,8 +652,8 @@ def main() -> int:
     mode_text = MODE_FILE.read_text(encoding="utf-8", errors="replace")
     try:
         mode = parse_mode(mode_text)
-    except Exception as e:
-        print(f"[FAIL] Could not parse MODE.yaml: {e}")
+    except Exception as exc:
+        print(f"[FAIL] Could not parse MODE.yaml: {exc}")
         return 1
 
     if mode not in VALID_MODES:
@@ -474,7 +665,9 @@ def main() -> int:
     entries, run_spec = parse_manifest(manifest_text)
 
     if not entries:
-        print("[FAIL] Could not parse any entries from MANIFEST.yaml (expected 'paths:' section)")
+        print(
+            "[FAIL] Could not parse any entries from MANIFEST.yaml (expected 'paths:' section)"
+        )
         return 1
 
     # Manifest must declare the baseline invariants
@@ -490,10 +683,24 @@ def main() -> int:
     allow_partial = args.allow_partial
 
     errors, warnings = check_paths(entries, mode=mode, strict=strict)
-    run_errors, run_warnings = check_runs(run_spec, mode=mode, strict=strict, allow_partial=allow_partial)
+    run_errors, run_warnings = check_runs(
+        run_spec, mode=mode, strict=strict, allow_partial=allow_partial
+    )
 
     errors.extend(run_errors)
     warnings.extend(run_warnings)
+
+    latest_errors, latest_warnings = check_latest_run_populated(
+        run_spec, mode=mode, strict=strict, allow_partial=allow_partial
+    )
+    errors.extend(latest_errors)
+    warnings.extend(latest_warnings)
+
+    placeholder_errors, placeholder_warnings = check_latest_run_no_placeholders(
+        run_spec, mode=mode, strict=strict, allow_partial=allow_partial
+    )
+    errors.extend(placeholder_errors)
+    warnings.extend(placeholder_warnings)
 
     if warnings:
         print("[WARN] Issues found:")

@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-05 - RUN_20260105_2221Z.
+Last verified: 2026-01-11 - RUN_20260111_0335Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -13,22 +13,64 @@ This is the canonical **long-lived** progress record for the project.
 
 ## Timeline
 
+### 2026-01-11 - RUN_20260111_0335Z (Run artifact placeholder enforcement v2 + admin doc drift fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_0335Z
+- Added CI enforcement to reject run artifacts containing template placeholders (patterns like FILL_ME, RUN_DATE_TIME, PATH variables, etc.) for the latest run only.
+- Updated scripts/verify_rehydration_pack.py with check_latest_run_no_placeholders() function that scans all markdown files in latest run's agent folders and reports violations with line numbers.
+- Updated Cursor Agent Prompt template to explicitly require placeholder replacement with critical CI failure warning.
+- Fixed encoding corruption in Progress_Log.md (route-email-support-team, backend/src, asset.<hash>).
+- Templates under REHYDRATION_PACK/_TEMPLATES/ are explicitly exempted from enforcement (they should keep placeholder examples).
+
+### 2026-01-11 - RUN_20260111_0008Z (Codecov verification + model default alignment docs)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_0008Z
+- Updated MASTER_CHECKLIST with explicit epics for Codecov upload (shipped), Codecov branch-protection required checks (roadmap), and middleware OpenAI GPT-5.x-only defaults (roadmap) to reflect current shipped vs roadmap reality.
+- Extended CI and GitHub Actions runbook with a concise “Codecov verification” section covering how to capture the CI run URL and confirm Codecov status checks on PRs, and refreshed local CI evidence via `python scripts/run_ci_checks.py` (run failed initially due to missing Progress_Log entry and was then fixed by this update).
+
+### 2026-01-10 - RUN_20260110_2003Z (Ticket metadata guard + skip-tag routing)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_2003Z
+- Added PII-safe ticket metadata helper + read-before-write guard for order status automation; closed/follow-up/status-read-fail tickets now route to Email Support with escalation + skip-reason tags.
+- Hardened persistence to store only fingerprints/keys/counts (no payload bodies) and granted worker Secrets Manager read for the Richpanel API key with MW_ENV wiring; updated tests/docs accordingly.
+
+### 2026-01-10 - RUN_20260110_1900Z (CI/security stack hardening)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_1900Z
+- CI validate gate now enforces ruff, black, and mypy alongside infra build/CDK synth and scripts/run_ci_checks.py --ci; coverage + Codecov upload run in advisory mode with documentation that private repos must provide the CODECOV_TOKEN repo secret.
+- Added dedicated CodeQL, Gitleaks, and IaC (Checkov) workflows plus Dependabot updates for GitHub Actions, npm (infra/cdk), and pip to keep security tooling current.
+
+### 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z
+- Added Richpanel get_ticket() helper and enforced read-before-write on outbound replies.
+- Reply-after-close and follow-up cases now route to Email Support with mw-followup-escalation, mw-route-email-support, and skip-reason tags (no duplicate auto-replies).
+- Updated tests, docs, and changelog; CI run/report captured for the run.
+
+### 2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0244Z
+- CI now fails in build mode if the latest run is missing or under-reported (RUN_REPORT.md required + min non-empty line counts).
+- scripts/new_run_folder.py now generates RUN_REPORT.md for A/B/C and creates C/AGENT_PROMPTS_ARCHIVE.md by copying REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md.
+- Updated RUNS README and refreshed Task Board + Master Checklist with shipped vs roadmap labels and a progress dashboard (no unverified env claims).
+
+### 2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260110_0019Z
+- Implemented outbound read-before-write ticket status check + reply-after-close skip (route to Email Support when already closed).
+- Implemented follow-up policy: if ticket already has mw-auto-replied, skip auto-reply and apply route-email-support-team.
+- Added unit tests + docs update; added run report artifacts.
+
+
 ### 2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260105_2221Z
-- Added repo-root `mypy.ini` that scopes checking to `backend/src` + `scripts` and excludes generated CDK assets and archives to stop Cursor/mypy from scanning `asset.<hash>` folders.
-- Documented the asset error and cleanup step (`infra/cdk/cdk.out` deletion) in the CI runbook.
+- Added repo-root mypy.ini that scopes checking to backend/src + scripts and excludes generated CDK assets and archives to stop Cursor/mypy from scanning asset.<hash> folders.
+- Documented the asset error and cleanup step (infra/cdk/cdk.out deletion) in the CI runbook.
 
 ### 2026-01-03 - RUN_20260103_2300Z (E2E evidence hardening + prod readiness checklist)
 - Dev/Staging smoke job summaries now include explicit confirmations for idempotency, conversation state, and audit records, plus derived CloudWatch dashboard/alarm names.
 - CI runbook evidence steps updated to require the new summary fields and to enumerate the dashboard/alarm names per environment.
-- Prod promotion checklist restated to require human go/no-go plus captured `deploy-prod` and `prod-e2e-smoke` run URLs before enabling prod.
+- Prod promotion checklist restated to require a human go/no-go plus captured deploy-prod and prod-e2e-smoke run URLs before enabling prod.
 
 ### 2026-01-03 - RUN_20260103_1640Z (Persistence validation hardening)
 - Added offline persistence/pipeline tests covering kill-switch caching, idempotency writes, conversation-state/audit persistence, and ingress envelope sanitization.
 - Extended dev_e2e_smoke.py to assert idempotency + conversation_state + audit trail records and emit console links into job summaries.
 - Wired the new persistence test script into scripts/run_ci_checks.py and extended Dev/Staging smoke workflows (derived-only evidence, no secrets).
 - Hardened E2E smoke evidence expectations to explicitly record idempotency + conversation state + audit confirmations and capture CloudWatch dashboards/alarms when present.
-- Updated prod promotion checklist to require a human go/no-go plus recorded `deploy-prod` and `prod-e2e-smoke` workflow run URLs before enabling prod.
+- Updated prod promotion checklist to require a human go/no-go plus recorded deploy-prod and prod-e2e-smoke run URLs before enabling prod.
 
 ### 2026-01-03 - Docs heartbeat + anti-drift enforcement
 - Added CI gate scripts/verify_admin_logs_sync.py to enforce that the latest RUN_ID is referenced in Progress_Log.md.
