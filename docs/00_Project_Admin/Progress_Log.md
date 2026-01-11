@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-10 - RUN_20260110_2003Z.
+Last verified: 2026-01-11 - RUN_20260111_0359Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_0359Z (CI coverage + lint gating hardening)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_0359Z
+- CI now runs unit-test coverage via `coverage run -m unittest discover`, keeps Codecov upload soft-fail, and makes ruff/black/mypy blocking again; runbook updated with the new plan and run artifacts captured.
 
 ### 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z
