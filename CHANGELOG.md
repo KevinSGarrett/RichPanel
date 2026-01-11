@@ -7,6 +7,7 @@
 - Created E2E Test Runbook (docs/08_Engineering/E2E_Test_Runbook.md) with detailed procedures for dev/staging/prod E2E smoke tests.
 - Created NEXT_10 suggested items list (REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md) to track emerging priorities.
 - Linked NEXT_10 from TASK_BOARD.md; now visible as emerging priorities tracker.
+- Removed empty workflow files (codeql.yml, gitleaks.yml, iac_scan.yml) that were causing GitHub Actions failures.
 - Evidence: REHYDRATION_PACK/RUNS/RUN_20260111_1638Z/A/, CI checks pass (python scripts/run_ci_checks.py --ci)
 
 ## 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics)

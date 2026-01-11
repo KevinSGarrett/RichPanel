@@ -22,6 +22,7 @@ This is the canonical **long-lived** progress record for the project.
 - Created NEXT_10 suggested items list (REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md) to track emerging priorities (Codecov hardening, CloudWatch dashboards/alarms, etc.).
 - Linked NEXT_10 from TASK_BOARD.md; now visible as emerging priorities tracker.
 - Fixed missing RUN_20260110_2200Z/C folder (CI validation requirement).
+- Removed empty workflow files (codeql.yml, gitleaks.yml, iac_scan.yml) that were causing GitHub Actions failures; these should be properly implemented in a future run.
 
 ### 2026-01-11 - RUN_20260111_0335Z (Run artifact placeholder enforcement v2 + admin doc drift fix)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_0335Z
