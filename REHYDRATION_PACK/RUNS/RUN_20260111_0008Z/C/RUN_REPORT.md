@@ -14,15 +14,41 @@
 ## Diffstat (required)
 - Command: `git diff --stat origin/run/B33_ticketmetadata_shadow_fix_and_gpt5_models`
 - Output:
-  - `backend/src/richpanel_middleware/automation/pipeline.py    | 58 ++++++++++------------`
-  - `backend/src/richpanel_middleware/integrations/richpanel/__init__.py             |  4 ++`
-  - `backend/src/richpanel_middleware/integrations/richpanel/tickets.py` (new)
-  - `3 files changed, 31 insertions(+), 31 deletions(-)`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/DOCS_IMPACT_MAP.md   |  29 ++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/FIX_REPORT.md        |  21 +++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/GIT_RUN_PLAN.md      |  58 +++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/RUN_REPORT.md        | 143 ++++++++++++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/RUN_SUMMARY.md       |  42 +++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/STRUCTURE_REPORT.md  |  32 ++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/TEST_MATRIX.md       |  15 ++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/DOCS_IMPACT_MAP.md   |  23 +++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/FIX_REPORT.md        |  21 +++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/GIT_RUN_PLAN.md      |  58 +++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/RUN_REPORT.md        |  59 +++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/RUN_SUMMARY.md       |  33 ++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/STRUCTURE_REPORT.md  |  27 ++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/TEST_MATRIX.md       |  15 ++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/AGENT_PROMPTS_ARCHIVE.md  | 180 +++++++++++++++++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/DOCS_IMPACT_MAP.md   |  22 +++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/FIX_REPORT.md        |  21 +++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/GIT_RUN_PLAN.md      |  57 +++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/RUN_REPORT.md        |  62 +++++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/RUN_SUMMARY.md       |  36 +++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/STRUCTURE_REPORT.md  |  28 ++++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/TEST_MATRIX.md       |  14 ++`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/RUN_META.md            |  11 ++`
+  - `backend/src/richpanel_middleware/automation/pipeline.py    |  58 ++++---`
+  - `backend/src/richpanel_middleware/integrations/richpanel/__init__.py             |   4 ++`
+  - `backend/src/richpanel_middleware/integrations/richpanel/tickets.py              |  97 +++++++++++`
+  - `26 files changed, 1135 insertions(+), 31 deletions(-)`
 
 ## Files touched (required)
 - **Added**
   - `backend/src/richpanel_middleware/integrations/richpanel/tickets.py`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/A/*`
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/B/*`
   - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/C/*` (filled templates)
+  - `REHYDRATION_PACK/RUNS/RUN_20260111_0008Z/RUN_META.md`
 - **Modified**
   - `backend/src/richpanel_middleware/automation/pipeline.py`
   - `backend/src/richpanel_middleware/integrations/richpanel/__init__.py`
