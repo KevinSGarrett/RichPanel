@@ -20,10 +20,11 @@ Add CI coverage collection with Codecov upload and document lint enforcement roa
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260111_ci_coverage_docs
-- PR: New (supersedes #74)
-- CI status at end of run: pending push
-- Main updated: no
-- Branch cleanup done: no
+- PR: [#76](https://github.com/KevinSGarrett/RichPanel/pull/76) (supersedes #74)
+- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/20889222987
+- CI status at end of run: in_progress (auto-merge enabled)
+- Main updated: pending CI
+- Branch cleanup done: pending merge
 
 ## Tests and evidence
 - Tests run: `coverage run -m unittest discover -s scripts -p "test_*.py"` (80 tests OK)
