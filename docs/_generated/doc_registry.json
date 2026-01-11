@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 846,
-    "approx_tokens": 1099,
+    "word_count": 932,
+    "approx_tokens": 1211,
     "last_updated": ""
   },
   {
@@ -1925,9 +1925,9 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2251,
-    "approx_tokens": 2926,
-    "last_updated": "2026-01-05"
+    "word_count": 2934,
+    "approx_tokens": 3814,
+    "last_updated": "2026-01-11"
   },
   {
     "path": "08_Engineering/Developer_Guide.md",

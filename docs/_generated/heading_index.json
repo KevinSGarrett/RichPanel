@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-11 - run_20260111_0357z (ci coverage + lint enforcement docs)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601110357z-ci-coverage-lint-enforcement-docs"
+    }
+  ],
   "2026-01-10 - run_20260110_1638z (waveaudit reply-after-close semantics + escalation tags)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12201,16 +12207,68 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "9) if you cannot fix quickly": [
+  "9) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-if-you-cannot-fix-quickly"
+      "anchor": "9-codecov-coverage-reporting-and-gating"
     }
   ],
-  "10) seed secrets manager (dev/staging)": [
+  "current state (2026-01-11)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-seed-secrets-manager-devstaging"
+      "anchor": "current-state-2026-01-11"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "current-state-2026-01-11"
+    }
+  ],
+  "operational plan (phased rollout)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "operational-plan-phased-rollout"
+    }
+  ],
+  "codecov verification (per-pr)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "codecov-verification-per-pr"
+    }
+  ],
+  "troubleshooting codecov failures": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "troubleshooting-codecov-failures"
+    }
+  ],
+  "10) lint/type enforcement roadmap": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "10-linttype-enforcement-roadmap"
+    }
+  ],
+  "operational plan (phased enforcement)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "operational-plan-phased-enforcement"
+    }
+  ],
+  "tracking": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "tracking"
+    }
+  ],
+  "11) if you cannot fix quickly": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "11-if-you-cannot-fix-quickly"
+    }
+  ],
+  "12) seed secrets manager (dev/staging)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "12-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
