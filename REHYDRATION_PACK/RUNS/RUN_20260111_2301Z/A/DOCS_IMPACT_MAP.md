@@ -1,17 +1,16 @@
 # Docs Impact Map
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260111_2301Z`  
+**Agent:** A  
+**Date:** 2026-01-11
 
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- <DOC_PATH_1> — <WHAT_CHANGED>
-- <DOC_PATH_2> — <WHAT_CHANGED>
+- None (Agent A idle)
 
 ## Docs that should be updated next (if any)
-- <DOC_PATH> — <WHY>
+- None
 
 ## Index/registry updates
 - `docs/INDEX.md` updated: yes/no
@@ -20,4 +19,4 @@ Goal: document what changed and where documentation must be updated.
 - `reference/_generated/*` regenerated: yes/no
 
 ## Notes
-<FILL_ME>
+- Placeholder-compliance only; no PII added.

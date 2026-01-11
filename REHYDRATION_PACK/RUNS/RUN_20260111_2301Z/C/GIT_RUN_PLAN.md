@@ -2,10 +2,10 @@
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
+**RUN_ID:** RUN_20260111_2301Z  
 **Mode:** sequential (default)  
 **Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
+**Target branch:** `run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof`  
 **Merge strategy:** merge commit (locked)  
 **Branch cleanup:** yes (required)  
 
@@ -16,13 +16,7 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ## Branch plan
 ### Sequential (default)
-- All agents use: `run/<RUN_ID>`
-
-### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+- All agents use: `run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof`
 
 ---
 
@@ -30,29 +24,30 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - none (idle)
 - Locked paths (do not edit):
-  - <path patterns>
+  - all
 
 ### Agent B
 - Allowed paths:
-  - <path patterns>
+  - scripts/dev_richpanel_outbound_smoke.py
+  - REHYDRATION_PACK/RUNS/RUN_20260111_2301Z/B/**
 - Locked paths:
-  - <path patterns>
+  - backend/src/**
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - none (idle)
 - Locked paths:
-  - <path patterns>
+  - all
 
 ---
 
 ## Integration checklist (Integrator)
 - [ ] Pull latest `main`
-- [ ] Merge agent branches (if parallel) into `run/<RUN_ID>`
-- [ ] Run: `python scripts/run_ci_checks.py`
-- [ ] Merge `run/<RUN_ID>` → `main` (PR preferred)
+- [ ] Merge agent branches (if parallel) into `run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof`
+- [ ] Run: `python scripts/run_ci_checks.py --ci`
+- [ ] Merge `run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof` → `main` (PR preferred)
 - [ ] Confirm Actions are green (or document failure + fix)
 - [ ] Delete run branches + agent branches
 - [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md`

@@ -1,7 +1,7 @@
 {
   "audit_ddb_console": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
   "audit_trail_table": "rp_mw_dev_audit_trail",
-  "audit_ts_action_id": "2026-01-11T23:39:40.995607+00:00#evt:dbdd7689-88fa-42aa-9095-0f1f753ff3be",
+  "audit_ts_action_id": "2026-01-11T23:55:33.970923+00:00#evt:e3d89ac7-3752-4163-bb67-e8b26bc138fb",
   "conversation_ddb_console": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
   "conversation_id": "api-scentimenttesting3300-41afc455-345e-4c18-b17f-ee0f0e9166e0",
   "conversation_state_table": "rp_mw_dev_conversation_state",
@@ -12,21 +12,21 @@
       "body_hash": "b29660fccc683b01",
       "dry_run": true,
       "has_body": true,
-      "prompt_fingerprint": "7c3a1e94dfb4db62082125c0adcd22537015e417614bc7a5d8db56074da08dee",
+      "prompt_fingerprint": "f58004c0ce1e271bce82071778497df243e27178480720b60bd5cf7aeebd54f8",
       "reason": "order status draft reply (dry-run)"
     },
     {
       "body_hash": "b29660fccc683b01",
       "dry_run": true,
       "has_body": true,
-      "prompt_fingerprint": "7c3a1e94dfb4db62082125c0adcd22537015e417614bc7a5d8db56074da08dee",
+      "prompt_fingerprint": "f58004c0ce1e271bce82071778497df243e27178480720b60bd5cf7aeebd54f8",
       "reason": "order status draft reply (dry-run)"
     }
   ],
   "draft_reply_count": 2,
   "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com",
   "env": "dev",
-  "event_id": "evt:dbdd7689-88fa-42aa-9095-0f1f753ff3be",
+  "event_id": "evt:e3d89ac7-3752-4163-bb67-e8b26bc138fb",
   "failure_reason": null,
   "idempotency_mode": "automation_candidate",
   "idempotency_payload_field_count": null,
@@ -35,8 +35,8 @@
   "idempotency_table": "rp_mw_dev_idempotency",
   "ingress_status_code": 200,
   "logs_console": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker",
-  "message_id": "7ff7e3be9a0246eb802f722a664c6f63",
-  "payload_sha256": "4da45348b8c71775",
+  "message_id": "ec054fd60c9d475ebcbfcc8e5806c710",
+  "payload_sha256": "fbe1894ae44e1224",
   "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
   "region": "us-east-2",
   "result": "PASS",
@@ -44,10 +44,12 @@
   "richpanel_has_test_tag": true,
   "richpanel_status_after": "OPEN",
   "richpanel_status_before": "OPEN",
+  "richpanel_status_changed": false,
   "richpanel_status_code_after": 200,
   "richpanel_status_code_before": 200,
   "richpanel_subject_hash": "dd1d8036cd5b649e",
   "richpanel_subject_hash_after": "dd1d8036cd5b649e",
+  "richpanel_tags_added": [],
   "richpanel_tags_after": [
     "053d59c2-87b0-4e9c-b094-585c295f7246",
     "07566394-20e5-4417-be85-789ffea62452",
@@ -66,6 +68,9 @@
     "mw-intent-order_status_tracking",
     "mw-routing-applied"
   ],
+  "richpanel_tags_removed": [],
+  "richpanel_updated_at_after": "2026-01-11T23:55:34.775Z",
+  "richpanel_updated_at_before": "2026-01-11T23:39:41.693Z",
   "routing": {
     "category": "order_status",
     "reason": "matched order status keyword",
@@ -76,5 +81,5 @@
   },
   "run_id": "RUN_20260111_2301Z",
   "state_actions_count": 2,
-  "timestamp_utc": "2026-01-11T23:39:41Z"
+  "timestamp_utc": "2026-01-11T23:55:38Z"
 }

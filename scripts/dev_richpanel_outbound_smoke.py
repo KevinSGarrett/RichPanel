@@ -641,12 +641,14 @@ def fetch_ticket_snapshot(
     status = None
     tags: Set[str] = set()
     subject = None
+    updated_at = None
     if isinstance(payload, dict):
         status = _coerce_str(payload.get("status") or payload.get("state"))
         raw_tags = payload.get("tags")
         if isinstance(raw_tags, list):
             tags = {t.strip() for t in raw_tags if isinstance(t, str) and t.strip()}
         subject = _coerce_str(payload.get("subject") or payload.get("title"))
+        updated_at = _coerce_str(payload.get("updated_at"))
 
     def _has_test_tag(tag_set: Set[str]) -> bool:
         lower_allow = {t.lower() for t in test_tag_allowlist if t}
@@ -666,6 +668,7 @@ def fetch_ticket_snapshot(
         "has_test_tag": has_test_tag,
         "has_test_subject": has_test_subject,
         "subject_hash": _hash_text(subject),
+        "updated_at": updated_at,
         "dry_run": getattr(resp, "dry_run", False),
     }
 
@@ -965,6 +968,11 @@ def main() -> int:
         or os.path.join("REHYDRATION_PACK", "RUNS", args.run_id, "B")
     )
     proof_path = os.path.join(proof_dir, "e2e_outbound_proof.json")
+    tags_before = set(pre_snapshot.get("tags") or [])
+    tags_after = set(post_snapshot.get("tags") or [])
+    tags_added = sorted(t for t in tags_after - tags_before)
+    tags_removed = sorted(t for t in tags_before - tags_after)
+    status_changed = pre_snapshot.get("status") != post_snapshot.get("status")
     proof_payload = {
         "run_id": args.run_id,
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -995,6 +1003,11 @@ def main() -> int:
         "richpanel_has_test_subject": pre_snapshot.get("has_test_subject"),
         "richpanel_subject_hash": pre_snapshot.get("subject_hash"),
         "richpanel_subject_hash_after": post_snapshot.get("subject_hash"),
+        "richpanel_updated_at_before": pre_snapshot.get("updated_at"),
+        "richpanel_updated_at_after": post_snapshot.get("updated_at"),
+        "richpanel_status_changed": status_changed,
+        "richpanel_tags_added": tags_added,
+        "richpanel_tags_removed": tags_removed,
         "ddb_console": console_links["ddb"],
         "logs_console": console_links["logs"],
         "conversation_ddb_console": console_links["conversation_ddb"],
@@ -1026,8 +1039,11 @@ def main() -> int:
             "routing_tags": routing_state["tags"],
             "draft_action_present": draft_action_present,
             "draft_reply_count": len(draft_replies),
-            "richpanel_status": richpanel_result["status"],
-            "richpanel_tags": richpanel_result["tags"],
+            "richpanel_status": post_snapshot.get("status"),
+            "richpanel_tags": post_snapshot.get("tags"),
+            "richpanel_tags_added": tags_added,
+            "richpanel_tags_removed": tags_removed,
+            "richpanel_status_changed": status_changed,
         }
         append_summary(args.summary_path, env_name=env_name, data=summary_data)
 

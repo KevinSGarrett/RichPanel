@@ -2,8 +2,8 @@
 
 - RUN_ID: `RUN_20260111_2301Z`
 - Mode: build
-- Objective: <FILL_ME>
-- Stop conditions: <FILL_ME>
+- Objective: Richpanel outbound smoke proof (Agent B active; A/C idle placeholders)
+- Stop conditions: proof captured or AWS/test-ticket unavailable
 
 ## Notes
 - Each agent writes to its folder: A/, B/, C/

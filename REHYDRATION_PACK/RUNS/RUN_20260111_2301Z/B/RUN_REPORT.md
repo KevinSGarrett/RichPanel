@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-11
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof
-- **PR:** not opened (can open if requested)
+- **PR:** #78
 - **PR merge strategy:** merge commit (standard)
 
 ## Objective + stop conditions
@@ -37,6 +37,7 @@
 ## Tests / Proof (required)
 - `python scripts/run_ci_checks.py --ci` — PASS.
 - Outbound proof: `REHYDRATION_PACK/RUNS/RUN_20260111_2301Z/B/e2e_outbound_proof.json` — PASS; ingress 200; Dynamo idempotency/state/audit recorded; Richpanel tags include `mw-auto-replied`, `mw-routing-applied`, `mw-intent-order_status_tracking`; status observed OPEN.
+- Actions run: local CI only (no GitHub Actions run for this branch).
 
 CI snippet:
 ```
@@ -55,5 +56,4 @@ CI snippet:
 - Ticket status did not change to RESOLVED despite outbound enabled; requires follow-up with Richpanel if closure is required.
 
 ## Follow-ups (actionable)
-- [ ] Open PR for this branch if desired.
 - [ ] Confirm with Richpanel whether status should close via REST path; adjust worker if needed.
