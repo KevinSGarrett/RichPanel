@@ -17,12 +17,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: 3.11
+
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install black mypy ruff coverage
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
 
       - name: Install infra dependencies
         working-directory: infra/cdk
@@ -39,8 +44,44 @@ jobs:
 
       - name: CDK synth
         working-directory: infra/cdk
-        run: npx cdk synth
+        run: npm run synth
 
       - name: Run repo validations
         run: |
           python scripts/run_ci_checks.py --ci
+
+      - name: Ruff
+        run: |
+          ruff check backend/src scripts
+
+      - name: Black
+        run: |
+          black --check backend/src scripts
+
+      - name: Mypy
+        run: |
+          mypy --config-file mypy.ini
+
+      - name: Collect coverage (advisory)
+        continue-on-error: true
+        run: |
+          coverage run scripts/run_ci_checks.py
+          coverage xml
+
+      - name: Upload coverage to Codecov (advisory)
+        continue-on-error: true
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          flags: python
+          fail_ci_if_error: false
+
+      - name: Upload coverage.xml artifact (for debugging)
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
