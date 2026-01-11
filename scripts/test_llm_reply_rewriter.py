@@ -1,91 +1,157 @@
 from __future__ import annotations
 
-import json
 import os
 import sys
 import unittest
 from pathlib import Path
-from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from richpanel_middleware.automation.llm_reply_rewriter import (
-    RewriteResult,
-    rewrite_order_status_reply,
+from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
+    rewrite_reply,
 )
-from richpanel_middleware.integrations.openai import ChatCompletionResponse
+from richpanel_middleware.integrations.openai import (  # noqa: E402
+    ChatCompletionResponse,
+    OpenAIRequestError,
+)
 
 
-class _FakeOpenAIClient:
-    def __init__(self, response: ChatCompletionResponse):
+class _FakeClient:
+    def __init__(self, *, response: ChatCompletionResponse, raise_error: bool = False) -> None:
         self.response = response
+        self.raise_error = raise_error
         self.calls = 0
 
-    def chat_completion(
-        self,
-        request,
-        *,
-        safe_mode: bool,
-        automation_enabled: bool,
-    ) -> ChatCompletionResponse:
+    def chat_completion(self, request, safe_mode: bool, automation_enabled: bool):  # type: ignore[no-untyped-def]
         self.calls += 1
+        if self.raise_error:
+            raise OpenAIRequestError("simulated failure")
         return self.response
 
 
-class _FailingOpenAIClient:
-    def __init__(self, exc: Exception):
-        self.exc = exc
-        self.calls = 0
-
-    def chat_completion(self, request, *, safe_mode: bool, automation_enabled: bool):
-        self.calls += 1
-        raise self.exc
-
-
-class LLMReplyRewriterTests(unittest.TestCase):
+class ReplyRewriteTests(unittest.TestCase):
     def setUp(self) -> None:
         os.environ.pop("OPENAI_REPLY_REWRITE_ENABLED", None)
 
-    def test_rewrite_disabled_is_fail_closed(self) -> None:
-        draft = {"body": "Original reply"}
-        summary = {"status": "shipped", "id": "ord-123"}
-
-        result = rewrite_order_status_reply(
-            draft,
-            summary,
-            safe_mode=True,
-            automation_enabled=False,
-            allow_network=False,
-            outbound_enabled=False,
+    def test_gates_block_when_disabled(self) -> None:
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten", "confidence": 0.9}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-1",
+            event_id="evt-1",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
         )
 
-        self.assertIsInstance(result, RewriteResult)
-        self.assertFalse(result.used_llm)
+        self.assertFalse(result.rewritten)
         self.assertEqual(result.reason, "rewrite_disabled")
-        self.assertEqual(result.reply, draft)
+        self.assertEqual(result.body, "deterministic reply")
+        self.assertEqual(client.calls, 0)
 
-    def test_invalid_response_falls_back_to_deterministic(self) -> None:
+    def test_rewrite_applies_when_enabled_and_safe(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten response", "confidence": 0.95, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
 
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-2",
+            event_id="evt-2",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.body, "rewritten response")
+        self.assertEqual(result.reason, "applied")
+        self.assertEqual(client.calls, 1)
+
+    def test_gates_block_network(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten response", "confidence": 0.95}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-net",
+            event_id="evt-net",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            outbound_enabled=True,
+            client=client,
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.reason, "network_disabled")
+        self.assertEqual(result.body, "deterministic reply")
+        self.assertEqual(client.calls, 0)
+
+    def test_gates_block_outbound(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten response", "confidence": 0.95}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-outbound",
+            event_id="evt-outbound",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            client=client,
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.reason, "outbound_disabled")
+        self.assertEqual(result.body, "deterministic reply")
+        self.assertEqual(client.calls, 0)
+
+    def test_fallback_on_parse_failure_preserves_original(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
             message="not-json",
             status_code=200,
-            url="http://example.com",
-            raw={"choices": [{"message": {"content": "not-json"}}]},
-            dry_run=False,
+            url="https://example.com",
         )
-        client = _FakeOpenAIClient(response)
+        client = _FakeClient(response=response)
 
-        draft = {"body": "Deterministic reply"}
-        summary = {"status": "pending", "id": "ord-456"}
-
-        result = rewrite_order_status_reply(
-            draft,
-            summary,
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-3",
+            event_id="evt-3",
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
@@ -93,31 +159,24 @@ class LLMReplyRewriterTests(unittest.TestCase):
             client=client,
         )
 
-        self.assertFalse(result.used_llm)
-        self.assertEqual(result.reason, "invalid_response")
-        self.assertEqual(result.reply, draft)
-        self.assertEqual(client.calls, 1)
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, "original body")
+        self.assertEqual(result.reason, "invalid_json")
 
-    def test_rewrite_success_updates_body(self) -> None:
+    def test_fallback_on_low_confidence_preserves_original(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
-
-        rewritten_body = "Rewritten reply body"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
-            message='{"body": "Rewritten reply body", "confidence": 0.92, "risk_flag": false}',
+            message='{"body": "maybe", "confidence": 0.2}',
             status_code=200,
-            url="http://example.com",
-            raw={"choices": [{"message": {"content": rewritten_body}}]},
-            dry_run=False,
+            url="https://example.com",
         )
-        client = _FakeOpenAIClient(response)
+        client = _FakeClient(response=response)
 
-        draft = {"body": "Original deterministic reply"}
-        summary = {"status": "delivered", "id": "ord-789"}
-
-        result = rewrite_order_status_reply(
-            draft,
-            summary,
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-low",
+            event_id="evt-low",
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
@@ -125,30 +184,44 @@ class LLMReplyRewriterTests(unittest.TestCase):
             client=client,
         )
 
-        self.assertTrue(result.used_llm)
-        self.assertEqual(result.reason, "rewritten")
-        self.assertEqual(result.reply["body"], rewritten_body)
-        self.assertEqual(result.reply.get("confidence"), 0.92)
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, "original body")
+        self.assertEqual(result.reason, "low_confidence")
 
-    def test_log_record_redacts_pii(self) -> None:
-        draft = {"body": "Customer email is ava@example.com"}
-        summary = {"status": "shipped", "id": "ord-999"}
-
-        result = rewrite_order_status_reply(
-            draft,
-            summary,
-            safe_mode=True,
-            automation_enabled=True,
-            allow_network=False,
-            outbound_enabled=False,
+    def test_logs_do_not_include_body(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "safe text", "confidence": 0.9}',
+            status_code=200,
+            url="https://example.com",
         )
+        client = _FakeClient(response=response)
+        reply_body = "Sensitive customer info 12345"
 
-        log_record = result.log_record()
-        log_str = json.dumps(log_record)
+        with self.assertLogs("richpanel_middleware.automation.llm_reply_rewriter", level="INFO") as captured:
+            result = rewrite_reply(
+                reply_body,
+                conversation_id="t-4",
+                event_id="evt-4",
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                client=client,
+            )
 
-        self.assertNotIn("ava@example.com", log_str)
-        self.assertTrue(log_record["prompt_fingerprint"])
+        combined_logs = " ".join(captured.output)
+        self.assertNotIn(reply_body, combined_logs)
+        self.assertTrue(result.fingerprint)
+
+
+def main() -> int:
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(ReplyRewriteTests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    return 0 if result.wasSuccessful() else 1
 
 
 if __name__ == "__main__":
-    unittest.main()
+    raise SystemExit(main())
+

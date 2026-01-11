@@ -4,11 +4,13 @@ import hashlib
 import json
 import logging
 import os
-from dataclasses import dataclass
-from typing import Any, Dict, Optional
+import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import (
     ChatCompletionRequest,
+    ChatCompletionResponse,
     ChatMessage,
     OpenAIClient,
     OpenAIRequestError,
@@ -16,21 +18,24 @@ from richpanel_middleware.integrations.openai import (
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_REPLY_MODEL = "gpt-5.2-chat-latest"
-DEFAULT_TEMPERATURE = 0.2
-DEFAULT_MAX_TOKENS = 256
-OPENAI_REPLY_REWRITE_ENABLED_DEFAULT = False
+DEFAULT_MODEL = os.environ.get("OPENAI_REPLY_REWRITE_MODEL") or os.environ.get(
+    "OPENAI_MODEL", "gpt-5.2-chat-latest"
+)
+DEFAULT_TEMPERATURE = 0.0
+DEFAULT_MAX_TOKENS = int(os.environ.get("OPENAI_REPLY_REWRITE_MAX_TOKENS", 400))
+DEFAULT_CONFIDENCE_THRESHOLD = float(os.environ.get("OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD", 0.7))
+DEFAULT_MAX_CHARS = int(os.environ.get("OPENAI_REPLY_REWRITE_MAX_CHARS", 1000))
+DEFAULT_ENABLED = False
 
-_SYSTEM_PROMPT = """You are a guardrailed editor for ecommerce customer support.
-- Rewrite the reply for clarity and empathy.
-- Do NOT add new promises, discounts, or tracking details.
-- Keep all factual statements unchanged.
-- Keep length under 1000 characters.
-- If the draft already looks safe, return it unchanged.
-
-Respond ONLY with compact JSON:
-{"body": "<rewritten reply text>", "confidence": <0-1 float>, "risk_flag": <true|false>}
-"""
+SUSPICIOUS_PATTERNS = [
+    r"password",
+    r"ssn",
+    r"\b\d{3}-\d{2}-\d{4}\b",
+    r"credit card",
+    r"\b4\d{3}\s?\d{4}\s?\d{4}\s?\d{4}\b",
+    r"\b5\d{3}\s?\d{4}\s?\d{4}\s?\d{4}\b",
+    r"social security",
+]
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -39,214 +44,282 @@ def _to_bool(value: Optional[str], default: bool = False) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _fingerprint(obj: Any, *, length: int = 12) -> str:
+def _fingerprint(text: str, *, length: int = 12) -> str:
     try:
-        serialized = json.dumps(obj, sort_keys=True, default=str)
+        serialized = json.dumps(text, ensure_ascii=False, sort_keys=True)
     except Exception:
-        serialized = str(obj)
+        serialized = str(text)
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
 
 
-def _rewrite_block_reason(
+def _gating_reason(
     *,
     rewrite_enabled: bool,
     safe_mode: bool,
     automation_enabled: bool,
     allow_network: bool,
     outbound_enabled: bool,
+    reply_body: str,
 ) -> Optional[str]:
     if not rewrite_enabled:
         return "rewrite_disabled"
-    if not outbound_enabled:
-        return "outbound_disabled"
     if safe_mode:
         return "safe_mode"
     if not automation_enabled:
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
+    if not outbound_enabled:
+        return "outbound_disabled"
+    if not reply_body:
+        return "empty_body"
     return None
 
 
-def _build_user_prompt(draft_reply: Dict[str, Any], order_summary: Dict[str, Any]) -> str:
-    body = draft_reply.get("body") or ""
-    safe_summary = {
-        "status": order_summary.get("status"),
-        "eta": order_summary.get("eta") or order_summary.get("delivery_estimate"),
-        "id_hash": _fingerprint(order_summary.get("id")),
-    }
-    return json.dumps({"draft_reply": body, "order_summary": safe_summary}, default=str)
+def _build_prompt(reply_body: str) -> List[ChatMessage]:
+    trimmed = reply_body[: DEFAULT_MAX_CHARS * 2]  # bound input size defensively
+    system = (
+        "You rewrite Richpanel customer replies. Preserve facts and promises, "
+        "avoid new commitments, keep it concise and professional. "
+        "Return strict JSON with keys body (string <= 1000 chars), "
+        "confidence (0-1 float), risk_flags (list of strings). "
+        "If the input seems risky or contains sensitive data, add 'suspicious_content' "
+        "to risk_flags and keep the original tone."
+    )
+    user = f"Rewrite this reply safely:\n\n{trimmed}"
+    return [ChatMessage(role="system", content=system), ChatMessage(role="user", content=user)]
 
 
-def _parse_response(message: str) -> Optional[Dict[str, Any]]:
+def _parse_response(
+    response: ChatCompletionResponse,
+    *,
+    fingerprint: str,
+) -> Tuple[Optional[str], float, List[str], Optional[str]]:
+    """
+    Returns (body, confidence, risk_flags, error_reason)
+    """
+    if response.dry_run or not response.message:
+        return None, 0.0, [], response.reason or "dry_run"
+
+    content = response.message.strip()
+    fence = re.search(r"```(?:json)?\s*([\s\S]*?)```", content)
+    if fence:
+        content = fence.group(1).strip()
+
     try:
-        parsed = json.loads(message)
-    except Exception:
-        return None
+        parsed = json.loads(content)
+    except json.JSONDecodeError:
+        return None, 0.0, [], "invalid_json"
+
     if not isinstance(parsed, dict):
-        return None
+        return None, 0.0, [], "not_a_dict"
+
     body = parsed.get("body")
-    if not body or not isinstance(body, str):
-        return None
-    confidence = parsed.get("confidence")
-    if confidence is not None:
-        try:
-            confidence = float(confidence)
-        except (TypeError, ValueError):
-            confidence = None
-    risk_flag = bool(parsed.get("risk_flag"))
-    result: Dict[str, Any] = {"body": body}
-    if confidence is not None:
-        result["confidence"] = confidence
-    result["risk_flag"] = risk_flag
-    return result
+    confidence = parsed.get("confidence", 0.0)
+    risk_flags = parsed.get("risk_flags") or []
+    if body is None or not isinstance(body, str):
+        return None, 0.0, [], "missing_body"
+    try:
+        confidence = float(confidence)
+    except (TypeError, ValueError):
+        confidence = 0.0
+
+    if not isinstance(risk_flags, list):
+        risk_flags = []
+
+    if len(body) > DEFAULT_MAX_CHARS:
+        body = body[:DEFAULT_MAX_CHARS]
+        risk_flags.append("truncated")
+
+    # Detect obvious risky patterns in the rewritten text.
+    for pattern in SUSPICIOUS_PATTERNS:
+        if re.search(pattern, body, flags=re.IGNORECASE):
+            risk_flags.append("suspicious_content")
+            break
+
+    LOGGER.info(
+        "reply_rewrite.parsed",
+        extra={
+            "fingerprint": fingerprint,
+            "confidence": confidence,
+            "risk_flags": risk_flags,
+            "dry_run": response.dry_run,
+            "status": response.status_code,
+        },
+    )
+    return body, confidence, [str(flag) for flag in risk_flags], None
 
 
 @dataclass
-class RewriteResult:
-    reply: Dict[str, Any]
-    used_llm: bool
+class ReplyRewriteResult:
+    body: str
+    rewritten: bool
     reason: str
+    model: str
+    confidence: float
     dry_run: bool
-    prompt_fingerprint: str
-    response_fingerprint: Optional[str] = None
-
-    def log_record(self) -> Dict[str, Any]:
-        return {
-            "used_llm": self.used_llm,
-            "reason": self.reason,
-            "dry_run": self.dry_run,
-            "prompt_fingerprint": self.prompt_fingerprint,
-            "response_fingerprint": self.response_fingerprint,
-            "has_reply": bool(self.reply),
-        }
+    fingerprint: str
+    risk_flags: List[str] = field(default_factory=list)
+    gated_reason: Optional[str] = None
 
 
-def rewrite_order_status_reply(
-    draft_reply: Dict[str, Any],
-    order_summary: Dict[str, Any],
+def rewrite_reply(
+    reply_body: str,
     *,
+    conversation_id: str,
+    event_id: str,
     safe_mode: bool,
     automation_enabled: bool,
     allow_network: bool,
     outbound_enabled: bool,
     rewrite_enabled: Optional[bool] = None,
     client: Optional[OpenAIClient] = None,
-) -> RewriteResult:
+) -> ReplyRewriteResult:
     """
-    Attempt to rewrite the deterministic order-status reply with an LLM.
+    Attempt to rewrite a deterministic reply via OpenAI.
 
-    Fail-closed:
-    - Disabled by default via OPENAI_REPLY_REWRITE_ENABLED (False)
-    - Requires outbound_enabled, allow_network, automation_enabled, and safe_mode == False
-    - On any error or risk flag, returns the original draft reply.
+    Fail-closed: if any gate fails or the model output is low-confidence/unsafe,
+    the original reply is returned untouched.
     """
-    rewrite_enabled = (
-        rewrite_enabled
-        if rewrite_enabled is not None
-        else _to_bool(
-            os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"),
-            default=OPENAI_REPLY_REWRITE_ENABLED_DEFAULT,
-        )
+    enabled = rewrite_enabled if rewrite_enabled is not None else _to_bool(
+        os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
     )
-    prompt_fingerprint = _fingerprint(
-        {
-            "draft_reply": draft_reply.get("body"),
-            "order_summary": {
-                "status": order_summary.get("status"),
-                "eta": order_summary.get("eta") or order_summary.get("delivery_estimate"),
-                "id": order_summary.get("id"),
-            },
-        }
-    )
-
-    reason = _rewrite_block_reason(
-        rewrite_enabled=rewrite_enabled,
+    fingerprint = _fingerprint(reply_body or "")
+    gating_reason = _gating_reason(
+        rewrite_enabled=enabled,
         safe_mode=safe_mode,
         automation_enabled=automation_enabled,
         allow_network=allow_network,
         outbound_enabled=outbound_enabled,
+        reply_body=reply_body or "",
     )
-    if reason:
-        return RewriteResult(
-            reply=draft_reply,
-            used_llm=False,
-            reason=reason,
+    if gating_reason:
+        LOGGER.info(
+            "reply_rewrite.gated",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "reason": gating_reason,
+                "fingerprint": fingerprint,
+                "allow_network": allow_network,
+                "outbound_enabled": outbound_enabled,
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason=gating_reason,
+            model=DEFAULT_MODEL,
+            confidence=0.0,
             dry_run=True,
-            prompt_fingerprint=prompt_fingerprint,
+            fingerprint=fingerprint,
+            gated_reason=gating_reason,
         )
 
-    client = client or OpenAIClient(allow_network=allow_network)
+    messages = _build_prompt(reply_body)
     request = ChatCompletionRequest(
-        model=DEFAULT_REPLY_MODEL,
-        messages=[
-            ChatMessage(role="system", content=_SYSTEM_PROMPT),
-            ChatMessage(role="user", content=_build_user_prompt(draft_reply, order_summary)),
-        ],
+        model=DEFAULT_MODEL,
+        messages=messages,
         temperature=DEFAULT_TEMPERATURE,
         max_tokens=DEFAULT_MAX_TOKENS,
-        metadata={"feature": "reply_rewriter"},
+        metadata={"conversation_id": conversation_id, "event_id": event_id},
     )
+    openai_client = client or OpenAIClient(allow_network=allow_network)
 
     try:
-        response = client.chat_completion(
+        response = openai_client.chat_completion(
             request, safe_mode=safe_mode, automation_enabled=automation_enabled
         )
-    except OpenAIRequestError:
-        return RewriteResult(
-            reply=draft_reply,
-            used_llm=False,
-            reason="exception",
-            dry_run=True,
-            prompt_fingerprint=prompt_fingerprint,
+    except OpenAIRequestError as exc:
+        LOGGER.warning(
+            "reply_rewrite.request_failed",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "error": str(exc)[:200],
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason="request_failed",
+            model=DEFAULT_MODEL,
+            confidence=0.0,
+            dry_run=False,
+            fingerprint=fingerprint,
         )
 
-    response_fingerprint = _fingerprint(response.raw) if response.raw else None
+    rewritten_body, confidence, risk_flags, parse_error = _parse_response(
+        response, fingerprint=fingerprint
+    )
 
-    if not response.message:
-        return RewriteResult(
-            reply=draft_reply,
-            used_llm=False,
-            reason="empty_response",
+    if parse_error:
+        LOGGER.warning(
+            "reply_rewrite.parse_failed",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "parse_error": parse_error,
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason=parse_error,
+            model=response.model,
+            confidence=confidence,
             dry_run=response.dry_run,
-            prompt_fingerprint=prompt_fingerprint,
-            response_fingerprint=response_fingerprint,
+            fingerprint=fingerprint,
+            risk_flags=risk_flags,
         )
 
-    parsed = _parse_response(response.message)
-    if not parsed:
-        return RewriteResult(
-            reply=draft_reply,
-            used_llm=False,
-            reason="invalid_response",
+    if confidence < DEFAULT_CONFIDENCE_THRESHOLD or ("suspicious_content" in risk_flags):
+        LOGGER.info(
+            "reply_rewrite.fallback",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "confidence": confidence,
+                "risk_flags": risk_flags,
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason="low_confidence" if confidence < DEFAULT_CONFIDENCE_THRESHOLD else "risk_flagged",
+            model=response.model,
+            confidence=confidence,
             dry_run=response.dry_run,
-            prompt_fingerprint=prompt_fingerprint,
-            response_fingerprint=response_fingerprint,
+            fingerprint=fingerprint,
+            risk_flags=risk_flags,
         )
 
-    if parsed.get("risk_flag"):
-        return RewriteResult(
-            reply=draft_reply,
-            used_llm=False,
-            reason="risk_flagged",
-            dry_run=response.dry_run,
-            prompt_fingerprint=prompt_fingerprint,
-            response_fingerprint=response_fingerprint,
-        )
+    LOGGER.info(
+        "reply_rewrite.applied",
+        extra={
+            "conversation_id": conversation_id,
+            "event_id": event_id,
+            "fingerprint": fingerprint,
+            "confidence": confidence,
+            "risk_flags": risk_flags,
+            "model": response.model,
+        },
+    )
 
-    rewritten_reply = dict(draft_reply)
-    rewritten_reply["body"] = parsed["body"]
-    if "confidence" in parsed:
-        rewritten_reply["confidence"] = parsed["confidence"]
-
-    return RewriteResult(
-        reply=rewritten_reply,
-        used_llm=not response.dry_run,
-        reason="rewritten",
+    return ReplyRewriteResult(
+        body=rewritten_body or reply_body,
+        rewritten=True,
+        reason="applied",
+        model=response.model,
+        confidence=confidence,
         dry_run=response.dry_run,
-        prompt_fingerprint=prompt_fingerprint,
-        response_fingerprint=response_fingerprint,
+        fingerprint=fingerprint,
+        risk_flags=risk_flags,
     )
 
 
-__all__ = ["RewriteResult", "rewrite_order_status_reply"]
+__all__ = ["rewrite_reply", "ReplyRewriteResult"]
+
