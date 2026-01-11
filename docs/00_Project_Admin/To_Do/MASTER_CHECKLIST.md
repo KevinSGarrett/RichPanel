@@ -44,3 +44,4 @@ Important:
 Notes:
 - Build owners can be adjusted as build mode progresses.
 - Keep this file small; detailed tasks belong in `PLAN_CHECKLIST.md` and source docs.
+- Do not claim dev/staging/prod state here unless linked to verified evidence.

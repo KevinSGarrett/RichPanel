@@ -321,21 +321,22 @@ def wait_for_dynamodb_record(
 
 
 def validate_idempotency_item(item: Dict[str, Any]) -> str:
-    required = ["event_id", "mode", "safe_mode", "automation_enabled", "payload_excerpt", "status"]
+    required = ["event_id", "mode", "safe_mode", "automation_enabled", "payload_fingerprint", "status"]
     missing = [key for key in required if key not in item]
     if missing:
         raise SmokeFailure(f"Idempotency item missing required fields: {', '.join(missing)}")
 
-    excerpt = item.get("payload_excerpt")
-    if not isinstance(excerpt, str):
-        raise SmokeFailure("Idempotency item payload_excerpt was not a string.")
-    excerpt = excerpt.strip()
-    if not excerpt:
-        raise SmokeFailure("Idempotency item payload_excerpt was empty.")
-    if len(excerpt) > 2000:
-        raise SmokeFailure("Idempotency item payload_excerpt exceeded 2000 characters.")
+    fingerprint = item.get("payload_fingerprint")
+    if not isinstance(fingerprint, str):
+        raise SmokeFailure("Idempotency item payload_fingerprint was not a string.")
+    fingerprint = fingerprint.strip()
+    if not fingerprint:
+        raise SmokeFailure("Idempotency item payload_fingerprint was empty.")
+    field_count = item.get("payload_field_count")
+    if not isinstance(field_count, int):
+        raise SmokeFailure("Idempotency item payload_field_count was not an integer.")
 
-    return excerpt
+    return fingerprint
 
 
 def _normalize_tags(value: Any) -> List[str]:
@@ -622,13 +623,10 @@ def main() -> int:
         event_id=event_id,
         timeout_seconds=args.wait_seconds,
     )
-    payload_excerpt = validate_idempotency_item(item)
+    payload_fingerprint = validate_idempotency_item(item)
     mode = item.get("mode")
     print(f"[OK] Event '{event_id}' observed in table '{dynamo_table}' (mode={mode}).")
-    print(
-        "[OK] Idempotency payload_excerpt is present and bounded "
-        f"({len(payload_excerpt)} chars, max 2000)."
-    )
+    print(f"[OK] Idempotency payload_fingerprint captured ({payload_fingerprint[:12]}...).")
     print(f"[INFO] DynamoDB console: {console_links['ddb']}")
     conversation_id = item.get("conversation_id") or payload["conversation_id"]
 

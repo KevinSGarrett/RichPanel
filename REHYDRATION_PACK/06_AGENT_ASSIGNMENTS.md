@@ -2,6 +2,8 @@
 
 This file must contain **only the currently active prompts** for the current run/cycle.
 
+prompt-repeat-override: true
+
 **⚠️ REQUIRED IN EVERY PROMPT:** Model + MAX mode + Cycle metadata (see below)
 
 ---

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
@@ -36,6 +37,7 @@ from lambda_handlers.worker import handler as worker  # noqa: E402
 from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
     RichpanelResponse,
+    RichpanelRequestError,
 )
 
 
@@ -313,7 +315,8 @@ class PipelineTests(unittest.TestCase):
             "conversation_id",
             "mode",
             "status",
-            "payload_excerpt",
+            "payload_fingerprint",
+            "payload_field_count",
             "safe_mode",
             "automation_enabled",
             "expires_at",
@@ -321,6 +324,8 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(field, item)
         self.assertEqual(item["status"], "processed")
         self.assertEqual(item["mode"], plan.mode)
+        self.assertGreater(len(item["payload_fingerprint"]), 0)
+        self.assertEqual(item["payload_field_count"], len(envelope.payload))
 
     def test_execute_and_record_writes_state_and_audit_tables(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-555", "message_id": "m-555"})
@@ -363,6 +368,23 @@ class PipelineTests(unittest.TestCase):
             self.assertNotIn("order_status_draft_reply", action_types)
             if scenario["safe_mode"]:
                 self.assertEqual(plan.mode, "route_only")
+
+
+    def test_state_and_audit_redact_customer_body(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "t-pii", "message": "Sensitive PII content should not persist"}
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=False)
+
+        worker._persist_idempotency(envelope, plan)
+        worker._execute_and_record(envelope, plan)
+
+        idempotency_items = worker._table(os.environ["IDEMPOTENCY_TABLE_NAME"]).items
+        state_items = worker._table(os.environ["CONVERSATION_STATE_TABLE_NAME"]).items
+        audit_items = worker._table(os.environ["AUDIT_TRAIL_TABLE_NAME"]).items
+
+        combined = json.dumps([idempotency_items, state_items, audit_items], default=str)
+        self.assertNotIn("Sensitive PII content", combined)
 
 
 class OutboundOrderStatusTests(unittest.TestCase):
@@ -419,19 +441,97 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(len(executor.calls), 3)
 
-        tag_call = executor.calls[0]
+        get_call = executor.calls[0]
+        self.assertEqual(get_call["method"], "GET")
+        self.assertIn("/v1/tickets/", get_call["path"])
+        self.assertNotIn("/add-tags", get_call["path"])
+
+        tag_call = executor.calls[1]
         self.assertEqual(tag_call["method"], "PUT")
         self.assertIn("/add-tags", tag_call["path"])
         self.assertEqual(tag_call["kwargs"]["json_body"]["tags"], ["mw-auto-replied"])
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
-        reply_call = executor.calls[1]
+        reply_call = executor.calls[2]
         self.assertEqual(reply_call["kwargs"]["json_body"]["status"], "resolved")
         self.assertIn("comment", reply_call["kwargs"]["json_body"])
         self.assertEqual(reply_call["kwargs"]["json_body"]["comment"]["type"], "public")
         self.assertFalse(reply_call["kwargs"]["dry_run"])
+
+    def test_outbound_skips_when_ticket_already_resolved(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_status="resolved")
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "already_resolved")
+        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(executor.calls[0]["method"], "GET")
+        route_call = executor.calls[1]
+        self.assertEqual(route_call["method"], "PUT")
+        self.assertIn("/add-tags", route_call["path"])
+        tags = route_call["kwargs"]["json_body"]["tags"]
+        self.assertIn("route-email-support-team", tags)
+        self.assertIn("mw-skip-order-status-closed", tags)
+
+    def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_status="open", ticket_tags=["mw-auto-replied"])
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "followup_after_auto_reply")
+        self.assertEqual(len(executor.calls), 2)
+        self.assertEqual(executor.calls[0]["method"], "GET")
+        route_call = executor.calls[1]
+        self.assertEqual(route_call["method"], "PUT")
+        self.assertIn("/add-tags", route_call["path"])
+        tags = route_call["kwargs"]["json_body"]["tags"]
+        self.assertIn("route-email-support-team", tags)
+        self.assertIn("mw-skip-followup-after-auto-reply", tags)
+        self.assertIn("mw-escalated-human", tags)
+
+    def test_outbound_status_read_failure_routes_to_email_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(raise_on_get=True)
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "status_read_failed")
+        self.assertEqual(len(executor.calls), 2)
+        route_call = executor.calls[1]
+        tags = route_call["kwargs"]["json_body"]["tags"]
+        self.assertIn("route-email-support-team", tags)
+        self.assertIn("mw-skip-status-read-failed", tags)
 
     def test_outbound_logging_does_not_emit_reply_body(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -457,11 +557,29 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
 
 class _RecordingExecutor:
-    def __init__(self) -> None:
+    def __init__(
+        self, *, ticket_status: str = "open", ticket_tags: list[str] | None = None, raise_on_get: bool = False
+    ) -> None:
         self.calls: list[dict[str, Any]] = []
+        self.ticket_status = ticket_status
+        self.ticket_tags = ticket_tags or []
+        self.raise_on_get = raise_on_get
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
+
+        if method.upper() == "GET" and path.startswith("/v1/tickets/") and "/add-tags" not in path:
+            if self.raise_on_get:
+                raise RichpanelRequestError("simulated ticket read failure")
+            body = json.dumps({"status": self.ticket_status, "tags": self.ticket_tags}).encode("utf-8")
+            return RichpanelResponse(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                body=body,
+                url=path,
+                dry_run=kwargs.get("dry_run", False),
+            )
+
         return RichpanelResponse(
             status_code=202,
             headers={},
@@ -469,6 +587,8 @@ class _RecordingExecutor:
             url=path,
             dry_run=kwargs.get("dry_run", False),
         )
+
+
 
 
 

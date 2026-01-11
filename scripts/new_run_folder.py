@@ -22,8 +22,6 @@ from __future__ import annotations
 
 import argparse
 import re
-from datetime import datetime, timezone
-from pathlib import Path
 import shutil
 import sys
 from typing import Optional
@@ -103,6 +101,13 @@ def main() -> int:
     # Create run root + agent folders
     for aid in AGENT_IDS:
         (run_root / aid).mkdir(parents=True, exist_ok=True)
+
+    def find_template(src_name: str) -> Optional[Path]:
+        for d in templates_dirs:
+            candidate = d / src_name
+            if candidate.exists():
+                return candidate
+        return None
 
     # Copy templates into each agent folder
     for aid in AGENT_IDS:
