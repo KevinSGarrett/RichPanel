@@ -3,8 +3,6 @@ import json
 import logging
 import os
 import time
-import uuid
-from datetime import datetime, timezone
 from typing import Any, Dict
 
 try:
@@ -53,9 +51,7 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
         return _error_response(401, "invalid_token")
 
     payload = _parse_payload(event)
-    message_envelope = build_event_envelope(
-        payload, default_group_id=DEFAULT_MESSAGE_GROUP_ID, source=EVENT_SOURCE
-    )
+    message_envelope = build_event_envelope(payload, default_group_id=DEFAULT_MESSAGE_GROUP_ID, source=EVENT_SOURCE)
 
     try:
         _sqs_client().send_message(
@@ -157,4 +153,3 @@ def _sqs_client():
             raise RuntimeError("boto3 is required to create an sqs client.")
         _SQS_CLIENT = boto3.client("sqs")
     return _SQS_CLIENT
-
