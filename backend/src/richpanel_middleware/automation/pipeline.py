@@ -514,8 +514,15 @@ def execute_order_status_reply(
         if ticket_metadata is None:
             return _route_email_support("status_read_failed")
 
+        # Treat 4xx responses (e.g., 404 ticket not found) as status read failures.
+        if ticket_metadata.status_code is not None and ticket_metadata.status_code >= 400:
+            return _route_email_support("status_read_failed")
+
         ticket_status = ticket_metadata.status
         ticket_tags = ticket_metadata.tags
+
+        if ticket_status is None:
+            return _route_email_support("status_read_failed")
 
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)

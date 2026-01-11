@@ -79,7 +79,7 @@ class OpenAIClientTests(unittest.TestCase):
         client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
 
         request = ChatCompletionRequest(
-            model="gpt-5.2-chat-latest",
+            model="gpt-4o-mini",
             messages=[ChatMessage(role="user", content="hi")],
         )
         response = client.chat_completion(request, safe_mode=True, automation_enabled=True)
@@ -93,7 +93,7 @@ class OpenAIClientTests(unittest.TestCase):
         client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
 
         request = ChatCompletionRequest(
-            model="gpt-5.2-chat-latest",
+            model="gpt-4o-mini",
             messages=[ChatMessage(role="user", content="hi there")],
         )
         response = client.chat_completion(request, safe_mode=False, automation_enabled=False)
@@ -139,7 +139,7 @@ class OpenAIClientTests(unittest.TestCase):
         client = OpenAIClient(allow_network=False, transport=transport)
 
         request = ChatCompletionRequest(
-            model="gpt-5.2-chat-latest",
+            model="gpt-4o-mini",
             messages=[ChatMessage(role="user", content="hello")],
         )
         response = client.chat_completion(request, safe_mode=False, automation_enabled=True)
@@ -162,7 +162,7 @@ class OpenAIClientTests(unittest.TestCase):
         client = OpenAIClient(allow_network=True, transport=transport, secrets_client=secrets_client)
 
         request = ChatCompletionRequest(
-            model="gpt-5.2-chat-latest",
+            model="gpt-4o-mini",
             messages=[ChatMessage(role="user", content="hello")],
         )
         response = client.chat_completion(request, safe_mode=False, automation_enabled=True)
