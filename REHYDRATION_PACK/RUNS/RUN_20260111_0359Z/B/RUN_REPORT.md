@@ -44,7 +44,7 @@
   - Evidence: console output from run (orders/pipeline/clients tests all green; no uncommitted diffs after regen).
 - **Coverage**: `coverage run -m unittest discover -s scripts -p "test_*.py"` + `coverage xml` (succeeded locally).
 - **Lint/type checks**: Ruff/Black/Mypy are currently advisory in CI due to existing lint findings in the branch; plan to flip back to blocking after the backlog is cleared.
-- **GitHub Actions**: CI run pending after push; will capture Codecov upload link and add to this folder once available.
+- **GitHub Actions**: CI green for head (`CI` run https://github.com/KevinSGarrett/RichPanel/actions/runs/20889477918; Codecov patch/project checks succeeded).
 
 ## PR / merge status
 - PR link: https://github.com/KevinSGarrett/RichPanel/pull/74
@@ -61,7 +61,7 @@
 - Merge with `origin/main` favored branch versions; watch CI for regressions.
 
 ## Follow-ups
-- Push updated branch, monitor CI + Codecov upload, enable auto-merge, drop the run link into `B/`, and clean up Ruff/Black/Mypy findings so lint can be flipped back to blocking.
+- Enable auto-merge once checks settle, then clean up Ruff/Black/Mypy findings so lint can be flipped back to blocking.
 
 ## Notes
 - Run folder `RUN_20260111_0359Z` created via `python scripts/new_run_folder.py --now`; B docs updated here for evidence tracking.

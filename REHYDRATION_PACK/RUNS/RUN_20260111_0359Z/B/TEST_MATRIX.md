@@ -10,6 +10,7 @@ List the tests you ran (or explicitly note none).
 |---|---|---|---|
 | CI-equivalent | `python scripts/run_ci_checks.py --ci` | pass | local console output (all checks green) |
 | Coverage unit tests | `coverage run -m unittest discover -s scripts -p "test_*.py"` | pass | local console output; `coverage xml` generated |
+| GitHub Actions CI | Workflow run `CI` | pass | https://github.com/KevinSGarrett/RichPanel/actions/runs/20889477918 |
 
 ## Notes
-- GitHub Actions run with Codecov upload will be linked once the branch is pushed and CI completes.
+- GitHub Actions CI run is green; Codecov patch/project checks succeeded on the same run.
