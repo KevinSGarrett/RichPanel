@@ -1,11 +1,11 @@
-# Git Run Plan (Template)
+﻿# Git Run Plan
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
-**Mode:** sequential (default)  
-**Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
+**RUN_ID:** RUN_20260110_1638Z  
+**Mode:** sequential  
+**Integrator:** C  
+**Target branch:** `run/B33_ticketmetadata_shadow_fix_and_gpt5_models`  
 **Merge strategy:** merge commit (locked)  
 **Branch cleanup:** yes (required)  
 
@@ -16,13 +16,13 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ## Branch plan
 ### Sequential (default)
-- All agents use: `run/<RUN_ID>`
+- All agents use: `run/B33_ticketmetadata_shadow_fix_and_gpt5_models`
 
 ### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+- Agent A: `run/B33_ticketmetadata_shadow_fix_and_gpt5_models-A`
+- Agent B: `run/B33_ticketmetadata_shadow_fix_and_gpt5_models-B`
+- Agent C: `run/B33_ticketmetadata_shadow_fix_and_gpt5_models-C`
+- Integrator merges into `run/B33_ticketmetadata_shadow_fix_and_gpt5_models`
 
 ---
 
@@ -30,29 +30,33 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - n/a (not active this run)
 - Locked paths (do not edit):
-  - <path patterns>
+  - n/a
 
 ### Agent B
 - Allowed paths:
-  - <path patterns>
+  - n/a (not active this run)
 - Locked paths:
-  - <path patterns>
+  - n/a
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - backend/src/richpanel_middleware/automation/**
+  - scripts/test_openai_client.py
+  - config/.env.example
+  - REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/C/**
 - Locked paths:
-  - <path patterns>
+  - docs/_generated/**
+  - reference/_generated/**
 
 ---
 
 ## Integration checklist (Integrator)
-- [ ] Pull latest `main`
-- [ ] Merge agent branches (if parallel) into `run/<RUN_ID>`
-- [ ] Run: `python scripts/run_ci_checks.py`
-- [ ] Merge `run/<RUN_ID>` → `main` (PR preferred)
+- [ ] Pull latest `main` (branch cut from current HEAD)
+- [ ] Merge agent branches (if parallel) into `run/B33_ticketmetadata_shadow_fix_and_gpt5_models`
+- [x] Run: `python scripts/run_ci_checks.py`
+- [ ] Merge `run/B33_ticketmetadata_shadow_fix_and_gpt5_models` â†’ `main` (PR with merge commit)
 - [ ] Confirm Actions are green (or document failure + fix)
-- [ ] Delete run branches + agent branches
+- [ ] Delete run branch after merge
 - [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md`

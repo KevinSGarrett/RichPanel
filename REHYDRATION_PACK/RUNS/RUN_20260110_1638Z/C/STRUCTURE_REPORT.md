@@ -1,27 +1,28 @@
-# Structure Report
+﻿# Structure Report
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** C  
+**Date:** 2026-01-10
 
 ## Summary
-- <ONE_SENTENCE_SUMMARY>
+- No structural changes; updated existing configs/tests to use GPT-5.2 defaults.
 
 ## New files/folders added
-- <PATH_1>
-- <PATH_2>
+- None
 
 ## Files/folders modified
-- <PATH_1>
-- <PATH_2>
+- backend/src/richpanel_middleware/automation/llm_routing.py
+- backend/src/richpanel_middleware/automation/prompts.py
+- scripts/test_openai_client.py
+- config/.env.example
 
 ## Files/folders removed
-- <NONE or list>
+- None
 
 ## Rationale (why this structure change was needed)
-<FILL_ME>
+Align default OpenAI model selection with GPT-5.2 while preserving env overrides and existing safety gates.
 
 ## Navigation updates performed
-- `docs/INDEX.md` updated: yes/no
-- `docs/CODEMAP.md` updated: yes/no
-- registries regenerated: yes/no
+- `docs/INDEX.md` updated: no
+- `docs/CODEMAP.md` updated: no
+- registries regenerated: no new artifacts committed (CI regen only)
