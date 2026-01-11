@@ -33,6 +33,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
 )
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
+from richpanel_middleware.automation.llm_reply_rewriter import ReplyRewriteResult  # noqa: E402
 from lambda_handlers.worker import handler as worker  # noqa: E402
 from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
@@ -325,8 +326,10 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(field, item)
         self.assertEqual(item["status"], "processed")
         self.assertEqual(item["mode"], plan.mode)
-        self.assertGreater(len(item["payload_fingerprint"]), 0)
+        self.assertGreaterEqual(len(item["payload_fingerprint"]), 16)
         self.assertEqual(item["payload_field_count"], len(envelope.payload))
+        serialized = json.dumps(item)
+        self.assertNotIn("Sensitive PII content", serialized)
 
     def test_execute_and_record_writes_state_and_audit_tables(self) -> None:
         envelope = build_event_envelope({"ticket_id": "t-555", "message_id": "m-555"})
@@ -555,6 +558,36 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
         combined_logs = " ".join(captured.output)
         self.assertNotIn(reply_body, combined_logs)
+
+    def test_reply_rewrite_result_is_recorded(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor()
+
+        fake_rewrite_result = ReplyRewriteResult(
+            body="rewritten body",
+            rewritten=True,
+            reason="applied",
+            model="gpt-5.2-chat-latest",
+            confidence=0.95,
+            dry_run=False,
+            fingerprint="abc123",
+            risk_flags=[],
+        )
+
+        with mock.patch("richpanel_middleware.automation.pipeline.rewrite_reply", return_value=fake_rewrite_result):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        responses = result.get("responses") or []
+        self.assertTrue(any(entry.get("action") == "reply_rewrite" for entry in responses))
 
 
 class _RecordingExecutor:

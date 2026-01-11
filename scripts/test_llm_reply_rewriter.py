@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import unittest
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -187,6 +188,82 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertFalse(result.rewritten)
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "low_confidence")
+
+    def test_gates_block_empty_body(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten", "confidence": 0.9}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+
+        result = rewrite_reply(
+            "",
+            conversation_id="t-empty",
+            event_id="evt-empty",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.reason, "empty_body")
+        self.assertEqual(client.calls, 0)
+
+    def test_suspicious_content_triggers_risk_flag_and_fallback(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "password 123", "confidence": 0.95, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-risk",
+            event_id="evt-risk",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertIn("suspicious_content", result.risk_flags)
+        self.assertEqual(result.reason, "risk_flagged")
+
+    def test_truncates_long_body_and_marks_risk_flag(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        long_text = "x" * 1500
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps({"body": long_text, "confidence": 0.95}),
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _FakeClient(response=response)
+
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-long",
+            event_id="evt-long",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+
+        self.assertTrue(result.rewritten)
+        self.assertLessEqual(len(result.body), 1000)
+        self.assertIn("truncated", result.risk_flags)
 
     def test_logs_do_not_include_body(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
