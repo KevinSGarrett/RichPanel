@@ -45,7 +45,7 @@ jobs:
 
       - name: CDK synth
         working-directory: infra/cdk
-        run: npm run synth
+        run: npx cdk synth
 
       - name: Run repo validations
         run: |
