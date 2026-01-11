@@ -112,3 +112,10 @@
 - Templates now enforce comprehensive evidence capture before merge
 - E2E_Test_Runbook.md provides standalone reference for E2E testing procedures
 - NEXT_10 list captures emerging priorities discovered during this run
+
+## Post-push fix (commit 571229b)
+- **Issue**: Empty workflow files (.github/workflows/codeql.yml, gitleaks.yml, iac_scan.yml) were causing GitHub Actions failures
+- **Root cause**: These files were added as empty placeholders in a previous run and committed in error
+- **Fix**: Removed empty workflow files; updated Progress_Log.md and CHANGELOG.md
+- **Status**: Fix committed and pushed to branch
+- **Next**: These workflows should be properly implemented with actual definitions in a future run (see NEXT_10 list)

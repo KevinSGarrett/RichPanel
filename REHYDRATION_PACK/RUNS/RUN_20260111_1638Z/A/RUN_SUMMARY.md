@@ -43,4 +43,5 @@ Make PR health checks and end-to-end proof runs non-optional in the workflow by 
 - NEXT_10 items start with 10 suggestions from this run (Codecov hardening, CloudWatch dashboards/alarms, etc.)
 
 ## Issues / follow-ups
-- None (follow-up items captured in NEXT_10 list)
+- **Fixed post-push**: Removed empty security workflow files (codeql.yml, gitleaks.yml, iac_scan.yml) that were causing GitHub Actions failures (commit 571229b)
+- Other follow-up items captured in NEXT_10 list
