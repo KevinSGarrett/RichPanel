@@ -20,7 +20,7 @@ Stabilize CI coverage + Codecov flow for PR #74 and align runbook.
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260110_1622Z_github_ci_security_stack`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/74
-- CI status at end of run: green (`CI` run https://github.com/KevinSGarrett/RichPanel/actions/runs/20889477918; Codecov patch/project success)
+- CI status at end of run: green (`CI` run https://github.com/KevinSGarrett/RichPanel/actions/runs/20889516366; Codecov patch/project success)
 - Main updated: merged origin/main into branch (preferring branch versions)
 - Branch cleanup done: no
 

@@ -44,7 +44,7 @@
   - Evidence: console output from run (orders/pipeline/clients tests all green; no uncommitted diffs after regen).
 - **Coverage**: `coverage run -m unittest discover -s scripts -p "test_*.py"` + `coverage xml` (succeeded locally).
 - **Lint/type checks**: Ruff/Black/Mypy are currently advisory in CI due to existing lint findings in the branch; plan to flip back to blocking after the backlog is cleared.
-- **GitHub Actions**: CI green for head (`CI` run https://github.com/KevinSGarrett/RichPanel/actions/runs/20889477918; Codecov patch/project checks succeeded).
+- **GitHub Actions**: CI green for head (`CI` run https://github.com/KevinSGarrett/RichPanel/actions/runs/20889516366; Codecov patch/project checks succeeded).
 
 ## PR / merge status
 - PR link: https://github.com/KevinSGarrett/RichPanel/pull/74
