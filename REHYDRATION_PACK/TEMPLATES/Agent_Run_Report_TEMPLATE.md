@@ -45,6 +45,15 @@ Paste output snippet proving you ran:
 
 <PASTE_OUTPUT_SNIPPET>
 
+## PR Health Check (required)
+- **PR link:** <LINK>
+- **Actions run link (CI):** <GITHUB_ACTIONS_RUN_URL or gh run view output>
+- **Codecov status (patch/project):** <status or "N/A">
+- **Bugbot status:** <link or "quota exhausted — manual substitute review provided">
+- **Manual substitute review evidence (if Bugbot unavailable):** <summary + evidence path/link>
+- **Tests required:** `python scripts/run_ci_checks.py --ci` (and optional `python -m compileall backend/src scripts`)
+- **Evidence recorded in run artifacts:** <RUN_REPORT.md section + TEST_MATRIX.md row>
+
 ## Docs impact (summary)
 - **Docs updated:** <NONE or list>
 - **Docs to update next:** <NONE or list>

@@ -2480,6 +2480,102 @@
     "text": "DR posture documented (single region, multi-AZ)"
   },
   {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-4376574CE9",
+    "line": 514,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Branch will be deleted after merge"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-53744FFEEA",
+    "line": 513,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "PR uses merge commit method (not squash)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-68BED06779",
+    "line": 512,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "All evidence captured in run artifacts with no placeholders"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-B1B8E701F8",
+    "line": 508,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "All CI checks are green"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-BA7DC5512F",
+    "line": 511,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "E2E smoke tests passed (if automation/outbound touched)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-BB4AF0C070",
+    "line": 510,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Bugbot review completed and findings addressed (or manual review documented)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-C6EEA8D803",
+    "line": 509,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Codecov status is acceptable (\u226550% patch, \u22645% project drop)"
+  },
+  {
+    "checked": false,
+    "heading_path": "E2E Test Runbook (for Cursor Agents) > 10) Checklist",
+    "id": "PLN-3445A4AC81",
+    "line": 144,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "No PII in artifacts (IDs/URLs only)"
+  },
+  {
+    "checked": false,
+    "heading_path": "E2E Test Runbook (for Cursor Agents) > 10) Checklist",
+    "id": "PLN-7E2DDF00C1",
+    "line": 145,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Added PR Health Check summary in RUN_REPORT.md"
+  },
+  {
+    "checked": false,
+    "heading_path": "E2E Test Runbook (for Cursor Agents) > 10) Checklist",
+    "id": "PLN-819C999CF2",
+    "line": 141,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Determined if E2E required for this PR"
+  },
+  {
+    "checked": false,
+    "heading_path": "E2E Test Runbook (for Cursor Agents) > 10) Checklist",
+    "id": "PLN-AEA975BF74",
+    "line": 142,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Ran required E2E workflow(s)"
+  },
+  {
+    "checked": false,
+    "heading_path": "E2E Test Runbook (for Cursor Agents) > 10) Checklist",
+    "id": "PLN-AFD8DD3335",
+    "line": 143,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Captured run URLs and confirmations in TEST_MATRIX.md"
+  },
+  {
     "checked": true,
     "heading_path": "Wave 08 Definition of Done Checklist > 1) Documentation deliverables (this repo)",
     "id": "PLN-1D465D3B64",

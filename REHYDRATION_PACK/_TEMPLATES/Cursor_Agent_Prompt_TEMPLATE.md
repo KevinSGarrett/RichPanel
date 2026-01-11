@@ -15,6 +15,19 @@
 
 ---
 
+## PR Health Check (REQUIRED before merge)
+- PR link: <FILL_PR_LINK>
+- Actions run link (CI): <PASTE_GITHUB_ACTIONS_RUN_URL or gh run view output>
+- Codecov status (patch/project) if available: <status or "N/A">
+- Bugbot status: <link or "quota exhausted — manual review provided">
+  - If Bugbot quota is exhausted, include manual substitute review evidence (e.g., `python scripts/run_ci_checks.py --ci` output and/or `python -m compileall backend/src scripts` pass, plus a short findings summary).
+- Required tests and how to run:
+  - `python scripts/run_ci_checks.py --ci`
+  - Optional manual check: `python -m compileall backend/src scripts`
+- Record evidence in run artifacts (`RUN_REPORT.md`, `TEST_MATRIX.md`) with commands + outputs (no placeholders).
+
+---
+
 ## Context (read first)
 - Current goal: <FILL_ME>
 - Relevant docs/paths:

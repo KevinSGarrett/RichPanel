@@ -2,10 +2,12 @@
 
 > This is the **single most important** file for "what to do next".
 
-Last updated: 2026-01-10 (WaveAudit midpoint audit checklist + prompt template drift fixes)
+Last updated: 2026-01-11 (PR Health Check docs + E2E runbook + Next 10)
 
 **Current mode:** build (implementation active).
 **Environment status:** Do not claim dev/staging/prod state unless verified and linked in the latest `REHYDRATION_PACK/RUNS/<RUN_ID>/*/RUN_REPORT.md` or `REHYDRATION_PACK/GITHUB_STATE.md`.
+
+**Related:** `09_NEXT_10_SUGGESTED_ITEMS.md` (emerging priorities)
 
 ---
 
