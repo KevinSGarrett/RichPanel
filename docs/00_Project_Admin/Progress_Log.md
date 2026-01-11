@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-11 - RUN_20260111_0532Z.
+Last verified: 2026-01-11 - RUN_20260111_1714Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_1714Z (PR Health Check docs + E2E runbook + Next 10)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_1714Z
+- Added PR Health Check guidance to agent prompt + run report templates and CI runbook (manual substitute review steps when Bugbot quota is exhausted).
+- Added E2E Test Runbook (dev/staging/prod guidance, evidence capture, no-PII reminders).
+- Added Next 10 suggested items list and linked from Task Board; updated Progress Log for this run.
 
 ### 2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_0532Z

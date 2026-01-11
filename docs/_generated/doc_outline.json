@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_1714Z (PR Health Check docs + E2E runbook + Next 10)",
+        "anchor": "2026-01-11-run202601111714z-pr-health-check-docs-e2e-runbook-next-10"
+      },
+      {
+        "level": 3,
         "text": "2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)",
         "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
       },
@@ -11019,8 +11024,8 @@
       },
       {
         "level": 3,
-        "text": "Current state (2026-01-11)",
-        "anchor": "current-state-2026-01-11"
+        "text": "Current state (2026-01-10)",
+        "anchor": "current-state-2026-01-10"
       },
       {
         "level": 3,
@@ -11039,23 +11044,23 @@
       },
       {
         "level": 2,
-        "text": "10) Lint/Type enforcement roadmap",
-        "anchor": "10-linttype-enforcement-roadmap"
+        "text": "10) PR Health Check (required before every merge)",
+        "anchor": "10-pr-health-check-required-before-every-merge"
       },
       {
         "level": 3,
-        "text": "Current state (2026-01-11)",
-        "anchor": "current-state-2026-01-11"
+        "text": "Why this matters",
+        "anchor": "why-this-matters"
       },
       {
         "level": 3,
-        "text": "Operational plan (phased enforcement)",
-        "anchor": "operational-plan-phased-enforcement"
+        "text": "Health check components",
+        "anchor": "health-check-components"
       },
       {
         "level": 3,
-        "text": "Tracking",
-        "anchor": "tracking"
+        "text": "Pre-merge checklist",
+        "anchor": "pre-merge-checklist"
       },
       {
         "level": 2,
@@ -11126,6 +11131,86 @@
         "level": 2,
         "text": "Troubleshooting",
         "anchor": "troubleshooting"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/E2E_Test_Runbook.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "E2E Test Runbook (for Cursor Agents)",
+        "anchor": "e2e-test-runbook-for-cursor-agents"
+      },
+      {
+        "level": 2,
+        "text": "1) When E2E tests are required",
+        "anchor": "1-when-e2e-tests-are-required"
+      },
+      {
+        "level": 2,
+        "text": "2) Environments and workflows",
+        "anchor": "2-environments-and-workflows"
+      },
+      {
+        "level": 2,
+        "text": "3) What the smoke tests validate",
+        "anchor": "3-what-the-smoke-tests-validate"
+      },
+      {
+        "level": 2,
+        "text": "4) Dev E2E smoke (PowerShell-safe)",
+        "anchor": "4-dev-e2e-smoke-powershell-safe"
+      },
+      {
+        "level": 2,
+        "text": "5) Staging E2E smoke",
+        "anchor": "5-staging-e2e-smoke"
+      },
+      {
+        "level": 2,
+        "text": "6) Prod E2E smoke (with explicit approval)",
+        "anchor": "6-prod-e2e-smoke-with-explicit-approval"
+      },
+      {
+        "level": 2,
+        "text": "7) Evidence capture (all environments)",
+        "anchor": "7-evidence-capture-all-environments"
+      },
+      {
+        "level": 2,
+        "text": "8) Failure triage",
+        "anchor": "8-failure-triage"
+      },
+      {
+        "level": 2,
+        "text": "9) Template snippet for TEST_MATRIX.md",
+        "anchor": "9-template-snippet-for-testmatrixmd"
+      },
+      {
+        "level": 2,
+        "text": "E2E Smoke Tests",
+        "anchor": "e2e-smoke-tests"
+      },
+      {
+        "level": 3,
+        "text": "Dev E2E Smoke",
+        "anchor": "dev-e2e-smoke"
+      },
+      {
+        "level": 3,
+        "text": "Staging E2E Smoke",
+        "anchor": "staging-e2e-smoke"
+      },
+      {
+        "level": 3,
+        "text": "Prod E2E Smoke",
+        "anchor": "prod-e2e-smoke"
+      },
+      {
+        "level": 2,
+        "text": "10) Checklist",
+        "anchor": "10-checklist"
       }
     ]
   },
