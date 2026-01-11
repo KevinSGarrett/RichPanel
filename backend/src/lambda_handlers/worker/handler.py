@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import math
@@ -179,7 +180,8 @@ def _persist_idempotency(
     event_id = str(envelope.event_id or f"evt:{int(time.time() * 1000)}")
     received_at = envelope.received_at or datetime.now(timezone.utc).isoformat()
     payload = envelope.payload or {}
-    payload_excerpt = _truncate_payload(payload)
+    payload_fingerprint = _payload_fingerprint(payload)
+    payload_field_count = len(payload) if isinstance(payload, dict) else 0
     conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
     source_message_id = _safe_str(envelope.message_id or envelope.dedupe_id)
     expires_at = _now_epoch_seconds() + max(IDEMPOTENCY_TTL_SECONDS, 0)
@@ -194,7 +196,8 @@ def _persist_idempotency(
         "automation_enabled": plan.automation_enabled,
         "mode": plan.mode,
         "source": envelope.source or "richpanel_http_target",
-        "payload_excerpt": payload_excerpt,
+        "payload_fingerprint": payload_fingerprint,
+        "payload_field_count": payload_field_count,
         "expires_at": expires_at,
         "status": "processed",
     }
@@ -241,16 +244,6 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
         state_writer=_state_writer,
         audit_writer=_audit_writer,
     )
-
-
-def _truncate_payload(value: Any) -> str:
-    serialized = value
-    if not isinstance(value, str):
-        try:
-            serialized = json.dumps(value)
-        except (TypeError, ValueError):
-            serialized = str(value)
-    return (serialized or "")[:2000]
 
 
 def _safe_str(value: Optional[Any]) -> Optional[str]:
@@ -369,6 +362,14 @@ def _ddb_sanitize(value: Any) -> Any:
             return None
         return Decimal(str(value))
     return value
+
+
+def _payload_fingerprint(value: Any) -> str:
+    try:
+        serialized = json.dumps(value, sort_keys=True, default=str)
+    except Exception:
+        serialized = str(value)
+    return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
 
 
 def _table(name: str):

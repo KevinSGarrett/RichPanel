@@ -1,7 +1,7 @@
 from .client import (
     HttpTransport,
-    RichpanelExecutor,
     RichpanelClient,
+    RichpanelExecutor,
     RichpanelRequestError,
     RichpanelResponse,
     SecretLoadError,
@@ -19,4 +19,3 @@ __all__ = [
     "TransportError",
     "HttpTransport",
 ]
-

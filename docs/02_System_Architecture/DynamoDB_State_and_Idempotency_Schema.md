@@ -56,7 +56,9 @@ Purpose:
 - `safe_mode` (bool)
 - `automation_enabled` (bool)
 - `source_message_id` (string, optional if missing)
-- `payload_excerpt` (string, redacted/truncated; max 2k chars)
+- `payload_fingerprint` (string, sha256 of normalized payload; no bodies)
+- `payload_keys` (string list of top-level keys; no bodies)
+- `payload_size` (number, serialized length; bounds only)
 - `intent` (string, optional placeholder)
 
 **Recommended TTL**

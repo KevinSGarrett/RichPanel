@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 633,
-    "approx_tokens": 822,
+    "word_count": 1327,
+    "approx_tokens": 1725,
     "last_updated": ""
   },
   {
@@ -705,8 +705,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 484,
-    "approx_tokens": 629,
+    "word_count": 560,
+    "approx_tokens": 728,
     "last_updated": ""
   },
   {
@@ -735,8 +735,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 10246,
-    "approx_tokens": 13319,
+    "word_count": 10497,
+    "approx_tokens": 13646,
     "last_updated": ""
   },
   {
@@ -745,8 +745,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 75,
-    "approx_tokens": 97,
+    "word_count": 79,
+    "approx_tokens": 102,
     "last_updated": ""
   },
   {
@@ -875,8 +875,8 @@
     "section": "02_System_Architecture",
     "status": "canonical",
     "in_index": true,
-    "word_count": 910,
-    "approx_tokens": 1183,
+    "word_count": 926,
+    "approx_tokens": 1203,
     "last_updated": "2026-01-03"
   },
   {
@@ -1345,8 +1345,8 @@
     "section": "05_FAQ_Automation",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1107,
-    "approx_tokens": 1439,
+    "word_count": 1170,
+    "approx_tokens": 1521,
     "last_updated": "2025-12-29"
   },
   {
@@ -1915,8 +1915,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2251,
-    "approx_tokens": 2926,
+    "word_count": 3656,
+    "approx_tokens": 4752,
     "last_updated": "2026-01-05"
   },
   {
@@ -1928,6 +1928,16 @@
     "word_count": 198,
     "approx_tokens": 257,
     "last_updated": ""
+  },
+  {
+    "path": "08_Engineering/E2E_Test_Runbook.md",
+    "title": "E2E Test Runbook (for Cursor Agents)",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 1863,
+    "approx_tokens": 2421,
+    "last_updated": "2026-01-11"
   },
   {
     "path": "08_Engineering/GitHub_Workflow_and_Repo_Standards.md",
@@ -3815,8 +3825,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10647,
-    "approx_tokens": 13841,
+    "word_count": 10659,
+    "approx_tokens": 13856,
     "last_updated": ""
   },
   {

@@ -2,6 +2,8 @@
 
 This file must contain **only the currently active prompts** for the current run/cycle.
 
+prompt-repeat-override: true
+
 **⚠️ REQUIRED IN EVERY PROMPT:** Model + MAX mode + Cycle metadata (see below)
 
 ---
@@ -49,115 +51,100 @@ python scripts/new_run_folder.py --now
 
 ## Current prompts
 
-## Prompt — Agent A (B29-A) — Fix Drift Permanently: Run Reports + Prompt Archive + Checklist Hygiene
+### Agent A ??? WaveAudit checklist + rehydration drift fixes
 
-## Model + MAX mode + Cycle
-- **Model used:** <model-name> (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
+```markdown
+# Cursor Agent Prompt
+
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** Agent A  
+**Task ID(s):** WaveAudit midpoint audit checklist + template drift + verifier enforcement
+
+## Model + MAX mode + Cycle (REQUIRED)
+- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
 - **MAX mode:** ON | OFF
-- **Cycle:** 2× (Cycle 1 implement, Cycle 2 review + edge cases)
+- **Cycle:** 1??
 
-```text
-✅ Agent A Prompt (B29-A) — Fix Drift Permanently: Run Reports + Prompt Archive + Checklist Hygiene
+## Context (read first)
+- Current goal: Convert WaveAudit findings into repo checklists and fix REHYDRATION_PACK drift; run CI checks; open PR.
+- Relevant docs/paths:
+  - `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
+  - `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md`
+  - `REHYDRATION_PACK/05_TASK_BOARD.md`
+  - `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`
+  - `scripts/verify_rehydration_pack.py`
 
-Cycle: 2× (Cycle 1 implement, Cycle 2 review + edge cases)
+## Objective
+Convert WaveAudit findings into a repo-native midpoint audit checklist and ensure REHYDRATION_PACK templates/verifiers enforce evidence-backed run reporting.
 
-Mission
+## Deliverables (explicit)
+- [ ] Midpoint audit checklist created and wired into PM docs.
+- [ ] Cursor agent prompt template requires: RUN_REPORT.md + RUN_SUMMARY.md + STRUCTURE_REPORT.md + DOCS_IMPACT_MAP.md + TEST_MATRIX.md.
+- [ ] `scripts/verify_rehydration_pack.py` enforces required RUN_REPORT sections (Diffstat / Commands Run / Tests / Proof / Files Changed).
+- [ ] `python scripts/run_ci_checks.py` passes and output is captured in `REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/A/RUN_REPORT.md`.
+- [ ] PR opened; auto-merge enabled (merge commit); Bugbot triggered with `@cursor review`.
 
-Make it impossible to run agents without generating durable run history, and make it impossible for PM to accidentally send the same prompts again.
-
-Deliverables (must land in repo)
-1) Run-report enforcement (CI-hard requirement)
-
-Update the repo so CI fails if the latest run folder is missing or empty.
-
-Update scripts/verify_rehydration_pack.py (or add a dedicated script) so that in MODE=build:
-
-REHYDRATION_PACK/RUNS/ must contain at least one RUN_* directory.
-
-The latest run must have A/, B/, C/ subfolders.
-
-Each agent folder must contain populated files:
-
-RUN_REPORT.md (new required artifact)
-
-RUN_SUMMARY.md
-
-STRUCTURE_REPORT.md
-
-DOCS_IMPACT_MAP.md
-
-TEST_MATRIX.md
-
-“Populated” rule: at least 25 non-empty lines in RUN_REPORT.md, and at least 10 non-empty lines in each of the other required docs.
-
-Wire this into:
-
-scripts/run_ci_checks.py so it runs on every validate.
-
-CI must go red if reports are missing.
-
-2) Add/upgrade templates so agents can’t “half-report”
-
-In REHYDRATION_PACK/TEMPLATES/:
-
-Add Agent_Run_Report_TEMPLATE.md (high-detail: diffstat, files touched, tests run, PR link, worktree path, blockers, follow-ups).
-
-Update scripts/new_run_folder.py so it creates RUN_REPORT.md in A/B/C folders from that template automatically.
-
-3) Prompt archive enforcement (so dedup actually works)
-
-Right now scripts/verify_agent_prompts_fresh.py expects archived prompts but the repo isn’t consistently archiving them.
-
-Make scripts/new_run_folder.py also create:
-
-REHYDRATION_PACK/RUNS/<RUN_ID>/C/AGENT_PROMPTS_ARCHIVE.md
-…and copy in the current REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md content automatically.
-
-Also update REHYDRATION_PACK/RUNS/README.md to make this an explicit requirement.
-
-4) Checklist + task board hygiene (align docs to reality)
-
-Update these to match what’s actually shipped (and clearly label shipped vs roadmap):
-
-docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md
-
-REHYDRATION_PACK/05_TASK_BOARD.md
-
-Also add a small “progress dashboard” section (counts + % complete) and ensure it doesn’t make claims about staging/prod unless verified.
-
-Tests / Proof
-
-Run and paste evidence into your RUN_REPORT:
-
-AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py
-
-PR requirements
-
-Branch: run/B29_run_report_enforcement_20260110
-
-PR: open + auto-merge (merge commit) + delete branch
-
-Trigger Bugbot with @cursor review
+## Tests / evidence required
+- Tests to run: `python scripts/run_ci_checks.py`
+- Evidence location:
+  - `REHYDRATION_PACK/RUNS/RUN_20260110_1638Z/A/RUN_REPORT.md` (commands + outputs)
 ```
 
-## Prompt — Agent B (no tasks assigned)
+---
 
-## Model + MAX mode + Cycle
-- **Model used:** <model-name> (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
+### Agent B ??? Review routing + personalization alignment (WaveAudit)
+
+```markdown
+# Cursor Agent Prompt
+
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** Agent B  
+**Task ID(s):** Midpoint audit review (routing + personalization)
+
+## Model + MAX mode + Cycle (REQUIRED)
+- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
 - **MAX mode:** ON | OFF
-- **Cycle:** 2× (Cycle 1 implement, Cycle 2 review + edge cases)
+- **Cycle:** 1??
 
-```text
-No tasks assigned in this cycle. Do not make changes.
+## Context (read first)
+- `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
+
+## Objective
+Review the Midpoint Audit checklist for routing/personalization correctness (including the shift to guardrailed OpenAI rewrite) and propose any missing tasks/evidence requirements.
+
+## Deliverables (explicit)
+- [ ] PR comment or patch improving checklist items related to routing + personalization.
+- [ ] Any required follow-ups added to the checklist with clear evidence requirements.
+
+## Tests / evidence required
+- Tests to run: N/A (docs-only), unless code is changed.
 ```
 
-## Prompt — Agent C (no tasks assigned)
+---
 
-## Model + MAX mode + Cycle
-- **Model used:** <model-name> (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
+### Agent C ??? Review QA/ops readiness items (WaveAudit)
+
+```markdown
+# Cursor Agent Prompt
+
+**Run ID:** `RUN_20260110_1638Z`  
+**Agent:** Agent C  
+**Task ID(s):** Midpoint audit review (QA + Richpanel ops)
+
+## Model + MAX mode + Cycle (REQUIRED)
+- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
 - **MAX mode:** ON | OFF
-- **Cycle:** 2× (Cycle 1 implement, Cycle 2 review + edge cases)
+- **Cycle:** 1??
 
-```text
-No tasks assigned in this cycle. Do not make changes.
+## Context (read first)
+- `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
+
+## Objective
+Review QA/test-evidence + Richpanel configuration checklist items for completeness and make sure each item has clear, objective evidence requirements.
+
+## Deliverables (explicit)
+- [ ] PR comment or patch improving checklist items related to QA evidence + Richpanel ops configuration.
+
+## Tests / evidence required
+- Tests to run: N/A (docs-only), unless code is changed.
 ```

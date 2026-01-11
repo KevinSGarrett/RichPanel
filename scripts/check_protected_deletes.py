@@ -135,7 +135,9 @@ def resolve_ci_range(cwd: Path) -> str | None:
     base = (os.getenv("GITHUB_BASE_REF") or "").strip()
     if base:
         # Prefer origin/<base> if present; otherwise just use HEAD~1.
-        rc, _ = run_git(["show-ref", "--verify", "--quiet", f"refs/remotes/origin/{base}"], cwd)
+        rc, _ = run_git(
+            ["show-ref", "--verify", "--quiet", f"refs/remotes/origin/{base}"], cwd
+        )
         if rc == 0:
             return f"origin/{base}...HEAD"
 
@@ -155,7 +157,9 @@ def resolve_ci_range(cwd: Path) -> str | None:
 def diff_for_range(cwd: Path, diff_range: str) -> tuple[bool, str, str]:
     """Return (ok, output, source_desc)."""
     if diff_range == "HEAD":
-        rc, out = run_git(["show", "--name-status", "--format=", "--diff-filter=DR", "HEAD"], cwd)
+        rc, out = run_git(
+            ["show", "--name-status", "--format=", "--diff-filter=DR", "HEAD"], cwd
+        )
         return (rc == 0), out, "git show HEAD"
 
     rc, out = run_git(["diff", "--name-status", "--diff-filter=DR", diff_range], cwd)
@@ -164,8 +168,12 @@ def diff_for_range(cwd: Path, diff_range: str) -> tuple[bool, str, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ci", action="store_true", help="CI mode: check commit range (best-effort)")
-    ap.add_argument("--range", dest="diff_range", help="Explicit diff range, e.g. HEAD~1...HEAD")
+    ap.add_argument(
+        "--ci", action="store_true", help="CI mode: check commit range (best-effort)"
+    )
+    ap.add_argument(
+        "--range", dest="diff_range", help="Explicit diff range, e.g. HEAD~1...HEAD"
+    )
     args = ap.parse_args()
 
     root = repo_root()
@@ -191,7 +199,9 @@ def main() -> int:
                 violations.append((status, path, new_path))
 
         if violations:
-            print("[FAIL] Unapproved delete/rename of protected paths detected (local diff).")
+            print(
+                "[FAIL] Unapproved delete/rename of protected paths detected (local diff)."
+            )
             for status, path, new_path in violations:
                 if status.startswith("R"):
                     print(f"- {status}: {path} -> {new_path}")
@@ -207,12 +217,16 @@ def main() -> int:
     # --- 2) CI / explicit range behavior ---
     diff_range = args.diff_range or resolve_ci_range(root)
     if not diff_range:
-        print("[INFO] Protected delete check: no diff range could be determined. Skipping.")
+        print(
+            "[INFO] Protected delete check: no diff range could be determined. Skipping."
+        )
         return 0
 
     ok, out, source = diff_for_range(root, diff_range)
     if not ok:
-        print(f"[INFO] Protected delete check: could not compute diff ({source}). Skipping.")
+        print(
+            f"[INFO] Protected delete check: could not compute diff ({source}). Skipping."
+        )
         return 0
 
     changes = parse_name_status(out)
@@ -223,7 +237,9 @@ def main() -> int:
             violations.append((status, path, new_path))
 
     if violations:
-        print(f"[FAIL] Unapproved delete/rename of protected paths detected ({source}).")
+        print(
+            f"[FAIL] Unapproved delete/rename of protected paths detected ({source})."
+        )
         for status, path, new_path in violations:
             if status.startswith("R"):
                 print(f"- {status}: {path} -> {new_path}")

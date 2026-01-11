@@ -13,7 +13,6 @@ if str(SRC) not in sys.path:
 from richpanel_middleware.integrations.shipstation import (  # noqa: E402
     ShipStationClient,
     ShipStationExecutor,
-    ShipStationResponse,
     TransportRequest,
     TransportResponse,
 )
@@ -66,7 +65,9 @@ class ShipStationClientTests(unittest.TestCase):
 
     def test_dry_run_default_skips_transport(self) -> None:
         transport = _FailingTransport()
-        client = ShipStationClient(api_key="key", api_secret="secret", transport=transport)
+        client = ShipStationClient(
+            api_key="key", api_secret="secret", transport=transport
+        )
 
         response = client.request(
             "GET",
@@ -81,9 +82,7 @@ class ShipStationClientTests(unittest.TestCase):
         self.assertFalse(transport.called)
 
     def test_list_shipments_builds_expected_path_and_sorted_query(self) -> None:
-        transport = _RecordingTransport(
-            [TransportResponse(status_code=200, headers={}, body=b"{}")]
-        )
+        transport = _RecordingTransport([TransportResponse(status_code=200, headers={}, body=b"{}")])
         client = ShipStationClient(
             api_key="key",
             api_secret="secret",
@@ -148,7 +147,9 @@ class ShipStationClientTests(unittest.TestCase):
         sleeps: list[float] = []
         transport = _RecordingTransport(
             [
-                TransportResponse(status_code=429, headers={"Retry-After": "2"}, body=b""),
+                TransportResponse(
+                    status_code=429, headers={"Retry-After": "2"}, body=b""
+                ),
                 TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
             ]
         )
@@ -211,9 +212,7 @@ class ShipStationClientTests(unittest.TestCase):
         self.assertFalse(transport.called)
 
     def test_executor_allows_outbound_when_enabled(self) -> None:
-        transport = _RecordingTransport(
-            [TransportResponse(status_code=200, headers={}, body=b"{}")]
-        )
+        transport = _RecordingTransport([TransportResponse(status_code=200, headers={}, body=b"{}")])
         client = ShipStationClient(
             api_key="key",
             api_secret="secret",
@@ -242,5 +241,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

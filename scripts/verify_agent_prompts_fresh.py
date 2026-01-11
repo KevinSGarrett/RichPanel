@@ -128,6 +128,25 @@ def ordinal_label(idx: int) -> str:
     return f"{idx + 1}th newest"
 
 
+def latest_run_id() -> Optional[str]:
+    """
+    Determine the latest RUN_* folder (lexicographic by RUN_YYYYMMDD_HHMMZ).
+
+    The prompt repeat guard should compare the current prompts against *previous* runs,
+    not against the current run's own archive.
+    """
+    runs_dir = ROOT / "REHYDRATION_PACK/RUNS"
+    if not runs_dir.exists():
+        return None
+
+    run_re = re.compile(RUN_ID_PATTERN)
+    run_dirs = [p for p in runs_dir.iterdir() if p.is_dir() and run_re.match(p.name)]
+    if not run_dirs:
+        return None
+
+    return sorted(run_dirs, key=lambda p: p.name)[-1].name
+
+
 def main() -> int:
     if not CURRENT_PROMPTS_PATH.exists():
         print(f"[FAIL] Missing prompts file: {CURRENT_PROMPTS_PATH}")
@@ -158,11 +177,12 @@ def main() -> int:
             print(f"[FAIL] Matching archive fingerprint: {archive_fp}")
             return 1
 
-    print(f"[OK] Current prompts differ from the last {len(archives_to_check)} archive(s).")
+    print(
+        f"[OK] Current prompts differ from the last {len(archives_to_check)} archive(s)."
+    )
     print(f"[INFO] Prompt set fingerprint: {current_fp}")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

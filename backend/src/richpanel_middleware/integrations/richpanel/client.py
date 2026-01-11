@@ -190,6 +190,7 @@ class RichpanelClient:
         headers: Optional[Dict[str, str]] = None,
         timeout_seconds: Optional[float] = None,
         dry_run: Optional[bool] = None,
+        log_body_excerpt: bool = True,
     ) -> RichpanelResponse:
         use_dry_run = self.dry_run if dry_run is None else bool(dry_run)
         url = self._build_url(path, params)
@@ -245,7 +246,7 @@ class RichpanelClient:
             last_response = response
 
             should_retry, delay = self._should_retry(response, attempt)
-            self._log_response(method.upper(), response, latency_ms, attempt, delay if should_retry else None)
+            self._log_response(method.upper(), response, latency_ms, attempt, delay if should_retry else None, log_body_excerpt=log_body_excerpt)
 
             if should_retry and attempt < self.max_attempts:
                 self._sleep(delay)
@@ -367,6 +368,8 @@ class RichpanelClient:
         latency_ms: int,
         attempt: int,
         retry_in: Optional[float],
+        *,
+        log_body_excerpt: bool,
     ) -> None:
         extra = {
             "method": method,
@@ -375,7 +378,7 @@ class RichpanelClient:
             "latency_ms": latency_ms,
             "attempt": attempt,
             "dry_run": response.dry_run,
-            "body_excerpt": _truncate(self._excerpt_body(response.body), 256),
+            "body_len": len(response.body or b"") if log_body_excerpt else 0,
         }
         if retry_in is not None:
             extra["retry_in"] = retry_in
@@ -426,10 +429,13 @@ class RichpanelExecutor:
         outbound is disabled unless explicitly overridden by caller.
         """
         requested_dry_run = kwargs.pop("dry_run", None)
+        log_body_excerpt = kwargs.pop("log_body_excerpt", True)
         effective_dry_run = (
             not self._outbound_enabled if requested_dry_run is None else bool(requested_dry_run)
         )
-        return self._client.request(method, path, dry_run=effective_dry_run, **kwargs)
+        return self._client.request(
+            method, path, dry_run=effective_dry_run, log_body_excerpt=log_body_excerpt, **kwargs
+        )
 
     def _resolve_outbound_enabled(self, override: Optional[bool]) -> bool:
         if override is not None:

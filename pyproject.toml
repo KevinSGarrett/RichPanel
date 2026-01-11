@@ -1,0 +1,44 @@
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+extend-exclude = """
+(?x)(
+  ^REHYDRATION_PACK/
+| ^PM_REHYDRATION_PACK/
+| ^docs/_generated/
+| ^17/
+| ^WaveAudit/
+)
+"""
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [
+  "REHYDRATION_PACK",
+  "PM_REHYDRATION_PACK",
+  "docs/_generated",
+  "17",
+  "WaveAudit",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+
+[tool.coverage.run]
+branch = true
+source = ["backend/src", "scripts"]
+omit = [
+  "REHYDRATION_PACK/*",
+  "PM_REHYDRATION_PACK/*",
+  "docs/_generated/*",
+  "17/*",
+  "WaveAudit/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "if TYPE_CHECKING:",
+  "if __name__ == \"__main__\":",
+]
+

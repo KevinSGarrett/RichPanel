@@ -39,6 +39,34 @@
   - Result: pass/fail
   - Evidence: <PASTE_OUTPUT_OR_POINT_TO_FILE>
 
+## PR Health Check (required before merge)
+
+### CI Status
+- **CI run URL**: <GITHUB_ACTIONS_RUN_URL>
+- **CI result**: pass/fail
+- **Failures fixed**: <yes/no/N/A — list fixes if applicable>
+
+### Codecov Status
+- **Patch coverage**: <PERCENTAGE>% (target: ≥50%)
+- **Project coverage**: <PERCENTAGE>% change (threshold: ≤5% drop)
+- **Codecov URL**: <CODECOV_PR_URL or "pending">
+- **Coverage gaps addressed**: <yes/no/N/A — explain if gaps remain>
+
+### Bugbot Review
+- **Bugbot triggered**: <yes/no>
+- **Bugbot review URL**: <PR_COMMENT_URL or "quota exhausted">
+- **Findings count**: <NUMBER>
+- **Findings addressed**: <yes/N/A — list key findings + resolutions>
+- **Manual review (if Bugbot unavailable)**: <REVIEWER_NAME + summary or N/A>
+
+### E2E Testing (if automation/outbound touched)
+- **E2E tests required**: <yes/no>
+- **Dev E2E run URL**: <GITHUB_ACTIONS_RUN_URL or N/A>
+- **Staging E2E run URL**: <GITHUB_ACTIONS_RUN_URL or N/A>
+- **Prod E2E run URL**: <GITHUB_ACTIONS_RUN_URL or N/A>
+- **E2E results**: <all pass / failures documented / N/A>
+- **Evidence location**: `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/TEST_MATRIX.md`
+
 ## PR / merge status
 - PR link: <LINK>
 - Merge method: merge commit

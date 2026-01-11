@@ -26,14 +26,28 @@ def repo_root() -> Path:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--max", type=int, default=10, help="Max allowed active remote branches (default: 10)")
-    ap.add_argument("--strict", action="store_true", help="Exit non-zero if over budget")
+    ap.add_argument(
+        "--max",
+        type=int,
+        default=10,
+        help="Max allowed active remote branches (default: 10)",
+    )
+    ap.add_argument(
+        "--strict", action="store_true", help="Exit non-zero if over budget"
+    )
     args = ap.parse_args()
 
     root = repo_root()
     try:
-        subprocess.run(["git", "fetch", "--prune"], cwd=str(root), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        p = subprocess.run(["git", "branch", "-r"], cwd=str(root), capture_output=True, text=True)
+        subprocess.run(
+            ["git", "fetch", "--prune"],
+            cwd=str(root),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        p = subprocess.run(
+            ["git", "branch", "-r"], cwd=str(root), capture_output=True, text=True
+        )
         if p.returncode != 0:
             print("[WARN] Could not list remote branches.")
             return 0
@@ -47,7 +61,9 @@ def main() -> int:
         count = len(branches)
         print(f"[INFO] Active remote branches: {count} (budget={args.max})")
         if count > args.max:
-            print("[WARN] Branch budget exceeded. Consider deleting merged run branches.")
+            print(
+                "[WARN] Branch budget exceeded. Consider deleting merged run branches."
+            )
             # show a few
             for b in branches[:25]:
                 print(f"- {b}")

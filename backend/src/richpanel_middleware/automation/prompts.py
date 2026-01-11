@@ -22,7 +22,7 @@ ORDER_STATUS_SYSTEM_PROMPT = (
 
 @dataclass
 class PromptConfig:
-    model: str = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    model: str = os.environ.get("OPENAI_MODEL", "gpt-5.2-chat-latest")
     temperature: float = 0.0
     max_tokens: int = 256
 
@@ -75,7 +75,9 @@ def prompt_fingerprint(contract: PromptContract) -> str:
         "max_tokens": contract.max_tokens,
         "metadata": contract.metadata,
     }
-    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
     return hashlib.sha256(serialized).hexdigest()
 
 
@@ -146,9 +148,7 @@ def run_offline_order_status_eval(
     for fixture in fixtures:
         contract = build_order_status_contract(fixture)
         request = contract.to_request()
-        response = client.chat_completion(
-            request, safe_mode=safe_mode, automation_enabled=automation_enabled
-        )
+        response = client.chat_completion(request, safe_mode=safe_mode, automation_enabled=automation_enabled)
         results.append(
             OfflineEvalResult(
                 fixture_name=fixture.name,
@@ -172,4 +172,3 @@ __all__ = [
     "prompt_fingerprint",
     "run_offline_order_status_eval",
 ]
-

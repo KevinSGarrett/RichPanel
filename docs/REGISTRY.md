@@ -253,6 +253,7 @@ Legend:
 - ✅ [Branch Protection and Merge Settings](08_Engineering/Branch_Protection_and_Merge_Settings.md)  (`08_Engineering/Branch_Protection_and_Merge_Settings.md`)
 - ✅ [CI and GitHub Actions Runbook (for Cursor Agents)](08_Engineering/CI_and_Actions_Runbook.md)  (`08_Engineering/CI_and_Actions_Runbook.md`)
 - ✅ [Developer Guide](08_Engineering/Developer_Guide.md)  (`08_Engineering/Developer_Guide.md`)
+- 📎 [E2E Test Runbook (for Cursor Agents)](08_Engineering/E2E_Test_Runbook.md)  (`08_Engineering/E2E_Test_Runbook.md`)
 - ✅ [GitHub Workflow and Repo Standards](08_Engineering/GitHub_Workflow_and_Repo_Standards.md)  (`08_Engineering/GitHub_Workflow_and_Repo_Standards.md`)
 - ✅ [Multi‑Agent GitOps Playbook](08_Engineering/Multi_Agent_GitOps_Playbook.md)  (`08_Engineering/Multi_Agent_GitOps_Playbook.md`)
 - ✅ [Protected Paths and Safe Deletion Rules](08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md)  (`08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md`)

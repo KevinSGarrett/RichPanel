@@ -2480,6 +2480,142 @@
     "text": "DR posture documented (single region, multi-AZ)"
   },
   {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-4376574CE9",
+    "line": 510,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Branch will be deleted after merge"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-53744FFEEA",
+    "line": 509,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "PR uses merge commit method (not squash)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-68BED06779",
+    "line": 508,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "All evidence captured in run artifacts with no placeholders"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-B1B8E701F8",
+    "line": 504,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "All CI checks are green"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-BA7DC5512F",
+    "line": 507,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "E2E smoke tests passed (if automation/outbound touched)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-BB4AF0C070",
+    "line": 506,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Bugbot review completed and findings addressed (or manual review documented)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Dev E2E smoke > Pre-merge checklist",
+    "id": "PLN-C6EEA8D803",
+    "line": 505,
+    "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
+    "text": "Codecov status is acceptable (\u226550% patch, \u22645% project drop)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-1136E50DF1",
+    "line": 365,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "CloudWatch dashboard/alarm names surfaced (or \"no dashboards/alarms surfaced\")"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-1FB1B2BF71",
+    "line": 364,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "All evidence includes DynamoDB confirmations (no placeholders)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-2D2F3CFED4",
+    "line": 366,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Routing + draft confirmations captured (safe fields only, no PII)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-45C7BFB902",
+    "line": 367,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Any failures documented with triage notes and remediation plan"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-790F88EA90",
+    "line": 361,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Ran staging E2E smoke test after staging deploy (if required)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-7DE2A8AD84",
+    "line": 358,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Identified if PR touches automation/outbound paths"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-A2C34A6733",
+    "line": 362,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Captured staging E2E run URL + pass/fail in TEST_MATRIX.md"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-C47278B3B0",
+    "line": 360,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Captured dev E2E run URL + pass/fail in TEST_MATRIX.md"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-D8203019AC",
+    "line": 359,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Ran dev E2E smoke test (if required)"
+  },
+  {
+    "checked": false,
+    "heading_path": "Or run with explicit event ID > 12) Summary checklist",
+    "id": "PLN-EAF2EE2354",
+    "line": 363,
+    "source_path": "docs/08_Engineering/E2E_Test_Runbook.md",
+    "text": "Prod E2E smoke deferred until post-deploy with PM approval"
+  },
+  {
     "checked": true,
     "heading_path": "Wave 08 Definition of Done Checklist > 1) Documentation deliverables (this repo)",
     "id": "PLN-1D465D3B64",

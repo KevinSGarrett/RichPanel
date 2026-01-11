@@ -2,7 +2,10 @@
 
 > This is the **single most important** file for “what to do next”.
 
-Last updated: 2026-01-10 (Run reporting + prompt archive + checklist hygiene)
+Last updated: 2026-01-11 (PR Health Check + E2E routine + Next 10 list)
+
+**Related:**
+- `09_NEXT_10_SUGGESTED_ITEMS.md` — Emerging priorities and follow-up work (not yet on task board)
 
 **Current mode:** build (implementation active).  
 Environment state (dev/staging/prod) is **not asserted** here unless explicitly linked to evidence. Prod promotion remains gated.

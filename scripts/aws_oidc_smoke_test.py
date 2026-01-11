@@ -47,7 +47,9 @@ def aws_env(region: str) -> dict[str, str]:
     return env
 
 
-def run_aws_command(args: Sequence[str], *, env_vars: dict[str, str], redact_output: bool) -> str:
+def run_aws_command(
+    args: Sequence[str], *, env_vars: dict[str, str], redact_output: bool
+) -> str:
     cmd = ["aws", *args]
     try:
         proc = subprocess.run(
@@ -89,9 +91,7 @@ def check_identity(*, expected_account: str | None, env_vars: dict[str, str]) ->
     print(f"    ARN: {arn}")
 
     if expected_account and account != expected_account:
-        raise SmokeTestError(
-            f"Expected AWS account {expected_account}, but received {account}."
-        )
+        raise SmokeTestError(f"Expected AWS account {expected_account}, but received {account}.")
 
 
 def build_ssm_parameter_names(env_name: str) -> list[str]:
@@ -123,9 +123,7 @@ def check_ssm_parameters(*, env_name: str, env_vars: dict[str, str]) -> None:
     missing = [name for name in names if name not in found]
 
     if missing:
-        raise SmokeTestError(
-            f"Missing or unreadable SSM parameters: {', '.join(missing)}"
-        )
+        raise SmokeTestError(f"Missing or unreadable SSM parameters: {', '.join(missing)}")
 
     print("    OK:", ", ".join(sorted(found)))
 
@@ -154,15 +152,11 @@ def check_secrets(*, env_name: str, env_vars: dict[str, str]) -> None:
             missing.append(secret)
 
     if missing:
-        raise SmokeTestError(
-            f"Missing Secrets Manager entries: {', '.join(missing)}"
-        )
+        raise SmokeTestError(f"Missing Secrets Manager entries: {', '.join(missing)}")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Verify AWS deploy-role permissions for kill switches + secrets."
-    )
+    parser = argparse.ArgumentParser(description="Verify AWS deploy-role permissions for kill switches + secrets.")
     parser.add_argument(
         "--env",
         required=True,
@@ -198,4 +192,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

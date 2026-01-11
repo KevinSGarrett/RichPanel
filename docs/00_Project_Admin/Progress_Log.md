@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-11 - RUN_20260111_0335Z.
+Last verified: 2026-01-11 - RUN_20260111_1638Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,16 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_1638Z (PR Health Check + E2E routine enforcement)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_1638Z
+- Updated Cursor Agent Prompt template with comprehensive PR Health Check requirements (CI, Codecov, Bugbot, E2E tests).
+- Updated Agent Run Report template with PR Health Check section (structured fields for all evidence).
+- Added section 10 to CI and Actions Runbook: PR Health Check (required before every merge), covering CI status, Codecov verification, Bugbot review, and E2E testing triggers.
+- Created E2E Test Runbook (docs/08_Engineering/E2E_Test_Runbook.md) with detailed procedures for dev/staging/prod E2E smoke tests, evidence requirements, and failure triage.
+- Created NEXT_10 suggested items list (REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md) to track emerging priorities (Codecov hardening, CloudWatch dashboards/alarms, etc.).
+- Linked NEXT_10 from TASK_BOARD.md; now visible as emerging priorities tracker.
+- Fixed missing RUN_20260110_2200Z/C folder (CI validation requirement).
 
 ### 2026-01-11 - RUN_20260111_0335Z (Run artifact placeholder enforcement v2 + admin doc drift fix)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_0335Z

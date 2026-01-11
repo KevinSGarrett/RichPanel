@@ -26,7 +26,6 @@ import re
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REF_ROOT = REPO_ROOT / "reference"
 

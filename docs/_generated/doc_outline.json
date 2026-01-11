@@ -1234,6 +1234,46 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_1638Z (PR Health Check + E2E routine enforcement)",
+        "anchor": "2026-01-11-run202601111638z-pr-health-check-e2e-routine-enforcement"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-11 - RUN_20260111_0335Z (Run artifact placeholder enforcement v2 + admin doc drift fix)",
+        "anchor": "2026-01-11-run202601110335z-run-artifact-placeholder-enforcement-v2-admin-doc-drift-fix"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-11 - RUN_20260111_0008Z (Codecov verification + model default alignment docs)",
+        "anchor": "2026-01-11-run202601110008z-codecov-verification-model-default-alignment-docs"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-10 - RUN_20260110_2003Z (Ticket metadata guard + skip-tag routing)",
+        "anchor": "2026-01-10-run202601102003z-ticket-metadata-guard-skip-tag-routing"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-10 - RUN_20260110_1900Z (CI/security stack hardening)",
+        "anchor": "2026-01-10-run202601101900z-cisecurity-stack-hardening"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)",
+        "anchor": "2026-01-10-run202601101638z-waveaudit-reply-after-close-semantics-escalation-tags"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-10 - RUN_20260110_0244Z (Run-report enforcement + prompt archive + checklist hygiene)",
+        "anchor": "2026-01-10-run202601100244z-run-report-enforcement-prompt-archive-checklist-hygiene"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-10 - RUN_20260110_0019Z (Audit remediation: reply-after-close + status read-before-write)",
+        "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
+      },
+      {
+        "level": 3,
         "text": "2026-01-05 - RUN_20260105_2221Z (mypy config for generated CDK assets)",
         "anchor": "2026-01-05-run202601052221z-mypy-config-for-generated-cdk-assets"
       },
@@ -10924,13 +10964,58 @@
       },
       {
         "level": 2,
-        "text": "9) If you cannot fix quickly",
-        "anchor": "9-if-you-cannot-fix-quickly"
+        "text": "9) Codecov coverage reporting and gating",
+        "anchor": "9-codecov-coverage-reporting-and-gating"
+      },
+      {
+        "level": 3,
+        "text": "Current state (2026-01-10)",
+        "anchor": "current-state-2026-01-10"
+      },
+      {
+        "level": 3,
+        "text": "Operational plan (phased rollout)",
+        "anchor": "operational-plan-phased-rollout"
+      },
+      {
+        "level": 3,
+        "text": "Codecov verification (per-PR)",
+        "anchor": "codecov-verification-per-pr"
+      },
+      {
+        "level": 3,
+        "text": "Troubleshooting Codecov failures",
+        "anchor": "troubleshooting-codecov-failures"
       },
       {
         "level": 2,
-        "text": "10) Seed Secrets Manager (dev/staging)",
-        "anchor": "10-seed-secrets-manager-devstaging"
+        "text": "10) PR Health Check (required before every merge)",
+        "anchor": "10-pr-health-check-required-before-every-merge"
+      },
+      {
+        "level": 3,
+        "text": "Why this matters",
+        "anchor": "why-this-matters"
+      },
+      {
+        "level": 3,
+        "text": "Health check components",
+        "anchor": "health-check-components"
+      },
+      {
+        "level": 3,
+        "text": "Pre-merge checklist",
+        "anchor": "pre-merge-checklist"
+      },
+      {
+        "level": 2,
+        "text": "11) If you cannot fix quickly",
+        "anchor": "11-if-you-cannot-fix-quickly"
+      },
+      {
+        "level": 2,
+        "text": "12) Seed Secrets Manager (dev/staging)",
+        "anchor": "12-seed-secrets-manager-devstaging"
       },
       {
         "level": 3,
@@ -10991,6 +11076,211 @@
         "level": 2,
         "text": "Troubleshooting",
         "anchor": "troubleshooting"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/E2E_Test_Runbook.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "E2E Test Runbook (for Cursor Agents)",
+        "anchor": "e2e-test-runbook-for-cursor-agents"
+      },
+      {
+        "level": 2,
+        "text": "1) When E2E tests are required",
+        "anchor": "1-when-e2e-tests-are-required"
+      },
+      {
+        "level": 2,
+        "text": "2) E2E smoke test environments",
+        "anchor": "2-e2e-smoke-test-environments"
+      },
+      {
+        "level": 2,
+        "text": "3) What E2E smoke tests validate",
+        "anchor": "3-what-e2e-smoke-tests-validate"
+      },
+      {
+        "level": 2,
+        "text": "4) Dev E2E smoke test",
+        "anchor": "4-dev-e2e-smoke-test"
+      },
+      {
+        "level": 3,
+        "text": "When to run",
+        "anchor": "when-to-run"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "Expected outputs",
+        "anchor": "expected-outputs"
+      },
+      {
+        "level": 3,
+        "text": "Evidence capture",
+        "anchor": "evidence-capture"
+      },
+      {
+        "level": 3,
+        "text": "Troubleshooting",
+        "anchor": "troubleshooting"
+      },
+      {
+        "level": 2,
+        "text": "5) Staging E2E smoke test",
+        "anchor": "5-staging-e2e-smoke-test"
+      },
+      {
+        "level": 3,
+        "text": "When to run",
+        "anchor": "when-to-run"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "Expected outputs",
+        "anchor": "expected-outputs"
+      },
+      {
+        "level": 3,
+        "text": "Evidence capture",
+        "anchor": "evidence-capture"
+      },
+      {
+        "level": 3,
+        "text": "Staging-specific notes",
+        "anchor": "staging-specific-notes"
+      },
+      {
+        "level": 2,
+        "text": "6) Prod E2E smoke test",
+        "anchor": "6-prod-e2e-smoke-test"
+      },
+      {
+        "level": 3,
+        "text": "When to run",
+        "anchor": "when-to-run"
+      },
+      {
+        "level": 3,
+        "text": "How to run (PowerShell-safe)",
+        "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "Expected outputs",
+        "anchor": "expected-outputs"
+      },
+      {
+        "level": 3,
+        "text": "Evidence capture",
+        "anchor": "evidence-capture"
+      },
+      {
+        "level": 3,
+        "text": "Prod-specific notes",
+        "anchor": "prod-specific-notes"
+      },
+      {
+        "level": 2,
+        "text": "7) E2E test evidence requirements",
+        "anchor": "7-e2e-test-evidence-requirements"
+      },
+      {
+        "level": 2,
+        "text": "8) E2E test failure triage",
+        "anchor": "8-e2e-test-failure-triage"
+      },
+      {
+        "level": 3,
+        "text": "Step 1 — Capture the failure",
+        "anchor": "step-1-capture-the-failure"
+      },
+      {
+        "level": 3,
+        "text": "Step 2 — Classify the failure",
+        "anchor": "step-2-classify-the-failure"
+      },
+      {
+        "level": 3,
+        "text": "Step 3 — Reproduce locally (if possible)",
+        "anchor": "step-3-reproduce-locally-if-possible"
+      },
+      {
+        "level": 3,
+        "text": "Step 4 — Fix or escalate",
+        "anchor": "step-4-fix-or-escalate"
+      },
+      {
+        "level": 3,
+        "text": "Step 5 — Document the fix",
+        "anchor": "step-5-document-the-fix"
+      },
+      {
+        "level": 2,
+        "text": "9) E2E test evidence templates",
+        "anchor": "9-e2e-test-evidence-templates"
+      },
+      {
+        "level": 3,
+        "text": "TEST_MATRIX.md template (E2E section)",
+        "anchor": "testmatrixmd-template-e2e-section"
+      },
+      {
+        "level": 3,
+        "text": "RUN_REPORT.md template (PR Health Check E2E section)",
+        "anchor": "runreportmd-template-pr-health-check-e2e-section"
+      },
+      {
+        "level": 2,
+        "text": "10) Common E2E test pitfalls",
+        "anchor": "10-common-e2e-test-pitfalls"
+      },
+      {
+        "level": 3,
+        "text": "Reusing event IDs",
+        "anchor": "reusing-event-ids"
+      },
+      {
+        "level": 3,
+        "text": "Missing Secrets Manager entries",
+        "anchor": "missing-secrets-manager-entries"
+      },
+      {
+        "level": 3,
+        "text": "Expired API tokens",
+        "anchor": "expired-api-tokens"
+      },
+      {
+        "level": 3,
+        "text": "CloudFormation outputs not found",
+        "anchor": "cloudformation-outputs-not-found"
+      },
+      {
+        "level": 3,
+        "text": "False positives on routing/drafts",
+        "anchor": "false-positives-on-routingdrafts"
+      },
+      {
+        "level": 2,
+        "text": "11) Local E2E testing (advanced)",
+        "anchor": "11-local-e2e-testing-advanced"
+      },
+      {
+        "level": 2,
+        "text": "12) Summary checklist",
+        "anchor": "12-summary-checklist"
       }
     ]
   },

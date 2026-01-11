@@ -172,6 +172,11 @@ Minimum required checks before sending an order-status auto-reply:
 - If the ticket is closed/solved → do not auto-reply.
 - If a prior auto-reply was sent for this same inbound message id → do not auto-reply.
 
+When a ticket is skipped, the worker routes to Email Support and applies tags for visibility:
+- Closed/solved: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-resolved`
+- Follow-up after middleware auto-reply: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-followup`
+- Ticket status read failed: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-status-read-failed`
+
 See: `FAQ_Automation_Dedup_Rate_Limits.md` and common issue `01-automation-loops.md`.
 
 ---

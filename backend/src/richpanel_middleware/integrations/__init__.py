@@ -1,13 +1,3 @@
-from .richpanel import (
-    HttpTransport,
-    RichpanelExecutor,
-    RichpanelClient,
-    RichpanelRequestError,
-    RichpanelResponse,
-    SecretLoadError,
-    Transport,
-    TransportError,
-)
 from .openai import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -16,16 +6,26 @@ from .openai import (
     OpenAIConfigError,
     OpenAIRequestError,
 )
-from .shopify import (
-    ShopifyClient,
-    ShopifyRequestError,
-    ShopifyResponse,
+from .richpanel import (
+    HttpTransport,
+    RichpanelClient,
+    RichpanelExecutor,
+    RichpanelRequestError,
+    RichpanelResponse,
+    SecretLoadError,
+    Transport,
+    TransportError,
 )
 from .shipstation import (
     ShipStationClient,
     ShipStationExecutor,
     ShipStationRequestError,
     ShipStationResponse,
+)
+from .shopify import (
+    ShopifyClient,
+    ShopifyRequestError,
+    ShopifyResponse,
 )
 
 __all__ = [

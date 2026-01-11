@@ -1471,6 +1471,54 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-11 - run_20260111_1638z (pr health check + e2e routine enforcement)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601111638z-pr-health-check-e2e-routine-enforcement"
+    }
+  ],
+  "2026-01-11 - run_20260111_0335z (run artifact placeholder enforcement v2 + admin doc drift fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601110335z-run-artifact-placeholder-enforcement-v2-admin-doc-drift-fix"
+    }
+  ],
+  "2026-01-11 - run_20260111_0008z (codecov verification + model default alignment docs)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601110008z-codecov-verification-model-default-alignment-docs"
+    }
+  ],
+  "2026-01-10 - run_20260110_2003z (ticket metadata guard + skip-tag routing)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601102003z-ticket-metadata-guard-skip-tag-routing"
+    }
+  ],
+  "2026-01-10 - run_20260110_1900z (ci/security stack hardening)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601101900z-cisecurity-stack-hardening"
+    }
+  ],
+  "2026-01-10 - run_20260110_1638z (waveaudit reply-after-close semantics + escalation tags)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601101638z-waveaudit-reply-after-close-semantics-escalation-tags"
+    }
+  ],
+  "2026-01-10 - run_20260110_0244z (run-report enforcement + prompt archive + checklist hygiene)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601100244z-run-report-enforcement-prompt-archive-checklist-hygiene"
+    }
+  ],
+  "2026-01-10 - run_20260110_0019z (audit remediation: reply-after-close + status read-before-write)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-10-run202601100019z-audit-remediation-reply-after-close-status-read-before-write"
+    }
+  ],
   "2026-01-05 - run_20260105_2221z (mypy config for generated cdk assets)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -5458,6 +5506,10 @@
     },
     {
       "path": "05_FAQ_Automation/Macro_Alignment_and_Governance.md",
+      "anchor": "why-this-matters"
+    },
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "why-this-matters"
     },
     {
@@ -12051,6 +12103,18 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "how-to-run-powershell-safe"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "how-to-run-powershell-safe"
     }
   ],
   "evidence expectations": [
@@ -12099,16 +12163,64 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "9) if you cannot fix quickly": [
+  "9) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-if-you-cannot-fix-quickly"
+      "anchor": "9-codecov-coverage-reporting-and-gating"
     }
   ],
-  "10) seed secrets manager (dev/staging)": [
+  "current state (2026-01-10)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-seed-secrets-manager-devstaging"
+      "anchor": "current-state-2026-01-10"
+    }
+  ],
+  "operational plan (phased rollout)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "operational-plan-phased-rollout"
+    }
+  ],
+  "codecov verification (per-pr)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "codecov-verification-per-pr"
+    }
+  ],
+  "troubleshooting codecov failures": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "troubleshooting-codecov-failures"
+    }
+  ],
+  "10) pr health check (required before every merge)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "10-pr-health-check-required-before-every-merge"
+    }
+  ],
+  "health check components": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "health-check-components"
+    }
+  ],
+  "pre-merge checklist": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "pre-merge-checklist"
+    }
+  ],
+  "11) if you cannot fix quickly": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "11-if-you-cannot-fix-quickly"
+    }
+  ],
+  "12) seed secrets manager (dev/staging)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "12-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
@@ -12171,8 +12283,216 @@
       "anchor": "troubleshooting"
     },
     {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "troubleshooting"
+    },
+    {
       "path": "98_Agent_Ops/Validation_and_Automation.md",
       "anchor": "troubleshooting"
+    }
+  ],
+  "e2e test runbook (for cursor agents)": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "e2e-test-runbook-for-cursor-agents"
+    }
+  ],
+  "1) when e2e tests are required": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "1-when-e2e-tests-are-required"
+    }
+  ],
+  "2) e2e smoke test environments": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "2-e2e-smoke-test-environments"
+    }
+  ],
+  "3) what e2e smoke tests validate": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "3-what-e2e-smoke-tests-validate"
+    }
+  ],
+  "4) dev e2e smoke test": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "4-dev-e2e-smoke-test"
+    }
+  ],
+  "when to run": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "when-to-run"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "when-to-run"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "when-to-run"
+    }
+  ],
+  "expected outputs": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "expected-outputs"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "expected-outputs"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "expected-outputs"
+    }
+  ],
+  "evidence capture": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "evidence-capture"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "evidence-capture"
+    },
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "evidence-capture"
+    }
+  ],
+  "5) staging e2e smoke test": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "5-staging-e2e-smoke-test"
+    }
+  ],
+  "staging-specific notes": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "staging-specific-notes"
+    }
+  ],
+  "6) prod e2e smoke test": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "6-prod-e2e-smoke-test"
+    }
+  ],
+  "prod-specific notes": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "prod-specific-notes"
+    }
+  ],
+  "7) e2e test evidence requirements": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "7-e2e-test-evidence-requirements"
+    }
+  ],
+  "8) e2e test failure triage": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "8-e2e-test-failure-triage"
+    }
+  ],
+  "step 1 — capture the failure": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "step-1-capture-the-failure"
+    }
+  ],
+  "step 2 — classify the failure": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "step-2-classify-the-failure"
+    }
+  ],
+  "step 3 — reproduce locally (if possible)": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "step-3-reproduce-locally-if-possible"
+    }
+  ],
+  "step 4 — fix or escalate": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "step-4-fix-or-escalate"
+    }
+  ],
+  "step 5 — document the fix": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "step-5-document-the-fix"
+    }
+  ],
+  "9) e2e test evidence templates": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "9-e2e-test-evidence-templates"
+    }
+  ],
+  "test_matrix.md template (e2e section)": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "testmatrixmd-template-e2e-section"
+    }
+  ],
+  "run_report.md template (pr health check e2e section)": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "runreportmd-template-pr-health-check-e2e-section"
+    }
+  ],
+  "10) common e2e test pitfalls": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "10-common-e2e-test-pitfalls"
+    }
+  ],
+  "reusing event ids": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "reusing-event-ids"
+    }
+  ],
+  "missing secrets manager entries": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "missing-secrets-manager-entries"
+    }
+  ],
+  "expired api tokens": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "expired-api-tokens"
+    }
+  ],
+  "cloudformation outputs not found": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "cloudformation-outputs-not-found"
+    }
+  ],
+  "false positives on routing/drafts": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "false-positives-on-routingdrafts"
+    }
+  ],
+  "11) local e2e testing (advanced)": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "11-local-e2e-testing-advanced"
+    }
+  ],
+  "12) summary checklist": [
+    {
+      "path": "08_Engineering/E2E_Test_Runbook.md",
+      "anchor": "12-summary-checklist"
     }
   ],
   "github workflow and repo standards": [

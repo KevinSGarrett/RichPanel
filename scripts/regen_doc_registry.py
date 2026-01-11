@@ -19,13 +19,11 @@ Design goals:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 import json
 import re
 import sys
-from typing import Dict, List, Tuple
-
+from typing import Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DOCS_ROOT = REPO_ROOT / "docs"
@@ -117,9 +115,7 @@ def extract_outline(md_text: str, max_items: int = 80) -> List[Dict[str, object]
         # trim very long headings
         if len(text) > 140:
             text = text[:137] + "..."
-        outline.append(
-            {"level": level, "text": text, "anchor": slugify_github_like(text)}
-        )
+        outline.append({"level": level, "text": text, "anchor": slugify_github_like(text)})
         if len(outline) >= max_items:
             break
     return outline
@@ -209,7 +205,9 @@ def main() -> int:
             key = str(h["text"]).strip().lower()
             if not key:
                 continue
-            heading_index.setdefault(key, []).append({"path": rel, "anchor": str(h["anchor"])})
+            heading_index.setdefault(key, []).append(
+                {"path": rel, "anchor": str(h["anchor"])}
+            )
 
     # Write docs/REGISTRY.md
     groups: Dict[str, List[Dict[str, object]]] = {}
@@ -227,7 +225,9 @@ def main() -> int:
 
     lines: List[str] = []
     lines.append("# Docs Registry (Complete Listing)\n")
-    lines.append("This registry lists **every markdown file** under `docs/` so nothing becomes orphaned.\n")
+    lines.append(
+        "This registry lists **every markdown file** under `docs/` so nothing becomes orphaned.\n"
+    )
     lines.append("Use `docs/INDEX.md` for curated navigation.\n")
     lines.append("Legend:\n")
     lines.append("- ✅ canonical (linked from `docs/INDEX.md`)\n")

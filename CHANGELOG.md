@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-01-11 - RUN_20260111_1638Z (PR Health Check + E2E routine enforcement)
+- Updated Cursor Agent Prompt template with comprehensive PR Health Check requirements (CI, Codecov, Bugbot, E2E tests).
+- Updated Agent Run Report template with PR Health Check section (structured fields for all evidence).
+- Added section 10 to CI and Actions Runbook: PR Health Check (required before every merge).
+- Created E2E Test Runbook (docs/08_Engineering/E2E_Test_Runbook.md) with detailed procedures for dev/staging/prod E2E smoke tests.
+- Created NEXT_10 suggested items list (REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md) to track emerging priorities.
+- Linked NEXT_10 from TASK_BOARD.md; now visible as emerging priorities tracker.
+- Evidence: REHYDRATION_PACK/RUNS/RUN_20260111_1638Z/A/, CI checks pass (python scripts/run_ci_checks.py --ci)
+
+## 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics)
+- Added Richpanel client/executor get_ticket() helper to enforce read-before-write before outbound replies.
+- Order-status automation now routes closed/follow-up tickets to Email Support with escalation + skip-reason tags instead of auto-replying.
+- Updated docs/tests/progress log/run artifacts for the new safety semantics.
 
 ## 2025-12-29 — Wave F13 (CR-001 No-tracking delivery estimates)
 - Added CR-001 change request and FAQ spec for SLA-based delivery estimates when tracking does not exist yet.

@@ -150,3 +150,61 @@ Before pushing your branch:
 - [ ] Updated `REHYDRATION_PACK/GITHUB_STATE.md` if creating/merging PRs
 - [ ] Filled out required run artifacts in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
 - [ ] Wrote agent summary (see schema above)
+
+---
+
+## PR Health Check (REQUIRED before merge)
+
+Every PR must pass the following health checks before merge. Document results in your run artifacts.
+
+### 1. CI Status
+- [ ] All CI checks are green (`.github/workflows/ci.yml`)
+- [ ] Recorded CI run URL in run artifacts
+- [ ] Fixed any CI failures (see `docs/08_Engineering/CI_and_Actions_Runbook.md` section 4)
+
+### 2. Codecov Status
+- [ ] Codecov patch status checked (target: ≥50% on changed lines)
+- [ ] Codecov project status checked (no >5% coverage drop)
+- [ ] Recorded Codecov status in run artifacts
+- [ ] If coverage issues exist, either:
+  - Added tests to meet threshold, OR
+  - Documented why coverage gap is acceptable
+
+### 3. Bugbot Review
+- [ ] Triggered Bugbot via PR comment: `@cursor review` or `bugbot run`
+- [ ] Recorded Bugbot review output in run artifacts
+- [ ] Addressed all Bugbot findings OR documented why findings are false positives
+- [ ] If Bugbot quota exhausted, performed manual code review and documented findings
+
+**Commands (PowerShell-safe):**
+```powershell
+# Get PR number for current branch
+$pr = gh pr view --json number --jq '.number'
+
+# Trigger Bugbot
+gh pr comment $pr -b '@cursor review'
+
+# View PR status checks
+gh pr view $pr --json statusCheckRollup --jq '.statusCheckRollup'
+
+# Get CI run URL
+gh run list --branch (git branch --show-current) --workflow ci.yml --limit 1 --json url --jq '.[0].url'
+```
+
+### 4. E2E Testing (when automation/outbound logic is touched)
+- [ ] Identified if changes touch automation/outbound paths
+- [ ] Ran appropriate E2E smoke test(s):
+  - Dev: `gh workflow run dev-e2e-smoke.yml`
+  - Staging: `gh workflow run staging-e2e-smoke.yml` (after deploy)
+  - Prod: `gh workflow run prod-e2e-smoke.yml` (only with PM approval)
+- [ ] Captured E2E run URLs and summary outputs in run artifacts
+- [ ] All E2E tests passed OR failures documented with remediation plan
+
+**See:** `docs/08_Engineering/E2E_Test_Runbook.md` for detailed E2E testing procedures.
+
+### 5. Evidence Capture
+All PR health check results must be captured in:
+- `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md` (PR Health Check section)
+- `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/TEST_MATRIX.md` (E2E evidence)
+
+**No placeholders allowed** — CI will fail if template placeholders remain in run artifacts.

@@ -1,6 +1,6 @@
 # MASTER CHECKLIST (Epics / Milestones)
 
-Last verified: 2026-01-10 — run reporting + checklist hygiene pass.
+Last verified: 2026-01-11 — Codecov + model default alignment pass.
 
 This checklist is the **high-level map** of work required to complete the project.
 It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and generated outputs).
@@ -12,11 +12,11 @@ Status definitions used here:
 - **In progress**: actively being implemented in the repo
 - **Roadmap**: not shipped yet (planned/pending)
 
-As of 2026-01-10 (based on the table below):
-- Total epics: 17
-- Shipped: 9 (52.9%)
-- In progress: 2 (11.8%)
-- Roadmap: 6 (35.3%)
+As of 2026-01-11 (based on the table below):
+- Total epics: 20
+- Shipped: 10 (50.0%)
+- In progress: 2 (10.0%)
+- Roadmap: 8 (40.0%)
 
 Important:
 - This file does **not** assert live environment state (dev/staging/prod). Only mark deployments/smoke tests as verified when there is explicit linked evidence (e.g., GitHub Actions run URLs, runbook evidence logs).
@@ -40,6 +40,9 @@ Important:
 | CHK-015 | Build: Richpanel UI configuration (teams/tags/macros/automation triggers) | Roadmap | Ops + PM | `docs/12_Cursor_Agent_Work_Packages/00_Overview/Implementation_Sequence_Sprints.md` |
 | CHK-016 | Build: Production go-live (human go/no-go + prod promotion checklist + enablement) | Roadmap | PM + Ops | `docs/00_Project_Admin/Progress_Log.md`, `.github/workflows/deploy-prod.yml`, `.github/workflows/prod-e2e-smoke.yml` |
 | CHK-017 | Build: Real outbound automation (email/SMS/notifications) | Roadmap | Agent C | `docs/07_Notifications_Outbound/` |
+| CHK-018 | CI: Codecov upload wired in CI (advisory, non-blocking) | Shipped | Agent B | `.github/workflows/ci.yml`, `codecov.yml`, `docs/08_Engineering/CI_and_Actions_Runbook.md` |
+| CHK-019 | CI: Codecov branch-protection required status checks enabled | Roadmap | PM + Eng | `codecov.yml`, `branch_protection_main.json` |
+| CHK-020 | Build: Middleware OpenAI defaults moved to GPT-5.x family (no GPT-4/4o) | Roadmap | Agent B | `docs/04_LLM_Design_Evaluation/Model_Config_and_Versioning.md`, `backend/src/richpanel_middleware/automation/prompts.py`, `backend/src/richpanel_middleware/automation/llm_routing.py` |
 
 Notes:
 - Build owners can be adjusted as build mode progresses.

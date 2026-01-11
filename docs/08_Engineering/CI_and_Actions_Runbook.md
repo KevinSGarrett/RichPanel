@@ -14,14 +14,39 @@ A change is not considered “done” until:
 - GitHub Actions checks are green (unless explicitly waived by PM)
 
 ### What runs in CI (ci.yml)
-Every PR automatically runs:
+The blocking `validate` job runs on every push/PR:
 
-1. `npm install` / `npm ci` for `infra/cdk`
-2. `npm run build` for the CDK package
-3. `npx cdk synth` to confirm the stack renders cleanly
+1. Set up Python 3.11 + install tooling (`black`, `ruff`, `mypy`, `coverage[toml]`, `pip-audit`)
+2. Set up Node.js 20 with npm cache for `infra/cdk`
+3. `npm ci`, `npm run build`, and `npm run synth` in `infra/cdk`
 4. `python scripts/run_ci_checks.py --ci` for repo-wide policy + hygiene validation
+5. `ruff check backend/src/richpanel_middleware scripts/run_ci_checks.py`
+6. `black --check backend/src/richpanel_middleware scripts/run_ci_checks.py`
+7. `mypy backend/src/richpanel_middleware`
+8. `coverage run --rcfile=pyproject.toml -m unittest discover -s scripts -p "test_*.py"` + `coverage xml --rcfile=pyproject.toml` (upload to Codecov with `fail_ci_if_error=false`)
+9. `pip-audit --progress-spinner off` (advisory; continues on error)
 
-No steps are optional; your change must keep this pipeline green.
+Steps 1-8 gate the validate job; Codecov upload and pip-audit run but do not block.
+
+Advisory/non-blocking scheduled workflows:
+- `codeql.yml` (weekly + PR/push; continue-on-error)
+- `gitleaks.yml` (weekly + PR/push; soft-fail secret scan)
+- `iac_scan.yml` (weekly + PR/push; CDK synth + Checkov + Trivy, soft-fail)
+- Dependabot (weekly): pip at repo root + `infra/cdk` npm.
+
+Local mirror for the validate job:
+```powershell
+npm ci --prefix infra/cdk
+npm run build --prefix infra/cdk
+npm run synth --prefix infra/cdk
+python scripts/run_ci_checks.py --ci
+ruff check backend/src/richpanel_middleware scripts/run_ci_checks.py
+black --check backend/src/richpanel_middleware scripts/run_ci_checks.py
+mypy backend/src/richpanel_middleware
+coverage run --rcfile=pyproject.toml -m unittest discover -s scripts -p "test_*.py"
+coverage xml --rcfile=pyproject.toml
+pip-audit --progress-spinner off  # advisory; matches CI behavior
+```
 
 ---
 
@@ -301,7 +326,192 @@ python scripts/run_ci_checks.py
 
 ---
 
-## 9) If you cannot fix quickly
+## 9) Codecov coverage reporting and gating
+
+### Current state (2026-01-10)
+With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is automatically uploaded on every CI run.
+
+**Coverage workflow:**
+1. CI runs `coverage run scripts/run_ci_checks.py` followed by `coverage xml`
+2. `coverage.xml` is uploaded to Codecov using `codecov/codecov-action@v4` (advisory; does not block CI)
+3. `coverage.xml` is also uploaded as a GitHub Actions artifact (`coverage-report`) with 30-day retention for debugging
+
+**Status checks configured in codecov.yml:**
+- **Project status**: requires coverage not to drop by more than 5% compared to base branch
+- **Patch status**: requires at least 50% coverage on new/changed lines (±10% threshold)
+- Both checks use `target: auto` and generous thresholds to avoid breaking PRs on day 1
+
+### Operational plan (phased rollout)
+
+**Phase 1: Observation (current)**
+- Codecov uploads on every PR but does not block merges
+- CI step uses `continue-on-error: true` and `fail_ci_if_error: false`
+- Monitor Codecov PR comments and status checks for 2-3 PRs to validate behavior
+
+**Phase 2: Soft enforcement (after 2-3 green runs)**
+- Once Codecov is reliably uploading and posting comments without false positives:
+  1. Remove `continue-on-error: true` from the Codecov upload step in `.github/workflows/ci.yml`
+  2. Change `fail_ci_if_error: false` to `fail_ci_if_error: true`
+  3. Add `codecov/patch` and optionally `codecov/project` as **required status checks** in branch protection rules
+- This makes coverage gating a hard requirement without breaking existing PRs
+
+**Phase 3: Tighten targets (incremental)**
+- After Phase 2 is stable, gradually increase coverage targets in `codecov.yml`:
+  - Patch target: 50% → 60% → 70%
+  - Project threshold: 5% → 3% → 1%
+- Make changes incrementally and observe impact before tightening further
+
+### Codecov verification (per-PR)
+
+Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to verify Codecov behavior on a PR:
+
+1. Identify the latest `CI` workflow run for the PR branch and copy its URL:
+   - UI: open the PR → **Checks** tab → click the `CI` run → copy the browser URL.
+   - CLI: `gh run list --branch <branch> --workflow ci.yml --limit 1 --json databaseId,url --jq '.[0].url'`
+   - Record this URL in `REHYDRATION_PACK/RUNS/<RUN_ID>/A/TEST_MATRIX.md` under the Codecov row.
+2. In the `CI` run, confirm the **“Upload coverage to Codecov (advisory)”** step completed without error and (when successful) printed a Codecov link.
+3. On the PR’s **Checks** surface, confirm Codecov statuses appear (e.g., `codecov/project`, `codecov/patch`).
+   - CLI alternative: `gh pr view <number> --json statusCheckRollup --jq '.statusCheckRollup'`.
+4. If statuses are missing or stuck in “pending”, treat it as an observation-only defect in Phase 1: capture the PR link, CI run URL, and a 1–2 line note in the rehydration pack, then follow the troubleshooting steps below.
+
+### Troubleshooting Codecov failures
+
+**Coverage upload fails (401/403)**
+- Verify `CODECOV_TOKEN` is set in GitHub repository secrets (Settings → Secrets and variables → Actions)
+- Check Codecov dashboard for repository activation status
+
+**False positive on patch coverage**
+- Review the Codecov PR comment to identify which lines are flagged
+- Add targeted tests or adjust `codecov.yml` thresholds if the flagged code is legitimately untestable
+- For generated code or test utilities, add paths to the `ignore` section in `codecov.yml`
+
+**Coverage.xml missing or empty**
+- Verify `coverage run scripts/run_ci_checks.py` succeeded in CI logs
+- Check that `coverage xml` ran without errors
+- Download the `coverage-report` artifact from GitHub Actions to inspect the raw XML
+
+---
+
+## 10) PR Health Check (required before every merge)
+
+Every PR must pass a comprehensive health check before merge. This is **non-optional** — treat it as a hard gate, not a suggestion.
+
+### Why this matters
+- Catches integration issues before they hit main
+- Ensures test coverage stays healthy
+- Provides audit trail for production incidents
+- Prevents accumulation of technical debt
+- Enables safe, confident deployments
+
+### Health check components
+
+#### 1. CI Status (hard requirement)
+- All GitHub Actions checks must be green
+- Record the CI run URL in run artifacts
+- If CI fails, fix immediately (see section 4)
+
+**Commands:**
+```powershell
+# Get CI run URL for current branch
+$branch = git branch --show-current
+$ciUrl = gh run list --branch $branch --workflow ci.yml --limit 1 --json url --jq '.[0].url'
+$ciUrl
+```
+
+#### 2. Codecov Status (soft enforcement, trending toward hard)
+- **Patch coverage**: must be ≥50% on new/changed lines (±10% threshold)
+- **Project coverage**: must not drop >5% vs. base branch
+- If Codecov status is "pending" or "error", treat as advisory (Phase 1)
+- Once Codecov is stable (Phase 2), will become a hard requirement
+
+**How to check:**
+```powershell
+# View all status checks including Codecov
+$pr = gh pr view --json number --jq '.number'
+gh pr view $pr --json statusCheckRollup --jq '.statusCheckRollup[] | select(.context | contains("codecov"))'
+```
+
+**What to do if coverage is low:**
+- Add unit tests for new logic
+- Add integration tests for new API paths
+- If code is legitimately untestable (e.g., generated code), add to `ignore` in `codecov.yml`
+- Document coverage gap rationale in run artifacts
+
+See section 9 for detailed Codecov guidance.
+
+#### 3. Bugbot Review (required process, not CI-gated yet)
+- Trigger Bugbot on every PR via `@cursor review` or `bugbot run` comment
+- Read the Bugbot output and address findings
+- If Bugbot quota is exhausted, perform manual code review and document it
+
+**How to trigger:**
+```powershell
+$pr = gh pr view --json number --jq '.number'
+gh pr comment $pr -b '@cursor review'
+# Wait 30-60 seconds, then view comments
+gh pr view $pr --comments
+```
+
+**If Bugbot is unavailable:**
+- Perform manual code review focusing on:
+  - Security issues (secrets, injection, auth bypasses)
+  - Logic errors and edge cases
+  - Error handling gaps
+  - Breaking changes to APIs or contracts
+- Document review findings in run artifacts with reviewer name and summary
+
+See section 3 for more Bugbot details.
+
+#### 4. E2E Testing (when automation/outbound logic is touched)
+If your PR touches any of these paths, E2E smoke tests are **mandatory**:
+- `backend/src/richpanel_middleware/automation/`
+- `backend/src/richpanel_middleware/integrations/`
+- `backend/src/lambda_handlers/`
+- `infra/cdk/` (if ingress/queue/worker resources change)
+
+**Which E2E tests to run:**
+- **Dev E2E smoke**: always run after touching automation/outbound paths
+- **Staging E2E smoke**: run after deploying to staging (before promoting to prod)
+- **Prod E2E smoke**: run only after deploying to prod (with PM approval)
+
+**Commands:**
+```powershell
+# Dev E2E smoke
+$eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
+gh workflow run dev-e2e-smoke.yml --ref (git branch --show-current) -f event-id=$eventId
+gh run watch --exit-status
+gh run view --json url --jq '.url'
+```
+
+See section 5-7 for detailed E2E testing procedures, and `docs/08_Engineering/E2E_Test_Runbook.md` for comprehensive E2E guidance.
+
+#### 5. Evidence Capture (hard requirement)
+All PR health check results **must** be documented in run artifacts:
+- `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md` (PR Health Check section)
+- `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/TEST_MATRIX.md` (E2E evidence)
+
+**Required fields:**
+- CI run URL + pass/fail
+- Codecov patch/project percentages + URL
+- Bugbot review URL (or "quota exhausted" + manual review summary)
+- E2E run URLs + pass/fail (if applicable)
+
+**No placeholders allowed** — CI will fail if template placeholders like `<FILL_ME>` remain.
+
+### Pre-merge checklist
+
+Before clicking merge (or enabling auto-merge):
+- [ ] All CI checks are green
+- [ ] Codecov status is acceptable (≥50% patch, ≤5% project drop)
+- [ ] Bugbot review completed and findings addressed (or manual review documented)
+- [ ] E2E smoke tests passed (if automation/outbound touched)
+- [ ] All evidence captured in run artifacts with no placeholders
+- [ ] PR uses merge commit method (not squash)
+- [ ] Branch will be deleted after merge
+
+---
+
+## 11) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -310,7 +520,9 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 10) Seed Secrets Manager (dev/staging)
+---
+
+## 12) Seed Secrets Manager (dev/staging)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
