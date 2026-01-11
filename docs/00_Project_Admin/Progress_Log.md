@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-10 - RUN_20260110_2003Z.
+Last verified: 2026-01-11 - RUN_20260111_0357Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,14 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_0357Z (CI coverage + lint enforcement docs)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_0357Z
+- Added complete CI workflow with lint checks (ruff, black, mypy as advisory), coverage collection with unittest discover, and Codecov upload.
+- Added CI runbook Section 9 documenting Codecov phased rollout plan.
+- Added CI runbook Section 10 documenting lint/type enforcement roadmap (Phase 1: advisory → Phase 2: fix+enforce → Phase 3: mypy).
+- Updated runbook Section 1 with new CI workflow steps (lint, coverage, Codecov).
+- Supersedes PR #74 due to merge conflicts; new PR #76 created.
 
 ### 2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260110_1638Z
