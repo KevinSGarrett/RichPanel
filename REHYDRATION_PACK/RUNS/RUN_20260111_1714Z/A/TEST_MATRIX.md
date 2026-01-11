@@ -7,8 +7,8 @@
 ## Local CI checks
 | Test | Command | Result | Evidence |
 |---|---|---|---|
-| CI-equivalent | python scripts/run_ci_checks.py --ci | in progress (generated-files warning; rerun after artifacts finalized) | will capture snippet after final rerun |
-| Manual compile check | python -m compileall backend/src scripts | pass | output recorded locally |
+| CI-equivalent | python scripts/run_ci_checks.py --ci | PASS | Excerpt: `[OK] REHYDRATION_PACK validated (mode=build)`; `[OK] CI-equivalent checks passed.` Actions: https://github.com/KevinSGarrett/RichPanel/actions/runs/20899198842 |
+| Manual compile check | python -m compileall backend/src scripts | PASS | No errors; used as manual substitute review while Bugbot quota exhausted |
 
 ## Unit / integration tests
 - No additional tests required (docs-only changes).
@@ -17,5 +17,5 @@
 - Not required (docs-only scope, no automation/outbound code touched).
 
 ## Notes
-- Will rerun python scripts/run_ci_checks.py --ci after all artifacts are finalized and record the Actions run URL in RUN_REPORT and PR body.
-- No PII recorded; only safe command outputs will be captured.
+- CI run recorded above; no further reruns planned unless requested.
+- No PII recorded; only safe command outputs captured.
