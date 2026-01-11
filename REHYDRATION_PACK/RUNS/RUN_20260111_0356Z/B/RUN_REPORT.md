@@ -61,7 +61,11 @@
 - **Local CI-equivalent**: `python scripts/run_ci_checks.py --ci`
   - Result: pass (detects uncommitted .github/workflows/ci.yml change as expected)
   - All regen scripts, validators, and unit tests passed
-- **GitHub Actions**: Will be available after push to PR #74 branch
+- **GitHub Actions**: https://github.com/KevinSGarrett/RichPanel/actions/runs/20887879134
+  - Result: success
+  - Coverage collected via unittest discover
+  - Codecov upload successful
+  - Coverage artifact uploaded
 
 ## PR / merge status
 - PR link: https://github.com/KevinSGarrett/RichPanel/pull/74
