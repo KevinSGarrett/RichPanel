@@ -271,12 +271,13 @@ def _redact_payload(payload: Any) -> Any:
     return payload
 
 
-def _fingerprint(value: Any, *, length: int = 16) -> str:
+def _fingerprint(value: Any, *, length: int = 64) -> str:
     try:
         serialized = json.dumps(value, sort_keys=True, default=str)
     except Exception:
         serialized = str(value)
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
+    digest = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+    return digest[:length] if length and length < len(digest) else digest
 
 
 def _safe_str(value: Optional[Any]) -> Optional[str]:

@@ -326,7 +326,7 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(field, item)
         self.assertEqual(item["status"], "processed")
         self.assertEqual(item["mode"], plan.mode)
-        self.assertGreaterEqual(len(item["payload_fingerprint"]), 16)
+        self.assertGreaterEqual(len(item["payload_fingerprint"]), 64)
         self.assertEqual(item["payload_field_count"], len(envelope.payload))
         serialized = json.dumps(item)
         self.assertNotIn("Sensitive PII content", serialized)
