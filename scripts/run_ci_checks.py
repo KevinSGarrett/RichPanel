@@ -24,9 +24,7 @@ What it does:
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
-import sys
 from pathlib import Path
 
 
@@ -38,16 +36,19 @@ def run(cmd: list[str], cwd: Path) -> int:
 
 def git_available(cwd: Path) -> bool:
     try:
-        p = subprocess.run(["git", "--version"], cwd=str(cwd), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        p = subprocess.run(
+            ["git", "--version"],
+            cwd=str(cwd),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         return p.returncode == 0
     except Exception:
         return False
 
 
 def git_status_porcelain(cwd: Path) -> str:
-    p = subprocess.run(
-        ["git", "status", "--short"], cwd=str(cwd), capture_output=True, text=True
-    )
+    p = subprocess.run(["git", "status", "--short"], cwd=str(cwd), capture_output=True, text=True)
     if p.returncode != 0:
         return ""
     return p.stdout.strip()
@@ -55,7 +56,9 @@ def git_status_porcelain(cwd: Path) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ci", action="store_true", help="CI mode: require no diffs after regen")
+    ap.add_argument(
+        "--ci", action="store_true", help="CI mode: require no diffs after regen"
+    )
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[1]
@@ -86,8 +89,11 @@ def main() -> int:
         ["python", "scripts/test_shopify_client.py"],
         ["python", "scripts/test_shipstation_client.py"],
         ["python", "scripts/test_order_lookup.py"],
+        ["python", "scripts/test_llm_reply_rewriter.py"],
         ["python", "scripts/test_llm_routing.py"],
-        ["python", "scripts/check_protected_deletes.py"] + (["--ci"] if args.ci else []),
+        ["python", "scripts/test_llm_reply_rewriter.py"],
+        ["python", "scripts/check_protected_deletes.py"]
+        + (["--ci"] if args.ci else []),
     ]
     for cmd in checks:
         rc = run(cmd, cwd=root)
@@ -99,8 +105,12 @@ def main() -> int:
     if args.ci and git_available(root):
         status = git_status_porcelain(root)
         if status:
-            print("\n[FAIL] Generated files changed after regen. Commit the regenerated outputs.")
-            print("Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.")
+            print(
+                "\n[FAIL] Generated files changed after regen. Commit the regenerated outputs."
+            )
+            print(
+                "Hint: run `python scripts/run_ci_checks.py` locally, commit, and push."
+            )
             print("\nUncommitted changes:")
             print(status)
             return 2

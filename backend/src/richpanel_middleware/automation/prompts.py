@@ -22,7 +22,7 @@ ORDER_STATUS_SYSTEM_PROMPT = (
 
 @dataclass
 class PromptConfig:
-    model: str = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    model: str = os.environ.get("OPENAI_MODEL", "gpt-5.2-chat-latest")
     temperature: float = 0.0
     max_tokens: int = 256
 

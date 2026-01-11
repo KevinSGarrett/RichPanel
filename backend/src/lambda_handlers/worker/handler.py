@@ -1,5 +1,4 @@
 import hashlib
-import hashlib
 import json
 import logging
 import math
@@ -181,7 +180,7 @@ def _persist_idempotency(
     event_id = str(envelope.event_id or f"evt:{int(time.time() * 1000)}")
     received_at = envelope.received_at or datetime.now(timezone.utc).isoformat()
     payload = envelope.payload or {}
-    payload_fingerprint = _payload_fingerprint(payload)
+    payload_fingerprint = _fingerprint(payload)
     payload_field_count = len(payload) if isinstance(payload, dict) else 0
     conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
     source_message_id = _safe_str(envelope.message_id or envelope.dedupe_id)
@@ -245,6 +244,39 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
         state_writer=_state_writer,
         audit_writer=_audit_writer,
     )
+
+
+def _truncate_payload(value: Any) -> str:
+    serialized = value
+    if not isinstance(value, str):
+        try:
+            serialized = json.dumps(value)
+        except (TypeError, ValueError):
+            serialized = str(value)
+    return (serialized or "")[:2000]
+
+
+def _redact_payload(payload: Any) -> Any:
+    """
+    Remove obvious message/PII fields before logging or persisting excerpts.
+    """
+    if isinstance(payload, dict):
+        redacted: Dict[str, Any] = {}
+        for key, val in payload.items():
+            key_lower = str(key).lower()
+            if "message" in key_lower or "body" in key_lower or "content" in key_lower:
+                continue
+            redacted[key] = val
+        return redacted
+    return payload
+
+
+def _fingerprint(value: Any, *, length: int = 16) -> str:
+    try:
+        serialized = json.dumps(value, sort_keys=True, default=str)
+    except Exception:
+        serialized = str(value)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
 
 
 def _safe_str(value: Optional[Any]) -> Optional[str]:
@@ -363,14 +395,6 @@ def _ddb_sanitize(value: Any) -> Any:
             return None
         return Decimal(str(value))
     return value
-
-
-def _payload_fingerprint(value: Any) -> str:
-    try:
-        serialized = json.dumps(value, sort_keys=True, default=str)
-    except Exception:
-        serialized = str(value)
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _table(name: str):

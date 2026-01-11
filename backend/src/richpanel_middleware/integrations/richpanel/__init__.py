@@ -8,6 +8,7 @@ from .client import (
     Transport,
     TransportError,
 )
+from .tickets import TicketMetadata, dedupe_tags, get_ticket_metadata
 
 __all__ = [
     "RichpanelClient",
@@ -18,5 +19,8 @@ __all__ = [
     "Transport",
     "TransportError",
     "HttpTransport",
+    "TicketMetadata",
+    "dedupe_tags",
+    "get_ticket_metadata",
 ]
 

@@ -37,19 +37,6 @@ These constraints align with the common issue: “wrong order → privacy leak�
 
 ---
 
-## Shipped semantics (v1)
-The following safety semantics are **implemented** in the middleware outbound executor:
-
-- **Status read-before-write**: before posting a reply + setting `status=resolved`, middleware reads the current ticket state via `GET /v1/tickets/{id}`.
-- **Reply-after-close prevention**: if the ticket is already `resolved/closed/solved`, middleware **does not** auto-reply; it instead applies the routing tag `route-email-support-team` and records reason `already_resolved`.
-- **Follow-up after auto-reply**: if a ticket already has `mw-auto-replied` and a new customer message arrives, middleware treats it as a follow-up and **does not** auto-reply; it applies `route-email-support-team` and records reason `followup_after_auto_reply`.
-
-### Roadmap (not yet shipped)
-- Remove/replace conflicting route tags when forcing a human handoff (requires validating tenant rules + `remove-tags` usage).
-- Time-window-based de-dupe (e.g., â€œmw-auto-replied within last X minutesâ€) using persisted state rather than tags alone.
-
----
-
 ## Definitions
 
 ### Deterministic match
@@ -184,6 +171,11 @@ Minimum required checks before sending an order-status auto-reply:
 - If the last message was from an agent (not the customer) → do not auto-reply.
 - If the ticket is closed/solved → do not auto-reply.
 - If a prior auto-reply was sent for this same inbound message id → do not auto-reply.
+
+When a ticket is skipped, the worker routes to Email Support and applies tags for visibility:
+- Closed/solved: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-resolved`
+- Follow-up after middleware auto-reply: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-followup`
+- Ticket status read failed: `route-email-support-team`, `mw-escalated-human`, `mw-auto-skipped-status-read-failed`
 
 See: `FAQ_Automation_Dedup_Rate_Limits.md` and common issue `01-automation-loops.md`.
 

@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-11 - run_20260111_0532z (llm rewriter rebase + gpt-5 defaults)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
+    }
+  ],
   "2026-01-11 - run_20260111_0357z (ci coverage + lint enforcement docs)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -8321,18 +8327,6 @@
     {
       "path": "05_FAQ_Automation/Order_Status_Automation.md",
       "anchor": "non-negotiable-safety-constraints"
-    }
-  ],
-  "shipped semantics (v1)": [
-    {
-      "path": "05_FAQ_Automation/Order_Status_Automation.md",
-      "anchor": "shipped-semantics-v1"
-    }
-  ],
-  "roadmap (not yet shipped)": [
-    {
-      "path": "05_FAQ_Automation/Order_Status_Automation.md",
-      "anchor": "roadmap-not-yet-shipped"
     }
   ],
   "deterministic match": [
