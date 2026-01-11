@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-11 - run_20260111_0359z (ci coverage + lint gating hardening)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-11-run202601110359z-ci-coverage-lint-gating-hardening"
+    }
+  ],
   "2026-01-10 - run_20260110_1638z (waveaudit reply-after-close semantics + escalation tags)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -2885,6 +2891,66 @@
     {
       "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
       "anchor": "progress-dashboard-repo-shipped-vs-roadmap"
+    }
+  ],
+  "midpoint audit checklist (waveaudit ??? repo tasks)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "midpoint-audit-checklist-waveaudit-repo-tasks"
+    }
+  ],
+  "owners (a/b/c)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "owners-abc"
+    }
+  ],
+  "evidence rules (per checkbox)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "evidence-rules-per-checkbox"
+    }
+  ],
+  "0) alignment: personalization strategy (mismatch resolution)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "0-alignment-personalization-strategy-mismatch-resolution"
+    }
+  ],
+  "1) documentation updates (waveaudit remediation)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "1-documentation-updates-waveaudit-remediation"
+    }
+  ],
+  "2) richpanel configuration (ops)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "2-richpanel-configuration-ops"
+    }
+  ],
+  "3) testing & validation (waveaudit requirements)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "3-testing-validation-waveaudit-requirements"
+    }
+  ],
+  "4) implementation (middleware + behavior)": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "4-implementation-middleware-behavior"
+    }
+  ],
+  "5) observability / monitoring / alerting": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "5-observability-monitoring-alerting"
+    }
+  ],
+  "6) training, comms, and log hygiene": [
+    {
+      "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+      "anchor": "6-training-comms-and-log-hygiene"
     }
   ],
   "plan checklist (traceable to plan docs)": [
@@ -12129,16 +12195,46 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "9) if you cannot fix quickly": [
+  "9) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-if-you-cannot-fix-quickly"
+      "anchor": "9-codecov-coverage-reporting-and-gating"
     }
   ],
-  "10) seed secrets manager (dev/staging)": [
+  "current state (2026-01-10)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-seed-secrets-manager-devstaging"
+      "anchor": "current-state-2026-01-10"
+    }
+  ],
+  "operational plan (phased rollout)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "operational-plan-phased-rollout"
+    }
+  ],
+  "codecov verification (per-pr)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "codecov-verification-per-pr"
+    }
+  ],
+  "troubleshooting codecov failures": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "troubleshooting-codecov-failures"
+    }
+  ],
+  "10) if you cannot fix quickly": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "10-if-you-cannot-fix-quickly"
+    }
+  ],
+  "11) seed secrets manager (dev/staging)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "11-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [

@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_0359Z (CI coverage + lint gating hardening)",
+        "anchor": "2026-01-11-run202601110359z-ci-coverage-lint-gating-hardening"
+      },
+      {
+        "level": 3,
         "text": "2026-01-10 - RUN_20260110_1638Z (WaveAudit reply-after-close semantics + escalation tags)",
         "anchor": "2026-01-10-run202601101638z-waveaudit-reply-after-close-semantics-escalation-tags"
       },
@@ -2811,6 +2816,61 @@
         "level": 2,
         "text": "Progress dashboard (repo-shipped vs roadmap)",
         "anchor": "progress-dashboard-repo-shipped-vs-roadmap"
+      }
+    ]
+  },
+  {
+    "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Midpoint Audit Checklist (WaveAudit ??? Repo Tasks)",
+        "anchor": "midpoint-audit-checklist-waveaudit-repo-tasks"
+      },
+      {
+        "level": 2,
+        "text": "Owners (A/B/C)",
+        "anchor": "owners-abc"
+      },
+      {
+        "level": 2,
+        "text": "Evidence rules (per checkbox)",
+        "anchor": "evidence-rules-per-checkbox"
+      },
+      {
+        "level": 2,
+        "text": "0) Alignment: personalization strategy (mismatch resolution)",
+        "anchor": "0-alignment-personalization-strategy-mismatch-resolution"
+      },
+      {
+        "level": 2,
+        "text": "1) Documentation updates (WaveAudit remediation)",
+        "anchor": "1-documentation-updates-waveaudit-remediation"
+      },
+      {
+        "level": 2,
+        "text": "2) Richpanel configuration (ops)",
+        "anchor": "2-richpanel-configuration-ops"
+      },
+      {
+        "level": 2,
+        "text": "3) Testing & validation (WaveAudit requirements)",
+        "anchor": "3-testing-validation-waveaudit-requirements"
+      },
+      {
+        "level": 2,
+        "text": "4) Implementation (middleware + behavior)",
+        "anchor": "4-implementation-middleware-behavior"
+      },
+      {
+        "level": 2,
+        "text": "5) Observability / monitoring / alerting",
+        "anchor": "5-observability-monitoring-alerting"
+      },
+      {
+        "level": 2,
+        "text": "6) Training, comms, and log hygiene",
+        "anchor": "6-training-comms-and-log-hygiene"
       }
     ]
   },
@@ -10949,13 +11009,38 @@
       },
       {
         "level": 2,
-        "text": "9) If you cannot fix quickly",
-        "anchor": "9-if-you-cannot-fix-quickly"
+        "text": "9) Codecov coverage reporting and gating",
+        "anchor": "9-codecov-coverage-reporting-and-gating"
+      },
+      {
+        "level": 3,
+        "text": "Current state (2026-01-10)",
+        "anchor": "current-state-2026-01-10"
+      },
+      {
+        "level": 3,
+        "text": "Operational plan (phased rollout)",
+        "anchor": "operational-plan-phased-rollout"
+      },
+      {
+        "level": 3,
+        "text": "Codecov verification (per-PR)",
+        "anchor": "codecov-verification-per-pr"
+      },
+      {
+        "level": 3,
+        "text": "Troubleshooting Codecov failures",
+        "anchor": "troubleshooting-codecov-failures"
       },
       {
         "level": 2,
-        "text": "10) Seed Secrets Manager (dev/staging)",
-        "anchor": "10-seed-secrets-manager-devstaging"
+        "text": "10) If you cannot fix quickly",
+        "anchor": "10-if-you-cannot-fix-quickly"
+      },
+      {
+        "level": 2,
+        "text": "11) Seed Secrets Manager (dev/staging)",
+        "anchor": "11-seed-secrets-manager-devstaging"
       },
       {
         "level": 3,
