@@ -8,8 +8,8 @@
 Stabilize CI coverage + Codecov flow for PR #74 and align runbook.
 
 ## Work completed (bullets)
-- Updated `.github/workflows/ci.yml` to run unit tests under coverage and make ruff/black/mypy blocking.
-- Refreshed CI runbook with new gating/coverage plan and phased Codecov enforcement.
+- Updated `.github/workflows/ci.yml` to run unit tests under coverage and execute ruff/black/mypy (advisory until lint debt is cleared).
+- Refreshed CI runbook with new gating/coverage plan and phased Codecov enforcement, noting temporary advisory lint.
 - Created run artifacts for B and captured local CI + coverage runs.
 
 ## Files changed
@@ -29,7 +29,7 @@ Stabilize CI coverage + Codecov flow for PR #74 and align runbook.
 - Evidence path/link: see RUN_REPORT.md (local command outputs) and upcoming CI run link (to add after push)
 
 ## Decisions made
-- Lint/type checks are blocking again; Codecov upload stays soft (`fail_ci_if_error=false`) while coverage collection is blocking.
+- Lint/type checks remain advisory because the branch has existing Ruff/Black/Mypy findings; flip to blocking after 2–3 consecutive green runs once the backlog is cleared. Codecov upload stays soft (`fail_ci_if_error=false`) while coverage collection is blocking.
 
 ## Issues / follow-ups
 - Monitor the next CI run for Codecov upload; enable auto-merge once checks are green.

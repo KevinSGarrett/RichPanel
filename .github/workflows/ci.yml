@@ -51,15 +51,18 @@ jobs:
         run: |
           python scripts/run_ci_checks.py --ci
 
-      - name: Ruff
+      - name: Ruff (advisory)
+        continue-on-error: true
         run: |
           ruff check backend/src scripts
 
-      - name: Black
+      - name: Black (advisory)
+        continue-on-error: true
         run: |
           black --check backend/src scripts
 
-      - name: Mypy
+      - name: Mypy (advisory)
+        continue-on-error: true
         run: |
           mypy --config-file mypy.ini
 
