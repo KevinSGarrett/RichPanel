@@ -1,8 +1,12 @@
+# Archive — snapshot of `REHYDRATION_PACK/06_AGENT_ASSIGNMENTS.md`
+
+Archived at run creation for `RUN_20260111_0356Z`.
+
+---
+
 # Current Cursor Agent Prompts (build mode)
 
 This file must contain **only the currently active prompts** for the current run/cycle.
-
-prompt-repeat-override: true
 
 **⚠️ REQUIRED IN EVERY PROMPT:** Model + MAX mode + Cycle metadata (see below)
 

@@ -2,22 +2,27 @@
 
 > This is the **single most important** file for "what to do next".
 
-Last updated: 2026-01-10 (WaveAudit midpoint audit checklist + prompt template drift fixes)
+Last updated: 2026-01-10 (Run reporting + prompt archive + checklist hygiene)
 
-**Current mode:** build (implementation active).
-**Environment status:** Do not claim dev/staging/prod state unless verified and linked in the latest `REHYDRATION_PACK/RUNS/<RUN_ID>/*/RUN_REPORT.md` or `REHYDRATION_PACK/GITHUB_STATE.md`.
-
----
-
-## Progress dashboard (snapshot)
-
-- P0 checkbox items: 9
-- Completed: 0 (0%)
-- Shipped baseline items (non-checkbox list): 16
+**Current mode:** build (implementation active).  
+Environment state (dev/staging/prod) is **not asserted** here unless explicitly linked to evidence. Prod promotion remains gated.
 
 ---
 
-## Roadmap / next (P0) - Integrations + configuration (do next)
+## Progress dashboard (repo-shipped vs roadmap)
+
+Status definitions:
+- **Shipped**: merged into the repo (code/docs/workflows exist)
+- **In progress**: actively being implemented in the repo
+- **Roadmap**: planned/pending (not shipped yet)
+
+Based on `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md` (CHK-001..017):
+- Total epics: 17
+- Shipped: 9 (52.9%)
+- In progress: 2 (11.8%)
+- Roadmap: 6 (35.3%)
+
+## P0 — Integrations + configuration (do next)
 - [ ] Shopify integration: confirm credentials + data availability + fallback behavior
 - [ ] ShipStation integration (if used): confirm credentials + field mapping
 - [ ] Shopify/ShipStation order lookup implementation (gated enrichment + tests) - in progress
@@ -39,7 +44,7 @@ Goal: stay safe while shipping.
 
 ---
 
-## Shipped baseline (completed)
+## Done (Shipped in repo)
 
 - DONE: TASK-251 - Bugbot PR loop documented (trigger via `@cursor review` / `bugbot run`) (Runbook)
 - DONE: TASK-250 - Offline-first integration skeletons present (Richpanel/OpenAI/Shopify/ShipStation) (skeletons)
