@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)",
+        "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
+      },
+      {
+        "level": 3,
         "text": "2026-01-11 - RUN_20260111_0357Z (CI coverage + lint enforcement docs)",
         "anchor": "2026-01-11-run202601110357z-ci-coverage-lint-enforcement-docs"
       },
@@ -7421,16 +7426,6 @@
         "level": 2,
         "text": "Non-negotiable safety constraints",
         "anchor": "non-negotiable-safety-constraints"
-      },
-      {
-        "level": 2,
-        "text": "Shipped semantics (v1)",
-        "anchor": "shipped-semantics-v1"
-      },
-      {
-        "level": 3,
-        "text": "Roadmap (not yet shipped)",
-        "anchor": "roadmap-not-yet-shipped"
       },
       {
         "level": 2,

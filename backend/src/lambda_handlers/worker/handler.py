@@ -256,7 +256,6 @@ def _truncate_payload(value: Any) -> str:
     return (serialized or "")[:2000]
 
 
-<<<<<<< Updated upstream
 def _redact_payload(payload: Any) -> Any:
     """
     Remove obvious message/PII fields before logging or persisting excerpts.
@@ -272,18 +271,11 @@ def _redact_payload(payload: Any) -> Any:
     return payload
 
 
-def _fingerprint(obj: Any, *, length: int = 12) -> str:
-    try:
-        serialized = json.dumps(obj, sort_keys=True, default=str)
-    except Exception:
-        serialized = str(obj)
-=======
 def _fingerprint(value: Any, *, length: int = 16) -> str:
     try:
         serialized = json.dumps(value, sort_keys=True, default=str)
     except Exception:
         serialized = str(value)
->>>>>>> Stashed changes
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
 
 

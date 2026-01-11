@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-11 - RUN_20260111_0357Z.
+Last verified: 2026-01-11 - RUN_20260111_0532Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_0532Z
+- Rebased PR #72 onto latest main; preserved fail-closed reply rewriter (feature-flagged/off by default) and GPT-5.2 chat defaults.
+- Kept shared Richpanel TicketMetadata helper (no shadowing) and PII-safe idempotency fingerprints.
+- Regenerated run artifacts; CI-equivalent checks rerun.
 
 ### 2026-01-11 - RUN_20260111_0357Z (CI coverage + lint enforcement docs)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_0357Z
