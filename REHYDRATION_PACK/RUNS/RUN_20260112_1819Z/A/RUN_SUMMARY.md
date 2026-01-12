@@ -24,7 +24,7 @@ Enforce GPT-5.x-only defaults via CI, clean mojibake artifacts, and update docs/
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260112_1819Z_openai_model_plan_enforcement`
-- PR: pending (to be opened against `main`)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/89 (merged 2026-01-12T18:42:38Z)
 - CI status at end of run: green (run_ci_checks.py --ci)
 - Main updated: no
 - Branch cleanup done: n/a
