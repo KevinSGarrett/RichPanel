@@ -152,3 +152,25 @@ Before pushing your branch:
 - [ ] Updated `REHYDRATION_PACK/GITHUB_STATE.md` if creating/merging PRs
 - [ ] Filled out required run artifacts in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/` (including `RUN_REPORT.md`)
 - [ ] Wrote agent summary (see schema above)
+
+## PR Health Check (required for all PRs)
+
+Before claiming a PR as "done", agents must complete the following health checks and document findings in `RUN_REPORT.md`:
+
+### Bugbot Review (required)
+- [ ] Triggered Bugbot review via `@cursor review` or `bugbot run` PR comment
+- [ ] Reviewed Bugbot findings in PR comments (`gh pr view <PR#> --comments`)
+- [ ] **Action required**: Either fix all Bugbot findings in this run, OR document why each finding is deferred with a follow-up checklist item
+
+### Codecov Status (required)
+- [ ] Verified Codecov patch status (`codecov/patch`) is passing or acceptable
+- [ ] Verified Codecov project status (`codecov/project`) is passing or acceptable
+- [ ] **Action required**: If Codecov flags coverage drop or insufficient patch coverage, either add tests to improve coverage OR document why coverage is acceptable as-is
+
+### E2E Proof (required if applicable)
+- [ ] **Required when**: Changes touch outbound integrations (Richpanel API, Shopify, ShipStation, email/SMS) or automation logic
+- [ ] Run appropriate E2E smoke test: `dev-e2e-smoke.yml`, `staging-e2e-smoke.yml`, or `prod-e2e-smoke.yml`
+- [ ] Record E2E run URL + summary in `TEST_MATRIX.md` and `RUN_REPORT.md`
+- [ ] **Action required**: If E2E test fails, fix the issue before merging
+
+**Gate rule**: A PR cannot be merged without addressing Bugbot findings, Codecov issues, and E2E requirements (when applicable). Document all triage decisions explicitly.

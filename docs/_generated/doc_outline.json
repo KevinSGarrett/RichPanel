@@ -1234,6 +1234,16 @@
       },
       {
         "level": 3,
+        "text": "2026-01-12 - RUN_20260112_0259Z (PR Health Check gates: Bugbot + Codecov + E2E enforcement)",
+        "anchor": "2026-01-12-run202601120259z-pr-health-check-gates-bugbot-codecov-e2e-enforcement"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-12 - RUN_20260112_0054Z (Worker flag wiring + CI proof)",
+        "anchor": "2026-01-12-run202601120054z-worker-flag-wiring-ci-proof"
+      },
+      {
+        "level": 3,
         "text": "2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)",
         "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
       },
@@ -10914,8 +10924,33 @@
       },
       {
         "level": 2,
-        "text": "4) When GitHub Actions fails (red status)",
-        "anchor": "4-when-github-actions-fails-red-status"
+        "text": "4) PR Health Check (required before merge)",
+        "anchor": "4-pr-health-check-required-before-merge"
+      },
+      {
+        "level": 3,
+        "text": "4.1 Bugbot review",
+        "anchor": "41-bugbot-review"
+      },
+      {
+        "level": 3,
+        "text": "4.2 Codecov status verification",
+        "anchor": "42-codecov-status-verification"
+      },
+      {
+        "level": 3,
+        "text": "4.3 E2E proof (when applicable)",
+        "anchor": "43-e2e-proof-when-applicable"
+      },
+      {
+        "level": 3,
+        "text": "4.4 PR Health Check CLI reference card",
+        "anchor": "44-pr-health-check-cli-reference-card"
+      },
+      {
+        "level": 2,
+        "text": "5) When GitHub Actions fails (red status)",
+        "anchor": "5-when-github-actions-fails-red-status"
       },
       {
         "level": 3,
@@ -10949,8 +10984,8 @@
       },
       {
         "level": 2,
-        "text": "5) Dev E2E smoke workflow",
-        "anchor": "5-dev-e2e-smoke-workflow"
+        "text": "6) Dev E2E smoke workflow",
+        "anchor": "6-dev-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10969,8 +11004,8 @@
       },
       {
         "level": 2,
-        "text": "6) Staging E2E smoke workflow",
-        "anchor": "6-staging-e2e-smoke-workflow"
+        "text": "7) Staging E2E smoke workflow",
+        "anchor": "7-staging-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -10989,8 +11024,8 @@
       },
       {
         "level": 2,
-        "text": "7) Prod promotion checklist (no prod deploy without explicit go/no-go)",
-        "anchor": "7-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+        "text": "8) Prod promotion checklist (no prod deploy without explicit go/no-go)",
+        "anchor": "8-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
       },
       {
         "level": 3,
@@ -11004,8 +11039,8 @@
       },
       {
         "level": 2,
-        "text": "8) Common causes (initial list)",
-        "anchor": "8-common-causes-initial-list"
+        "text": "9) Common causes (initial list)",
+        "anchor": "9-common-causes-initial-list"
       },
       {
         "level": 3,
@@ -11014,8 +11049,8 @@
       },
       {
         "level": 2,
-        "text": "9) Codecov coverage reporting and gating",
-        "anchor": "9-codecov-coverage-reporting-and-gating"
+        "text": "10) Codecov coverage reporting and gating",
+        "anchor": "10-codecov-coverage-reporting-and-gating"
       },
       {
         "level": 3,
@@ -11039,8 +11074,8 @@
       },
       {
         "level": 2,
-        "text": "10) Lint/Type enforcement roadmap",
-        "anchor": "10-linttype-enforcement-roadmap"
+        "text": "11) Lint/Type enforcement roadmap",
+        "anchor": "11-linttype-enforcement-roadmap"
       },
       {
         "level": 3,
@@ -11059,13 +11094,13 @@
       },
       {
         "level": 2,
-        "text": "11) If you cannot fix quickly",
-        "anchor": "11-if-you-cannot-fix-quickly"
+        "text": "12) If you cannot fix quickly",
+        "anchor": "12-if-you-cannot-fix-quickly"
       },
       {
         "level": 2,
-        "text": "12) Seed Secrets Manager (dev/staging)",
-        "anchor": "12-seed-secrets-manager-devstaging"
+        "text": "13) Seed Secrets Manager (dev/staging)",
+        "anchor": "13-seed-secrets-manager-devstaging"
       },
       {
         "level": 3,

@@ -83,7 +83,13 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
 
         try:
             envelope = normalize_event(body)
-            plan = plan_actions(envelope, safe_mode=safe_mode, automation_enabled=automation_enabled)
+            plan = plan_actions(
+                envelope,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                outbound_enabled=outbound_enabled,
+            )
             persisted = _persist_idempotency(envelope, plan)
             execution = _execute_and_record(envelope, plan)
             outbound_result = _maybe_execute_outbound_reply(
