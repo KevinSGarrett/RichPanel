@@ -23,7 +23,21 @@
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-TODO_REPLACE_DIFFSTAT
+Core changes:
+- backend/src/richpanel_middleware/commerce/order_lookup.py | 232 insertions(+), 9 deletions(-)
+- scripts/test_order_lookup.py | 101 insertions(+)
+- scripts/fixtures/order_lookup/payload_order_summary.json | 43 insertions(+)
+
+Run artifacts (C track):
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/AGENT_PROMPTS_ARCHIVE.md | 156 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/DOCS_IMPACT_MAP.md | 22 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/FIX_REPORT.md | 21 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/GIT_RUN_PLAN.md | 61 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/RUN_REPORT.md | 69 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/RUN_SUMMARY.md | 37 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/STRUCTURE_REPORT.md | 27 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/C/TEST_MATRIX.md | 14 insertions(+)
+- REHYDRATION_PACK/RUNS/RUN_20260112_2030Z/RUN_META.md | 11 insertions(+)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
