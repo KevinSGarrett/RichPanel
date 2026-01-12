@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-01-12
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260112_2112Z_order_lookup_patch_green
-- **PR:** (to be created for this run)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/92
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -49,6 +49,10 @@ List commands you ran (include key flags/env if relevant):
 Include test commands + results + links to evidence.
 
 - `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci` — pass — evidence snippet below.
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/92 (patch 100% green)
+- Bugbot check run: https://github.com/KevinSGarrett/RichPanel/runs/60158280604 (triggered via `@cursor review`)
+- GitHub Actions `validate` workflow — pass (see PR checks)
+- Codecov patch — green (100% of diff hit)
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
@@ -71,7 +75,7 @@ AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.p
 - None.
 
 ## Follow-ups (actionable)
-- [ ] Create PR, enable auto-merge, trigger Bugbot.
+- [x] Create PR, enable auto-merge, trigger Bugbot.
 - [ ] Delete branch after auto-merge completes.
 
 <!-- End of template -->

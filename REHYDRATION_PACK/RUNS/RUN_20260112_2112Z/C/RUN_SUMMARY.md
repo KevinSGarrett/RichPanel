@@ -21,9 +21,9 @@ Fix tracking dict stringification in order lookup, add coverage to make Codecov 
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260112_2112Z_order_lookup_patch_green`
-- PR: (will open to main)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/92 (auto-merge enabled)
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
-- Main updated: no
+- Main updated: no (awaiting auto-merge)
 - Branch cleanup done: no
 
 ## Tests and evidence
