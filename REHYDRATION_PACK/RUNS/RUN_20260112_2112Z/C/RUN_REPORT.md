@@ -21,9 +21,9 @@
 - Updated Progress_Log and captured run artifacts for RUN_20260112_2112Z/C.
 
 ## Diffstat (required)
-- backend/src/richpanel_middleware/commerce/order_lookup.py | small fix (+4/-4) for tracking dict extraction
-- scripts/test_order_lookup.py | +~90 (new payload-first coverage)
-- docs/00_Project_Admin/Progress_Log.md | +5/-0
+- backend/src/richpanel_middleware/commerce/order_lookup.py | 13 lines changed (+/-)
+- scripts/test_order_lookup.py | 115 insertions(+)
+- docs/00_Project_Admin/Progress_Log.md | 7 lines changed
 - docs/_generated/doc_outline.json | regenerated
 - docs/_generated/doc_registry.compact.json | regenerated
 - docs/_generated/doc_registry.json | regenerated
