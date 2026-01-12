@@ -11330,6 +11330,151 @@
     ]
   },
   {
+    "path": "08_Engineering/OpenAI_Model_Plan.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "OpenAI Model Plan",
+        "anchor": "openai-model-plan"
+      },
+      {
+        "level": 2,
+        "text": "Purpose",
+        "anchor": "purpose"
+      },
+      {
+        "level": 2,
+        "text": "Model Matrix (Per Workload)",
+        "anchor": "model-matrix-per-workload"
+      },
+      {
+        "level": 3,
+        "text": "Current Workloads",
+        "anchor": "current-workloads"
+      },
+      {
+        "level": 3,
+        "text": "Planned Roadmap Workloads",
+        "anchor": "planned-roadmap-workloads"
+      },
+      {
+        "level": 2,
+        "text": "Enforced Default Rule",
+        "anchor": "enforced-default-rule"
+      },
+      {
+        "level": 2,
+        "text": "Code Module Mapping",
+        "anchor": "code-module-mapping"
+      },
+      {
+        "level": 3,
+        "text": "1. LLM Routing (`llm_routing.py`)",
+        "anchor": "1-llm-routing-llmroutingpy"
+      },
+      {
+        "level": 3,
+        "text": "2. Reply Rewriter (`llm_reply_rewriter.py`)",
+        "anchor": "2-reply-rewriter-llmreplyrewriterpy"
+      },
+      {
+        "level": 3,
+        "text": "3. OpenAI Client (`openai/client.py`)",
+        "anchor": "3-openai-client-openaiclientpy"
+      },
+      {
+        "level": 2,
+        "text": "Phase Plan (Migration Strategy)",
+        "anchor": "phase-plan-migration-strategy"
+      },
+      {
+        "level": 3,
+        "text": "Phase 0: Env Vars + Defaults (Current)",
+        "anchor": "phase-0-env-vars-defaults-current"
+      },
+      {
+        "level": 3,
+        "text": "Phase 1: Responses API + Structured Outputs (Target)",
+        "anchor": "phase-1-responses-api-structured-outputs-target"
+      },
+      {
+        "level": 3,
+        "text": "Phase 2: Template Variants + Confidence Tuning (Future)",
+        "anchor": "phase-2-template-variants-confidence-tuning-future"
+      },
+      {
+        "level": 2,
+        "text": "Cost & Latency Model",
+        "anchor": "cost-latency-model"
+      },
+      {
+        "level": 3,
+        "text": "Pricing (GPT‑5 Family)",
+        "anchor": "pricing-gpt5-family"
+      },
+      {
+        "level": 3,
+        "text": "Volume Assumptions",
+        "anchor": "volume-assumptions"
+      },
+      {
+        "level": 3,
+        "text": "Daily Cost Estimate (Single Classifier Call)",
+        "anchor": "daily-cost-estimate-single-classifier-call"
+      },
+      {
+        "level": 3,
+        "text": "Latency Targets",
+        "anchor": "latency-targets"
+      },
+      {
+        "level": 2,
+        "text": "Governance & Updates",
+        "anchor": "governance-updates"
+      },
+      {
+        "level": 3,
+        "text": "Model Update Policy",
+        "anchor": "model-update-policy"
+      },
+      {
+        "level": 3,
+        "text": "Change Control",
+        "anchor": "change-control"
+      },
+      {
+        "level": 3,
+        "text": "Audit Trail",
+        "anchor": "audit-trail"
+      },
+      {
+        "level": 2,
+        "text": "Quick Reference",
+        "anchor": "quick-reference"
+      },
+      {
+        "level": 3,
+        "text": "Current Defaults (as of 2026-01-12)",
+        "anchor": "current-defaults-as-of-2026-01-12"
+      },
+      {
+        "level": 3,
+        "text": "Roadmap Targets",
+        "anchor": "roadmap-targets"
+      },
+      {
+        "level": 2,
+        "text": "Related Work Packages",
+        "anchor": "related-work-packages"
+      },
+      {
+        "level": 2,
+        "text": "See Also",
+        "anchor": "see-also"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
     "outline": [
       {

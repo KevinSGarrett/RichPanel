@@ -705,8 +705,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 481,
-    "approx_tokens": 625,
+    "word_count": 538,
+    "approx_tokens": 699,
     "last_updated": ""
   },
   {
@@ -1958,6 +1958,16 @@
     "word_count": 604,
     "approx_tokens": 785,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "08_Engineering/OpenAI_Model_Plan.md",
+    "title": "OpenAI Model Plan",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 1643,
+    "approx_tokens": 2135,
+    "last_updated": ""
   },
   {
     "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
@@ -3825,8 +3835,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10661,
-    "approx_tokens": 13859,
+    "word_count": 10670,
+    "approx_tokens": 13871,
     "last_updated": ""
   },
   {
