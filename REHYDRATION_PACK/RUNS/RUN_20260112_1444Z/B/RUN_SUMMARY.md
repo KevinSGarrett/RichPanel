@@ -16,10 +16,10 @@ Documented that Agent B was idle; engineering work handled by Agent C.
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: pending (worker flag coverage follow-up)
+- PR: #86 (merged)
 - CI status at end of run: green (shared)
 - Main updated: no
-- Branch cleanup done: no
+- Branch cleanup done: n/a (PR merged)
 
 ## Tests and evidence
 - Tests run: none for Agent B

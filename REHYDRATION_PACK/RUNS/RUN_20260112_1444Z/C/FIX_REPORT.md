@@ -7,7 +7,7 @@
 ## Failure observed
 - error: Codecov patch reported 1 uncovered line in worker flag wiring test.
 - where: scripts/test_worker_handler_flag_wiring.py (top-level sys.path conditional)
-- repro steps: run coverage on scripts suite; conditional branch sometimes skipped depending on import order.
+- repro steps: run coverage on scripts suite; conditional branch sometimes skipped when import order places backend/src later.
 
 ## Diagnosis
 - likely root cause: sys.path insertion used a conditional that could be bypassed when backend/src was already present but not first, leaving the deterministic insertion unexecuted and marked uncovered.

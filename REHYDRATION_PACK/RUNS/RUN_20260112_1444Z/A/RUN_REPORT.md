@@ -6,12 +6,12 @@
 - Date (UTC): 2026-01-12
 - Worktree path: C:\RichPanel_GIT
 - Branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: #86 (worker flag coverage follow-up; Agent A idle)
+- PR: #86 (merged; Agent A idle)
 - PR merge strategy: merge commit
 
 ## Objective + stop conditions
 - Objective: Agent A was idle for this run; documenting status only.
-- Stop conditions: Run recorded; no A-owned tasks pending.
+- Stop conditions: Run recorded; no A-owned tasks.
 
 ## What changed (high-level)
 - No code or docs authored by Agent A.
@@ -45,4 +45,4 @@
 - None.
 
 ## Follow-ups
-- [ ] No follow-up; Agent A idle placeholder compliance only.
+- None; Agent A idle placeholder compliance only.
