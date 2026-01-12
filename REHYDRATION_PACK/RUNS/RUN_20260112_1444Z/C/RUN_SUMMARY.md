@@ -25,7 +25,7 @@ Close the Codecov patch miss for worker flag wiring by making coverage determini
 
 ## Tests and evidence
 - Tests run: coverage run -m unittest discover -s scripts -p "test_*.py"; AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci
-- Evidence path/link: console output captured locally; will link Codecov/CI after push
+- Evidence path/link: Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/86 ; Bugbot review https://github.com/KevinSGarrett/RichPanel/pull/86#pullrequestreview-3651270882
 
 ## Decisions made
 - None beyond targeting sys.path determinism to satisfy coverage.

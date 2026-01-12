@@ -6,7 +6,7 @@
 - Date (UTC): 2026-01-12
 - Worktree path: C:\RichPanel_GIT
 - Branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: pending (worker flag coverage follow-up)
+- PR: #86 (worker flag coverage follow-up; Agent B idle)
 - PR merge strategy: merge commit
 
 ## Objective + stop conditions
@@ -45,4 +45,4 @@
 - None.
 
 ## Follow-ups
-- [ ] No follow-up; Agent B idle.
+- [ ] No follow-up; Agent B idle placeholder compliance only.

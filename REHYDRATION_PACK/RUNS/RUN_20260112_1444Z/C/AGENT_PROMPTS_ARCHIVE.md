@@ -20,7 +20,7 @@ prompt-repeat-override: true
 
 ```markdown
 ## Model + MAX mode + Cycle
-- **Model used:** <model-name> (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
+- **Model used:** gpt-5.1-codex-max-xhigh (see REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md)
 - **MAX mode:** ON | OFF
 - **Cycle:** 1× | 2× | 3× | 4×
 ```
@@ -45,7 +45,7 @@ python scripts/new_run_folder.py --now
 ```
 2) Paste the active prompts here (Agent A/B/C), including the **Model + MAX mode + Cycle** section for each agent
 3) Run agents sequentially to avoid merge conflicts
-4) When the cycle ends, archive the prior prompt text under `REHYDRATION_PACK/RUNS/<RUN_ID>/C/`
+4) When the cycle ends, archive the prior prompt text under `REHYDRATION_PACK/RUNS/RUN_20260112_1444Z/C/`
 
 ---
 
@@ -67,9 +67,9 @@ python scripts/new_run_folder.py --now
 **Task ID(s):** WaveAudit midpoint audit checklist + template drift + verifier enforcement
 
 ## Model + MAX mode + Cycle (REQUIRED)
-- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
-- **MAX mode:** ON | OFF
-- **Cycle:** 1??
+- **Model used:** gpt-5.1-codex-max-xhigh (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
+- **MAX mode:** ON
+- **Cycle:** 1×
 
 ## Context (read first)
 - Current goal: Convert WaveAudit findings into repo checklists and fix REHYDRATION_PACK drift; run CI checks; open PR.
@@ -108,9 +108,9 @@ Convert WaveAudit findings into a repo-native midpoint audit checklist and ensur
 **Task ID(s):** Midpoint audit review (routing + personalization)
 
 ## Model + MAX mode + Cycle (REQUIRED)
-- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
-- **MAX mode:** ON | OFF
-- **Cycle:** 1??
+- **Model used:** gpt-5.1-codex-max-xhigh (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
+- **MAX mode:** ON
+- **Cycle:** 1×
 
 ## Context (read first)
 - `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
@@ -138,9 +138,9 @@ Review the Midpoint Audit checklist for routing/personalization correctness (inc
 **Task ID(s):** Midpoint audit review (QA + Richpanel ops)
 
 ## Model + MAX mode + Cycle (REQUIRED)
-- **Model used:** <model-name> (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
-- **MAX mode:** ON | OFF
-- **Cycle:** 1??
+- **Model used:** gpt-5.1-codex-max-xhigh (see `REHYDRATION_PACK/07_CURSOR_MODEL_CATALOG.md`)
+- **MAX mode:** ON
+- **Cycle:** 1×
 
 ## Context (read first)
 - `docs/00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md`
