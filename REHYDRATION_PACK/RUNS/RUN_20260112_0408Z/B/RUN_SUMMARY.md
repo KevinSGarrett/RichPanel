@@ -23,10 +23,11 @@ Fix PII leak in dev E2E smoke proof JSON (Bugbot finding from PR #82) and make r
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260112_0408Z_e2e_proof_pii_sanitize`
-- PR: pending
+- PR #83: https://github.com/KevinSGarrett/RichPanel/pull/83 (merged)
+- PR #84 (cleanup): https://github.com/KevinSGarrett/RichPanel/pull/84 (merged)
 - CI status at end of run: green
-- Main updated: pending
-- Branch cleanup done: pending
+- Main updated: yes
+- Branch cleanup done: yes (auto-deleted)
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci` (PASS), dev E2E smoke (PASS), PII scan (CLEAN)
