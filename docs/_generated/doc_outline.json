@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-12 - RUN_20260112_0054Z (Worker flag wiring + CI proof)",
+        "anchor": "2026-01-12-run202601120054z-worker-flag-wiring-ci-proof"
+      },
+      {
+        "level": 3,
         "text": "2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)",
         "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
       },
