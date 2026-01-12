@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-11 - RUN_20260111_2301Z.
+Last verified: 2026-01-12 - RUN_20260112_0054Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-12 - RUN_20260112_0054Z (Worker flag wiring + CI proof)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_0054Z
+- Forwarded worker `allow_network`/`outbound_enabled` flags into `plan_actions`, added an offline-safe wiring unit test (now in `run_ci_checks.py`), and captured run artifacts. Local CI-equivalent checks passed for PR #78.
 
 ### 2026-01-11 - RUN_20260111_2301Z (Richpanel outbound smoke proof)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_2301Z
