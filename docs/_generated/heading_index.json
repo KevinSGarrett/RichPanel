@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_1444z (worker flag coverage determinism)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601121444z-worker-flag-coverage-determinism"
+    }
+  ],
   "2026-01-12 - run_20260112_0408z (e2e proof pii sanitization)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

@@ -10,8 +10,9 @@ from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+SRC_STR = str(SRC)
+# Keep SRC at the front of sys.path deterministically (no conditional that can be skipped)
+sys.path = [SRC_STR] + [p for p in sys.path if p != SRC_STR]
 
 # Ensure required env vars exist before importing the handler module.
 os.environ.setdefault("IDEMPOTENCY_TABLE_NAME", "local-idempotency")

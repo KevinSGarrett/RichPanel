@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-12 - RUN_20260112_0408Z.
+Last verified: 2026-01-12 - RUN_20260112_1444Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-12 - RUN_20260112_1444Z (Worker flag coverage determinism)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_1444Z
+- Made worker flag wiring test sys.path setup deterministic to close a Codecov patch miss; coverage now 100% on the file.
+- Captured new run artifacts (A/B idle, C recorded coverage fix), ran coverage + CI-equivalent checks locally.
 
 ### 2026-01-12 - RUN_20260112_0408Z (E2E proof PII sanitization)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_0408Z
