@@ -80,6 +80,54 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
             outbound_enabled=True,
         )
 
+    def test_plan_actions_receives_off_path_flags_when_outbound_disabled(self) -> None:
+        os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "false"
+        envelope = SimpleNamespace(
+            event_id="evt-2",
+            conversation_id="c-2",
+            payload={},
+            message_id="m2",
+            dedupe_id="m2",
+            group_id=None,
+            source="test",
+            received_at="2024-01-01T00:00:00Z",
+        )
+        fake_plan = mock.Mock()
+        fake_plan.safe_mode = False
+        fake_plan.automation_enabled = True
+        fake_plan.mode = "automation_candidate"
+        fake_plan.actions = []
+        fake_execution = mock.Mock(dry_run=True)
+
+        with mock.patch.object(worker, "_load_kill_switches", return_value=(False, True)), mock.patch.object(
+            worker, "normalize_event", return_value=envelope
+        ), mock.patch.object(worker, "plan_actions", return_value=fake_plan) as plan_mock, mock.patch.object(
+            worker, "_persist_idempotency"
+        ), mock.patch.object(
+            worker, "_execute_and_record", return_value=fake_execution
+        ), mock.patch.object(
+            worker,
+            "_maybe_execute_outbound_reply",
+            return_value={"sent": False, "reason": "skipped"},
+        ):
+            event = {
+                "Records": [
+                    {
+                        "messageId": "m2",
+                        "body": json.dumps({"payload": {"ticket_id": "t-2", "message_id": "m2"}}),
+                    }
+                ]
+            }
+            worker.lambda_handler(event, None)
+
+        plan_mock.assert_called_once_with(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            outbound_enabled=False,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
