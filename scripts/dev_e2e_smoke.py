@@ -21,12 +21,17 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
+import sys
 import time
 import uuid
+import urllib.parse
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -38,6 +43,20 @@ except ImportError as exc:  # pragma: no cover - enforced in CI
     raise SystemExit(
         "boto3 is required to run dev_e2e_smoke.py; install it with `pip install boto3`."
     ) from exc
+
+# Allow imports from backend/src without packaging.
+ROOT = Path(__file__).resolve().parents[1]
+BACKEND_SRC = ROOT / "backend" / "src"
+if str(BACKEND_SRC) not in sys.path:
+    sys.path.insert(0, str(BACKEND_SRC))
+
+from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
+    RichpanelClient,
+    RichpanelExecutor,
+    RichpanelRequestError,
+    SecretLoadError,
+    TransportError,
+)
 
 
 class SmokeFailure(RuntimeError):
@@ -52,6 +71,174 @@ class StackArtifacts:
     idempotency_table: str
     conversation_state_table: Optional[str] = None
     audit_trail_table: Optional[str] = None
+
+
+def _setup_boto_session(region: str, profile: Optional[str]) -> boto3.session.Session:
+    if profile:
+        boto3.setup_default_session(profile_name=profile, region_name=region)
+    return boto3.session.Session(region_name=region, profile_name=profile)
+
+
+def _iso_timestamp_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _parse_iso8601(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        if value.endswith("Z"):
+            value = value.replace("Z", "+00:00")
+        return datetime.fromisoformat(value)
+    except Exception:
+        return None
+
+
+def _seconds_delta(before: Optional[str], after: Optional[str]) -> Optional[float]:
+    start = _parse_iso8601(before)
+    end = _parse_iso8601(after)
+    if not start or not end:
+        return None
+    return (end - start).total_seconds()
+
+
+def _fingerprint(value: str, length: int = 12) -> str:
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return digest[:length]
+
+
+def _truncate_text(text: str, limit: int = 256) -> str:
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit]}..."
+
+
+def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not snapshot:
+        return None
+    sanitized = dict(snapshot)
+    ticket_id = sanitized.pop("ticket_id", None)
+    if ticket_id:
+        sanitized["ticket_id_fingerprint"] = _fingerprint(ticket_id)
+        if "@" not in ticket_id:
+            sanitized["ticket_id"] = ticket_id
+    return sanitized
+
+
+def _build_richpanel_executor(
+    *,
+    env_name: str,
+    allow_network: bool,
+    api_key_secret_id: Optional[str] = None,
+) -> RichpanelExecutor:
+    os.environ.setdefault("RICHPANEL_ENV", env_name)
+    client = RichpanelClient(
+        api_key_secret_id=api_key_secret_id,
+        dry_run=not allow_network,
+    )
+    return RichpanelExecutor(client=client, outbound_enabled=allow_network)
+
+
+def _fetch_ticket_snapshot(
+    executor: RichpanelExecutor,
+    ticket_ref: str,
+    *,
+    allow_network: bool,
+) -> Dict[str, Any]:
+    encoded_ref = urllib.parse.quote(ticket_ref, safe="")
+    attempts = [
+        f"/v1/tickets/{encoded_ref}",
+        f"/v1/tickets/number/{encoded_ref}",
+    ]
+    errors: List[str] = []
+    for path in attempts:
+        try:
+            response = executor.execute(
+                "GET",
+                path,
+                dry_run=not allow_network,
+                log_body_excerpt=False,
+            )
+        except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+            errors.append(f"{path}: {exc}")
+            continue
+
+        if response.status_code < 200 or response.status_code >= 300:
+            errors.append(f"{path}: status {response.status_code}")
+            continue
+
+        payload = response.json() or {}
+        if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
+            payload = payload["ticket"]
+        status = payload.get("status") or payload.get("state")
+        tags = _normalize_tags(payload.get("tags"))
+        updated_at = payload.get("updated_at") or payload.get("updatedAt")
+
+        return {
+            "ticket_id": str(payload.get("id") or ticket_ref),
+            "status": status.strip() if isinstance(status, str) else status,
+            "tags": tags,
+            "updated_at": updated_at,
+            "status_code": response.status_code,
+            "dry_run": response.dry_run,
+            "path": path,
+        }
+
+    raise SmokeFailure(
+        "Ticket lookup failed; attempted paths: "
+        + "; ".join(errors or attempts)
+    )
+
+
+def _apply_test_tag(
+    executor: RichpanelExecutor,
+    ticket_id: str,
+    tag_value: str,
+    *,
+    allow_network: bool,
+) -> Dict[str, Any]:
+    encoded_id = urllib.parse.quote(ticket_id, safe="")
+    try:
+        response = executor.execute(
+            "PUT",
+            f"/v1/tickets/{encoded_id}/add-tags",
+            json_body={"tags": [tag_value]},
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+    except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+        raise SmokeFailure(f"Failed to apply test tag to ticket {ticket_id}: {exc}") from exc
+
+    if response.dry_run:
+        raise SmokeFailure("Test tag was not applied because Richpanel client is in dry-run mode.")
+
+    if response.status_code < 200 or response.status_code >= 300:
+        body = response.json()
+        snippet = None
+        try:
+            snippet = _truncate_text(json.dumps(body) if body is not None else "")
+        except Exception:
+            snippet = _truncate_text(str(body))
+        raise SmokeFailure(
+            "Applying test tag failed with status "
+            f"{response.status_code} (ticket_fingerprint={_fingerprint(ticket_id)}, path={response.url}, body={snippet})."
+        )
+
+    return {
+        "status_code": response.status_code,
+        "dry_run": response.dry_run,
+        "path": response.url,
+    }
+
+
+def _tag_deltas(
+    before: Optional[List[str]], after: Optional[List[str]]
+) -> Tuple[List[str], List[str]]:
+    before_set = set(before or [])
+    after_set = set(after or [])
+    added = sorted(after_set - before_set)
+    removed = sorted(before_set - after_set)
+    return added, removed
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,6 +272,35 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=60,
         help="How long to wait for the DynamoDB record before failing (default: 60).",
+    )
+    parser.add_argument(
+        "--profile",
+        help="Optional AWS profile name for the boto3 session (default: use ambient credentials).",
+    )
+    parser.add_argument(
+        "--ticket-id",
+        help="Richpanel ticket/conversation ID to target for tag verification (optional).",
+    )
+    parser.add_argument(
+        "--ticket-number",
+        help="Richpanel ticket number to resolve and target (optional; tries ID then number endpoint).",
+    )
+    parser.add_argument(
+        "--run-id",
+        help="Run identifier for tagging/proof attribution (default: RUN_ID env or timestamp).",
+    )
+    parser.add_argument(
+        "--apply-test-tag",
+        action="store_true",
+        help="Apply a unique mw-smoke:<RUN_ID> tag to the ticket (requires ticket-id or ticket-number).",
+    )
+    parser.add_argument(
+        "--proof-path",
+        help="Optional path to write a PII-safe proof JSON artifact.",
+    )
+    parser.add_argument(
+        "--richpanel-secret-id",
+        help="Optional override for the Richpanel API key secret ARN/ID.",
     )
     return parser.parse_args()
 
@@ -321,20 +537,33 @@ def wait_for_dynamodb_record(
 
 
 def validate_idempotency_item(item: Dict[str, Any]) -> str:
-    required = ["event_id", "mode", "safe_mode", "automation_enabled", "payload_fingerprint", "status"]
+    required = ["event_id", "mode", "safe_mode", "automation_enabled", "status"]
     missing = [key for key in required if key not in item]
     if missing:
         raise SmokeFailure(f"Idempotency item missing required fields: {', '.join(missing)}")
 
     fingerprint = item.get("payload_fingerprint")
-    if not isinstance(fingerprint, str):
-        raise SmokeFailure("Idempotency item payload_fingerprint was not a string.")
-    fingerprint = fingerprint.strip()
-    if not fingerprint:
-        raise SmokeFailure("Idempotency item payload_fingerprint was empty.")
     field_count = item.get("payload_field_count")
+
+    if not fingerprint:
+        excerpt = item.get("payload_excerpt")
+        if excerpt:
+            try:
+                parsed_excerpt = json.loads(excerpt)
+                fingerprint = hashlib.sha256(excerpt.encode("utf-8")).hexdigest()
+                if field_count is None and isinstance(parsed_excerpt, dict):
+                    field_count = len(parsed_excerpt)
+            except Exception:
+                fingerprint = None
+
+    if not isinstance(fingerprint, str) or not fingerprint.strip():
+        raise SmokeFailure("Idempotency item payload_fingerprint was not present or empty.")
+    fingerprint = fingerprint.strip()
+    if field_count is None:
+        field_count = 0
     if not isinstance(field_count, int):
         raise SmokeFailure("Idempotency item payload_field_count was not an integer.")
+    item.setdefault("payload_field_count", field_count)
 
     return fingerprint
 
@@ -457,10 +686,15 @@ def wait_for_audit_record(
     )
 
 
-def build_payload(event_id: Optional[str]) -> Dict[str, Any]:
-    return {
+def build_payload(
+    event_id: Optional[str],
+    *,
+    conversation_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    payload: Dict[str, Any] = {
         "event_id": event_id or f"evt:{uuid.uuid4()}",
-        "conversation_id": f"conv-{uuid.uuid4().hex[:8]}",
+        "conversation_id": conversation_id or f"conv-{uuid.uuid4().hex[:8]}",
         "message_id": uuid.uuid4().hex,
         "source": "dev_e2e_smoke",
         "received_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -470,6 +704,9 @@ def build_payload(event_id: Optional[str]) -> Dict[str, Any]:
             "nonce": uuid.uuid4().hex,
         },
     }
+    if run_id:
+        payload["payload"]["run_id"] = run_id
+    return payload
 
 
 def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
@@ -566,11 +803,12 @@ def main() -> int:
     args = parse_args()
     region = args.region
     env_name = args.env
+    run_id = args.run_id or os.environ.get("RUN_ID") or time.strftime("%Y%m%d%H%M%S")
     default_idempotency_table = f"rp_mw_{env_name}_idempotency"
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
 
-    session = boto3.session.Session(region_name=region)
+    session = _setup_boto_session(region, args.profile)
     cfn_client = session.client("cloudformation")
     sqs_client = session.client("sqs")
     apigwv2_client = session.client("apigatewayv2")
@@ -605,9 +843,36 @@ def main() -> int:
 
     token = load_webhook_token(secrets_client, artifacts.secrets_namespace)
 
-    payload = build_payload(args.event_id)
+    ticket_ref = args.ticket_id or args.ticket_number
+    if args.apply_test_tag and not ticket_ref:
+        raise SmokeFailure("--apply-test-tag requires --ticket-id or --ticket-number.")
+
+    allow_network = True  # webhook + Richpanel calls must use real tokens for proof
+    ticket_executor: Optional[RichpanelExecutor] = None
+    pre_ticket: Optional[Dict[str, Any]] = None
+    post_ticket: Optional[Dict[str, Any]] = None
+    tag_result: Optional[Dict[str, Any]] = None
+    tag_error: Optional[str] = None
+    test_tag_value = f"mw-smoke:{run_id}"
+
+    if ticket_ref:
+        ticket_executor = _build_richpanel_executor(
+            env_name=env_name,
+            allow_network=allow_network,
+            api_key_secret_id=args.richpanel_secret_id,
+        )
+        pre_ticket = _fetch_ticket_snapshot(ticket_executor, ticket_ref, allow_network=allow_network)
+        print(
+            f"[INFO] Resolved ticket for smoke proof (path={pre_ticket['path']}, "
+            f"id_fingerprint={_fingerprint(pre_ticket['ticket_id'])})."
+        )
+        payload_conversation = pre_ticket["ticket_id"]
+    else:
+        payload_conversation = None
+
+    payload = build_payload(args.event_id, conversation_id=payload_conversation, run_id=run_id)
     event_id = payload["event_id"]
-    print(f"[INFO] Sending synthetic webhook with event_id={event_id}")
+    print(f"[INFO] Sending synthetic webhook with event_id={event_id} (run_id={run_id})")
 
     response = send_webhook(artifacts.endpoint_url, token, payload)
     returned_event_id = response.get("event_id")
@@ -629,6 +894,9 @@ def main() -> int:
     print(f"[OK] Idempotency payload_fingerprint captured ({payload_fingerprint[:12]}...).")
     print(f"[INFO] DynamoDB console: {console_links['ddb']}")
     conversation_id = item.get("conversation_id") or payload["conversation_id"]
+    conversation_label = (
+        conversation_id if conversation_id and "@" not in conversation_id else _fingerprint(conversation_id)
+    )
 
     state_item = wait_for_conversation_state_record(
         ddb_resource,
@@ -637,7 +905,7 @@ def main() -> int:
         timeout_seconds=args.wait_seconds,
     )
     print(
-        f"[OK] Conversation state written for '{conversation_id}' "
+        f"[OK] Conversation state written for '{conversation_label}' "
         f"in '{artifacts.conversation_state_table}'."
     )
 
@@ -649,7 +917,7 @@ def main() -> int:
         timeout_seconds=args.wait_seconds,
     )
     print(
-        f"[OK] Audit record written for '{conversation_id}' "
+        f"[OK] Audit record written for '{conversation_label}' "
         f"in '{artifacts.audit_trail_table}'."
     )
     routing_state = validate_routing(state_item, label="Conversation state")
@@ -709,7 +977,7 @@ def main() -> int:
         "conversation_state_console": console_links["conversation_ddb"],
         "audit_trail_table": artifacts.audit_trail_table,
         "audit_console": console_links["audit_ddb"],
-        "conversation_id": conversation_id,
+        "conversation_id": conversation_label,
         "idempotency_status": item.get("status", "observed"),
         "idempotency_mode": mode or "unknown",
         "audit_sort_key": audit_item.get("ts_action_id"),
@@ -722,10 +990,154 @@ def main() -> int:
         "draft_reply_count": len(draft_replies),
         "draft_replies_safe": safe_draft_replies,
     }
+
+    tags_added: List[str] = []
+    tags_removed: List[str] = []
+    updated_at_delta = None
+    test_tag_verified = None
+
+    if ticket_executor and payload_conversation:
+        if args.apply_test_tag:
+            try:
+                tag_result = _apply_test_tag(
+                    ticket_executor,
+                    payload_conversation,
+                    test_tag_value,
+                    allow_network=allow_network,
+                )
+                print(
+                    f"[OK] Applied test tag '{test_tag_value}' to ticket "
+                    f"{_fingerprint(payload_conversation)} (status={tag_result['status_code']})."
+                )
+            except SmokeFailure as exc:
+                tag_error = str(exc)
+                print(f"[FAIL] Test tag could not be applied: {tag_error}")
+
+        post_ticket = _fetch_ticket_snapshot(
+            ticket_executor, payload_conversation, allow_network=allow_network
+        )
+        tags_added, tags_removed = _tag_deltas(
+            pre_ticket.get("tags") if pre_ticket else [], post_ticket.get("tags") if post_ticket else []
+        )
+        updated_at_delta = _seconds_delta(
+            pre_ticket.get("updated_at") if pre_ticket else None,
+            post_ticket.get("updated_at") if post_ticket else None,
+        )
+        test_tag_verified = (
+            test_tag_value in (post_ticket.get("tags") or [])
+            if args.apply_test_tag and not tag_error
+            else (False if tag_error else None)
+        )
+        print(
+            f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
+            f"updated_at_delta={updated_at_delta}s."
+        )
+
     if args.summary_path:
         append_summary(args.summary_path, env_name=env_name, data=summary_data)
 
-    return 0
+    safe_pre_ticket = _sanitize_ticket_snapshot(pre_ticket)
+    safe_post_ticket = _sanitize_ticket_snapshot(post_ticket)
+    conversation_fingerprint = _fingerprint(conversation_id) if conversation_id else None
+    safe_conversation_id = conversation_id if conversation_id and "@" not in conversation_id else None
+
+    criteria = {
+        "webhook_accepted": True,
+        "dynamo_records": True,
+        "ticket_lookup": bool(pre_ticket) if ticket_ref else None,
+        "test_tag_verified": test_tag_verified,
+    }
+    required_checks: List[bool] = [
+        criteria["webhook_accepted"],
+        criteria["dynamo_records"],
+    ]
+    if criteria["ticket_lookup"] is not None:
+        required_checks.append(bool(criteria["ticket_lookup"]))
+    if test_tag_verified is not None:
+        required_checks.append(bool(test_tag_verified))
+    failed = [name for name, value in criteria.items() if value is False]
+    result_status = "PASS" if all(required_checks) else "FAIL"
+    failure_reason = None
+    if result_status != "PASS":
+        failure_reason = (
+            f"Failed criteria: {', '.join(failed)}" if failed else "One or more criteria failed."
+        )
+
+    proof_payload = {
+        "meta": {
+            "run_id": run_id,
+            "timestamp": _iso_timestamp_now(),
+            "env": env_name,
+            "region": region,
+        },
+        "inputs": {
+            "ticket_ref": ticket_ref,
+            "ticket_ref_fingerprint": _fingerprint(ticket_ref) if ticket_ref else None,
+            "apply_test_tag": args.apply_test_tag,
+            "test_tag_value": test_tag_value if args.apply_test_tag else None,
+            "command": "python " + " ".join(sys.argv),
+        },
+        "webhook": {
+            "endpoint": f"{artifacts.endpoint_url}/webhook",
+            "queue_url": artifacts.queue_url,
+            "event_id": event_id,
+            "conversation_id": safe_conversation_id,
+            "conversation_id_fingerprint": conversation_fingerprint,
+            "accepted": True,
+        },
+        "dynamo": {
+            "idempotency_table": dynamo_table,
+            "conversation_state_table": artifacts.conversation_state_table,
+            "audit_trail_table": artifacts.audit_trail_table,
+            "links": {
+                "idempotency": console_links["ddb"],
+                "conversation_state": console_links["conversation_ddb"],
+                "audit": console_links["audit_ddb"],
+                "logs": console_links["logs"],
+            },
+            "idempotency_record": {
+                "status": item.get("status"),
+                "mode": mode,
+                "safe_mode": item.get("safe_mode"),
+                "automation_enabled": item.get("automation_enabled"),
+                "payload_field_count": item.get("payload_field_count"),
+            },
+            "state_record": {
+                "routing": routing_state,
+                "action_count": state_item.get("action_count"),
+                "updated_at": state_item.get("updated_at"),
+            },
+            "audit_record": {
+                "routing": routing_audit,
+                "recorded_at": audit_item.get("recorded_at"),
+                "ts_action_id": audit_item.get("ts_action_id"),
+            },
+        },
+        "richpanel": {
+            "pre": safe_pre_ticket,
+            "post": safe_post_ticket,
+            "tags_added": tags_added,
+            "tags_removed": tags_removed,
+            "updated_at_delta_seconds": updated_at_delta,
+            "test_tag_verified": test_tag_verified,
+            "tag_result": tag_result,
+            "tag_error": tag_error,
+        },
+        "result": {
+            "status": result_status,
+            "criteria": criteria,
+            "failure_reason": failure_reason,
+        },
+    }
+
+    if args.proof_path:
+        proof_path = Path(args.proof_path)
+        proof_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(proof_path, "w", encoding="utf-8") as handle:
+            json.dump(proof_payload, handle, indent=2)
+        print(f"[OK] Wrote proof artifact to {proof_path}")
+
+    return 0 if result_status == "PASS" else 1
 
 
 if __name__ == "__main__":

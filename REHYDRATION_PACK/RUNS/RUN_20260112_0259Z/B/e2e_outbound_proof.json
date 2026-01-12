@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "run_id": "RUN_20260112_0259Z",
+    "timestamp": "2026-01-12T03:34:37.899021+00:00",
+    "env": "dev",
+    "region": "us-east-2"
+  },
+  "inputs": {
+    "ticket_ref": "1023",
+    "ticket_ref_fingerprint": "6629ddae3736",
+    "apply_test_tag": true,
+    "test_tag_value": "mw-smoke:RUN_20260112_0259Z",
+    "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --idempotency-table rp_mw_dev_idempotency --wait-seconds 90 --profile richpanel-dev --ticket-number 1023 --run-id RUN_20260112_0259Z --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id": "evt:8908bb9a-fd15-486f-a3f5-5a3ff58eb64c",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "c317ac552b77",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 6
+    },
+    "state_record": {
+      "routing": {
+        "category": "general",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-unknown"
+        ],
+        "reason": "no customer message provided; default routing applied"
+      },
+      "action_count": null,
+      "updated_at": "2026-01-12T03:34:36.772171+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "general",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-unknown"
+        ],
+        "reason": "no customer message provided; default routing applied"
+      },
+      "recorded_at": "2026-01-12T03:34:36.772171+00:00",
+      "ts_action_id": "2026-01-12T03:34:36.772171+00:00#evt:8908bb9a-fd15-486f-a3f5-5a3ff58eb64c"
+    }
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "tags": [],
+      "updated_at": "2026-01-12T03:34:24.972Z",
+      "status_code": 200,
+      "dry_run": false,
+      "path": "/v1/tickets/number/1023",
+      "ticket_id_fingerprint": "c317ac552b77"
+    },
+    "post": {
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke:RUN_20260112_0259Z"
+      ],
+      "updated_at": "2026-01-12T03:34:37.428Z",
+      "status_code": 200,
+      "dry_run": false,
+      "path": "/v1/tickets/%3CCAMxAqfVV8fAxEFVZsScUHJRg9imYvW9QFDrRK0qGZX5x3yQmjw%40mail.gmail.com%3E",
+      "ticket_id_fingerprint": "c317ac552b77"
+    },
+    "tags_added": [
+      "mw-smoke:RUN_20260112_0259Z"
+    ],
+    "tags_removed": [],
+    "updated_at_delta_seconds": 12.456,
+    "test_tag_verified": true,
+    "tag_result": {
+      "status_code": 200,
+      "dry_run": false,
+      "path": "https://api.richpanel.com/v1/tickets/%3CCAMxAqfVV8fAxEFVZsScUHJRg9imYvW9QFDrRK0qGZX5x3yQmjw%40mail.gmail.com%3E/add-tags"
+    },
+    "tag_error": null
+  },
+  "result": {
+    "status": "PASS",
+    "criteria": {
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "test_tag_verified": true
+    },
+    "failure_reason": null
+  }
+}

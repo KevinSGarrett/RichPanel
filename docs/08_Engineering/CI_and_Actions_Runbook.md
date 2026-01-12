@@ -340,12 +340,38 @@ Notes:
 - `gh run watch` exits non-zero if the workflow fails—treat that as a blocking issue.
 - `gh run view --json url --jq '.url'` prints the run URL; capture it in the rehydration pack evidence table.
 
+#### CLI proof (real Richpanel tokens + test tag)
+- Use when you need unambiguous DEV evidence with real Richpanel tokens and a real ticket.
+- PowerShell-safe example (replace placeholders):
+```powershell
+$runId = "RUN_20260112_0259Z"
+$ticketId = "<richpanel-ticket-id-or-number>"
+python scripts/dev_e2e_smoke.py `
+  --env dev `
+  --region us-east-2 `
+  --stack-name RichpanelMiddleware-dev `
+  --idempotency-table rp_mw_dev_idempotency `
+  --wait-seconds 90 `
+  --profile <aws-profile> `
+  --ticket-id $ticketId `
+  --run-id $runId `
+  --apply-test-tag `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_outbound_proof.json"
+```
+- You may use `--ticket-number` instead of `--ticket-id`. `--apply-test-tag` requires one of them.
+- The script:
+  - sends the webhook and waits for idempotency/state/audit records,
+  - applies `mw-smoke:<RUN_ID>` as a tag via Richpanel API,
+  - fetches pre/post ticket status + tags and records tag deltas + updated_at delta,
+  - writes a PII-safe proof JSON (command used, criteria, Dynamo links, tag verification).
+
 ### Evidence expectations
 - Copy the GitHub Actions run URL and the job summary block (ingress URL, queue URL, DynamoDB tables, log group, CloudWatch Logs) into `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`.
 - Record the explicit confirmations from the summary that idempotency, conversation state, and audit records were written (event_id + conversation_id observed) and link the DynamoDB consoles for each table.
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state “no dashboards/alarms surfaced”.
 - Paste the smoke summary lines that confirm routing category/tags and the order_status_draft_reply plan + draft_replies count (safe fields only; no message bodies).
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
+- For CLI proofs, attach the proof JSON path (e.g., `REHYDRATION_PACK/RUNS/<RUN_ID>/B/e2e_outbound_proof.json`), the exact command used, and confirm that `mw-smoke:<RUN_ID>` appears in tags_added with updated_at delta > 0.
 
 ## 7) Staging E2E smoke workflow
 
