@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-12 - RUN_20260112_0259Z.
+Last verified: 2026-01-12 - RUN_20260112_0408Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,15 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-12 - RUN_20260112_0408Z (E2E proof PII sanitization)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_0408Z
+- Fixed PII leak in dev E2E smoke proof JSON (Bugbot finding from PR #82).
+- Added path redaction (`_redact_path()`, `_sanitize_tag_result()`) to prevent ticket ID leakage.
+- Added PII safety assertion (`_check_pii_safe()`) that scans for `%40`, `mail.`, `@`, etc. before writing proof JSON.
+- Regenerated clean proof with `tags_added` including `mw-smoke:RUN_20260112_0408Z` and redacted paths.
+- Repaired RUN_20260112_0259Z/B artifacts with real PR #82 data.
+- Added PII-safe proof note to `docs/08_Engineering/CI_and_Actions_Runbook.md`.
 
 ### 2026-01-12 - RUN_20260112_0259Z (PR Health Check gates: Bugbot + Codecov + E2E enforcement)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_0259Z

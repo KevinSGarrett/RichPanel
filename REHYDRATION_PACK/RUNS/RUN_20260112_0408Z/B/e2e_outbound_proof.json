@@ -1,8 +1,7 @@
 {
-  "_note": "This proof JSON has been sanitized to remove PII. See RUN_20260112_0408Z for the current sanitized proof format.",
   "meta": {
-    "run_id": "RUN_20260112_0259Z",
-    "timestamp": "2026-01-12T03:34:37.899021+00:00",
+    "run_id": "RUN_20260112_0408Z",
+    "timestamp": "2026-01-12T04:12:13.309521+00:00",
     "env": "dev",
     "region": "us-east-2"
   },
@@ -10,13 +9,13 @@
     "ticket_ref": "1023",
     "ticket_ref_fingerprint": "6629ddae3736",
     "apply_test_tag": true,
-    "test_tag_value": "mw-smoke:RUN_20260112_0259Z",
-    "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --idempotency-table rp_mw_dev_idempotency --wait-seconds 90 --profile richpanel-dev --ticket-number 1023 --run-id RUN_20260112_0259Z --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json"
+    "test_tag_value": "mw-smoke:RUN_20260112_0408Z",
+    "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --idempotency-table rp_mw_dev_idempotency --wait-seconds 90 --profile richpanel-dev --ticket-number 1023 --run-id RUN_20260112_0408Z --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json"
   },
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id": "evt:8908bb9a-fd15-486f-a3f5-5a3ff58eb64c",
+    "event_id": "evt:357da6bb-598d-4784-8072-4a74c6b4002f",
     "conversation_id": null,
     "conversation_id_fingerprint": "c317ac552b77",
     "accepted": true
@@ -48,7 +47,7 @@
         "reason": "no customer message provided; default routing applied"
       },
       "action_count": null,
-      "updated_at": "2026-01-12T03:34:36.772171+00:00"
+      "updated_at": "2026-01-12T04:12:09.190473+00:00"
     },
     "audit_record": {
       "routing": {
@@ -59,38 +58,38 @@
         ],
         "reason": "no customer message provided; default routing applied"
       },
-      "recorded_at": "2026-01-12T03:34:36.772171+00:00",
-      "ts_action_id": "2026-01-12T03:34:36.772171+00:00#evt:8908bb9a-fd15-486f-a3f5-5a3ff58eb64c"
+      "recorded_at": "2026-01-12T04:12:09.190473+00:00",
+      "ts_action_id": "2026-01-12T04:12:09.190473+00:00#evt:357da6bb-598d-4784-8072-4a74c6b4002f"
     }
   },
   "richpanel": {
     "pre": {
       "status": "OPEN",
       "tags": [],
-      "updated_at": "2026-01-12T03:34:24.972Z",
+      "updated_at": "2026-01-12T04:11:53.143Z",
       "status_code": 200,
       "dry_run": false,
+      "ticket_id_fingerprint": "c317ac552b77",
       "endpoint_variant": "number",
-      "path_redacted": "/v1/tickets/number/<redacted>",
-      "ticket_id_fingerprint": "c317ac552b77"
+      "path_redacted": "/v1/tickets/number/<redacted>"
     },
     "post": {
       "status": "OPEN",
       "tags": [
-        "mw-smoke:RUN_20260112_0259Z"
+        "mw-smoke:RUN_20260112_0408Z"
       ],
-      "updated_at": "2026-01-12T03:34:37.428Z",
+      "updated_at": "2026-01-12T04:12:13.827Z",
       "status_code": 200,
       "dry_run": false,
+      "ticket_id_fingerprint": "c317ac552b77",
       "endpoint_variant": "id",
-      "path_redacted": "/v1/tickets/<redacted>",
-      "ticket_id_fingerprint": "c317ac552b77"
+      "path_redacted": "/v1/tickets/<redacted>"
     },
     "tags_added": [
-      "mw-smoke:RUN_20260112_0259Z"
+      "mw-smoke:RUN_20260112_0408Z"
     ],
     "tags_removed": [],
-    "updated_at_delta_seconds": 12.456,
+    "updated_at_delta_seconds": 20.684,
     "test_tag_verified": true,
     "tag_result": {
       "status_code": 200,

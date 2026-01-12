@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_0408z (e2e proof pii sanitization)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601120408z-e2e-proof-pii-sanitization"
+    }
+  ],
   "2026-01-12 - run_20260112_0259z (pr health check gates: bugbot + codecov + e2e enforcement)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

@@ -365,6 +365,12 @@ python scripts/dev_e2e_smoke.py `
   - fetches pre/post ticket status + tags and records tag deltas + updated_at delta,
   - writes a PII-safe proof JSON (command used, criteria, Dynamo links, tag verification).
 
+#### PII-safe proof JSON requirements
+Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed IDs.
+- **Fingerprints only:** Ticket IDs are hashed to `ticket_id_fingerprint` (12-char SHA256 prefix).
+- **Redacted paths:** API paths use `path_redacted` with `<redacted>` placeholders (e.g., `/v1/tickets/<redacted>/add-tags`).
+- **Safety assertion:** The script scans the proof JSON before writing and fails if it detects `%40`, `mail.`, `%3C`, `%3E`, or `@`.
+
 ### Evidence expectations
 - Copy the GitHub Actions run URL and the job summary block (ingress URL, queue URL, DynamoDB tables, log group, CloudWatch Logs) into `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`.
 - Record the explicit confirmations from the summary that idempotency, conversation state, and audit records were written (event_id + conversation_id observed) and link the DynamoDB consoles for each table.

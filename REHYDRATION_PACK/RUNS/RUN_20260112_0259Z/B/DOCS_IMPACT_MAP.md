@@ -1,23 +1,22 @@
 # Docs Impact Map
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260112_0259Z`  
+**Agent:** B (Engineering)  
+**Date:** 2026-01-12
 
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- <DOC_PATH_1> — <WHAT_CHANGED>
-- <DOC_PATH_2> — <WHAT_CHANGED>
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` — Added CLI Richpanel proof workflow section with command patterns and evidence expectations
 
 ## Docs that should be updated next (if any)
-- <DOC_PATH> — <WHY>
+- None required; proof workflow is now documented
 
 ## Index/registry updates
-- `docs/INDEX.md` updated: yes/no
-- `docs/CODEMAP.md` updated: yes/no
-- `docs/_generated/*` regenerated: yes/no
-- `reference/_generated/*` regenerated: yes/no
+- `docs/INDEX.md` updated: no
+- `docs/CODEMAP.md` updated: no
+- `docs/_generated/*` regenerated: yes (doc_registry.json, doc_registry.compact.json)
+- `reference/_generated/*` regenerated: no (no reference changes)
 
 ## Notes
-<FILL_ME>
+The CLI proof workflow documentation was added to CI_and_Actions_Runbook.md to standardize how dev E2E smoke proof is captured and stored in run artifacts.
