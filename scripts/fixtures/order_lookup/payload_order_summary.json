@@ -1,0 +1,43 @@
+{
+  "order_id": "order_123",
+  "payload": {
+    "order": {
+      "fulfillment_status": "shipped",
+      "updated_at": "2024-02-01T00:00:00Z",
+      "created_at": "2024-01-30T12:00:00Z",
+      "current_total_price": "59.99",
+      "itemsCount": 3,
+      "fulfillments": [
+        {
+          "tracking_company": "carrier_demo",
+          "tracking_numbers": [
+            "trk_123"
+          ]
+        }
+      ],
+      "shipping_lines": [
+        {
+          "title": "Priority"
+        }
+      ]
+    },
+    "tracking": {
+      "tracking_number": "trk_123",
+      "carrier": "carrier_demo",
+      "service": "Priority"
+    }
+  },
+  "shipment": {
+    "trackingNumber": "trk_123",
+    "carrierCode": "carrier_demo",
+    "serviceCode": "priority_ground"
+  },
+  "fulfillments": [
+    {
+      "tracking_company": "carrier_demo",
+      "tracking_numbers": [
+        "trk_123"
+      ]
+    }
+  ]
+}

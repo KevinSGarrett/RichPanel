@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, Optional
 
 from richpanel_middleware.ingest.envelope import EventEnvelope
 from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
+
+LOGGER = logging.getLogger(__name__)
 
 OrderSummary = Dict[str, Any]
 
@@ -24,6 +27,51 @@ SHOPIFY_ORDER_FIELDS = [
 ]
 
 
+def _order_summary_from_payload(payload: Dict[str, Any]) -> Optional[OrderSummary]:
+    if not isinstance(payload, dict) or not payload:
+        return None
+
+    candidates = []
+    seen: set[int] = set()
+
+    def _queue_candidate(obj: Any) -> None:
+        if isinstance(obj, dict) and id(obj) not in seen:
+            seen.add(id(obj))
+            candidates.append(obj)
+
+    _queue_candidate(payload)
+
+    idx = 0
+    while idx < len(candidates):
+        candidate = candidates[idx]
+        _queue_candidate(candidate.get("payload"))
+        _queue_candidate(candidate.get("order"))
+
+        orders = candidate.get("orders")
+        if isinstance(orders, list) and orders:
+            first_order = orders[0]
+            if isinstance(first_order, dict):
+                _queue_candidate(first_order)
+
+        _queue_candidate(candidate.get("tracking"))
+        _queue_candidate(candidate.get("shipment"))
+
+        fulfillments = candidate.get("fulfillments")
+        if isinstance(fulfillments, list) and fulfillments:
+            first_fulfillment = fulfillments[0]
+            if isinstance(first_fulfillment, dict):
+                _queue_candidate(first_fulfillment)
+        idx += 1
+
+    merged: OrderSummary = {}
+    for candidate in candidates:
+        merged = _merge_summary(merged, _extract_payload_fields(candidate))
+
+    if _has_payload_shipping_signal(merged):
+        return merged
+    return None
+
+
 def lookup_order_summary(
     envelope: EventEnvelope,
     *,
@@ -40,9 +88,18 @@ def lookup_order_summary(
     - Returns a stable OrderSummary dict even when outbound calls are skipped.
     """
     summary = _baseline_summary(envelope)
+
+    payload_summary = _order_summary_from_payload(envelope.payload)
+    if payload_summary:
+        return _merge_summary(summary, payload_summary)
+
     order_id = summary["order_id"]
 
     if not _should_enrich(order_id, allow_network, safe_mode, automation_enabled):
+        if not allow_network:
+            LOGGER.debug(
+                "order lookup skipped network: payload missing shipping signals and network disabled"
+            )
         return summary
 
     try:
@@ -158,11 +215,12 @@ def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
         or ""
     )
     updated_at = _coerce_str(payload.get("updated_at") or payload.get("fulfillment_updated_at")) or envelope.received_at
-    items_count = (
-        _coerce_int(payload.get("items_count") or payload.get("itemsCount"))
-        or (len(payload.get("items")) if isinstance(payload.get("items"), list) else None)
-        or 0
-    )
+    items = payload.get("items")
+    items_count = _coerce_int(payload.get("items_count") or payload.get("itemsCount"))
+    if items_count is None and isinstance(items, list):
+        items_count = len(items)
+    if items_count is None:
+        items_count = 0
     total_price = _coerce_price(payload.get("total_price") or payload.get("amount") or payload.get("price"))
     created_at = _coerce_str(
         payload.get("created_at")
@@ -193,6 +251,162 @@ def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
         summary["shipping_method"] = shipping_method
         summary["shipping_method_name"] = shipping_method
     return summary
+
+
+def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
+    if not isinstance(payload, dict):
+        return {}
+
+    # Start with shapes that mirror Shopify and ShipStation responses.
+    summary = _merge_summary(_extract_shipstation_fields(payload), _extract_shopify_fields(payload))
+
+    status = summary.get("status") or _coerce_str(
+        payload.get("fulfillment_status")
+        or payload.get("order_status")
+        or payload.get("status")
+        or payload.get("financial_status")
+        or payload.get("fulfillmentStatus")
+        or payload.get("orderStatus")
+        or payload.get("financialStatus")
+    )
+    if status:
+        summary["status"] = status
+
+    tracking_number = summary.get("tracking_number") or _first_str(
+        payload.get("tracking_numbers") or payload.get("trackingNumbers")
+    )
+    tracking_number = tracking_number or _coerce_str(
+        payload.get("tracking_number")
+        or payload.get("trackingNumber")
+        or payload.get("tracking")
+        or payload.get("tracking_number_id")
+    )
+    tracking_obj = payload.get("tracking")
+    if isinstance(tracking_obj, dict):
+        tracking_number = tracking_number or _coerce_str(
+            tracking_obj.get("number")
+            or tracking_obj.get("id")
+            or tracking_obj.get("trackingNumber")
+            or tracking_obj.get("tracking_number")
+        )
+    if tracking_number:
+        summary["tracking_number"] = tracking_number
+
+    carrier = summary.get("carrier") or _coerce_str(
+        payload.get("carrier")
+        or payload.get("carrierCode")
+        or payload.get("shipping_carrier")
+        or payload.get("tracking_company")
+        or payload.get("shipping_company")
+        or payload.get("shippingCarrier")
+        or payload.get("carrier_code")
+    )
+    if isinstance(tracking_obj, dict):
+        carrier = carrier or _coerce_str(
+            tracking_obj.get("carrier")
+            or tracking_obj.get("carrierCode")
+            or tracking_obj.get("shippingCarrier")
+            or tracking_obj.get("company")
+        )
+
+    shipment_obj = payload.get("shipment")
+    if isinstance(shipment_obj, dict):
+        carrier = carrier or _coerce_str(
+            shipment_obj.get("carrier")
+            or shipment_obj.get("carrierCode")
+            or shipment_obj.get("shippingCarrier")
+        )
+
+    if carrier:
+        summary["carrier"] = carrier
+
+    shipping_method = summary.get("shipping_method") or _coerce_str(
+        payload.get("shipping_method")
+        or payload.get("shipping_method_name")
+        or payload.get("shipping_service")
+        or payload.get("shipping_option")
+        or payload.get("serviceCode")
+        or payload.get("service_name")
+        or payload.get("shippingMethod")
+        or payload.get("shippingService")
+    )
+    if isinstance(tracking_obj, dict):
+        shipping_method = shipping_method or _coerce_str(
+            tracking_obj.get("service")
+            or tracking_obj.get("shipping_method")
+            or tracking_obj.get("shippingMethod")
+        )
+    if isinstance(shipment_obj, dict):
+        shipping_method = shipping_method or _coerce_str(
+            shipment_obj.get("serviceCode")
+            or shipment_obj.get("service")
+            or shipment_obj.get("shippingMethod")
+        )
+    if shipping_method:
+        summary["shipping_method"] = shipping_method
+        summary["shipping_method_name"] = shipping_method
+
+    updated_at = summary.get("updated_at") or _coerce_str(
+        payload.get("updated_at")
+        or payload.get("fulfillment_updated_at")
+        or payload.get("processed_at")
+        or payload.get("updatedAt")
+        or payload.get("processedAt")
+    )
+    if updated_at:
+        summary["updated_at"] = updated_at
+
+    created_at = summary.get("created_at") or _coerce_str(
+        payload.get("created_at")
+        or payload.get("order_created_at")
+        or payload.get("ordered_at")
+        or payload.get("order_date")
+    )
+    if created_at:
+        summary["created_at"] = created_at
+
+    items_count = summary.get("items_count")
+    if items_count is None:
+        items_count = _coerce_int(
+            payload.get("items_count") or payload.get("itemsCount") or payload.get("line_items_count")
+        )
+        if items_count is None:
+            items = payload.get("items")
+            if isinstance(items, list):
+                items_count = len(items)
+            else:
+                line_items = payload.get("line_items")
+                if isinstance(line_items, list):
+                    items_count = len(line_items)
+    if items_count is not None:
+        summary["items_count"] = items_count
+
+    total_price = summary.get("total_price") or _coerce_price(
+        payload.get("total_price")
+        or payload.get("current_total_price")
+        or payload.get("amount")
+        or payload.get("price")
+    )
+    if total_price is not None:
+        summary["total_price"] = total_price
+
+    return summary
+
+
+def _has_payload_shipping_signal(summary: OrderSummary) -> bool:
+    if not summary:
+        return False
+
+    for key in (
+        "tracking_number",
+        "carrier",
+        "shipping_method",
+        "status",
+    ):
+        value = summary.get(key)
+        if value not in (None, "", "unknown"):
+            return True
+    return False
 
 
 def _extract_order_id(payload: Dict[str, Any], conversation_id: str) -> str:
@@ -240,10 +454,10 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
             )
     shipping_method = shipping_method or _coerce_str(payload.get("shipping_line"))
 
-    items_count = (
-        _coerce_int(payload.get("line_items_count"))
-        or (len(payload.get("line_items")) if isinstance(payload.get("line_items"), list) else None)
-    )
+    line_items = payload.get("line_items")
+    items_count = _coerce_int(payload.get("line_items_count"))
+    if items_count is None and isinstance(line_items, list):
+        items_count = len(line_items)
 
     summary: OrderSummary = {}
     if status:
