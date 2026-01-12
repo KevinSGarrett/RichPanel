@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_2212z (order lookup nested tracking string fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601122212z-order-lookup-nested-tracking-string-fix"
+    }
+  ],
   "2026-01-12 - run_20260112_2112z (order lookup payload fix + patch green)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

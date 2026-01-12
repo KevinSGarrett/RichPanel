@@ -283,6 +283,8 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
             or tracking_obj.get("trackingNumber")
             or tracking_obj.get("tracking_number")
         )
+    elif isinstance(tracking_obj, str):
+        tracking_number = tracking_number or _coerce_str(tracking_obj)
     tracking_number = tracking_number or _coerce_str(
         payload.get("tracking_number")
         or payload.get("trackingNumber")
