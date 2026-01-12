@@ -256,6 +256,7 @@ Legend:
 - ✅ [Developer Guide](08_Engineering/Developer_Guide.md)  (`08_Engineering/Developer_Guide.md`)
 - ✅ [GitHub Workflow and Repo Standards](08_Engineering/GitHub_Workflow_and_Repo_Standards.md)  (`08_Engineering/GitHub_Workflow_and_Repo_Standards.md`)
 - ✅ [Multi‑Agent GitOps Playbook](08_Engineering/Multi_Agent_GitOps_Playbook.md)  (`08_Engineering/Multi_Agent_GitOps_Playbook.md`)
+- 📎 [OpenAI Model Plan](08_Engineering/OpenAI_Model_Plan.md)  (`08_Engineering/OpenAI_Model_Plan.md`)
 - ✅ [Protected Paths and Safe Deletion Rules](08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md)  (`08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md`)
 - ✅ [Repository Conventions](08_Engineering/Repository_Conventions.md)  (`08_Engineering/Repository_Conventions.md`)
 

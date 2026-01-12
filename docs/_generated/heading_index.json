@@ -3787,6 +3787,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "08_Testing_Quality/LLM_Regression_Gates_Checklist.md",
       "anchor": "purpose"
     },
@@ -4810,6 +4814,10 @@
     },
     {
       "path": "04_LLM_Design_Evaluation/Multi_Intent_Priority_Matrix.md",
+      "anchor": "change-control"
+    },
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
       "anchor": "change-control"
     }
   ],
@@ -12557,6 +12565,170 @@
       "anchor": "8-what-not-to-do"
     }
   ],
+  "openai model plan": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "openai-model-plan"
+    }
+  ],
+  "model matrix (per workload)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "model-matrix-per-workload"
+    }
+  ],
+  "current workloads": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "current-workloads"
+    }
+  ],
+  "planned roadmap workloads": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "planned-roadmap-workloads"
+    }
+  ],
+  "enforced default rule": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "enforced-default-rule"
+    }
+  ],
+  "code module mapping": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "code-module-mapping"
+    }
+  ],
+  "1. llm routing (`llm_routing.py`)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "1-llm-routing-llmroutingpy"
+    }
+  ],
+  "2. reply rewriter (`llm_reply_rewriter.py`)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "2-reply-rewriter-llmreplyrewriterpy"
+    }
+  ],
+  "3. openai client (`openai/client.py`)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "3-openai-client-openaiclientpy"
+    }
+  ],
+  "phase plan (migration strategy)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "phase-plan-migration-strategy"
+    }
+  ],
+  "phase 0: env vars + defaults (current)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "phase-0-env-vars-defaults-current"
+    }
+  ],
+  "phase 1: responses api + structured outputs (target)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "phase-1-responses-api-structured-outputs-target"
+    }
+  ],
+  "phase 2: template variants + confidence tuning (future)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "phase-2-template-variants-confidence-tuning-future"
+    }
+  ],
+  "cost & latency model": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "cost-latency-model"
+    }
+  ],
+  "pricing (gpt‑5 family)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "pricing-gpt5-family"
+    }
+  ],
+  "volume assumptions": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "volume-assumptions"
+    }
+  ],
+  "daily cost estimate (single classifier call)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "daily-cost-estimate-single-classifier-call"
+    }
+  ],
+  "latency targets": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "latency-targets"
+    }
+  ],
+  "governance & updates": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "governance-updates"
+    }
+  ],
+  "model update policy": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "model-update-policy"
+    },
+    {
+      "path": "10_Governance_Continuous_Improvement/Model_Update_Policy.md",
+      "anchor": "model-update-policy"
+    },
+    {
+      "path": "11_Governance_Continuous_Improvement/Model_Update_Policy.md",
+      "anchor": "model-update-policy"
+    }
+  ],
+  "audit trail": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "audit-trail"
+    }
+  ],
+  "quick reference": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "quick-reference"
+    }
+  ],
+  "current defaults (as of 2026-01-12)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "current-defaults-as-of-2026-01-12"
+    }
+  ],
+  "roadmap targets": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "roadmap-targets"
+    }
+  ],
+  "related work packages": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "related-work-packages"
+    }
+  ],
+  "see also": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "see-also"
+    }
+  ],
   "protected paths and safe deletion rules": [
     {
       "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
@@ -14875,16 +15047,6 @@
     {
       "path": "12_Cursor_Agent_Work_Packages/01_Work_Breakdown/Dependency_Map.md",
       "anchor": "3-change-protocol"
-    }
-  ],
-  "model update policy": [
-    {
-      "path": "10_Governance_Continuous_Improvement/Model_Update_Policy.md",
-      "anchor": "model-update-policy"
-    },
-    {
-      "path": "11_Governance_Continuous_Improvement/Model_Update_Policy.md",
-      "anchor": "model-update-policy"
     }
   ],
   "legacy folder: 10_governance_continuous_improvement": [
