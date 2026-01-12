@@ -38,7 +38,6 @@
 - `python scripts/run_ci_checks.py --ci` — PASS.
 - Outbound proof: `REHYDRATION_PACK/RUNS/RUN_20260111_2301Z/B/e2e_outbound_proof.json` — PASS; ingress 200; Dynamo idempotency/state/audit recorded; Richpanel tags include `mw-auto-replied`, `mw-routing-applied`, `mw-intent-order_status_tracking`; status observed OPEN.
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/78
-- Actions: local CI only (no GitHub Actions run for this branch).
 - Actions run: local CI only (no GitHub Actions run for this branch).
 
 CI snippet:
