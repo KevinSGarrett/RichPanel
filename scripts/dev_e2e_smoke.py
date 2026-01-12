@@ -113,16 +113,92 @@ def _truncate_text(text: str, limit: int = 256) -> str:
     return f"{text[:limit]}..."
 
 
+def _redact_path(path: Optional[str]) -> Optional[str]:
+    """Redact ticket IDs from API paths to prevent PII leakage."""
+    if not path:
+        return None
+    # Extract the base path structure without the ID
+    if "/v1/tickets/number/" in path:
+        return "/v1/tickets/number/<redacted>"
+    if "/v1/tickets/" in path:
+        # Could be /v1/tickets/{id} or /v1/tickets/{id}/add-tags etc.
+        parts = path.split("/v1/tickets/")
+        if len(parts) > 1:
+            suffix = parts[1]
+            # Check for sub-paths like /add-tags
+            if "/" in suffix:
+                sub_path = "/" + suffix.split("/", 1)[1]
+                return f"/v1/tickets/<redacted>{sub_path}"
+            return "/v1/tickets/<redacted>"
+    return "<redacted>"
+
+
+def _extract_endpoint_variant(path: Optional[str]) -> Optional[str]:
+    """Extract whether the path used 'id' or 'number' endpoint."""
+    if not path:
+        return None
+    if "/v1/tickets/number/" in path:
+        return "number"
+    if "/v1/tickets/" in path:
+        return "id"
+    return "unknown"
+
+
 def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     if not snapshot:
         return None
     sanitized = dict(snapshot)
+    
+    # Remove ticket_id, replace with fingerprint only
     ticket_id = sanitized.pop("ticket_id", None)
     if ticket_id:
         sanitized["ticket_id_fingerprint"] = _fingerprint(ticket_id)
-        if "@" not in ticket_id:
-            sanitized["ticket_id"] = ticket_id
+        # NEVER include raw ticket_id - it may contain email/message-id PII
+    
+    # Remove raw path, replace with redacted version and endpoint variant
+    raw_path = sanitized.pop("path", None)
+    if raw_path:
+        sanitized["endpoint_variant"] = _extract_endpoint_variant(raw_path)
+        sanitized["path_redacted"] = _redact_path(raw_path)
+    
     return sanitized
+
+
+def _sanitize_tag_result(tag_result: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Sanitize the tag application result to remove PII from paths."""
+    if not tag_result:
+        return None
+    sanitized = dict(tag_result)
+    raw_path = sanitized.pop("path", None)
+    if raw_path:
+        sanitized["path_redacted"] = _redact_path(raw_path)
+    return sanitized
+
+
+# PII patterns that must not appear in proof JSON
+_PII_PATTERNS = [
+    "%40",       # URL-encoded @
+    "%3C",       # URL-encoded <
+    "%3E",       # URL-encoded >
+    "mail.",     # email domain fragment
+    "@",         # literal @
+    "<",         # literal < (except in redacted placeholders)
+    ">",         # literal > (except in redacted placeholders)
+]
+
+
+def _check_pii_safe(payload_json: str) -> Optional[str]:
+    """
+    Check if the proof JSON contains any PII patterns.
+    Returns an error message if PII is detected, None if safe.
+    """
+    # Allow <redacted> as a safe placeholder
+    safe_json = payload_json.replace("<redacted>", "REDACTED_PLACEHOLDER")
+    
+    for pattern in _PII_PATTERNS:
+        if pattern in safe_json:
+            return f"PII pattern '{pattern}' detected in proof payload"
+    return None
 
 
 def _build_richpanel_executor(
@@ -227,7 +303,7 @@ def _apply_test_tag(
     return {
         "status_code": response.status_code,
         "dry_run": response.dry_run,
-        "path": response.url,
+        "path": response.url,  # Will be sanitized before inclusion in proof JSON
     }
 
 
@@ -1120,7 +1196,7 @@ def main() -> int:
             "tags_removed": tags_removed,
             "updated_at_delta_seconds": updated_at_delta,
             "test_tag_verified": test_tag_verified,
-            "tag_result": tag_result,
+            "tag_result": _sanitize_tag_result(tag_result),
             "tag_error": tag_error,
         },
         "result": {
@@ -1133,8 +1209,21 @@ def main() -> int:
     if args.proof_path:
         proof_path = Path(args.proof_path)
         proof_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Safety check: scan proof JSON for PII patterns before writing
+        proof_json_str = json.dumps(proof_payload, indent=2)
+        pii_error = _check_pii_safe(proof_json_str)
+        if pii_error:
+            # Update result to FAIL and include PII detection reason
+            proof_payload["result"]["status"] = "FAIL"
+            proof_payload["result"]["failure_reason"] = pii_error
+            result_status = "FAIL"
+            print(f"[FAIL] PII safety check failed: {pii_error}")
+            # Re-serialize with updated result
+            proof_json_str = json.dumps(proof_payload, indent=2)
+        
         with open(proof_path, "w", encoding="utf-8") as handle:
-            json.dump(proof_payload, handle, indent=2)
+            handle.write(proof_json_str)
         print(f"[OK] Wrote proof artifact to {proof_path}")
 
     return 0 if result_status == "PASS" else 1

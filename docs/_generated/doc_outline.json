@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-12 - RUN_20260112_0408Z (E2E proof PII sanitization)",
+        "anchor": "2026-01-12-run202601120408z-e2e-proof-pii-sanitization"
+      },
+      {
+        "level": 3,
         "text": "2026-01-12 - RUN_20260112_0259Z (PR Health Check gates: Bugbot + Codecov + E2E enforcement)",
         "anchor": "2026-01-12-run202601120259z-pr-health-check-gates-bugbot-codecov-e2e-enforcement"
       },

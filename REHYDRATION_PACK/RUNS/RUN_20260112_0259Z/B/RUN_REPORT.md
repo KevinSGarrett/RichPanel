@@ -1,63 +1,77 @@
-# Agent Run Report (Template)
+# Agent Run Report
 
-> High-detail, durable run history artifact. This file is **required** per agent per run.
+> High-detail, durable run history artifact for Agent B — RUN_20260112_0259Z.
 
 ## Metadata (required)
-- **Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`
-- **Agent:** A | B | C
-- **Date (UTC):** YYYY-MM-DD
-- **Worktree path:** <ABSOLUTE_PATH>
-- **Branch:** <branch>
-- **PR:** <none | link>
+- **Run ID:** `RUN_20260112_0259Z`
+- **Agent:** B (Engineering)
+- **Date (UTC):** 2026-01-12
+- **Worktree path:** `C:\RichPanel_GIT`
+- **Branch:** `run/RUN_20260112_0259Z_pr_health_check_gates`
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/82
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
-- **Objective:** <FILL_ME>
-- **Stop conditions:** <FILL_ME>
+- **Objective:** Strengthen the Real Richpanel E2E outbound smoke test so it produces unambiguous proof every time using real tokens, and standardize how proof is captured into run artifacts.
+- **Stop conditions:** Smoke test produces a real PASS proof JSON with strong attribution; run artifacts contain the exact command used + output summary + links to evidence.
 
 ## What changed (high-level)
-- <CHANGE_1>
-- <CHANGE_2>
+- Added ticket-aware proof mode to `dev_e2e_smoke.py` with `--profile`, `--env`, `--region` flags
+- Added PII-safe ticket lookup (id or number) with fingerprinting
+- Added optional `mw-smoke:<RUN_ID>` tag verification via Richpanel API
+- Emitted structured outbound proof JSON with pre/post status/tags, updated_at delta, Dynamo references, and explicit PASS/FAIL criteria
+- Documented the CLI Richpanel proof command in CI_and_Actions_Runbook
 
 ## Diffstat (required)
-Paste `git diff --stat` (or PR diffstat) here:
-
-<PASTE_DIFFSTAT>
+```
+docs/08_Engineering/CI_and_Actions_Runbook.md           |  30 ++++
+docs/_generated/doc_registry.compact.json               |   2 +-
+docs/_generated/doc_registry.json                       |   2 +-
+scripts/dev_e2e_smoke.py                                | 567 ++++++++++++++++-
+REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json (new)
+5 files changed, 567 insertions(+), 20 deletions(-)
+```
 
 ## Files Changed (required)
-List key files changed (grouped by area) and why:
-- <PATH_1> - <why>
-- <PATH_2> - <why>
+- `scripts/dev_e2e_smoke.py` - Added proof mode with ticket tagging, CLI flags, proof JSON output
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` - Documented CLI Richpanel proof workflow
+- `REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json` - Generated proof artifact
 
 ## Commands Run (required)
-List commands you ran (include key flags/env if relevant):
-- <COMMAND_1> - <why>
-- <COMMAND_2> - <why>
+- `python scripts/new_run_folder.py --now` - Created run folder
+- `python scripts/run_ci_checks.py --ci` - Verified CI passes
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --idempotency-table rp_mw_dev_idempotency --wait-seconds 90 --profile richpanel-dev --ticket-number 1023 --run-id RUN_20260112_0259Z --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json` - Generated proof
 
 ## Tests / Proof (required)
-Include test commands + results + links to evidence.
+- `python scripts/run_ci_checks.py --ci` - PASS - CI green
+- Dev E2E smoke with tagging - PASS - evidence: `REHYDRATION_PACK/RUNS/RUN_20260112_0259Z/B/e2e_outbound_proof.json`
 
-- <TEST_COMMAND_1> - pass/fail - evidence: <PATH_OR_LINK>
-- <TEST_COMMAND_2> - pass/fail - evidence: <PATH_OR_LINK>
-
-Paste output snippet proving you ran:
-`AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
-
-<PASTE_OUTPUT_SNIPPET>
+CI output snippet:
+```
+[OK] CI-equivalent checks passed.
+```
 
 ## Docs impact (summary)
-- **Docs updated:** <NONE or list>
-- **Docs to update next:** <NONE or list>
+- **Docs updated:** `docs/08_Engineering/CI_and_Actions_Runbook.md` (CLI proof workflow section)
+- **Docs to update next:** None
 
 ## Risks / edge cases considered
-- <RISK_1 + mitigation>
-- <RISK_2 + mitigation>
+- **PII leak via ticket IDs in paths** - IDENTIFIED by Bugbot post-merge; fixed in follow-up PR (RUN_20260112_0408Z)
+- **Richpanel API uses email/message-id as ticket id** - Handled via fingerprinting, but raw paths leaked in v1
 
 ## Blockers / open questions
-- <NONE or list>
+- None
 
 ## Follow-ups (actionable)
-- [ ] <FOLLOW_UP_1>
-- [ ] <FOLLOW_UP_2>
+- [x] Fix PII leak in proof JSON paths (done in RUN_20260112_0408Z)
+- [x] Add PII safety assertion before writing proof JSON
 
-<!-- End of template -->
+## PR Health Check Evidence
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/82
+- **CI Status:** Green (all checks passed)
+- **Codecov:** Coverage maintained
+- **Bugbot Finding:** Medium severity - PII leak via path fields (URL-encoded email in `richpanel.post.path` and `tag_result.path`)
+- **Bugbot Fix:** Addressed in follow-up RUN_20260112_0408Z
+
+## Notes
+This proof JSON was superseded by the sanitized version in RUN_20260112_0408Z due to the PII leak issue.
