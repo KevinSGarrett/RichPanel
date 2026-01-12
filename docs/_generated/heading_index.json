@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_1819z (openai model default enforcement)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601121819z-openai-model-default-enforcement"
+    }
+  ],
   "2026-01-12 - run_20260112_1444z (worker flag coverage determinism)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12641,6 +12647,12 @@
     {
       "path": "08_Engineering/OpenAI_Model_Plan.md",
       "anchor": "phase-2-template-variants-confidence-tuning-future"
+    }
+  ],
+  "ci enforcement (gpt-5.x-only)": [
+    {
+      "path": "08_Engineering/OpenAI_Model_Plan.md",
+      "anchor": "ci-enforcement-gpt-5x-only"
     }
   ],
   "cost & latency model": [

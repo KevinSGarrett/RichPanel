@@ -234,6 +234,14 @@ This violates `docs/06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md
 
 ---
 
+## CI Enforcement (GPT-5.x-only)
+
+- `scripts/verify_openai_model_defaults.py` fails if any GPT-4 family defaults (`gpt-4`, `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`) appear in `backend/src` or `config`, or if GPT model tokens there are not GPT-5 family prefixes.
+- `scripts/run_ci_checks.py` runs this guard in both local and `--ci` modes; any regression to GPT-4 defaults breaks CI-equivalent checks.
+- Docs, OpenAI_Research, and REHYDRATION_PACK history are excluded from this guard to avoid blocking historical references.
+
+---
+
 ## Cost & Latency Model
 
 ### Pricing (GPT‑5 Family)
