@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_0054z (worker flag wiring + ci proof)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601120054z-worker-flag-wiring-ci-proof"
+    }
+  ],
   "2026-01-11 - run_20260111_2301z (richpanel outbound smoke proof)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
