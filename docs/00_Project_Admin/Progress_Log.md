@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-12 - RUN_20260112_0054Z.
+Last verified: 2026-01-12 - RUN_20260112_0259Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,15 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-12 - RUN_20260112_0259Z (PR Health Check gates: Bugbot + Codecov + E2E enforcement)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_0259Z
+- Enforced PR Health Check gates (Bugbot/Codecov/E2E proof) in templates and runbooks to ensure agents cannot claim PRs as "done" without evidence.
+- Updated `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md` with required PR Health Check section (Bugbot review, Codecov status, E2E proof when applicable).
+- Created `REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md` with explicit Bugbot/Codecov/E2E findings sections.
+- Updated `docs/08_Engineering/CI_and_Actions_Runbook.md` with comprehensive Section 4 "PR Health Check" including CLI-first commands for viewing Bugbot output, Codecov status, and running E2E smoke tests.
+- Updated `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md` with CHK-009B (PR Health Check gates shipped).
+- Updated `REHYDRATION_PACK/05_TASK_BOARD.md` to reflect shipped process gate (TASK-252).
 
 ### 2026-01-12 - RUN_20260112_0054Z (Worker flag wiring + CI proof)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_0054Z

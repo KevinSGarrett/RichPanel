@@ -140,7 +140,133 @@ We require **merge commits only** for auditability and traceability.
 
 ---
 
-## 4) When GitHub Actions fails (red status)
+## 4) PR Health Check (required before merge)
+
+Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.
+
+### 4.1 Bugbot review
+
+**Requirement:** All PRs must receive a Bugbot review (or explicit fallback if quota exceeded).
+
+#### How to trigger Bugbot (mention-only mode)
+Post a trigger comment on the PR:
+```powershell
+# Using PR number
+gh pr comment <PR#> -b '@cursor review'
+# or
+gh pr comment <PR#> -b 'bugbot run'
+
+# Using current branch (infers PR)
+gh pr comment (gh pr view --json number --jq '.number') -b '@cursor review'
+```
+
+Alternative: Use workflow dispatch (see Section 3 for details).
+
+#### How to view Bugbot output
+```powershell
+# View all PR comments (including Bugbot output)
+gh pr view <PR#> --comments
+
+# Filter for Bugbot comments (if many comments exist)
+gh pr view <PR#> --json comments --jq '.comments[] | select(.author.login=="cursor-bot" or .body | contains("Bugbot")) | {author: .author.login, body: .body}'
+```
+
+#### Action required
+- **If Bugbot flags issues**: Either fix them in this run OR document each deferred finding with a follow-up checklist item in `REHYDRATION_PACK/05_TASK_BOARD.md` or `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md`
+- **If quota exceeded**: Document "Bugbot quota exceeded; performed manual code review" and list manual review findings
+
+### 4.2 Codecov status verification
+
+**Requirement:** Verify Codecov patch and project status checks are passing or acceptable.
+
+#### How to view Codecov status
+```powershell
+# View PR checks (includes Codecov statuses)
+gh pr view <PR#> --json statusCheckRollup --jq '.statusCheckRollup[] | select(.context | contains("codecov")) | {context: .context, state: .state, description: .description, targetUrl: .targetUrl}'
+
+# View full PR status including Codecov
+gh pr checks <PR#>
+```
+
+#### Codecov thresholds (current)
+- **Patch coverage**: ≥50% (±10% threshold)
+- **Project coverage**: must not drop >5% from base branch
+
+#### Action required
+- **If patch coverage is low**: Add tests to cover new/changed lines OR document why coverage is acceptable (e.g., "integration test planned for staging")
+- **If project coverage drops**: Investigate which files lost coverage; add tests or document rationale
+
+#### Fallback if Codecov is unavailable
+If Codecov is not configured or failing to upload:
+- Download the `coverage-report` artifact from the CI run
+- Review `coverage.xml` locally
+- Document: "Codecov unavailable; reviewed coverage.xml directly (X% patch coverage)"
+
+### 4.3 E2E proof (when applicable)
+
+**Requirement:** When changes touch outbound integrations or automation logic, E2E smoke test must pass.
+
+#### When E2E proof is mandatory
+- Changes to `backend/src/lambda_handlers/worker/handler.py` (automation execution)
+- Changes to `backend/src/richpanel_middleware/integrations/` (Richpanel, Shopify, ShipStation clients)
+- Changes to webhook ingestion or event handling
+- Changes to routing logic that affects automation triggers
+
+#### How to run E2E smoke tests
+**Dev environment:**
+```powershell
+$eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
+gh workflow run dev-e2e-smoke.yml --ref <branch-name> -f event-id=$eventId
+gh run watch --exit-status
+gh run view --json url --jq '.url'
+```
+
+**Staging environment** (after staging deploy):
+```powershell
+$eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
+gh workflow run staging-e2e-smoke.yml --ref main -f event-id=$eventId
+$runId = gh run list --workflow staging-e2e-smoke.yml --branch main --limit 1 --json databaseId --jq '.[0].databaseId'
+gh run watch $runId --exit-status
+gh run view $runId --json url --jq '.url'
+```
+
+#### Action required
+- **If E2E test passes**: Record run URL + summary in `TEST_MATRIX.md` and `RUN_REPORT.md`
+- **If E2E test fails**: Fix the issue before merging; do not defer E2E failures
+
+#### Evidence expectations
+Capture in `TEST_MATRIX.md`:
+- GitHub Actions run URL
+- Job summary (ingress URL, queue URL, DynamoDB tables, CloudWatch Logs)
+- Confirmation that idempotency, conversation state, and audit records were written
+- Routing result (category/tags)
+- Draft reply confirmation (count, safe fields only)
+
+### 4.4 PR Health Check CLI reference card
+
+Quick reference for all health checks:
+```powershell
+# 1. Trigger Bugbot
+gh pr comment <PR#> -b '@cursor review'
+
+# 2. View Bugbot output
+gh pr view <PR#> --comments
+
+# 3. View Codecov status
+gh pr checks <PR#>
+
+# 4. Run E2E smoke (dev)
+$eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
+gh workflow run dev-e2e-smoke.yml --ref <branch> -f event-id=$eventId
+gh run watch --exit-status
+
+# 5. View E2E results
+gh run view --json url --jq '.url'
+```
+
+---
+
+## 5) When GitHub Actions fails (red status)
 
 ### Step 1 — Identify the failing job
 Preferred (if GitHub CLI is available and authenticated):
@@ -193,7 +319,7 @@ Fallback:
 
 ---
 
-## 5) Dev E2E smoke workflow
+## 6) Dev E2E smoke workflow
 
 The “Dev E2E Smoke” workflow (`.github/workflows/dev-e2e-smoke.yml`) continuously validates the dev stack by sending a synthetic webhook and confirming the worker Lambda writes idempotency, conversation state, and audit records to DynamoDB.
 
@@ -221,7 +347,7 @@ Notes:
 - Paste the smoke summary lines that confirm routing category/tags and the order_status_draft_reply plan + draft_replies count (safe fields only; no message bodies).
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 
-## 6) Staging E2E smoke workflow
+## 7) Staging E2E smoke workflow
 
 The “Staging E2E Smoke” workflow (`.github/workflows/staging-e2e-smoke.yml`) validates the staging stack end-to-end using the same script as dev, but under the staging deploy role.
 
@@ -251,7 +377,7 @@ Guidance:
 - Paste the routing + draft confirmation lines from the smoke summary (routing category/tags plus order_status_draft_reply presence and draft_replies count with safe fields only).
 - If discovery falls back (missing CloudFormation outputs), capture the warning lines so reviewers can see which derived values were used, but never paste raw secret material.
 
-## 7) Prod promotion checklist (no prod deploy without explicit go/no-go)
+## 8) Prod promotion checklist (no prod deploy without explicit go/no-go)
 
 Only promote to prod with PM/lead approval recorded in the notes. Stop immediately if staging evidence is missing or stale.
 
@@ -285,7 +411,7 @@ Notes:
 - Keep both run URLs plus the `${GITHUB_STEP_SUMMARY}` contents in the rehydration pack evidence tables.
 - If prod deploy is intentionally deferred, record the decision and skip the commands.
 
-## 8) Common causes (initial list)
+## 9) Common causes (initial list)
 - stale generated registries not committed
 - accidental placeholder left in an INDEX-linked doc (doc hygiene)
 - broken markdown link in `docs/INDEX.md`
@@ -307,7 +433,7 @@ python scripts/run_ci_checks.py
 
 ---
 
-## 9) Codecov coverage reporting and gating
+## 10) Codecov coverage reporting and gating
 
 ### Current state (2026-01-11)
 With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is automatically uploaded on every CI run.
@@ -361,7 +487,7 @@ Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to ve
 
 ---
 
-## 10) Lint/Type enforcement roadmap
+## 11) Lint/Type enforcement roadmap
 
 ### Current state (2026-01-11)
 Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisory). They do **not** block PR merges.
@@ -393,7 +519,7 @@ Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisor
 
 ---
 
-## 11) If you cannot fix quickly
+## 12) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -402,7 +528,7 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 12) Seed Secrets Manager (dev/staging)
+## 13) Seed Secrets Manager (dev/staging)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`

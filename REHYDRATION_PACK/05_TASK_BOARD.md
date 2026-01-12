@@ -2,7 +2,7 @@
 
 > This is the **single most important** file for "what to do next".
 
-Last updated: 2026-01-10 (WaveAudit midpoint audit checklist + prompt template drift fixes)
+Last updated: 2026-01-12 (PR Health Check gates: Bugbot + Codecov + E2E enforcement in templates/runbooks)
 
 **Current mode:** build (implementation active).
 **Environment status:** Do not claim dev/staging/prod state unless verified and linked in the latest `REHYDRATION_PACK/RUNS/<RUN_ID>/*/RUN_REPORT.md` or `REHYDRATION_PACK/GITHUB_STATE.md`.
@@ -27,6 +27,7 @@ Last updated: 2026-01-10 (WaveAudit midpoint audit checklist + prompt template d
 ## Roadmap / next (P0) - Release gates (keep green)
 Goal: stay safe while shipping.
 
+- [x] PR Health Check gates enforced (Bugbot + Codecov + E2E) - templates/runbooks updated
 - [ ] Keep safety defaults intact (safe_mode + automation_enabled + dry-run)
 - [ ] Maintain doc anti-drift gate (`verify_admin_logs_sync`)
 - [ ] Keep smoke evidence recorded (links in test evidence log)
@@ -41,6 +42,7 @@ Goal: stay safe while shipping.
 
 ## Shipped baseline (completed)
 
+- DONE: TASK-252 - PR Health Check gates enforced in templates/runbooks (Bugbot + Codecov + E2E proof requirements documented)
 - DONE: TASK-251 - Bugbot PR loop documented (trigger via `@cursor review` / `bugbot run`) (Runbook)
 - DONE: TASK-250 - Offline-first integration skeletons present (Richpanel/OpenAI/Shopify/ShipStation) (skeletons)
 - DONE: TASK-240 - Added PM prompts, RUN scaffolding script, and GitHub ops policy (Wave F10)

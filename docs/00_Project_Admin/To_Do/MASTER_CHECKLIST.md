@@ -7,11 +7,11 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 
 ## Progress dashboard (snapshot)
 
-- Total epics: 18
-- Done: 9 (50.0%)
-- In progress: 2 (11.1%)
-- Not started: 4 (22.2%)
-- Pending: 3 (16.7%)
+- Total epics: 19
+- Done: 10 (52.6%)
+- In progress: 2 (10.5%)
+- Not started: 4 (21.1%)
+- Pending: 3 (15.8%)
 
 > Note: "Done" can include "Done (skeleton)" where only scaffolding exists.
 
@@ -28,6 +28,7 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 | CHK-007 | Dev/Staging E2E smoke tests (GitHub Actions) | Done | Agent A | `.github/workflows/dev-e2e-smoke.yml`, `.github/workflows/staging-e2e-smoke.yml` |
 | CHK-008 | Build: Offline-first integration skeletons (Richpanel/OpenAI/Shopify/ShipStation) | Done (skeleton) | Agent A | `backend/src/richpanel_middleware/integrations/`, `backend/src/integrations/` |
 | CHK-009 | Process: Bugbot in PR loop (trigger + runbook) | Done | PM | `docs/08_Engineering/CI_and_Actions_Runbook.md` |
+| CHK-009B | Process: PR Health Check gates (Bugbot + Codecov + E2E) enforced in templates/runbooks | Done | Agent A | `REHYDRATION_PACK/_TEMPLATES/`, `docs/08_Engineering/CI_and_Actions_Runbook.md` |
 
 ## Roadmap (remaining)
 

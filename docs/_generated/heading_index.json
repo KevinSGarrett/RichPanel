@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-12 - run_20260112_0259z (pr health check gates: bugbot + codecov + e2e enforcement)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-12-run202601120259z-pr-health-check-gates-bugbot-codecov-e2e-enforcement"
+    }
+  ],
   "2026-01-12 - run_20260112_0054z (worker flag wiring + ci proof)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12089,10 +12095,40 @@
       "anchor": "merge-policy-auditability"
     }
   ],
-  "4) when github actions fails (red status)": [
+  "4) pr health check (required before merge)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "4-when-github-actions-fails-red-status"
+      "anchor": "4-pr-health-check-required-before-merge"
+    }
+  ],
+  "4.1 bugbot review": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "41-bugbot-review"
+    }
+  ],
+  "4.2 codecov status verification": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "42-codecov-status-verification"
+    }
+  ],
+  "4.3 e2e proof (when applicable)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "43-e2e-proof-when-applicable"
+    }
+  ],
+  "4.4 pr health check cli reference card": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "44-pr-health-check-cli-reference-card"
+    }
+  ],
+  "5) when github actions fails (red status)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "5-when-github-actions-fails-red-status"
     }
   ],
   "step 1 — identify the failing job": [
@@ -12131,10 +12167,10 @@
       "anchor": "step-6-push-and-verify-green"
     }
   ],
-  "5) dev e2e smoke workflow": [
+  "6) dev e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "5-dev-e2e-smoke-workflow"
+      "anchor": "6-dev-e2e-smoke-workflow"
     }
   ],
   "when to run it": [
@@ -12171,16 +12207,16 @@
       "anchor": "evidence-expectations"
     }
   ],
-  "6) staging e2e smoke workflow": [
+  "7) staging e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "6-staging-e2e-smoke-workflow"
+      "anchor": "7-staging-e2e-smoke-workflow"
     }
   ],
-  "7) prod promotion checklist (no prod deploy without explicit go/no-go)": [
+  "8) prod promotion checklist (no prod deploy without explicit go/no-go)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "7-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+      "anchor": "8-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
     }
   ],
   "checklist": [
@@ -12195,10 +12231,10 @@
       "anchor": "powershell-safe-commands"
     }
   ],
-  "8) common causes (initial list)": [
+  "9) common causes (initial list)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "8-common-causes-initial-list"
+      "anchor": "9-common-causes-initial-list"
     }
   ],
   "dynamodb: `typeerror: float types are not supported`": [
@@ -12207,10 +12243,10 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "9) codecov coverage reporting and gating": [
+  "10) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-codecov-coverage-reporting-and-gating"
+      "anchor": "10-codecov-coverage-reporting-and-gating"
     }
   ],
   "current state (2026-01-11)": [
@@ -12241,10 +12277,10 @@
       "anchor": "troubleshooting-codecov-failures"
     }
   ],
-  "10) lint/type enforcement roadmap": [
+  "11) lint/type enforcement roadmap": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-linttype-enforcement-roadmap"
+      "anchor": "11-linttype-enforcement-roadmap"
     }
   ],
   "operational plan (phased enforcement)": [
@@ -12259,16 +12295,16 @@
       "anchor": "tracking"
     }
   ],
-  "11) if you cannot fix quickly": [
+  "12) if you cannot fix quickly": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "11-if-you-cannot-fix-quickly"
+      "anchor": "12-if-you-cannot-fix-quickly"
     }
   ],
-  "12) seed secrets manager (dev/staging)": [
+  "13) seed secrets manager (dev/staging)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "12-seed-secrets-manager-devstaging"
+      "anchor": "13-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
