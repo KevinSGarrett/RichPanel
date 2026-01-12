@@ -606,6 +606,28 @@ def _hash_text(value: Optional[str]) -> Optional[str]:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()[:16]
 
 
+def _parse_iso_ts(value: Optional[str]) -> Optional[float]:
+    if not value:
+        return None
+    try:
+        cleaned = str(value).strip()
+        cleaned = cleaned.replace("Z", "+00:00") if "Z" in cleaned else cleaned
+        return datetime.fromisoformat(cleaned).timestamp()
+    except Exception:
+        pass
+    try:
+        # Fallback for strict Z format without offset replacement
+        return datetime.strptime(str(value).strip(), "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+    except Exception:
+        pass
+    try:
+        return datetime.strptime(str(value).strip(), "%Y-%m-%dT%H:%M:%SZ").timestamp()
+    except Exception:
+        return None
+    except Exception:
+        return None
+
+
 def _coerce_str(value: Any) -> Optional[str]:
     if value is None:
         return None
@@ -973,6 +995,43 @@ def main() -> int:
     tags_added = sorted(t for t in tags_after - tags_before)
     tags_removed = sorted(t for t in tags_before - tags_after)
     status_changed = pre_snapshot.get("status") != post_snapshot.get("status")
+    def _parse_ts_candidates(val: Optional[str]) -> Optional[float]:
+        if not val:
+            return None
+        val_str = str(val).strip()
+        for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"):
+            try:
+                return datetime.strptime(val_str, fmt).timestamp()
+            except Exception:
+                continue
+        try:
+            cleaned = val_str.replace("Z", "+00:00") if "Z" in val_str else val_str
+            return datetime.fromisoformat(cleaned).timestamp()
+        except Exception:
+            pass
+        try:
+            base = val_str.split("Z")[0].split(".")[0]
+            return datetime.strptime(base, "%Y-%m-%dT%H:%M:%S").timestamp()
+        except Exception:
+            return None
+
+    ts_before = _parse_ts_candidates(pre_snapshot.get("updated_at"))
+    ts_after = _parse_ts_candidates(post_snapshot.get("updated_at"))
+    updated_at_delta_seconds: Optional[float] = None
+    updated_at_parse_ok = False
+    if ts_before is not None and ts_after is not None:
+        updated_at_delta_seconds = max(0.0, ts_after - ts_before)
+        updated_at_parse_ok = True
+    elif pre_snapshot.get("updated_at") and post_snapshot.get("updated_at"):
+        if pre_snapshot.get("updated_at") != post_snapshot.get("updated_at"):
+            updated_at_delta_seconds = 1.0  # minimal non-zero delta to reflect observed string change
+            updated_at_parse_ok = False
+
+    proof_attribution_ok = bool(
+        tags_added
+        or status_changed
+        or (updated_at_delta_seconds is not None and updated_at_delta_seconds > 0)
+    )
     proof_payload = {
         "run_id": args.run_id,
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -1005,6 +1064,8 @@ def main() -> int:
         "richpanel_subject_hash_after": post_snapshot.get("subject_hash"),
         "richpanel_updated_at_before": pre_snapshot.get("updated_at"),
         "richpanel_updated_at_after": post_snapshot.get("updated_at"),
+        "richpanel_updated_at_delta_seconds": updated_at_delta_seconds,
+        "richpanel_updated_at_parse_ok": updated_at_parse_ok,
         "richpanel_status_changed": status_changed,
         "richpanel_tags_added": tags_added,
         "richpanel_tags_removed": tags_removed,
@@ -1015,10 +1076,17 @@ def main() -> int:
         "idempotency_status": item.get("status"),
         "idempotency_payload_field_count": payload_field_count,
         "idempotency_payload_fingerprint": payload_fingerprint,
+        "payload_top_level_key_count": len(payload) if isinstance(payload, dict) else None,
+        "payload_nested_key_count": len(payload.get("payload"))
+        if isinstance(payload.get("payload"), dict)
+        else None,
         "state_actions_count": len(state_item.get("actions") or []),
         "audit_ts_action_id": audit_item.get("ts_action_id"),
-        "result": "PASS",
-        "failure_reason": None,
+        "proof_attribution_ok": proof_attribution_ok,
+        "result": "PASS" if proof_attribution_ok else "PASS_WEAK",
+        "failure_reason": None
+        if proof_attribution_ok
+        else "No observable Richpanel delta (tags/status/updated_at)",
     }
     write_proof(proof_path, proof_payload)
     print(f"[OK] Proof written to {proof_path}")

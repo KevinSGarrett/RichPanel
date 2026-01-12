@@ -21,8 +21,8 @@ Produce a passing Richpanel outbound smoke proof with PII-safe evidence.
 - Working branch: run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof
 - PR: #78
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Main updated: n/a (Integrator only)
+- Branch cleanup done: n/a (Integrator only)
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci`; outbound smoke command.

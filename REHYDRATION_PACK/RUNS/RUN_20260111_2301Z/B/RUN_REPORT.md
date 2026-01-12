@@ -31,12 +31,14 @@
 
 ## Commands Run (required)
 - `aws sts get-caller-identity --profile richpanel-dev` — verify AWS creds.
-- `python scripts/dev_richpanel_outbound_smoke.py --profile richpanel-dev --env dev --region us-east-2 --conversation-id api-scentimenttesting3300-41afc455-345e-4c18-b17f-ee0f0e9166e0 --confirm-test-ticket --allow-non-test-ticket --run-id RUN_20260111_2301Z` — outbound smoke (PASS; tags applied; status remained OPEN).
+- `python scripts/dev_richpanel_outbound_smoke.py --profile richpanel-dev --env dev --region us-east-2 --conversation-id api-scentimenttesting3300-41afc455-345e-4c18-b17f-ee0f0e9166e0 --confirm-test-ticket --allow-non-test-ticket --run-id RUN_20260111_2301Z` — outbound smoke (PASS).
 - `python scripts/run_ci_checks.py --ci` — full CI equivalent (PASS).
 
 ## Tests / Proof (required)
 - `python scripts/run_ci_checks.py --ci` — PASS.
 - Outbound proof: `REHYDRATION_PACK/RUNS/RUN_20260111_2301Z/B/e2e_outbound_proof.json` — PASS; ingress 200; Dynamo idempotency/state/audit recorded; Richpanel tags include `mw-auto-replied`, `mw-routing-applied`, `mw-intent-order_status_tracking`; status observed OPEN.
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/78
+- Actions: local CI only (no GitHub Actions run for this branch).
 - Actions run: local CI only (no GitHub Actions run for this branch).
 
 CI snippet:

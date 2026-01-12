@@ -18,8 +18,8 @@ Agent C inactive; placeholder compliance only.
 - Working branch: run/RUN_20260111_2301Z_richpanel_outbound_smoke_proof
 - PR: #78
 - CI status at end of run: green (run by Agent B)
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Main updated: n/a (Agent C idle)
+- Branch cleanup done: n/a (Agent C idle)
 
 ## Tests and evidence
 - Tests run: none (Agent C idle)
