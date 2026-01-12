@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-12 - RUN_20260112_1444Z (Worker flag coverage determinism)",
+        "anchor": "2026-01-12-run202601121444z-worker-flag-coverage-determinism"
+      },
+      {
+        "level": 3,
         "text": "2026-01-12 - RUN_20260112_0408Z (E2E proof PII sanitization)",
         "anchor": "2026-01-12-run202601120408z-e2e-proof-pii-sanitization"
       },
