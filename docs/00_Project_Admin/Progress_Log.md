@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-12 - RUN_20260112_1444Z.
+Last verified: 2026-01-12 - RUN_20260112_2112Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-12 - RUN_20260112_2112Z (Order lookup payload fix + patch green)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_2112Z
+- Fixed tracking dict handling in order lookup to avoid stringified dicts and added targeted tests for tracking dict/id, orders list payloads, shipment dicts, and fulfillment signals.
+- Achieved Codecov patch green with new coverage; CI-equivalent and Bugbot checks passed for the follow-up PR.
 
 ### 2026-01-12 - RUN_20260112_1819Z (OpenAI model default enforcement)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_1819Z

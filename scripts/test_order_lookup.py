@@ -174,6 +174,121 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shopify.called)
         self.assertFalse(shipstation.called)
 
+    def test_payload_tracking_dict_number_is_used_not_stringified(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {"order_id": "T-1", "tracking": {"number": "ABC123"}}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "ABC123")
+        self.assertNotIn("{", summary["tracking_number"])
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_tracking_dict_id_fallback(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {"order_id": "T-2", "tracking": {"id": "ABC999"}}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "ABC999")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_orders_list_candidate_is_used(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {
+            "orders": [
+                {
+                    "shipment": {"carrierCode": "orders_carrier", "serviceCode": "orders_ground"},
+                    "tracking": {"number": "ORD-123"},
+                }
+            ]
+        }
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "ORD-123")
+        self.assertEqual(summary["carrier"], "orders_carrier")
+        self.assertEqual(summary["shipping_method"], "orders_ground")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_shipment_dict_used_for_carrier_and_service(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {
+            "order_id": "SHIP-1",
+            "shipment": {"carrierCode": "ship_demo", "serviceCode": "priority_ship"},
+        }
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["carrier"], "ship_demo")
+        self.assertEqual(summary["shipping_method"], "priority_ship")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_fulfillments_list_used_for_tracking_and_carrier(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {
+            "order_id": "FUL-1",
+            "fulfillments": [
+                {"tracking_company": "fulfill_carrier", "tracking_numbers": ["FUL-TRACK-1"]}
+            ],
+        }
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "FUL-TRACK-1")
+        self.assertEqual(summary["carrier"], "fulfill_carrier")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
     def test_shopify_enrichment_merges_fields_when_network_enabled(self) -> None:
         order_payload = _load_fixture("shopify_order.json")
         transport = _RecordingTransport(

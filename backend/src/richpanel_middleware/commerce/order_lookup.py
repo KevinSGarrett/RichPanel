@@ -272,16 +272,10 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
     if status:
         summary["status"] = status
 
+    tracking_obj = payload.get("tracking")
     tracking_number = summary.get("tracking_number") or _first_str(
         payload.get("tracking_numbers") or payload.get("trackingNumbers")
     )
-    tracking_number = tracking_number or _coerce_str(
-        payload.get("tracking_number")
-        or payload.get("trackingNumber")
-        or payload.get("tracking")
-        or payload.get("tracking_number_id")
-    )
-    tracking_obj = payload.get("tracking")
     if isinstance(tracking_obj, dict):
         tracking_number = tracking_number or _coerce_str(
             tracking_obj.get("number")
@@ -289,6 +283,11 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
             or tracking_obj.get("trackingNumber")
             or tracking_obj.get("tracking_number")
         )
+    tracking_number = tracking_number or _coerce_str(
+        payload.get("tracking_number")
+        or payload.get("trackingNumber")
+        or payload.get("tracking_number_id")
+    )
     if tracking_number:
         summary["tracking_number"] = tracking_number
 
