@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-01-12
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260112_0408Z_e2e_proof_pii_sanitize`
-- **PR:** (to be created)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/83 (merged 2026-01-12T04:19:58Z)
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -47,6 +47,12 @@ REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json | new
 - Dev E2E smoke with PII sanitization - PASS - evidence: `REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json`
 - PII scan: `rg -n "%40|mail.|%3C|%3E|@" REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json` - no matches (CLEAN)
 
+### Proof JSON highlights
+- `tags_added` includes `mw-smoke:RUN_20260112_0408Z`
+- `updated_at_delta_seconds`: 20.684
+- `result.status`: PASS
+- `path_redacted` fields present (no raw ticket IDs)
+
 ## Docs impact (summary)
 - **Docs updated:** `docs/08_Engineering/CI_and_Actions_Runbook.md` (PII-safe proof note)
 - **Docs to update next:** None
@@ -62,7 +68,26 @@ REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json | new
 - None - PII leak fix is complete
 
 ## PR Health Check Evidence
-- **PR:** (pending)
-- **CI Status:** Green
-- **Codecov:** Coverage maintained
-- **Bugbot:** To be triggered after PR creation
+
+### PR #83 (main fix)
+- **URL:** https://github.com/KevinSGarrett/RichPanel/pull/83
+- **Status:** Merged (2026-01-12T04:19:58Z)
+- **CI:** All checks passed (green)
+
+### PR #84 (placeholder cleanup follow-up)
+- **URL:** https://github.com/KevinSGarrett/RichPanel/pull/84
+- **Status:** Merged (2026-01-12T04:22:17Z)
+
+### Codecov
+- Coverage maintained; no regressions reported on PR #83.
+- Codecov PR page: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/83
+
+### Bugbot
+- **Trigger comment:** https://github.com/KevinSGarrett/RichPanel/pull/83#issuecomment-3736827776
+- Bugbot trigger posted via `@cursor review`. No outcome comment observed in PR thread.
+- **Manual verification:** PII scan + CI pass confirmed clean.
+
+### Proof Evidence
+- **Proof JSON:** `REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json`
+- **PII scan command:** `rg -n "%40|mail.|%3C|%3E|@" REHYDRATION_PACK/RUNS/RUN_20260112_0408Z/B/e2e_outbound_proof.json`
+- **Result:** No matches (CLEAN)
