@@ -6,7 +6,7 @@
 - Date (UTC): 2026-01-12
 - Worktree path: C:\RichPanel_GIT
 - Branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: #86 https://github.com/KevinSGarrett/RichPanel/pull/86 (open)
+- PR: #86 https://github.com/KevinSGarrett/RichPanel/pull/86 (merged 2026-01-12T15:33:39Z)
 - PR merge strategy: merge commit
 
 ## Objective + stop conditions
@@ -85,4 +85,4 @@
 - None; PR health checks are green (CI, Codecov) and Bugbot reported no bugs.
 
 ## Follow-ups (actionable)
-- [ ] Merge PR #86 via merge-commit and delete branch after auto-merge completes.
+- None (PR #86 merged).
