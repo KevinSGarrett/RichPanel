@@ -107,6 +107,73 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shopify.called)
         self.assertFalse(shipstation.called)
 
+    def test_payload_only_summary_when_network_disabled(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = _load_fixture("payload_order_summary.json")
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "trk_123")
+        self.assertEqual(summary["carrier"], "carrier_demo")
+        self.assertEqual(summary["shipping_method"], "Priority")
+        self.assertEqual(summary["status"], "shipped")
+        self.assertEqual(summary["items_count"], 3)
+        self.assertEqual(summary["total_price"], "59.99")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_only_summary_skips_network_when_enabled(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = _load_fixture("payload_order_summary.json")
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "trk_123")
+        self.assertEqual(summary["carrier"], "carrier_demo")
+        self.assertEqual(summary["shipping_method"], "Priority")
+        self.assertEqual(summary["status"], "shipped")
+        self.assertEqual(summary["items_count"], 3)
+        self.assertEqual(summary["total_price"], "59.99")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_missing_shipping_signals_offline_returns_baseline(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        envelope = _envelope({"order_id": "B-1"})
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["order_id"], "B-1")
+        self.assertEqual(summary["status"], "unknown")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
     def test_shopify_enrichment_merges_fields_when_network_enabled(self) -> None:
         order_payload = _load_fixture("shopify_order.json")
         transport = _RecordingTransport(
@@ -145,6 +212,40 @@ class OrderLookupTests(unittest.TestCase):
         request: ShopifyTransportRequest = transport.requests[0]
         self.assertIn("/orders/A-100.json", request.url)
         self.assertFalse(shipstation_client.called)
+
+    def test_shopify_fallback_used_when_payload_has_no_shipping_fields(self) -> None:
+        order_payload = _load_fixture("shopify_order.json")
+        transport = _RecordingTransport(
+            [
+                ShopifyTransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=json.dumps(order_payload).encode("utf-8"),
+                )
+            ]
+        )
+        shopify_client = ShopifyClient(
+            access_token="test-token",
+            allow_network=True,
+            transport=transport,
+        )
+        shipstation_client = _FailingShipStationClient()
+
+        envelope = _envelope({"order_id": "A-200"})
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify_client,
+            shipstation_client=shipstation_client,
+        )
+
+        self.assertEqual(summary["tracking_number"], "1Z999")
+        self.assertEqual(summary["carrier"], "UPS")
+        self.assertEqual(summary["status"], "fulfilled")
+        self.assertEqual(len(transport.requests), 1)
 
     def test_shipstation_enrichment_fills_tracking_when_shopify_missing(self) -> None:
         shopify_payload = deepcopy(_load_fixture("shopify_order.json"))
