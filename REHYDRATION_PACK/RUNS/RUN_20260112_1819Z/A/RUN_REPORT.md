@@ -21,7 +21,7 @@
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-<PENDING_FINAL_DIFFSTAT_AFTER_CI_PASS>
+33 files changed, 1050 insertions(+), 9 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -42,18 +42,21 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/verify_openai_model_defaults.py` - validate GPT-5.x guard locally.
 - `rg -n --pcre2 "\\xE2\\x80\\x9C|\\xE2\\x80\\x9D|\\xE2\\x80\\x98|\\xE2\\x80\\x99|\\xE2\\x80\\x94|\\xE2\\x80\\x93|\\xC2\\xA0" docs REHYDRATION_PACK docs/00_Project_Admin` - confirm mojibake removal (no matches).
 - `rg -n --pcre2 "GPT\\xE2" .` - confirm no broken GPT strings (no matches).
-- `python scripts/run_ci_checks.py --ci` - CI-equivalent (initial runs: one failed on missing Progress_Log entry, one failed on expected git-diff cleanliness check).
+- `python scripts/run_ci_checks.py --ci` - CI-equivalent (final run green after Progress_Log entry and commit).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - `python scripts/verify_openai_model_defaults.py` - pass - console output recorded above.
-- `python scripts/run_ci_checks.py --ci` - pending final clean pass (current failure only due to expected git diff check; will rerun after final commit).
+- `python scripts/run_ci_checks.py --ci` - pass (CI-equivalent green).
 
 Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`
 
-<CI_SNIPPET_PENDING_FINAL_PASS>
+```
+[OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
+[OK] CI-equivalent checks passed.
+```
 
 ## Docs impact (summary)
 - **Docs updated:** OpenAI_Model_Plan (CI enforcement), MASTER_CHECKLIST (guard reference), Progress_Log (new run), generated registries.
@@ -67,5 +70,5 @@ Paste output snippet proving you ran:
 - None.
 
 ## Follow-ups (actionable)
-- [ ] Rerun `python scripts/run_ci_checks.py --ci` on a clean working tree and update run artifacts with final pass + PR link.
+- [ ] Create PR to `main`, enable auto-merge (merge), and add @cursor review.
 

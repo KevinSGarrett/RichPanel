@@ -24,14 +24,14 @@ Enforce GPT-5.x-only defaults via CI, clean mojibake artifacts, and update docs/
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260112_1819Z_openai_model_plan_enforcement`
-- PR: pending (will open to `main`)
-- CI status at end of run: pending final clean pass
+- PR: pending (to be opened against `main`)
+- CI status at end of run: green (run_ci_checks.py --ci)
 - Main updated: no
 - Branch cleanup done: n/a
 
 ## Tests and evidence
-- Tests run: `python scripts/verify_openai_model_defaults.py`; `python scripts/run_ci_checks.py --ci` (rerun planned after final commit for clean pass)
-- Evidence path/link: see RUN_REPORT.md
+- Tests run: `python scripts/verify_openai_model_defaults.py`; `python scripts/run_ci_checks.py --ci`
+- Evidence path/link: see RUN_REPORT.md (CI snippet recorded)
 
 ## Decisions made
 - Enforce GPT-5.x defaults in CI for backend/config via denylist + prefix guard.
