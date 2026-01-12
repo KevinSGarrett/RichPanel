@@ -1,33 +1,32 @@
 # Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260112_0054Z`  
+**Agent:** B  
+**Date:** 2026-01-12
 
 ## Objective
-<FILL_ME>
+Agent idle; placeholder compliance only.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- No work performed.
+- Artifact retained for completeness.
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- None.
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Working branch: n/a (idle)
+- PR: none
+- CI status at end of run: not run (idle)
+- Main updated: no
+- Branch cleanup done: n/a
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: none (idle)
+- Evidence path/link: n/a
 
 ## Decisions made
-- <NONE or list>
+- None.
 
 ## Issues / follow-ups
-- <NONE or list>
+- None.
