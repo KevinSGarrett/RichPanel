@@ -10,12 +10,12 @@
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
-- **Objective:** Wire worker planning flags (`allow_network`, `outbound_enabled`) into `plan_actions`, add offline-safe coverage, and verify CI is clean for the PR.
-- **Stop conditions:** Flags forwarded into planning, wiring test added and running in CI helper, `python scripts/run_ci_checks.py --ci` passes with a clean git status, PR updated with evidence.
+- **Objective:** Wire worker planning flags (`allow_network`, `outbound_enabled`) into `plan_actions`, add online/offline-safe coverage (ON + OFF paths), and verify CI is clean for the PR.
+- **Stop conditions:** Flags forwarded into planning, wiring tests (ON/OFF) added and running in CI helper, `python scripts/run_ci_checks.py --ci` passes with a clean git status, PR updated with evidence.
 
 ## What changed (high-level)
 - Forwarded worker-derived `allow_network`/`outbound_enabled` to `plan_actions` so planning matches execution gates.
-- Added offline-safe wiring unit test and included it in `run_ci_checks.py`.
+- Added offline-safe wiring unit tests for both ON and OFF outbound paths and included them in `run_ci_checks.py`.
 - Captured run artifacts for Agent C and confirmed CI-equivalent checks are green.
 
 ## Diffstat (required)
@@ -66,7 +66,7 @@ scripts/test_worker_handler_flag_wiring.py         |  85 +++++++++++
 - `git push` — publish branch updates for PR #78.
 
 ## Tests / Proof (required)
-- `python scripts/test_worker_handler_flag_wiring.py` — **pass** (asserts `plan_actions` called with `allow_network=True`, `outbound_enabled=True` derived from worker flags).
+- `python scripts/test_worker_handler_flag_wiring.py` — **pass** (asserts `plan_actions` called with `allow_network=True`, `outbound_enabled=True` for ON, and `allow_network=False`, `outbound_enabled=False` for OFF).
 - `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci` — **pass** (all suites green; working tree remained clean).
 - PR Health Check: PR #78 updated; Codecov link not available from local run (no upload); CI proof below.
 
