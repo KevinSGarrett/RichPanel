@@ -18,7 +18,7 @@ Close the Codecov patch miss for worker flag wiring by making coverage determini
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: pending (will open after local verification)
+- PR: #86 (open)
 - CI status at end of run: green locally (run_ci_checks.py --ci)
 - Main updated: no
 - Branch cleanup done: no

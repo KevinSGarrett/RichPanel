@@ -6,7 +6,7 @@
 - Date (UTC): 2026-01-12
 - Worktree path: C:\RichPanel_GIT
 - Branch: run/RUN_20260112_1444Z_worker_flag_cov
-- PR: not yet opened (worker flag coverage follow-up)
+- PR: #86 https://github.com/KevinSGarrett/RichPanel/pull/86 (open)
 - PR merge strategy: merge commit
 
 ## Objective + stop conditions
@@ -34,6 +34,7 @@
 ## Tests / Proof (required)
 - coverage run -m unittest discover -s scripts -p "test_*.py" - pass - evidence: local console output (89 tests, 100% file coverage).
 - AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci - pass; includes doc/registry regen and Progress_Log update for RUN_20260112_1444Z.
+- Codecov patch/project: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/86 (patch green; worker test 100%).
 
 ## Docs impact (summary)
 - Docs updated: Run artifacts under `REHYDRATION_PACK/RUNS/RUN_20260112_1444Z`.
@@ -44,8 +45,8 @@
 - Run pack completeness depends on replacing all placeholders; reviewed A/B/C files accordingly.
 
 ## Blockers / open questions
-- Codecov status link pending until branch is pushed and checks complete.
+- Cursor Bugbot check still pending; triggers sent via `bugbot run` and `@cursor review`.
 
 ## Follow-ups (actionable)
-- [ ] Push branch, collect Codecov patch/project links, and update this report with the URLs and final diffstat.
-- [ ] Trigger Bugbot review and address findings.
+- [ ] Capture Bugbot findings (or note if quota/permissions block) and update report.
+- [ ] Record final diffstat once branch merges.
