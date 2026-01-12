@@ -13,6 +13,11 @@ This is the canonical **long-lived** progress record for the project.
 
 ## Timeline
 
+### 2026-01-12 - RUN_20260112_1819Z (OpenAI model default enforcement)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260112_1819Z
+- Added `scripts/verify_openai_model_defaults.py` to fail CI if GPT-4 family defaults appear in backend/src or config; wired into `run_ci_checks.py`.
+- Fixed mojibake/encoding artifacts and updated `docs/08_Engineering/OpenAI_Model_Plan.md` to call out the new CI guard; refreshed checklist references.
+
 ### 2026-01-12 - RUN_20260112_1444Z (Worker flag coverage determinism)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_1444Z
 - Made worker flag wiring test sys.path setup deterministic to close a Codecov patch miss; coverage now 100% on the file.

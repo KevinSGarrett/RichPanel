@@ -35,7 +35,7 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 | ID | Epic | Status | Primary owner | References |
 |---|---|---|---|---|
 | CHK-010 | Build: Ingest + persist (idempotency + state + audit) + ACK-fast + enqueue | In progress | Agent A | `backend/src/lambda_handlers/ingress/handler.py`, `backend/src/lambda_handlers/worker/handler.py`, `scripts/dev_e2e_smoke.py`, `docs/03_Richpanel_Integration/Webhooks_and_Event_Handling.md` |
-| CHK-010A | LLM: Per-workload OpenAI model env vars + defaults GPT‑5.x | Not started | Agent A | `docs/08_Engineering/OpenAI_Model_Plan.md`, `backend/src/richpanel_middleware/automation/llm_routing.py`, `backend/src/integrations/openai/client.py` |
+| CHK-010A | LLM: Per-workload OpenAI model env vars + defaults GPT-5.x | Not started | Agent A | `docs/08_Engineering/OpenAI_Model_Plan.md`, `backend/src/richpanel_middleware/automation/llm_routing.py`, `backend/src/integrations/openai/client.py`, `scripts/verify_openai_model_defaults.py` |
 | CHK-010B | LLM: Responses API + Structured Outputs migration (routing first, then verifier) | Not started | Agent A | `docs/08_Engineering/OpenAI_Model_Plan.md`, `docs/04_LLM_Design_Evaluation/Prompting_and_Output_Schemas.md` |
 | CHK-011 | Build: Router MVP (intent -> dept) | Not started | Agent B | `docs/04_LLM_Design_Evaluation/` |
 | CHK-012 | Build: Automation MVP (FAQ / order status) | Not started | Agent C | `docs/05_FAQ_Automation/` |

@@ -51,7 +51,7 @@ DEFAULT_ROUTING_MAX_TOKENS = 256
 DEFAULT_CONFIDENCE_THRESHOLD = 0.85
 
 # Roadmap flag: when True, use LLM routing as primary (if confidence passes)
-# OFF by default â€” enable only for evaluation/dev environments
+# OFF by default -- enable only for evaluation/dev environments
 OPENAI_ROUTING_PRIMARY_DEFAULT = False
 
 

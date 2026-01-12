@@ -83,6 +83,7 @@ def main() -> int:
         ["python", "scripts/verify_plan_sync.py"],
         ["python", "scripts/verify_secret_inventory_sync.py"],
         ["python", "scripts/verify_admin_logs_sync.py"],
+        ["python", "scripts/verify_openai_model_defaults.py"],
         ["python", "scripts/test_pipeline_handlers.py"],
         ["python", "scripts/test_richpanel_client.py"],
         ["python", "scripts/test_openai_client.py"],
