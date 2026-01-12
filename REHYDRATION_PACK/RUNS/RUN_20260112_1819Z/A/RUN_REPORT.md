@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-12
 - **Worktree path:** `C:/RichPanel_GIT`
 - **Branch:** `run/RUN_20260112_1819Z_openai_model_plan_enforcement`
-- **PR:** pending (to be opened against `main`)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/89 (merged 2026-01-12T18:42:38Z)
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -70,5 +70,5 @@ Paste output snippet proving you ran:
 - None.
 
 ## Follow-ups (actionable)
-- [ ] Create PR to `main`, enable auto-merge (merge), and add @cursor review.
+- Follow-ups: None (PR #89 merged).
 
