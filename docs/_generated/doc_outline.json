@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-11 - RUN_20260111_2301Z (Richpanel outbound smoke proof)",
+        "anchor": "2026-01-11-run202601112301z-richpanel-outbound-smoke-proof"
+      },
+      {
+        "level": 3,
         "text": "2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)",
         "anchor": "2026-01-11-run202601110532z-llm-rewriter-rebase-gpt-5-defaults"
       },

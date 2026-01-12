@@ -1,0 +1,90 @@
+{
+  "audit_ddb_console": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+  "audit_trail_table": "rp_mw_dev_audit_trail",
+  "audit_ts_action_id": "2026-01-12T00:21:48.398015+00:00#evt:042c98df-6352-41cd-aa3e-46d2dc015325",
+  "conversation_ddb_console": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+  "conversation_id": "api-scentimenttesting3300-41afc455-345e-4c18-b17f-ee0f0e9166e0",
+  "conversation_state_table": "rp_mw_dev_conversation_state",
+  "ddb_console": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+  "draft_action_present": true,
+  "draft_replies_safe": [
+    {
+      "body_hash": "b29660fccc683b01",
+      "dry_run": true,
+      "has_body": true,
+      "prompt_fingerprint": "7d5626eb7373c79bb557b90ce0820b9cf7bed15912f9fa5f7ce6a44c37309060",
+      "reason": "order status draft reply (dry-run)"
+    },
+    {
+      "body_hash": "b29660fccc683b01",
+      "dry_run": true,
+      "has_body": true,
+      "prompt_fingerprint": "7d5626eb7373c79bb557b90ce0820b9cf7bed15912f9fa5f7ce6a44c37309060",
+      "reason": "order status draft reply (dry-run)"
+    }
+  ],
+  "draft_reply_count": 2,
+  "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com",
+  "env": "dev",
+  "event_id": "evt:042c98df-6352-41cd-aa3e-46d2dc015325",
+  "failure_reason": null,
+  "idempotency_mode": "automation_candidate",
+  "idempotency_payload_field_count": null,
+  "idempotency_payload_fingerprint": null,
+  "idempotency_status": "processed",
+  "idempotency_table": "rp_mw_dev_idempotency",
+  "ingress_status_code": 200,
+  "logs_console": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker",
+  "message_id": "d5bfa6d8636643a392d08480d3797a21",
+  "payload_nested_key_count": 8,
+  "payload_sha256": "d51777da3e60cb3e",
+  "payload_top_level_key_count": 10,
+  "proof_attribution_ok": true,
+  "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+  "region": "us-east-2",
+  "result": "PASS",
+  "richpanel_has_test_subject": true,
+  "richpanel_has_test_tag": true,
+  "richpanel_status_after": "OPEN",
+  "richpanel_status_before": "OPEN",
+  "richpanel_status_changed": false,
+  "richpanel_status_code_after": 200,
+  "richpanel_status_code_before": 200,
+  "richpanel_subject_hash": "dd1d8036cd5b649e",
+  "richpanel_subject_hash_after": "dd1d8036cd5b649e",
+  "richpanel_tags_added": [],
+  "richpanel_tags_after": [
+    "053d59c2-87b0-4e9c-b094-585c295f7246",
+    "07566394-20e5-4417-be85-789ffea62452",
+    "1771b52d-8d0a-44e2-b2bc-642be28357b4",
+    "mw-auto-replied",
+    "mw-auto-replied-test",
+    "mw-intent-order_status_tracking",
+    "mw-routing-applied"
+  ],
+  "richpanel_tags_before": [
+    "053d59c2-87b0-4e9c-b094-585c295f7246",
+    "07566394-20e5-4417-be85-789ffea62452",
+    "1771b52d-8d0a-44e2-b2bc-642be28357b4",
+    "mw-auto-replied",
+    "mw-auto-replied-test",
+    "mw-intent-order_status_tracking",
+    "mw-routing-applied"
+  ],
+  "richpanel_tags_removed": [],
+  "richpanel_updated_at_after": "2026-01-12T00:21:49.037Z",
+  "richpanel_updated_at_before": "2026-01-12T00:13:43.396Z",
+  "richpanel_updated_at_delta_seconds": 485.6410000324249,
+  "richpanel_updated_at_parse_ok": true,
+  "routing": {
+    "category": "order_status",
+    "reason": "matched order status keyword",
+    "tags": [
+      "mw-routing-applied",
+      "mw-intent-order_status_tracking"
+    ]
+  },
+  "run_id": "RUN_20260111_2301Z",
+  "state_actions_count": 2,
+  "timestamp_utc": "2026-01-12T00:21:53Z"
+}

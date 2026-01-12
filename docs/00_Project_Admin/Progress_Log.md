@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-11 - RUN_20260111_0532Z.
+Last verified: 2026-01-11 - RUN_20260111_2301Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-11 - RUN_20260111_2301Z (Richpanel outbound smoke proof)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260111_2301Z
+- Hardened outbound smoke CLI (test-ticket guardrails, AWS profile, PII-safe proof) and produced PASS proof using DEV ticket `api-scentimenttesting3300-41afc455-345e-4c18-b17f-ee0f0e9166e0`; ingress 200, Dynamo evidence present, Richpanel tags applied (status OPEN). CI-equivalent checks passed.
 
 ### 2026-01-11 - RUN_20260111_0532Z (LLM rewriter rebase + GPT-5 defaults)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260111_0532Z
