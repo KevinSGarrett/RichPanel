@@ -1229,7 +1229,7 @@ def build_console_links(
     }
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover - integration entrypoint
     args = parse_args()
     region = args.region
     env_name = args.env
