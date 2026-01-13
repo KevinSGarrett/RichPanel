@@ -28,6 +28,7 @@ if str(SCRIPTS) not in sys.path:
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
     _compute_middleware_outcome,
+    _order_status_flags,
     _sanitize_decimals,
 )
 
@@ -212,6 +213,29 @@ class CriteriaTests(unittest.TestCase):
         self.assertTrue(outcome["middleware_tag_present"])
         self.assertTrue(outcome["middleware_tag_added"])
         self.assertTrue(outcome["middleware_outcome"])
+
+    def test_order_status_flags_convert_values(self) -> None:
+        middleware_ok, middleware_tag_ok, status_resolved_ok, skip_tags_present_ok = _order_status_flags(
+            scenario="order_status",
+            middleware_outcome=True,
+            middleware_tag_added=False,
+            status_resolved=False,
+            skip_tags_present=True,
+        )
+
+        self.assertTrue(middleware_ok)
+        self.assertFalse(middleware_tag_ok)
+        self.assertFalse(status_resolved_ok)
+        self.assertFalse(skip_tags_present_ok)
+
+        fallback_flags = _order_status_flags(
+            scenario="other",
+            middleware_outcome=True,
+            middleware_tag_added=True,
+            status_resolved=True,
+            skip_tags_present=False,
+        )
+        self.assertEqual(fallback_flags, (None, None, None, None))
 
 
 class URLEncodingTests(unittest.TestCase):

@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** `run/RUN_20260113_1450Z_order_status_repair_loop_prevention`
-- **PR:** not opened yet (will open after CI/Codecov/Bugbot verification)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/95
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
