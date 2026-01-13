@@ -709,7 +709,6 @@ def execute_routing_tags(
             extra={
                 "event_id": envelope.event_id,
                 "conversation_id": envelope.conversation_id,
-                "target_id_matches": target_id == envelope.conversation_id,
                 "status": response.status_code,
                 "dry_run": response.dry_run,
                 "tag_count": len(tags),
