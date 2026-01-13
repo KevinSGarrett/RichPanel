@@ -50,7 +50,7 @@ Use this file to coordinate Git/GitHub execution for this run.
 ## Integration checklist (Integrator)
 - [x] Pull latest `main`
 - [x] Merge agent branches (single branch)
-- [ ] Run: `python scripts/run_ci_checks.py --ci`
+- [x] Run: `python scripts/run_ci_checks.py --ci`
 - [ ] Merge `run/RUN_20260112_2112Z_order_lookup_patch_green` → `main` (PR #92 auto-merge)
 - [ ] Confirm Actions are green (or document failure + fix)
 - [ ] Delete run branches + agent branches

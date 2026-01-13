@@ -22,16 +22,16 @@ Optional polish: handle numeric tracking values in nested payloads without reint
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260112_2112Z_order_lookup_patch_green`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/92
-- CI status at end of run: pending (will run `python scripts/run_ci_checks.py --ci`)
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (to be run)
-- Evidence path/link: snippet to be recorded in `C/RUN_REPORT.md`
+- Tests run: `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
+- Evidence path/link: snippet in `C/RUN_REPORT.md`
 
 ## Decisions made
 - Treat numeric tracking objects explicitly (int/float) to satisfy Bugbot low severity; keep payload-first gating unchanged.
 
 ## Issues / follow-ups
-- Await CI, Codecov, Bugbot confirmations; enable auto-merge after checks.
+- Await latest Bugbot check and auto-merge; delete branch after merge.
