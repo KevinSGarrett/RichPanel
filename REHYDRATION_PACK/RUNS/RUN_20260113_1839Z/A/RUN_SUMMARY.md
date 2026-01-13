@@ -29,7 +29,7 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 - Branch cleanup done: pending for current PR
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (PRs #96/#97/#98).
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (PRs #96/#97/#98, and will include #<NEW_PR>).
 
 ## Decisions made
 - Proceed with docs-only scope; use wait-loop evidence + Bugbot/Codecov capture post-PR.
