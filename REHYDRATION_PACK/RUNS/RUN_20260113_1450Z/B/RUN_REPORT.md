@@ -54,19 +54,20 @@ Include test commands + results + links to evidence.
 
 - `python -m pytest scripts/test_pipeline_handlers.py scripts/test_e2e_smoke_encoding.py` — pass (see console output).
 - `python scripts/dev_e2e_smoke.py ... --run-id RUN_20260113_1450Z --ticket-number 1035 --apply-test-tag` — pass; evidence: `REHYDRATION_PACK/RUNS/RUN_20260113_1450Z/B/e2e_outbound_proof.json`.
-- `python scripts/run_ci_checks.py --ci` — will rerun on clean tree (first attempt failed only for missing Progress_Log reference; fixed and ready to re-run).
+- `python scripts/run_ci_checks.py --ci` — PASS on clean tree (see snippet below; untracked RUN_20260113_1438Z was locally excluded to keep tree clean).
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
 
 ```
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Uncommitted changes:
-M backend/src/richpanel_middleware/automation/pipeline.py
-M docs/00_Project_Admin/Progress_Log.md
+[verify_admin_logs_sync] Checking admin logs sync...
+  Latest run folder: RUN_20260113_1450Z
+[OK] RUN_20260113_1450Z is referenced in Progress_Log.md
 ...
+$ python scripts/check_protected_deletes.py --ci
+
+[OK] CI-equivalent checks passed.
 ```
-(Will rerun on a clean tree to capture PASS snippet.)
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/08_Engineering/CI_and_Actions_Runbook.md`
@@ -80,7 +81,7 @@ M docs/00_Project_Admin/Progress_Log.md
 - Need Codecov + Bugbot results after PR is opened.
 
 ## Follow-ups (actionable)
-- [ ] Rerun `python scripts/run_ci_checks.py --ci` on clean tree and capture PASS snippet.
+- [x] Rerun `python scripts/run_ci_checks.py --ci` on clean tree and capture PASS snippet.
 - [ ] Open PR, trigger Codecov + Bugbot, and gate merge on green.
 - [ ] Update RUN_REPORT once Codecov/Bugbot/PR links are available.
 

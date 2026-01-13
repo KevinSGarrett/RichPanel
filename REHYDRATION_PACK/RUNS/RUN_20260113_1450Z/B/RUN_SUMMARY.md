@@ -21,7 +21,7 @@ Repair order-status automation: restore loop-prevention guard, harden smoke PASS
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260113_1450Z_order_status_repair_loop_prevention`
 - PR: not opened yet (will open after run_ci_checks and coverage review)
-- CI status at end of run: run_ci_checks to rerun on clean tree; targeted pytest + smoke proof completed
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`, clean tree)
 - Main updated: no
 - Branch cleanup done: no
 
