@@ -46,10 +46,14 @@ scripts/test_pipeline_handlers.py                  |   9 +-
 - `python scripts/dev_e2e_smoke.py ... --ticket-number 1002 --diagnose-ticket-update --confirm-test-ticket --run-id RUN_20260113_2219Z --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json` — dev proof + diagnostics (PASS_STRONG).
 - `python scripts/run_ci_checks.py --ci` — CI-equivalent (PASS).
 - PII scans: `rg -n "%40|%3C|%3E|@" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S`; `rg -n "gmail|mail." REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S`.
+- `gh pr checks 104` — captured pending and final outputs (see Wait-for-green evidence).
 
 ## Tests / Proof (required)
 - Dev smoke (order_status): **PASS_STRONG** for ticket 1002. Evidence: `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json` (status open→closed, status_changed=true, reply_evidence=status_changed_delta=0.0, diagnostics winner `ticket_state_closed`).
 - `python scripts/run_ci_checks.py --ci` — PASS (CI-equivalent).
+- Wait-for-green evidence:
+  - Pending snapshot: `Cursor Bugbot  pending`, `validate pending`, `codecov/patch fail` (earlier run).
+  - Final snapshot: `Cursor Bugbot pass`, `codecov/patch pass`, `validate pass` (gh pr checks 104).
 
 CI command snippet:
 ```
