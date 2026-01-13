@@ -19,10 +19,10 @@ Use this file to coordinate Git/GitHub execution for this run.
 - All agents use: `run/<RUN_ID>`
 
 ### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+- Agent A: `run/RUN_20260112_2112Z_order_lookup_patch_green-A`
+- Agent B: `run/RUN_20260112_2112Z_order_lookup_patch_green-B`
+- Agent C: `run/RUN_20260112_2112Z_order_lookup_patch_green-C`
+- Integrator merges into `run/RUN_20260112_2112Z_order_lookup_patch_green`
 
 ---
 
