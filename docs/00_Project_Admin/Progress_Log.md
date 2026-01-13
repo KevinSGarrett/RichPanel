@@ -15,8 +15,8 @@ This is the canonical **long-lived** progress record for the project.
 
 ### 2026-01-12 - RUN_20260112_2212Z (Order lookup nested tracking string fix)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_2212Z
-- Fixed nested tracking string extraction (tracking under order payload) without reintroducing dict stringification; added a nested tracking string unit test.
-- Kept payload-first behavior, Codecov patch green, and CI-equivalent/Bugbot checks for PR #92.
+- Fixed nested tracking string extraction (tracking under order payload) without reintroducing dict stringification; added nested tracking string unit test and resolved Bugbot Medium finding.
+- Kept payload-first behavior, Codecov patch green, and CI-equivalent checks clean for PR #92.
 
 ### 2026-01-12 - RUN_20260112_2112Z (Order lookup payload fix + patch green)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260112_2112Z

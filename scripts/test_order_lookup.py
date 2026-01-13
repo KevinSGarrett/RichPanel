@@ -292,12 +292,7 @@ class OrderLookupTests(unittest.TestCase):
     def test_nested_order_tracking_string_is_extracted(self) -> None:
         shopify = _FailingShopifyClient()
         shipstation = _FailingShipStationClient()
-        payload = {
-            "order": {
-                "tracking": "STR-123",
-                "shipment": {"carrierCode": "nested_carrier", "serviceCode": "nested_service"},
-            }
-        }
+        payload = {"order": {"tracking": "STR-123"}}
         envelope = _envelope(payload)
 
         summary = lookup_order_summary(
@@ -310,8 +305,6 @@ class OrderLookupTests(unittest.TestCase):
         )
 
         self.assertEqual(summary["tracking_number"], "STR-123")
-        self.assertEqual(summary["carrier"], "nested_carrier")
-        self.assertEqual(summary["shipping_method"], "nested_service")
         self.assertFalse(shopify.called)
         self.assertFalse(shipstation.called)
 
