@@ -505,6 +505,16 @@ def execute_order_status_reply(
             }
         )
     try:
+        # URL-encode conversation_id for write operations (email IDs have special chars)
+        import urllib.parse
+        encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
+
+        ticket_metadata = _safe_ticket_metadata_fetch(
+            envelope.conversation_id,
+            executor=executor,
+            allow_network=allow_network,
+        )
+
         def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
             skip_tag = _SKIP_REASON_TAGS.get(reason)
@@ -516,7 +526,7 @@ def execute_order_status_reply(
 
             route_response = executor.execute(
                 "PUT",
-                f"/v1/tickets/{envelope.conversation_id}/add-tags",
+                f"/v1/tickets/{encoded_id}/add-tags",
                 json_body={"tags": route_tags},
                 dry_run=not allow_network,
             )
@@ -545,11 +555,6 @@ def execute_order_status_reply(
                 "responses": responses,
             }
 
-        ticket_metadata = _safe_ticket_metadata_fetch(
-            envelope.conversation_id,
-            executor=executor,
-            allow_network=allow_network,
-        )
         if ticket_metadata is None:
             return _route_email_support("status_read_failed")
 
@@ -564,7 +569,7 @@ def execute_order_status_reply(
 
         tag_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}/add-tags",
+            f"/v1/tickets/{encoded_id}/add-tags",
             json_body={"tags": [loop_prevention_tag]},
             dry_run=not allow_network,
         )
@@ -578,7 +583,7 @@ def execute_order_status_reply(
 
         reply_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}",
+            f"/v1/tickets/{encoded_id}",
             json_body={
                 "status": "resolved",
                 "comment": {"body": reply_body, "type": "public", "source": "middleware"},
@@ -688,10 +693,14 @@ def execute_routing_tags(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
 
+    # URL-encode conversation_id for write operations (email IDs have special chars)
+    import urllib.parse
+    encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
+
     try:
         response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}/add-tags",
+            f"/v1/tickets/{encoded_id}/add-tags",
             json_body={"tags": tags},
             dry_run=not allow_network,
         )
