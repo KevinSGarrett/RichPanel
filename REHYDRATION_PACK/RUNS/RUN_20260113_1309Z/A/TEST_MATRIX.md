@@ -10,3 +10,4 @@
 
 ## Notes
 - Testing handled by Agent B only; Agent A performed no execution this run.
+- No additional validation required for Agent A.
