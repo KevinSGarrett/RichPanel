@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_0122Z.
+Last verified: 2026-01-13 - RUN_20260113_0433Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-13 - RUN_20260113_0433Z (Order-status E2E smoke proof mode + URL encoding fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_0433Z
+- Fixed Richpanel middleware write operations: URL-encode email-based conversation IDs before building API paths (root cause: special chars @, <, >, + were causing 200 responses but no state mutation).
+- Added order_status scenario to dev_e2e_smoke.py with deterministic seeded tracking payload and middleware-attributable PASS criteria (resolved/closed or mw-* tag beyond smoke).
+- Added unit tests for URL encoding enforcement and scenario payload validation; wired into CI checks.
+- Dev proof run delivered PASS with middleware tags applied (mw-routing-applied, mw-intent-order_status_tracking).
 
 ### 2026-01-13 - RUN_20260113_0122Z (Order lookup numeric tracking polish)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_0122Z
