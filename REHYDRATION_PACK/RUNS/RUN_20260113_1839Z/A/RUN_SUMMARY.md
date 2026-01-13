@@ -23,13 +23,13 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260113_1450Z_artifact_cleanup + follow-ups run/RUN_20260113_1839Z_evidence + run/RUN_20260113_1839Z_final (merged) + current ship branch
-- PRs: #96 (docs), #97 (evidence), #98 (final evidence), #<NEW_PR> (ship polish) via auto-merge (merge commits)
+- PRs: #96 (docs), #97 (evidence), #98 (final evidence), #100 (ship polish) via auto-merge (merge commits)
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
 - Main updated: yes (PRs merged; current PR pending)
 - Branch cleanup done: pending for current PR
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (PRs #96/#97/#98, and will include #<NEW_PR>).
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (see “Commands Run” + “Wait-for-green evidence” for PRs #96/#97/#98/#100).
 
 ## Decisions made
 - Proceed with docs-only scope; use wait-loop evidence + Bugbot/Codecov capture post-PR.
