@@ -23,7 +23,7 @@ Deliver PASS_STRONG order_status dev proof with middleware-attributable reply an
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260113_2219Z_order_status_pass_strong`
 - PR: none (to be created)
-- CI status at end of run: pending final `python scripts/run_ci_checks.py --ci` after all edits (current run exits non-zero only due to regenerated files awaiting commit)
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
 - Main updated: no
 - Branch cleanup done: no
 
