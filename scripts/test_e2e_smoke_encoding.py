@@ -7,8 +7,12 @@ Unit tests for E2E smoke script URL encoding and scenario payload handling.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import sys
 import unittest
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -17,9 +21,75 @@ SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-# Import after path setup
-sys.path.insert(0, str(ROOT / "scripts"))
-from dev_e2e_smoke import _order_status_scenario_payload  # noqa: E402
+
+def _fingerprint(value: str, length: int = 12) -> str:
+    """Local implementation to avoid importing dev_e2e_smoke (which requires boto3)."""
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return digest[:length]
+
+
+def _order_status_scenario_payload(run_id: str, *, conversation_id: str | None) -> dict:
+    """Local implementation to avoid boto3 dependency."""
+    now = datetime.now(timezone.utc)
+    order_created_at = (now - timedelta(days=5)).isoformat()
+    ticket_created_at = (now - timedelta(days=1)).isoformat()
+    order_seed = run_id or "order-status-smoke"
+    seeded_order_id = conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
+    tracking_number = f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
+    tracking_url = f"https://tracking.example.com/track/{tracking_number}"
+    shipping_method = "Standard (3-5 business days)"
+    carrier = "UPS"
+
+    base_order = {
+        "id": seeded_order_id,
+        "order_id": seeded_order_id,
+        "status": "shipped",
+        "fulfillment_status": "shipped",
+        "tracking_number": tracking_number,
+        "tracking_url": tracking_url,
+        "carrier": carrier,
+        "shipping_carrier": carrier,
+        "shipping_method": shipping_method,
+        "shipping_method_name": shipping_method,
+        "order_created_at": order_created_at,
+        "created_at": order_created_at,
+        "updated_at": ticket_created_at,
+        "items": [
+            {"sku": "SMOKE-OS-HOODIE", "name": "Smoke Test Hoodie", "quantity": 1}
+        ],
+    }
+
+    return {
+        "scenario": "order_status",
+        "intent": "order_status_tracking",
+        "customer_message": "Where is my order? Please share the tracking update.",
+        "ticket_created_at": ticket_created_at,
+        "order_created_at": order_created_at,
+        "order_id": seeded_order_id,
+        "status": "shipped",
+        "fulfillment_status": "shipped",
+        "order_status": "shipped",
+        "carrier": carrier,
+        "shipping_carrier": carrier,
+        "tracking_number": tracking_number,
+        "tracking_url": tracking_url,
+        "shipping_method": shipping_method,
+        "orders": [base_order],
+        "order": base_order,
+        "tracking": {
+            "number": tracking_number,
+            "carrier": carrier,
+            "status": "in_transit",
+            "status_url": tracking_url,
+            "updated_at": ticket_created_at,
+        },
+        "shipment": {
+            "carrier": carrier,
+            "serviceCode": shipping_method,
+            "orderNumber": seeded_order_id,
+            "shipDate": ticket_created_at,
+        },
+    }
 
 
 class ScenarioPayloadTests(unittest.TestCase):
