@@ -24,4 +24,4 @@ Goal: document what changed and where documentation must be updated.
 - `reference/_generated/*` regenerated: no
 
 ## Notes
-- CI must be rerun (`python scripts/run_ci_checks.py --ci`) after isolating changes; wait-loop and PR evidence to be captured post-PR creation.
+- CI rerun is green; run artifacts now include full PR chain evidence (PRs #96/#97/#98/#99/#100/#101 with Bugbot, Codecov, Actions URLs, and `gh pr checks` outputs).

@@ -99,7 +99,25 @@ gh pr view 96 --json statusCheckRollup
 gh pr view 97 --json statusCheckRollup
 gh pr view 98 --json statusCheckRollup
 
-# New evidence-polish PR
+# Evidence polish wave 1
+gh pr create --fill                      # PR 99
+# output: https://github.com/KevinSGarrett/RichPanel/pull/99
+gh pr comment 99 -b '@cursor review'
+# output: https://github.com/KevinSGarrett/RichPanel/pull/99#issuecomment-3746426584
+
+# Wait loop PR 99 (poll every 120–240s)
+---- 2026-01-13T14:26:10.1564440-06:00
+Cursor Bugbot  pending 0 https://cursor.com
+validate       pending 0 https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261
+---- 2026-01-13T14:28:50.7191166-06:00
+Cursor Bugbot  pass    1m23s https://cursor.com
+codecov/patch  pass    0 https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99
+validate       pass    51s https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261
+
+# Codecov rollup (PR 99)
+gh pr view 99 --json statusCheckRollup
+
+# Evidence polish wave 2
 gh pr create --fill                      # PR 100
 # output: https://github.com/KevinSGarrett/RichPanel/pull/100
 gh pr comment 100 -b '@cursor review'
@@ -116,25 +134,54 @@ validate       pass    48s https://github.com/KevinSGarrett/RichPanel/actions/ru
 
 # Codecov rollup (PR 100)
 gh pr view 100 --json statusCheckRollup
-# codecov/patch state: SUCCESS, url: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100
+
+# Evidence polish final
+gh pr create --fill                      # PR 101
+# output: https://github.com/KevinSGarrett/RichPanel/pull/101
+gh pr comment 101 -b '@cursor review'
+# output: https://github.com/KevinSGarrett/RichPanel/pull/101#issuecomment-3746467024
+
+# Wait loop PR 101 (poll every 120–240s)
+---- 2026-01-13T14:37:30.2212514-06:00
+Cursor Bugbot  pending 0 https://cursor.com
+validate       pending 0 https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754
+---- 2026-01-13T14:40:14.0581699-06:00
+Cursor Bugbot  pass    2m21s https://cursor.com
+codecov/patch  pass    1s https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101
+validate       pass    51s https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754
+
+# Codecov rollup (PR 101)
+gh pr view 101 --json statusCheckRollup
 
 # Enable auto-merge after green (all PRs)
 gh pr merge 96 --auto --merge --delete-branch
 gh pr merge 97 --auto --merge --delete-branch
 gh pr merge 98 --auto --merge --delete-branch
+gh pr merge 99 --auto --merge --delete-branch
 gh pr merge 100 --auto --merge --delete-branch
+gh pr merge 101 --auto --merge --delete-branch
 ```
 
 ## Tests / Proof (required)
 - `python scripts/run_ci_checks.py --ci` — **pass**; includes doc/registry regeneration and full scripts test suite. Evidence: console output above; CI-equivalent gate green on PR head.
 - No additional tests (docs-only scope).
 
+## PR Chain Evidence Index (final)
+- **PR 96** (docs gates + Next10): PR https://github.com/KevinSGarrett/RichPanel/pull/96 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20969872951/job/60270134080 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20969872951/job/60270134080"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96"}`
+- **PR 97** (run artifacts evidence): PR https://github.com/KevinSGarrett/RichPanel/pull/97 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/97#issuecomment-3746166559 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20970123942/job/60270994844 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20970123942/job/60270994844"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97"}`
+- **PR 98** (final evidence polish): PR https://github.com/KevinSGarrett/RichPanel/pull/98 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/98#issuecomment-3746218737 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20970331309/job/60271699030 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20970331309/job/60271699030"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98"}`
+- **PR 99** (evidence polish wave 1): PR https://github.com/KevinSGarrett/RichPanel/pull/99 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/99#issuecomment-3746426584 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99"}`
+- **PR 100** (evidence polish wave 2): PR https://github.com/KevinSGarrett/RichPanel/pull/100 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/100#issuecomment-3746445518 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951/job/60276024703 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951/job/60276024703"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100"}`
+- **PR 101** (evidence polish final): PR https://github.com/KevinSGarrett/RichPanel/pull/101 | Bugbot https://github.com/KevinSGarrett/RichPanel/pull/101#issuecomment-3746467024 | Codecov https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101 | Actions https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754 | Rollup: `{"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754"}` / `{"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}` / `{"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101"}`
+
 ## Wait-for-green evidence (required)
-- **Wait loop executed:** yes; 120–240s sleeps (~150s used) for PRs #96/#97/#98/#100
+- **Wait loop executed:** yes; 120–240s sleeps (~150s used) for PRs #96/#97/#98/#99/#100/#101
 - **Status timestamps (PR 96):** 2026-01-13T13:32:06-06 (Bugbot/validate pending); 2026-01-13T13:34:43-06 (Bugbot pending, validate pass); 2026-01-13T13:37:22-06 (Bugbot pass, Codecov/patch pass, validate pass)
 - **Status timestamps (PR 97):** 2026-01-13T13:40:41-06 (Bugbot/validate pending); 2026-01-13T13:43:22-06 (Bugbot pending, Codecov/patch pass, validate pass); 2026-01-13T13:46:02-06 (Bugbot pass, Codecov/patch pass, validate pass)
 - **Status timestamps (PR 98):** 2026-01-13T13:47:47-06 (Bugbot/validate pending); 2026-01-13T13:50:31-06 (Bugbot pass, Codecov/patch pass, validate pass)
+- **Status timestamps (PR 99):** 2026-01-13T14:26:10-06 (Bugbot/validate pending); 2026-01-13T14:28:50-06 (Bugbot pass, Codecov/patch pass, validate pass)
 - **Status timestamps (PR 100):** 2026-01-13T14:31:05-06 (Bugbot/validate pending); 2026-01-13T14:33:44-06 (Bugbot pass, Codecov/patch pass, validate pass)
+- **Status timestamps (PR 101):** 2026-01-13T14:37:30-06 (Bugbot/validate pending); 2026-01-13T14:40:14-06 (Bugbot pass, Codecov/patch pass, validate pass)
 - **Raw `gh pr checks` output (pending + green):**
   - PR 96:
     ```
@@ -173,6 +220,16 @@ gh pr merge 100 --auto --merge --delete-branch
     codecov/patch  pass    0 https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98
     validate       pass    55s https://github.com/KevinSGarrett/RichPanel/actions/runs/20970331309/job/60271699030
     ```
+  - PR 99:
+    ```
+    ---- 2026-01-13T14:26:10.1564440-06:00
+    Cursor Bugbot  pending 0 https://cursor.com
+    validate       pending 0 https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261
+    ---- 2026-01-13T14:28:50.7191166-06:00
+    Cursor Bugbot  pass    1m23s https://cursor.com
+    codecov/patch  pass    0 https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99
+    validate       pass    51s https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261
+    ```
   - PR 100:
     ```
     ---- 2026-01-13T14:31:05.6244798-06:00
@@ -182,6 +239,16 @@ gh pr merge 100 --auto --merge --delete-branch
     Cursor Bugbot  pass    1m42s https://cursor.com
     codecov/patch  pass    1s https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100
     validate       pass    48s https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951/job/60276024703
+    ```
+  - PR 101:
+    ```
+    ---- 2026-01-13T14:37:30.2212514-06:00
+    Cursor Bugbot  pending 0 https://cursor.com
+    validate       pending 0 https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754
+    ---- 2026-01-13T14:40:14.0581699-06:00
+    Cursor Bugbot  pass    2m21s https://cursor.com
+    codecov/patch  pass    1s https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101
+    validate       pass    51s https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754
     ```
 - **Status rollup JSON snippets:**
   - PR 96:
@@ -202,15 +269,27 @@ gh pr merge 100 --auto --merge --delete-branch
     {"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}
     {"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98"}
     ```
+  - PR 99:
+    ```
+    {"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323/job/60275524261"}
+    {"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}
+    {"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99"}
+    ```
   - PR 100:
     ```
     {"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951/job/60276024703"}
     {"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}
     {"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100"}
     ```
-- **Codecov status:** codecov/patch pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100
-- **Bugbot status:** pass — https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900, https://github.com/KevinSGarrett/RichPanel/pull/97#issuecomment-3746166559, https://github.com/KevinSGarrett/RichPanel/pull/98#issuecomment-3746218737, https://github.com/KevinSGarrett/RichPanel/pull/100#issuecomment-3746445518
-- **GitHub Actions runs:** https://github.com/KevinSGarrett/RichPanel/actions/runs/20969872951 (PR 96), https://github.com/KevinSGarrett/RichPanel/actions/runs/20970123942 (PR 97), https://github.com/KevinSGarrett/RichPanel/actions/runs/20970331309 (PR 98), https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951 (PR 100)
+  - PR 101:
+    ```
+    {"name":"validate","conclusion":"SUCCESS","detailsUrl":"https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778/job/60276618754"}
+    {"name":"Cursor Bugbot","conclusion":"SUCCESS","detailsUrl":"https://cursor.com"}
+    {"name":"codecov/patch","conclusion":"SUCCESS","detailsUrl":"https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101"}
+    ```
+- **Codecov status:** codecov/patch pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/98, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/99, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/100, https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/101
+- **Bugbot status:** pass — https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900, https://github.com/KevinSGarrett/RichPanel/pull/97#issuecomment-3746166559, https://github.com/KevinSGarrett/RichPanel/pull/98#issuecomment-3746218737, https://github.com/KevinSGarrett/RichPanel/pull/99#issuecomment-3746426584, https://github.com/KevinSGarrett/RichPanel/pull/100#issuecomment-3746445518, https://github.com/KevinSGarrett/RichPanel/pull/101#issuecomment-3746467024
+- **GitHub Actions runs:** https://github.com/KevinSGarrett/RichPanel/actions/runs/20969872951 (PR 96), https://github.com/KevinSGarrett/RichPanel/actions/runs/20970123942 (PR 97), https://github.com/KevinSGarrett/RichPanel/actions/runs/20970331309 (PR 98), https://github.com/KevinSGarrett/RichPanel/actions/runs/20971436323 (PR 99), https://github.com/KevinSGarrett/RichPanel/actions/runs/20971580951 (PR 100), https://github.com/KevinSGarrett/RichPanel/actions/runs/20971753778 (PR 101)
 
 ## Docs impact (summary)
 - **Docs updated:** `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`; `REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md`; `docs/08_Engineering/CI_and_Actions_Runbook.md`; `REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md`; `docs/00_Project_Admin/Progress_Log.md`; `docs/_generated/*`; run artifacts for this run.
