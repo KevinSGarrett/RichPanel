@@ -308,6 +308,25 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shopify.called)
         self.assertFalse(shipstation.called)
 
+    def test_nested_order_tracking_numeric_is_extracted(self) -> None:
+        shopify = _FailingShopifyClient()
+        shipstation = _FailingShipStationClient()
+        payload = {"order": {"tracking": 12345}}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=shopify,
+            shipstation_client=shipstation,
+        )
+
+        self.assertEqual(summary["tracking_number"], "12345")
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
     def test_shopify_enrichment_merges_fields_when_network_enabled(self) -> None:
         order_payload = _load_fixture("shopify_order.json")
         transport = _RecordingTransport(

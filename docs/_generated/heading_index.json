@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_0122z (order lookup numeric tracking polish)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601130122z-order-lookup-numeric-tracking-polish"
+    }
+  ],
   "2026-01-12 - run_20260112_2212z (order lookup nested tracking string fix)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
