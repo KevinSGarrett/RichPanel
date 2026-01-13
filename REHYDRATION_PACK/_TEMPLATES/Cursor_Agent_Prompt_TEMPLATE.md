@@ -174,3 +174,16 @@ Before claiming a PR as "done", agents must complete the following health checks
 - [ ] **Action required**: If E2E test fails, fix the issue before merging
 
 **Gate rule**: A PR cannot be merged without addressing Bugbot findings, Codecov issues, and E2E requirements (when applicable). Document all triage decisions explicitly.
+
+### Wait-for-green (mandatory)
+- **Do not declare the run complete** or enable auto-merge until Codecov and Bugbot have finished and are green (or a documented fallback is recorded).
+- After triggering Bugbot and pushing commits, **poll checks every 120–240s** until neither `gh pr checks <PR#>` nor the status rollup shows pending/in-progress contexts for Codecov or Bugbot.
+- Sample PowerShell-safe loop (adjust sleep as needed):
+```powershell
+$pr = <PR#>
+do {
+  gh pr checks $pr
+  Start-Sleep -Seconds (Get-Random -Minimum 120 -Maximum 240)
+} while (gh pr checks $pr | Select-String -Pattern 'Pending|In progress|Queued')
+```
+- If Bugbot quota is exhausted, record “quota exhausted; performed manual review” in `RUN_REPORT.md` and continue waiting for Codecov to complete before merging.

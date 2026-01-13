@@ -43,6 +43,13 @@
 - **Evidence location:** `qa/test_evidence/<RUN_ID>/` or <CI_LINK>
 - **Results:** <pass/fail summary>
 
+## Wait-for-green evidence (required)
+- **Wait loop executed:** yes/no (sleep interval used)
+- **Status timestamps:** <e.g., `2026-01-13T18:45Z` `gh pr checks <PR#>` output attached/redacted>
+- **Check rollup proof:** <link to PR Checks tab or screenshot (redacted)>
+- **Codecov status:** <codecov/patch state + link/screenshot>
+- **Bugbot status:** <comment link or "quota exhausted; manual review documented">
+
 ## PR Health Check (required for PRs)
 
 ### Bugbot Findings
