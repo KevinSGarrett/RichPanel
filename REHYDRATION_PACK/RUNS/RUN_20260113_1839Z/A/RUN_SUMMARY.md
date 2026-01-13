@@ -22,11 +22,11 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 - `REHYDRATION_PACK/RUNS/RUN_20260113_1839Z/A/*` (artifacts)
 
 ## Git/GitHub status (required)
-- Working branch: run/RUN_20260113_1450Z_artifact_cleanup (merged)
-- PR: #96 (merged via auto-merge, merge commit)
+- Working branch: run/RUN_20260113_1450Z_artifact_cleanup (merged) plus follow-up branch run/RUN_20260113_1839Z_evidence (merged)
+- PRs: #96 (docs) and #97 (evidence) merged via auto-merge, merge commit
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
-- Main updated: yes (PR merged)
-- Branch cleanup done: yes (auto-merge deleted branch)
+- Main updated: yes (PRs merged)
+- Branch cleanup done: yes (auto-merge deleted branches)
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md.

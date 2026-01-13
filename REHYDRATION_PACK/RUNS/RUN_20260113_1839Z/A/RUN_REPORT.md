@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260113_1450Z_artifact_cleanup → merged to main
-- **PR:** #96 (docs-only) — merged via auto-merge (merge commit)
+- **PRs:** #96 (docs changes) and #97 (run-artifact evidence) — both merged via auto-merge (merge commit)
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -49,15 +49,18 @@ python scripts/new_run_folder.py --now
 python scripts/run_ci_checks.py --ci
 # output: [OK] CI-equivalent checks passed. (full log captured above; includes docs/regens + tests)
 
-# Create PR (docs-only)
-gh pr create --fill
+# Create PRs (docs-only then evidence)
+gh pr create --fill          # PR 96
 # output: https://github.com/KevinSGarrett/RichPanel/pull/96
-
-# Trigger Bugbot
 gh pr comment 96 -b '@cursor review'
 # output: https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900
 
-# Wait loop (poll every 120–240s)
+gh pr create --fill          # PR 97 (evidence)
+# output: https://github.com/KevinSGarrett/RichPanel/pull/97
+gh pr comment 97 -b '@cursor review'
+# output: https://github.com/KevinSGarrett/RichPanel/pull/97#issuecomment-3746166559
+
+# Wait loop PR 96 (poll every 120–240s)
 ---- 2026-01-13T13:32:06-06
 Cursor Bugbot pending; validate pending
 ---- 2026-01-13T13:34:43-06
@@ -65,12 +68,23 @@ Cursor Bugbot pending; validate pass
 ---- 2026-01-13T13:37:22-06
 Cursor Bugbot pass; codecov/patch pass; validate pass
 
+# Wait loop PR 97 (poll every 120–240s)
+---- 2026-01-13T13:40:41-06
+Cursor Bugbot pending; validate pending
+---- 2026-01-13T13:43:22-06
+Cursor Bugbot pending; codecov/patch pass; validate pass
+---- 2026-01-13T13:46:02-06
+Cursor Bugbot pass; codecov/patch pass; validate pass
+
 # Codecov rollup
 gh pr view 96 --json statusCheckRollup
 # codecov/patch state: SUCCESS, url: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96
+gh pr view 97 --json statusCheckRollup
+# codecov/patch state: SUCCESS, url: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97
 
-# Enable auto-merge after green
+# Enable auto-merge after green (both PRs)
 gh pr merge 96 --auto --merge --delete-branch
+gh pr merge 97 --auto --merge --delete-branch
 ```
 
 ## Tests / Proof (required)
@@ -78,11 +92,12 @@ gh pr merge 96 --auto --merge --delete-branch
 - No additional tests (docs-only scope).
 
 ## Wait-for-green evidence (required)
-- **Wait loop executed:** yes; 120–240s sleeps (150s used)
-- **Status timestamps:** 2026-01-13T13:32:06-06 (Bugbot/validate pending); 2026-01-13T13:34:43-06 (Bugbot pending, validate pass); 2026-01-13T13:37:22-06 (Bugbot pass, Codecov/patch pass, validate pass)
-- **Check rollup proof:** `gh pr checks 96` outputs above; status rollup JSON shows Codecov and Bugbot SUCCESS
-- **Codecov status:** codecov/patch pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96
-- **Bugbot status:** pass — https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900
+- **Wait loop executed:** yes; 120–240s sleeps (150s used) for both PRs
+- **Status timestamps (PR 96):** 2026-01-13T13:32:06-06 (Bugbot/validate pending); 2026-01-13T13:34:43-06 (Bugbot pending, validate pass); 2026-01-13T13:37:22-06 (Bugbot pass, Codecov/patch pass, validate pass)
+- **Status timestamps (PR 97):** 2026-01-13T13:40:41-06 (Bugbot/validate pending); 2026-01-13T13:43:22-06 (Bugbot pending, Codecov/patch pass, validate pass); 2026-01-13T13:46:02-06 (Bugbot pass, Codecov/patch pass, validate pass)
+- **Check rollup proof:** `gh pr checks 96` and `gh pr checks 97` outputs above; rollup JSON captured via `gh pr view --json statusCheckRollup`
+- **Codecov status:** codecov/patch pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96 and https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/97
+- **Bugbot status:** pass — https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900 and https://github.com/KevinSGarrett/RichPanel/pull/97#issuecomment-3746166559
 
 ## Docs impact (summary)
 - **Docs updated:** `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`; `REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md`; `docs/08_Engineering/CI_and_Actions_Runbook.md`; `REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md`; `docs/00_Project_Admin/Progress_Log.md`; `docs/_generated/*`; run artifacts for this run.
