@@ -23,15 +23,17 @@ Fix nested string tracking extraction in order lookup, keep Codecov patch green,
 - Working branch: `run/RUN_20260112_2112Z_order_lookup_patch_green`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/92
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
-- Main updated: no (pending auto-merge)
+- Main updated: no (auto-merge enabled)
 - Branch cleanup done: no
 
 ## Tests and evidence
 - Tests run: `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/92 (patch green)
+- Bugbot: https://github.com/KevinSGarrett/RichPanel/runs/60172080121 (no issues found)
 - Evidence path/link: snippet in `C/RUN_REPORT.md`
 
 ## Decisions made
 - Keep payload-first short-circuit when any shipping signal is present; add string-handling branch only when tracking is str.
 
 ## Issues / follow-ups
-- None pending (await auto-merge of PR #92).
+- Enable auto-merge on PR #92 and delete branch after merge.

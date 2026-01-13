@@ -19,6 +19,7 @@
 - Added explicit string-handling branch for `tracking` objects in payload candidates (no dict stringification).
 - Added nested order tracking string test and maintained payload-first coverage to keep Codecov patch green.
 - Updated Progress_Log and recorded run artifacts for RUN_20260112_2212Z.
+- Bugbot Medium Severity fixed: nested payload string tracking extracted without dict stringification.
 
 ## Diffstat (required)
 - backend/src/richpanel_middleware/commerce/order_lookup.py | small net delta (+/-)
@@ -40,15 +41,15 @@ List key files changed (grouped by area) and why:
 ## Commands Run (required)
 List commands you ran (include key flags/env if relevant):
 - `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
-- `git status -sb` / `git add -A` / `git commit` / `git push`
-- `@cursor review` (to re-trigger Bugbot after updates)
+- `git status -sb`
+- `git add -A && git commit && git push`
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci` — pass
+- `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci` — pass (clean tree)
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/92 (patch green, 100% diff hit)
-- Bugbot check run: https://github.com/KevinSGarrett/RichPanel/runs/60158280604 (triggered for this update)
+- Bugbot: https://github.com/KevinSGarrett/RichPanel/runs/60172080121 (✅ no issues found; Medium finding resolved)
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
@@ -71,6 +72,7 @@ AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.p
 - None.
 
 ## Follow-ups (actionable)
+- [x] Confirm Bugbot reports no issues on PR #92.
 - [ ] Delete branch after auto-merge completes.
 
 <!-- End of template -->
