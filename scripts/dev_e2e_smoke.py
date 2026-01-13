@@ -898,21 +898,19 @@ def build_payload(
         "message_id": uuid.uuid4().hex,
         "source": "dev_e2e_smoke",
         "received_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "payload": {
-            "type": "smoke_test",
-            "agent": "dev_e2e_smoke.py",
-            "nonce": uuid.uuid4().hex,
-        },
+        "type": "smoke_test",
+        "agent": "dev_e2e_smoke.py",
+        "nonce": uuid.uuid4().hex,
     }
     if run_id:
-        payload["payload"]["run_id"] = run_id
+        payload["run_id"] = run_id
     
     if scenario == "order_status":
         scenario_payload = _order_status_scenario_payload(run_id or "smoke", conversation_id=conversation_id)
-        # Flatten scenario fields to top-level payload for middleware visibility
+        # Merge scenario fields at top level for middleware visibility
         for key, value in scenario_payload.items():
-            if key not in payload["payload"]:
-                payload["payload"][key] = value
+            if key not in payload:
+                payload[key] = value
     
     return payload
 
