@@ -556,7 +556,7 @@ def execute_order_status_reply(
                 route_tags.append(skip_tag)
             if reason in _ESCALATION_REASONS:
                 route_tags.append(ESCALATION_TAG)
-            route_tags = list(dedupe_tags(route_tags))
+            route_tags = sorted(dedupe_tags(route_tags))
 
             route_response = executor.execute(
                 "PUT",
@@ -597,8 +597,12 @@ def execute_order_status_reply(
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)
 
-        tags_to_apply_set = dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, run_specific_reply_tag])
-        tags_to_apply = list(tags_to_apply_set)
+        if loop_prevention_tag in (ticket_metadata.tags or set()):
+            return _route_email_support("followup_after_auto_reply", ticket_status=ticket_status)
+
+        tags_to_apply = sorted(
+            dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, run_specific_reply_tag])
+        )
         tag_response = executor.execute(
             "PUT",
             f"/v1/tickets/{encoded_id}/add-tags",
@@ -696,7 +700,7 @@ def execute_routing_tags(
     - uses the known Richpanel add-tags endpoint (no department assignment endpoints)
     """
     routing = plan.routing
-    tags = list(dedupe_tags(getattr(routing, "tags", None) if routing else None))
+    tags = sorted(dedupe_tags(getattr(routing, "tags", None) if routing else None))
     if routing_applied_tag and routing_applied_tag not in tags:
         tags.insert(0, routing_applied_tag)
 

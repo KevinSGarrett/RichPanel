@@ -147,6 +147,7 @@ class CriteriaTests(unittest.TestCase):
         self.assertTrue(outcome["skip_tags_present"])
         self.assertFalse(outcome["middleware_outcome"])
         self.assertFalse(outcome["middleware_tag_present"])
+        self.assertFalse(outcome["middleware_tag_added"])
 
     def test_middleware_outcome_ignores_historical_skip_tags(self) -> None:
         outcome = _compute_middleware_outcome(
@@ -157,6 +158,18 @@ class CriteriaTests(unittest.TestCase):
         self.assertFalse(outcome["skip_tags_present"])
         self.assertFalse(outcome["middleware_outcome"])
         self.assertFalse(outcome["middleware_tag_present"])
+        self.assertFalse(outcome["middleware_tag_added"])
+
+    def test_middleware_outcome_rejects_route_to_support_tag_added(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            tags_added=["route-email-support-team"],
+            post_tags=["route-email-support-team"],
+        )
+        self.assertTrue(outcome["skip_tags_present"])
+        self.assertFalse(outcome["middleware_outcome"])
+        self.assertFalse(outcome["middleware_tag_present"])
+        self.assertFalse(outcome["middleware_tag_added"])
 
     def test_middleware_outcome_accepts_resolved(self) -> None:
         outcome = _compute_middleware_outcome(
@@ -167,6 +180,17 @@ class CriteriaTests(unittest.TestCase):
         self.assertFalse(outcome["skip_tags_present"])
         self.assertTrue(outcome["middleware_outcome"])
         self.assertTrue(outcome["status_resolved"])
+        self.assertFalse(outcome["middleware_tag_added"])
+
+    def test_middleware_outcome_requires_tag_added_not_only_present(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            tags_added=[],
+            post_tags=["mw-order-status-answered:RUN"],
+        )
+        self.assertFalse(outcome["middleware_tag_present"])
+        self.assertFalse(outcome["middleware_tag_added"])
+        self.assertFalse(outcome["middleware_outcome"])
 
     def test_pii_guard_detects_patterns(self) -> None:
         msg = _check_pii_safe('{"path":"mailto:test@example.com"}')
@@ -186,6 +210,7 @@ class CriteriaTests(unittest.TestCase):
             post_tags=["mw-order-status-answered:RUN"],
         )
         self.assertTrue(outcome["middleware_tag_present"])
+        self.assertTrue(outcome["middleware_tag_added"])
         self.assertTrue(outcome["middleware_outcome"])
 
 
