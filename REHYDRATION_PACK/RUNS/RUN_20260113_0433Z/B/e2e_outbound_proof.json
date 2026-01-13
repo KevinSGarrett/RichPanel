@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "run_id": "RUN_20260113_0433Z",
+    "timestamp": "2026-01-13T04:58:32.852925+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "inputs": {
+    "ticket_ref": "1035",
+    "ticket_ref_fingerprint": "f46733e16199",
+    "apply_test_tag": true,
+    "test_tag_value": "mw-smoke:RUN_20260113_0433Z",
+    "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile rp-admin-kevin --ticket-number 1035 --run-id RUN_20260113_0433Z --scenario order_status --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/e2e_outbound_proof.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id": "evt:ab220b09-d267-45d8-b6ea-a879da2d0c4f",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "b3e3ba4d2e9c",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 27
+    },
+    "state_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "action_count": 2,
+      "updated_at": "2026-01-13T04:58:32.300058+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "recorded_at": "2026-01-13T04:58:32.300058+00:00",
+      "ts_action_id": "2026-01-13T04:58:32.300058+00:00#evt:ab220b09-d267-45d8-b6ea-a879da2d0c4f"
+    }
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke:RUN_20260113_0122Z",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-intent-unknown",
+        "mw-smoke:RUN_20260113_0433Z"
+      ],
+      "updated_at": "2026-01-13T04:56:30.951Z",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "b3e3ba4d2e9c",
+      "endpoint_variant": "number",
+      "path_redacted": "/v1/tickets/number/<redacted>"
+    },
+    "post": {
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke:RUN_20260113_0122Z",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-intent-unknown",
+        "mw-smoke:RUN_20260113_0433Z",
+        "route-email-support-team",
+        "mw-skip-status-read-failed"
+      ],
+      "updated_at": "2026-01-13T04:58:33.106Z",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "b3e3ba4d2e9c",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [
+      "mw-skip-status-read-failed",
+      "route-email-support-team"
+    ],
+    "tags_removed": [],
+    "updated_at_delta_seconds": 122.155,
+    "status_before": "open",
+    "status_after": "open",
+    "status_changed": false,
+    "middleware_tags_added": [
+      "mw-skip-status-read-failed",
+      "route-email-support-team"
+    ],
+    "test_tag_verified": true,
+    "tag_result": {
+      "status_code": 200,
+      "dry_run": false,
+      "path_redacted": "/v1/tickets/<redacted>/add-tags"
+    },
+    "tag_error": null
+  },
+  "result": {
+    "status": "PASS",
+    "criteria": {
+      "scenario": "order_status",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": true,
+      "middleware_outcome": true,
+      "status_resolved_or_closed": false,
+      "middleware_tag_applied": true,
+      "test_tag_verified": true,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_order_status",
+        "description": "Routing intent matched order-status keywords",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_outcome",
+        "description": "Ticket resolved/closed or middleware tag applied via API",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "status_resolved_or_closed",
+        "description": "Post status is resolved/closed",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "middleware_tag_applied",
+        "description": "Middleware tag (mw-*) added excluding mw-smoke",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "test_tag_verified",
+        "description": "Test tag 'mw-smoke:RUN_20260113_0433Z' observed on ticket",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}
