@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+import urllib.parse
 from typing import Any, Optional, Set
 
 from richpanel_middleware.integrations.richpanel.client import (
@@ -73,9 +74,10 @@ def get_ticket_metadata(
             dry_run=bool(getattr(upstream, "dry_run", not allow_network)),
         )
 
+    encoded_id = urllib.parse.quote(str(conversation_id), safe="")
     response = executor.execute(
         "GET",
-        f"/v1/tickets/{conversation_id}",
+        f"/v1/tickets/{encoded_id}",
         dry_run=not allow_network,
     )
     payload = response.json() or {}

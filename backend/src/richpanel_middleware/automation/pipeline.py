@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import urllib.parse
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
@@ -12,15 +13,10 @@ from richpanel_middleware.automation.delivery_estimate import (
     build_tracking_reply,
     compute_delivery_estimate,
 )
-from richpanel_middleware.automation.router import (
-    RoutingDecision,
-    classify_routing,
-    extract_customer_message,
-)
+from richpanel_middleware.automation.router import RoutingDecision, extract_customer_message
 from richpanel_middleware.automation.llm_routing import (
     RoutingArtifact,
     compute_dual_routing,
-    get_openai_routing_primary,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (
     ReplyRewriteResult,
@@ -47,6 +43,7 @@ from richpanel_middleware.ingest.envelope import EventEnvelope, normalize_envelo
 
 LOGGER = logging.getLogger(__name__)
 LOOP_PREVENTION_TAG = "mw-auto-replied"
+ORDER_STATUS_REPLY_TAG = "mw-order-status-answered"
 ROUTING_APPLIED_TAG = "mw-routing-applied"
 EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
 ESCALATION_TAG = "mw-escalated-human"
@@ -143,7 +140,7 @@ def _redact_actions_for_storage(actions: List[Dict[str, Any]]) -> List[Dict[str,
 
 
 def _safe_ticket_metadata_fetch(
-    conversation_id: str,
+    ticket_id: str,
     *,
     executor: RichpanelExecutor,
     allow_network: bool,
@@ -152,9 +149,40 @@ def _safe_ticket_metadata_fetch(
     Fetch ticket status + tags without logging the ticket body.
     """
     try:
-        return get_ticket_metadata(conversation_id, executor, allow_network=allow_network)
+        return get_ticket_metadata(ticket_id, executor, allow_network=allow_network)
     except (RichpanelRequestError, SecretLoadError, TransportError):
         return None
+
+
+def _resolve_target_ticket_id(
+    envelope: EventEnvelope,
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> str:
+    """
+    Resolve the canonical Richpanel ticket id, preferring ticket_number when present.
+    Falls back to envelope.conversation_id.
+    """
+    payload = envelope.payload if isinstance(envelope.payload, dict) else {}
+    ticket_number = payload.get("ticket_number") or payload.get("conversation_no")
+    if ticket_number:
+        encoded_number = urllib.parse.quote(str(ticket_number), safe="")
+        try:
+            resp = executor.execute(
+                "GET",
+                f"/v1/tickets/number/{encoded_number}",
+                dry_run=not allow_network,
+                log_body_excerpt=False,
+            )
+            if resp.status_code == 200:
+                body = resp.json() or {}
+                ticket_obj = body.get("ticket") if isinstance(body, dict) else {}
+                if isinstance(ticket_obj, dict) and ticket_obj.get("id"):
+                    return str(ticket_obj.get("id"))
+        except (RichpanelRequestError, SecretLoadError, TransportError):
+            pass
+    return str(envelope.conversation_id)
 
 
 
@@ -506,11 +534,17 @@ def execute_order_status_reply(
         )
     try:
         # URL-encode conversation_id for write operations (email IDs have special chars)
-        import urllib.parse
-        encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
+        target_id = _resolve_target_ticket_id(
+            envelope, executor=executor, allow_network=allow_network
+        )
+        encoded_id = urllib.parse.quote(str(target_id), safe="")
+        run_id = None
+        if isinstance(envelope.payload, dict):
+            run_id = envelope.payload.get("run_id") or envelope.payload.get("RUN_ID")
+        run_specific_reply_tag = f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
 
         ticket_metadata = _safe_ticket_metadata_fetch(
-            envelope.conversation_id,
+            target_id,
             executor=executor,
             allow_network=allow_network,
         )
@@ -559,18 +593,16 @@ def execute_order_status_reply(
             return _route_email_support("status_read_failed")
 
         ticket_status = ticket_metadata.status
-        ticket_tags = ticket_metadata.tags
 
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)
 
-        if loop_prevention_tag in set(ticket_tags or []):
-            return _route_email_support("followup_after_auto_reply", ticket_status=ticket_status)
-
+        tags_to_apply_set = dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, run_specific_reply_tag])
+        tags_to_apply = list(tags_to_apply_set)
         tag_response = executor.execute(
             "PUT",
             f"/v1/tickets/{encoded_id}/add-tags",
-            json_body={"tags": [loop_prevention_tag]},
+            json_body={"tags": tags_to_apply},
             dry_run=not allow_network,
         )
         responses.append(
@@ -587,7 +619,7 @@ def execute_order_status_reply(
             json_body={
                 "status": "resolved",
                 "comment": {"body": reply_body, "type": "public", "source": "middleware"},
-                "tags": [loop_prevention_tag],
+                "tags": tags_to_apply,
             },
             dry_run=not allow_network,
         )
@@ -693,9 +725,10 @@ def execute_routing_tags(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
 
-    # URL-encode conversation_id for write operations (email IDs have special chars)
-    import urllib.parse
-    encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
+    target_id = _resolve_target_ticket_id(
+        envelope, executor=executor, allow_network=allow_network
+    )
+    encoded_id = urllib.parse.quote(str(target_id), safe="")
 
     try:
         response = executor.execute(

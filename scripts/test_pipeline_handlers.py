@@ -452,7 +452,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
         tag_call = executor.calls[1]
         self.assertEqual(tag_call["method"], "PUT")
         self.assertIn("/add-tags", tag_call["path"])
-        self.assertEqual(tag_call["kwargs"]["json_body"]["tags"], ["mw-auto-replied"])
+        self.assertEqual(
+            set(tag_call["kwargs"]["json_body"]["tags"]),
+            {"mw-auto-replied", "mw-order-status-answered"},
+        )
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
         reply_call = executor.calls[2]
@@ -500,17 +503,19 @@ class OutboundOrderStatusTests(unittest.TestCase):
             richpanel_executor=cast(RichpanelExecutor, executor),
         )
 
-        self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "followup_after_auto_reply")
-        self.assertEqual(len(executor.calls), 2)
+        self.assertTrue(result["sent"])
+        self.assertEqual(len(executor.calls), 3)
         self.assertEqual(executor.calls[0]["method"], "GET")
-        route_call = executor.calls[1]
-        self.assertEqual(route_call["method"], "PUT")
-        self.assertIn("/add-tags", route_call["path"])
-        tags = route_call["kwargs"]["json_body"]["tags"]
-        self.assertIn("route-email-support-team", tags)
-        self.assertIn("mw-skip-followup-after-auto-reply", tags)
-        self.assertIn("mw-escalated-human", tags)
+        tag_call = executor.calls[1]
+        self.assertEqual(tag_call["method"], "PUT")
+        self.assertIn("/add-tags", tag_call["path"])
+        self.assertIn("mw-order-status-answered", tag_call["kwargs"]["json_body"]["tags"])
+        reply_call = executor.calls[2]
+        self.assertEqual(reply_call["method"], "PUT")
+        self.assertEqual(reply_call["kwargs"]["json_body"]["status"], "resolved")
+        self.assertNotIn("route-email-support-team", tag_call["kwargs"]["json_body"]["tags"])
+        self.assertNotIn("mw-skip-followup-after-auto-reply", tag_call["kwargs"]["json_body"]["tags"])
+        self.assertNotIn("mw-escalated-human", tag_call["kwargs"]["json_body"]["tags"])
 
     def test_outbound_status_read_failure_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
