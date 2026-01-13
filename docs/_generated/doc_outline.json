@@ -1234,6 +1234,16 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_2219Z (Order-status PASS_STRONG via nested ticket.state)",
+        "anchor": "2026-01-13-run202601132219z-order-status-passstrong-via-nested-ticketstate"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-13 - RUN_20260113_2132Z (Order-status PASS_STRONG diagnostic + payload fix)",
+        "anchor": "2026-01-13-run202601132132z-order-status-passstrong-diagnostic-payload-fix"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_1839Z (PR wait-for-green hardening + Next 10 sync)",
         "anchor": "2026-01-13-run202601131839z-pr-wait-for-green-hardening-next-10-sync"
       },

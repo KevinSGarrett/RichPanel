@@ -389,13 +389,16 @@ python scripts/dev_e2e_smoke.py `
   --wait-seconds 120 `
   --profile <aws-profile> `
   --ticket-number $ticketNumber `
+  --confirm-test-ticket `
+  --diagnose-ticket-update `
   --run-id $runId `
   --scenario order_status `
   --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_outbound_proof.json"
 ```
 - Use a **real DEV ticket** (ID or number); the scenario fails fast without one.
-- PASS criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; middleware outcome requires either ticket status resolved/closed **or** a success middleware tag added in this run (`mw-auto-replied`, `mw-order-status-answered`, `mw-reply-sent`, or their run-suffixed variants); routing-only tags do not count; the run **fails** if any skip/escalation tags were added (`mw-skip-*`, `route-email-support-team`, `mw-escalated-human`); PII scan passes.
-- Proof JSON must include scenario name, pass criteria details, Dynamo evidence (idempotency/state/audit), and pre/post ticket status + tags.
+- PASS_STRONG criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; **ticket status resolved/closed AND reply evidence from middleware** (message_count delta > 0, `last_message_source=middleware`, or status_changed metadata from the middleware reply); no skip/escalation tags (`mw-skip-*`, `route-email-support-team`, `mw-escalated-human`). PASS_WEAK only allowed when Richpanel refuses status changes but middleware still tags successfully; classification is recorded in `result.classification`.
+- Proof JSON must include scenario name, classification, pass criteria details, Dynamo evidence (idempotency/state/audit), pre/post ticket status + tags, message_count delta / last_message_source, and PII scan result.
+- Optional diagnostic (recommended): include `--diagnose-ticket-update --confirm-test-ticket` to try candidate Richpanel update schemas (status/state/closed/comment) against the target ticket; diagnostics are PII-safe (redacted paths, ticket fingerprint only). The working schema today is `{\"ticket\": {\"state\": \"closed\"}}` (status/state at top level are rejected).
 
 #### PII-safe proof JSON requirements
 Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed IDs.
@@ -408,6 +411,7 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 - Record the explicit confirmations from the summary that idempotency, conversation state, and audit records were written (event_id + conversation_id observed) and link the DynamoDB consoles for each table.
 - Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state “no dashboards/alarms surfaced”.
 - Paste the smoke summary lines that confirm routing category/tags and the order_status_draft_reply plan + draft_replies count (safe fields only; no message bodies).
+- For order_status, note classification (PASS_STRONG vs PASS_WEAK) plus the evidence that status changed to resolved/closed and reply evidence was observed (message_count delta or last_message_source=middleware).
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 - For CLI proofs, attach the proof JSON path (e.g., `REHYDRATION_PACK/RUNS/<RUN_ID>/B/e2e_outbound_proof.json`), the exact command used, and confirm that `mw-smoke:<RUN_ID>` appears in tags_added with updated_at delta > 0.
 

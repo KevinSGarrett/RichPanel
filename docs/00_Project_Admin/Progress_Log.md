@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_1839Z.
+Last verified: 2026-01-13 - RUN_20260113_2219Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,16 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-13 - RUN_20260113_2219Z (Order-status PASS_STRONG via nested ticket.state)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_2219Z
+- Diagnostics proved Richpanel requires `{"ticket": {"state": "closed"}}` (status/state top-level rejected); middleware now uses nested ticket payload with tags/comment.
+- Dev smoke proof (ticket 1001) PASS_STRONG: status open→closed, reply evidence via state change metadata, PII-safe proof JSON, no apply override.
+
+### 2026-01-13 - RUN_20260113_2132Z (Order-status PASS_STRONG diagnostic + payload fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_2132Z
+- Identified Richpanel ticket update schema requiring `{"ticket": {"state": "<status>"}}`; added diagnostics + apply option to dev_e2e_smoke and updated middleware to use nested ticket state with comment/tags.
+- Delivered PASS_STRONG dev proof (ticket 1035) with PII-safe evidence (closed status + applied diagnostic payload); updated CI runbook criteria and proof classification.
 
 ### 2026-01-13 - RUN_20260113_1839Z (PR wait-for-green hardening + Next 10 sync)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_1839Z

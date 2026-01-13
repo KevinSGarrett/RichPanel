@@ -616,24 +616,52 @@ def execute_order_status_reply(
                 "dry_run": tag_response.dry_run,
             }
         )
+        comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
+        update_candidates = [
+            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("state_closed", {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}),
+            ("status_closed", {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}),
+            ("state_resolved", {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}),
+            ("status_resolved", {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}),
+            ("state_CLOSED", {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}),
+            ("status_CLOSED", {"status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}),
+            ("state_RESOLVED", {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
+            ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
+        ]
 
-        reply_response = executor.execute(
-            "PUT",
-            f"/v1/tickets/{encoded_id}",
-            json_body={
-                "status": "resolved",
-                "comment": {"body": reply_body, "type": "public", "source": "middleware"},
-                "tags": tags_to_apply,
-            },
-            dry_run=not allow_network,
-        )
-        responses.append(
-            {
-                "action": "reply_and_resolve",
-                "status": reply_response.status_code,
-                "dry_run": reply_response.dry_run,
+        update_success = None
+        for candidate_name, payload in update_candidates:
+            reply_response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{encoded_id}",
+                json_body=payload,
+                dry_run=not allow_network,
+            )
+            responses.append(
+                {
+                    "action": "reply_and_resolve",
+                    "status": reply_response.status_code,
+                    "dry_run": reply_response.dry_run,
+                    "candidate": candidate_name,
+                }
+            )
+            if 200 <= reply_response.status_code < 300:
+                update_success = candidate_name
+                break
+
+        if update_success is None:
+            return {
+                "sent": False,
+                "reason": "reply_update_failed",
+                "responses": responses,
             }
-        )
 
         LOGGER.info(
             "automation.order_status_reply.sent",
@@ -643,6 +671,7 @@ def execute_order_status_reply(
                 "statuses": [entry["status"] for entry in responses if "status" in entry],
                 "dry_run": any(entry.get("dry_run") for entry in responses),
                 "loop_tag": loop_prevention_tag,
+                "update_candidate": update_success,
             },
         )
         return {"sent": True, "reason": "sent", "responses": responses}

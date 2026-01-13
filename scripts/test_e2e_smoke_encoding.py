@@ -28,7 +28,10 @@ if str(SCRIPTS) not in sys.path:
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
     _compute_middleware_outcome,
+    _compute_reply_evidence,
+    _diagnose_ticket_update,
     _sanitize_decimals,
+    _sanitize_response_metadata,
 )
 
 
@@ -135,6 +138,98 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertNotIn("@", serialized)
         self.assertNotIn("%40", serialized)
         self.assertNotIn("mail.", serialized)
+
+
+class DiagnosticsTests(unittest.TestCase):
+    class _MockResponse:
+        def __init__(self, status_code: int, dry_run: bool, url: str) -> None:
+            self.status_code = status_code
+            self.dry_run = dry_run
+            self.url = url
+
+        def json(self) -> dict:
+            return {}
+
+    class _MockExecutor:
+        def __init__(self, status_code: int = 200) -> None:
+            self.status_code = status_code
+            self.calls: list[dict] = []
+
+        def execute(self, method: str, path: str, json_body: dict, dry_run: bool, log_body_excerpt: bool) -> "DiagnosticsTests._MockResponse":  # type: ignore[override]  # noqa: E501
+            self.calls.append({"method": method, "path": path, "body": json_body, "dry_run": dry_run})
+            return DiagnosticsTests._MockResponse(self.status_code, dry_run, path)
+
+    def test_diagnose_skips_without_confirm(self) -> None:
+        executor = self._MockExecutor()
+        result = _diagnose_ticket_update(
+            executor,
+            "ticket-123",
+            allow_network=True,
+            confirm_test_ticket=False,
+            diagnostic_message="test",
+        )
+        self.assertFalse(result["performed"])
+        self.assertEqual(result["reason"], "confirm_test_ticket_not_set")
+        self.assertFalse(executor.calls)
+
+    def test_diagnose_selects_first_successful_candidate(self) -> None:
+        executor = self._MockExecutor(status_code=200)
+        result = _diagnose_ticket_update(
+            executor,
+            "ticket-123",
+            allow_network=True,
+            confirm_test_ticket=True,
+            diagnostic_message="test",
+        )
+        self.assertTrue(result["performed"])
+        self.assertEqual(result["winning_candidate"], "status_resolved")
+        self.assertEqual(result["winning_payload"], {"status": "resolved"})
+        self.assertTrue(any(entry["ok"] for entry in result["results"]))
+        # Ensure response metadata redaction works
+        sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
+        self.assertEqual(sanitized["endpoint_variant"], "id")
+
+
+class ReplyEvidenceTests(unittest.TestCase):
+    def test_reply_evidence_status_change(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=True,
+            updated_at_delta=1.23,
+            message_count_delta=None,
+            last_message_source_after=None,
+        )
+        self.assertTrue(evidence)
+        self.assertIn("status_changed_delta=1.23", reason)
+
+    def test_reply_evidence_message_delta(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=2,
+            last_message_source_after=None,
+        )
+        self.assertTrue(evidence)
+        self.assertIn("message_count_delta=2", reason)
+
+    def test_reply_evidence_middleware_source(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after="middleware",
+        )
+        self.assertTrue(evidence)
+        self.assertIn("last_message_source=middleware", reason)
+
+    def test_reply_evidence_none(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after=None,
+        )
+        self.assertFalse(evidence)
+        self.assertEqual(reason, "no_reply_evidence_fields")
 
 
 class CriteriaTests(unittest.TestCase):

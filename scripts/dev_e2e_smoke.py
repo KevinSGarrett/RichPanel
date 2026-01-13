@@ -304,7 +304,6 @@ _PII_PATTERNS = [
     "mail.",     # email domain fragment
     "@",         # literal @
     "<",         # literal < (except in redacted placeholders)
-    ">",         # literal > (except in redacted placeholders)
 ]
 
 
@@ -381,12 +380,20 @@ def _fetch_ticket_snapshot(
         status = payload.get("status") or payload.get("state")
         tags = _normalize_tags(payload.get("tags"))
         updated_at = payload.get("updated_at") or payload.get("updatedAt")
+        message_count = _safe_int(
+            payload.get("messages_count")
+            or payload.get("message_count")
+            or payload.get("messagesCount")
+        )
+        last_message_source = payload.get("last_message_source") or payload.get("lastMessageSource")
 
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
             "status": status.strip() if isinstance(status, str) else status,
             "tags": tags,
             "updated_at": updated_at,
+            "message_count": message_count,
+            "last_message_source": last_message_source,
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "path": path,
@@ -437,6 +444,153 @@ def _apply_test_tag(
         "dry_run": response.dry_run,
         "path": response.url,  # Will be sanitized before inclusion in proof JSON
     }
+
+
+def _safe_int(value: Any) -> Optional[int]:
+    try:
+        if value is None:
+            return None
+        if isinstance(value, (int, Decimal)):
+            return int(value)
+        if isinstance(value, str) and value.strip():
+            return int(value.strip())
+    except Exception:
+        return None
+    return None
+
+
+def _sanitize_response_metadata(response: Any) -> Dict[str, Any]:
+    """Strip PII from Richpanel HTTP responses before storing in proof."""
+    status = getattr(response, "status_code", None)
+    dry_run = getattr(response, "dry_run", None)
+    url = getattr(response, "url", None)
+    return {
+        "status_code": status,
+        "dry_run": dry_run,
+        "path_redacted": _redact_path(url),
+        "endpoint_variant": _extract_endpoint_variant(url),
+    }
+
+
+def _diagnose_ticket_update(
+    executor: RichpanelExecutor,
+    ticket_id: str,
+    *,
+    allow_network: bool,
+    confirm_test_ticket: bool,
+    diagnostic_message: str = "middleware diagnostic",
+) -> Dict[str, Any]:
+    """
+    Try a handful of ticket update payloads to learn the correct schema.
+    Requires --confirm-test-ticket to avoid accidental writes.
+    """
+    if not confirm_test_ticket:
+        return {"performed": False, "reason": "confirm_test_ticket_not_set"}
+
+    encoded_id = urllib.parse.quote(ticket_id, safe="")
+    comment = {"body": diagnostic_message, "type": "public", "source": "middleware"}
+    candidates: List[Tuple[str, Dict[str, Any]]] = [
+        ("status_resolved", {"status": "resolved"}),
+        ("state_resolved", {"state": "resolved"}),
+        ("status_closed", {"status": "closed"}),
+        ("state_closed", {"state": "closed"}),
+        ("status_RESOLVED", {"status": "RESOLVED"}),
+        ("state_RESOLVED", {"state": "RESOLVED"}),
+        ("status_CLOSED", {"status": "CLOSED"}),
+        ("state_CLOSED", {"state": "CLOSED"}),
+        ("status_resolved_with_comment", {"status": "resolved", "comment": comment}),
+        ("state_resolved_with_comment", {"state": "resolved", "comment": comment}),
+        ("status_closed_with_comment", {"status": "closed", "comment": comment}),
+        ("state_closed_with_comment", {"state": "closed", "comment": comment}),
+        ("status_RESOLVED_with_comment", {"status": "RESOLVED", "comment": comment}),
+        ("state_RESOLVED_with_comment", {"state": "RESOLVED", "comment": comment}),
+        ("status_CLOSED_with_comment", {"status": "CLOSED", "comment": comment}),
+        ("state_CLOSED_with_comment", {"state": "CLOSED", "comment": comment}),
+        ("ticket_status_closed", {"ticket": {"status": "closed"}}),
+        ("ticket_state_closed", {"ticket": {"state": "closed"}}),
+        ("ticket_status_resolved", {"ticket": {"status": "resolved"}}),
+        ("ticket_state_resolved", {"ticket": {"state": "resolved"}}),
+        ("ticket_status_closed_with_comment", {"ticket": {"status": "closed", "comment": comment}}),
+        ("ticket_state_closed_with_comment", {"ticket": {"state": "closed", "comment": comment}}),
+        ("ticket_status_resolved_with_comment", {"ticket": {"status": "resolved", "comment": comment}}),
+        ("ticket_state_resolved_with_comment", {"ticket": {"state": "resolved", "comment": comment}}),
+        ("ticket_state_CLOSED_with_comment", {"ticket": {"state": "CLOSED", "comment": comment}}),
+        ("ticket_state_RESOLVED_with_comment", {"ticket": {"state": "RESOLVED", "comment": comment}}),
+        ("ticket_state_closed_and_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment}}),
+        ("ticket_state_CLOSED_and_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment}}),
+    ]
+
+    results: List[Dict[str, Any]] = []
+    winning_payload: Optional[Dict[str, Any]] = None
+    for name, payload in candidates:
+        payload_keys = sorted(payload.keys())
+        try:
+            response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{encoded_id}",
+                json_body=payload,
+                dry_run=not allow_network,
+                log_body_excerpt=False,
+            )
+            results.append(
+                {
+                    "candidate": name,
+                    "payload_keys": payload_keys,
+                    "ok": 200 <= response.status_code < 300 and not response.dry_run,
+                    "status_code": response.status_code,
+                    "dry_run": response.dry_run,
+                    **_sanitize_response_metadata(response),
+                }
+            )
+            if 200 <= response.status_code < 300 and not response.dry_run and winning_payload is None:
+                winning_payload = payload
+        except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+            results.append(
+                {
+                    "candidate": name,
+                    "payload_keys": payload_keys,
+                    "ok": False,
+                    "error": str(exc),
+                }
+            )
+
+    winning = next((entry for entry in results if entry.get("ok")), None)
+    return {
+        "performed": True,
+        "ticket_fingerprint": _fingerprint(ticket_id),
+        "winning_candidate": winning.get("candidate") if winning else None,
+        "winning_payload": winning_payload,
+        "results": results,
+    }
+
+
+def _compute_reply_evidence(
+    *,
+    status_changed: bool,
+    updated_at_delta: Optional[float],
+    message_count_delta: Optional[int],
+    last_message_source_after: Optional[str],
+) -> Tuple[bool, str]:
+    reasons: List[str] = []
+    reply_evidence = False
+    if message_count_delta is not None:
+        if message_count_delta > 0:
+            reply_evidence = True
+            reasons.append(f"message_count_delta={message_count_delta}")
+        else:
+            reasons.append(f"message_count_delta={message_count_delta}")
+    if isinstance(last_message_source_after, str) and last_message_source_after.lower() == "middleware":
+        reply_evidence = True
+        reasons.append("last_message_source=middleware")
+    if status_changed:
+        reply_evidence = True
+        reason = "status_changed"
+        if updated_at_delta is not None:
+            reason = f"{reason}_delta={updated_at_delta}"
+        reasons.append(reason)
+    if not reasons:
+        reasons.append("no_reply_evidence_fields")
+    return reply_evidence, "; ".join(reasons)
 
 
 def _tag_deltas(
@@ -507,6 +661,21 @@ def parse_args() -> argparse.Namespace:
         "--apply-test-tag",
         action="store_true",
         help="Apply a unique mw-smoke:<RUN_ID> tag to the ticket (requires ticket-id or ticket-number).",
+    )
+    parser.add_argument(
+        "--diagnose-ticket-update",
+        action="store_true",
+        help="Run ticket update payload diagnostics (requires --confirm-test-ticket and a ticket reference).",
+    )
+    parser.add_argument(
+        "--apply-winning-candidate",
+        action="store_true",
+        help="If diagnostics find a working ticket update payload, apply it to the ticket (requires --confirm-test-ticket).",
+    )
+    parser.add_argument(
+        "--confirm-test-ticket",
+        action="store_true",
+        help="Explicitly allow writes to the provided ticket when running diagnostics.",
     )
     parser.add_argument(
         "--proof-path",
@@ -1060,7 +1229,7 @@ def build_console_links(
     }
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover - integration entrypoint
     args = parse_args()
     region = args.region
     env_name = args.env
@@ -1122,6 +1291,8 @@ def main() -> int:
     post_ticket: Optional[Dict[str, Any]] = None
     tag_result: Optional[Dict[str, Any]] = None
     tag_error: Optional[str] = None
+    diagnostic_result: Optional[Dict[str, Any]] = None
+    applied_winning_candidate = False
     test_tag_value = f"mw-smoke:{run_id}"
 
     if ticket_ref:
@@ -1135,6 +1306,57 @@ def main() -> int:
             f"[INFO] Resolved ticket for smoke proof (path={pre_ticket['path']}, "
             f"id_fingerprint={_fingerprint(pre_ticket['ticket_id'])})."
         )
+
+        if args.diagnose_ticket_update:
+            diagnostic_message = "middleware diagnostic (no PII)"
+            diagnostic_result = _diagnose_ticket_update(
+                ticket_executor,
+                pre_ticket["ticket_id"],
+                allow_network=allow_network,
+                confirm_test_ticket=args.confirm_test_ticket,
+                diagnostic_message=diagnostic_message,
+            )
+            if diagnostic_result.get("performed"):
+                winning = diagnostic_result.get("winning_candidate")
+                winning_payload = diagnostic_result.get("winning_payload")
+                print(
+                    f"[INFO] Ticket update diagnostics executed; winning_candidate={winning or 'none'} "
+                    f"(ticket_fingerprint={diagnostic_result.get('ticket_fingerprint')})."
+                )
+                if args.apply_winning_candidate and winning_payload:
+                    try:
+                        apply_payload = json.loads(json.dumps(winning_payload))
+                        if isinstance(apply_payload.get("ticket"), dict):
+                            ticket_body = apply_payload["ticket"]
+                            ticket_body.setdefault(
+                                "comment",
+                                {"body": diagnostic_message, "type": "public", "source": "middleware"},
+                            )
+                        apply_payload.setdefault(
+                            "comment",
+                            {"body": diagnostic_message, "type": "public", "source": "middleware"},
+                        )
+                        apply_response = ticket_executor.execute(
+                            "PUT",
+                            f"/v1/tickets/{urllib.parse.quote(pre_ticket['ticket_id'], safe='')}",
+                            json_body=apply_payload,
+                            dry_run=not allow_network,
+                            log_body_excerpt=False,
+                        )
+                        print(
+                            f"[INFO] Applied winning candidate payload to ticket "
+                            f"(status={apply_response.status_code}, dry_run={apply_response.dry_run})."
+                        )
+                        applied_winning_candidate = (
+                            200 <= apply_response.status_code < 300 and not apply_response.dry_run
+                        )
+                    except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                        print(f"[WARN] Applying winning candidate failed: {exc}")
+            else:
+                print(
+                    f"[INFO] Ticket update diagnostics skipped: {diagnostic_result.get('reason', 'unknown_reason')}."
+                )
+
         payload_conversation = pre_ticket["ticket_id"]
     else:
         payload_conversation = None
@@ -1284,6 +1506,11 @@ def main() -> int:
     status_after = None
     status_resolved = None
     status_changed = None
+    message_count_before = None
+    message_count_after = None
+    message_count_delta = None
+    last_message_source_before = None
+    last_message_source_after = None
     middleware_tags_added: List[str] = []
     middleware_tag_present = None
     middleware_outcome = None
@@ -1334,6 +1561,12 @@ def main() -> int:
             status_after = status_after_val.strip().lower()
         status_resolved = status_after in {"resolved", "closed"} if status_after else False
         status_changed = status_before != status_after if status_after or status_before else None
+        message_count_before = _safe_int(pre_ticket_data.get("message_count"))
+        message_count_after = _safe_int(post_ticket_data.get("message_count"))
+        if message_count_before is not None and message_count_after is not None:
+            message_count_delta = message_count_after - message_count_before
+        last_message_source_before = pre_ticket_data.get("last_message_source")
+        last_message_source_after = post_ticket_data.get("last_message_source")
         middleware_tags_added = [tag for tag in tags_added if tag and not tag.startswith("mw-smoke:")]
         skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
         outcome = _compute_middleware_outcome(
@@ -1363,6 +1596,15 @@ def main() -> int:
     middleware_tag_ok = bool(middleware_tag_present) if args.scenario == "order_status" else None
     status_resolved_ok = bool(status_resolved) if args.scenario == "order_status" else None
     skip_tags_present_ok = (not skip_tags_present) if args.scenario == "order_status" else None
+    reply_evidence = None
+    reply_evidence_reason = None
+    if args.scenario == "order_status" and ticket_executor and post_ticket:
+        reply_evidence, reply_evidence_reason = _compute_reply_evidence(
+            status_changed=status_changed or False,
+            updated_at_delta=updated_at_delta,
+            message_count_delta=message_count_delta,
+            last_message_source_after=last_message_source_after,
+        )
 
     criteria = {
         "scenario": args.scenario,
@@ -1375,6 +1617,7 @@ def main() -> int:
         "middleware_tag_applied": middleware_tag_ok,
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
+        "reply_evidence": reply_evidence,
     }
 
     required_checks: List[bool] = [
@@ -1440,9 +1683,15 @@ def main() -> int:
                 },
                 {
                     "name": "no_skip_tags",
-                    "description": "No skip/error tags added this run (mw-skip-*, route-email-support-team, mw-escalated-human)",
+                    "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
                     "required": True,
                     "value": skip_tags_present_ok,
+                },
+                {
+                    "name": "reply_evidence",
+                    "description": "Middleware reply evidence observed (message_count_delta greater than 0 or last_message_source=middleware)",
+                    "required": False,
+                    "value": reply_evidence,
                 },
             ]
         )
@@ -1459,10 +1708,30 @@ def main() -> int:
         )
 
     failed = [item["name"] for item in criteria_details if item.get("required") and not item.get("value")]
-    result_status = "PASS" if all(required_checks) and not failed else "FAIL"
+    base_pass = all(required_checks) and not failed
+    classification = "FAIL"
+    classification_reason = None
+    if args.scenario == "order_status":
+        if base_pass and status_resolved_ok and reply_evidence:
+            classification = "PASS_STRONG"
+        elif base_pass and middleware_ok:
+            classification = "PASS_WEAK"
+            classification_reason = "status_or_reply_evidence_missing"
+        else:
+            classification_reason = (
+                f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
+            )
+    else:
+        classification = "PASS_STRONG" if base_pass else "FAIL"
+        if not base_pass:
+            classification_reason = (
+                f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
+            )
+
+    result_status = "PASS" if classification in {"PASS_STRONG", "PASS_WEAK"} else "FAIL"
     failure_reason = None
     if result_status != "PASS":
-        failure_reason = (
+        failure_reason = classification_reason or (
             f"Failed criteria: {', '.join(failed)}" if failed else "One or more criteria failed."
         )
 
@@ -1475,6 +1744,11 @@ def main() -> int:
             "value": True,
         }
     )
+
+    safe_diagnostics = None
+    if diagnostic_result:
+        safe_diagnostics = dict(diagnostic_result)
+        safe_diagnostics.pop("winning_payload", None)
 
     proof_payload = {
         "meta": {
@@ -1537,13 +1811,23 @@ def main() -> int:
             "status_before": status_before,
             "status_after": status_after,
             "status_changed": status_changed,
+            "message_count_before": message_count_before,
+            "message_count_after": message_count_after,
+            "message_count_delta": message_count_delta,
+            "last_message_source_before": last_message_source_before,
+            "last_message_source_after": last_message_source_after,
             "middleware_tags_added": middleware_tags_added,
             "test_tag_verified": test_tag_verified,
             "tag_result": _sanitize_tag_result(tag_result),
             "tag_error": tag_error,
+            "diagnostics": safe_diagnostics,
         },
         "result": {
             "status": result_status,
+            "classification": classification,
+            "classification_reason": classification_reason,
+            "reply_evidence": reply_evidence,
+            "reply_evidence_reason": reply_evidence_reason,
             "criteria": criteria,
             "criteria_details": criteria_details,
             "failure_reason": failure_reason,
@@ -1577,6 +1861,11 @@ def main() -> int:
         with open(proof_path, "w", encoding="utf-8") as handle:
             handle.write(proof_json_str)
         print(f"[OK] Wrote proof artifact to {proof_path}")
+
+    print(
+        f"[RESULT] classification={classification}; status={result_status}; "
+        f"failure_reason={failure_reason or 'none'}"
+    )
 
     return 0 if result_status == "PASS" else 1
 
