@@ -144,6 +144,18 @@ We require **merge commits only** for auditability and traceability.
 
 Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.
 
+### 4.0 Wait-for-green gate (mandatory)
+- **No “done” until green:** Do not declare a run complete or enable auto-merge until Codecov and Bugbot checks have finished and are green (or an explicitly documented fallback is recorded).
+- **Wait loop:** After pushing and triggering Bugbot, poll checks every 120–240 seconds until the PR status rollup (and `gh pr checks <PR#>`) shows Codecov + Bugbot contexts completed/green.
+  ```powershell
+  $pr = <PR#>
+  do {
+    gh pr checks $pr
+    Start-Sleep -Seconds (Get-Random -Minimum 120 -Maximum 240)
+  } while (gh pr checks $pr | Select-String -Pattern 'Pending|In progress|Queued')
+  ```
+- **Bugbot quota exhausted:** Record "Bugbot quota exhausted; performed manual review" in `RUN_REPORT.md`, perform a manual diff review (focus on risk areas/tests touched), and capture findings/deferrals. You must still wait for Codecov to finish and be green before merging.
+
 ### 4.1 Bugbot review
 
 **Requirement:** All PRs must receive a Bugbot review (or explicit fallback if quota exceeded).

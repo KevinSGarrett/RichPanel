@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_1450Z.
+Last verified: 2026-01-13 - RUN_20260113_1839Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-13 - RUN_20260113_1839Z (PR wait-for-green hardening + Next 10 sync)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_1839Z
+- Hardened templates and CI runbook to require waiting for Codecov + Bugbot to finish (120–240s poll loop) before claiming a run/merge; added wait-for-green evidence section to Run Report template.
+- Synced repo Next 10 list with PM pack priorities (10 items, updated statuses/owners).
 
 ### 2026-01-13 - RUN_20260113_1450Z (Order-status repair: loop prevention + strict PASS)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_1450Z

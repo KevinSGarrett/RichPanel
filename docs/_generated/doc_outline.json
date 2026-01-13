@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_1839Z (PR wait-for-green hardening + Next 10 sync)",
+        "anchor": "2026-01-13-run202601131839z-pr-wait-for-green-hardening-next-10-sync"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_1450Z (Order-status repair: loop prevention + strict PASS)",
         "anchor": "2026-01-13-run202601131450z-order-status-repair-loop-prevention-strict-pass"
       },
@@ -10976,6 +10981,11 @@
         "level": 2,
         "text": "4) PR Health Check (required before merge)",
         "anchor": "4-pr-health-check-required-before-merge"
+      },
+      {
+        "level": 3,
+        "text": "4.0 Wait-for-green gate (mandatory)",
+        "anchor": "40-wait-for-green-gate-mandatory"
       },
       {
         "level": 3,

@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_1839z (pr wait-for-green hardening + next 10 sync)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601131839z-pr-wait-for-green-hardening-next-10-sync"
+    }
+  ],
   "2026-01-13 - run_20260113_1450z (order-status repair: loop prevention + strict pass)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12167,6 +12173,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "4-pr-health-check-required-before-merge"
+    }
+  ],
+  "4.0 wait-for-green gate (mandatory)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "40-wait-for-green-gate-mandatory"
     }
   ],
   "4.1 bugbot review": [
