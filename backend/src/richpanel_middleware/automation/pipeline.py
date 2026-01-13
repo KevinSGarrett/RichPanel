@@ -505,6 +505,18 @@ def execute_order_status_reply(
             }
         )
     try:
+        ticket_metadata = _safe_ticket_metadata_fetch(
+            envelope.conversation_id,
+            executor=executor,
+            allow_network=allow_network,
+        )
+        if ticket_metadata is None:
+            # Fall back to conversation_id if metadata fetch fails
+            target_id = envelope.conversation_id
+        else:
+            # Use the canonical ticket_id from metadata for write operations
+            target_id = ticket_metadata.ticket_id or envelope.conversation_id
+
         def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
             skip_tag = _SKIP_REASON_TAGS.get(reason)
@@ -516,7 +528,7 @@ def execute_order_status_reply(
 
             route_response = executor.execute(
                 "PUT",
-                f"/v1/tickets/{envelope.conversation_id}/add-tags",
+                f"/v1/tickets/{target_id}/add-tags",
                 json_body={"tags": route_tags},
                 dry_run=not allow_network,
             )
@@ -545,11 +557,6 @@ def execute_order_status_reply(
                 "responses": responses,
             }
 
-        ticket_metadata = _safe_ticket_metadata_fetch(
-            envelope.conversation_id,
-            executor=executor,
-            allow_network=allow_network,
-        )
         if ticket_metadata is None:
             return _route_email_support("status_read_failed")
 
@@ -564,7 +571,7 @@ def execute_order_status_reply(
 
         tag_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}/add-tags",
+            f"/v1/tickets/{target_id}/add-tags",
             json_body={"tags": [loop_prevention_tag]},
             dry_run=not allow_network,
         )
@@ -578,7 +585,7 @@ def execute_order_status_reply(
 
         reply_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}",
+            f"/v1/tickets/{target_id}",
             json_body={
                 "status": "resolved",
                 "comment": {"body": reply_body, "type": "public", "source": "middleware"},
@@ -688,10 +695,33 @@ def execute_routing_tags(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
 
+    # Resolve conversation_id to canonical ticket ID for write operations
+    target_id = envelope.conversation_id
+    if allow_network:
+        try:
+            import urllib.parse
+            # Try to fetch ticket metadata to get canonical ID
+            encoded = urllib.parse.quote(str(envelope.conversation_id), safe="")
+            read_resp = executor.execute(
+                "GET",
+                f"/v1/tickets/{encoded}",
+                dry_run=False,
+            )
+            if read_resp.status_code == 200:
+                ticket_data = read_resp.json()
+                if isinstance(ticket_data, dict):
+                    ticket_obj = ticket_data.get("ticket") or ticket_data
+                    canonical_id = ticket_obj.get("id")
+                    if canonical_id:
+                        target_id = canonical_id
+        except Exception:
+            # Fall back to using conversation_id as-is
+            pass
+
     try:
         response = executor.execute(
             "PUT",
-            f"/v1/tickets/{envelope.conversation_id}/add-tags",
+            f"/v1/tickets/{target_id}/add-tags",
             json_body={"tags": tags},
             dry_run=not allow_network,
         )
@@ -700,6 +730,7 @@ def execute_routing_tags(
             extra={
                 "event_id": envelope.event_id,
                 "conversation_id": envelope.conversation_id,
+                "target_id_matches": target_id == envelope.conversation_id,
                 "status": response.status_code,
                 "dry_run": response.dry_run,
                 "tag_count": len(tags),
