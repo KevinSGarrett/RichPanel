@@ -1234,6 +1234,21 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_0122Z (Order lookup numeric tracking polish)",
+        "anchor": "2026-01-13-run202601130122z-order-lookup-numeric-tracking-polish"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-12 - RUN_20260112_2212Z (Order lookup nested tracking string fix)",
+        "anchor": "2026-01-12-run202601122212z-order-lookup-nested-tracking-string-fix"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-12 - RUN_20260112_2112Z (Order lookup payload fix + patch green)",
+        "anchor": "2026-01-12-run202601122112z-order-lookup-payload-fix-patch-green"
+      },
+      {
+        "level": 3,
         "text": "2026-01-12 - RUN_20260112_1819Z (OpenAI model default enforcement)",
         "anchor": "2026-01-12-run202601121819z-openai-model-default-enforcement"
       },
