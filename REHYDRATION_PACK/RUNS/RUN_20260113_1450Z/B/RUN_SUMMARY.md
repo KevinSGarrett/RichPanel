@@ -21,16 +21,16 @@ Repair order-status automation: restore loop-prevention guard, harden smoke PASS
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260113_1450Z_order_status_repair_loop_prevention`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/95
-- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`, clean tree)
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`, clean tree); Codecov/patch green; Cursor Bugbot SUCCESS.
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python -m pytest scripts/test_pipeline_handlers.py scripts/test_e2e_smoke_encoding.py`; `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile richpanel-dev --ticket-number 1035 --run-id RUN_20260113_1450Z --scenario order_status --apply-test-tag`
-- Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260113_1450Z/B/e2e_outbound_proof.json`
+- Tests run: `python -m pytest scripts/test_pipeline_handlers.py scripts/test_e2e_smoke_encoding.py`; `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile richpanel-dev --ticket-number 1035 --run-id RUN_20260113_1450Z --scenario order_status --apply-test-tag`; `python scripts/run_ci_checks.py --ci`.
+- Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260113_1450Z/B/e2e_outbound_proof.json`; PR checks (Codecov/Bugbot) on PR #95.
 
 ## Decisions made
 - Skip/escalation tags added during smoke are hard FAIL; PASS requires resolved/closed or a success middleware tag added this run (routing tags alone don’t count).
 
 ## Issues / follow-ups
-- Pending: full `python scripts/run_ci_checks.py --ci`, PR creation, and Codecov/Bugbot verification.
+- None; awaiting auto-merge after final verification.
