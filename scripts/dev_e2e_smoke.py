@@ -104,9 +104,8 @@ def _compute_middleware_outcome(
     status_resolved = normalized_status in {"resolved", "closed"} if normalized_status else False
     skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
     positive_tags_added = [tag for tag in tags_added if _is_positive_middleware_tag(tag)]
-    positive_tags_present = [tag for tag in post_tags if _is_positive_middleware_tag(tag)]
-    middleware_tag_present = bool(positive_tags_present)
     middleware_tag_added = bool(positive_tags_added)
+    middleware_tag_present = middleware_tag_added
     middleware_outcome = (status_resolved or middleware_tag_added) and not bool(skip_tags_added)
     return {
         "status_resolved": status_resolved,
@@ -115,26 +114,6 @@ def _compute_middleware_outcome(
         "middleware_outcome": middleware_outcome,
         "skip_tags_present": bool(skip_tags_added),
     }
-
-
-def _order_status_flags(
-    *,
-    scenario: str,
-    middleware_outcome: Optional[bool],
-    middleware_tag_added: Optional[bool],
-    status_resolved: Optional[bool],
-    skip_tags_present: Optional[bool],
-) -> tuple[Optional[bool], Optional[bool], Optional[bool], Optional[bool]]:
-    if scenario != "order_status":
-        return None, None, None, None
-
-    middleware_ok = bool(middleware_outcome)
-    middleware_tag_ok = bool(middleware_tag_added)
-    status_resolved_ok = bool(status_resolved)
-    skip_tags_present_ok = (not skip_tags_present) if skip_tags_present is not None else None
-    return middleware_ok, middleware_tag_ok, status_resolved_ok, skip_tags_present_ok
-
-
 @dataclass
 class StackArtifacts:
     endpoint_url: str
@@ -1307,7 +1286,6 @@ def main() -> int:
     status_changed = None
     middleware_tags_added: List[str] = []
     middleware_tag_present = None
-    middleware_tag_added = None
     middleware_outcome = None
     skip_tags_present = None
     skip_tags_added: List[str] = []
@@ -1364,7 +1342,6 @@ def main() -> int:
             post_tags=post_ticket_data.get("tags") or [],
         )
         middleware_tag_present = outcome["middleware_tag_present"] if post_ticket else None
-        middleware_tag_added = outcome["middleware_tag_added"] if post_ticket else None
         middleware_outcome = outcome["middleware_outcome"] if post_ticket else None
         skip_tags_present = outcome["skip_tags_present"] if post_ticket else None
         print(
@@ -1382,18 +1359,10 @@ def main() -> int:
 
     ticket_lookup_ok = bool(pre_ticket) if ticket_ref else None
     intent_ok = intent_matches_order_status if args.scenario == "order_status" else None
-    (
-        middleware_ok,
-        middleware_tag_ok,
-        status_resolved_ok,
-        skip_tags_present_ok,
-    ) = _order_status_flags(
-        scenario=args.scenario,
-        middleware_outcome=middleware_outcome,
-        middleware_tag_added=middleware_tag_added,
-        status_resolved=status_resolved,
-        skip_tags_present=skip_tags_present,
-    )
+    middleware_ok = bool(middleware_outcome) if args.scenario == "order_status" else None
+    middleware_tag_ok = bool(middleware_tag_present) if args.scenario == "order_status" else None
+    status_resolved_ok = bool(status_resolved) if args.scenario == "order_status" else None
+    skip_tags_present_ok = (not skip_tags_present) if args.scenario == "order_status" else None
 
     criteria = {
         "scenario": args.scenario,
