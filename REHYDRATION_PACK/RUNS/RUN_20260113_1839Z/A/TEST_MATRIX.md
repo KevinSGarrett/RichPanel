@@ -8,7 +8,7 @@ List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| CI equivalent (planned) | `python scripts/run_ci_checks.py --ci` | Pending rerun (must pass) | Will attach output in RUN_REPORT.md |
+| CI equivalent | `python scripts/run_ci_checks.py --ci` | Pass | Output captured in RUN_REPORT.md |
 
 ## Notes
-- Need to rerun `python scripts/run_ci_checks.py --ci` on a clean workspace (stash applied) to get green before PR creation and capture evidence. No other tests planned (docs-only scope).
+- CI-equivalent run passed after staging docs-only changes; no additional tests required for this docs-only PR.
