@@ -20,7 +20,7 @@ Deliver follow-up fix for order-status smoke: encode ticket reads, fix Richpanel
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260113_1309Z_order_status_proof_fix_v2`
-- PR: pending (to be opened to `main`)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/94
 - CI status at end of run: green locally via `python scripts/run_ci_checks.py --ci`
 - Main updated: no
 - Branch cleanup done: no

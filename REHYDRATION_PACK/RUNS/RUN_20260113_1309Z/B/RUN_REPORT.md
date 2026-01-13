@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260113_1309Z_order_status_proof_fix_v2
-- **PR:** pending (to main)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/94
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -63,16 +63,18 @@ Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
 
 ```
+[OK] REHYDRATION_PACK validated (mode=build).
 [OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
 [OK] RUN_20260113_1309Z is referenced in Progress_Log.md
 ...
-Ran 25 tests in 0.006s
+Ran 25 tests in 0.008s
 
 OK
 ...
-Ran 11 tests in 0.008s
+Ran 11 tests in 0.009s
 
 OK
+[OK] CI-equivalent checks passed.
 ```
 
 ## Docs impact (summary)
