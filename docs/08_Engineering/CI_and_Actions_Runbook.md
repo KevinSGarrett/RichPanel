@@ -365,6 +365,26 @@ python scripts/dev_e2e_smoke.py `
   - fetches pre/post ticket status + tags and records tag deltas + updated_at delta,
   - writes a PII-safe proof JSON (command used, criteria, Dynamo links, tag verification).
 
+##### Order-status scenario (DEV proof)
+PowerShell-safe example (replace placeholders):
+```powershell
+$runId = "RUN_20260113_0122Z"
+$ticketNumber = "<dev-richpanel-ticket-number>"
+python scripts/dev_e2e_smoke.py `
+  --env dev `
+  --region us-east-2 `
+  --stack-name RichpanelMiddleware-dev `
+  --wait-seconds 120 `
+  --profile <aws-profile> `
+  --ticket-number $ticketNumber `
+  --run-id $runId `
+  --scenario order_status `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_outbound_proof.json"
+```
+- Use a **real DEV ticket** (ID or number); the scenario fails fast without one.
+- PASS criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; Richpanel API shows at least one middleware outcome (ticket resolved/closed or mw-* tag added that is not the `mw-smoke:<RUN_ID>` helper tag); PII scan passes.
+- Proof JSON must include scenario name, pass criteria details, Dynamo evidence (idempotency/state/audit), and pre/post ticket status + tags.
+
 #### PII-safe proof JSON requirements
 Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed IDs.
 - **Fingerprints only:** Ticket IDs are hashed to `ticket_id_fingerprint` (12-char SHA256 prefix).

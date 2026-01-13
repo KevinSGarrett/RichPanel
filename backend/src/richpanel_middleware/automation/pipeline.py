@@ -514,8 +514,12 @@ def execute_order_status_reply(
             # Fall back to conversation_id if metadata fetch fails
             target_id = envelope.conversation_id
         else:
-            # Use the canonical ticket_id from metadata for write operations
-            target_id = ticket_metadata.ticket_id or envelope.conversation_id
+            # Use conversation_no for write operations (email-based IDs return 200 but don't apply)
+            target_id = (
+                str(ticket_metadata.conversation_no)
+                if ticket_metadata.conversation_no
+                else ticket_metadata.ticket_id or envelope.conversation_id
+            )
 
         def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
@@ -695,25 +699,19 @@ def execute_routing_tags(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
 
-    # Resolve conversation_id to canonical ticket ID for write operations
+    # Resolve conversation_id to conversation_no for write operations
+    # Email-based IDs return 200 but don't apply writes; use conversation_no instead
     target_id = envelope.conversation_id
     if allow_network:
         try:
-            import urllib.parse
-            # Try to fetch ticket metadata to get canonical ID
-            encoded = urllib.parse.quote(str(envelope.conversation_id), safe="")
-            read_resp = executor.execute(
-                "GET",
-                f"/v1/tickets/{encoded}",
-                dry_run=False,
+            # Fetch ticket metadata first to get conversation_no
+            metadata = _safe_ticket_metadata_fetch(
+                envelope.conversation_id,
+                executor=executor,
+                allow_network=allow_network,
             )
-            if read_resp.status_code == 200:
-                ticket_data = read_resp.json()
-                if isinstance(ticket_data, dict):
-                    ticket_obj = ticket_data.get("ticket") or ticket_data
-                    canonical_id = ticket_obj.get("id")
-                    if canonical_id:
-                        target_id = canonical_id
+            if metadata and metadata.conversation_no:
+                target_id = str(metadata.conversation_no)
         except Exception:
             # Fall back to using conversation_id as-is
             pass

@@ -121,6 +121,7 @@ class TicketMetadata:
     ticket_id: str
     status: Optional[str] = None
     tags: List[str] = None  # type: ignore[assignment]
+    conversation_no: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.tags is None:
@@ -337,9 +338,16 @@ class RichpanelClient:
                 response=resp,
             )
 
-        status = _coerce_str(data.get("status") or data.get("state"))
-        tags = _normalize_tag_list(data.get("tags"))
-        return TicketMetadata(ticket_id=str(ticket_id), status=status, tags=tags)
+        ticket_obj = data.get("ticket") or data
+        status = _coerce_str(ticket_obj.get("status") or ticket_obj.get("state"))
+        tags = _normalize_tag_list(ticket_obj.get("tags"))
+        conversation_no = ticket_obj.get("conversation_no")
+        if conversation_no is not None:
+            try:
+                conversation_no = int(conversation_no)
+            except (TypeError, ValueError):
+                conversation_no = None
+        return TicketMetadata(ticket_id=str(ticket_id), status=status, tags=tags, conversation_no=conversation_no)
 
     def _to_response(self, transport_response: TransportResponse, url: str) -> RichpanelResponse:
         return RichpanelResponse(
