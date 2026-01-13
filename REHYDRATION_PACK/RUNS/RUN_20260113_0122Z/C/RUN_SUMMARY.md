@@ -28,6 +28,8 @@ Optional polish: handle numeric tracking values in nested payloads without reint
 
 ## Tests and evidence
 - Tests run: `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/92 (patch green)
+- Bugbot: https://github.com/KevinSGarrett/RichPanel/runs/60175344605 (no issues found)
 - Evidence path/link: snippet in `C/RUN_REPORT.md`
 
 ## Decisions made

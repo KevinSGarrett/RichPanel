@@ -47,7 +47,7 @@ Include test commands + results + links to evidence.
 
 - `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci` — pass (clean tree)
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/92 (patch green)
-- Bugbot: https://github.com/KevinSGarrett/RichPanel/runs/60172786155 (latest: no issues found)
+- Bugbot: https://github.com/KevinSGarrett/RichPanel/runs/60175344605 (no issues found)
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
