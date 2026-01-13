@@ -28,7 +28,9 @@ if str(SCRIPTS) not in sys.path:
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
     _compute_middleware_outcome,
+    _diagnose_ticket_update,
     _sanitize_decimals,
+    _sanitize_response_metadata,
 )
 
 
@@ -135,6 +137,56 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertNotIn("@", serialized)
         self.assertNotIn("%40", serialized)
         self.assertNotIn("mail.", serialized)
+
+
+class DiagnosticsTests(unittest.TestCase):
+    class _MockResponse:
+        def __init__(self, status_code: int, dry_run: bool, url: str) -> None:
+            self.status_code = status_code
+            self.dry_run = dry_run
+            self.url = url
+
+        def json(self) -> dict:
+            return {}
+
+    class _MockExecutor:
+        def __init__(self, status_code: int = 200) -> None:
+            self.status_code = status_code
+            self.calls: list[dict] = []
+
+        def execute(self, method: str, path: str, json_body: dict, dry_run: bool, log_body_excerpt: bool) -> "DiagnosticsTests._MockResponse":  # type: ignore[override]  # noqa: E501
+            self.calls.append({"method": method, "path": path, "body": json_body, "dry_run": dry_run})
+            return DiagnosticsTests._MockResponse(self.status_code, dry_run, path)
+
+    def test_diagnose_skips_without_confirm(self) -> None:
+        executor = self._MockExecutor()
+        result = _diagnose_ticket_update(
+            executor,
+            "ticket-123",
+            allow_network=True,
+            confirm_test_ticket=False,
+            diagnostic_message="test",
+        )
+        self.assertFalse(result["performed"])
+        self.assertEqual(result["reason"], "confirm_test_ticket_not_set")
+        self.assertFalse(executor.calls)
+
+    def test_diagnose_selects_first_successful_candidate(self) -> None:
+        executor = self._MockExecutor(status_code=200)
+        result = _diagnose_ticket_update(
+            executor,
+            "ticket-123",
+            allow_network=True,
+            confirm_test_ticket=True,
+            diagnostic_message="test",
+        )
+        self.assertTrue(result["performed"])
+        self.assertEqual(result["winning_candidate"], "status_resolved")
+        self.assertEqual(result["winning_payload"], {"status": "resolved"})
+        self.assertTrue(any(entry["ok"] for entry in result["results"]))
+        # Ensure response metadata redaction works
+        sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
+        self.assertEqual(sanitized["endpoint_variant"], "id")
 
 
 class CriteriaTests(unittest.TestCase):
