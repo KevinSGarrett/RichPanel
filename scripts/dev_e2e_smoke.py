@@ -40,10 +40,14 @@ try:
     import boto3  # type: ignore
     from boto3.dynamodb.conditions import Key  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
-except ImportError as exc:  # pragma: no cover - enforced in CI
-    raise SystemExit(
-        "boto3 is required to run dev_e2e_smoke.py; install it with `pip install boto3`."
-    ) from exc
+except ImportError:  # pragma: no cover - enforced in CI
+    boto3 = None  # type: ignore
+    Key = None  # type: ignore
+
+    class _MissingBoto3(Exception):
+        ...
+
+    BotoCoreError = ClientError = _MissingBoto3  # type: ignore
 
 # Allow imports from backend/src without packaging.
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +68,51 @@ class SmokeFailure(RuntimeError):
     """Raised when the dev E2E smoke test cannot complete successfully."""
 
 
+_SKIP_MIDDLEWARE_TAGS = {
+    "mw-skip-status-read-failed",
+    "route-email-support-team",
+    "mw-skip-followup-after-auto-reply",
+    "mw-escalated-human",
+}
+
+_POSITIVE_MIDDLEWARE_TAGS = {
+    "mw-auto-replied",
+    "mw-reply-sent",
+    "mw-order-status-answered",
+}
+
+def _is_positive_middleware_tag(tag: str) -> bool:
+    return tag in _POSITIVE_MIDDLEWARE_TAGS or any(
+        tag.startswith(prefix + ":") for prefix in _POSITIVE_MIDDLEWARE_TAGS
+    )
+
+
+def _compute_middleware_outcome(
+    *,
+    status_after: Optional[str],
+    tags_added: List[str],
+    post_tags: List[str],
+) -> Dict[str, Any]:
+    """
+    Decide whether middleware produced a valid outcome.
+    - PASS requires either resolved/closed OR a positive middleware tag.
+    - Skip/error tags (mw-skip-status-read-failed, route-email-support-team) are NOT valid.
+    - Smoke tags (mw-smoke:<RUN_ID>) are ignored for PASS purposes.
+    """
+    normalized_status = status_after.strip().lower() if isinstance(status_after, str) else None
+    status_resolved = normalized_status in {"resolved", "closed"} if normalized_status else False
+    skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
+    positive_tags_present = [tag for tag in post_tags if _is_positive_middleware_tag(tag)]
+    middleware_tag_present = bool(positive_tags_present)
+    middleware_outcome = status_resolved or middleware_tag_present
+    return {
+        "status_resolved": status_resolved,
+        "middleware_tag_present": middleware_tag_present,
+        "middleware_outcome": middleware_outcome and not bool(skip_tags_added),
+        "skip_tags_present": bool(skip_tags_added),
+    }
+
+
 @dataclass
 class StackArtifacts:
     endpoint_url: str
@@ -74,7 +123,9 @@ class StackArtifacts:
     audit_trail_table: Optional[str] = None
 
 
-def _setup_boto_session(region: str, profile: Optional[str]) -> boto3.session.Session:
+def _setup_boto_session(region: str, profile: Optional[str]) -> Any:
+    if boto3 is None:
+        raise SmokeFailure("boto3 is required to run dev_e2e_smoke.py; install it with `pip install boto3`.")
     if profile:
         boto3.setup_default_session(profile_name=profile, region_name=region)
     return boto3.session.Session(region_name=region, profile_name=profile)
@@ -149,19 +200,19 @@ def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Di
     if not snapshot:
         return None
     sanitized = dict(snapshot)
-    
+
     # Remove ticket_id, replace with fingerprint only
     ticket_id = sanitized.pop("ticket_id", None)
     if ticket_id:
         sanitized["ticket_id_fingerprint"] = _fingerprint(ticket_id)
         # NEVER include raw ticket_id - it may contain email/message-id PII
-    
+
     # Remove raw path, replace with redacted version and endpoint variant
     raw_path = sanitized.pop("path", None)
     if raw_path:
         sanitized["endpoint_variant"] = _extract_endpoint_variant(raw_path)
         sanitized["path_redacted"] = _redact_path(raw_path)
-    
+
     return sanitized
 
 
@@ -891,6 +942,7 @@ def build_payload(
     conversation_id: Optional[str] = None,
     run_id: Optional[str] = None,
     scenario: str = "baseline",
+    ticket_number: Optional[str] = None,
 ) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "event_id": event_id or f"evt:{uuid.uuid4()}",
@@ -904,14 +956,16 @@ def build_payload(
     }
     if run_id:
         payload["run_id"] = run_id
-    
+    if ticket_number:
+        payload["ticket_number"] = ticket_number
+
     if scenario == "order_status":
         scenario_payload = _order_status_scenario_payload(run_id or "smoke", conversation_id=conversation_id)
         # Merge scenario fields at top level for middleware visibility
         for key, value in scenario_payload.items():
             if key not in payload:
                 payload[key] = value
-    
+
     return payload
 
 
@@ -979,8 +1033,8 @@ def build_console_links(
         f"https://{region}.console.aws.amazon.com/dynamodbv2/home"
         f"?region={region}#item-explorer?initialTagKey=&initialTagValue=&table={idempotency_table}"
     )
-    conversation_console = None
-    audit_console = None
+    conversation_console: str = ""
+    audit_console: str = ""
     if conversation_state_table:
         conversation_console = (
             f"https://{region}.console.aws.amazon.com/dynamodbv2/home"
@@ -1084,7 +1138,13 @@ def main() -> int:
     else:
         payload_conversation = None
 
-    payload = build_payload(args.event_id, conversation_id=payload_conversation, run_id=run_id, scenario=args.scenario)
+    payload = build_payload(
+        args.event_id,
+        conversation_id=payload_conversation,
+        run_id=run_id,
+        scenario=args.scenario,
+        ticket_number=ticket_ref,
+    )
     event_id = payload["event_id"]
     print(f"[INFO] Sending synthetic webhook with event_id={event_id} (run_id={run_id})")
 
@@ -1226,6 +1286,8 @@ def main() -> int:
     middleware_tags_added: List[str] = []
     middleware_tag_present = None
     middleware_outcome = None
+    skip_tags_present = None
+    skip_tags_added: List[str] = []
 
     if ticket_executor and payload_conversation:
         if args.apply_test_tag:
@@ -1247,35 +1309,40 @@ def main() -> int:
         post_ticket = _fetch_ticket_snapshot(
             ticket_executor, payload_conversation, allow_network=allow_network
         )
+        pre_ticket_data: Dict[str, Any] = pre_ticket or {}
+        post_ticket_data: Dict[str, Any] = post_ticket or {}
         tags_added, tags_removed = _tag_deltas(
-            pre_ticket.get("tags") if pre_ticket else [], post_ticket.get("tags") if post_ticket else []
+            pre_ticket_data.get("tags") or [], post_ticket_data.get("tags") or []
         )
         updated_at_delta = _seconds_delta(
-            pre_ticket.get("updated_at") if pre_ticket else None,
-            post_ticket.get("updated_at") if post_ticket else None,
+            pre_ticket_data.get("updated_at"),
+            post_ticket_data.get("updated_at"),
         )
         test_tag_verified = (
-            test_tag_value in (post_ticket.get("tags") or [])
+            test_tag_value in (post_ticket_data.get("tags") or [])
             if args.apply_test_tag and not tag_error
             else (False if tag_error else None)
         )
-        status_before = (
-            pre_ticket.get("status").strip().lower() if pre_ticket and isinstance(pre_ticket.get("status"), str) else None
-        )
-        status_after = (
-            post_ticket.get("status").strip().lower()
-            if post_ticket and isinstance(post_ticket.get("status"), str)
-            else None
-        )
+        status_before_val = pre_ticket_data.get("status")
+        status_after_val = post_ticket_data.get("status")
+        status_before = None
+        status_after = None
+        if isinstance(status_before_val, str):
+            status_before = status_before_val.strip().lower()
+        if isinstance(status_after_val, str):
+            status_after = status_after_val.strip().lower()
         status_resolved = status_after in {"resolved", "closed"} if status_after else False
         status_changed = status_before != status_after if status_after or status_before else None
         middleware_tags_added = [tag for tag in tags_added if tag and not tag.startswith("mw-smoke:")]
-        middleware_tag_present = bool(middleware_tags_added) if post_ticket else None
-        middleware_outcome = (
-            (status_resolved or bool(middleware_tags_added))
-            if post_ticket
-            else None
+        skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
+        outcome = _compute_middleware_outcome(
+            status_after=status_after,
+            tags_added=tags_added,
+            post_tags=post_ticket_data.get("tags") or [],
         )
+        middleware_tag_present = outcome["middleware_tag_present"] if post_ticket else None
+        middleware_outcome = outcome["middleware_outcome"] if post_ticket else None
+        skip_tags_present = outcome["skip_tags_present"] if post_ticket else None
         print(
             f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
             f"updated_at_delta={updated_at_delta}s."
@@ -1294,6 +1361,7 @@ def main() -> int:
     middleware_ok = bool(middleware_outcome) if args.scenario == "order_status" else None
     middleware_tag_ok = bool(middleware_tag_present) if args.scenario == "order_status" else None
     status_resolved_ok = bool(status_resolved) if args.scenario == "order_status" else None
+    skip_tags_present_ok = (not skip_tags_present) if args.scenario == "order_status" else None
 
     criteria = {
         "scenario": args.scenario,
@@ -1304,6 +1372,7 @@ def main() -> int:
         "middleware_outcome": middleware_ok,
         "status_resolved_or_closed": status_resolved_ok,
         "middleware_tag_applied": middleware_tag_ok,
+        "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
     }
 
@@ -1341,6 +1410,7 @@ def main() -> int:
     if args.scenario == "order_status":
         required_checks.append(bool(intent_ok))
         required_checks.append(bool(middleware_ok))
+        required_checks.append(bool(skip_tags_present_ok))
         criteria_details.extend(
             [
                 {
@@ -1351,7 +1421,7 @@ def main() -> int:
                 },
                 {
                     "name": "middleware_outcome",
-                    "description": "Ticket resolved/closed or middleware tag applied via API",
+                    "description": "Ticket resolved/closed or valid middleware tag applied (non-skip)",
                     "required": True,
                     "value": middleware_ok,
                 },
@@ -1363,9 +1433,15 @@ def main() -> int:
                 },
                 {
                     "name": "middleware_tag_applied",
-                    "description": "Middleware tag (mw-*) added excluding mw-smoke",
+                    "description": "Middleware tag (mw-*) added excluding mw-smoke and skip/error tags",
                     "required": False,
                     "value": middleware_tag_ok,
+                },
+                {
+                    "name": "no_skip_tags",
+                    "description": "No skip/error tags added this run (mw-skip-status-read-failed, route-email-support-team)",
+                    "required": True,
+                    "value": skip_tags_present_ok,
                 },
             ]
         )
@@ -1455,6 +1531,7 @@ def main() -> int:
             "post": safe_post_ticket,
             "tags_added": tags_added,
             "tags_removed": tags_removed,
+            "skip_tags_added": skip_tags_added,
             "updated_at_delta_seconds": updated_at_delta,
             "status_before": status_before,
             "status_after": status_after,

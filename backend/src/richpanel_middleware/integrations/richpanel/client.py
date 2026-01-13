@@ -320,7 +320,8 @@ class RichpanelClient:
         Uses: GET /v1/tickets/{id}
         Returns only: status + tags (no messages/customer profile).
         """
-        resp = self.request("GET", f"/v1/tickets/{ticket_id}", dry_run=dry_run)
+        encoded_id = urllib.parse.quote(str(ticket_id), safe="")
+        resp = self.request("GET", f"/v1/tickets/{encoded_id}", dry_run=dry_run)
         if resp.dry_run:
             return TicketMetadata(ticket_id=str(ticket_id), status=None, tags=[])
 
@@ -338,7 +339,8 @@ class RichpanelClient:
                 response=resp,
             )
 
-        ticket_obj = data.get("ticket") or data
+        ticket_candidate = data.get("ticket")
+        ticket_obj = ticket_candidate if isinstance(ticket_candidate, dict) else data
         status = _coerce_str(ticket_obj.get("status") or ticket_obj.get("state"))
         tags = _normalize_tag_list(ticket_obj.get("tags"))
         conversation_no = ticket_obj.get("conversation_no")

@@ -165,6 +165,45 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(response.status_code, 202)
         self.assertEqual(len(transport.requests), 1)
 
+    def test_get_ticket_metadata_handles_ticket_dict(self) -> None:
+        body = b'{"ticket": {"status": "OPEN", "tags": ["vip"], "conversation_no": 123}}'
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=body)]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        meta = client.get_ticket_metadata("abc")
+
+        self.assertEqual(meta.status, "OPEN")
+        self.assertEqual(meta.tags, ["vip"])
+        self.assertEqual(meta.conversation_no, 123)
+
+    def test_get_ticket_metadata_handles_non_dict_ticket_string(self) -> None:
+        body = b'{"ticket": "error", "status": "OPEN", "tags": ["t1"]}'
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=body)]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        meta = client.get_ticket_metadata("abc")
+
+        self.assertEqual(meta.status, "OPEN")
+        self.assertEqual(meta.tags, ["t1"])
+        self.assertIsNone(meta.conversation_no)
+
+    def test_get_ticket_metadata_handles_non_dict_ticket_number(self) -> None:
+        body = b'{"ticket": 123, "status": "CLOSED", "tags": ["t2"]}'
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=body)]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        meta = client.get_ticket_metadata("abc")
+
+        self.assertEqual(meta.status, "CLOSED")
+        self.assertEqual(meta.tags, ["t2"])
+        self.assertIsNone(meta.conversation_no)
+
 
 def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(RichpanelClientTests)

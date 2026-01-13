@@ -1234,6 +1234,16 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_1309Z (Order-status proof fix v3: encoded reads + real middleware tag)",
+        "anchor": "2026-01-13-run202601131309z-order-status-proof-fix-v3-encoded-reads-real-middleware-tag"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-13 - RUN_20260113_0528Z (Order-status proof fix v2: real resolve + client crash fix)",
+        "anchor": "2026-01-13-run202601130528z-order-status-proof-fix-v2-real-resolve-client-crash-fix"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_0433Z (Order-status E2E smoke proof mode + URL encoding fix)",
         "anchor": "2026-01-13-run202601130433z-order-status-e2e-smoke-proof-mode-url-encoding-fix"
       },

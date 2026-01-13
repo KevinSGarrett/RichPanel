@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_0433Z.
+Last verified: 2026-01-13 - RUN_20260113_0528Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,19 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-13 - RUN_20260113_1309Z (Order-status proof fix v3: encoded reads + real middleware tag)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_1309Z
+- Re-ran order_status proof with canonical ID resolution + URL-encoded reads/writes; ensured deduped tags serialize as JSON lists.
+- Tightened PASS logic to ignore historical skip/escalation tags; only fail on skip tags added this run.
+- Captured PASS proof with `mw-order-status-answered:RUN_20260113_1309Z` and no skip tags added; status read no longer fails.
+
+### 2026-01-13 - RUN_20260113_0528Z (Order-status proof fix v2: real resolve + client crash fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_0528Z
+- Fixed Richpanel client crash when `ticket` is non-dict (Bugbot Medium) with type checks and new unit tests.
+- Applied URL encoding to ticket reads as well as writes; ensured safe metadata fetches.
+- Tightened order_status PASS criteria: skip/error tags no longer count; PASS requires resolve/close or valid reply tag.
+- Added coverage for PII guard, Decimal sanitization, and skip-tag rejection; Codecov patch green target.
 
 ### 2026-01-13 - RUN_20260113_0433Z (Order-status E2E smoke proof mode + URL encoding fix)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_0433Z

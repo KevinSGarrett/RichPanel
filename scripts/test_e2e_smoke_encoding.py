@@ -13,6 +13,7 @@ import sys
 import unittest
 import uuid
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -20,6 +21,15 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+from dev_e2e_smoke import (  # type: ignore  # noqa: E402
+    _check_pii_safe,
+    _compute_middleware_outcome,
+    _sanitize_decimals,
+)
 
 
 def _fingerprint(value: str, length: int = 12) -> str:
@@ -125,6 +135,58 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertNotIn("@", serialized)
         self.assertNotIn("%40", serialized)
         self.assertNotIn("mail.", serialized)
+
+
+class CriteriaTests(unittest.TestCase):
+    def test_middleware_outcome_rejects_skip_tags(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            tags_added=["mw-skip-status-read-failed"],
+            post_tags=["mw-skip-status-read-failed", "mw-smoke:RUN"],
+        )
+        self.assertTrue(outcome["skip_tags_present"])
+        self.assertFalse(outcome["middleware_outcome"])
+        self.assertFalse(outcome["middleware_tag_present"])
+
+    def test_middleware_outcome_ignores_historical_skip_tags(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            tags_added=[],
+            post_tags=["mw-skip-status-read-failed", "mw-smoke:RUN"],
+        )
+        self.assertFalse(outcome["skip_tags_present"])
+        self.assertFalse(outcome["middleware_outcome"])
+        self.assertFalse(outcome["middleware_tag_present"])
+
+    def test_middleware_outcome_accepts_resolved(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="resolved",
+            tags_added=[],
+            post_tags=["mw-smoke:RUN"],
+        )
+        self.assertFalse(outcome["skip_tags_present"])
+        self.assertTrue(outcome["middleware_outcome"])
+        self.assertTrue(outcome["status_resolved"])
+
+    def test_pii_guard_detects_patterns(self) -> None:
+        msg = _check_pii_safe('{"path":"mailto:test@example.com"}')
+        self.assertIsNotNone(msg)
+
+    def test_sanitize_decimals_converts(self) -> None:
+        obj = {"a": Decimal("1.0"), "b": [Decimal("2.5"), {"c": Decimal("3")}]}
+        sanitized = _sanitize_decimals(obj)
+        self.assertEqual(sanitized["a"], 1)
+        self.assertEqual(sanitized["b"][0], 2.5)
+        self.assertEqual(sanitized["b"][1]["c"], 3)
+
+    def test_middleware_outcome_counts_positive_tag_added(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            tags_added=["mw-order-status-answered:RUN"],
+            post_tags=["mw-order-status-answered:RUN"],
+        )
+        self.assertTrue(outcome["middleware_tag_present"])
+        self.assertTrue(outcome["middleware_outcome"])
 
 
 class URLEncodingTests(unittest.TestCase):
@@ -259,6 +321,7 @@ def main() -> int:
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
+    suite.addTests(loader.loadTestsFromTestCase(CriteriaTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

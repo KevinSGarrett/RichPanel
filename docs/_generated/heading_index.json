@@ -1471,6 +1471,18 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_1309z (order-status proof fix v3: encoded reads + real middleware tag)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601131309z-order-status-proof-fix-v3-encoded-reads-real-middleware-tag"
+    }
+  ],
+  "2026-01-13 - run_20260113_0528z (order-status proof fix v2: real resolve + client crash fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601130528z-order-status-proof-fix-v2-real-resolve-client-crash-fix"
+    }
+  ],
   "2026-01-13 - run_20260113_0433z (order-status e2e smoke proof mode + url encoding fix)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
