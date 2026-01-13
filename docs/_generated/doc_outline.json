@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_1450Z (Order-status repair: loop prevention + strict PASS)",
+        "anchor": "2026-01-13-run202601131450z-order-status-repair-loop-prevention-strict-pass"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_1309Z (Order-status proof fix v3: encoded reads + real middleware tag)",
         "anchor": "2026-01-13-run202601131309z-order-status-proof-fix-v3-encoded-reads-real-middleware-tag"
       },

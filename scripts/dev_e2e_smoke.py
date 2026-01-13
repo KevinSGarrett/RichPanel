@@ -70,8 +70,9 @@ class SmokeFailure(RuntimeError):
 
 _SKIP_MIDDLEWARE_TAGS = {
     "mw-skip-status-read-failed",
-    "route-email-support-team",
+    "mw-skip-order-status-closed",
     "mw-skip-followup-after-auto-reply",
+    "route-email-support-team",
     "mw-escalated-human",
 }
 
@@ -102,13 +103,16 @@ def _compute_middleware_outcome(
     normalized_status = status_after.strip().lower() if isinstance(status_after, str) else None
     status_resolved = normalized_status in {"resolved", "closed"} if normalized_status else False
     skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
+    positive_tags_added = [tag for tag in tags_added if _is_positive_middleware_tag(tag)]
     positive_tags_present = [tag for tag in post_tags if _is_positive_middleware_tag(tag)]
     middleware_tag_present = bool(positive_tags_present)
-    middleware_outcome = status_resolved or middleware_tag_present
+    middleware_tag_added = bool(positive_tags_added)
+    middleware_outcome = (status_resolved or middleware_tag_added) and not bool(skip_tags_added)
     return {
         "status_resolved": status_resolved,
         "middleware_tag_present": middleware_tag_present,
-        "middleware_outcome": middleware_outcome and not bool(skip_tags_added),
+        "middleware_tag_added": middleware_tag_added,
+        "middleware_outcome": middleware_outcome,
         "skip_tags_present": bool(skip_tags_added),
     }
 
@@ -1285,6 +1289,7 @@ def main() -> int:
     status_changed = None
     middleware_tags_added: List[str] = []
     middleware_tag_present = None
+    middleware_tag_added = None
     middleware_outcome = None
     skip_tags_present = None
     skip_tags_added: List[str] = []
@@ -1341,6 +1346,7 @@ def main() -> int:
             post_tags=post_ticket_data.get("tags") or [],
         )
         middleware_tag_present = outcome["middleware_tag_present"] if post_ticket else None
+        middleware_tag_added = outcome["middleware_tag_added"] if post_ticket else None
         middleware_outcome = outcome["middleware_outcome"] if post_ticket else None
         skip_tags_present = outcome["skip_tags_present"] if post_ticket else None
         print(
@@ -1359,7 +1365,7 @@ def main() -> int:
     ticket_lookup_ok = bool(pre_ticket) if ticket_ref else None
     intent_ok = intent_matches_order_status if args.scenario == "order_status" else None
     middleware_ok = bool(middleware_outcome) if args.scenario == "order_status" else None
-    middleware_tag_ok = bool(middleware_tag_present) if args.scenario == "order_status" else None
+    middleware_tag_ok = bool(middleware_tag_added) if args.scenario == "order_status" else None
     status_resolved_ok = bool(status_resolved) if args.scenario == "order_status" else None
     skip_tags_present_ok = (not skip_tags_present) if args.scenario == "order_status" else None
 
@@ -1421,7 +1427,7 @@ def main() -> int:
                 },
                 {
                     "name": "middleware_outcome",
-                    "description": "Ticket resolved/closed or valid middleware tag applied (non-skip)",
+                    "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
                     "required": True,
                     "value": middleware_ok,
                 },
@@ -1433,13 +1439,13 @@ def main() -> int:
                 },
                 {
                     "name": "middleware_tag_applied",
-                    "description": "Middleware tag (mw-*) added excluding mw-smoke and skip/error tags",
+                    "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
                     "required": False,
                     "value": middleware_tag_ok,
                 },
                 {
                     "name": "no_skip_tags",
-                    "description": "No skip/error tags added this run (mw-skip-status-read-failed, route-email-support-team)",
+                    "description": "No skip/error tags added this run (mw-skip-*, route-email-support-team, mw-escalated-human)",
                     "required": True,
                     "value": skip_tags_present_ok,
                 },

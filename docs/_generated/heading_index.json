@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_1450z (order-status repair: loop prevention + strict pass)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601131450z-order-status-repair-loop-prevention-strict-pass"
+    }
+  ],
   "2026-01-13 - run_20260113_1309z (order-status proof fix v3: encoded reads + real middleware tag)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

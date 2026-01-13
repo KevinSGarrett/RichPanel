@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_0528Z.
+Last verified: 2026-01-13 - RUN_20260113_1450Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-13 - RUN_20260113_1450Z (Order-status repair: loop prevention + strict PASS)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260113_1450Z
+- Restored loop-prevention guard for order-status replies (route follow-ups to Email Support when `mw-auto-replied` already present) and serialized deduped tags as sorted lists.
+- Tightened smoke PASS: fail when any skip/escalation tag is added; PASS requires resolved/closed or a success middleware tag added in the run (routing tags alone insufficient).
+- Captured DEV proof (ticket 1035) with `mw-order-status-answered:RUN_20260113_1450Z` added and no skip tags added; updated CI runbook criteria.
 
 ### 2026-01-13 - RUN_20260113_1309Z (Order-status proof fix v3: encoded reads + real middleware tag)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_1309Z

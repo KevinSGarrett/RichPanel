@@ -382,7 +382,7 @@ python scripts/dev_e2e_smoke.py `
   --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_outbound_proof.json"
 ```
 - Use a **real DEV ticket** (ID or number); the scenario fails fast without one.
-- PASS criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; Richpanel API shows at least one middleware outcome (ticket resolved/closed or mw-* tag added that is not the `mw-smoke:<RUN_ID>` helper tag); PII scan passes.
+- PASS criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; middleware outcome requires either ticket status resolved/closed **or** a success middleware tag added in this run (`mw-auto-replied`, `mw-order-status-answered`, `mw-reply-sent`, or their run-suffixed variants); routing-only tags do not count; the run **fails** if any skip/escalation tags were added (`mw-skip-*`, `route-email-support-team`, `mw-escalated-human`); PII scan passes.
 - Proof JSON must include scenario name, pass criteria details, Dynamo evidence (idempotency/state/audit), and pre/post ticket status + tags.
 
 #### PII-safe proof JSON requirements
