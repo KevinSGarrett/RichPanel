@@ -121,10 +121,84 @@ All files complete, no placeholders.
 
 **Pushed:** ✓
 
+## Diffstat
+```
+ backend/src/richpanel_middleware/automation/pipeline.py          | 22 +++---
+ backend/src/richpanel_middleware/integrations/richpanel/client.py | 13 +++-
+ docs/00_Project_Admin/Progress_Log.md                            |  9 ++-
+ docs/08_Engineering/CI_and_Actions_Runbook.md                    | 26 +++++++
+ docs/_generated/doc_registry.compact.json                        |  6 +-
+ docs/_generated/doc_registry.json                                 |  6 +-
+ scripts/dev_e2e_smoke.py                                         | 341 ++++++++++++++++++
+ scripts/run_ci_checks.py                                         |  1 +
+ scripts/test_e2e_smoke_encoding.py                               | 197 ++++++++++
+ REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/*.md                  | 662 +
+ 10 files changed, 1242 insertions(+), 41 deletions(-)
+```
+
+## Commands Run
+```powershell
+# Create run folder
+python scripts/new_run_folder.py --now
+
+# Run CI checks
+python scripts/run_ci_checks.py
+
+# Deploy to dev
+cd infra/cdk
+npx cdk deploy RichpanelMiddleware-dev --require-approval never -c env=dev
+
+# Run order_status proof
+python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile rp-admin-kevin --ticket-number 1035 --run-id RUN_20260113_0433Z --scenario order_status --apply-test-tag --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/e2e_outbound_proof.json
+
+# Open PR
+gh pr create --title "..." --body "..."
+gh pr merge 93 --auto --merge --delete-branch
+gh pr comment 93 -b '@cursor review'
+```
+
+## Files Changed
+### Backend (Middleware)
+- `backend/src/richpanel_middleware/automation/pipeline.py`
+  - execute_routing_tags: URL-encode conversation_id before add-tags
+  - execute_order_status_reply: URL-encode for all write paths
+
+- `backend/src/richpanel_middleware/integrations/richpanel/client.py`
+  - TicketMetadata: added conversation_no field
+  - get_ticket_metadata: extract conversation_no from response
+
+### Scripts
+- `scripts/dev_e2e_smoke.py`
+  - Added --scenario argument + order_status builder
+  - Flattened payload structure for ingress compatibility
+  - Enhanced proof criteria with middleware outcome tracking
+  
+- `scripts/test_e2e_smoke_encoding.py` (NEW)
+  - 5 unit tests for URL encoding + scenario validation
+
+- `scripts/run_ci_checks.py`
+  - Wired new tests into CI
+
+### Documentation
+- `docs/08_Engineering/CI_and_Actions_Runbook.md`
+  - Added order-status scenario section with command + PASS criteria
+
+- `docs/00_Project_Admin/Progress_Log.md`
+  - Added RUN_20260113_0433Z entry
+
+### Run Artifacts
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/RUN_SUMMARY.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/STRUCTURE_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/DOCS_IMPACT_MAP.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/TEST_MATRIX.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/FIX_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/RUN_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260113_0433Z/B/e2e_outbound_proof.json`
+
 ## Next Actions
-1. Open PR targeting `main`
-2. Enable auto-merge (merge commit, delete branch)
-3. Post `@cursor review` comment
-4. Wait for CI + Codecov
-5. Record Bugbot outcome + Codecov status in this file
-6. Merge when green
+1. ✅ Open PR targeting `main`
+2. ✅ Enable auto-merge (merge commit, delete branch)
+3. ✅ Post `@cursor review` comment
+4. ⏳ Wait for CI + Codecov
+5. ⏳ Record Bugbot outcome + Codecov status in this file
+6. ⏳ Merge when green
