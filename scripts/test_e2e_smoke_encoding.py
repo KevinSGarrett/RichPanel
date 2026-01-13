@@ -28,6 +28,7 @@ if str(SCRIPTS) not in sys.path:
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
     _compute_middleware_outcome,
+    _compute_reply_evidence,
     _diagnose_ticket_update,
     _sanitize_decimals,
     _sanitize_response_metadata,
@@ -187,6 +188,48 @@ class DiagnosticsTests(unittest.TestCase):
         # Ensure response metadata redaction works
         sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
         self.assertEqual(sanitized["endpoint_variant"], "id")
+
+
+class ReplyEvidenceTests(unittest.TestCase):
+    def test_reply_evidence_status_change(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=True,
+            updated_at_delta=1.23,
+            message_count_delta=None,
+            last_message_source_after=None,
+        )
+        self.assertTrue(evidence)
+        self.assertIn("status_changed_delta=1.23", reason)
+
+    def test_reply_evidence_message_delta(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=2,
+            last_message_source_after=None,
+        )
+        self.assertTrue(evidence)
+        self.assertIn("message_count_delta=2", reason)
+
+    def test_reply_evidence_middleware_source(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after="middleware",
+        )
+        self.assertTrue(evidence)
+        self.assertIn("last_message_source=middleware", reason)
+
+    def test_reply_evidence_none(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after=None,
+        )
+        self.assertFalse(evidence)
+        self.assertEqual(reason, "no_reply_evidence_fields")
 
 
 class CriteriaTests(unittest.TestCase):

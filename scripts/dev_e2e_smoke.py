@@ -564,6 +564,35 @@ def _diagnose_ticket_update(
     }
 
 
+def _compute_reply_evidence(
+    *,
+    status_changed: bool,
+    updated_at_delta: Optional[float],
+    message_count_delta: Optional[int],
+    last_message_source_after: Optional[str],
+) -> Tuple[bool, str]:
+    reasons: List[str] = []
+    reply_evidence = False
+    if message_count_delta is not None:
+        if message_count_delta > 0:
+            reply_evidence = True
+            reasons.append(f"message_count_delta={message_count_delta}")
+        else:
+            reasons.append(f"message_count_delta={message_count_delta}")
+    if isinstance(last_message_source_after, str) and last_message_source_after.lower() == "middleware":
+        reply_evidence = True
+        reasons.append("last_message_source=middleware")
+    if status_changed:
+        reply_evidence = True
+        reason = "status_changed"
+        if updated_at_delta is not None:
+            reason = f"{reason}_delta={updated_at_delta}"
+        reasons.append(reason)
+    if not reasons:
+        reasons.append("no_reply_evidence_fields")
+    return reply_evidence, "; ".join(reasons)
+
+
 def _tag_deltas(
     before: Optional[List[str]], after: Optional[List[str]]
 ) -> Tuple[List[str], List[str]]:
@@ -1570,26 +1599,12 @@ def main() -> int:
     reply_evidence = None
     reply_evidence_reason = None
     if args.scenario == "order_status" and ticket_executor and post_ticket:
-        reasons: List[str] = []
-        reply_evidence = False
-        if message_count_delta is not None:
-            if message_count_delta > 0:
-                reply_evidence = True
-                reasons.append(f"message_count_delta={message_count_delta}")
-            else:
-                reasons.append(f"message_count_delta={message_count_delta}")
-        if isinstance(last_message_source_after, str) and last_message_source_after.lower() == "middleware":
-            reply_evidence = True
-            reasons.append("last_message_source=middleware")
-        if status_changed:
-            reply_evidence = True
-            reason = "status_changed"
-            if updated_at_delta is not None:
-                reason = f"{reason}_delta={updated_at_delta}"
-            reasons.append(reason)
-        if not reasons:
-            reasons.append("no_reply_evidence_fields")
-        reply_evidence_reason = "; ".join(reasons)
+        reply_evidence, reply_evidence_reason = _compute_reply_evidence(
+            status_changed=status_changed or False,
+            updated_at_delta=updated_at_delta,
+            message_count_delta=message_count_delta,
+            last_message_source_after=last_message_source_after,
+        )
 
     criteria = {
         "scenario": args.scenario,
