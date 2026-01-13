@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260113_1450Z_artifact_cleanup → merged to main
-- **PRs:** #96 (docs changes), #97 (run-artifact evidence), #98 (final evidence polish), #100 (evidence polish follow-up) — all merge commits
+- **PRs:** #96, #97, #98, #99, #100, #101 — all merged via auto-merge (merge commits)
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
