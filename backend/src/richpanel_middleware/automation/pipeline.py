@@ -505,21 +505,15 @@ def execute_order_status_reply(
             }
         )
     try:
+        # URL-encode conversation_id for write operations (email IDs have special chars)
+        import urllib.parse
+        encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
+
         ticket_metadata = _safe_ticket_metadata_fetch(
             envelope.conversation_id,
             executor=executor,
             allow_network=allow_network,
         )
-        if ticket_metadata is None:
-            # Fall back to conversation_id if metadata fetch fails
-            target_id = envelope.conversation_id
-        else:
-            # Use conversation_no for write operations (email-based IDs return 200 but don't apply)
-            target_id = (
-                str(ticket_metadata.conversation_no)
-                if ticket_metadata.conversation_no
-                else ticket_metadata.ticket_id or envelope.conversation_id
-            )
 
         def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
@@ -532,7 +526,7 @@ def execute_order_status_reply(
 
             route_response = executor.execute(
                 "PUT",
-                f"/v1/tickets/{target_id}/add-tags",
+                f"/v1/tickets/{encoded_id}/add-tags",
                 json_body={"tags": route_tags},
                 dry_run=not allow_network,
             )
@@ -575,7 +569,7 @@ def execute_order_status_reply(
 
         tag_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{target_id}/add-tags",
+            f"/v1/tickets/{encoded_id}/add-tags",
             json_body={"tags": [loop_prevention_tag]},
             dry_run=not allow_network,
         )
@@ -589,7 +583,7 @@ def execute_order_status_reply(
 
         reply_response = executor.execute(
             "PUT",
-            f"/v1/tickets/{target_id}",
+            f"/v1/tickets/{encoded_id}",
             json_body={
                 "status": "resolved",
                 "comment": {"body": reply_body, "type": "public", "source": "middleware"},
@@ -699,27 +693,14 @@ def execute_routing_tags(
         outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
     )
 
-    # Resolve conversation_id to conversation_no for write operations
-    # Email-based IDs return 200 but don't apply writes; use conversation_no instead
-    target_id = envelope.conversation_id
-    if allow_network:
-        try:
-            # Fetch ticket metadata first to get conversation_no
-            metadata = _safe_ticket_metadata_fetch(
-                envelope.conversation_id,
-                executor=executor,
-                allow_network=allow_network,
-            )
-            if metadata and metadata.conversation_no:
-                target_id = str(metadata.conversation_no)
-        except Exception:
-            # Fall back to using conversation_id as-is
-            pass
+    # URL-encode conversation_id for write operations (email IDs have special chars)
+    import urllib.parse
+    encoded_id = urllib.parse.quote(str(envelope.conversation_id), safe="")
 
     try:
         response = executor.execute(
             "PUT",
-            f"/v1/tickets/{target_id}/add-tags",
+            f"/v1/tickets/{encoded_id}/add-tags",
             json_body={"tags": tags},
             dry_run=not allow_network,
         )
