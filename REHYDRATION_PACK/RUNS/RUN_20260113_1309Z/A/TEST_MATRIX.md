@@ -9,4 +9,4 @@
 | None (agent inactive) | n/a | n/a | n/a |
 
 ## Notes
-- Testing handled by Agent B only.
+- Testing handled by Agent B only; Agent A performed no execution this run.
