@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-13 - RUN_20260113_0433Z (Order-status E2E smoke proof mode + URL encoding fix)",
+        "anchor": "2026-01-13-run202601130433z-order-status-e2e-smoke-proof-mode-url-encoding-fix"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_0122Z (Order lookup numeric tracking polish)",
         "anchor": "2026-01-13-run202601130122z-order-lookup-numeric-tracking-polish"
       },

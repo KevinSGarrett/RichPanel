@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_0433z (order-status e2e smoke proof mode + url encoding fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601130433z-order-status-e2e-smoke-proof-mode-url-encoding-fix"
+    }
+  ],
   "2026-01-13 - run_20260113_0122z (order lookup numeric tracking polish)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
