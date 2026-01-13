@@ -459,9 +459,12 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
         reply_call = executor.calls[2]
-        self.assertEqual(reply_call["kwargs"]["json_body"]["status"], "resolved")
-        self.assertIn("comment", reply_call["kwargs"]["json_body"])
-        self.assertEqual(reply_call["kwargs"]["json_body"]["comment"]["type"], "public")
+        body = reply_call["kwargs"]["json_body"]
+        self.assertIn("ticket", body)
+        ticket_payload = body["ticket"]
+        self.assertIn(ticket_payload.get("state"), {"closed", "resolved", "CLOSED", "RESOLVED"})
+        self.assertIn("comment", ticket_payload)
+        self.assertEqual(ticket_payload["comment"]["type"], "public")
         self.assertFalse(reply_call["kwargs"]["dry_run"])
 
     def test_outbound_skips_when_ticket_already_resolved(self) -> None:

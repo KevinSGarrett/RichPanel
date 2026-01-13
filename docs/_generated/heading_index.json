@@ -1471,6 +1471,18 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-13 - run_20260113_2219z (order-status pass_strong via nested ticket.state)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601132219z-order-status-passstrong-via-nested-ticketstate"
+    }
+  ],
+  "2026-01-13 - run_20260113_2132z (order-status pass_strong diagnostic + payload fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-13-run202601132132z-order-status-passstrong-diagnostic-payload-fix"
+    }
+  ],
   "2026-01-13 - run_20260113_1839z (pr wait-for-green hardening + next 10 sync)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

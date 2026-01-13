@@ -1,0 +1,517 @@
+{
+  "meta": {
+    "run_id": "RUN_20260113_2219Z",
+    "timestamp": "2026-01-13T22:38:48.639417+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "inputs": {
+    "ticket_ref": "1002",
+    "ticket_ref_fingerprint": "b281bc2c616c",
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts/dev_e2e_smoke.py --profile richpanel-dev --env dev --region us-east-2 --scenario order_status --ticket-number 1002 --diagnose-ticket-update --confirm-test-ticket --run-id RUN_20260113_2219Z --wait-seconds 120 --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id": "evt:d4ee8941-2abc-4606-84ac-71931503014c",
+    "conversation_id": "340f0b32-b074-4dbd-9f0d-bcd20e52e897",
+    "conversation_id_fingerprint": "1bedae7ac397",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 28
+    },
+    "state_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "action_count": 2,
+      "updated_at": "2026-01-13T22:38:47.725796+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "recorded_at": "2026-01-13T22:38:47.725796+00:00",
+      "ts_action_id": "2026-01-13T22:38:47.725796+00:00#evt:d4ee8941-2abc-4606-84ac-71931503014c"
+    }
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "tags": [],
+      "updated_at": "2025-12-19T14:39:29.757Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "1bedae7ac397",
+      "endpoint_variant": "number",
+      "path_redacted": "/v1/tickets/number/<redacted>"
+    },
+    "post": {
+      "status": "CLOSED",
+      "tags": [],
+      "updated_at": "2025-12-19T14:39:29.757Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "1bedae7ac397",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "updated_at_delta_seconds": 0.0,
+    "status_before": "open",
+    "status_after": "closed",
+    "status_changed": true,
+    "message_count_before": null,
+    "message_count_after": null,
+    "message_count_delta": null,
+    "last_message_source_before": null,
+    "last_message_source_after": null,
+    "middleware_tags_added": [],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": {
+      "performed": true,
+      "ticket_fingerprint": "1bedae7ac397",
+      "winning_candidate": "ticket_state_closed",
+      "results": [
+        {
+          "candidate": "status_resolved",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_resolved",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_closed",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_closed",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_RESOLVED",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_RESOLVED",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_CLOSED",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_CLOSED",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_resolved_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_resolved_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_closed_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_closed_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_RESOLVED_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_RESOLVED_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_CLOSED_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_CLOSED_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_closed",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_resolved",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_resolved",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_closed_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_resolved_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_resolved_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_CLOSED_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_RESOLVED_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed_and_status_CLOSED",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_CLOSED_and_status_CLOSED",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        }
+      ]
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "classification": "PASS_STRONG",
+    "classification_reason": null,
+    "reply_evidence": true,
+    "reply_evidence_reason": "status_changed_delta=0.0",
+    "criteria": {
+      "scenario": "order_status",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": true,
+      "middleware_outcome": true,
+      "status_resolved_or_closed": true,
+      "middleware_tag_applied": false,
+      "no_skip_tags": true,
+      "test_tag_verified": null,
+      "reply_evidence": true,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_order_status",
+        "description": "Routing intent matched order-status keywords",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_outcome",
+        "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "status_resolved_or_closed",
+        "description": "Post status is resolved/closed",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "middleware_tag_applied",
+        "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "no_skip_tags",
+        "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "reply_evidence",
+        "description": "Middleware reply evidence observed (message_count_delta greater than 0 or last_message_source=middleware)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}
