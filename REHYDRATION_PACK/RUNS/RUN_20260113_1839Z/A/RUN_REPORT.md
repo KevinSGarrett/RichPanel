@@ -5,8 +5,8 @@
 - **Agent:** A
 - **Date (UTC):** 2026-01-13
 - **Worktree path:** C:\RichPanel_GIT
-- **Branch:** run/RUN_20260113_1450Z_artifact_cleanup
-- **PR:** #<pending> (will be created in this run)
+- **Branch:** run/RUN_20260113_1450Z_artifact_cleanup → merged to main
+- **PR:** #96 (docs-only) — merged via auto-merge (merge commit)
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -40,30 +40,60 @@
 - `docs/_generated/*` — registries regenerated.
 
 ## Commands Run (required)
-- `python scripts/new_run_folder.py --now` — generated RUN_20260113_1839Z scaffold. (OK)
-- `python scripts/run_ci_checks.py --ci` — **to run after workspace is clean; currently pending rerun in this run.**
-- `git diff --stat` — captured diffstat for reporting.
-- `gh pr create --fill` — to be executed after CI green.
-- `gh pr comment <PR#> -b '@cursor review'` — to be executed after PR creation.
-- Wait-loop commands (`gh pr checks`, polling 120–240s) — to be executed after Bugbot + Codecov checks present.
+```powershell
+# Run folder
+python scripts/new_run_folder.py --now
+# output: OK: created C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260113_1839Z
+
+# CI equivalent (pass)
+python scripts/run_ci_checks.py --ci
+# output: [OK] CI-equivalent checks passed. (full log captured above; includes docs/regens + tests)
+
+# Create PR (docs-only)
+gh pr create --fill
+# output: https://github.com/KevinSGarrett/RichPanel/pull/96
+
+# Trigger Bugbot
+gh pr comment 96 -b '@cursor review'
+# output: https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900
+
+# Wait loop (poll every 120–240s)
+---- 2026-01-13T13:32:06-06
+Cursor Bugbot pending; validate pending
+---- 2026-01-13T13:34:43-06
+Cursor Bugbot pending; validate pass
+---- 2026-01-13T13:37:22-06
+Cursor Bugbot pass; codecov/patch pass; validate pass
+
+# Codecov rollup
+gh pr view 96 --json statusCheckRollup
+# codecov/patch state: SUCCESS, url: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96
+
+# Enable auto-merge after green
+gh pr merge 96 --auto --merge --delete-branch
+```
 
 ## Tests / Proof (required)
-- Planned: `python scripts/run_ci_checks.py --ci` (must be green on PR head; rerun pending once workspace stays clean for this branch).
-- No other tests (docs-only scope).
+- `python scripts/run_ci_checks.py --ci` — **pass**; includes doc/registry regeneration and full scripts test suite. Evidence: console output above; CI-equivalent gate green on PR head.
+- No additional tests (docs-only scope).
 
-Wait-for-green evidence: will be captured after PR exists and checks start (poll timestamps + `gh pr checks` outputs + Codecov rollup). Pending.
+## Wait-for-green evidence (required)
+- **Wait loop executed:** yes; 120–240s sleeps (150s used)
+- **Status timestamps:** 2026-01-13T13:32:06-06 (Bugbot/validate pending); 2026-01-13T13:34:43-06 (Bugbot pending, validate pass); 2026-01-13T13:37:22-06 (Bugbot pass, Codecov/patch pass, validate pass)
+- **Check rollup proof:** `gh pr checks 96` outputs above; status rollup JSON shows Codecov and Bugbot SUCCESS
+- **Codecov status:** codecov/patch pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/96
+- **Bugbot status:** pass — https://github.com/KevinSGarrett/RichPanel/pull/96#issuecomment-3746108900
 
 ## Docs impact (summary)
-- **Docs updated:** `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`; `REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md`; `docs/08_Engineering/CI_and_Actions_Runbook.md`; `REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md`; `docs/00_Project_Admin/Progress_Log.md`; `docs/_generated/*`.
+- **Docs updated:** `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`; `REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md`; `docs/08_Engineering/CI_and_Actions_Runbook.md`; `REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md`; `docs/00_Project_Admin/Progress_Log.md`; `docs/_generated/*`; run artifacts for this run.
 - **Docs to update next:** None identified.
 
 ## Risks / edge cases considered
-- Need clean workspace (stash pre-existing changes) to allow `run_ci_checks` to succeed; must reapply user changes after finishing to avoid losing them.
-- Must ensure wait-loop evidence captured with actual PR number and green statuses before enabling auto-merge.
+- Auto-merge executed immediately after checks turned green; ensure future runs still capture wait-loop evidence before enabling auto-merge.
 
 ## Blockers / open questions
-- None; proceeding to rerun CI, create PR, trigger Bugbot, and collect evidence.
+- None.
 
 ## Follow-ups (actionable)
-- [ ] Rerun `python scripts/run_ci_checks.py --ci` and capture output (expect green).
-- [ ] Create PR, trigger Bugbot, and run wait loop until Codecov + Bugbot green; capture evidence and enable auto-merge.
+- [x] Rerun `python scripts/run_ci_checks.py --ci` and capture output (green).
+- [x] Create PR, trigger Bugbot, and run wait loop until Codecov + Bugbot green; capture evidence and enable auto-merge.

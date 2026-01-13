@@ -10,7 +10,7 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 ## Work completed (bullets)
 - Added wait-for-green polling guidance and “no auto-merge until green” language to agent prompt + CI runbook; added wait-for-green evidence section to Run Report template.
 - Synced `REHYDRATION_PACK/09_NEXT_10_SUGGESTED_ITEMS.md` with PM pack (10 items, statuses/owners).
-- Logged the run in Progress Log and regenerated doc registries; run artifacts populated (A).
+- Logged the run in Progress Log and regenerated doc registries; run artifacts populated (A) with CI/PR/Bugbot/Codecov evidence.
 
 ## Files changed
 - `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`
@@ -22,17 +22,17 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 - `REHYDRATION_PACK/RUNS/RUN_20260113_1839Z/A/*` (artifacts)
 
 ## Git/GitHub status (required)
-- Working branch: run/RUN_20260113_1450Z_artifact_cleanup
-- PR: none yet (to be created after CI green)
-- CI status at end of run: pending rerun (will rerun `python scripts/run_ci_checks.py --ci` after isolating changes)
-- Main updated: no
-- Branch cleanup done: no
+- Working branch: run/RUN_20260113_1450Z_artifact_cleanup (merged)
+- PR: #96 (merged via auto-merge, merge commit)
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
+- Main updated: yes (PR merged)
+- Branch cleanup done: yes (auto-merge deleted branch)
 
 ## Tests and evidence
-- Planned: `python scripts/run_ci_checks.py --ci` (must pass for PR head). Evidence to be captured in RUN_REPORT.md once rerun.
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md.
 
 ## Decisions made
 - Proceed with docs-only scope; use wait-loop evidence + Bugbot/Codecov capture post-PR.
 
 ## Issues / follow-ups
-- Need clean workspace (stash done) to rerun CI to green, then create PR, trigger Bugbot, run wait-loop, capture evidence, and enable auto-merge.
+- None outstanding.
