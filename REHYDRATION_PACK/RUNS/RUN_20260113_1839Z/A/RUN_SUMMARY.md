@@ -22,14 +22,14 @@ Harden templates/runbook with mandatory wait-for-green (Codecov + Bugbot) and sy
 - `REHYDRATION_PACK/RUNS/RUN_20260113_1839Z/A/*` (artifacts)
 
 ## Git/GitHub status (required)
-- Working branch: run/RUN_20260113_1450Z_artifact_cleanup + follow-ups run/RUN_20260113_1839Z_evidence + run/RUN_20260113_1839Z_final (merged) + current ship branch
-- PRs: #96 (docs), #97 (evidence), #98 (final evidence), #100 (ship polish) via auto-merge (merge commits)
+- Working branch history: run/RUN_20260113_1450Z_artifact_cleanup + follow-ups run/RUN_20260113_1839Z_evidence + run/RUN_20260113_1839Z_final + run/RUN_20260113_1839Z_ship + run/RUN_20260113_1839Z_docfix (all merged)
+- PRs: #96, #97, #98, #99, #100, #101 (all auto-merged, merge commits)
 - CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
-- Main updated: yes (PRs merged; current PR pending)
-- Branch cleanup done: pending for current PR
+- Main updated: yes (all PRs merged)
+- Branch cleanup done: yes (auto-merge deleted branches)
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (see “Commands Run” + “Wait-for-green evidence” for PRs #96/#97/#98/#100).
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass). Evidence: console output in RUN_REPORT.md. Actions URLs + `gh pr checks` outputs captured in RUN_REPORT (see “Commands Run”, “PR Chain Evidence Index”, and “Wait-for-green evidence” for PRs #96/#97/#98/#99/#100/#101).
 
 ## Decisions made
 - Proceed with docs-only scope; use wait-loop evidence + Bugbot/Codecov capture post-PR.
