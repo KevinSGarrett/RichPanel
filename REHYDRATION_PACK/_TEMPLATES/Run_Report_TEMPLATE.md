@@ -47,6 +47,7 @@
 - **Wait loop executed:** yes/no (sleep interval used)
 - **Status timestamps:** <e.g., `2026-01-13T18:45Z` `gh pr checks <PR#>` output attached/redacted>
 - **Check rollup proof:** <link to PR Checks tab or screenshot (redacted)>
+- **GitHub Actions run:** <link to CI run that carried checks>
 - **Codecov status:** <codecov/patch state + link/screenshot>
 - **Bugbot status:** <comment link or "quota exhausted; manual review documented">
 
