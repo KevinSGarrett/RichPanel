@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-13 - RUN_20260113_2219Z.
+Last verified: 2026-01-14 - RUN_20260114_0100Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-14 - RUN_20260114_0100Z (Order-status follow-up: reply evidence + coverage)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260114_0100Z
+- Strengthened reply evidence (message/metadata/tag-based), added diagnostics/apply coverage tests to satisfy Codecov, and prepared follow-up PR for 95+ scoring.
 
 ### 2026-01-13 - RUN_20260113_2219Z (Order-status PASS_STRONG via nested ticket.state)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260113_2219Z

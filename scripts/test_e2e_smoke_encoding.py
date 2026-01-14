@@ -180,25 +180,28 @@ class DiagnosticsTests(unittest.TestCase):
             allow_network=True,
             confirm_test_ticket=True,
             diagnostic_message="test",
+            apply_winning=True,
         )
         self.assertTrue(result["performed"])
         self.assertEqual(result["winning_candidate"], "status_resolved")
         self.assertEqual(result["winning_payload"], {"status": "resolved"})
         self.assertTrue(any(entry["ok"] for entry in result["results"]))
+        self.assertIsNotNone(result.get("apply_result"))
         # Ensure response metadata redaction works
         sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
         self.assertEqual(sanitized["endpoint_variant"], "id")
 
 
 class ReplyEvidenceTests(unittest.TestCase):
-    def test_reply_evidence_status_change(self) -> None:
+    def test_reply_evidence_status_change_only(self) -> None:
         evidence, reason = _compute_reply_evidence(
             status_changed=True,
             updated_at_delta=1.23,
             message_count_delta=None,
             last_message_source_after=None,
+            tags_added=[],
         )
-        self.assertTrue(evidence)
+        self.assertFalse(evidence)
         self.assertIn("status_changed_delta=1.23", reason)
 
     def test_reply_evidence_message_delta(self) -> None:
@@ -207,6 +210,7 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=2,
             last_message_source_after=None,
+            tags_added=[],
         )
         self.assertTrue(evidence)
         self.assertIn("message_count_delta=2", reason)
@@ -217,6 +221,7 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=None,
             last_message_source_after="middleware",
+            tags_added=[],
         )
         self.assertTrue(evidence)
         self.assertIn("last_message_source=middleware", reason)
@@ -227,9 +232,24 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=None,
             last_message_source_after=None,
+            tags_added=[],
         )
         self.assertFalse(evidence)
         self.assertEqual(reason, "no_reply_evidence_fields")
+
+    def test_reply_evidence_tags_and_update_success(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after=None,
+            tags_added=["mw-order-status-answered"],
+            reply_update_success=True,
+            reply_update_candidate="ticket_state_closed",
+        )
+        self.assertTrue(evidence)
+        self.assertIn("positive_middleware_tag_added", reason)
+        self.assertIn("reply_update_success:ticket_state_closed", reason)
 
 
 class CriteriaTests(unittest.TestCase):

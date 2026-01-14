@@ -47,6 +47,7 @@ ORDER_STATUS_REPLY_TAG = "mw-order-status-answered"
 ROUTING_APPLIED_TAG = "mw-routing-applied"
 EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
 ESCALATION_TAG = "mw-escalated-human"
+REPLY_SENT_TAG = "mw-reply-sent"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
@@ -601,7 +602,7 @@ def execute_order_status_reply(
             return _route_email_support("followup_after_auto_reply", ticket_status=ticket_status)
 
         tags_to_apply = sorted(
-            dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, run_specific_reply_tag])
+            dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, REPLY_SENT_TAG, run_specific_reply_tag])
         )
         tag_response = executor.execute(
             "PUT",
@@ -650,6 +651,7 @@ def execute_order_status_reply(
                     "status": reply_response.status_code,
                     "dry_run": reply_response.dry_run,
                     "candidate": candidate_name,
+                    "update_success": 200 <= reply_response.status_code < 300 and not reply_response.dry_run,
                 }
             )
             if 200 <= reply_response.status_code < 300:

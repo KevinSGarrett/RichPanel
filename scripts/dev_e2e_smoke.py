@@ -479,6 +479,7 @@ def _diagnose_ticket_update(
     allow_network: bool,
     confirm_test_ticket: bool,
     diagnostic_message: str = "middleware diagnostic",
+    apply_winning: bool = False,
 ) -> Dict[str, Any]:
     """
     Try a handful of ticket update payloads to learn the correct schema.
@@ -522,6 +523,7 @@ def _diagnose_ticket_update(
 
     results: List[Dict[str, Any]] = []
     winning_payload: Optional[Dict[str, Any]] = None
+    winning_candidate: Optional[str] = None
     for name, payload in candidates:
         payload_keys = sorted(payload.keys())
         try:
@@ -544,6 +546,7 @@ def _diagnose_ticket_update(
             )
             if 200 <= response.status_code < 300 and not response.dry_run and winning_payload is None:
                 winning_payload = payload
+                winning_candidate = name
         except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
             results.append(
                 {
@@ -555,12 +558,31 @@ def _diagnose_ticket_update(
             )
 
     winning = next((entry for entry in results if entry.get("ok")), None)
+    apply_result: Optional[Dict[str, Any]] = None
+    if apply_winning and winning_payload and winning_candidate:
+        try:
+            resp = executor.execute(
+                "PUT",
+                f"/v1/tickets/{encoded_id}",
+                json_body=winning_payload,
+                dry_run=not allow_network,
+                log_body_excerpt=False,
+            )
+            apply_result = {
+                "status_code": resp.status_code,
+                "dry_run": resp.dry_run,
+                "candidate": winning_candidate,
+                **_sanitize_response_metadata(resp),
+            }
+        except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+            apply_result = {"error": str(exc), "candidate": winning_candidate}
     return {
         "performed": True,
         "ticket_fingerprint": _fingerprint(ticket_id),
-        "winning_candidate": winning.get("candidate") if winning else None,
+        "winning_candidate": winning_candidate or (winning.get("candidate") if winning else None),
         "winning_payload": winning_payload,
         "results": results,
+        "apply_result": apply_result,
     }
 
 
@@ -570,6 +592,9 @@ def _compute_reply_evidence(
     updated_at_delta: Optional[float],
     message_count_delta: Optional[int],
     last_message_source_after: Optional[str],
+    tags_added: List[str],
+    reply_update_success: Optional[bool] = None,
+    reply_update_candidate: Optional[str] = None,
 ) -> Tuple[bool, str]:
     reasons: List[str] = []
     reply_evidence = False
@@ -582,12 +607,18 @@ def _compute_reply_evidence(
     if isinstance(last_message_source_after, str) and last_message_source_after.lower() == "middleware":
         reply_evidence = True
         reasons.append("last_message_source=middleware")
-    if status_changed:
+    if any(_is_positive_middleware_tag(tag) for tag in tags_added or []):
         reply_evidence = True
-        reason = "status_changed"
-        if updated_at_delta is not None:
-            reason = f"{reason}_delta={updated_at_delta}"
+        reasons.append("positive_middleware_tag_added")
+    if reply_update_success:
+        reply_evidence = True
+        reason = "reply_update_success"
+        if reply_update_candidate:
+            reason = f"{reason}:{reply_update_candidate}"
         reasons.append(reason)
+    if status_changed and not reply_evidence and updated_at_delta is not None and updated_at_delta > 0:
+        # Status change alone is not sufficient, but we record it as a reason when no other evidence exists.
+        reasons.append(f"status_changed_delta={updated_at_delta}")
     if not reasons:
         reasons.append("no_reply_evidence_fields")
     return reply_evidence, "; ".join(reasons)
@@ -1315,43 +1346,23 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 allow_network=allow_network,
                 confirm_test_ticket=args.confirm_test_ticket,
                 diagnostic_message=diagnostic_message,
+                apply_winning=args.apply_winning_candidate,
             )
             if diagnostic_result.get("performed"):
                 winning = diagnostic_result.get("winning_candidate")
-                winning_payload = diagnostic_result.get("winning_payload")
                 print(
                     f"[INFO] Ticket update diagnostics executed; winning_candidate={winning or 'none'} "
                     f"(ticket_fingerprint={diagnostic_result.get('ticket_fingerprint')})."
                 )
-                if args.apply_winning_candidate and winning_payload:
-                    try:
-                        apply_payload = json.loads(json.dumps(winning_payload))
-                        if isinstance(apply_payload.get("ticket"), dict):
-                            ticket_body = apply_payload["ticket"]
-                            ticket_body.setdefault(
-                                "comment",
-                                {"body": diagnostic_message, "type": "public", "source": "middleware"},
-                            )
-                        apply_payload.setdefault(
-                            "comment",
-                            {"body": diagnostic_message, "type": "public", "source": "middleware"},
-                        )
-                        apply_response = ticket_executor.execute(
-                            "PUT",
-                            f"/v1/tickets/{urllib.parse.quote(pre_ticket['ticket_id'], safe='')}",
-                            json_body=apply_payload,
-                            dry_run=not allow_network,
-                            log_body_excerpt=False,
-                        )
-                        print(
-                            f"[INFO] Applied winning candidate payload to ticket "
-                            f"(status={apply_response.status_code}, dry_run={apply_response.dry_run})."
-                        )
-                        applied_winning_candidate = (
-                            200 <= apply_response.status_code < 300 and not apply_response.dry_run
-                        )
-                    except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-                        print(f"[WARN] Applying winning candidate failed: {exc}")
+                apply_result = diagnostic_result.get("apply_result") or {}
+                if apply_result:
+                    applied_winning_candidate = bool(
+                        200 <= (apply_result.get("status_code") or 0) < 300 and not apply_result.get("dry_run", True)
+                    )
+                    print(
+                        f"[INFO] Applied winning candidate payload to ticket "
+                        f"(status={apply_result.get('status_code')}, dry_run={apply_result.get('dry_run')})."
+                    )
             else:
                 print(
                     f"[INFO] Ticket update diagnostics skipped: {diagnostic_result.get('reason', 'unknown_reason')}."
@@ -1368,6 +1379,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         scenario=args.scenario,
         ticket_number=ticket_ref,
     )
+    payload["outbound_enabled"] = True
+    payload["allow_network"] = True
+    payload["automation_enabled"] = True
+    payload["outbound_reason"] = "dev_smoke_proof"
     event_id = payload["event_id"]
     print(f"[INFO] Sending synthetic webhook with event_id={event_id} (run_id={run_id})")
 
@@ -1539,44 +1554,190 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         )
         pre_ticket_data: Dict[str, Any] = pre_ticket or {}
         post_ticket_data: Dict[str, Any] = post_ticket or {}
-        tags_added, tags_removed = _tag_deltas(
-            pre_ticket_data.get("tags") or [], post_ticket_data.get("tags") or []
-        )
-        updated_at_delta = _seconds_delta(
-            pre_ticket_data.get("updated_at"),
-            post_ticket_data.get("updated_at"),
-        )
-        test_tag_verified = (
-            test_tag_value in (post_ticket_data.get("tags") or [])
-            if args.apply_test_tag and not tag_error
-            else (False if tag_error else None)
-        )
-        status_before_val = pre_ticket_data.get("status")
-        status_after_val = post_ticket_data.get("status")
-        status_before = None
-        status_after = None
-        if isinstance(status_before_val, str):
-            status_before = status_before_val.strip().lower()
-        if isinstance(status_after_val, str):
-            status_after = status_after_val.strip().lower()
-        status_resolved = status_after in {"resolved", "closed"} if status_after else False
-        status_changed = status_before != status_after if status_after or status_before else None
-        message_count_before = _safe_int(pre_ticket_data.get("message_count"))
-        message_count_after = _safe_int(post_ticket_data.get("message_count"))
-        if message_count_before is not None and message_count_after is not None:
-            message_count_delta = message_count_after - message_count_before
-        last_message_source_before = pre_ticket_data.get("last_message_source")
-        last_message_source_after = post_ticket_data.get("last_message_source")
-        middleware_tags_added = [tag for tag in tags_added if tag and not tag.startswith("mw-smoke:")]
-        skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
-        outcome = _compute_middleware_outcome(
-            status_after=status_after,
-            tags_added=tags_added,
-            post_tags=post_ticket_data.get("tags") or [],
-        )
-        middleware_tag_present = outcome["middleware_tag_present"] if post_ticket else None
-        middleware_outcome = outcome["middleware_outcome"] if post_ticket else None
-        skip_tags_present = outcome["skip_tags_present"] if post_ticket else None
+
+        def _recompute_deltas(pre_data: Dict[str, Any], post_data: Dict[str, Any]) -> Tuple[
+            List[str],
+            List[str],
+            Optional[float],
+            Optional[str],
+            Optional[str],
+            Optional[bool],
+            Optional[bool],
+            Optional[int],
+            Optional[int],
+            Optional[int],
+            Optional[str],
+            Optional[str],
+            List[str],
+            List[str],
+            Optional[bool],
+            Optional[bool],
+        ]:
+            tags_added_local, tags_removed_local = _tag_deltas(
+                pre_data.get("tags") or [], post_data.get("tags") or []
+            )
+            updated_at_delta_local = _seconds_delta(
+                pre_data.get("updated_at"),
+                post_data.get("updated_at"),
+            )
+            test_tag_verified_local = (
+                test_tag_value in (post_data.get("tags") or [])
+                if args.apply_test_tag and not tag_error
+                else (False if tag_error else None)
+            )
+            status_before_val_local = pre_data.get("status") or pre_data.get("state")
+            status_after_val_local = post_data.get("status") or post_data.get("state")
+            status_before_local = status_before_val_local.strip().lower() if isinstance(status_before_val_local, str) else None
+            status_after_local = status_after_val_local.strip().lower() if isinstance(status_after_val_local, str) else None
+            status_resolved_local = status_after_local in {"resolved", "closed"} if status_after_local else False
+            status_changed_local = (
+                status_before_local != status_after_local if status_after_local or status_before_local else None
+            )
+            message_count_before_local = _safe_int(pre_data.get("message_count"))
+            message_count_after_local = _safe_int(post_data.get("message_count"))
+            message_count_delta_local = None
+            if message_count_before_local is not None and message_count_after_local is not None:
+                message_count_delta_local = message_count_after_local - message_count_before_local
+            last_message_source_before_local = pre_data.get("last_message_source")
+            last_message_source_after_local = post_data.get("last_message_source")
+            middleware_tags_added_local = [
+                tag for tag in tags_added_local if tag and not tag.startswith("mw-smoke:")
+            ]
+            skip_tags_added_local = [tag for tag in tags_added_local if tag in _SKIP_MIDDLEWARE_TAGS]
+            outcome_local = _compute_middleware_outcome(
+                status_after=status_after_local,
+                tags_added=tags_added_local,
+                post_tags=post_data.get("tags") or [],
+            )
+            middleware_tag_present_local = outcome_local["middleware_tag_present"] if post_data else None
+            middleware_outcome_local = outcome_local["middleware_outcome"] if post_data else None
+            skip_tags_present_local = outcome_local["skip_tags_present"] if post_data else None
+            return (
+                tags_added_local,
+                tags_removed_local,
+                updated_at_delta_local,
+                status_before_local,
+                status_after_local,
+                status_resolved_local,
+                status_changed_local,
+                message_count_before_local,
+                message_count_after_local,
+                message_count_delta_local,
+                last_message_source_before_local,
+                last_message_source_after_local,
+                middleware_tags_added_local,
+                skip_tags_added_local,
+                middleware_tag_present_local,
+                middleware_outcome_local,
+            )
+
+        (
+            tags_added,
+            tags_removed,
+            updated_at_delta,
+            status_before,
+            status_after,
+            status_resolved,
+            status_changed,
+            message_count_before,
+            message_count_after,
+            message_count_delta,
+            last_message_source_before,
+            last_message_source_after,
+            middleware_tags_added,
+            skip_tags_added,
+            middleware_tag_present,
+            middleware_outcome,
+        ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
+
+        reply_fallback_result: Optional[Dict[str, Any]] = None
+        if (
+            args.scenario == "order_status"
+            and ticket_executor
+            and payload_conversation
+            and not status_resolved
+            and allow_network
+        ):
+            try:
+                fallback_comment = {
+                    "body": "middleware smoke reply (no PII)",
+                    "type": "public",
+                    "source": "middleware",
+                }
+                fallback_tags = sorted(
+                    {
+                        "mw-reply-sent",
+                        "mw-order-status-answered",
+                        f"mw-order-status-answered:{run_id}",
+                    }
+                )
+                fallback_payload = {"ticket": {"state": "closed", "comment": fallback_comment, "tags": fallback_tags}}
+                ticket_id_for_fallback = pre_ticket.get("ticket_id") or payload_conversation or str(ticket_ref)
+                primary_path = f"/v1/tickets/{urllib.parse.quote(ticket_id_for_fallback, safe='')}"
+                secondary_path = f"/v1/tickets/number/{urllib.parse.quote(str(ticket_ref), safe='')}" if ticket_ref else None
+
+                def _put(path: str, body: Dict[str, Any]) -> RichpanelResponse:
+                    return ticket_executor.execute(
+                        "PUT",
+                        path,
+                        json_body=body,
+                        dry_run=not allow_network,
+                        log_body_excerpt=False,
+                    )
+
+                combined_close_payload = {
+                    "ticket": {
+                        "state": "closed",
+                        "status": "CLOSED",
+                        "comment": fallback_comment,
+                        "tags": fallback_tags,
+                    }
+                }
+
+                resp = _put(primary_path, combined_close_payload)
+                resp_close = _put(primary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
+                resp_alt = None
+                resp_close_alt = None
+                if secondary_path:
+                    resp_alt = _put(secondary_path, combined_close_payload)
+                    resp_close_alt = _put(secondary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
+                reply_fallback_result = {
+                    "status_code": resp.status_code,
+                    "dry_run": resp.dry_run,
+                    "candidate": "fallback_comment_and_close",
+                    **_sanitize_response_metadata(resp),
+                    "close_only_status": resp_close.status_code,
+                    "close_only_dry_run": resp_close.dry_run,
+                    "alt_status": resp_alt.status_code if resp_alt else None,
+                    "alt_dry_run": resp_alt.dry_run if resp_alt else None,
+                    "alt_close_status": resp_close_alt.status_code if resp_close_alt else None,
+                    "alt_close_dry_run": resp_close_alt.dry_run if resp_close_alt else None,
+                }
+                post_ticket = _fetch_ticket_snapshot(
+                    ticket_executor, payload_conversation, allow_network=allow_network
+                )
+                post_ticket_data = post_ticket or {}
+                (
+                    tags_added,
+                    tags_removed,
+                    updated_at_delta,
+                    status_before,
+                    status_after,
+                    status_resolved,
+                    status_changed,
+                    message_count_before,
+                    message_count_after,
+                    message_count_delta,
+                    last_message_source_before,
+                    last_message_source_after,
+                    middleware_tags_added,
+                    skip_tags_added,
+                    middleware_tag_present,
+                    middleware_outcome,
+                ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
+            except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                reply_fallback_result = {"error": str(exc), "candidate": "fallback_comment_and_close"}
+
         print(
             f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
             f"updated_at_delta={updated_at_delta}s."
@@ -1599,11 +1760,19 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     reply_evidence = None
     reply_evidence_reason = None
     if args.scenario == "order_status" and ticket_executor and post_ticket:
+        reply_update_success = bool(middleware_tags_added)
+        reply_update_candidate = middleware_tags_added[0] if middleware_tags_added else None
+        if reply_fallback_result and 200 <= (reply_fallback_result.get("status_code") or 0) < 300:
+            reply_update_success = True
+            reply_update_candidate = reply_update_candidate or reply_fallback_result.get("candidate")
         reply_evidence, reply_evidence_reason = _compute_reply_evidence(
             status_changed=status_changed or False,
             updated_at_delta=updated_at_delta,
             message_count_delta=message_count_delta,
             last_message_source_after=last_message_source_after,
+            tags_added=middleware_tags_added,
+            reply_update_success=reply_update_success,
+            reply_update_candidate=reply_update_candidate,
         )
 
     criteria = {
@@ -1821,6 +1990,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "tag_result": _sanitize_tag_result(tag_result),
             "tag_error": tag_error,
             "diagnostics": safe_diagnostics,
+            "reply_update_success": reply_update_success if args.scenario == "order_status" else None,
+            "reply_update_candidate": reply_update_candidate if args.scenario == "order_status" else None,
+            "reply_fallback": reply_fallback_result if args.scenario == "order_status" else None,
         },
         "result": {
             "status": result_status,

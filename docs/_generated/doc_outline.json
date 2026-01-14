@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-14 - RUN_20260114_0100Z (Order-status follow-up: reply evidence + coverage)",
+        "anchor": "2026-01-14-run202601140100z-order-status-follow-up-reply-evidence-coverage"
+      },
+      {
+        "level": 3,
         "text": "2026-01-13 - RUN_20260113_2219Z (Order-status PASS_STRONG via nested ticket.state)",
         "anchor": "2026-01-13-run202601132219z-order-status-passstrong-via-nested-ticketstate"
       },
