@@ -442,7 +442,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertGreaterEqual(len(executor.calls), 3)
+        self.assertEqual(len(executor.calls), 3)
 
         get_call = executor.calls[0]
         self.assertEqual(get_call["method"], "GET")

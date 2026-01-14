@@ -657,6 +657,7 @@ def execute_order_status_reply(
             )
             if candidate_success:
                 update_success = candidate_name
+                break
 
         if update_success is None:
             return {
