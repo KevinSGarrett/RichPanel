@@ -48,11 +48,11 @@
 - Richpanel number-path closes can 404; ID path with combined state/status mitigates. Left fallback logging in proof (status codes only).
 
 ## Blockers / follow-ups
-- Wait-for-green: Codecov patch PASS, validate PASS, Cursor Bugbot currently pending (see snapshot below). Need final green then auto-merge.
-- After Bugbot green: enable `gh pr merge 105 --auto --merge --delete-branch`.
+- Wait-for-green: COMPLETE. All checks green (Codecov patch, validate, Cursor Bugbot).
+- Next: `gh pr merge 105 --auto --merge --delete-branch`.
 
 ## PR checks snapshots (gh pr checks 105)
-- Latest: Codecov/patch: pass; validate: pass; Cursor Bugbot: pending.
+- Final green: Bugbot pass; codecov/patch pass; validate pass.
 
 ## Notes
 - A/C folders are idle reports (no placeholders).  
