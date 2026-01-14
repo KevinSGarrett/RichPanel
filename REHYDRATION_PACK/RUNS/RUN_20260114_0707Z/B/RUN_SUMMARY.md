@@ -5,33 +5,35 @@
 **Date:** 2026-01-14
 
 ## Objective
-Add a DEV-only outbound toggle workflow with auto-revert, document DEV proof window steps, and land changes with CI/Bugbot/Codecov evidence.
+Update docs/runbook guidance for order-status proofs (PASS_STRONG vs PASS_WEAK, status/state closure) and align logging guidance with the new message-excerpt gate.
 
 ## Work completed (bullets)
-- Authored `.github/workflows/set-outbound-flags.yml` for DEV outbound toggling with OIDC + concurrency + auto-revert.
-- Added DEV proof window guidance to `docs/08_Engineering/CI_and_Actions_Runbook.md` and logged the run in `Progress_Log.md`.
-- Regenerated doc registries after doc changes.
+- Clarified order-status proof rules, closure verification, skip/escalation fail conditions, and proof JSON reading notes in `docs/08_Engineering/CI_and_Actions_Runbook.md`.
+- Documented the logging gate in `docs/08_Engineering/OpenAI_Model_Plan.md` (excerpts off by default; debug-flag only, truncated, non-prod).
+- Cleaned rehydration artifacts (normalized run folder, archived prior proof JSON) and ensured placeholder-free run files; regenerated doc registries.
 
 ## Files changed
-- `.github/workflows/set-outbound-flags.yml`
 - `docs/08_Engineering/CI_and_Actions_Runbook.md`
-- `docs/00_Project_Admin/Progress_Log.md`
-- `docs/_generated/*`
-- `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/B/*`
+- `docs/08_Engineering/OpenAI_Model_Plan.md`
+- `docs/_generated/doc_registry*.json`
+- `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/B/*` and agent READMEs
+- Removed: `REHYDRATION_PACK/RUNS/RUN_20260114_PROOFZ`, `.../RUN_20260114_PROOFZ2`
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260114_0707Z_dev_outbound_toggle_workflow`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/107
-- CI status at end of run: local CI-equivalent green; PR checks green (validate + Codecov + Bugbot)
+- CI status at end of run: validations/tests green; clean-tree gate will pass after committing regenerated files.
 - Main updated: no (not integrator)
-- Branch cleanup done: pending (auto-merge target)
+- Branch cleanup: branch retained for PR #107 updates.
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (with AWS region vars).
-- Evidence path/link: run log in `RUN_REPORT.md` (CI-equivalent green).
+- Tests run: `python scripts/run_ci_checks.py --ci` (validations/tests green; clean-tree check awaits commit).
+- Evidence path/link: excerpts recorded in `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/B/RUN_REPORT.md`.
 
 ## Decisions made
-- Keep workflow DEV-only (hardcoded account/function) and include auto-revert by default.
+- Preserve PASS_WEAK classification only when closure is impossible and explicitly documented; treat skip/escalation tags as hard failures.
+- Keep message excerpts gated behind a debug flag with truncation and non-prod restriction.
 
 ## Issues / follow-ups
-- None.
+- Re-run `python scripts/run_ci_checks.py --ci` after committing regenerated outputs.
+- Push updated docs to refresh Codecov + Bugbot statuses on PR #107.

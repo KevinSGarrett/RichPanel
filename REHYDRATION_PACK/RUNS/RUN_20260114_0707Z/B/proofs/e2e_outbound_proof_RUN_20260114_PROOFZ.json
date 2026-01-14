@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "run_id": "RUN_20260114_PROOFZ",
+    "timestamp": "2026-01-14T15:01:18.551038+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "inputs": {
+    "ticket_ref": "1037",
+    "ticket_ref_fingerprint": "920c37d6464a",
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts/dev_e2e_smoke.py --profile richpanel-dev --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --ticket-number 1037 --run-id RUN_20260114_PROOFZ --wait-seconds 120 --proof-path REHYDRATION_PACK/RUNS/RUN_20260114_PROOFZ/B/e2e_outbound_proof.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id": "evt:3ef2a6e4-4450-472a-bd9c-801b90874f00",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "bc9b140d861c",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 32
+    },
+    "state_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "action_count": 2,
+      "updated_at": "2026-01-14T15:01:15.969279+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "recorded_at": "2026-01-14T15:01:15.969279+00:00",
+      "ts_action_id": "2026-01-14T15:01:15.969279+00:00#evt:3ef2a6e4-4450-472a-bd9c-801b90874f00"
+    }
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "tags": [],
+      "updated_at": "2026-01-14T14:48:00.241Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "bc9b140d861c",
+      "endpoint_variant": "number",
+      "path_redacted": "/v1/tickets/number/<redacted>"
+    },
+    "post": {
+      "status": "OPEN",
+      "tags": [
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-order-status-answered:RUN_20260114_PROOFZ",
+        "mw-order-status-answered",
+        "mw-auto-replied"
+      ],
+      "updated_at": "2026-01-14T15:01:17.441Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "bc9b140d861c",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [
+      "mw-auto-replied",
+      "mw-intent-order_status_tracking",
+      "mw-order-status-answered",
+      "mw-order-status-answered:RUN_20260114_PROOFZ",
+      "mw-routing-applied"
+    ],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "updated_at_delta_seconds": 797.2,
+    "status_before": "open",
+    "status_after": "open",
+    "status_changed": false,
+    "message_count_before": null,
+    "message_count_after": null,
+    "message_count_delta": null,
+    "last_message_source_before": null,
+    "last_message_source_after": null,
+    "middleware_tags_added": [
+      "mw-auto-replied",
+      "mw-intent-order_status_tracking",
+      "mw-order-status-answered",
+      "mw-order-status-answered:RUN_20260114_PROOFZ",
+      "mw-routing-applied"
+    ],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": null,
+    "reply_update_success": true,
+    "reply_update_candidate": "mw-auto-replied",
+    "reply_fallback": null
+  },
+  "result": {
+    "status": "PASS",
+    "classification": "PASS_WEAK",
+    "classification_reason": "status_or_reply_evidence_missing",
+    "reply_evidence": true,
+    "reply_evidence_reason": "positive_middleware_tag_added; reply_update_success:mw-auto-replied",
+    "fallback_close_used": false,
+    "criteria": {
+      "scenario": "order_status",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": true,
+      "middleware_outcome": true,
+      "status_resolved_or_closed": false,
+      "middleware_tag_applied": true,
+      "no_skip_tags": true,
+      "test_tag_verified": null,
+      "reply_evidence": true,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_order_status",
+        "description": "Routing intent matched order-status keywords",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_outcome",
+        "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "status_resolved_or_closed",
+        "description": "Post status is resolved/closed",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "middleware_tag_applied",
+        "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "no_skip_tags",
+        "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "reply_evidence",
+        "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}

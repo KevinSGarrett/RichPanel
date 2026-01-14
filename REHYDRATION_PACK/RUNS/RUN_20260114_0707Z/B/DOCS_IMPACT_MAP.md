@@ -7,8 +7,8 @@
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- `docs/08_Engineering/CI_and_Actions_Runbook.md` — added DEV proof window steps for outbound enablement with auto-revert.
-- `docs/00_Project_Admin/Progress_Log.md` — logged RUN_20260114_0707Z entry.
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` — clarified order-status PASS_STRONG vs PASS_WEAK rules, dual status/state closure check, skip/escalation tag handling, and proof JSON reading guidance.
+- `docs/08_Engineering/OpenAI_Model_Plan.md` — documented the logging gate (message excerpts default off; debug-flag only, truncated, no request/user bodies, non-prod only).
 
 ## Docs that should be updated next (if any)
 - None.
@@ -20,4 +20,4 @@ Goal: document what changed and where documentation must be updated.
 - `reference/_generated/*` regenerated: no
 
 ## Notes
-- Registries refreshed automatically via `python scripts/run_ci_checks.py --ci` regen steps.
+- Registries regenerated after the doc updates.

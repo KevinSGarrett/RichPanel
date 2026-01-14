@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-14 - run_20260114_2025z (b39 docs alignment + logging gate)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-14-run202601142025z-b39-docs-alignment-logging-gate"
+    }
+  ],
   "2026-01-14 - run_20260114_0707z (dev outbound toggle workflow + auto-revert)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

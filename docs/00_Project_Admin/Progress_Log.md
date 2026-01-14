@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-14 - RUN_20260114_2025Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-14 - RUN_20260114_2025Z (B39 docs alignment + logging gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260114_2025Z
+- Clarified order-status proof classifications and proof JSON fields in the CI runbook, aligned OpenAI model logging guidance with the shipped non-production debug flag gate, regenerated doc/reference registries, and prepared new run artifacts for B39 scoring.
 
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z

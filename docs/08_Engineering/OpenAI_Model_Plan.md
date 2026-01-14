@@ -104,12 +104,12 @@ This document defines the **authoritative model selection strategy** for all Ope
 **Target state (Phase 1):**
 - Migrate to Responses API + Structured Outputs
 - Add strict JSON Schema for rewrite output (body, confidence, risk_flags)
-- Fix logging (no response excerpts per PII policy)
+- Fix logging (message excerpts disabled by default; only gated, redacted debug logging allowed)
 
 **Required changes:**
 1. Migrate `rewrite_reply()` to Responses API
 2. Add JSON Schema for `ReplyRewriteResult` contract
-3. Remove `message_excerpt` logging from OpenAI client (line 440 of `client.py`)
+3. Keep message excerpts disabled by default; allow only an opt-in debug flag (non-production only), with truncated excerpts that exclude request bodies and user content; flag must never be enabled in production
 
 ---
 
@@ -123,12 +123,12 @@ This document defines the **authoritative model selection strategy** for all Ope
 **Target state (Phase 1):**
 - Add new method: `OpenAIClient.responses()` for Responses API
 - Keep `chat_completion()` for backward compatibility
-- Fix logging violation: remove `message_excerpt` (line 440)
+- Fix logging violation: message excerpts disabled by default; only gated, truncated debug logging allowed
 
 **Required changes:**
 1. Add `responses()` method with JSON Schema support
 2. Remove response body logging (PII compliance)
-3. Add `log_response_excerpt` flag (default: `False`)
+3. Add `log_response_excerpt` flag (default: `False`), only usable for explicit debug (non-production only), never in production; truncate and exclude request/user bodies
 
 **Logging fix (CRITICAL for PII compliance):**
 
@@ -146,7 +146,7 @@ Current violation:
 
 This violates `docs/06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md` Rule D: "Do not log OpenAI request/response bodies."
 
-**Fix:** Remove this logging or gate it behind an explicit dev-only flag that defaults to `False`.
+**Fix (current plan after Agent C gate):** Message excerpts are disabled by default. A short excerpt may be logged only when an explicit debug flag is enabled. The debug flag is non-production only. Excerpts must be truncated and must exclude request bodies or any user content. The flag must never be enabled in production.
 
 ---
 
@@ -166,7 +166,7 @@ This violates `docs/06_Security_Privacy_Compliance/PII_Handling_and_Redaction.md
 **Required actions:**
 1. Add `OPENAI_ROUTING_MODEL` env var to `llm_routing.py`
 2. Add `OPENAI_CLASSIFIER_MODEL`, `OPENAI_VERIFIER_MODEL` for roadmap workloads
-3. Fix OpenAI client logging (remove `message_excerpt`)
+3. Keep OpenAI client message excerpts gated: default disabled; debug flag only outside production; truncate and exclude request/user bodies
 4. Update env var documentation in runbooks
 
 **Acceptance criteria:**

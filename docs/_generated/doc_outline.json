@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-14 - RUN_20260114_2025Z (B39 docs alignment + logging gate)",
+        "anchor": "2026-01-14-run202601142025z-b39-docs-alignment-logging-gate"
+      },
+      {
+        "level": 3,
         "text": "2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)",
         "anchor": "2026-01-14-run202601140707z-dev-outbound-toggle-workflow-auto-revert"
       },

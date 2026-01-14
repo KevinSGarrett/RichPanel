@@ -385,6 +385,11 @@ python scripts/dev_e2e_smoke.py `
   - writes a PII-safe proof JSON (command used, criteria, Dynamo links, tag verification).
 
 ##### Order-status scenario (DEV proof)
+Classification rules (recorded in the proof JSON):
+- **PASS_STRONG:** middleware reply evidence **and** ticket is closed/resolved by either: `ticket.status` in {`closed`,`resolved`} **or** `ticket.state` in {`closed`,`resolved`} (state **or** status qualifies; proof checks both).
+- **PASS_WEAK:** middleware reply evidence **and** success tag applied **only** when closure is known-impossible, and that limitation is documented in the proof JSON.
+- **FAIL:** any skip/escalation tags present (`mw-skip-*`, `route-email-support-team`, `mw-escalated-human`) **or** missing closure evidence **or** missing middleware evidence.
+
 PowerShell-safe example (replace placeholders):
 ```powershell
 $runId = "RUN_20260113_0433Z"
@@ -403,7 +408,8 @@ python scripts/dev_e2e_smoke.py `
   --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_outbound_proof.json"
 ```
 - Use a **real DEV ticket** (ID or number); the scenario fails fast without one.
-- PASS_STRONG criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; **ticket status resolved/closed AND reply evidence from middleware** (message_count delta > 0, `last_message_source=middleware`, or status_changed metadata from the middleware reply); no skip/escalation tags (`mw-skip-*`, `route-email-support-team`, `mw-escalated-human`). PASS_WEAK only allowed when Richpanel refuses status changes but middleware still tags successfully; classification is recorded in `result.classification`.
+- PASS_STRONG criteria: webhook accepted; idempotency + state + audit records observed; routing intent is order-status; **ticket closed/resolved by `ticket.status` or `ticket.state` AND reply evidence from middleware** (message_count delta > 0, `last_message_source=middleware`, or status_changed metadata from the middleware reply); no skip/escalation tags.
+- PASS_WEAK only allowed when Richpanel refuses status/state changes but middleware still tags successfully; the proof must call out why closure was impossible and record the classification in `result.classification`.
 - Proof JSON must include scenario name, classification, pass criteria details, Dynamo evidence (idempotency/state/audit), pre/post ticket status + tags, message_count delta / last_message_source, and PII scan result.
 - Optional diagnostic (recommended): include `--diagnose-ticket-update --confirm-test-ticket` to try candidate Richpanel update schemas (status/state/closed/comment) against the target ticket; diagnostics are PII-safe (redacted paths, ticket fingerprint only). The working schema today is `{\"ticket\": {\"state\": \"closed\"}}` (status/state at top level are rejected).
 
@@ -412,6 +418,14 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 - **Fingerprints only:** Ticket IDs are hashed to `ticket_id_fingerprint` (12-char SHA256 prefix).
 - **Redacted paths:** API paths use `path_redacted` with `<redacted>` placeholders (e.g., `/v1/tickets/<redacted>/add-tags`).
 - **Safety assertion:** The script scans the proof JSON before writing and fails if it detects `%40`, `mail.`, `%3C`, `%3E`, or `@`.
+
+How to read the proof JSON:
+- `result.classification`.
+- `pass_criteria.ticket_closed.status_ok` and `.state_ok` (or equivalent); either may be true for PASS_STRONG.
+- `pre.ticket.status` / `pre.ticket.state` and `post.ticket.status` / `post.ticket.state`.
+- `tags_added` / `tags_removed` plus an explicit “no skip tags” check.
+- Middleware attribution fields: `message_count_delta`, `last_message_source`, or middleware metadata.
+- `pii_scan` must be `"clean"`.
 
 ### Evidence expectations
 - Copy the GitHub Actions run URL and the job summary block (ingress URL, queue URL, DynamoDB tables, log group, CloudWatch Logs) into `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`.
