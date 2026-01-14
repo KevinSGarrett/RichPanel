@@ -15,7 +15,7 @@ on:
         options: ["true", "false"]
         default: "true"
       revert_after_minutes:
-        description: "Minutes to wait before auto-revert (enable + auto_revert=true)"
+        description: "Minutes to wait before auto-revert (enable + auto_revert=true). Max 55."
         required: false
         default: "30"
 
@@ -27,6 +27,8 @@ env:
   AWS_REGION: us-east-2
   AWS_ACCOUNT_ID: "151124909266"
   FUNC: "rp-mw-dev-worker"
+  KEY: "RICHPANEL_OUTBOUND_ENABLED"
+  MAX_REVERT_MINUTES: "55"
 
 jobs:
   toggle:
@@ -37,25 +39,62 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Configure AWS credentials via OIDC
+      - name: Configure AWS credentials via OIDC (toggle)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/rp-ci-deploy
           aws-region: ${{ env.AWS_REGION }}
-          role-session-name: github-actions-set-outbound-dev
+          role-session-name: github-actions-set-outbound-dev-toggle
 
-      - name: Toggle RICHPANEL_OUTBOUND_ENABLED with optional auto-revert
-        id: toggle
+      - name: Validate inputs (enforce safe revert window; handle leading zeros)
+        id: validate
         shell: bash
         run: |
           set -euo pipefail
 
           ACTION="${{ inputs.action }}"
           AUTO_REVERT="${{ inputs.auto_revert }}"
-          REVERT_MINUTES="${{ inputs.revert_after_minutes }}"
+          RAW_MINUTES="${{ inputs.revert_after_minutes }}"
+          MAX="${{ env.MAX_REVERT_MINUTES }}"
 
+          echo "revert_required=false" >> "$GITHUB_OUTPUT"
+          echo "revert_minutes=0" >> "$GITHUB_OUTPUT"
+
+          if [ "$ACTION" != "enable" ] || [ "$AUTO_REVERT" != "true" ]; then
+            exit 0
+          fi
+
+          if ! [[ "$RAW_MINUTES" =~ ^[0-9]+$ ]]; then
+            echo "[ERROR] revert_after_minutes must be an integer string (digits only)" >&2
+            exit 1
+          fi
+
+          # Convert using base-10 so inputs like "08" do not crash bash arithmetic (octal issue)
+          MINUTES=$(python - <<'PY'
+          import os
+          print(int(os.environ["RAW_MINUTES"], 10))
+          PY
+          )
+
+          if [ "$MINUTES" -lt 1 ] || [ "$MINUTES" -gt "$MAX" ]; then
+            echo "[ERROR] revert_after_minutes must be between 1 and ${MAX} (got ${MINUTES})" >&2
+            exit 1
+          fi
+
+          echo "revert_required=true" >> "$GITHUB_OUTPUT"
+          echo "revert_minutes=$MINUTES" >> "$GITHUB_OUTPUT"
+        env:
+          RAW_MINUTES: ${{ inputs.revert_after_minutes }}
+
+      - name: Toggle RICHPANEL_OUTBOUND_ENABLED (no env JSON printed)
+        id: toggle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ACTION="${{ inputs.action }}"
           FUNC="${{ env.FUNC }}"
-          KEY="RICHPANEL_OUTBOUND_ENABLED"
+          KEY="${{ env.KEY }}"
 
           DESIRED="false"
           if [ "$ACTION" = "enable" ]; then
@@ -65,24 +104,27 @@ jobs:
           echo "[INFO] Function: $FUNC"
           echo "[INFO] Desired: $KEY=$DESIRED"
 
-          # Fetch env vars without printing them
           ENV_VARS_JSON=$(aws lambda get-function-configuration \
             --function-name "$FUNC" \
             --query 'Environment.Variables' \
             --output json)
 
-          ORIG_INFO=$(ENV_VARS_JSON="$ENV_VARS_JSON" KEY="$KEY" python - <<'PY'
+          ORIG_INFO_JSON=$(ENV_VARS_JSON="$ENV_VARS_JSON" KEY="$KEY" python - <<'PY'
           import json, os
           env = json.loads(os.environ.get("ENV_VARS_JSON") or "{}")
           if not isinstance(env, dict):
               env = {}
           key = os.environ["KEY"]
-          exists = key in env
-          val = env.get(key)
-          print(json.dumps({"exists": exists, "value": val}))
+          print(json.dumps({"exists": key in env, "value": env.get(key)}))
           PY
           )
-          echo "orig_info=$ORIG_INFO" >> "$GITHUB_OUTPUT"
+
+          ORIG_INFO_B64=$(python - <<'PY'
+          import base64, os
+          print(base64.b64encode(os.environ["ORIG_INFO_JSON"].encode("utf-8")).decode("ascii"))
+          PY
+          )
+          echo "orig_info_b64=$ORIG_INFO_B64" >> "$GITHUB_OUTPUT"
 
           UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" KEY="$KEY" DESIRED="$DESIRED" python - <<'PY'
           import json, os
@@ -99,44 +141,70 @@ jobs:
             --environment "$UPDATED_ENV" >/dev/null
 
           echo "[OK] Set $KEY=$DESIRED on $FUNC"
+        env:
+          ORIG_INFO_JSON: ""
 
-          if [ "$ACTION" = "enable" ] && [ "$AUTO_REVERT" = "true" ]; then
-            if ! [[ "$REVERT_MINUTES" =~ ^[0-9]+$ ]]; then
-              echo "[ERROR] revert_after_minutes must be an integer" >&2
-              exit 1
-            fi
+      - name: Sleep before auto-revert
+        if: ${{ steps.validate.outputs.revert_required == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          MINUTES="${{ steps.validate.outputs.revert_minutes }}"
+          echo "[INFO] Auto-revert enabled. Sleeping ${MINUTES} minutes..."
+          sleep $((MINUTES*60))
 
-            echo "[INFO] Auto-revert enabled. Sleeping ${REVERT_MINUTES} minutes..."
-            sleep $((REVERT_MINUTES*60))
+      # Re-assume creds before revert so we never hit OIDC session expiry
+      - name: Configure AWS credentials via OIDC (revert)
+        if: ${{ steps.validate.outputs.revert_required == 'true' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-set-outbound-dev-revert
 
-            CUR_ENV_JSON=$(aws lambda get-function-configuration \
-              --function-name "$FUNC" \
-              --query 'Environment.Variables' \
-              --output json)
+      - name: Auto-revert to original value
+        if: ${{ steps.validate.outputs.revert_required == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
 
-            REVERT_ENV=$(CUR_ENV_JSON="$CUR_ENV_JSON" ORIG_INFO="$ORIG_INFO" KEY="$KEY" python - <<'PY'
-            import json, os
-            env = json.loads(os.environ.get("CUR_ENV_JSON") or "{}")
-            if not isinstance(env, dict):
-                env = {}
-            orig = json.loads(os.environ.get("ORIG_INFO") or "{}")
-            key = os.environ["KEY"]
-            if orig.get("exists"):
-                env[key] = orig.get("value")
-            else:
-                env.pop(key, None)
-            print(json.dumps({"Variables": env}))
-            PY
-            )
+          FUNC="${{ env.FUNC }}"
+          KEY="${{ env.KEY }}"
+          ORIG_INFO_B64="${{ steps.toggle.outputs.orig_info_b64 }}"
 
-            aws lambda update-function-configuration \
-              --function-name "$FUNC" \
-              --environment "$REVERT_ENV" >/dev/null
+          ORIG_INFO_JSON=$(python - <<'PY'
+          import base64, os
+          print(base64.b64decode(os.environ["ORIG_INFO_B64"]).decode("utf-8"))
+          PY
+          )
 
-            echo "[OK] Auto-revert complete for $KEY on $FUNC"
-          else
-            echo "[INFO] Auto-revert skipped."
-          fi
+          CUR_ENV_JSON=$(aws lambda get-function-configuration \
+            --function-name "$FUNC" \
+            --query 'Environment.Variables' \
+            --output json)
+
+          REVERT_ENV=$(CUR_ENV_JSON="$CUR_ENV_JSON" ORIG_INFO_JSON="$ORIG_INFO_JSON" KEY="$KEY" python - <<'PY'
+          import json, os
+          env = json.loads(os.environ.get("CUR_ENV_JSON") or "{}")
+          if not isinstance(env, dict):
+              env = {}
+          orig = json.loads(os.environ.get("ORIG_INFO_JSON") or "{}")
+          key = os.environ["KEY"]
+          if orig.get("exists"):
+              env[key] = orig.get("value")
+          else:
+              env.pop(key, None)
+          print(json.dumps({"Variables": env}))
+          PY
+          )
+
+          aws lambda update-function-configuration \
+            --function-name "$FUNC" \
+            --environment "$REVERT_ENV" >/dev/null
+
+          echo "[OK] Auto-revert complete for $KEY on $FUNC"
+        env:
+          ORIG_INFO_B64: ""
 
       - name: Summary
         if: always()

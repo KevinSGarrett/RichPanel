@@ -355,7 +355,7 @@ Notes:
 ### DEV proof window: enabling outbound writes (dev-only)
 - Purpose: temporarily enable outbound writes on `rp-mw-dev-worker` for PASS_STRONG proofs, with automatic revert.
 - Step 1: run `set-runtime-flags.yml` with `safe_mode=false` and `automation_enabled=true`.
-- Step 2: run `set-outbound-flags.yml` with `action=enable`, `auto_revert=true`, `revert_after_minutes=30` (recommended).
+- Step 2: run `set-outbound-flags.yml` with `action=enable`, `auto_revert=true`, `revert_after_minutes=30` (recommended; max 55; inputs like `08` are accepted but prefer plain numbers such as `8`).
 - After the proof, either let auto-revert run or dispatch `set-outbound-flags.yml` with `action=disable` immediately.
 - Reminder: DEV only—never use this workflow for staging or prod.
 

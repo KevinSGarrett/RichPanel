@@ -1,15 +1,14 @@
 # Test Matrix
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260114_0707Z`  
+**Agent:** A  
+**Date:** 2026-01-14
 
 List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| None (idle run) | not executed | not run | not applicable |
 
 ## Notes
-<FILL_ME>
+No tests executed; Agent A remained idle for this run.

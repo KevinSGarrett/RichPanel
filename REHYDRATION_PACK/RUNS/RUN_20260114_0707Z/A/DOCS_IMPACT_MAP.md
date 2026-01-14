@@ -1,23 +1,22 @@
 # Docs Impact Map
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260114_0707Z`  
+**Agent:** A  
+**Date:** 2026-01-14
 
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- <DOC_PATH_1> — <WHAT_CHANGED>
-- <DOC_PATH_2> — <WHAT_CHANGED>
+- None; Agent A performed no work.
 
 ## Docs that should be updated next (if any)
-- <DOC_PATH> — <WHY>
+- None identified for this idle run.
 
 ## Index/registry updates
-- `docs/INDEX.md` updated: yes/no
-- `docs/CODEMAP.md` updated: yes/no
-- `docs/_generated/*` regenerated: yes/no
-- `reference/_generated/*` regenerated: yes/no
+- `docs/INDEX.md` updated: no
+- `docs/CODEMAP.md` updated: no
+- `docs/_generated/*` regenerated: no
+- `reference/_generated/*` regenerated: no
 
 ## Notes
-<FILL_ME>
+Idle entry only; folder retained to satisfy verifier.
