@@ -1743,7 +1743,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         fallback_tags=fallback_tags,
                         allow_network=allow_network,
                     )
-                    fallback_used = True
+                    fallback_success = 200 <= (reply_fallback_result.get("status_code") or 0) < 300 and not reply_fallback_result.get("dry_run")
+                    fallback_used = bool(fallback_success)
                     post_ticket = _fetch_ticket_snapshot(
                         ticket_executor, payload_conversation, allow_network=allow_network
                     )
