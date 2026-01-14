@@ -586,6 +586,58 @@ def _diagnose_ticket_update(
     }
 
 
+def _apply_fallback_close(
+    *,
+    ticket_executor: RichpanelExecutor,
+    ticket_ref: Optional[str],
+    ticket_id_for_fallback: str,
+    fallback_comment: Dict[str, Any],
+    fallback_tags: List[str],
+    allow_network: bool,
+) -> Dict[str, Any]:
+    primary_path = f"/v1/tickets/{urllib.parse.quote(ticket_id_for_fallback, safe='')}"
+    secondary_path = f"/v1/tickets/number/{urllib.parse.quote(str(ticket_ref), safe='')}" if ticket_ref else None
+
+    def _put(path: str, body: Dict[str, Any]) -> RichpanelResponse:
+        return ticket_executor.execute(
+            "PUT",
+            path,
+            json_body=body,
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+
+    combined_close_payload = {
+        "ticket": {
+            "state": "closed",
+            "status": "CLOSED",
+            "comment": fallback_comment,
+            "tags": fallback_tags,
+        }
+    }
+
+    resp = _put(primary_path, combined_close_payload)
+    resp_close = _put(primary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
+    resp_alt = None
+    resp_close_alt = None
+    if secondary_path:
+        resp_alt = _put(secondary_path, combined_close_payload)
+        resp_close_alt = _put(secondary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
+
+    return {
+        "status_code": resp.status_code,
+        "dry_run": resp.dry_run,
+        "candidate": "fallback_comment_and_close",
+        **_sanitize_response_metadata(resp),
+        "close_only_status": resp_close.status_code,
+        "close_only_dry_run": resp_close.dry_run,
+        "alt_status": resp_alt.status_code if resp_alt else None,
+        "alt_dry_run": resp_alt.dry_run if resp_alt else None,
+        "alt_close_status": resp_close_alt.status_code if resp_close_alt else None,
+        "alt_close_dry_run": resp_close_alt.dry_run if resp_close_alt else None,
+    }
+
+
 def _compute_reply_evidence(
     *,
     status_changed: bool,
@@ -1671,48 +1723,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         f"mw-order-status-answered:{run_id}",
                     }
                 )
-                fallback_payload = {"ticket": {"state": "closed", "comment": fallback_comment, "tags": fallback_tags}}
                 ticket_id_for_fallback = pre_ticket.get("ticket_id") or payload_conversation or str(ticket_ref)
-                primary_path = f"/v1/tickets/{urllib.parse.quote(ticket_id_for_fallback, safe='')}"
-                secondary_path = f"/v1/tickets/number/{urllib.parse.quote(str(ticket_ref), safe='')}" if ticket_ref else None
-
-                def _put(path: str, body: Dict[str, Any]) -> RichpanelResponse:
-                    return ticket_executor.execute(
-                        "PUT",
-                        path,
-                        json_body=body,
-                        dry_run=not allow_network,
-                        log_body_excerpt=False,
-                    )
-
-                combined_close_payload = {
-                    "ticket": {
-                        "state": "closed",
-                        "status": "CLOSED",
-                        "comment": fallback_comment,
-                        "tags": fallback_tags,
-                    }
-                }
-
-                resp = _put(primary_path, combined_close_payload)
-                resp_close = _put(primary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
-                resp_alt = None
-                resp_close_alt = None
-                if secondary_path:
-                    resp_alt = _put(secondary_path, combined_close_payload)
-                    resp_close_alt = _put(secondary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
-                reply_fallback_result = {
-                    "status_code": resp.status_code,
-                    "dry_run": resp.dry_run,
-                    "candidate": "fallback_comment_and_close",
-                    **_sanitize_response_metadata(resp),
-                    "close_only_status": resp_close.status_code,
-                    "close_only_dry_run": resp_close.dry_run,
-                    "alt_status": resp_alt.status_code if resp_alt else None,
-                    "alt_dry_run": resp_alt.dry_run if resp_alt else None,
-                    "alt_close_status": resp_close_alt.status_code if resp_close_alt else None,
-                    "alt_close_dry_run": resp_close_alt.dry_run if resp_close_alt else None,
-                }
+                reply_fallback_result = _apply_fallback_close(
+                    ticket_executor=ticket_executor,
+                    ticket_ref=ticket_ref,
+                    ticket_id_for_fallback=ticket_id_for_fallback,
+                    fallback_comment=fallback_comment,
+                    fallback_tags=fallback_tags,
+                    allow_network=allow_network,
+                )
                 post_ticket = _fetch_ticket_snapshot(
                     ticket_executor, payload_conversation, allow_network=allow_network
                 )
