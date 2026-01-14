@@ -18,17 +18,19 @@ Align documentation for B39 (order-status proof rules + proof JSON reading, Open
 - `docs/00_Project_Admin/Progress_Log.md`
 - `docs/_generated/doc_registry*.json`, `doc_outline.json`, `heading_index.json`
 - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/*`
+- `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `.../C/*` (idle stubs to satisfy validation)
+- Pre-existing on branch: `.github/workflows/set-outbound-flags.yml`, `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/*`
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260114_2025Z_b39_docs_alignment`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/108
-- CI status at end of run: `<pending>`
+- CI status at end of run: green (`python scripts/run_ci_checks.py --ci`)
 - Main updated: no
 - Branch cleanup done: no (keep for PR)
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (final pass pending clean-tree run)
-- Evidence path/link: `<pending>`
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass)
+- Evidence path/link: run report snippet + PR checks https://github.com/KevinSGarrett/RichPanel/pull/108/checks
 
 ## Decisions made
 - None beyond documented doc/logging clarifications.
