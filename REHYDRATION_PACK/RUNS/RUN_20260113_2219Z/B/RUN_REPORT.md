@@ -49,20 +49,20 @@
 - Richpanel number-path closes can 404; ID path with combined state/status mitigates. Left fallback logging in proof (status codes only).
 
 ## Blockers / follow-ups
-- Wait-for-green: all checks green (Bugbot pass, Codecov patch pass, validate pass) on PR #106.
+- Wait-for-green: Codecov/patch + validate are green; Cursor Bugbot reported `skipping` on PR #106 (accepted fallback). Proceed to auto-merge.
 - Next: enable auto-merge (`gh pr merge 106 --auto --merge --delete-branch`) after this report is committed.
 
 ## PR checks snapshots
 - Initial (pending):
   ```
   Cursor Bugbot	pending	https://cursor.com
-  validate       pending	https://github.com/KevinSGarrett/RichPanel/actions/runs/20982231737/job/60309498349
+  validate       pending	https://github.com/KevinSGarrett/RichPanel/actions/runs/20982415207/job/60310033791
   ```
 - Final (current head):
   ```
-  Cursor Bugbot  pass     https://cursor.com
+  Cursor Bugbot  skipping https://cursor.com
   codecov/patch  pass     https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/106
-  validate       pass     https://github.com/KevinSGarrett/RichPanel/actions/runs/20982231737/job/60309498349
+  validate       pass     https://github.com/KevinSGarrett/RichPanel/actions/runs/20982415207/job/60310033791
   ```
 
 ## Notes
