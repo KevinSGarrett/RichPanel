@@ -36,7 +36,7 @@
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/DOCS_IMPACT_MAP.md   |  24 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/FIX_REPORT.md        |  17 ++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 +++++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        | 116 +++++++++++++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        | 118 +++++++++++++++++++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_SUMMARY.md       |  38 +++++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/STRUCTURE_REPORT.md  |  28 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/TEST_MATRIX.md       |  14 +++
@@ -97,6 +97,8 @@ Paste output snippet proving you ran:
 - 2026-01-14T22:33:36Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green on pre-final push).
 - 2026-01-14T22:35:09Z — validate in progress; Cursor Bugbot queued (post-final push).
 - 2026-01-14T22:40:42Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after final push).
+- 2026-01-14T22:41:39Z — validate kicking off; Cursor Bugbot queued (post-evidence update).
+- 2026-01-14T22:48:09Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after evidence update).
 
 ## Docs impact (summary)
 - **Docs updated:** CI_and_Actions_Runbook, OpenAI_Model_Plan, Progress_Log, doc registries.
