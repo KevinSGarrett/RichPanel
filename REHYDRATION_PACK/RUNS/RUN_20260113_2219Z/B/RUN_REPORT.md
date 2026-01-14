@@ -53,6 +53,11 @@
 
 ## PR checks snapshots (gh pr checks 105)
 - Final green: Bugbot pass; codecov/patch pass; validate pass.
+  ```
+  Cursor Bugbot  pass   https://cursor.com
+  codecov/patch  pass   https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/105
+  validate       pass   https://github.com/KevinSGarrett/RichPanel/actions/runs/20980236949/job/60303475710
+  ```
 
 ## Notes
 - A/C folders are idle reports (no placeholders).  
