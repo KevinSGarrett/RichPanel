@@ -27,3 +27,6 @@
 ## Notes
 - See Agent A artifacts for full evidence and CI/test results.
 - No follow-up items assigned to Agent B.
+
+## Follow-ups
+- None; agent idle this run.
