@@ -18,7 +18,7 @@ Goal: document what changed and where documentation must be updated.
 - `docs/INDEX.md` updated: no
 - `docs/CODEMAP.md` updated: no
 - `docs/_generated/*` regenerated: yes
-- `reference/_generated/*` regenerated: yes
+- `reference/_generated/*` regenerated: no
 
 ## Notes
 - Registries regenerated via `python scripts/run_ci_checks.py --ci`.

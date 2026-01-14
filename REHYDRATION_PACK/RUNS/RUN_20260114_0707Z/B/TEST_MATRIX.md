@@ -8,7 +8,7 @@ List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| CI-equivalent | `$Env:AWS_REGION="us-east-2"; $Env:AWS_DEFAULT_REGION="us-east-2"; python scripts/run_ci_checks.py --ci` | pass (tests; clean-tree gate requires commit) | excerpts in `RUN_REPORT.md` |
+| CI-equivalent | `$Env:AWS_REGION="us-east-2"; $Env:AWS_DEFAULT_REGION="us-east-2"; python scripts/run_ci_checks.py --ci` | pass | see run log in `RUN_REPORT.md` |
 
 ## Notes
-- All validations/tests passed; the clean-tree requirement will complete after committing regenerated outputs.
+- First run flagged missing Progress_Log entry and missing A/C folders; reran after fixes and regen, now green.

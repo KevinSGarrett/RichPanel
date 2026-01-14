@@ -17,62 +17,36 @@
 
 ## What changed (high-level)
 - Clarified order-status PASS_STRONG/WEAK/FAIL rules and the exact proof JSON fields to inspect.
-- Synced OpenAI model plan logging language with the non-production debug flag gate; regenerated doc/reference registries and Progress Log.
-- Captured run artifacts for `RUN_20260114_2025Z` and opened PR #108.
+- Synced OpenAI model plan logging language with the non-production debug flag gate; regenerated doc registries and Progress Log.
+- Scoped PR #108 to docs-only by dropping workflow/outbound-proof additions and refreshed `RUN_20260114_2025Z` artifacts.
 
 ## Diffstat (required)
 ```
-.github/workflows/set-outbound-flags.yml           | 213 ++++++++++++++++++++
-.../RUNS/RUN_20260114_0707Z/A/DOCS_IMPACT_MAP.md   |  22 +++
-.../RUNS/RUN_20260114_0707Z/A/FIX_REPORT.md        |  21 ++
-.../RUNS/RUN_20260114_0707Z/A/GIT_RUN_PLAN.md      |  58 ++++++
-.../RUNS/RUN_20260114_0707Z/A/README.md            |   1 +
-.../RUNS/RUN_20260114_0707Z/A/RUN_REPORT.md        |  38 ++++
-.../RUNS/RUN_20260114_0707Z/A/RUN_SUMMARY.md       |  31 +++
-.../RUNS/RUN_20260114_0707Z/A/STRUCTURE_REPORT.md  |  25 +++
-.../RUNS/RUN_20260114_0707Z/A/TEST_MATRIX.md       |  14 ++
-.../RUNS/RUN_20260114_0707Z/B/DOCS_IMPACT_MAP.md   |  23 +++
-.../RUNS/RUN_20260114_0707Z/B/RUN_REPORT.md        |  88 +++++++++
-.../RUNS/RUN_20260114_0707Z/B/RUN_SUMMARY.md       |  39 ++++
-.../RUNS/RUN_20260114_0707Z/B/STRUCTURE_REPORT.md  |  36 ++++
-.../RUNS/RUN_20260114_0707Z/B/TEST_MATRIX.md       |  14 ++
-.../e2e_outbound_proof_RUN_20260114_PROOFZ.json    | 217 +++++++++++++++++++++
-.../RUN_20260114_0707Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++
-.../RUNS/RUN_20260114_0707Z/C/DOCS_IMPACT_MAP.md   |  22 +++
-.../RUNS/RUN_20260114_0707Z/C/FIX_REPORT.md        |  21 ++
-.../RUNS/RUN_20260114_0707Z/C/GIT_RUN_PLAN.md      |  58 ++++++
-.../RUNS/RUN_20260114_0707Z/C/README.md            |   1 +
-.../RUNS/RUN_20260114_0707Z/C/RUN_REPORT.md        |  38 ++++
-.../RUNS/RUN_20260114_0707Z/C/RUN_SUMMARY.md       |  31 +++
-.../RUNS/RUN_20260114_0707Z/C/STRUCTURE_REPORT.md  |  25 +++
-.../RUNS/RUN_20260114_0707Z/C/TEST_MATRIX.md       |  14 ++
-.../RUNS/RUN_20260114_0707Z/RUN_META.md            |  11 ++
-.../RUNS/RUN_20260114_2025Z/A/DOCS_IMPACT_MAP.md   |  24 +++
-.../RUNS/RUN_20260114_2025Z/A/FIX_REPORT.md        |  17 ++
-.../RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 +++++
-.../RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        |  67 +++++++
-.../RUNS/RUN_20260114_2025Z/A/RUN_SUMMARY.md       |  37 ++++
-.../RUNS/RUN_20260114_2025Z/A/STRUCTURE_REPORT.md  |  28 +++
-.../RUNS/RUN_20260114_2025Z/A/TEST_MATRIX.md       |  14 ++
-.../RUNS/RUN_20260114_2025Z/B/DOCS_IMPACT_MAP.md   |  17 ++
-.../RUNS/RUN_20260114_2025Z/B/RUN_REPORT.md        |  33 ++++
-.../RUNS/RUN_20260114_2025Z/B/RUN_SUMMARY.md       |  28 +++
-.../RUNS/RUN_20260114_2025Z/B/STRUCTURE_REPORT.md  |  23 +++
-.../RUNS/RUN_20260114_2025Z/B/TEST_MATRIX.md       |  13 ++
-.../RUNS/RUN_20260114_2025Z/C/DOCS_IMPACT_MAP.md   |  17 ++
-.../RUNS/RUN_20260114_2025Z/C/RUN_REPORT.md        |  33 ++++
-.../RUNS/RUN_20260114_2025Z/C/RUN_SUMMARY.md       |  28 +++
-.../RUNS/RUN_20260114_2025Z/C/STRUCTURE_REPORT.md  |  23 +++
-.../RUNS/RUN_20260114_2025Z/C/TEST_MATRIX.md       |  13 ++
-.../RUNS/RUN_20260114_2025Z/RUN_META.md            |  11 ++
-docs/00_Project_Admin/Progress_Log.md              |  10 +-
-docs/08_Engineering/CI_and_Actions_Runbook.md      |  23 ++-
-docs/08_Engineering/OpenAI_Model_Plan.md           |  12 +-
-docs/_generated/doc_outline.json                   |  15 ++
-docs/_generated/doc_registry.compact.json          |   2 +-
-docs/_generated/doc_registry.json                  |  12 +-
-docs/_generated/heading_index.json                 |  18 ++
-50 files changed, 1770 insertions(+), 15 deletions(-)
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/DOCS_IMPACT_MAP.md   |  24 +++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/FIX_REPORT.md        |  17 ++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 ++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        | 106 +++++++++++++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_SUMMARY.md       |  38 ++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/STRUCTURE_REPORT.md  |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/TEST_MATRIX.md       |  14 +++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/DOCS_IMPACT_MAP.md   |  17 ++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_REPORT.md        |  33 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_SUMMARY.md       |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/STRUCTURE_REPORT.md  |  23 +++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/TEST_MATRIX.md       |  13 +++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/DOCS_IMPACT_MAP.md   |  17 ++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_REPORT.md        |  33 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_SUMMARY.md       |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/STRUCTURE_REPORT.md  |  23 +++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/TEST_MATRIX.md       |  13 +++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/RUN_META.md            |  11 +++
+docs/00_Project_Admin/Progress_Log.md                           |   6 +-
+docs/08_Engineering/CI_and_Actions_Runbook.md                   |  16 +++-
+docs/08_Engineering/OpenAI_Model_Plan.md                        |  12 +--
+docs/_generated/doc_outline.json                                |   5 +
+docs/_generated/doc_registry.compact.json                       |   2 +-
+docs/_generated/doc_registry.json                               |  12 +--
+docs/_generated/heading_index.json                              |   6 ++
 ```
 
 ## Files Changed (required)
@@ -82,8 +56,7 @@ List key files changed (grouped by area) and why:
 - `docs/00_Project_Admin/Progress_Log.md` - added RUN_20260114_2025Z entry and refreshed last-verified marker.
 - `docs/_generated/doc_registry*.json`, `doc_outline.json`, `heading_index.json` - regenerated registries after doc updates.
 - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/*` - run report/summary/structure/docs impact/test matrix for this run.
-- `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `.../C/*` - stubs marked idle to satisfy run validation.
-- `.github/workflows/set-outbound-flags.yml` + `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/*` - pre-existing changes already on this branch (not modified in this run).
+- `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `.../C/*` - idle stubs to satisfy run validation.
 
 ## Commands Run (required)
 List commands you ran (include key flags/env if relevant):

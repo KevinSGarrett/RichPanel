@@ -19,7 +19,6 @@ Align documentation for B39 (order-status proof rules + proof JSON reading, Open
 - `docs/_generated/doc_registry*.json`, `doc_outline.json`, `heading_index.json`
 - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/*`
 - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `.../C/*` (idle stubs to satisfy validation)
-- Pre-existing on branch: `.github/workflows/set-outbound-flags.yml`, `REHYDRATION_PACK/RUNS/RUN_20260114_0707Z/*`
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260114_2025Z_b39_docs_alignment`
@@ -36,4 +35,4 @@ Align documentation for B39 (order-status proof rules + proof JSON reading, Open
 - None beyond documented doc/logging clarifications.
 
 ## Issues / follow-ups
-- None (pending final checks)
+- None (checks captured; no follow-ups)
