@@ -119,7 +119,7 @@ jobs:
           PY
           )
 
-          ORIG_INFO_B64=$(python - <<'PY'
+          ORIG_INFO_B64=$(ORIG_INFO_JSON="$ORIG_INFO_JSON" python - <<'PY'
           import base64, os
           print(base64.b64encode(os.environ["ORIG_INFO_JSON"].encode("utf-8")).decode("ascii"))
           PY
@@ -204,7 +204,7 @@ jobs:
 
           echo "[OK] Auto-revert complete for $KEY on $FUNC"
         env:
-          ORIG_INFO_B64: ""
+          ORIG_INFO_B64: ${{ steps.toggle.outputs.orig_info_b64 }}
 
       - name: Summary
         if: always()
