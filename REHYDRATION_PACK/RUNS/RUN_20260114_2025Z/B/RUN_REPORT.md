@@ -12,5 +12,18 @@
 - No files were added, modified, or removed by Agent B.
 - No commands or tests were executed by Agent B.
 
+## Files Changed
+- None (agent idle).
+
+## Commands Run
+- None; Agent B executed no commands.
+
+## Diffstat
+- Not applicable (no changes by Agent B).
+
+## Tests / Proof
+- None executed; see Agent A run report for CI evidence.
+
 ## Notes
 - See Agent A artifacts for full evidence and CI/test results.
+- No follow-up items assigned to Agent B.
