@@ -4,4 +4,9 @@
 **Agent:** B  
 **Date:** 2026-01-14
 
-No tests were executed by Agent B (agent not used in this run).
+| Test name | Command / method | Pass/Fail | Evidence |
+|---|---|---|---|
+| None | Not run (agent idle) | n/a | n/a |
+
+## Notes
+- Agent B executed no tests; see Agent A artifacts for CI proof.
