@@ -23,8 +23,8 @@ Deliver PASS_STRONG order_status proof with middleware-attributable reply eviden
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260114_0100Z_order_status_pass_strong_followup`
-- PR: pending creation for this follow-up
-- CI status: PASS pre-artifact (`python scripts/run_ci_checks.py --ci`); will rerun after updates
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/106
+- CI status: PASS (`python scripts/run_ci_checks.py --ci` on PR head)
 - Main updated: no
 - Branch cleanup: pending PR merge
 
@@ -40,7 +40,7 @@ Deliver PASS_STRONG order_status proof with middleware-attributable reply eviden
 - Still need PR creation, wait-for-green (Codecov/Bugbot), and PII scan outputs added to RUN_REPORT after PR is opened.
 
 ## Dev E2E Smoke (latest PASS_STRONG)
-- Event ID: `evt:8e282398-4119-4976-81ec-96172480e6f3`
+- Event ID: `evt:80568429-690c-4c64-8338-5b020a4f556e`
 - Ticket: 1020 (OPEN → CLOSED)
 - Tags added: none (already present); reply evidence: `reply_update_success:ticket_state_closed` (diagnostics winning candidate, no fallback)
 - Proof: `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json`

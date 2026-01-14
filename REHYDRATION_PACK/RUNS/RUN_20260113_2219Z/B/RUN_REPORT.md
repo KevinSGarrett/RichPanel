@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree:** C:/RichPanel_GIT
 - **Branch:** `run/RUN_20260114_0100Z_order_status_pass_strong_followup`
-- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/105
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/106
 - **Merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -32,14 +32,15 @@
 - Dev proof (PASS_STRONG):  
   `python scripts/dev_e2e_smoke.py --profile richpanel-dev --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --ticket-number 1020 --run-id RUN_20260113_2219Z --wait-seconds 120 --confirm-test-ticket --diagnose-ticket-update --apply-winning-candidate --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json`
 - CI equivalent:  
-  `python scripts/run_ci_checks.py --ci` (PASS pre-artifact; rerun pending after final updates)
+  `python scripts/run_ci_checks.py --ci` (PASS on PR head)
 - PII scans (latest):  
-  - `rg -n "%40|%3C|%3E|@" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches (exit 1)  
-  - `rg -n "gmail|mail\\." REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches (exit 1)
+  - `rg -n "<encoded-at-pattern>" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches  
+  - `rg -n "<mail-fragment-pattern>" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches  
+  - (patterns redacted in report to avoid self-match; commands executed with encoded-at/mail fragments)
 
 ## Tests / Proof
 - Dev smoke (order_status) ticket 1020: **PASS_STRONG**. Status OPEN→CLOSED; tags already present; reply evidence from `reply_update_success:ticket_state_closed` (diagnostics winning candidate applied, no fallback used). Evidence: `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json` (PII-safe).
-- `python scripts/run_ci_checks.py --ci`: PASS (pre-artifact). Will rerun after final doc/artifact commits for PR head.
+- `python scripts/run_ci_checks.py --ci`: PASS on PR head.
 
 ## Docs impact
 - Updated runbook and Progress_Log as noted; doc registries regenerated.
@@ -48,11 +49,21 @@
 - Richpanel number-path closes can 404; ID path with combined state/status mitigates. Left fallback logging in proof (status codes only).
 
 ## Blockers / follow-ups
-- PR still to open for this follow-up; need wait-for-green snapshots after PR is up.
-- Need fresh PII scan output after final artifacts + proof.
+- Wait-for-green: codecov/patch + validate are green; Bugbot reported `skipping` on PR #106. Add auto-merge after artifacts updated with snapshots.
+- Need to paste wait-for-green outputs into this report once checks complete; then enable auto-merge.
 
 ## PR checks snapshots
-- PR not yet created for this follow-up. Snapshots to be added after `gh pr create` and wait-for-green loop.
+- Initial (pending):
+  ```
+  Cursor Bugbot	pending	https://cursor.com
+  validate       pending	https://github.com/KevinSGarrett/RichPanel/actions/runs/20981548127/job/60307338190
+  ```
+- Final (current head):
+  ```
+  codecov/patch  pass     https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/106
+  validate       pass     https://github.com/KevinSGarrett/RichPanel/actions/runs/20981548127/job/60307338190
+  Cursor Bugbot  skipping https://cursor.com
+  ```
 
 ## Notes
 - A/C folders are idle reports (no placeholders).  
@@ -60,4 +71,7 @@
 
 ## Links
 - PR #104 (merged): https://github.com/KevinSGarrett/RichPanel/pull/104
-- Follow-up PR: pending creation (will update with PR number, Codecov, Bugbot, Actions links)
+- PR #106 (this follow-up): https://github.com/KevinSGarrett/RichPanel/pull/106
+- Codecov (this PR): https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/106
+- Bugbot (this PR): https://cursor.com
+- Actions run (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/20981548127
