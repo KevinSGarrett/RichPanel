@@ -172,7 +172,7 @@ jobs:
           KEY="${{ env.KEY }}"
           ORIG_INFO_B64="${{ steps.toggle.outputs.orig_info_b64 }}"
 
-          ORIG_INFO_JSON=$(python - <<'PY'
+          ORIG_INFO_JSON=$(ORIG_INFO_B64="$ORIG_INFO_B64" python - <<'PY'
           import base64, os
           print(base64.b64decode(os.environ["ORIG_INFO_B64"]).decode("utf-8"))
           PY
