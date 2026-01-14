@@ -57,3 +57,10 @@
 ## Notes
 - A/C folders are idle reports (no placeholders).  
 - No request/response bodies stored; proof is PII-safe.  
+
+## Links
+- PR #104 (merged): https://github.com/KevinSGarrett/RichPanel/pull/104
+- PR #105 (this follow-up): https://github.com/KevinSGarrett/RichPanel/pull/105
+- Codecov (this PR): https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/105
+- Bugbot (this PR): https://cursor.com
+- Actions run (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/20979949798
