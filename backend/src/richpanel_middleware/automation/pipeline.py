@@ -619,14 +619,14 @@ def execute_order_status_reply(
         )
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         update_candidates = [
-            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}}),
             ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
             ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
+            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
             ("state_closed", {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}),
             ("status_closed", {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}),
             ("state_resolved", {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}),
@@ -657,7 +657,6 @@ def execute_order_status_reply(
             )
             if candidate_success:
                 update_success = candidate_name
-                break
 
         if update_success is None:
             return {

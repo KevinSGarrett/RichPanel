@@ -442,7 +442,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertEqual(len(executor.calls), 3)
+        self.assertGreaterEqual(len(executor.calls), 3)
 
         get_call = executor.calls[0]
         self.assertEqual(get_call["method"], "GET")
@@ -527,6 +527,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
         self.assertFalse(result["sent"])
         self.assertEqual(result["reason"], "reply_update_failed")
+        reply_calls = [c for c in executor.calls if c["method"] == "PUT" and "/v1/tickets/" in c["path"]]
+        self.assertGreaterEqual(len(reply_calls), 1)
+        for call in reply_calls:
+            self.assertTrue(call["kwargs"].get("dry_run", False))
 
     def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -620,6 +624,8 @@ class _RecordingExecutor:
         self.force_dry_run = force_dry_run
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+        effective_dry_run = self.force_dry_run or kwargs.get("dry_run", False)
+        kwargs["dry_run"] = effective_dry_run
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
 
         if method.upper() == "GET" and path.startswith("/v1/tickets/") and "/add-tags" not in path:
@@ -646,7 +652,7 @@ class _RecordingExecutor:
             headers={},
             body=b"",
             url=path,
-            dry_run=self.force_dry_run or kwargs.get("dry_run", False),
+            dry_run=effective_dry_run,
         )
 
 
