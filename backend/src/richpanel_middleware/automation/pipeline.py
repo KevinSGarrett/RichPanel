@@ -645,16 +645,17 @@ def execute_order_status_reply(
                 json_body=payload,
                 dry_run=not allow_network,
             )
+            candidate_success = 200 <= reply_response.status_code < 300 and not reply_response.dry_run
             responses.append(
                 {
                     "action": "reply_and_resolve",
                     "status": reply_response.status_code,
                     "dry_run": reply_response.dry_run,
                     "candidate": candidate_name,
-                    "update_success": 200 <= reply_response.status_code < 300 and not reply_response.dry_run,
+                    "update_success": candidate_success,
                 }
             )
-            if 200 <= reply_response.status_code < 300:
+            if candidate_success:
                 update_success = candidate_name
                 break
 

@@ -511,6 +511,23 @@ class OutboundOrderStatusTests(unittest.TestCase):
         # Expect GET + add-tags + at least one reply attempt
         self.assertGreaterEqual(len(executor.calls), 3)
 
+    def test_outbound_reply_dry_run_does_not_send(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_status="open", reply_status_codes=[200, 200], force_dry_run=True)
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "reply_update_failed")
+
     def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_status="open", ticket_tags=["mw-auto-replied"])
@@ -592,6 +609,7 @@ class _RecordingExecutor:
         ticket_tags: list[str] | None = None,
         raise_on_get: bool = False,
         reply_status_codes: list[int] | None = None,
+        force_dry_run: bool = False,
     ) -> None:
         self.calls: list[dict[str, Any]] = []
         self.ticket_status = ticket_status
@@ -599,6 +617,7 @@ class _RecordingExecutor:
         self.raise_on_get = raise_on_get
         self.reply_status_codes = reply_status_codes or [202]
         self._reply_index = 0
+        self.force_dry_run = force_dry_run
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
@@ -627,7 +646,7 @@ class _RecordingExecutor:
             headers={},
             body=b"",
             url=path,
-            dry_run=kwargs.get("dry_run", False),
+            dry_run=self.force_dry_run or kwargs.get("dry_run", False),
         )
 
 
