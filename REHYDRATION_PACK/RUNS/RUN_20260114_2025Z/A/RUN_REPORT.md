@@ -22,26 +22,37 @@
 
 ## Diffstat (required)
 ```
+[OK] REHYDRATION_PACK validated (mode=build).
+[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
+[OK] RUN_20260114_2025Z is referenced in Progress_Log.md
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+[OK] CI-equivalent checks passed.
+```
+
+## Wait-for-green evidence (PR #108)
+- 2026-01-14T22:27:13Z — codecov/patch pass; validate pass; Cursor Bugbot in progress.
+- 2026-01-14T22:33:36Z — Cursor Bugbot pass; codecov/patch pass; validate pass. (All green snapshot captured.)
+```
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/DOCS_IMPACT_MAP.md   |  24 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/FIX_REPORT.md        |  17 ++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 ++++++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        | 106 +++++++++++++++++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_SUMMARY.md       |  38 ++++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/STRUCTURE_REPORT.md  |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 +++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_REPORT.md        | 114 +++++++++++++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/RUN_SUMMARY.md       |  38 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/STRUCTURE_REPORT.md  |  28 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/TEST_MATRIX.md       |  14 +++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/DOCS_IMPACT_MAP.md   |  17 ++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_REPORT.md        |  33 +++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_SUMMARY.md       |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_REPORT.md        |  33 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/RUN_SUMMARY.md       |  28 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/STRUCTURE_REPORT.md  |  23 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/TEST_MATRIX.md       |  13 +++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/DOCS_IMPACT_MAP.md   |  17 ++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_REPORT.md        |  33 +++++++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_SUMMARY.md       |  28 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_REPORT.md        |  33 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/RUN_SUMMARY.md       |  28 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/STRUCTURE_REPORT.md  |  23 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/TEST_MATRIX.md       |  13 +++
-REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/RUN_META.md            |  11 +++
+REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/RUN_META.md            |  11 ++
 docs/00_Project_Admin/Progress_Log.md                           |   6 +-
-docs/08_Engineering/CI_and_Actions_Runbook.md                   |  16 +++-
+docs/08_Engineering/CI_and_Actions_Runbook.md                   |  16 ++-
 docs/08_Engineering/OpenAI_Model_Plan.md                        |  12 +--
 docs/_generated/doc_outline.json                                |   5 +
 docs/_generated/doc_registry.compact.json                       |   2 +-
@@ -61,32 +72,29 @@ List key files changed (grouped by area) and why:
 ## Commands Run (required)
 List commands you ran (include key flags/env if relevant):
 - `python scripts/new_run_folder.py --now` - allocate RUN_20260114_2025Z folders.
-- `python scripts/new_run_folder.py --now` - allocate RUN_20260114_2025Z folders.
-- `python scripts/run_ci_checks.py --ci` - initial run (failed: Progress_Log entry missing).
-- `python scripts/run_ci_checks.py --ci` - rerun after Progress_Log update (tests pass; failed on uncommitted regen).
-- `python scripts/run_ci_checks.py --ci` - rerun after B/C folders restored (PASS; snippet below).
-- `git push -u origin run/RUN_20260114_2025Z_b39_docs_alignment` - publish branch.
-- `gh pr create --title "Align docs for order-status proof and logging gate" ...` - open PR #108.
+- `git checkout origin/main -- .github/workflows/set-outbound-flags.yml REHYDRATION_PACK/RUNS/RUN_20260114_0707Z` - drop out-of-scope files from PR #108.
+- `python scripts/run_ci_checks.py --ci` - clean-tree pass after scope split (snippet below).
+- `git push origin run/RUN_20260114_2025Z_b39_docs_alignment` - publish scope-split branch for PR #108.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- `python scripts/run_ci_checks.py --ci` - pass - evidence: https://github.com/KevinSGarrett/RichPanel/pull/108/checks (see snippet)
-- `codecov/patch` status: pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108
-- `Cursor Bugbot` status: pass — https://cursor.com
-- `validate` workflow: pass — https://github.com/KevinSGarrett/RichPanel/pull/108/checks
+- `python scripts/run_ci_checks.py --ci` — pass on clean tree (see snippet). Evidence: https://github.com/KevinSGarrett/RichPanel/pull/108/checks
 
 Paste output snippet proving you ran:
-`AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
+`python scripts/run_ci_checks.py --ci`
 
 ```
 [OK] REHYDRATION_PACK validated (mode=build).
 [OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
-OK: docs + reference validation passed
-[OK] Secret inventory is in sync with code defaults.
 [OK] RUN_20260114_2025Z is referenced in Progress_Log.md
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
 [OK] CI-equivalent checks passed.
 ```
+
+## Wait-for-green evidence (PR #108)
+- 2026-01-14T22:27:13Z — codecov/patch pass; validate pass; Cursor Bugbot in progress.
+- 2026-01-14T22:33:36Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green).
 
 ## Docs impact (summary)
 - **Docs updated:** CI_and_Actions_Runbook, OpenAI_Model_Plan, Progress_Log, doc registries.
