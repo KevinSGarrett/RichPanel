@@ -1,13 +1,13 @@
-# Git Run Plan (Template)
+# Git Run Plan
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
-**Mode:** sequential (default)  
-**Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
+**RUN_ID:** RUN_20260114_2025Z  
+**Mode:** sequential (docs-only)  
+**Integrator:** A (single-agent run)  
+**Target branch:** `run/RUN_20260114_2025Z_b39_docs_alignment`  
 **Merge strategy:** merge commit (locked)  
-**Branch cleanup:** yes (required)  
+**Branch cleanup:** yes (after merge)  
 
 ---
 
@@ -15,14 +15,7 @@ Use this file to coordinate Git/GitHub execution for a run.
 - `main` is protected: changes land via PR (required status checks; merge commit).
 
 ## Branch plan
-### Sequential (default)
-- All agents use: `run/<RUN_ID>`
-
-### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+- Sequential: single branch `run/RUN_20260114_2025Z_b39_docs_alignment`
 
 ---
 
@@ -30,29 +23,28 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - `docs/08_Engineering/CI_and_Actions_Runbook.md`
+  - `docs/08_Engineering/OpenAI_Model_Plan.md`
+  - `docs/00_Project_Admin/Progress_Log.md`
+  - `docs/_generated/*`
+  - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/*`
+  - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/RUN_META.md`
 - Locked paths (do not edit):
-  - <path patterns>
+  - `backend/**`, `infra/**`, any other docs unless required by registry tooling
 
 ### Agent B
-- Allowed paths:
-  - <path patterns>
-- Locked paths:
-  - <path patterns>
+- Not used (scope is single-agent docs run).
 
 ### Agent C
-- Allowed paths:
-  - <path patterns>
-- Locked paths:
-  - <path patterns>
+- Not used (scope is single-agent docs run).
 
 ---
 
 ## Integration checklist (Integrator)
 - [ ] Pull latest `main`
-- [ ] Merge agent branches (if parallel) into `run/<RUN_ID>`
-- [ ] Run: `python scripts/run_ci_checks.py`
-- [ ] Merge `run/<RUN_ID>` → `main` (PR preferred)
-- [ ] Confirm Actions are green (or document failure + fix)
-- [ ] Delete run branches + agent branches
-- [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md`
+- [ ] Run: `python scripts/run_ci_checks.py --ci` on a clean tree
+- [ ] Create/verify PR #108 (merge commit)
+- [ ] Wait for Codecov/patch + Cursor Bugbot green
+- [ ] Merge `run/RUN_20260114_2025Z_b39_docs_alignment` → `main`
+- [ ] Delete run branch after merge
+- [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md` if required

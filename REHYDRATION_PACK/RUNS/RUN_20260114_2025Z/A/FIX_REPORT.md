@@ -1,21 +1,17 @@
-# Fix Report (If Applicable)
+# Fix Report
 
-**Run ID:** RUN_<YYYYMMDD>_<HHMMZ>  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** RUN_20260114_2025Z  
+**Agent:** A  
+**Date:** 2026-01-14
 
 ## Failure observed
-- error:
-- where:
-- repro steps:
+- None (docs-only run; no runtime regressions touched).
 
 ## Diagnosis
-- likely root cause:
+- Not applicable.
 
 ## Fix applied
-- files changed:
-- why it works:
+- Not applicable.
 
 ## Verification
-- tests run:
-- results:
+- `python scripts/run_ci_checks.py --ci` (will be captured in run report/test matrix).
