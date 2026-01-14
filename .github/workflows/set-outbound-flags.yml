@@ -1,0 +1,145 @@
+name: Set Richpanel Outbound (Dev)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Enable or disable outbound writes for DEV (rp-mw-dev-worker)"
+        required: true
+        type: choice
+        options: [enable, disable]
+      auto_revert:
+        description: "Auto-revert after delay (only applies when enabling)"
+        required: true
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+      revert_after_minutes:
+        description: "Minutes to wait before auto-revert (enable + auto_revert=true)"
+        required: false
+        default: "30"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+  AWS_ACCOUNT_ID: "151124909266"
+  FUNC: "rp-mw-dev-worker"
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    concurrency:
+      group: rp-mw-dev-outbound-toggle
+      cancel-in-progress: false
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-set-outbound-dev
+
+      - name: Toggle RICHPANEL_OUTBOUND_ENABLED with optional auto-revert
+        id: toggle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ACTION="${{ inputs.action }}"
+          AUTO_REVERT="${{ inputs.auto_revert }}"
+          REVERT_MINUTES="${{ inputs.revert_after_minutes }}"
+
+          FUNC="${{ env.FUNC }}"
+          KEY="RICHPANEL_OUTBOUND_ENABLED"
+
+          DESIRED="false"
+          if [ "$ACTION" = "enable" ]; then
+            DESIRED="true"
+          fi
+
+          echo "[INFO] Function: $FUNC"
+          echo "[INFO] Desired: $KEY=$DESIRED"
+
+          # Fetch env vars without printing them
+          ENV_VARS_JSON=$(aws lambda get-function-configuration \
+            --function-name "$FUNC" \
+            --query 'Environment.Variables' \
+            --output json)
+
+          ORIG_INFO=$(ENV_VARS_JSON="$ENV_VARS_JSON" KEY="$KEY" python - <<'PY'
+          import json, os
+          env = json.loads(os.environ.get("ENV_VARS_JSON") or "{}")
+          if not isinstance(env, dict):
+              env = {}
+          key = os.environ["KEY"]
+          exists = key in env
+          val = env.get(key)
+          print(json.dumps({"exists": exists, "value": val}))
+          PY
+          )
+          echo "orig_info=$ORIG_INFO" >> "$GITHUB_OUTPUT"
+
+          UPDATED_ENV=$(ENV_VARS_JSON="$ENV_VARS_JSON" KEY="$KEY" DESIRED="$DESIRED" python - <<'PY'
+          import json, os
+          env = json.loads(os.environ.get("ENV_VARS_JSON") or "{}")
+          if not isinstance(env, dict):
+              env = {}
+          env[os.environ["KEY"]] = os.environ["DESIRED"]
+          print(json.dumps({"Variables": env}))
+          PY
+          )
+
+          aws lambda update-function-configuration \
+            --function-name "$FUNC" \
+            --environment "$UPDATED_ENV" >/dev/null
+
+          echo "[OK] Set $KEY=$DESIRED on $FUNC"
+
+          if [ "$ACTION" = "enable" ] && [ "$AUTO_REVERT" = "true" ]; then
+            if ! [[ "$REVERT_MINUTES" =~ ^[0-9]+$ ]]; then
+              echo "[ERROR] revert_after_minutes must be an integer" >&2
+              exit 1
+            fi
+
+            echo "[INFO] Auto-revert enabled. Sleeping ${REVERT_MINUTES} minutes..."
+            sleep $((REVERT_MINUTES*60))
+
+            CUR_ENV_JSON=$(aws lambda get-function-configuration \
+              --function-name "$FUNC" \
+              --query 'Environment.Variables' \
+              --output json)
+
+            REVERT_ENV=$(CUR_ENV_JSON="$CUR_ENV_JSON" ORIG_INFO="$ORIG_INFO" KEY="$KEY" python - <<'PY'
+            import json, os
+            env = json.loads(os.environ.get("CUR_ENV_JSON") or "{}")
+            if not isinstance(env, dict):
+                env = {}
+            orig = json.loads(os.environ.get("ORIG_INFO") or "{}")
+            key = os.environ["KEY"]
+            if orig.get("exists"):
+                env[key] = orig.get("value")
+            else:
+                env.pop(key, None)
+            print(json.dumps({"Variables": env}))
+            PY
+            )
+
+            aws lambda update-function-configuration \
+              --function-name "$FUNC" \
+              --environment "$REVERT_ENV" >/dev/null
+
+            echo "[OK] Auto-revert complete for $KEY on $FUNC"
+          else
+            echo "[INFO] Auto-revert skipped."
+          fi
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "[DONE] set-outbound-flags workflow finished."

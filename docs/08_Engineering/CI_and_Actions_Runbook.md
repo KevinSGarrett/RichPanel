@@ -352,6 +352,13 @@ Notes:
 - `gh run watch` exits non-zero if the workflow fails—treat that as a blocking issue.
 - `gh run view --json url --jq '.url'` prints the run URL; capture it in the rehydration pack evidence table.
 
+### DEV proof window: enabling outbound writes (dev-only)
+- Purpose: temporarily enable outbound writes on `rp-mw-dev-worker` for PASS_STRONG proofs, with automatic revert.
+- Step 1: run `set-runtime-flags.yml` with `safe_mode=false` and `automation_enabled=true`.
+- Step 2: run `set-outbound-flags.yml` with `action=enable`, `auto_revert=true`, `revert_after_minutes=30` (recommended).
+- After the proof, either let auto-revert run or dispatch `set-outbound-flags.yml` with `action=disable` immediately.
+- Reminder: DEV only—never use this workflow for staging or prod.
+
 #### CLI proof (real Richpanel tokens + test tag)
 - Use when you need unambiguous DEV evidence with real Richpanel tokens and a real ticket.
 - PowerShell-safe example (replace placeholders):

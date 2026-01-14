@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)",
+        "anchor": "2026-01-14-run202601140707z-dev-outbound-toggle-workflow-auto-revert"
+      },
+      {
+        "level": 3,
         "text": "2026-01-14 - RUN_20260114_0100Z (Order-status follow-up: reply evidence + coverage)",
         "anchor": "2026-01-14-run202601140100z-order-status-follow-up-reply-evidence-coverage"
       },
@@ -11071,6 +11076,11 @@
         "level": 3,
         "text": "How to run (PowerShell-safe)",
         "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 3,
+        "text": "DEV proof window: enabling outbound writes (dev-only)",
+        "anchor": "dev-proof-window-enabling-outbound-writes-dev-only"
       },
       {
         "level": 3,

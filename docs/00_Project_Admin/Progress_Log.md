@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0100Z.
+Last verified: 2026-01-14 - RUN_20260114_0707Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z
+- Added a DEV-only GitHub Actions workflow to toggle `RICHPANEL_OUTBOUND_ENABLED` on `rp-mw-dev-worker` with OIDC + auto-revert, plus operator runbook guidance and run artifacts.
 
 ### 2026-01-14 - RUN_20260114_0100Z (Order-status follow-up: reply evidence + coverage)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0100Z
