@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree:** C:/RichPanel_GIT
 - **Branch:** `run/RUN_20260114_0100Z_order_status_pass_strong_followup`
-- **PR:** pending creation (follow-up for 95+ score)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/105
 - **Merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -48,7 +48,11 @@
 - Richpanel number-path closes can 404; ID path with combined state/status mitigates. Left fallback logging in proof (status codes only).
 
 ## Blockers / follow-ups
-- Create PR, run wait-for-green loop (Codecov/Bugbot), add outputs + PII scan results to this report, then enable auto-merge.
+- Wait-for-green: Codecov patch PASS, validate PASS, Cursor Bugbot currently pending (see snapshot below). Need final green then auto-merge.
+- After Bugbot green: enable `gh pr merge 105 --auto --merge --delete-branch`.
+
+## PR checks snapshots (gh pr checks 105)
+- Latest: Codecov/patch: pass; validate: pass; Cursor Bugbot: pending.
 
 ## Notes
 - A/C folders are idle reports (no placeholders).  
