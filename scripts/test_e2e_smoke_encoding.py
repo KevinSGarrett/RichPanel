@@ -29,6 +29,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
     _sanitize_response_metadata,
@@ -180,25 +181,28 @@ class DiagnosticsTests(unittest.TestCase):
             allow_network=True,
             confirm_test_ticket=True,
             diagnostic_message="test",
+            apply_winning=True,
         )
         self.assertTrue(result["performed"])
         self.assertEqual(result["winning_candidate"], "status_resolved")
         self.assertEqual(result["winning_payload"], {"status": "resolved"})
         self.assertTrue(any(entry["ok"] for entry in result["results"]))
+        self.assertIsNotNone(result.get("apply_result"))
         # Ensure response metadata redaction works
         sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
         self.assertEqual(sanitized["endpoint_variant"], "id")
 
 
 class ReplyEvidenceTests(unittest.TestCase):
-    def test_reply_evidence_status_change(self) -> None:
+    def test_reply_evidence_status_change_only(self) -> None:
         evidence, reason = _compute_reply_evidence(
             status_changed=True,
             updated_at_delta=1.23,
             message_count_delta=None,
             last_message_source_after=None,
+            tags_added=[],
         )
-        self.assertTrue(evidence)
+        self.assertFalse(evidence)
         self.assertIn("status_changed_delta=1.23", reason)
 
     def test_reply_evidence_message_delta(self) -> None:
@@ -207,6 +211,7 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=2,
             last_message_source_after=None,
+            tags_added=[],
         )
         self.assertTrue(evidence)
         self.assertIn("message_count_delta=2", reason)
@@ -217,6 +222,7 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=None,
             last_message_source_after="middleware",
+            tags_added=[],
         )
         self.assertTrue(evidence)
         self.assertIn("last_message_source=middleware", reason)
@@ -227,9 +233,68 @@ class ReplyEvidenceTests(unittest.TestCase):
             updated_at_delta=None,
             message_count_delta=None,
             last_message_source_after=None,
+            tags_added=[],
         )
         self.assertFalse(evidence)
         self.assertEqual(reason, "no_reply_evidence_fields")
+
+    def test_reply_evidence_tags_and_update_success(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=None,
+            last_message_source_after=None,
+            tags_added=["mw-order-status-answered"],
+            reply_update_success=True,
+            reply_update_candidate="ticket_state_closed",
+        )
+        self.assertTrue(evidence)
+        self.assertIn("positive_middleware_tag_added", reason)
+        self.assertIn("reply_update_success:ticket_state_closed", reason)
+
+
+class FallbackCloseTests(unittest.TestCase):
+    class _Resp:
+        def __init__(self, status_code: int, dry_run: bool, url: str) -> None:
+            self.status_code = status_code
+            self.dry_run = dry_run
+            self.url = url
+
+    class _Exec:
+        def __init__(self, responses: list["FallbackCloseTests._Resp"]) -> None:
+            self.responses = responses
+            self.calls: list[tuple[str, str, dict[str, Any]]] = []
+
+        def execute(self, method: str, path: str, **kwargs: Any) -> "FallbackCloseTests._Resp":
+            self.calls.append((method, path, kwargs))
+            return self.responses.pop(0)
+
+    def test_fallback_close_records_alt_paths_and_metadata(self) -> None:
+        responses = [
+            self._Resp(200, False, "/v1/tickets/id123"),
+            self._Resp(200, False, "/v1/tickets/id123"),
+            self._Resp(201, False, "/v1/tickets/number/1025"),
+            self._Resp(202, False, "/v1/tickets/number/1025"),
+        ]
+        execu = self._Exec(responses)
+        result = _apply_fallback_close(
+            ticket_executor=execu,
+            ticket_ref="1025",
+            ticket_id_for_fallback="id123",
+            fallback_comment={"body": "test", "type": "public", "source": "middleware"},
+            fallback_tags=["mw-reply-sent"],
+            allow_network=True,
+        )
+        # Primary success recorded
+        self.assertEqual(result["status_code"], 200)
+        self.assertEqual(result["close_only_status"], 200)
+        # Alt paths captured
+        self.assertEqual(result["alt_status"], 201)
+        self.assertEqual(result["alt_close_status"], 202)
+        # Calls hit both id and number paths
+        paths = [call[1] for call in execu.calls]
+        self.assertIn("/v1/tickets/id123", paths[0])
+        self.assertIn("/v1/tickets/number/1025", paths[-1])
 
 
 class CriteriaTests(unittest.TestCase):

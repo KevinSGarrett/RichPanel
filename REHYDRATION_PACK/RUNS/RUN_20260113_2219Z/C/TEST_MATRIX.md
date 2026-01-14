@@ -1,15 +1,17 @@
-# Test Matrix
+# Test Matrix (Idle)
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** `RUN_20260113_2219Z`  
+**Agent:** C  
+**Date:** 2026-01-13
 
-List the tests you ran (or explicitly note none).
+Agent C did not execute tests in this run.
 
-| Test name | Command / method | Pass/Fail | Evidence path/link |
-|---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| Test | Status | Notes |
+| --- | --- | --- |
+| (none) | n/a | idle |
 
-## Notes
-<FILL_ME>
+- No unit tests run.
+- No integration/e2e tests run.
+- No lint/type checks run.
+- No manual QA performed.
+- Handoff: testing handled by Agent B.

@@ -7,8 +7,8 @@
 Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
-- `docs/08_Engineering/CI_and_Actions_Runbook.md` — clarified PASS_STRONG criteria, added diagnostic flag, noted nested ticket payload.
-- `docs/00_Project_Admin/Progress_Log.md` — recorded RUN_20260113_2219Z entry and last-verified marker.
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` — PASS_STRONG criteria, diagnostics/apply guidance, and evidence requirements.
+- `docs/00_Project_Admin/Progress_Log.md` — recorded follow-up run and last-verified marker.
 
 ## Docs that should be updated next (if any)
 - None noted.
@@ -21,3 +21,4 @@ Goal: document what changed and where documentation must be updated.
 
 ## Notes
 - Proof and run artifacts stored in `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/`; PII-safe.
+- No additional doc work pending; PR will reference Codecov/Bugbot links once created.

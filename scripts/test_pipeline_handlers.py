@@ -455,7 +455,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         tags_payload = tag_call["kwargs"]["json_body"]["tags"]
         self.assertIsInstance(tags_payload, list)
         self.assertEqual(tags_payload, sorted(tags_payload))
-        self.assertEqual(tags_payload, ["mw-auto-replied", "mw-order-status-answered"])
+        self.assertEqual(tags_payload, ["mw-auto-replied", "mw-order-status-answered", "mw-reply-sent"])
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
         reply_call = executor.calls[2]
@@ -491,6 +491,25 @@ class OutboundOrderStatusTests(unittest.TestCase):
         tags = route_call["kwargs"]["json_body"]["tags"]
         self.assertIn("route-email-support-team", tags)
         self.assertIn("mw-skip-order-status-closed", tags)
+
+    def test_outbound_reply_update_failure(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_status="open", reply_status_codes=[500, 500])
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "reply_update_failed")
+        # Expect GET + add-tags + at least one reply attempt
+        self.assertGreaterEqual(len(executor.calls), 3)
 
     def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -567,12 +586,19 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
 class _RecordingExecutor:
     def __init__(
-        self, *, ticket_status: str = "open", ticket_tags: list[str] | None = None, raise_on_get: bool = False
+        self,
+        *,
+        ticket_status: str = "open",
+        ticket_tags: list[str] | None = None,
+        raise_on_get: bool = False,
+        reply_status_codes: list[int] | None = None,
     ) -> None:
         self.calls: list[dict[str, Any]] = []
         self.ticket_status = ticket_status
         self.ticket_tags = ticket_tags or []
         self.raise_on_get = raise_on_get
+        self.reply_status_codes = reply_status_codes or [202]
+        self._reply_index = 0
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
@@ -589,8 +615,15 @@ class _RecordingExecutor:
                 dry_run=kwargs.get("dry_run", False),
             )
 
+        status_code = (
+            self.reply_status_codes[self._reply_index]
+            if self._reply_index < len(self.reply_status_codes)
+            else self.reply_status_codes[-1]
+        )
+        self._reply_index += 1
+
         return RichpanelResponse(
-            status_code=202,
+            status_code=status_code,
             headers={},
             body=b"",
             url=path,

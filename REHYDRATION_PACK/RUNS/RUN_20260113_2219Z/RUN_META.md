@@ -2,8 +2,8 @@
 
 - RUN_ID: `RUN_20260113_2219Z`
 - Mode: build
-- Objective: <FILL_ME>
-- Stop conditions: <FILL_ME>
+- Objective: Order_status PASS_STRONG proof run (agent A/C idle)
+- Stop conditions: Agents A/C idle; no tasks assigned
 
 ## Notes
 - Each agent writes to its folder: A/, B/, C/
