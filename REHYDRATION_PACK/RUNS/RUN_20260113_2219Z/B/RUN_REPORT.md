@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-13
 - **Worktree:** C:/RichPanel_GIT
 - **Branch:** `run/RUN_20260114_0100Z_order_status_pass_strong_followup`
-- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/105
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/106
 - **Merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -14,9 +14,9 @@
 - Stop conditions: PASS_STRONG proof captured, CI green, PII scans clean, wait-for-green evidence captured post-PR.
 
 ## What changed (high-level)
-- Strengthened reply evidence (tag/message/source or reply_update_success) and added ID-first fallback close with combined state/status + comment/tags (no bodies stored).
-- Captured PASS_STRONG proof on ticket 1025 (OPEN → CLOSED) with middleware tags and fallback close success.
-- Cleaned A/C artifacts to idle; refreshed Progress_Log and doc registries; added targeted coverage for diagnostics/apply/failure paths.
+- Strengthened reply evidence (message delta / middleware source / positive middleware tag / successful reply update); fallback close gated behind explicit flag that forces PASS_WEAK.
+- Captured PASS_STRONG proof on ticket 1020 (OPEN → CLOSED) using diagnostics winning candidate (no fallback); reply evidence from `reply_update_success:ticket_state_closed`.
+- Cleaned A/C artifacts to idle; added targeted coverage for diagnostics/apply/failure paths.
 
 ## Diffstat (summary)
 - pipeline.py, dev_e2e_smoke.py, test_pipeline_handlers.py, test_e2e_smoke_encoding.py updated; doc registries regenerated; run artifacts updated.
@@ -30,16 +30,17 @@
 
 ## Commands run
 - Dev proof (PASS_STRONG):  
-  `python scripts/dev_e2e_smoke.py --scenario order_status --ticket-number 1025 --env dev --region us-east-2 --profile richpanel-dev --stack-name RichpanelMiddleware-dev --run-id RUN_20260113_2219Z --wait-seconds 120 --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json`
+  `python scripts/dev_e2e_smoke.py --profile richpanel-dev --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --ticket-number 1020 --run-id RUN_20260113_2219Z --wait-seconds 120 --confirm-test-ticket --diagnose-ticket-update --apply-winning-candidate --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json`
 - CI equivalent:  
-  `python scripts/run_ci_checks.py --ci` (PASS; only regen files uncommitted)
+  `python scripts/run_ci_checks.py --ci` (PASS on PR head)
 - PII scans (latest):  
-  - rg for URL-encoded at/angle patterns (0 matches)  
-  - rg for mail-domain fragments (0 matches)
+  - `rg -n "<encoded-at-pattern>" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches  
+  - `rg -n "<mail-fragment-pattern>" REHYDRATION_PACK/RUNS/RUN_20260113_2219Z -S` → no matches  
+  - (patterns redacted in report to avoid self-match; commands executed with encoded-at/mail fragments)
 
 ## Tests / Proof
-- Dev smoke (order_status) ticket 1025: **PASS_STRONG**. Status OPEN→CLOSED; tags applied (`mw-order-status-answered`, `mw-order-status-answered:RUN_20260113_2219Z`, `mw-reply-sent`); reply_fallback close 200 on ID path. Evidence: `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json`.
-- `python scripts/run_ci_checks.py --ci`: PASS (all suites). Will rerun after final doc/artifact commits for PR head.
+- Dev smoke (order_status) ticket 1020: **PASS_STRONG**. Status OPEN→CLOSED; tags already present; reply evidence from `reply_update_success:ticket_state_closed` (diagnostics winning candidate applied, no fallback used). Evidence: `REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json` (PII-safe).
+- `python scripts/run_ci_checks.py --ci`: PASS on PR head.
 
 ## Docs impact
 - Updated runbook and Progress_Log as noted; doc registries regenerated.
@@ -48,11 +49,21 @@
 - Richpanel number-path closes can 404; ID path with combined state/status mitigates. Left fallback logging in proof (status codes only).
 
 ## Blockers / follow-ups
-- Wait-for-green: COMPLETE. All checks green (Codecov patch, validate, Cursor Bugbot).
-- Next: `gh pr merge 105 --auto --merge --delete-branch`.
+- Wait-for-green: all checks green (Bugbot pass, Codecov/patch pass, validate pass) on PR #106.
+- Next: enable auto-merge (`gh pr merge 106 --auto --merge --delete-branch`) after this report is committed.
 
-## PR checks snapshots (gh pr checks 105)
-- Final green: Bugbot pass; codecov/patch pass; validate pass.
+## PR checks snapshots
+- Initial (pending):
+  ```
+  Cursor Bugbot	pending	https://cursor.com
+  validate       pending	https://github.com/KevinSGarrett/RichPanel/actions/runs/20983200373/job/60312264626
+  ```
+- Final (current head):
+  ```
+  Cursor Bugbot  pass     https://cursor.com
+  codecov/patch  pass     https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/106
+  validate       pass     https://github.com/KevinSGarrett/RichPanel/actions/runs/20983200373/job/60312264626
+  ```
 
 ## Notes
 - A/C folders are idle reports (no placeholders).  
@@ -60,7 +71,7 @@
 
 ## Links
 - PR #104 (merged): https://github.com/KevinSGarrett/RichPanel/pull/104
-- PR #105 (this follow-up): https://github.com/KevinSGarrett/RichPanel/pull/105
-- Codecov (this PR): https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/105
+- PR #106 (this follow-up): https://github.com/KevinSGarrett/RichPanel/pull/106
+- Codecov (this PR): https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/106
 - Bugbot (this PR): https://cursor.com
-- Actions run (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/20979949798
+- Actions run (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/20981548127

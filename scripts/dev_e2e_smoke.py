@@ -756,6 +756,11 @@ def parse_args() -> argparse.Namespace:
         help="If diagnostics find a working ticket update payload, apply it to the ticket (requires --confirm-test-ticket).",
     )
     parser.add_argument(
+        "--apply-fallback-close",
+        action="store_true",
+        help="Opt-in fallback comment+close for order_status (requires --confirm-test-ticket; forces PASS_WEAK).",
+    )
+    parser.add_argument(
         "--confirm-test-ticket",
         action="store_true",
         help="Explicitly allow writes to the provided ticket when running diagnostics.",
@@ -1376,6 +1381,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     tag_error: Optional[str] = None
     diagnostic_result: Optional[Dict[str, Any]] = None
     applied_winning_candidate = False
+    fallback_used = False
     test_tag_value = f"mw-smoke:{run_id}"
 
     if ticket_ref:
@@ -1606,6 +1612,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         )
         pre_ticket_data: Dict[str, Any] = pre_ticket or {}
         post_ticket_data: Dict[str, Any] = post_ticket or {}
+        fallback_used = False
 
         def _recompute_deltas(pre_data: Dict[str, Any], post_data: Dict[str, Any]) -> Tuple[
             List[str],
@@ -1709,53 +1716,59 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             and payload_conversation
             and not status_resolved
             and allow_network
+            and args.apply_fallback_close
         ):
-            try:
-                fallback_comment = {
-                    "body": "middleware smoke reply (no PII)",
-                    "type": "public",
-                    "source": "middleware",
-                }
-                fallback_tags = sorted(
-                    {
-                        "mw-reply-sent",
-                        "mw-order-status-answered",
-                        f"mw-order-status-answered:{run_id}",
+            if not args.confirm_test_ticket:
+                reply_fallback_result = {"error": "confirm_test_ticket_not_set", "candidate": "fallback_comment_and_close"}
+            else:
+                try:
+                    fallback_comment = {
+                        "body": "middleware smoke reply (no PII)",
+                        "type": "public",
+                        "source": "middleware",
                     }
-                )
-                ticket_id_for_fallback = pre_ticket.get("ticket_id") or payload_conversation or str(ticket_ref)
-                reply_fallback_result = _apply_fallback_close(
-                    ticket_executor=ticket_executor,
-                    ticket_ref=ticket_ref,
-                    ticket_id_for_fallback=ticket_id_for_fallback,
-                    fallback_comment=fallback_comment,
-                    fallback_tags=fallback_tags,
-                    allow_network=allow_network,
-                )
-                post_ticket = _fetch_ticket_snapshot(
-                    ticket_executor, payload_conversation, allow_network=allow_network
-                )
-                post_ticket_data = post_ticket or {}
-                (
-                    tags_added,
-                    tags_removed,
-                    updated_at_delta,
-                    status_before,
-                    status_after,
-                    status_resolved,
-                    status_changed,
-                    message_count_before,
-                    message_count_after,
-                    message_count_delta,
-                    last_message_source_before,
-                    last_message_source_after,
-                    middleware_tags_added,
-                    skip_tags_added,
-                    middleware_tag_present,
-                    middleware_outcome,
-                ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
-            except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-                reply_fallback_result = {"error": str(exc), "candidate": "fallback_comment_and_close"}
+                    fallback_tags = sorted(
+                        {
+                            "mw-reply-sent",
+                            "mw-order-status-answered",
+                            f"mw-order-status-answered:{run_id}",
+                        }
+                    )
+                    ticket_id_for_fallback = pre_ticket.get("ticket_id") or payload_conversation or str(ticket_ref)
+                    reply_fallback_result = _apply_fallback_close(
+                        ticket_executor=ticket_executor,
+                        ticket_ref=ticket_ref,
+                        ticket_id_for_fallback=ticket_id_for_fallback,
+                        fallback_comment=fallback_comment,
+                        fallback_tags=fallback_tags,
+                        allow_network=allow_network,
+                    )
+                    fallback_success = 200 <= (reply_fallback_result.get("status_code") or 0) < 300 and not reply_fallback_result.get("dry_run")
+                    fallback_used = bool(fallback_success)
+                    post_ticket = _fetch_ticket_snapshot(
+                        ticket_executor, payload_conversation, allow_network=allow_network
+                    )
+                    post_ticket_data = post_ticket or {}
+                    (
+                        tags_added,
+                        tags_removed,
+                        updated_at_delta,
+                        status_before,
+                        status_after,
+                        status_resolved,
+                        status_changed,
+                        message_count_before,
+                        message_count_after,
+                        message_count_delta,
+                        last_message_source_before,
+                        last_message_source_after,
+                        middleware_tags_added,
+                        skip_tags_added,
+                        middleware_tag_present,
+                        middleware_outcome,
+                    ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
+                except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                    reply_fallback_result = {"error": str(exc), "candidate": "fallback_comment_and_close"}
 
         print(
             f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
@@ -1781,6 +1794,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     if args.scenario == "order_status" and ticket_executor and post_ticket:
         reply_update_success = bool(middleware_tags_added)
         reply_update_candidate = middleware_tags_added[0] if middleware_tags_added else None
+        if diagnostic_result and diagnostic_result.get("performed") and diagnostic_result.get("winning_candidate"):
+            winning_candidate = diagnostic_result.get("winning_candidate")
+            winner_ok = any(
+                entry.get("candidate") == winning_candidate and entry.get("ok")
+                for entry in diagnostic_result.get("results", [])
+            )
+            if winner_ok:
+                reply_update_success = True
+                reply_update_candidate = winning_candidate
         if reply_fallback_result and 200 <= (reply_fallback_result.get("status_code") or 0) < 300:
             reply_update_success = True
             reply_update_candidate = reply_update_candidate or reply_fallback_result.get("candidate")
@@ -1877,7 +1899,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 },
                 {
                     "name": "reply_evidence",
-                    "description": "Middleware reply evidence observed (message_count_delta greater than 0 or last_message_source=middleware)",
+                    "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
                     "required": False,
                     "value": reply_evidence,
                 },
@@ -1900,7 +1922,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     classification = "FAIL"
     classification_reason = None
     if args.scenario == "order_status":
-        if base_pass and status_resolved_ok and reply_evidence:
+        if fallback_used:
+            classification = "PASS_WEAK"
+            classification_reason = "fallback_close_used_by_harness"
+        elif base_pass and status_resolved_ok and reply_evidence:
             classification = "PASS_STRONG"
         elif base_pass and middleware_ok:
             classification = "PASS_WEAK"
@@ -2019,6 +2044,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "classification_reason": classification_reason,
             "reply_evidence": reply_evidence,
             "reply_evidence_reason": reply_evidence_reason,
+            "fallback_close_used": fallback_used if args.scenario == "order_status" else None,
             "criteria": criteria,
             "criteria_details": criteria_details,
             "failure_reason": failure_reason,

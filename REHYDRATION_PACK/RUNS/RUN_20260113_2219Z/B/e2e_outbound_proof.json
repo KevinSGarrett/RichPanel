@@ -1,24 +1,24 @@
 {
   "meta": {
     "run_id": "RUN_20260113_2219Z",
-    "timestamp": "2026-01-14T02:05:37.258061+00:00",
+    "timestamp": "2026-01-14T03:55:17.302084+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status"
   },
   "inputs": {
-    "ticket_ref": "1025",
-    "ticket_ref_fingerprint": "463727910189",
+    "ticket_ref": "1020",
+    "ticket_ref_fingerprint": "f296867839c8",
     "apply_test_tag": false,
     "test_tag_value": null,
-    "command": "python scripts/dev_e2e_smoke.py --scenario order_status --ticket-number 1025 --env dev --region us-east-2 --profile richpanel-dev --stack-name RichpanelMiddleware-dev --run-id RUN_20260113_2219Z --summary-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/RUN_SUMMARY.md --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json --wait-seconds 120"
+    "command": "python scripts/dev_e2e_smoke.py --profile richpanel-dev --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --ticket-number 1020 --run-id RUN_20260113_2219Z --wait-seconds 120 --confirm-test-ticket --diagnose-ticket-update --apply-winning-candidate --proof-path REHYDRATION_PACK/RUNS/RUN_20260113_2219Z/B/e2e_outbound_proof.json"
   },
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id": "evt:4048a0b1-0410-4df8-9361-c67be2dc8b27",
+    "event_id": "evt:80568429-690c-4c64-8338-5b020a4f556e",
     "conversation_id": null,
-    "conversation_id_fingerprint": "005fe34b9331",
+    "conversation_id_fingerprint": "666fe64400f4",
     "accepted": true
   },
   "dynamo": {
@@ -49,7 +49,7 @@
         "intent": "order_status_tracking"
       },
       "action_count": 2,
-      "updated_at": "2026-01-14T02:05:36.171965+00:00"
+      "updated_at": "2026-01-14T03:55:13.730870+00:00"
     },
     "audit_record": {
       "routing": {
@@ -61,59 +61,58 @@
         "reason": "matched order status keyword",
         "intent": "order_status_tracking"
       },
-      "recorded_at": "2026-01-14T02:05:36.171965+00:00",
-      "ts_action_id": "2026-01-14T02:05:36.171965+00:00#evt:4048a0b1-0410-4df8-9361-c67be2dc8b27"
+      "recorded_at": "2026-01-14T03:55:13.730870+00:00",
+      "ts_action_id": "2026-01-14T03:55:13.730870+00:00#evt:80568429-690c-4c64-8338-5b020a4f556e"
     }
   },
   "richpanel": {
     "pre": {
-      "status": "OPEN",
+      "status": "CLOSED",
       "tags": [
-        "mw-reply-sent",
-        "mw-order-status-answered",
-        "mw-order-status-answered:RUN_20260113_2219Z",
-        "mw-routing-applied",
         "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-order-status-answered:RUN_20260113_2219Z",
+        "mw-auto-replied",
+        "mw-order-status-answered",
         "mw-skip-order-status-closed",
         "route-email-support-team"
       ],
-      "updated_at": "2026-01-14T02:00:13.673Z",
+      "updated_at": "2026-01-14T03:34:30.108Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "005fe34b9331",
+      "ticket_id_fingerprint": "666fe64400f4",
       "endpoint_variant": "number",
       "path_redacted": "/v1/tickets/number/<redacted>"
     },
     "post": {
       "status": "CLOSED",
       "tags": [
-        "mw-order-status-answered",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
         "mw-order-status-answered:RUN_20260113_2219Z",
-        "mw-reply-sent",
+        "mw-auto-replied",
+        "mw-order-status-answered",
         "mw-skip-order-status-closed",
         "route-email-support-team"
       ],
-      "updated_at": "2026-01-14T02:05:37.734Z",
+      "updated_at": "2026-01-14T03:55:15.489Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "005fe34b9331",
+      "ticket_id_fingerprint": "666fe64400f4",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
     "tags_added": [],
-    "tags_removed": [
-      "mw-intent-order_status_tracking",
-      "mw-routing-applied"
-    ],
+    "tags_removed": [],
     "skip_tags_added": [],
-    "updated_at_delta_seconds": 324.061,
-    "status_before": "open",
+    "updated_at_delta_seconds": 1245.381,
+    "status_before": "closed",
     "status_after": "closed",
-    "status_changed": true,
+    "status_changed": false,
     "message_count_before": null,
     "message_count_after": null,
     "message_count_delta": null,
@@ -123,29 +122,347 @@
     "test_tag_verified": null,
     "tag_result": null,
     "tag_error": null,
-    "diagnostics": null,
+    "diagnostics": {
+      "performed": true,
+      "ticket_fingerprint": "666fe64400f4",
+      "winning_candidate": "ticket_state_closed",
+      "results": [
+        {
+          "candidate": "status_resolved",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_resolved",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_closed",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_closed",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_RESOLVED",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_RESOLVED",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_CLOSED",
+          "payload_keys": [
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_CLOSED",
+          "payload_keys": [
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_resolved_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_resolved_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_closed_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_closed_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_RESOLVED_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_RESOLVED_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "status_CLOSED_with_comment",
+          "payload_keys": [
+            "comment",
+            "status"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "state_CLOSED_with_comment",
+          "payload_keys": [
+            "comment",
+            "state"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_closed",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_resolved",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_resolved",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_closed_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_status_resolved_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": false,
+          "status_code": 400,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_resolved_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_CLOSED_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_RESOLVED_with_comment",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_closed_and_status_CLOSED",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        },
+        {
+          "candidate": "ticket_state_CLOSED_and_status_CLOSED",
+          "payload_keys": [
+            "ticket"
+          ],
+          "ok": true,
+          "status_code": 200,
+          "dry_run": false,
+          "path_redacted": "/v1/tickets/<redacted>",
+          "endpoint_variant": "id"
+        }
+      ],
+      "apply_result": {
+        "status_code": 200,
+        "dry_run": false,
+        "candidate": "ticket_state_closed",
+        "path_redacted": "/v1/tickets/<redacted>",
+        "endpoint_variant": "id"
+      }
+    },
     "reply_update_success": true,
-    "reply_update_candidate": "fallback_comment_and_close",
-    "reply_fallback": {
-      "status_code": 200,
-      "dry_run": false,
-      "candidate": "fallback_comment_and_close",
-      "path_redacted": "/v1/tickets/<redacted>",
-      "endpoint_variant": "id",
-      "close_only_status": 200,
-      "close_only_dry_run": false,
-      "alt_status": 404,
-      "alt_dry_run": false,
-      "alt_close_status": 404,
-      "alt_close_dry_run": false
-    }
+    "reply_update_candidate": "ticket_state_closed",
+    "reply_fallback": null
   },
   "result": {
     "status": "PASS",
     "classification": "PASS_STRONG",
     "classification_reason": null,
     "reply_evidence": true,
-    "reply_evidence_reason": "reply_update_success:fallback_comment_and_close",
+    "reply_evidence_reason": "reply_update_success:ticket_state_closed",
+    "fallback_close_used": false,
     "criteria": {
       "scenario": "order_status",
       "webhook_accepted": true,
@@ -211,7 +528,7 @@
       },
       {
         "name": "reply_evidence",
-        "description": "Middleware reply evidence observed (message_count_delta greater than 0 or last_message_source=middleware)",
+        "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
         "required": false,
         "value": true
       },
