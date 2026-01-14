@@ -27,6 +27,7 @@
 ## Notes
 - See Agent A artifacts for the complete evidence and CI results.
 - No follow-up items assigned to Agent C.
+- Agent C remained idle by plan; no evidence required beyond this notice.
 
 ## Follow-ups
 - None; agent idle this run.
