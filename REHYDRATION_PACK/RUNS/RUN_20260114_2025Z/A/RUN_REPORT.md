@@ -99,6 +99,9 @@ List commands you ran (include key flags/env if relevant):
 Include test commands + results + links to evidence.
 
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: https://github.com/KevinSGarrett/RichPanel/pull/108/checks (see snippet)
+- `codecov/patch` status: pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108
+- `Cursor Bugbot` status: pass — https://cursor.com
+- `validate` workflow: pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21009266932/job/60399761599
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
