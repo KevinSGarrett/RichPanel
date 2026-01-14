@@ -21,17 +21,17 @@ Add a DEV-only outbound toggle workflow with auto-revert, document DEV proof win
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260114_0707Z_dev_outbound_toggle_workflow`
-- PR: pending
-- CI status at end of run: pending final pass
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/107
+- CI status at end of run: local CI-equivalent green; PR checks green (validate + Codecov + Bugbot)
 - Main updated: no (not integrator)
 - Branch cleanup done: pending (auto-merge target)
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (with AWS region vars) — rerun needed after final edits.
-- Evidence path/link: pending final CI output + wait-for-green snapshots.
+- Tests run: `python scripts/run_ci_checks.py --ci` (with AWS region vars).
+- Evidence path/link: run log in `RUN_REPORT.md` (CI-equivalent green).
 
 ## Decisions made
 - Keep workflow DEV-only (hardcoded account/function) and include auto-revert by default.
 
 ## Issues / follow-ups
-- Finalize run artifacts and wait-for-green evidence after PR creation.
+- None.
