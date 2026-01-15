@@ -7,7 +7,7 @@
 - Worktree path: `C:\RichPanel_GIT`
 - Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/110
-- Head SHA: `a2881fc03901315242a27eb4c70771ff033ba588`
+- Head SHA: `49b17cacdeb526fa2c7b2414a2f34e2e016bd6a0`
 
 ## Objective + scope
 - Gate OpenAI response `message_excerpt` logging behind an opt-in env flag (default OFF), keep logs PII-safe by skipping excerpts unless explicitly enabled, and add tests for flag on/off paths. Update run artifacts and Progress_Log for RUN_20260115_1200Z.
@@ -38,6 +38,9 @@
 ## Wait-for-Green Polling
 - 2026-01-15T10:09:23-06:00 — Actions: `validate` pending; Codecov: not yet reported; Bugbot: pending.
 - 2026-01-15T10:12:10-06:00 — Actions: `validate` failed (missing RUN_20260115_1200Z A/B folders and C artifacts); Codecov: not yet reported; Bugbot: pending.
+- 2026-01-15T10:23:51-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: pending.
+- 2026-01-15T10:26:36-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: pending.
+- 2026-01-15T10:29:21-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
 
 ## Notes / next steps
 - Add required RUN_20260115_1200Z artifacts (A/B folders, RUN_SUMMARY/STRUCTURE_REPORT/DOCS_IMPACT_MAP/TEST_MATRIX, and expand RUN_REPORT) to satisfy `verify_rehydration_pack`.
