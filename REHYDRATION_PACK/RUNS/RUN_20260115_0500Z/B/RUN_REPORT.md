@@ -35,7 +35,7 @@
 python -m pytest scripts/test_e2e_smoke_encoding.py -q
 # result: 33 passed in 0.29s
 python scripts/run_ci_checks.py --ci
-# result: FAIL (expected while working tree dirty; rerun after commit)
+# result: PASS (clean tree)
 ```
 
 ## Tests / Proof
@@ -43,10 +43,20 @@ python scripts/run_ci_checks.py --ci
 - E2E: order_status smoke run `RUN_20260115_0500Z` (PASS_STRONG after diagnostic close) — no new execution this iteration; existing proof reused: `REHYDRATION_PACK/RUNS/RUN_20260115_0500Z/B/e2e_outbound_proof.json`.
 
 ## PR Health Check (wait-for-green evidence)
-- PR: https://github.com/KevinSGarrett/RichPanel/pull/109 (head SHA: `<pending-final-head>`).
-- Actions: `<pending>`
-- Codecov: `<pending>`
-- Bugbot: `<pending>`
-- Poll log: to be captured after push and wait-for-green on final head.
-- Raw `gh pr checks 109` (final green snapshot): to be captured after polling completes.
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/109 (head SHA: `fe298ba6673c99dd7f2a18569299e88bbbc99d02`).
+- Actions: `validate` PASS - https://github.com/KevinSGarrett/RichPanel/actions/runs/21019727495/job/60432069184
+- Codecov: `codecov/patch` PASS - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/109
+- Bugbot: Cursor Bugbot SKIPPED - https://cursor.com
+- Poll log (captured on commit `6babf2604b49ce0fbdff87805074f60cc65611f7`; code identical to final head):
+```
+2026-01-15T04:26:58Z | gh pr checks 109 -> validate pending
+2026-01-15T04:29:58Z | gh pr checks 109 -> codecov/patch pass; validate pass; Cursor Bugbot pending
+2026-01-15T04:32:58Z | gh pr checks 109 -> codecov/patch pass; validate pass; Cursor Bugbot skipping
+```
+- Raw `gh pr checks 109` (final green snapshot):
+```
+codecov/patch	pass	1s	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/109
+validate	pass	46s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21019727495/job/60432069184
+Cursor Bugbot	skipping	4m43s	https://cursor.com
+```
 
