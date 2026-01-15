@@ -1,0 +1,11 @@
+# Structure Report
+- Agent folder B for RUN_20260115_0500Z contains required docs.
+- Proof snapshot includes status/state/tags/ticket_number with redacted IDs.
+- Ticket_id is fingerprinted and API paths are redacted.
+- State fields preserved even when null to show closure basis.
+- Reply evidence recorded via diagnostic reply_update_success and closed status.
+- No bodies/emails included; ticket_number is numeric.
+- Smoke tags scoped to run_id and excluded from outcome math.
+- safe_mode=true noted for routing; automation disabled in record.
+- RUN_REPORT documents commands, diffstat, and tests.
+- Files adhere to PII guard rules.

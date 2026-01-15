@@ -91,29 +91,73 @@ def _is_positive_middleware_tag(tag: str) -> bool:
 def _compute_middleware_outcome(
     *,
     status_after: Optional[str],
+    state_after: Optional[str],
     tags_added: List[str],
     post_tags: List[str],
 ) -> Dict[str, Any]:
     """
     Decide whether middleware produced a valid outcome.
-    - PASS requires either resolved/closed OR a positive middleware tag.
+    - Closure is satisfied when status OR state is resolved/closed/solved (case-insensitive).
     - Skip/error tags (mw-skip-status-read-failed, route-email-support-team) are NOT valid.
     - Smoke tags (mw-smoke:<RUN_ID>) are ignored for PASS purposes.
     """
+    closed_values = {"resolved", "closed", "solved"}
     normalized_status = status_after.strip().lower() if isinstance(status_after, str) else None
-    status_resolved = normalized_status in {"resolved", "closed"} if normalized_status else False
+    normalized_state = state_after.strip().lower() if isinstance(state_after, str) else None
+    status_resolved = normalized_status in closed_values if normalized_status else False
+    state_resolved = normalized_state in closed_values if normalized_state else False
+    closed_or_resolved = status_resolved or state_resolved
     skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
     positive_tags_added = [tag for tag in tags_added if _is_positive_middleware_tag(tag)]
     middleware_tag_added = bool(positive_tags_added)
     middleware_tag_present = middleware_tag_added
-    middleware_outcome = (status_resolved or middleware_tag_added) and not bool(skip_tags_added)
+    middleware_outcome = (closed_or_resolved or middleware_tag_added) and not bool(skip_tags_added)
     return {
         "status_resolved": status_resolved,
+        "state_resolved": state_resolved,
+        "closed_or_resolved": closed_or_resolved,
+        "status_after_normalized": normalized_status,
+        "state_after_normalized": normalized_state,
         "middleware_tag_present": middleware_tag_present,
         "middleware_tag_added": middleware_tag_added,
         "middleware_outcome": middleware_outcome,
         "skip_tags_present": bool(skip_tags_added),
     }
+
+
+def _classify_order_status_outcome(
+    *,
+    base_pass: bool,
+    closed_ok: Optional[bool],
+    reply_evidence: Optional[bool],
+    middleware_tag_ok: Optional[bool],
+    skip_tags_present_ok: Optional[bool],
+    failed_required: List[str],
+    fallback_used: bool,
+) -> Tuple[str, Optional[str]]:
+    """
+    Classify the order_status scenario result, enforcing:
+    - FAIL on skip/escalation tags.
+    - PASS_STRONG only when reply evidence exists AND ticket is closed/resolved via status/state.
+    - PASS_WEAK only when reply evidence exists and a middleware tag was applied (automation invariant) or harness fallback closed.
+    """
+    skip_or_escalated = skip_tags_present_ok is False
+    base_with_reply = base_pass and bool(reply_evidence)
+    closed_ok_bool = bool(closed_ok)
+
+    if skip_or_escalated:
+        return "FAIL", "skip_or_escalation_tags_added"
+    if fallback_used:
+        return "PASS_WEAK", "fallback_close_used_by_harness"
+    if base_with_reply and closed_ok_bool:
+        return "PASS_STRONG", None
+    if base_with_reply and bool(middleware_tag_ok):
+        return "PASS_WEAK", "ticket_not_closed_but_reply_evidence_present_with_middleware_tag"
+    if base_with_reply:
+        return "FAIL", "ticket_not_closed_no_automation_invariant"
+
+    failure_reason = f"Failed criteria: {', '.join(failed_required)}" if failed_required else "criteria_not_met"
+    return "FAIL", failure_reason
 @dataclass
 class StackArtifacts:
     endpoint_url: str
@@ -200,19 +244,41 @@ def _extract_endpoint_variant(path: Optional[str]) -> Optional[str]:
 def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     if not snapshot:
         return None
-    sanitized = dict(snapshot)
+    sanitized: Dict[str, Any] = {}
+
+    # Only keep a PII-safe subset of fields that we intentionally surface.
+    allowed_fields = {
+        "status",
+        "state",
+        "tags",
+        "updated_at",
+        "message_count",
+        "last_message_source",
+        "ticket_number",
+        "status_code",
+        "dry_run",
+    }
+    for key in allowed_fields:
+        if key in snapshot:
+            sanitized[key] = snapshot.get(key)
 
     # Remove ticket_id, replace with fingerprint only
-    ticket_id = sanitized.pop("ticket_id", None)
+    ticket_id = snapshot.get("ticket_id")
     if ticket_id:
         sanitized["ticket_id_fingerprint"] = _fingerprint(ticket_id)
         # NEVER include raw ticket_id - it may contain email/message-id PII
 
     # Remove raw path, replace with redacted version and endpoint variant
-    raw_path = sanitized.pop("path", None)
+    raw_path = snapshot.get("path")
     if raw_path:
         sanitized["endpoint_variant"] = _extract_endpoint_variant(raw_path)
         sanitized["path_redacted"] = _redact_path(raw_path)
+
+    # Drop any ticket_number that looks like it could contain PII
+    ticket_number = sanitized.get("ticket_number")
+    if isinstance(ticket_number, str):
+        if "@" in ticket_number or "<" in ticket_number or ">" in ticket_number:
+            sanitized.pop("ticket_number", None)
 
     return sanitized
 
@@ -377,7 +443,8 @@ def _fetch_ticket_snapshot(
         payload = response.json() or {}
         if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
             payload = payload["ticket"]
-        status = payload.get("status") or payload.get("state")
+        status = payload.get("status")
+        state = payload.get("state")
         tags = _normalize_tags(payload.get("tags"))
         updated_at = payload.get("updated_at") or payload.get("updatedAt")
         message_count = _safe_int(
@@ -386,14 +453,17 @@ def _fetch_ticket_snapshot(
             or payload.get("messagesCount")
         )
         last_message_source = payload.get("last_message_source") or payload.get("lastMessageSource")
+        ticket_number = payload.get("ticket_number") or payload.get("conversation_no") or payload.get("conversationNo")
 
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
             "status": status.strip() if isinstance(status, str) else status,
+            "state": state.strip() if isinstance(state, str) else state,
             "tags": tags,
             "updated_at": updated_at,
             "message_count": message_count,
             "last_message_source": last_message_source,
+            "ticket_number": ticket_number,
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "path": path,
@@ -1577,8 +1647,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     test_tag_verified = None
     status_before = None
     status_after = None
-    status_resolved = None
+    closed_or_resolved = None
     status_changed = None
+    state_changed = None
+    state_before = None
+    state_after = None
     message_count_before = None
     message_count_after = None
     message_count_delta = None
@@ -1620,6 +1693,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             Optional[float],
             Optional[str],
             Optional[str],
+            Optional[str],
+            Optional[str],
+            Optional[bool],
             Optional[bool],
             Optional[bool],
             Optional[int],
@@ -1629,6 +1705,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             Optional[str],
             List[str],
             List[str],
+            Optional[bool],
             Optional[bool],
             Optional[bool],
         ]:
@@ -1644,13 +1721,19 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 if args.apply_test_tag and not tag_error
                 else (False if tag_error else None)
             )
-            status_before_val_local = pre_data.get("status") or pre_data.get("state")
-            status_after_val_local = post_data.get("status") or post_data.get("state")
+            status_before_val_local = pre_data.get("status")
+            state_before_val_local = pre_data.get("state")
+            status_after_val_local = post_data.get("status")
+            state_after_val_local = post_data.get("state")
             status_before_local = status_before_val_local.strip().lower() if isinstance(status_before_val_local, str) else None
+            state_before_local = state_before_val_local.strip().lower() if isinstance(state_before_val_local, str) else None
             status_after_local = status_after_val_local.strip().lower() if isinstance(status_after_val_local, str) else None
-            status_resolved_local = status_after_local in {"resolved", "closed"} if status_after_local else False
+            state_after_local = state_after_val_local.strip().lower() if isinstance(state_after_val_local, str) else None
             status_changed_local = (
                 status_before_local != status_after_local if status_after_local or status_before_local else None
+            )
+            state_changed_local = (
+                state_before_local != state_after_local if state_after_local or state_before_local else None
             )
             message_count_before_local = _safe_int(pre_data.get("message_count"))
             message_count_after_local = _safe_int(post_data.get("message_count"))
@@ -1664,21 +1747,26 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             ]
             skip_tags_added_local = [tag for tag in tags_added_local if tag in _SKIP_MIDDLEWARE_TAGS]
             outcome_local = _compute_middleware_outcome(
-                status_after=status_after_local,
+                status_after=status_after_val_local,
+                state_after=state_after_val_local,
                 tags_added=tags_added_local,
                 post_tags=post_data.get("tags") or [],
             )
             middleware_tag_present_local = outcome_local["middleware_tag_present"] if post_data else None
             middleware_outcome_local = outcome_local["middleware_outcome"] if post_data else None
             skip_tags_present_local = outcome_local["skip_tags_present"] if post_data else None
+            closed_or_resolved_local = outcome_local["closed_or_resolved"] if post_data else None
             return (
                 tags_added_local,
                 tags_removed_local,
                 updated_at_delta_local,
                 status_before_local,
+                state_before_local,
                 status_after_local,
-                status_resolved_local,
+                state_after_local,
+                closed_or_resolved_local,
                 status_changed_local,
+                state_changed_local,
                 message_count_before_local,
                 message_count_after_local,
                 message_count_delta_local,
@@ -1688,6 +1776,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 skip_tags_added_local,
                 middleware_tag_present_local,
                 middleware_outcome_local,
+                skip_tags_present_local,
             )
 
         (
@@ -1695,9 +1784,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             tags_removed,
             updated_at_delta,
             status_before,
+            state_before,
             status_after,
-            status_resolved,
+            state_after,
+            closed_or_resolved,
             status_changed,
+            state_changed,
             message_count_before,
             message_count_after,
             message_count_delta,
@@ -1707,6 +1799,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             skip_tags_added,
             middleware_tag_present,
             middleware_outcome,
+            skip_tags_present,
         ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
 
         reply_fallback_result: Optional[Dict[str, Any]] = None
@@ -1714,7 +1807,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             args.scenario == "order_status"
             and ticket_executor
             and payload_conversation
-            and not status_resolved
+            and not closed_or_resolved
             and allow_network
             and args.apply_fallback_close
         ):
@@ -1754,9 +1847,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         tags_removed,
                         updated_at_delta,
                         status_before,
+                        state_before,
                         status_after,
-                        status_resolved,
+                        state_after,
+                        closed_or_resolved,
                         status_changed,
+                        state_changed,
                         message_count_before,
                         message_count_after,
                         message_count_delta,
@@ -1766,6 +1862,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         skip_tags_added,
                         middleware_tag_present,
                         middleware_outcome,
+                        skip_tags_present,
                     ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
                 except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
                     reply_fallback_result = {"error": str(exc), "candidate": "fallback_comment_and_close"}
@@ -1787,7 +1884,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     intent_ok = intent_matches_order_status if args.scenario == "order_status" else None
     middleware_ok = bool(middleware_outcome) if args.scenario == "order_status" else None
     middleware_tag_ok = bool(middleware_tag_present) if args.scenario == "order_status" else None
-    status_resolved_ok = bool(status_resolved) if args.scenario == "order_status" else None
+    closed_ok = bool(closed_or_resolved) if args.scenario == "order_status" else None
     skip_tags_present_ok = (not skip_tags_present) if args.scenario == "order_status" else None
     reply_evidence = None
     reply_evidence_reason = None
@@ -1806,8 +1903,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if reply_fallback_result and 200 <= (reply_fallback_result.get("status_code") or 0) < 300:
             reply_update_success = True
             reply_update_candidate = reply_update_candidate or reply_fallback_result.get("candidate")
+        status_or_state_changed = (status_changed or False) or (state_changed or False)
         reply_evidence, reply_evidence_reason = _compute_reply_evidence(
-            status_changed=status_changed or False,
+            status_changed=status_or_state_changed,
             updated_at_delta=updated_at_delta,
             message_count_delta=message_count_delta,
             last_message_source_after=last_message_source_after,
@@ -1823,7 +1921,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "ticket_lookup": ticket_lookup_ok,
         "intent_order_status": intent_ok,
         "middleware_outcome": middleware_ok,
-        "status_resolved_or_closed": status_resolved_ok,
+        "status_or_state_closed": closed_ok,
         "middleware_tag_applied": middleware_tag_ok,
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
@@ -1880,10 +1978,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     "value": middleware_ok,
                 },
                 {
-                    "name": "status_resolved_or_closed",
-                    "description": "Post status is resolved/closed",
+                    "name": "status_or_state_closed",
+                    "description": "Post status or state is resolved/closed/solved",
                     "required": False,
-                    "value": status_resolved_ok,
+                    "value": closed_ok,
                 },
                 {
                     "name": "middleware_tag_applied",
@@ -1919,27 +2017,23 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     failed = [item["name"] for item in criteria_details if item.get("required") and not item.get("value")]
     base_pass = all(required_checks) and not failed
-    classification = "FAIL"
-    classification_reason = None
     if args.scenario == "order_status":
-        if fallback_used:
-            classification = "PASS_WEAK"
-            classification_reason = "fallback_close_used_by_harness"
-        elif base_pass and status_resolved_ok and reply_evidence:
-            classification = "PASS_STRONG"
-        elif base_pass and middleware_ok:
-            classification = "PASS_WEAK"
-            classification_reason = "status_or_reply_evidence_missing"
-        else:
-            classification_reason = (
-                f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
-            )
+        classification, classification_reason = _classify_order_status_outcome(
+            base_pass=base_pass,
+            closed_ok=closed_ok,
+            reply_evidence=reply_evidence,
+            middleware_tag_ok=middleware_tag_ok,
+            skip_tags_present_ok=skip_tags_present_ok,
+            failed_required=failed,
+            fallback_used=fallback_used,
+        )
     else:
         classification = "PASS_STRONG" if base_pass else "FAIL"
-        if not base_pass:
-            classification_reason = (
-                f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
-            )
+        classification_reason = (
+            None
+            if base_pass
+            else (f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met")
+        )
 
     result_status = "PASS" if classification in {"PASS_STRONG", "PASS_WEAK"} else "FAIL"
     failure_reason = None
@@ -2023,13 +2117,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "updated_at_delta_seconds": updated_at_delta,
             "status_before": status_before,
             "status_after": status_after,
+            "state_before": state_before,
+            "state_after": state_after,
+            "closed_or_resolved": closed_or_resolved,
             "status_changed": status_changed,
+            "state_changed": state_changed,
             "message_count_before": message_count_before,
             "message_count_after": message_count_after,
             "message_count_delta": message_count_delta,
             "last_message_source_before": last_message_source_before,
             "last_message_source_after": last_message_source_after,
             "middleware_tags_added": middleware_tags_added,
+            "skip_tags_present": skip_tags_present,
             "test_tag_verified": test_tag_verified,
             "tag_result": _sanitize_tag_result(tag_result),
             "tag_error": tag_error,

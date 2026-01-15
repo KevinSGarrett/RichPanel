@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+from typing import Any
 import unittest
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -27,12 +28,15 @@ if str(SCRIPTS) not in sys.path:
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
+    _classify_order_status_outcome,
     _compute_middleware_outcome,
     _compute_reply_evidence,
     _apply_fallback_close,
     _diagnose_ticket_update,
+    _fetch_ticket_snapshot,
     _sanitize_decimals,
     _sanitize_response_metadata,
+    _sanitize_ticket_snapshot,
 )
 
 
@@ -301,6 +305,7 @@ class CriteriaTests(unittest.TestCase):
     def test_middleware_outcome_rejects_skip_tags(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="open",
+            state_after=None,
             tags_added=["mw-skip-status-read-failed"],
             post_tags=["mw-skip-status-read-failed", "mw-smoke:RUN"],
         )
@@ -312,6 +317,7 @@ class CriteriaTests(unittest.TestCase):
     def test_middleware_outcome_ignores_historical_skip_tags(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="open",
+            state_after=None,
             tags_added=[],
             post_tags=["mw-skip-status-read-failed", "mw-smoke:RUN"],
         )
@@ -323,6 +329,7 @@ class CriteriaTests(unittest.TestCase):
     def test_middleware_outcome_rejects_route_to_support_tag_added(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="open",
+            state_after=None,
             tags_added=["route-email-support-team"],
             post_tags=["route-email-support-team"],
         )
@@ -334,17 +341,33 @@ class CriteriaTests(unittest.TestCase):
     def test_middleware_outcome_accepts_resolved(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="resolved",
+            state_after=None,
             tags_added=[],
             post_tags=["mw-smoke:RUN"],
         )
         self.assertFalse(outcome["skip_tags_present"])
         self.assertTrue(outcome["middleware_outcome"])
         self.assertTrue(outcome["status_resolved"])
+        self.assertFalse(outcome["state_resolved"])
+        self.assertTrue(outcome["closed_or_resolved"])
         self.assertFalse(outcome["middleware_tag_added"])
+
+    def test_middleware_outcome_accepts_state_closed(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="open",
+            state_after="CLOSED",
+            tags_added=[],
+            post_tags=[],
+        )
+        self.assertFalse(outcome["status_resolved"])
+        self.assertTrue(outcome["state_resolved"])
+        self.assertTrue(outcome["closed_or_resolved"])
+        self.assertTrue(outcome["middleware_outcome"])
 
     def test_middleware_outcome_requires_tag_added_not_only_present(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="open",
+            state_after=None,
             tags_added=[],
             post_tags=["mw-order-status-answered:RUN"],
         )
@@ -366,12 +389,204 @@ class CriteriaTests(unittest.TestCase):
     def test_middleware_outcome_counts_positive_tag_added(self) -> None:
         outcome = _compute_middleware_outcome(
             status_after="open",
+            state_after=None,
             tags_added=["mw-order-status-answered:RUN"],
             post_tags=["mw-order-status-answered:RUN"],
         )
         self.assertTrue(outcome["middleware_tag_present"])
         self.assertTrue(outcome["middleware_tag_added"])
         self.assertTrue(outcome["middleware_outcome"])
+
+    def test_middleware_outcome_fails_with_skip_even_if_positive_tag(self) -> None:
+        outcome = _compute_middleware_outcome(
+            status_after="resolved",
+            state_after=None,
+            tags_added=["mw-escalated-human", "mw-order-status-answered"],
+            post_tags=["mw-escalated-human", "mw-order-status-answered"],
+        )
+        self.assertTrue(outcome["skip_tags_present"])
+        self.assertFalse(outcome["middleware_outcome"])
+        self.assertTrue(outcome["status_resolved"])
+
+    def test_order_status_classification_requires_closed_for_pass_strong(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=False,
+            reply_evidence=True,
+            middleware_tag_ok=True,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "PASS_WEAK")
+        self.assertEqual(reason, "ticket_not_closed_but_reply_evidence_present_with_middleware_tag")
+
+    def test_order_status_classification_requires_reply_evidence(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=True,
+            reply_evidence=False,
+            middleware_tag_ok=True,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "FAIL")
+        self.assertEqual(reason, "criteria_not_met")
+
+    def test_order_status_classification_fails_on_skip_even_with_evidence(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=True,
+            reply_evidence=True,
+            middleware_tag_ok=True,
+            skip_tags_present_ok=False,
+            failed_required=["no_skip_tags"],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "FAIL")
+        self.assertEqual(reason, "skip_or_escalation_tags_added")
+
+    def test_order_status_classification_fallback_returns_pass_weak(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=False,
+            reply_evidence=True,
+            middleware_tag_ok=False,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=True,
+        )
+        self.assertEqual(classification, "PASS_WEAK")
+        self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_order_status_classification_pass_strong_with_closure_and_reply(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=True,
+            reply_evidence=True,
+            middleware_tag_ok=True,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "PASS_STRONG")
+        self.assertIsNone(reason)
+
+    def test_order_status_classification_fails_without_closure_or_middleware_tag(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=False,
+            reply_evidence=True,
+            middleware_tag_ok=False,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "FAIL")
+        self.assertEqual(reason, "ticket_not_closed_no_automation_invariant")
+
+
+class FetchTicketSnapshotTests(unittest.TestCase):
+    def test_fetch_ticket_snapshot_strips_status_state_and_sets_ticket_number(self) -> None:
+        class StubResponse:
+            def __init__(self) -> None:
+                self.status_code = 200
+                self.dry_run = True
+
+            def json(self) -> dict:
+                return {
+                    "ticket": {
+                        "id": "abc",
+                        "status": " CLOSED ",
+                        "state": " RESOLVED ",
+                        "conversation_no": 1038,
+                        "tags": [],
+                    }
+                }
+
+        class StubExecutor:
+            def __init__(self, response: StubResponse) -> None:
+                self.response = response
+                self.calls = []
+
+            def execute(self, method: str, path: str, dry_run: bool, log_body_excerpt: bool) -> StubResponse:
+                self.calls.append(
+                    {
+                        "method": method,
+                        "path": path,
+                        "dry_run": dry_run,
+                        "log_body_excerpt": log_body_excerpt,
+                    }
+                )
+                return self.response
+
+        response = StubResponse()
+        executor = StubExecutor(response)
+
+        snapshot = _fetch_ticket_snapshot(executor, "TICKET-123", allow_network=False)
+
+        self.assertEqual(snapshot["status"], "CLOSED")
+        self.assertEqual(snapshot["state"], "RESOLVED")
+        self.assertEqual(snapshot["ticket_number"], 1038)
+        self.assertTrue(snapshot["dry_run"])
+        self.assertEqual(snapshot["path"], "/v1/tickets/TICKET-123")
+        self.assertEqual(executor.calls[0]["path"], "/v1/tickets/TICKET-123")
+        self.assertTrue(executor.calls[0]["dry_run"])
+
+
+class SnapshotSanitizationTests(unittest.TestCase):
+    def test_snapshot_sanitization_retains_state_and_status(self) -> None:
+        snapshot = {
+            "ticket_id": "abc-123",
+            "status": "Open",
+            "state": "resolved",
+            "ticket_number": "10025",
+            "path": "/v1/tickets/abc-123",
+            "tags": ["mw-smoke:RUN"],
+        }
+        sanitized = _sanitize_ticket_snapshot(snapshot)
+        self.assertIsNotNone(sanitized)
+        assert sanitized is not None  # type narrowing for mypy
+        self.assertEqual(sanitized["status"], "Open")
+        self.assertEqual(sanitized["state"], "resolved")
+        self.assertIn("ticket_id_fingerprint", sanitized)
+        self.assertNotIn("ticket_id", sanitized)
+        self.assertEqual(sanitized["path_redacted"], "/v1/tickets/<redacted>")
+        self.assertIn("endpoint_variant", sanitized)
+
+    def test_snapshot_sanitization_removes_pii_ticket_number(self) -> None:
+        snapshot = {
+            "ticket_id": "abc-123",
+            "status": "open",
+            "state": "closed",
+            "ticket_number": "customer@example.com",
+            "path": "/v1/tickets/abc-123/add-tags",
+            "tags": [],
+        }
+        sanitized = _sanitize_ticket_snapshot(snapshot)
+        self.assertIsNotNone(sanitized)
+        assert sanitized is not None
+        self.assertNotIn("ticket_number", sanitized)
+        self.assertEqual(sanitized["path_redacted"], "/v1/tickets/<redacted>/add-tags")
+
+    def test_snapshot_sanitization_drops_unknown_pii_fields(self) -> None:
+        snapshot = {
+            "ticket_id": "abc-123",
+            "status": "open",
+            "state": None,
+            "tags": [],
+            "path": "/v1/tickets/abc-123",
+            "customer_email": "person@example.com",
+            "body": "This should not be present",
+        }
+        sanitized = _sanitize_ticket_snapshot(snapshot)
+        self.assertIsNotNone(sanitized)
+        assert sanitized is not None
+        self.assertNotIn("customer_email", sanitized)
+        self.assertNotIn("body", sanitized)
+        self.assertIn("state", sanitized)
+        self.assertIn("path_redacted", sanitized)
 
 
 class URLEncodingTests(unittest.TestCase):

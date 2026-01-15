@@ -1,0 +1,11 @@
+# Run Summary
+- Run ID: RUN_20260115_0500Z
+- Agent: B
+- Scenario: order_status smoke proof
+- Outcome: PASS_STRONG (status CLOSED; reply_update_success ticket_state_closed)
+- Closure basis: status_after=CLOSED; state_after=None; closed_or_resolved=True
+- Reply evidence: reply_update_success=ticket_state_closed; tags_added=[]; message_count_delta=None
+- Skip/escalation tags: none observed
+- Proof: REHYDRATION_PACK/RUNS/RUN_20260115_0500Z/B/e2e_outbound_proof.json
+- Notes: safe_mode true so diagnostic close used with real Richpanel API
+- Tests: python -m pytest scripts/test_e2e_smoke_encoding.py (pass)

@@ -12,6 +12,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
+from richpanel_middleware.config import openai_log_response_excerpt_enabled
+
 try:
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -206,6 +208,8 @@ class OpenAIClient:
         self._sleeper = sleeper or time.sleep
         self._rng = rng or random.random
         self._secrets_client_obj = secrets_client
+        # Debug-only: include response excerpts in logs when explicitly enabled.
+        self._log_response_excerpt_enabled = openai_log_response_excerpt_enabled()
 
     def chat_completion(
         self,
@@ -431,13 +435,14 @@ class OpenAIClient:
             extra["retry_in"] = retry_in
             self._logger.warning("openai.retry", extra=extra)
         else:
-            preview = ""
-            if response.message:
-                preview = _truncate(response.message, limit=200)
-            elif response.raw:
-                preview = _truncate(json.dumps(response.raw, sort_keys=True), limit=200)
-            if preview:
-                extra["message_excerpt"] = preview
+            preview: Optional[str] = None
+            if self._log_response_excerpt_enabled:
+                if response.message:
+                    preview = _truncate(response.message, limit=200)
+                elif response.raw:
+                    preview = _truncate(json.dumps(response.raw, sort_keys=True), limit=200)
+                if preview:
+                    extra["message_excerpt"] = preview
             self._logger.info("openai.response", extra=extra)
 
     @staticmethod

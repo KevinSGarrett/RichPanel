@@ -21,6 +21,7 @@ from richpanel_middleware.automation.prompts import (  # noqa: E402
 )
 from richpanel_middleware.integrations.openai import (  # noqa: E402
     ChatCompletionRequest,
+    ChatCompletionResponse,
     ChatMessage,
     OpenAIClient,
     TransportRequest,
@@ -62,6 +63,18 @@ class _StubSecretsClient:
         return self.response
 
 
+class _RecordingLogger:
+    def __init__(self):
+        self.infos = []
+        self.warnings = []
+
+    def info(self, message: str, extra=None):
+        self.infos.append({"message": message, "extra": extra})
+
+    def warning(self, message: str, extra=None):
+        self.warnings.append({"message": message, "extra": extra})
+
+
 class OpenAIClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # Ensure host env flags do not leak into tests.
@@ -73,6 +86,7 @@ class OpenAIClientTests(unittest.TestCase):
         os.environ.pop("RICH_PANEL_ENV", None)
         os.environ.pop("MW_ENV", None)
         os.environ.pop("ENVIRONMENT", None)
+        os.environ.pop("OPENAI_LOG_RESPONSE_EXCERPT", None)
 
     def test_safe_mode_short_circuits_transport(self) -> None:
         transport = _FailingTransport()
@@ -190,6 +204,47 @@ class OpenAIClientTests(unittest.TestCase):
         # Ensure original dict is unchanged.
         self.assertEqual(headers["Authorization"], "Bearer secret")
         self.assertEqual(headers["authorization"], "Bearer secret-two")
+
+    def test_response_excerpt_logging_is_disabled_by_default(self) -> None:
+        logger = _RecordingLogger()
+        client = OpenAIClient(api_key="test-key", allow_network=True, transport=_FailingTransport(), logger=logger)
+
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message="hi there",
+            status_code=200,
+            url="https://api.openai.com/v1/chat/completions",
+            raw={},
+        )
+
+        client._log_response(response, latency_ms=10, attempt=1, retry_in=None)
+
+        self.assertTrue(logger.infos)
+        info_extra = logger.infos[-1]["extra"]
+        self.assertNotIn("message_excerpt", info_extra)
+
+    def test_response_excerpt_logging_respects_opt_in_flag(self) -> None:
+        os.environ["OPENAI_LOG_RESPONSE_EXCERPT"] = "1"
+        logger = _RecordingLogger()
+        client = OpenAIClient(api_key="test-key", allow_network=True, transport=_FailingTransport(), logger=logger)
+
+        long_message = "a" * 500
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=long_message,
+            status_code=200,
+            url="https://api.openai.com/v1/chat/completions",
+            raw={},
+        )
+
+        client._log_response(response, latency_ms=10, attempt=1, retry_in=None)
+
+        self.assertTrue(logger.infos)
+        info_extra = logger.infos[-1]["extra"]
+        self.assertIn("message_excerpt", info_extra)
+        excerpt = info_extra["message_excerpt"]
+        self.assertTrue(excerpt.endswith("..."))
+        self.assertLessEqual(len(excerpt), 203)
 
     def test_integrations_namespace_alias(self) -> None:
         self.assertIs(OpenAIClient, BoundaryOpenAIClient)

@@ -1,0 +1,11 @@
+# Test Matrix
+- Unit tests: python -m pytest scripts/test_e2e_smoke_encoding.py (pass).
+- E2E: order_status smoke (PASS_STRONG) run_id RUN_20260115_0500Z.
+- Proof: REHYDRATION_PACK/RUNS/RUN_20260115_0500Z/B/e2e_outbound_proof.json.
+- Reply evidence signals: reply_update_success and status_after=CLOSED.
+- Closure check: status/state normalized against closed/resolved/solved set.
+- Skip/escalation tags: none observed in tags_added.
+- PII guard: proof JSON scan passed before write.
+- CI: scripts/run_ci_checks.py --ci pending re-run after docs generation.
+- Follow-up: rerun CI and confirm Codecov/Bugbot green.
+- Notes: safe_mode true; automation disabled, closure forced via diagnostic update.
