@@ -88,13 +88,15 @@ Paste output snippet proving you ran:
 - 2026-01-14T22:40:42Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after final push).
 - 2026-01-14T22:41:39Z — validate kicking off; Cursor Bugbot queued (post-evidence update).
 - 2026-01-14T22:48:09Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after evidence update).
-- 2026-01-15T00:48:31Z — Cursor Bugbot pass; codecov/patch pass; validate pass (FINAL snapshot below).
+- 2026-01-15T00:51:50Z — Cursor Bugbot pending; validate pending (post-push poll).
+- 2026-01-15T00:54:24Z — validate pass; Cursor Bugbot pending (post-push poll).
+- 2026-01-15T00:56:48Z — validate pass; Cursor Bugbot pending (post-push poll).
+- 2026-01-15T00:59:31Z — Cursor Bugbot pass; validate pass; codecov/patch not emitted for this doc-only delta (FINAL snapshot below).
 
-FINAL — 2026-01-15T00:48:31Z
+FINAL — 2026-01-15T00:59:31Z
 ```
-Cursor Bugbot	pass	5m7s	https://cursor.com	
-codecov/patch	pass	0	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108	
-validate	pass	47s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21012677485/job/60411113665	
+Cursor Bugbot	pass	6m26s	https://cursor.com	
+validate	pass	49s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21015506208/job/60419762462	
 ```
 
 ## Docs impact (summary)
