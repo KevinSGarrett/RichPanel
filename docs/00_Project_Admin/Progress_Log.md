@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-15 - RUN_20260115_0500Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -13,6 +13,13 @@ This is the canonical **long-lived** progress record for the project.
 
 ## Timeline
 
+### 2026-01-15 - RUN_20260115_0500Z (Order-status closure + PASS_STRONG proof)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260115_0500Z
+- Captured PASS_STRONG order_status smoke with status/state closure and reply evidence (diagnostic update success), added state to sanitized snapshots, tightened classification to require closure + evidence, blocked skip/escalation bypass, and expanded unit coverage for closure, reply evidence, and PII guards.
+
+### 2026-01-14 - RUN_20260114_2025Z (B39 docs alignment + logging gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260114_2025Z
+- Clarified order-status proof classifications and proof JSON fields in the CI runbook, aligned OpenAI model logging guidance with the shipped non-production debug flag gate, regenerated doc/reference registries, and prepared new run artifacts for B39 scoring.
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z
 - Added a DEV-only GitHub Actions workflow to toggle `RICHPANEL_OUTBOUND_ENABLED` on `rp-mw-dev-worker` with OIDC + auto-revert, plus operator runbook guidance and run artifacts.
