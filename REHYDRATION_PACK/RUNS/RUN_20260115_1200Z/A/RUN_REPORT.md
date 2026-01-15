@@ -5,8 +5,8 @@
 - Agent: A
 - Date (UTC): 2026-01-15
 - Worktree path: `C:\RichPanel_GIT`
-- Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate`
-- PR: https://github.com/KevinSGarrett/RichPanel/pull/110
+- Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate_fix`
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/111
 
 ## Objective + stop conditions
 - Agent A was idle for this run; scope handled by Agent C only.
