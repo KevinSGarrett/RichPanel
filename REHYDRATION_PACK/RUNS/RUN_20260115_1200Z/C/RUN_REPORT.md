@@ -7,7 +7,7 @@
 - Worktree: `C:\RichPanel_GIT`
 - Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate_fix`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/111
-- Head SHA: `9e0021ac5c765870c6d1c887191ea01512b57d6f`
+- Head SHA: `68ea1ad031b46f8a4632ad118799a1b205d6f24d`
 
 ## Objective + Scope
 - Gate OpenAI response `message_excerpt` logging behind opt-in env flag (default OFF); keep logs PII-safe by default.
@@ -61,6 +61,9 @@
 - 2026-01-15T11:57:07-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
 - 2026-01-15T12:00:47-06:00 — Actions: `validate` passed (job 21041147668/60503001050); Codecov/patch: passed; Bugbot: pending.
 - 2026-01-15T12:04:00-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
+- 2026-01-15T12:07:33-06:00 — Actions: `validate` passed (job 21041336179/60503681394); Codecov/patch: pending/not listed; Bugbot: pending.
+- 2026-01-15T12:10:42-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: pending.
+- 2026-01-15T12:13:49-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
 
 ## Next Steps
 - All gates green on PR #111 (Actions validate, Codecov/patch, Bugbot). Close/supersede PR #110 referencing this clean PR.
