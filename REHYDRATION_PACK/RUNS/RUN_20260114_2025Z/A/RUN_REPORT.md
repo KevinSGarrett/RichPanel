@@ -96,13 +96,16 @@ Paste output snippet proving you ran:
 - 2026-01-15T01:03:22Z — codecov/patch pass; validate pass; Cursor Bugbot pending.
 - 2026-01-15T01:05:52Z — codecov/patch pass; validate pass; Cursor Bugbot pending.
 - 2026-01-15T01:08:23Z — codecov/patch pass; validate pass; Cursor Bugbot pending.
-- 2026-01-15T01:10:51Z — Cursor Bugbot pass; codecov/patch pass; validate pass (FINAL snapshot below).
+- 2026-01-15T01:10:51Z — Cursor Bugbot pass; codecov/patch pass; validate pass.
+- 2026-01-15T01:14:55Z — codecov/patch pass; validate pass; Cursor Bugbot pending (post-push poll).
+- 2026-01-15T01:17:33Z — codecov/patch pass; validate pass; Cursor Bugbot pending (post-push poll).
+- 2026-01-15T01:20:04Z — Cursor Bugbot pass; codecov/patch pass; validate pass (FINAL snapshot below).
 
-FINAL — 2026-01-15T01:10:51Z
+FINAL — 2026-01-15T01:20:04Z
 ```
-Cursor Bugbot	pass	8m32s	https://cursor.com	
-codecov/patch	pass	1s	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108	
-validate	pass	48s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21015718841/job/60420359784	
+Cursor Bugbot	pass	6m8s	https://cursor.com	
+codecov/patch	pass	0	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108	
+validate	pass	48s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21015969941/job/60421068977	
 ```
 
 ## Docs impact (summary)
