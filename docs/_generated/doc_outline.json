@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-15 - RUN_20260115_1200Z (OpenAI excerpt logging gate)",
+        "anchor": "2026-01-15-run202601151200z-openai-excerpt-logging-gate"
+      },
+      {
+        "level": 3,
         "text": "2026-01-15 - RUN_20260115_0500Z (Order-status closure + PASS_STRONG proof)",
         "anchor": "2026-01-15-run202601150500z-order-status-closure-passstrong-proof"
       },

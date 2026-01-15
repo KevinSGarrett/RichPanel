@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-15 - run_20260115_1200z (openai excerpt logging gate)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-15-run202601151200z-openai-excerpt-logging-gate"
+    }
+  ],
   "2026-01-15 - run_20260115_0500z (order-status closure + pass_strong proof)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
