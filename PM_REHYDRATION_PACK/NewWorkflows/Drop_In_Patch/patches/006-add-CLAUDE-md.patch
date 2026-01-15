@@ -1,0 +1,43 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -0,0 +1,40 @@
++# RichPanel Claude Review Guide
++
++This repository uses **Claude Code GitHub Actions** to perform gated, automated PR reviews (semantic + security + correctness).
++
++## Primary objective
++
++When asked to `/review` a PR, you must **audit the diff** and identify:
++
++1. **Correctness / regressions** (logic errors, incorrect edge cases, missing handling)
++2. **Security** (authz/authn, injection, SSRF, deserialization, unsafe defaults)
++3. **PII / sensitive data** handling (logging, telemetry, storage, redaction)
++4. **Reliability** (retries, idempotency, failure modes, timeouts)
++5. **Infra/CDK safety** (least privilege IAM, breaking changes, migration steps)
++6. **Test adequacy** (what tests exist, what is missing, where to add)
++
++## Hard requirements to enforce
++
++- **Do not recommend logging secrets or PII**.
++- **Fail closed** for security and privacy: if unsure, call it out as a blocking issue.
++- Prefer **idempotent handlers** and safe retries for worker/pipeline code.
++- Ensure changes keep **CI contract** green:
++  - `python scripts/run_ci_checks.py --ci` must pass.
++
++## Review style
++
++- Be **specific**: include file paths, symbols, and suggested edits.
++- Separate issues into:
++  - **Blocking** (must-fix before merge)
++  - **Non-blocking** (nice-to-have)
++- If you are uncertain, state the assumption and ask for clarification, but **still propose a safe default**.
++
++## Output format
++
++Use this structure:
++
++1) **Summary** (2–5 bullets)
++2) **Blocking issues** (numbered list)
++3) **Non-blocking improvements**
++4) **Test plan suggestions**
++5) **Risk notes** (what could go wrong in prod)

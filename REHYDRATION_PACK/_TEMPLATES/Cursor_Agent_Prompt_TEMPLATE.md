@@ -22,6 +22,25 @@
   - `<PATH_2>`
   - `<PATH_3>` (optional)
 
+## Risk classification (REQUIRED)
+
+**Risk label:** `risk:R<#>-<level>`  
+(Choose ONE: `risk:R0-docs`, `risk:R1-low`, `risk:R2-medium`, `risk:R3-high`, `risk:R4-critical`)
+
+**Justification:**
+- <Why this risk level applies based on blast radius, security impact, reversibility, etc.>
+
+**Required gates per risk level:**
+- R0: CI optional, no Bugbot/Codecov/Claude/E2E
+- R1: CI required, Codecov advisory, Bugbot optional, Claude optional
+- R2: CI + Codecov patch + Bugbot + Claude required
+- R3: CI + Codecov (patch+project) + Bugbot (stale-rerun) + Claude (security prompt, stale-rerun) + E2E if outbound
+- R4: All R3 gates + double-review + rollback plan + post-merge verification
+
+See: `docs/08_Engineering/Quality_Gates_and_Risk_Labels.md` for complete reference.
+
+---
+
 ## Objective
 <FILL_ME>
 
@@ -155,28 +174,64 @@ Before pushing your branch:
 
 ## PR Health Check (required for all PRs)
 
-Before claiming a PR as "done", agents must complete the following health checks and document findings in `RUN_REPORT.md`:
+Before claiming a PR as "done", agents must complete the following health checks based on the risk level and document findings in `RUN_REPORT.md`.
 
-### Bugbot Review (required)
+### Risk label application (required first step)
+- [ ] Applied exactly one risk label: `risk:R<#>-<level>`
+  - Use: `gh pr edit <PR#> --add-label "risk:R<#>-<level>"`
+- [ ] Documented risk justification in PR description and run report
+
+### Gate lifecycle (two-phase approach)
+
+**Phase A: Build & stabilize (local iteration)**
+- [ ] Iterated locally, running `python scripts/run_ci_checks.py --ci` until green
+- [ ] Only pushed to GitHub when diff was coherent (minimize CI/Codecov runs)
+
+**Phase B: Gate execution (PR-level, once per stable state)**
+- [ ] Applied `gates:ready` label when CI green and PR stable
+- [ ] Triggered required gates (based on risk level)
+- [ ] Waited for all gates to complete before declaring done
+
+### CI validation (required for R1+)
+- [ ] GitHub Actions `validate` check is green
+- [ ] Local CI-equivalent passed: `python scripts/run_ci_checks.py --ci`
+
+### Bugbot Review (required for R2+)
 - [ ] Triggered Bugbot review via `@cursor review` or `bugbot run` PR comment
 - [ ] Reviewed Bugbot findings in PR comments (`gh pr view <PR#> --comments`)
 - [ ] **Action required**: Either fix all Bugbot findings in this run, OR document why each finding is deferred with a follow-up checklist item
+- [ ] Documented Bugbot comment link in run report
+- [ ] **If quota exhausted**: Documented "Bugbot quota exhausted; performed manual review" + findings in run report
 
-### Codecov Status (required)
-- [ ] Verified Codecov patch status (`codecov/patch`) is passing or acceptable
-- [ ] Verified Codecov project status (`codecov/project`) is passing or acceptable
+### Codecov Status (required for R2+)
+- [ ] Verified Codecov patch status (`codecov/patch`) is passing or acceptable (≥50% for R2+)
+- [ ] Verified Codecov project status (`codecov/project`) is passing or acceptable (required for R3+)
 - [ ] **Action required**: If Codecov flags coverage drop or insufficient patch coverage, either add tests to improve coverage OR document why coverage is acceptable as-is
+- [ ] Documented Codecov status in run report
 
-### E2E Proof (required if applicable)
-- [ ] **Required when**: Changes touch outbound integrations (Richpanel API, Shopify, ShipStation, email/SMS) or automation logic
+### Claude Review (required for R2+)
+- [ ] **Required for**: R2 (medium), R3 (high), R4 (critical)
+- [ ] **Optional for**: R0 (docs), R1 (low)
+- [ ] Triggered Claude review:
+  - Option 1: `gh pr comment <PR#> -b '@claude review'` (if supported)
+  - Option 2: Manual review using PR diff + Claude API/web interface (if Anthropic key unavailable)
+- [ ] **For R3/R4**: Used security-focused prompt (auth, PII, input validation, secrets, error leakage)
+- [ ] Documented Claude verdict (PASS/CONCERNS/FAIL) and link in run report
+- [ ] **Action required**: Fixed concerns or documented waivers with justification
+- [ ] **If API unavailable**: Applied `waiver:active` label + documented manual review process
+
+### E2E Proof (required for R3/R4 or when touching outbound/automation)
+- [ ] **Required when**: Changes touch outbound integrations (Richpanel API, Shopify, ShipStation, email/SMS) or automation logic, OR risk level is R3/R4
 - [ ] Run appropriate E2E smoke test: `dev-e2e-smoke.yml`, `staging-e2e-smoke.yml`, or `prod-e2e-smoke.yml`
 - [ ] Record E2E run URL + summary in `TEST_MATRIX.md` and `RUN_REPORT.md`
 - [ ] **Action required**: If E2E test fails, fix the issue before merging
 
-**Gate rule**: A PR cannot be merged without addressing Bugbot findings, Codecov issues, and E2E requirements (when applicable). Document all triage decisions explicitly.
+### Staleness check (required for R2+)
+- [ ] Verified no new commits landed after Bugbot/Claude review
+- [ ] If new commits occurred after gates: re-ran required gates and updated `gates:stale` → `gates:passed`
 
-### Wait-for-green (mandatory)
-- **Do not declare the run complete** or enable auto-merge until Codecov and Bugbot have finished and are green (or a documented fallback is recorded).
+### Wait-for-green (mandatory for all PRs)
+- **Do not declare the run complete** or enable auto-merge until Bugbot (if required) and Codecov (if required) have finished and are green (or a documented fallback is recorded).
 - After triggering Bugbot and pushing commits, **poll checks every 120–240s** until neither `gh pr checks <PR#>` nor the status rollup shows pending/in-progress contexts for Codecov or Bugbot.
 - Sample PowerShell-safe loop (adjust sleep as needed):
 ```powershell
@@ -187,3 +242,15 @@ do {
 } while (gh pr checks $pr | Select-String -Pattern 'Pending|In progress|Queued')
 ```
 - If Bugbot quota is exhausted, record “quota exhausted; performed manual review” in `RUN_REPORT.md` and continue waiting for Codecov to complete before merging.
+### Final gate compliance checklist
+- [ ] Applied `gates:passed` label when all required gates completed successfully
+- [ ] All required gates satisfied per risk level (see Risk classification section above)
+- [ ] All evidence links recorded in run report (no placeholders)
+- [ ] Waivers documented (if any) with `waiver:active` label + justification in PR description and run report
+
+**Gate rule**: A PR cannot be merged without:
+1. Exactly one risk label (R0-R4)
+2. All required gates for that risk level satisfied
+3. Evidence documented in run report
+4. Gates non-stale (or re-run after new commits)
+5. `gates:passed` label applied

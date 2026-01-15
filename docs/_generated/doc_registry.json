@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2101,
-    "approx_tokens": 2731,
+    "word_count": 2193,
+    "approx_tokens": 2850,
     "last_updated": ""
   },
   {
@@ -705,8 +705,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 541,
-    "approx_tokens": 703,
+    "word_count": 574,
+    "approx_tokens": 746,
     "last_updated": ""
   },
   {
@@ -1925,9 +1925,9 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 4319,
-    "approx_tokens": 5614,
-    "last_updated": "2026-01-11"
+    "word_count": 5308,
+    "approx_tokens": 6900,
+    "last_updated": "2026-01-15"
   },
   {
     "path": "08_Engineering/Developer_Guide.md",
@@ -1978,6 +1978,16 @@
     "word_count": 132,
     "approx_tokens": 171,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+    "title": "Quality Gates and Risk Labels — Quick Reference",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 1440,
+    "approx_tokens": 1872,
+    "last_updated": ""
   },
   {
     "path": "08_Engineering/Repository_Conventions.md",

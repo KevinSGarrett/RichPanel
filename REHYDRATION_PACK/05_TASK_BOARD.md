@@ -2,7 +2,7 @@
 
 > This is the **single most important** file for "what to do next".
 
-Last updated: 2026-01-12 (PR Health Check gates: Bugbot + Codecov + E2E enforcement in templates/runbooks)
+Last updated: 2026-01-15 (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)
 
 **Current mode:** build (implementation active).
 **Environment status:** Do not claim dev/staging/prod state unless verified and linked in the latest `REHYDRATION_PACK/RUNS/<RUN_ID>/*/RUN_REPORT.md` or `REHYDRATION_PACK/GITHUB_STATE.md`.
@@ -28,6 +28,7 @@ Last updated: 2026-01-12 (PR Health Check gates: Bugbot + Codecov + E2E enforcem
 Goal: stay safe while shipping.
 
 - [x] PR Health Check gates enforced (Bugbot + Codecov + E2E) - templates/runbooks updated
+- [ ] NewWorkflows Phase 1 adoption (risk labels + gate matrix + Claude optional gate) - in progress RUN_20260115_2224Z
 - [ ] Keep safety defaults intact (safe_mode + automation_enabled + dry-run)
 - [ ] Maintain doc anti-drift gate (`verify_admin_logs_sync`)
 - [ ] Keep smoke evidence recorded (links in test evidence log)

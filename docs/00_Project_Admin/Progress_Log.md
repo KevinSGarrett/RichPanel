@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-15 - RUN_20260115_2224Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,14 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260115_2224Z
+- Operationalized NewWorkflows strategy (Bugbot + Codecov + Claude + risk gating) in repo docs and templates.
+- Created `docs/08_Engineering/Quality_Gates_and_Risk_Labels.md` reference card defining R0-R4 risk labels and gate requirements.
+- Updated `docs/08_Engineering/CI_and_Actions_Runbook.md` with risk label taxonomy, gate lifecycle labels, two-phase workflow, and Claude review procedures.
+- Enhanced agent prompt and run report templates with risk classification requirements, gate checklists, and evidence sections.
+- Updated MASTER_CHECKLIST, TASK_BOARD, and Progress_Log to track NewWorkflows Phase 1 adoption.
 
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z

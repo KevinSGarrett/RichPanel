@@ -1,17 +1,17 @@
 # MASTER CHECKLIST (Epics / Milestones)
 
-Last verified: 2026-01-10 - RUN_20260110_1445Z
+Last verified: 2026-01-15 - RUN_20260115_2224Z
 
 This checklist is the **high-level map** of work required to complete the project.
 It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and generated outputs).
 
 ## Progress dashboard (snapshot)
 
-- Total epics: 21
-- Done: 10 (47.6%)
-- In progress: 2 (9.5%)
-- Not started: 6 (28.6%)
-- Pending: 3 (14.3%)
+- Total epics: 22
+- Done: 10 (45.5%)
+- In progress: 3 (13.6%)
+- Not started: 6 (27.3%)
+- Pending: 3 (13.6%)
 
 > Note: "Done" can include "Done (skeleton)" where only scaffolding exists.
 
@@ -29,6 +29,7 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 | CHK-008 | Build: Offline-first integration skeletons (Richpanel/OpenAI/Shopify/ShipStation) | Done (skeleton) | Agent A | `backend/src/richpanel_middleware/integrations/`, `backend/src/integrations/` |
 | CHK-009 | Process: Bugbot in PR loop (trigger + runbook) | Done | PM | `docs/08_Engineering/CI_and_Actions_Runbook.md` |
 | CHK-009B | Process: PR Health Check gates (Bugbot + Codecov + E2E) enforced in templates/runbooks | Done | Agent A | `REHYDRATION_PACK/_TEMPLATES/`, `docs/08_Engineering/CI_and_Actions_Runbook.md` |
+| CHK-009C | Process: NewWorkflows Phase 1 (risk labels + gate matrix + Claude optional gate) operationalized in docs and templates | In progress | Agent A | `docs/08_Engineering/Quality_Gates_and_Risk_Labels.md`, `docs/08_Engineering/CI_and_Actions_Runbook.md`, PM_REHYDRATION_PACK/NewWorkflows/policies/ |
 
 ## Roadmap (remaining)
 
