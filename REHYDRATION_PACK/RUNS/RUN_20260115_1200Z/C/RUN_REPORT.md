@@ -7,7 +7,7 @@
 - Worktree: `C:\RichPanel_GIT`
 - Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate_fix`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/111
-- Head SHA: `d083cd3aa89e343c0070af1c8aa0b2a4cb01e19a`
+- Head SHA: `1bb125a29973307d64b1ad2733b70d7e8ef3f9ce`
 
 ## Objective + Scope
 - Gate OpenAI response `message_excerpt` logging behind opt-in env flag (default OFF); keep logs PII-safe by default.
@@ -57,6 +57,8 @@
 - 2026-01-15T11:42:42-06:00 — Actions: `validate` passed; Codecov/patch: passed (https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/111); Bugbot: pending.
 - 2026-01-15T11:45:48-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
 - 2026-01-15T11:50:26-06:00 — Actions: `validate` failed (missing Files Changed heading in RUN_REPORT.md); Codecov/patch: not reported; Bugbot: pending.
+- 2026-01-15T11:53:53-06:00 — Actions: `validate` passed (job 21040961900/60502342655); Codecov/patch: passed; Bugbot: pending.
+- 2026-01-15T11:57:07-06:00 — Actions: `validate` passed; Codecov/patch: passed; Bugbot: passed.
 
 ## Next Steps
 - Continue polling `gh pr checks 111` every 180s until Actions required checks, Codecov/patch, and Bugbot are all green; record raw outputs with timestamps.
