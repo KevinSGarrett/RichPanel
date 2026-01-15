@@ -43,7 +43,7 @@ python scripts/run_ci_checks.py --ci
 - E2E: order_status smoke run `RUN_20260115_0500Z` (PASS_STRONG after diagnostic close) — no new execution this iteration; existing proof reused: `REHYDRATION_PACK/RUNS/RUN_20260115_0500Z/B/e2e_outbound_proof.json`.
 
 ## PR Health Check (wait-for-green evidence)
-- PR: https://github.com/KevinSGarrett/RichPanel/pull/109 (head SHA: `079abbde52f3f1d8044c6fcf68241fdd52c01c10`).
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/109 (head SHA at evidence collection: `6babf2604b49ce0fbdff87805074f60cc65611f7`; current head adds doc-only run-report updates).
 - Actions: `validate` PASS - https://github.com/KevinSGarrett/RichPanel/actions/runs/21019727495/job/60432069184
 - Codecov: `codecov/patch` PASS - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/109
 - Bugbot: Cursor Bugbot SKIPPED - https://cursor.com
