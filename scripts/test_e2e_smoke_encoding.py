@@ -33,6 +33,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _compute_reply_evidence,
     _apply_fallback_close,
     _diagnose_ticket_update,
+    _fetch_ticket_snapshot,
     _sanitize_decimals,
     _sanitize_response_metadata,
     _sanitize_ticket_snapshot,
@@ -445,6 +446,93 @@ class CriteriaTests(unittest.TestCase):
         )
         self.assertEqual(classification, "FAIL")
         self.assertEqual(reason, "skip_or_escalation_tags_added")
+
+    def test_order_status_classification_fallback_returns_pass_weak(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=False,
+            reply_evidence=True,
+            middleware_tag_ok=False,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=True,
+        )
+        self.assertEqual(classification, "PASS_WEAK")
+        self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_order_status_classification_pass_strong_with_closure_and_reply(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=True,
+            reply_evidence=True,
+            middleware_tag_ok=True,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "PASS_STRONG")
+        self.assertIsNone(reason)
+
+    def test_order_status_classification_fails_without_closure_or_middleware_tag(self) -> None:
+        classification, reason = _classify_order_status_outcome(
+            base_pass=True,
+            closed_ok=False,
+            reply_evidence=True,
+            middleware_tag_ok=False,
+            skip_tags_present_ok=True,
+            failed_required=[],
+            fallback_used=False,
+        )
+        self.assertEqual(classification, "FAIL")
+        self.assertEqual(reason, "ticket_not_closed_no_automation_invariant")
+
+
+class FetchTicketSnapshotTests(unittest.TestCase):
+    def test_fetch_ticket_snapshot_strips_status_state_and_sets_ticket_number(self) -> None:
+        class StubResponse:
+            def __init__(self) -> None:
+                self.status_code = 200
+                self.dry_run = True
+
+            def json(self) -> dict:
+                return {
+                    "ticket": {
+                        "id": "abc",
+                        "status": " CLOSED ",
+                        "state": " RESOLVED ",
+                        "conversation_no": 1038,
+                        "tags": [],
+                    }
+                }
+
+        class StubExecutor:
+            def __init__(self, response: StubResponse) -> None:
+                self.response = response
+                self.calls = []
+
+            def execute(self, method: str, path: str, dry_run: bool, log_body_excerpt: bool) -> StubResponse:
+                self.calls.append(
+                    {
+                        "method": method,
+                        "path": path,
+                        "dry_run": dry_run,
+                        "log_body_excerpt": log_body_excerpt,
+                    }
+                )
+                return self.response
+
+        response = StubResponse()
+        executor = StubExecutor(response)
+
+        snapshot = _fetch_ticket_snapshot(executor, "TICKET-123", allow_network=False)
+
+        self.assertEqual(snapshot["status"], "CLOSED")
+        self.assertEqual(snapshot["state"], "RESOLVED")
+        self.assertEqual(snapshot["ticket_number"], 1038)
+        self.assertTrue(snapshot["dry_run"])
+        self.assertEqual(snapshot["path"], "/v1/tickets/TICKET-123")
+        self.assertEqual(executor.calls[0]["path"], "/v1/tickets/TICKET-123")
+        self.assertTrue(executor.calls[0]["dry_run"])
 
 
 class SnapshotSanitizationTests(unittest.TestCase):

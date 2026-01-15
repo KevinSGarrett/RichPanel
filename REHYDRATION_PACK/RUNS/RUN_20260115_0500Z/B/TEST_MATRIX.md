@@ -6,6 +6,7 @@
 - Closure check: status/state normalized against closed/resolved/solved set.
 - Skip/escalation tags: none observed in tags_added.
 - PII guard: proof JSON scan passed before write.
-- CI: scripts/run_ci_checks.py --ci pending re-run after docs generation.
-- Follow-up: rerun CI and confirm Codecov/Bugbot green.
+- CI: scripts/run_ci_checks.py --ci (pending clean-tree rerun post-commit).
+- Codecov: pending (post-push).
+- Bugbot: pending (post-push).
 - Notes: safe_mode true; automation disabled, closure forced via diagnostic update.
