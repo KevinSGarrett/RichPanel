@@ -22,17 +22,6 @@
 
 ## Diffstat (required)
 ```
-[OK] REHYDRATION_PACK validated (mode=build).
-[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
-[OK] RUN_20260114_2025Z is referenced in Progress_Log.md
-[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
-[OK] CI-equivalent checks passed.
-```
-
-## Wait-for-green evidence (PR #108)
-- 2026-01-14T22:27:13Z — codecov/patch pass; validate pass; Cursor Bugbot in progress.
-- 2026-01-14T22:33:36Z — Cursor Bugbot pass; codecov/patch pass; validate pass. (All green snapshot captured.)
-```
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/DOCS_IMPACT_MAP.md   |  24 +++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/FIX_REPORT.md        |  17 ++++
 REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/GIT_RUN_PLAN.md      |  50 +++++++++
@@ -67,13 +56,13 @@ List key files changed (grouped by area) and why:
 - `docs/00_Project_Admin/Progress_Log.md` - added RUN_20260114_2025Z entry and refreshed last-verified marker.
 - `docs/_generated/doc_registry*.json`, `doc_outline.json`, `heading_index.json` - regenerated registries after doc updates.
 - `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/A/*` - run report/summary/structure/docs impact/test matrix for this run.
-- `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `.../C/*` - idle stubs to satisfy run validation.
+- `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/B/*`, `REHYDRATION_PACK/RUNS/RUN_20260114_2025Z/C/*` - idle stubs to satisfy run validation.
 
 ## Commands Run (required)
 List commands you ran (include key flags/env if relevant):
 - `python scripts/new_run_folder.py --now` - allocate RUN_20260114_2025Z folders.
 - `git checkout origin/main -- .github/workflows/set-outbound-flags.yml REHYDRATION_PACK/RUNS/RUN_20260114_0707Z` - drop out-of-scope files from PR #108.
-- `python scripts/run_ci_checks.py --ci` - clean-tree pass after scope split (snippet below).
+- `python scripts/run_ci_checks.py --ci` - clean-tree rerun 2026-01-15 for verification (snippet below).
 - `git push origin run/RUN_20260114_2025Z_b39_docs_alignment` - publish scope-split branch for PR #108.
 
 ## Tests / Proof (required)
@@ -99,6 +88,14 @@ Paste output snippet proving you ran:
 - 2026-01-14T22:40:42Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after final push).
 - 2026-01-14T22:41:39Z — validate kicking off; Cursor Bugbot queued (post-evidence update).
 - 2026-01-14T22:48:09Z — Cursor Bugbot pass; codecov/patch pass; validate pass (all green after evidence update).
+- 2026-01-15T00:48:31Z — Cursor Bugbot pass; codecov/patch pass; validate pass (FINAL snapshot below).
+
+FINAL — 2026-01-15T00:48:31Z
+```
+Cursor Bugbot	pass	5m7s	https://cursor.com	
+codecov/patch	pass	0	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/108	
+validate	pass	47s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21012677485/job/60411113665	
+```
 
 ## Docs impact (summary)
 - **Docs updated:** CI_and_Actions_Runbook, OpenAI_Model_Plan, Progress_Log, doc registries.
