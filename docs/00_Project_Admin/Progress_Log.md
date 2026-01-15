@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-15 - RUN_20260115_0500Z.
+Last verified: 2026-01-15 - RUN_20260115_1200Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-15 - RUN_20260115_1200Z (OpenAI excerpt logging gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260115_1200Z
+- Gated OpenAI response excerpt logging behind an opt-in env flag (default off), kept logs PII-safe by skipping excerpts unless enabled, added flag on/off tests, and captured CI-equivalent evidence for the PR wait-for-green flow.
 
 ### 2026-01-15 - RUN_20260115_0500Z (Order-status closure + PASS_STRONG proof)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260115_0500Z
