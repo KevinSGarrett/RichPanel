@@ -7,7 +7,7 @@
 - Worktree path: `C:\RichPanel_GIT`
 - Branch: `run/RUN_20260115_1200Z_openai_excerpt_logging_gate`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/110
-- Head SHA: `49b17cacdeb526fa2c7b2414a2f34e2e016bd6a0`
+- Head SHA: `fd9980730728e44c23639dafeb8fd113989292a8`
 
 ## Objective + scope
 - Gate OpenAI response `message_excerpt` logging behind an opt-in env flag (default OFF), keep logs PII-safe by skipping excerpts unless explicitly enabled, and add tests for flag on/off paths. Update run artifacts and Progress_Log for RUN_20260115_1200Z.
