@@ -61,10 +61,10 @@ List commands you ran (include key flags/env if relevant):
 Include test commands + results + links to evidence.
 
 - python scripts/run_ci_checks.py --ci - pass (local) - evidence: local output snippet below.
-- GitHub Actions validate - pass - https://github.com/KevinSGarrett/RichPanel/actions/runs/21055218487/job/60550017079
+- GitHub Actions validate - pass - https://github.com/KevinSGarrett/RichPanel/actions/runs/21055750445/job/60551553284
 - Codecov patch check - pass - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/112
 - Bugbot check - pass (Cursor Bugbot) - https://cursor.com (review comment: https://github.com/KevinSGarrett/RichPanel/pull/112#pullrequestreview-3668535201)
-- Claude review - skipped (no `gate:claude` label applied) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21055218483/job/60550017349
+- Claude review - skipped (no `gate:claude` label applied) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21055750458/job/60551553374
 
 Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`

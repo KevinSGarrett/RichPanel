@@ -30,7 +30,7 @@ Adopt NewWorkflows Phase 1 artifacts (risk labels, label seeding, staleness, opt
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci` (local pass with run artifacts stashed)
-- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21055218487/job/60550017079
+- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21055750445/job/60551553284
 
 ## Decisions made
 - Risk label applied: `risk:R1-low` (docs-only + workflow wiring).
