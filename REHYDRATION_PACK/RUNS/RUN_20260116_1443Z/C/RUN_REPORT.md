@@ -56,7 +56,14 @@
 ```
 - Close probe (dev) — **pass**; proof: `REHYDRATION_PACK/RUNS/RUN_20260116_1443Z/C/richpanel_close_probe.json` (winning payload `ticket_state_closed_status_CLOSED`).
 - Dev E2E smoke (order_status, ticket 1037) — **PASS_WEAK** (ticket already CLOSED before run; no reply delta), proof: `REHYDRATION_PACK/RUNS/RUN_20260116_1443Z/C/e2e_order_status_close_proof.json`.
-- gh pr checks 112 — **pass** (Codecov/Bugbot/Claude/validate/mark-stale); latest output captured in RUN_REPORT after push.
+- gh pr checks 112 — **pass** (latest head):
+```
+Cursor Bugbot  pass  https://cursor.com
+claude-review  pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21070732566/job/60599397263
+codecov/patch  pass  https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/112
+mark-stale     pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21070732553/job/60599397208
+validate       pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21070732576/job/60599397170
+```
 - Codecov PASS: https://github.com/KevinSGarrett/RichPanel/pull/112#issuecomment-3757631766
 - Bugbot PASS: https://github.com/KevinSGarrett/RichPanel/pull/112#pullrequestreview-3668850840
 
