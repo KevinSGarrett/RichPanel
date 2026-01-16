@@ -24,13 +24,13 @@ Adopt NewWorkflows Phase 1 artifacts (risk labels, label seeding, staleness, opt
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260115_2224Z_newworkflows_docs`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/112
-- CI status at end of run: green (validate pass, codecov/patch pass; Bugbot check skipped after retrigger; claude-review skipped)
+- CI status at end of run: green (validate pass, codecov/patch pass, Bugbot pass; claude-review skipped)
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci` (local pass with run artifacts stashed)
-- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21054691688/job/60548252656
+- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21055100459/job/60549668560
 
 ## Decisions made
 - Risk label applied: `risk:R1-low` (docs-only + workflow wiring).

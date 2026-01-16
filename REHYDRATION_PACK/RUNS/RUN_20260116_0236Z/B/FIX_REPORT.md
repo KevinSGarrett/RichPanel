@@ -18,4 +18,4 @@
 
 ## Verification
 - tests run: `python scripts/run_ci_checks.py --ci` (local pass; run artifacts stashed), GitHub Actions validate
-- results: validate pass (https://github.com/KevinSGarrett/RichPanel/actions/runs/21054691688/job/60548252656), Codecov patch pass, Bugbot check skipped after retrigger (prior review no findings)
+- results: validate pass (https://github.com/KevinSGarrett/RichPanel/actions/runs/21055100459/job/60549668560), Codecov patch pass, Bugbot check pass
