@@ -1239,6 +1239,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-16 - RUN_20260116_1443Z (B40 close probe + pipeline fix)",
+        "anchor": "2026-01-16-run202601161443z-b40-close-probe-pipeline-fix"
+      },
+      {
+        "level": 3,
         "text": "2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)",
         "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
       },

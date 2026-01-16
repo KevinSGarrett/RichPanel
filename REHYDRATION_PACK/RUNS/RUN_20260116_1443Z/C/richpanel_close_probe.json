@@ -1,0 +1,269 @@
+{
+  "after": {
+    "dry_run": false,
+    "endpoint_variant": "id",
+    "last_message_source": null,
+    "message_count": null,
+    "path_redacted": "/v1/tickets/<redacted>",
+    "state": null,
+    "status": "CLOSED",
+    "status_code": 200,
+    "tags": [
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied",
+      "mw-order-status-answered:RUN_20260114_PROOFZ",
+      "mw-order-status-answered",
+      "mw-auto-replied",
+      "mw-smoke:RUN_20260115_0200Z"
+    ],
+    "ticket_id_fingerprint": "bc9b140d861c",
+    "updated_at": "2026-01-15T02:09:25.486Z"
+  },
+  "attempts": [
+    {
+      "candidate": "status_resolved_top",
+      "closed_state_reached": false,
+      "dry_run": false,
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "payload_summary": {
+        "keys": [
+          "comment",
+          "status"
+        ],
+        "status": "resolved"
+      },
+      "snapshot_after": {
+        "dry_run": false,
+        "endpoint_variant": "id",
+        "last_message_source": null,
+        "message_count": null,
+        "path_redacted": "/v1/tickets/<redacted>",
+        "state": null,
+        "status": "OPEN",
+        "status_code": 200,
+        "tags": [
+          "mw-intent-order_status_tracking",
+          "mw-routing-applied",
+          "mw-order-status-answered:RUN_20260114_PROOFZ",
+          "mw-order-status-answered",
+          "mw-auto-replied",
+          "mw-smoke:RUN_20260115_0200Z"
+        ],
+        "ticket_id_fingerprint": "bc9b140d861c",
+        "updated_at": "2026-01-15T02:09:25.486Z"
+      },
+      "state_after": null,
+      "state_before": null,
+      "status_after": "OPEN",
+      "status_before": "OPEN",
+      "status_changed": false,
+      "status_code": 400,
+      "updated_at_delta_seconds": 0.0
+    },
+    {
+      "candidate": "state_closed_top",
+      "closed_state_reached": false,
+      "dry_run": false,
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "payload_summary": {
+        "keys": [
+          "comment",
+          "state"
+        ],
+        "state": "closed"
+      },
+      "snapshot_after": {
+        "dry_run": false,
+        "endpoint_variant": "id",
+        "last_message_source": null,
+        "message_count": null,
+        "path_redacted": "/v1/tickets/<redacted>",
+        "state": null,
+        "status": "OPEN",
+        "status_code": 200,
+        "tags": [
+          "mw-intent-order_status_tracking",
+          "mw-routing-applied",
+          "mw-order-status-answered:RUN_20260114_PROOFZ",
+          "mw-order-status-answered",
+          "mw-auto-replied",
+          "mw-smoke:RUN_20260115_0200Z"
+        ],
+        "ticket_id_fingerprint": "bc9b140d861c",
+        "updated_at": "2026-01-15T02:09:25.486Z"
+      },
+      "state_after": null,
+      "state_before": null,
+      "status_after": "OPEN",
+      "status_before": "OPEN",
+      "status_changed": false,
+      "status_code": 400,
+      "updated_at_delta_seconds": 0.0
+    },
+    {
+      "candidate": "ticket_status_resolved",
+      "closed_state_reached": false,
+      "dry_run": false,
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "payload_summary": {
+        "keys": [
+          "ticket"
+        ],
+        "ticket.status": "resolved",
+        "ticket_keys": [
+          "comment",
+          "status"
+        ]
+      },
+      "snapshot_after": {
+        "dry_run": false,
+        "endpoint_variant": "id",
+        "last_message_source": null,
+        "message_count": null,
+        "path_redacted": "/v1/tickets/<redacted>",
+        "state": null,
+        "status": "OPEN",
+        "status_code": 200,
+        "tags": [
+          "mw-intent-order_status_tracking",
+          "mw-routing-applied",
+          "mw-order-status-answered:RUN_20260114_PROOFZ",
+          "mw-order-status-answered",
+          "mw-auto-replied",
+          "mw-smoke:RUN_20260115_0200Z"
+        ],
+        "ticket_id_fingerprint": "bc9b140d861c",
+        "updated_at": "2026-01-15T02:09:25.486Z"
+      },
+      "state_after": null,
+      "state_before": null,
+      "status_after": "OPEN",
+      "status_before": "OPEN",
+      "status_changed": false,
+      "status_code": 400,
+      "updated_at_delta_seconds": 0.0
+    },
+    {
+      "candidate": "ticket_status_closed",
+      "closed_state_reached": false,
+      "dry_run": false,
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "payload_summary": {
+        "keys": [
+          "ticket"
+        ],
+        "ticket.status": "closed",
+        "ticket_keys": [
+          "comment",
+          "status"
+        ]
+      },
+      "snapshot_after": {
+        "dry_run": false,
+        "endpoint_variant": "id",
+        "last_message_source": null,
+        "message_count": null,
+        "path_redacted": "/v1/tickets/<redacted>",
+        "state": null,
+        "status": "OPEN",
+        "status_code": 200,
+        "tags": [
+          "mw-intent-order_status_tracking",
+          "mw-routing-applied",
+          "mw-order-status-answered:RUN_20260114_PROOFZ",
+          "mw-order-status-answered",
+          "mw-auto-replied",
+          "mw-smoke:RUN_20260115_0200Z"
+        ],
+        "ticket_id_fingerprint": "bc9b140d861c",
+        "updated_at": "2026-01-15T02:09:25.486Z"
+      },
+      "state_after": null,
+      "state_before": null,
+      "status_after": "OPEN",
+      "status_before": "OPEN",
+      "status_changed": false,
+      "status_code": 400,
+      "updated_at_delta_seconds": 0.0
+    },
+    {
+      "candidate": "ticket_state_closed_status_CLOSED",
+      "closed_state_reached": true,
+      "dry_run": false,
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "payload_summary": {
+        "keys": [
+          "ticket"
+        ],
+        "ticket.state": "closed",
+        "ticket.status": "CLOSED",
+        "ticket_keys": [
+          "comment",
+          "state",
+          "status"
+        ]
+      },
+      "snapshot_after": {
+        "dry_run": false,
+        "endpoint_variant": "id",
+        "last_message_source": null,
+        "message_count": null,
+        "path_redacted": "/v1/tickets/<redacted>",
+        "state": null,
+        "status": "CLOSED",
+        "status_code": 200,
+        "tags": [
+          "mw-intent-order_status_tracking",
+          "mw-routing-applied",
+          "mw-order-status-answered:RUN_20260114_PROOFZ",
+          "mw-order-status-answered",
+          "mw-auto-replied",
+          "mw-smoke:RUN_20260115_0200Z"
+        ],
+        "ticket_id_fingerprint": "bc9b140d861c",
+        "updated_at": "2026-01-15T02:09:25.486Z"
+      },
+      "state_after": null,
+      "state_before": null,
+      "status_after": "CLOSED",
+      "status_before": "OPEN",
+      "status_changed": true,
+      "status_code": 200,
+      "updated_at_delta_seconds": 0.0
+    }
+  ],
+  "baseline_closed": false,
+  "before": {
+    "dry_run": false,
+    "endpoint_variant": "id",
+    "last_message_source": null,
+    "message_count": null,
+    "path_redacted": "/v1/tickets/<redacted>",
+    "state": null,
+    "status": "OPEN",
+    "status_code": 200,
+    "tags": [
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied",
+      "mw-order-status-answered:RUN_20260114_PROOFZ",
+      "mw-order-status-answered",
+      "mw-auto-replied",
+      "mw-smoke:RUN_20260115_0200Z"
+    ],
+    "ticket_id_fingerprint": "bc9b140d861c",
+    "updated_at": "2026-01-15T02:09:25.486Z"
+  },
+  "closed_state_reached": true,
+  "endpoint_variant": "id",
+  "generated_at": "2026-01-16T14:47:10.811124+00:00",
+  "run_id": "RUN_20260116_1443Z",
+  "status_changed": true,
+  "ticket_id_fingerprint": "bc9b140d861c",
+  "ticket_ref_fingerprint": "920c37d6464a",
+  "winning_candidate": "ticket_state_closed_status_CLOSED"
+}

@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-16 - RUN_20260116_0724Z.
+Last verified: 2026-01-16 - RUN_20260116_1443Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -16,6 +16,12 @@ This is the canonical **long-lived** progress record for the project.
 - Source: REHYDRATION_PACK/RUNS/RUN_20260116_0724Z
 - Added PowerShell-safe risk label and `gate:claude` examples to the CI runbook.
 - Regenerated doc registries and produced RUN_20260116_0724Z artifacts for agents A/B/C.
+
+### 2026-01-16 - RUN_20260116_1443Z (B40 close probe + pipeline fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_1443Z
+- Added `scripts/dev_richpanel_close_probe.py` to empirically test close payloads (PII-safe proof). Winning payload: `ticket.state=closed` + `ticket.status=CLOSED`.
+- Updated order_status pipeline to prefer the winning payload and require post-update status confirmation before succeeding; added offline tests to avoid 2xx false positives.
+- Ran dev E2E order_status smoke on ticket 1037 (PASS_WEAK: ticket already closed prior to run); proof artifacts stored under run C.
 
 ### 2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260116_0236Z

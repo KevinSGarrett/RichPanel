@@ -1477,6 +1477,12 @@
       "anchor": "2026-01-16-run202601160724z-runbook-label-guidance-run-artifacts"
     }
   ],
+  "2026-01-16 - run_20260116_1443z (b40 close probe + pipeline fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601161443z-b40-close-probe-pipeline-fix"
+    }
+  ],
   "2026-01-16 - run_20260116_0236z (newworkflows phase 1: labels, staleness, optional claude gate)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
