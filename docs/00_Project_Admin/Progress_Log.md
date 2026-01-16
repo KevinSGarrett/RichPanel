@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-15 - RUN_20260115_2224Z.
+Last verified: 2026-01-16 - RUN_20260116_0114Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0114Z
+- Fixed 3 Bugbot Medium findings from PR #112: label handling logic in gated-quality.yml, check-run selection in policy-gate.yml, unified label taxonomy.
+- Updated drop-in workflows to use gates:stale (not stale:gates) and risk:R#-level labels (risk:R0-docs, risk:R1-low, etc.) matching repo docs.
+- Fixed gate state transitions: always remove gates:ready and gates:stale after run, properly handle gates:passed/gates:failed based on outcome.
 
 ### 2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260115_2224Z

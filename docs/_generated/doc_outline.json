@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)",
+        "anchor": "2026-01-16-run202601160114z-newworkflows-phase-1-delta-bugbot-findings-fixed"
+      },
+      {
+        "level": 3,
         "text": "2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)",
         "anchor": "2026-01-15-run202601152224z-newworkflows-phase-1-risk-labels-gate-matrix-claude-optional-gate"
       },

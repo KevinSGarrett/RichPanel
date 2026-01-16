@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-16 - run_20260116_0114z (newworkflows phase 1 delta: bugbot findings fixed)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160114z-newworkflows-phase-1-delta-bugbot-findings-fixed"
+    }
+  ],
   "2026-01-15 - run_20260115_2224z (newworkflows phase 1: risk labels + gate matrix + claude optional gate)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
