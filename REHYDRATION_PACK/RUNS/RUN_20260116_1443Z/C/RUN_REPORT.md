@@ -59,10 +59,10 @@
 - gh pr checks 112 — **pass** (latest head):
 ```
 Cursor Bugbot  pass  https://cursor.com
-claude-review  pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071002095/job/60600341210
+claude-review  pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071607000/job/60602477892
 codecov/patch  pass  https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/112
-mark-stale     pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071002093/job/60600341199
-validate       pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071002108/job/60600341149
+mark-stale     pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071606987/job/60602477873
+validate       pass  https://github.com/KevinSGarrett/RichPanel/actions/runs/21071606999/job/60602477920
 ```
 - Codecov PASS: https://github.com/KevinSGarrett/RichPanel/pull/112#issuecomment-3757631766
 - Bugbot PASS: https://github.com/KevinSGarrett/RichPanel/pull/112#pullrequestreview-3668850840
