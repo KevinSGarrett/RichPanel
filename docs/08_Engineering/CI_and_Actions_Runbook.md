@@ -1,6 +1,6 @@
 # CI and GitHub Actions Runbook (for Cursor Agents)
 
-Last updated: 2026-01-15  
+Last updated: 2026-01-16  
 Status: Canonical
 
 This runbook defines how agents must keep CI green and how to self-fix when GitHub Actions fails.
@@ -185,7 +185,31 @@ Use these labels to track gate status through the PR workflow:
 
 **Staleness rule:** If a PR receives new commits after Bugbot/Claude review or after `gates:passed` label was applied, gates become stale. The PR must return to `gates:stale` status and re-run required gates.
 
-### 4.0.3 Cost-aware gate strategy (two-phase approach)
+### 4.0.3 Risk labels + seeded gate labels
+
+Risk and gate labels are seeded via a workflow so every repo has the same taxonomy.
+
+#### How to trigger label seeding
+- Actions UI: run workflow `.github/workflows/seed-gate-labels.yml`
+- PowerShell-safe CLI:
+```powershell
+gh workflow run seed-gate-labels.yml --ref main
+```
+
+#### PowerShell-safe label examples
+```powershell
+# Apply a risk label (required)
+gh pr edit <PR_NUMBER> --add-label "risk:R2-medium"
+
+# Trigger optional Claude review
+gh pr edit <PR_NUMBER> --add-label "gate:claude"
+```
+
+#### How to trigger Claude review (optional)
+Claude review runs only when the PR has the `gate:claude` label.
+If `ANTHROPIC_API_KEY` is missing, the workflow skips with a log line and does not fail.
+
+### 4.0.4 Cost-aware gate strategy (two-phase approach)
 
 **Phase A: Build & stabilize (local iteration)**
 - Agent iterates locally

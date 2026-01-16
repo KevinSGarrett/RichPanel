@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-16 - run_20260116_0236z (newworkflows phase 1: labels, staleness, optional claude gate)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
+    }
+  ],
   "2026-01-16 - run_20260116_0114z (newworkflows phase 1 delta: bugbot findings fixed)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12223,10 +12229,16 @@
       "anchor": "402-gate-lifecycle-labels-optional-but-recommended"
     }
   ],
-  "4.0.3 cost-aware gate strategy (two-phase approach)": [
+  "4.0.3 risk labels + seeded gate labels": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "403-cost-aware-gate-strategy-two-phase-approach"
+      "anchor": "403-risk-labels-seeded-gate-labels"
+    }
+  ],
+  "4.0.4 cost-aware gate strategy (two-phase approach)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "404-cost-aware-gate-strategy-two-phase-approach"
     }
   ],
   "5) pr health check (required before merge)": [

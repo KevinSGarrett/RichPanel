@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)",
+        "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
+      },
+      {
+        "level": 3,
         "text": "2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)",
         "anchor": "2026-01-16-run202601160114z-newworkflows-phase-1-delta-bugbot-findings-fixed"
       },
@@ -11024,8 +11029,13 @@
       },
       {
         "level": 3,
-        "text": "4.0.3 Cost-aware gate strategy (two-phase approach)",
-        "anchor": "403-cost-aware-gate-strategy-two-phase-approach"
+        "text": "4.0.3 Risk labels + seeded gate labels",
+        "anchor": "403-risk-labels-seeded-gate-labels"
+      },
+      {
+        "level": 3,
+        "text": "4.0.4 Cost-aware gate strategy (two-phase approach)",
+        "anchor": "404-cost-aware-gate-strategy-two-phase-approach"
       },
       {
         "level": 2,

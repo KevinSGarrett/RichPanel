@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-16 - RUN_20260116_0114Z.
+Last verified: 2026-01-16 - RUN_20260116_0236Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+
+### 2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0236Z
+- Replaced PR template with risk labels, PR health check, and optional Claude section.
+- Added seed-gate-labels, gates-staleness, and claude-review workflows under `.github/workflows`.
+- Updated CI runbook with label seeding and optional Claude trigger guidance.
 
 ### 2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260116_0114Z
