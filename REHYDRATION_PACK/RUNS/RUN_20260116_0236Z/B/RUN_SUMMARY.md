@@ -24,17 +24,17 @@ Adopt NewWorkflows Phase 1 artifacts (risk labels, label seeding, staleness, opt
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260115_2224Z_newworkflows_docs`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/112
-- CI status at end of run: green (validate pass, codecov/patch pass, Bugbot pass; claude-review skipped)
+- CI status at end of run: green (validate pass, codecov/patch pass, Bugbot pass, Claude review pass)
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci` (local pass with run artifacts stashed)
-- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21055750445/job/60551553284
+- Evidence path/link: https://github.com/KevinSGarrett/RichPanel/actions/runs/21056526718/job/60553783490
 
 ## Decisions made
 - Risk label applied: `risk:R1-low` (docs-only + workflow wiring).
-- Claude review left optional (no `gate:claude` label applied).
+- Claude review executed via `gate:claude` label once secrets were configured.
 
 ## Issues / follow-ups
 - Run `seed-gate-labels.yml` from default branch after merge.
