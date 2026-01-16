@@ -39,11 +39,11 @@
 +
 +Select **exactly one** and apply the matching PR label:
 +
-+- `risk:R0` — docs/comments only, no runtime impact
-+- `risk:R1` — low risk (minor behavior changes, non-critical paths)
-+- `risk:R2` — medium risk (core logic / integrations)
-+- `risk:R3` — high risk (security, PII, production safety, infra)
-+- `risk:R4` — critical (auth, secrets, compliance, payment-like flows)
++- `risk:R0-docs` — docs/comments only, no runtime impact
++- `risk:R1-low` — low risk (minor behavior changes, non-critical paths)
++- `risk:R2-medium` — medium risk (core logic / integrations)
++- `risk:R3-high` — high risk (security, PII, production safety, infra)
++- `risk:R4-critical` — critical (auth, secrets, compliance, payment-like flows)
 +
 +### Gated checks policy (how to run heavy tools)
 +
@@ -58,7 +58,7 @@
 +- Claude `/review` (risk ≥ R3)
 +- Bugbot trigger (`@cursor review`) (risk ≥ R3)
 +
-+If new commits are pushed after gates, the repo will label the PR `stale:gates`.
++If new commits are pushed after gates, the repo will label the PR `gates:stale`.
 +Remove staleness by re-running gates (apply `gates:ready` again after it is removed).
 +
 +## What changed

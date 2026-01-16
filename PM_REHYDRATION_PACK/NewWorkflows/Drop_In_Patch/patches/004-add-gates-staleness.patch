@@ -38,7 +38,7 @@
 +            }
 +
 +            const add = [];
-+            if (!labels.includes('stale:gates')) add.push('stale:gates');
++            if (!labels.includes('gates:stale')) add.push('gates:stale');
 +
 +            const remove = [];
 +            if (labels.includes('gates:passed')) remove.push('gates:passed');
@@ -52,4 +52,4 @@
 +              await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
 +            }
 +
-+            core.info(`Marked PR #${prNumber} as stale (stale:gates) due to new commits.`);
++            core.info(`Marked PR #${prNumber} as stale (gates:stale) due to new commits.`);

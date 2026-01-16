@@ -71,8 +71,8 @@ jobs:
             const shouldRun = isDispatch || (isLabeled && labelName === 'gates:ready');
 
             const headSha = String(pr.head.sha);
-            const headRepoFullName = String(pr.head.repo.full_name);
-            const sameRepo = headRepoFullName === `${owner}/${repo}`;
+            const headRepoFullName = String(pr.head.repo?.full_name || 'unknown');
+            const sameRepo = pr.head.repo && headRepoFullName === `${owner}/${repo}`;
 
             // Risk label parsing: highest wins if multiple
             const riskMap = {
