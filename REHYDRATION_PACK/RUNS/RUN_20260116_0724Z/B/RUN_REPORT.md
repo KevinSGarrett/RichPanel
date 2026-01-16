@@ -45,9 +45,13 @@ List commands you ran (include key flags/env if relevant):
 - gh pr checks 112
 
 ## Tests / Proof (required)
+- git fetch --all --prune — exit 0 (no stdout)
 - python scripts/run_ci_checks.py --ci — **pass** (local); excerpt:
 ```
-[PLACEHOLDER_CI_SNIPPET]
+[OK] REHYDRATION_PACK validated (mode=build).
+[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
+...
+[OK] CI-equivalent checks passed.
 ```
 - gh pr checks 112 — **pass** (latest head):
 ```
