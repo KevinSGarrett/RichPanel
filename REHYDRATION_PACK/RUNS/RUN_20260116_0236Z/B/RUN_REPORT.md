@@ -53,18 +53,18 @@ List commands you ran (include key flags/env if relevant):
 - python scripts/run_ci_checks.py --ci - final local pass with run artifacts stashed.
 - gh label create <labels> --force - seed labels manually (workflow not on default branch yet).
 - gh pr edit 112 --add-label "risk:R1-low" - apply risk label.
-- gh pr comment 112 -b "@cursor review" - trigger Bugbot review.
-- gh pr checks 112 - polling loop for checks.
+- gh pr comment 112 -b "@cursor review" - trigger Bugbot review (initial + after run artifacts push).
+- gh pr checks 112 - polling loop for checks (post-push).
 - Start-Sleep -Seconds 150 / 180 - wait between check polls.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - python scripts/run_ci_checks.py --ci - pass (local) - evidence: local output snippet below.
-- GitHub Actions validate - pass - https://github.com/KevinSGarrett/RichPanel/actions/runs/21054059591/job/60546419572
+- GitHub Actions validate - pass - https://github.com/KevinSGarrett/RichPanel/actions/runs/21054691688/job/60548252656
 - Codecov patch check - pass - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/112
-- Bugbot review - no findings - https://github.com/KevinSGarrett/RichPanel/pull/112#pullrequestreview-3668535201
-- Claude review - skipped (no gate:claude / missing secret) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21054059589/job/60546427990
+- Bugbot check - skipped after retrigger (no new review posted); prior review no findings - https://github.com/KevinSGarrett/RichPanel/pull/112#pullrequestreview-3668535201
+- Claude review - skipped (no gate:claude / missing secret) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21054691689/job/60548252849
 
 Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`
