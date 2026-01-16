@@ -76,11 +76,11 @@ jobs:
 
             // Risk label parsing: highest wins if multiple
             const riskMap = {
-              'risk:R0': 0,
-              'risk:R1': 1,
-              'risk:R2': 2,
-              'risk:R3': 3,
-              'risk:R4': 4,
+              'risk:R0-docs': 0,
+              'risk:R1-low': 1,
+              'risk:R2-medium': 2,
+              'risk:R3-high': 3,
+              'risk:R4-critical': 4,
             };
             let risk = null;
             for (const [name, val] of Object.entries(riskMap)) {
@@ -255,14 +255,20 @@ jobs:
               (!requireBugbot || results.bugbot === 'success'),
             ].every(Boolean);
 
+            // Label state logic:
+            // - Always remove gates:ready after gate run (run is complete)
+            // - Always remove gates:stale after gate run (run is fresh for current commit)
+            // - If gates pass: add gates:passed, remove gates:failed
+            // - If gates fail: add gates:failed, remove gates:passed
             const labelsToAdd = [];
-            const labelsToRemove = ['gates:ready', 'gates:failed'];
+            const labelsToRemove = ['gates:ready', 'gates:stale'];
 
             if (requiredOk) {
               labelsToAdd.push('gates:passed');
-              labelsToRemove.push('stale:gates');
+              labelsToRemove.push('gates:failed');
             } else {
               labelsToAdd.push('gates:failed');
+              labelsToRemove.push('gates:passed');
             }
 
             // Fetch current labels (to avoid API errors when removing non-existent labels)
