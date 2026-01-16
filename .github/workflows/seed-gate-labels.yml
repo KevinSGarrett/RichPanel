@@ -1,0 +1,65 @@
+name: Seed Gate Labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create/ensure required labels exist
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Labels used by the Bugbot/Codecov/Claude gated workflow.
+            // Colors are hex without #.
+            const desired = [
+              { name: 'risk:R0-docs', color: '0e8a16', description: 'R0: docs/comments only; no runtime impact' },
+              { name: 'risk:R1-low', color: 'c2e0c6', description: 'R1: low risk (tests/docs/non-critical code)' },
+              { name: 'risk:R2-medium', color: 'fbca04', description: 'R2: medium risk (core code paths)' },
+              { name: 'risk:R3-high', color: 'd93f0b', description: 'R3: high risk (security/PII/payments/infra)' },
+              { name: 'risk:R4-critical', color: 'b60205', description: 'R4: critical (prod safety / auth / secrets / compliance)' },
+              { name: 'gates:ready', color: '5319e7', description: 'Trigger gated checks once the diff is stable' },
+              { name: 'gates:passed', color: '0e8a16', description: 'Gated checks passed for current HEAD sha' },
+              { name: 'gates:failed', color: 'b60205', description: 'One or more gated checks failed' },
+              { name: 'gates:stale', color: 'e99695', description: 'New commits landed; gated checks are stale' },
+              { name: 'gate:claude', color: '5319e7', description: 'Trigger optional Claude review workflow' },
+            ];
+
+            async function listAllLabels() {
+              return await github.paginate(github.rest.issues.listLabelsForRepo, {
+                owner,
+                repo,
+                per_page: 100,
+              });
+            }
+
+            const existing = await listAllLabels();
+            const byName = new Map(existing.map(l => [String(l.name), l]));
+
+            for (const lab of desired) {
+              const curr = byName.get(lab.name);
+              if (!curr) {
+                await github.rest.issues.createLabel({ owner, repo, name: lab.name, color: lab.color, description: lab.description });
+                core.info(`Created label: ${lab.name}`);
+                continue;
+              }
+
+              // Update color/description if drifted
+              const needsUpdate = String(curr.color).toLowerCase() !== lab.color.toLowerCase() || String(curr.description || '') !== String(lab.description || '');
+              if (needsUpdate) {
+                await github.rest.issues.updateLabel({ owner, repo, name: lab.name, new_name: lab.name, color: lab.color, description: lab.description });
+                core.info(`Updated label: ${lab.name}`);
+              } else {
+                core.info(`Label OK: ${lab.name}`);
+              }
+            }
+
+            core.info('Done seeding gate labels.');

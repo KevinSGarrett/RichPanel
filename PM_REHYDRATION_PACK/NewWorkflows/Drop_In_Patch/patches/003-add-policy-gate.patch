@@ -1,0 +1,145 @@
+--- a/.github/workflows/policy-gate.yml
++++ b/.github/workflows/policy-gate.yml
+@@ -0,0 +1,135 @@
++name: Policy Gate
++
++on:
++  pull_request:
++    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled, edited]
++  workflow_dispatch:
++
++permissions:
++  checks: read
++  pull-requests: read
++  contents: read
++
++jobs:
++  policy-gate:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Evaluate required gates
++        uses: actions/github-script@v7
++        with:
++          github-token: ${{ github.token }}
++          script: |
++            const pr = context.payload.pull_request;
++            if (!pr) {
++              core.setFailed('Policy Gate only supports pull_request events (or workflow_dispatch with a PR payload).');
++              return;
++            }
++
++            const owner = context.repo.owner;
++            const repo = context.repo.repo;
++            const prNumber = pr.number;
++            const headSha = pr.head.sha;
++            const labels = (pr.labels || []).map(l => String(l.name));
++
++            // --- Risk parsing -------------------------------------------------
++            // Expect exactly one: risk:R0-docs|risk:R1-low|risk:R2-medium|risk:R3-high|risk:R4-critical
++            // Highest wins if multiple are present.
++            const riskMap = {
++              'risk:R0-docs': 0,
++              'risk:R1-low': 1,
++              'risk:R2-medium': 2,
++              'risk:R3-high': 3,
++              'risk:R4-critical': 4,
++            };
++            let risk = null;
++            for (const [name, val] of Object.entries(riskMap)) {
++              if (labels.includes(name)) risk = Math.max(risk ?? -1, val);
++            }
++
++            if (risk === null) {
++              core.setFailed([
++                'Missing required risk label.',
++                'Add one of: risk:R0-docs, risk:R1-low, risk:R2-medium, risk:R3-high, risk:R4-critical',
++                'Then re-run Policy Gate (or push a commit).'
++              ].join('\n'));
++              return;
++            }
++
++            const requireCoverage = risk >= 2;
++            const requireClaude = risk >= 3;
++            const requireBugbot = risk >= 3;
++
++            // --- Staleness rule ----------------------------------------------
++            // We deliberately do NOT run heavy gates on every commit.
++            // If new commits landed after gates, staleness workflow applies `gates:stale`.
++            if (requireCoverage && labels.includes('gates:stale')) {
++              core.setFailed([
++                'Gates are stale for this PR (label: gates:stale).',
++                'Action: re-run gated checks by adding label `gates:ready` (or workflow_dispatch).'
++              ].join('\n'));
++              return;
++            }
++
++            // --- Check-run inspection ----------------------------------------
++            // We enforce that the HEAD SHA has *successful* check-runs for required gates.
++            // NOTE: check run names are job names.
++            const requiredChecks = [
++              { name: 'validate', required: true, why: 'Base CI must pass.' },
++              { name: 'coverage-codecov', required: requireCoverage, why: 'Coverage/Codecov required for risk>=R2.' },
++              { name: 'claude-review', required: requireClaude, why: 'Claude semantic review required for risk>=R3.' },
++              { name: 'bugbot-trigger', required: requireBugbot, why: 'Bugbot review trigger required for risk>=R3.' },
++            ].filter(c => c.required);
++
++            const checksResp = await github.rest.checks.listForRef({
++              owner,
++              repo,
++              ref: headSha,
++              per_page: 100,
++            });
++
++            const runs = checksResp.data.check_runs || [];
++            // Runs are returned newest-first. Build map keeping only newest run per name.
++            const byName = new Map();
++            for (const r of runs) {
++              const name = String(r.name);
++              if (!byName.has(name)) {
++                byName.set(name, r);
++              }
++            }
++
++            const missing = [];
++            const failing = [];
++            const pending = [];
++
++            for (const req of requiredChecks) {
++              const r = byName.get(req.name);
++              if (!r) {
++                missing.push(`${req.name} — ${req.why}`);
++                continue;
++              }
++              const status = String(r.status);
++              const conclusion = String(r.conclusion);
++
++              if (status !== 'completed') {
++                pending.push(`${req.name} — status=${status}`);
++                continue;
++              }
++              if (conclusion !== 'success') {
++                failing.push(`${req.name} — conclusion=${conclusion}`);
++              }
++            }
++
++            const lines = [];
++            lines.push(`PR #${prNumber} risk=R${risk}`);
++            lines.push(`HEAD SHA: ${headSha}`);
++            lines.push(`Required gates: ${requiredChecks.map(c => c.name).join(', ')}`);
++
++            if (missing.length) lines.push(`\nMissing required checks:\n- ${missing.join('\n- ')}`);
++            if (pending.length) lines.push(`\nPending checks:\n- ${pending.join('\n- ')}`);
++            if (failing.length) lines.push(`\nFailing checks:\n- ${failing.join('\n- ')}`);
++
++            if (missing.length || pending.length || failing.length) {
++              lines.push('\nHow to satisfy gates (AI-only workflow):');
++              lines.push('- Ensure CI (validate) is green for the latest commit.');
++              if (risk >= 2) {
++                lines.push('- Run gated checks by adding label `gates:ready` (or use workflow_dispatch for Gated Quality).');
++              }
++              core.setFailed(lines.join('\n'));
++              return;
++            }
++
++            core.info(lines.join('\n'));
++            core.info('Policy Gate PASSED.');

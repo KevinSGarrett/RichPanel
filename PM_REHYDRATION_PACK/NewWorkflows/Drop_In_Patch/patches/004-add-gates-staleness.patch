@@ -1,0 +1,55 @@
+--- a/.github/workflows/gates-staleness.yml
++++ b/.github/workflows/gates-staleness.yml
+@@ -0,0 +1,52 @@
++name: Gates Staleness
++
++on:
++  pull_request:
++    types: [synchronize]
++
++permissions:
++  issues: write
++  pull-requests: read
++
++jobs:
++  mark-stale:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Mark gated checks as stale on new commits
++        uses: actions/github-script@v7
++        with:
++          github-token: ${{ github.token }}
++          script: |
++            const pr = context.payload.pull_request;
++            if (!pr) {
++              core.info('No pull_request in payload; nothing to do.');
++              return;
++            }
++
++            const owner = context.repo.owner;
++            const repo = context.repo.repo;
++            const prNumber = pr.number;
++            const labels = (pr.labels || []).map(l => String(l.name));
++
++            const shouldMark = labels.includes('gates:passed') || labels.includes('gates:failed');
++            if (!shouldMark) {
++              core.info('No gate state labels present; skipping.');
++              return;
++            }
++
++            const add = [];
++            if (!labels.includes('gates:stale')) add.push('gates:stale');
++
++            const remove = [];
++            if (labels.includes('gates:passed')) remove.push('gates:passed');
++            if (labels.includes('gates:failed')) remove.push('gates:failed');
++
++            if (add.length) {
++              await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: add });
++            }
++
++            for (const name of remove) {
++              await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
++            }
++
++            core.info(`Marked PR #${prNumber} as stale (gates:stale) due to new commits.`);

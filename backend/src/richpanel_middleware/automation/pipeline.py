@@ -619,7 +619,9 @@ def execute_order_status_reply(
         )
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         update_candidates = [
+            # Empirically winning payload from close probe (B40)
             ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
+            # Variants (keep for compatibility)
             ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
             ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
             ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}}),
@@ -635,6 +637,8 @@ def execute_order_status_reply(
             ("status_CLOSED", {"status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}),
             ("state_RESOLVED", {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
             ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
+            ("ticket_state_nested_status_resolved", {"ticket_state": {"status": "resolved"}, "comment": comment_payload}),
+            ("ticket_state_nested_state_closed", {"ticket_state": {"state": "closed"}, "comment": comment_payload}),
         ]
 
         update_success = None
@@ -645,7 +649,32 @@ def execute_order_status_reply(
                 json_body=payload,
                 dry_run=not allow_network,
             )
-            candidate_success = 200 <= reply_response.status_code < 300 and not reply_response.dry_run
+            candidate_success_http = 200 <= reply_response.status_code < 300 and not reply_response.dry_run
+
+            post_status = None
+            post_state = None
+            closed_after = False
+            status_changed = False
+            if allow_network and not reply_response.dry_run:
+                try:
+                    post_metadata = get_ticket_metadata(
+                        envelope.conversation_id,
+                        executor=executor,
+                        allow_network=allow_network,
+                    )
+                    post_status = post_metadata.status
+                    post_state = getattr(post_metadata, "state", None)
+                    closed_after = _is_closed_status(post_status) or _is_closed_status(post_state)
+                    status_changed = (
+                        post_status != ticket_metadata.status
+                        or post_state != getattr(ticket_metadata, "state", None)
+                    )
+                    ticket_metadata = post_metadata
+                except (RichpanelRequestError, SecretLoadError, TransportError):
+                    closed_after = False
+                    status_changed = False
+
+            candidate_success = candidate_success_http and (closed_after or status_changed or not allow_network)
             responses.append(
                 {
                     "action": "reply_and_resolve",
@@ -653,6 +682,9 @@ def execute_order_status_reply(
                     "dry_run": reply_response.dry_run,
                     "candidate": candidate_name,
                     "update_success": candidate_success,
+                    "closed_after": closed_after,
+                    "status_after": post_status,
+                    "state_after": post_state,
                 }
             )
             if candidate_success:

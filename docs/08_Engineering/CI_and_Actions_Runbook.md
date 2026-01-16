@@ -1,6 +1,6 @@
 # CI and GitHub Actions Runbook (for Cursor Agents)
 
-Last updated: 2026-01-11  
+Last updated: 2026-01-16  
 Status: Canonical
 
 This runbook defines how agents must keep CI green and how to self-fix when GitHub Actions fails.
@@ -140,11 +140,102 @@ We require **merge commits only** for auditability and traceability.
 
 ---
 
-## 4) PR Health Check (required before merge)
+## 4) Risk labels and gate requirements (NewWorkflows)
+
+**Every PR must have exactly one risk label** that determines which quality gates are required before merge.
+
+### 4.0.1 Risk label taxonomy
+
+Apply exactly one of these labels to every PR (use `gh pr edit <PR#> --add-label "<label>"`):
+
+- **`risk:R0-docs`** — Docs-only / non-functional changes
+  - Examples: docs edits, markdown formatting, typos, README updates
+  - Gates: CI optional (if repo requires it, must pass); Bugbot/Codecov/Claude not required
+
+- **`risk:R1-low`** — Low-risk, localized changes
+  - Examples: small refactors, non-critical bugfixes, logging tweaks, UI copy changes
+  - Gates: CI required; Codecov advisory; Bugbot optional (required if critical zones touched); Claude optional
+
+- **`risk:R2-medium`** — Behavior changes or non-trivial logic
+  - Examples: new endpoints, automation routing changes, classifier threshold updates, caching changes, schema changes
+  - Gates: CI required; Codecov patch required; Bugbot required; Claude semantic review required
+
+- **`risk:R3-high`** — High blast radius or security-sensitive
+  - Examples: auth/permissions changes, PII handling, webhooks, payment/order logic, background jobs, infra runtime changes
+  - Gates: CI required; Codecov patch + project; Bugbot required (stale-rerun); Claude required (security prompt); E2E proof required if outbound/automation
+
+- **`risk:R4-critical`** — Production emergency / security incident
+  - Examples: actively exploited vulnerabilities, incident mitigation, key rotation, data corruption fixes
+  - Gates: All R3 gates + double-review strategy + explicit rollback plan + post-merge verification
+
+**Critical zones** (auto-upgrade to R2 minimum):
+- Any file under `backend/`
+- Automation/routing logic
+- Webhook handlers
+- Anything touching: secrets, auth, PII, outbound requests, persistence/data migration
+
+### 4.0.2 Gate lifecycle labels (optional but recommended)
+
+Use these labels to track gate status through the PR workflow:
+
+- **`gates:ready`** — PR is stable (CI green, diff coherent) and ready to run heavy gates (Bugbot/Claude/Codecov)
+- **`gates:running`** — Gate workflows are currently in-flight
+- **`gates:passed`** — Required gates completed successfully for current PR state
+- **`gates:stale`** — New commits landed after gates ran; must re-run gates before merge
+
+**Staleness rule:** If a PR receives new commits after Bugbot/Claude review or after `gates:passed` label was applied, gates become stale. The PR must return to `gates:stale` status and re-run required gates.
+
+### 4.0.3 Risk labels + seeded gate labels
+
+Risk and gate labels are seeded via a workflow so every repo has the same taxonomy.
+
+#### How to trigger label seeding
+- Actions UI: run workflow `.github/workflows/seed-gate-labels.yml`
+- PowerShell-safe CLI:
+```powershell
+gh workflow run seed-gate-labels.yml --ref main
+```
+
+#### PowerShell-safe label examples (risk + gate)
+```powershell
+# Apply exactly one risk label (required)
+gh pr edit <PR_NUMBER> --add-label "risk:R0-docs"
+gh pr edit <PR_NUMBER> --add-label "risk:R1-low"
+gh pr edit <PR_NUMBER> --add-label "risk:R2-medium"
+gh pr edit <PR_NUMBER> --add-label "risk:R3-high"
+gh pr edit <PR_NUMBER> --add-label "risk:R4-critical"
+
+# Trigger optional Claude review
+gh pr edit <PR_NUMBER> --add-label "gate:claude"
+```
+
+#### How to trigger Claude review (optional)
+Claude review runs only when the PR has the `gate:claude` label.
+If `ANTHROPIC_API_KEY` is missing, the workflow skips with a log line and does not fail.
+
+### 4.0.4 Cost-aware gate strategy (two-phase approach)
+
+**Phase A: Build & stabilize (local iteration)**
+- Agent iterates locally
+- Runs `python scripts/run_ci_checks.py --ci` until green
+- Commits locally as needed
+- Pushes to GitHub only when diff is coherent (reduces CI/Codecov cost)
+
+**Phase B: Gate execution (PR-level, once per stable state)**
+- When CI is green and PR is stable, apply label: `gates:ready`
+- Heavy gates run once:
+  - Bugbot (if required by risk level)
+  - Claude review (if required by risk level)
+  - Codecov gating (if required by risk level)
+- This avoids running expensive AI reviews on every micro-commit
+
+---
+
+## 5) PR Health Check (required before merge)
 
 Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.
 
-### 4.0 Wait-for-green gate (mandatory)
+### 5.0 Wait-for-green gate (mandatory)
 - **No “done” until green:** Do not declare a run complete or enable auto-merge until Codecov and Bugbot checks have finished and are green (or an explicitly documented fallback is recorded).
 - **Wait loop:** After pushing and triggering Bugbot, poll checks every 120–240 seconds until the PR status rollup (and `gh pr checks <PR#>`) shows Codecov + Bugbot contexts completed/green.
   ```powershell
@@ -156,7 +247,7 @@ Every PR must pass the following health checks before being considered "done" an
   ```
 - **Bugbot quota exhausted:** Record "Bugbot quota exhausted; performed manual review" in `RUN_REPORT.md`, perform a manual diff review (focus on risk areas/tests touched), and capture findings/deferrals. You must still wait for Codecov to finish and be green before merging.
 
-### 4.1 Bugbot review
+### 5.1 Bugbot review
 
 **Requirement:** All PRs must receive a Bugbot review (or explicit fallback if quota exceeded).
 
@@ -187,7 +278,7 @@ gh pr view <PR#> --json comments --jq '.comments[] | select(.author.login=="curs
 - **If Bugbot flags issues**: Either fix them in this run OR document each deferred finding with a follow-up checklist item in `REHYDRATION_PACK/05_TASK_BOARD.md` or `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md`
 - **If quota exceeded**: Document "Bugbot quota exceeded; performed manual code review" and list manual review findings
 
-### 4.2 Codecov status verification
+### 5.2 Codecov status verification
 
 **Requirement:** Verify Codecov patch and project status checks are passing or acceptable.
 
@@ -214,7 +305,82 @@ If Codecov is not configured or failing to upload:
 - Review `coverage.xml` locally
 - Document: "Codecov unavailable; reviewed coverage.xml directly (X% patch coverage)"
 
-### 4.3 E2E proof (when applicable)
+### 5.3 Claude review (Semantic Review Agent)
+
+**Requirement:** Claude semantic review is required for R2+ PRs (medium, high, critical risk).
+
+Claude review provides a semantic/correctness/security-focused review of the diff, complementing Bugbot's bug detection.
+
+#### When Claude review is required
+
+- **R0/R1**: Optional (not required unless uncertainty exists)
+- **R2 (medium)**: Required once on stable diff
+- **R3 (high)**: Required with security-focused prompt; rerun if significant changes occur after review
+- **R4 (critical)**: Required + double-review strategy (Claude + independent LLM review, e.g., AM deep review)
+
+#### How to trigger Claude review
+
+**Option 1: GitHub comment (if supported by your setup)**
+```powershell
+gh pr comment <PR#> -b '@claude review'
+```
+
+**Option 2: Manual Claude API call (fallback when Anthropic key is missing)**
+- If Anthropic API key is not configured in your environment, you must perform manual review:
+  1. Download the PR diff: `gh pr diff <PR#> > pr_diff.txt`
+  2. Conduct manual code review focusing on:
+     - Correctness and logic errors
+     - Security implications (especially for R3/R4)
+     - Edge cases and error handling
+     - Integration correctness
+  3. Document review findings in run report with section: "Claude review fallback (manual)"
+  4. Apply waiver label: `waiver:active` and document the waiver in PR description
+
+**Option 3: External Claude review (via ChatGPT or Claude web interface)**
+- Copy the PR diff and paste into a Claude conversation
+- Use this prompt for R2:
+  ```
+  Please review this code change for correctness, security, and potential bugs.
+  Focus on: logic errors, edge cases, error handling, integration issues.
+  ```
+- Use this prompt for R3/R4 (security-focused):
+  ```
+  Please perform a security-focused code review of this change.
+  Pay special attention to: authentication, authorization, PII handling,
+  input validation, SQL injection, XSS, secrets exposure, rate limiting,
+  outbound request safety, error information leakage.
+  ```
+- Copy the review output and paste into run report
+
+#### How to view Claude review output
+
+If Claude posts to GitHub:
+```powershell
+# View PR comments (including Claude output)
+gh pr view <PR#> --comments
+
+# Filter for Claude comments
+gh pr view <PR#> --json comments --jq '.comments[] | select(.author.login=="claude-bot" or .body | contains("Claude")) | {author: .author.login, body: .body}'
+```
+
+#### Action required
+
+- **If Claude flags concerns**: Either fix them in this run OR document each item with justification/waiver
+- **If Claude verdict is PASS**: Record the verdict and link in run report
+- **If Claude verdict is FAIL**: Fix blocking issues before merge; waivers require PM approval
+- **If Anthropic key is missing**: Document manual review process and findings; apply `waiver:active` label
+
+#### Evidence requirements
+
+Document in run report:
+- Claude triggered: yes/no (or "manual fallback")
+- Link to Claude output (or "manual review recorded")
+- Verdict: PASS/CONCERNS/FAIL (or "manual: no blocking issues")
+- Actions taken (fixes or waivers with justification)
+
+---
+
+### 5.4 E2E proof (when applicable)
 
 **Requirement:** When changes touch outbound integrations or automation logic, E2E smoke test must pass.
 
@@ -254,10 +420,13 @@ Capture in `TEST_MATRIX.md`:
 - Routing result (category/tags)
 - Draft reply confirmation (count, safe fields only)
 
-### 4.4 PR Health Check CLI reference card
+### 5.5 PR Health Check CLI reference card
 
 Quick reference for all health checks:
 ```powershell
+# 0. Apply risk label (required)
+gh pr edit <PR#> --add-label "risk:R2-medium"  # Choose appropriate risk level
+
 # 1. Trigger Bugbot
 gh pr comment <PR#> -b '@cursor review'
 
@@ -267,18 +436,29 @@ gh pr view <PR#> --comments
 # 3. View Codecov status
 gh pr checks <PR#>
 
-# 4. Run E2E smoke (dev)
+# 4. Trigger Claude review (if required for R2+)
+# Option 1: GitHub comment (if supported)
+gh pr comment <PR#> -b '@claude review'
+# Option 2: Manual review (if Anthropic key missing)
+gh pr diff <PR#> > pr_diff.txt
+# Then review manually and document in run report
+
+# 5. Run E2E smoke (dev) - if required for R3/R4 or outbound changes
 $eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
 gh workflow run dev-e2e-smoke.yml --ref <branch> -f event-id=$eventId
 gh run watch --exit-status
 
-# 5. View E2E results
+# 6. View E2E results
 gh run view --json url --jq '.url'
+
+# 7. Apply gate status labels as workflow progresses
+gh pr edit <PR#> --add-label "gates:ready"   # When PR is stable
+gh pr edit <PR#> --add-label "gates:passed"  # When all gates green
 ```
 
 ---
 
-## 5) When GitHub Actions fails (red status)
+## 6) When GitHub Actions fails (red status)
 
 ### Step 1 — Identify the failing job
 Preferred (if GitHub CLI is available and authenticated):
@@ -331,7 +511,7 @@ Fallback:
 
 ---
 
-## 6) Dev E2E smoke workflow
+## 7) Dev E2E smoke workflow
 
 The “Dev E2E Smoke” workflow (`.github/workflows/dev-e2e-smoke.yml`) continuously validates the dev stack by sending a synthetic webhook and confirming the worker Lambda writes idempotency, conversation state, and audit records to DynamoDB.
 
@@ -422,7 +602,7 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 - For CLI proofs, attach the proof JSON path (e.g., `REHYDRATION_PACK/RUNS/<RUN_ID>/B/e2e_outbound_proof.json`), the exact command used, and confirm that `mw-smoke:<RUN_ID>` appears in tags_added with updated_at delta > 0.
 
-## 7) Staging E2E smoke workflow
+## 8) Staging E2E smoke workflow
 
 The “Staging E2E Smoke” workflow (`.github/workflows/staging-e2e-smoke.yml`) validates the staging stack end-to-end using the same script as dev, but under the staging deploy role.
 
@@ -452,7 +632,7 @@ Guidance:
 - Paste the routing + draft confirmation lines from the smoke summary (routing category/tags plus order_status_draft_reply presence and draft_replies count with safe fields only).
 - If discovery falls back (missing CloudFormation outputs), capture the warning lines so reviewers can see which derived values were used, but never paste raw secret material.
 
-## 8) Prod promotion checklist (no prod deploy without explicit go/no-go)
+## 9) Prod promotion checklist (no prod deploy without explicit go/no-go)
 
 Only promote to prod with PM/lead approval recorded in the notes. Stop immediately if staging evidence is missing or stale.
 
@@ -486,7 +666,7 @@ Notes:
 - Keep both run URLs plus the `${GITHUB_STEP_SUMMARY}` contents in the rehydration pack evidence tables.
 - If prod deploy is intentionally deferred, record the decision and skip the commands.
 
-## 9) Common causes (initial list)
+## 10) Common causes (initial list)
 - stale generated registries not committed
 - accidental placeholder left in an INDEX-linked doc (doc hygiene)
 - broken markdown link in `docs/INDEX.md`
@@ -508,7 +688,7 @@ python scripts/run_ci_checks.py
 
 ---
 
-## 10) Codecov coverage reporting and gating
+## 11) Codecov coverage reporting and gating
 
 ### Current state (2026-01-11)
 With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is automatically uploaded on every CI run.
@@ -562,7 +742,7 @@ Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to ve
 
 ---
 
-## 11) Lint/Type enforcement roadmap
+## 12) Lint/Type enforcement roadmap
 
 ### Current state (2026-01-11)
 Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisory). They do **not** block PR merges.
@@ -594,7 +774,7 @@ Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisor
 
 ---
 
-## 12) If you cannot fix quickly
+## 13) If you cannot fix quickly
 Escalate to PM by updating:
 - `REHYDRATION_PACK/OPEN_QUESTIONS.md`
 and include:
@@ -603,7 +783,7 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 13) Seed Secrets Manager (dev/staging)
+## 14) Seed Secrets Manager (dev/staging)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`

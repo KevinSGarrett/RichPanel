@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-16 - RUN_20260116_1443Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,36 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-16 - RUN_20260116_0724Z (Runbook label guidance + run artifacts)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0724Z
+- Added PowerShell-safe risk label and `gate:claude` examples to the CI runbook.
+- Regenerated doc registries and produced RUN_20260116_0724Z artifacts for agents A/B/C.
+
+### 2026-01-16 - RUN_20260116_1443Z (B40 close probe + pipeline fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_1443Z
+- Added `scripts/dev_richpanel_close_probe.py` to empirically test close payloads (PII-safe proof). Winning payload: `ticket.state=closed` + `ticket.status=CLOSED`.
+- Updated order_status pipeline to prefer the winning payload and require post-update status confirmation before succeeding; added offline tests to avoid 2xx false positives.
+- Ran dev E2E order_status smoke on ticket 1037 (PASS_WEAK: ticket already closed prior to run); proof artifacts stored under run C.
+
+### 2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0236Z
+- Replaced PR template with risk labels, PR health check, and optional Claude section.
+- Added seed-gate-labels, gates-staleness, and claude-review workflows under `.github/workflows`.
+- Updated CI runbook with label seeding and optional Claude trigger guidance.
+
+### 2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0114Z
+- Fixed 3 Bugbot Medium findings from PR #112: label handling logic in gated-quality.yml, check-run selection in policy-gate.yml, unified label taxonomy.
+- Updated drop-in workflows to use gates:stale (not stale:gates) and risk:R#-level labels (risk:R0-docs, risk:R1-low, etc.) matching repo docs.
+- Fixed gate state transitions: always remove gates:ready and gates:stale after run, properly handle gates:passed/gates:failed based on outcome.
+
+### 2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260115_2224Z
+- Operationalized NewWorkflows strategy (Bugbot + Codecov + Claude + risk gating) in repo docs and templates.
+- Created `docs/08_Engineering/Quality_Gates_and_Risk_Labels.md` reference card defining R0-R4 risk labels and gate requirements.
+- Updated `docs/08_Engineering/CI_and_Actions_Runbook.md` with risk label taxonomy, gate lifecycle labels, two-phase workflow, and Claude review procedures.
+- Enhanced agent prompt and run report templates with risk classification requirements, gate checklists, and evidence sections.
+- Updated MASTER_CHECKLIST, TASK_BOARD, and Progress_Log to track NewWorkflows Phase 1 adoption.
 
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z

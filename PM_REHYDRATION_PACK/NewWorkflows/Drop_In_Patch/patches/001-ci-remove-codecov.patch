@@ -1,0 +1,162 @@
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,88 +1,71 @@
+-name: CI
+-
+-on:
+-  push:
+-    branches: [main]
+-  pull_request:
+-  workflow_dispatch:
+-
+-jobs:
+-  validate:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - name: Checkout
+-        uses: actions/checkout@v4
+-        with:
+-          fetch-depth: 0
+-
+-      - name: Set up Python
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.11"
+-
+-      - name: Install Python tooling
+-        run: |
+-          python -m pip install --upgrade pip
+-          pip install black mypy ruff coverage
+-
+-      - name: Set up Node.js
+-        uses: actions/setup-node@v4
+-        with:
+-          node-version: "20"
+-
+-      - name: Install infra dependencies
+-        working-directory: infra/cdk
+-        run: |
+-          if [ -f package-lock.json ]; then
+-            npm ci
+-          else
+-            npm install
+-          fi
+-
+-      - name: Build infra TypeScript
+-        working-directory: infra/cdk
+-        run: npm run build
+-
+-      - name: CDK synth
+-        working-directory: infra/cdk
+-        run: npx cdk synth
+-
+-      - name: Run repo validations
+-        run: |
+-          python scripts/run_ci_checks.py --ci
+-
+-      - name: Ruff
+-        continue-on-error: true
+-        run: |
+-          ruff check backend/src scripts
+-
+-      - name: Black
+-        continue-on-error: true
+-        run: |
+-          black --check backend/src scripts
+-
+-      - name: Mypy
+-        continue-on-error: true
+-        run: |
+-          mypy --config-file mypy.ini
+-
+-      - name: Run unit tests with coverage
+-        run: |
+-          coverage run -m unittest discover -s scripts -p "test_*.py"
+-          coverage xml
+-
+-      - name: Upload coverage to Codecov
+-        uses: codecov/codecov-action@v4
+-        with:
+-          token: ${{ secrets.CODECOV_TOKEN }}
+-          files: coverage.xml
+-          flags: python
+-          fail_ci_if_error: false
+-
+-      - name: Upload coverage.xml artifact
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: coverage-report
+-          path: coverage.xml
+-          retention-days: 30
++name: CI
++
++on:
++  push:
++    branches: [main]
++  pull_request:
++  workflow_dispatch:
++
++jobs:
++  validate:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
++
++      - name: Set up Python
++        uses: actions/setup-python@v5
++        with:
++          python-version: "3.11"
++
++      - name: Install Python tooling
++        run: |
++          python -m pip install --upgrade pip
++          pip install black mypy ruff
++
++      - name: Set up Node.js
++        uses: actions/setup-node@v4
++        with:
++          node-version: "20"
++
++      - name: Install infra dependencies
++        working-directory: infra/cdk
++        run: |
++          if [ -f package-lock.json ]; then
++            npm ci
++          else
++            npm install
++          fi
++
++      - name: Build infra TypeScript
++        working-directory: infra/cdk
++        run: npm run build
++
++      - name: CDK synth
++        working-directory: infra/cdk
++        run: npx cdk synth
++
++      - name: Run repo validations
++        run: |
++          python scripts/run_ci_checks.py --ci
++
++      - name: Ruff
++        continue-on-error: true
++        run: |
++          ruff check backend/src scripts
++
++      - name: Black
++        continue-on-error: true
++        run: |
++          black --check backend/src scripts
++
++      - name: Mypy
++        continue-on-error: true
++        run: |
++          mypy --config-file mypy.ini
++
++      - name: Run unit tests
++        run: |
++          python -m unittest discover -s scripts -p "test_*.py"

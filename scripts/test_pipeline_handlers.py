@@ -442,7 +442,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertEqual(len(executor.calls), 3)
+        self.assertGreaterEqual(len(executor.calls), 4)
 
         get_call = executor.calls[0]
         self.assertEqual(get_call["method"], "GET")
@@ -466,6 +466,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("comment", ticket_payload)
         self.assertEqual(ticket_payload["comment"]["type"], "public")
         self.assertFalse(reply_call["kwargs"]["dry_run"])
+
+        post_read = executor.calls[-1]
+        self.assertEqual(post_read["method"], "GET")
+        self.assertIn("/v1/tickets/", post_read["path"])
 
     def test_outbound_skips_when_ticket_already_resolved(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -510,6 +514,33 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertEqual(result["reason"], "reply_update_failed")
         # Expect GET + add-tags + at least one reply attempt
         self.assertGreaterEqual(len(executor.calls), 3)
+
+    def test_outbound_reply_requires_status_change_after_2xx(self) -> None:
+        """Do not stop at first 2xx if status remains open; continue until closed."""
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_status="open",
+            reply_status_codes=[200, 200],
+            update_status_after=[None, "CLOSED"],
+        )
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertTrue(result["sent"])
+        candidates = [r for r in result["responses"] if r.get("candidate")]
+        self.assertGreaterEqual(len(candidates), 2)
+        self.assertEqual(candidates[0]["candidate"], "ticket_state_closed_status_CLOSED")
+        self.assertFalse(candidates[0]["update_success"])  # 2xx but no status change yet
+        self.assertTrue(candidates[1]["update_success"])   # second candidate closed the ticket
+        self.assertTrue(candidates[1]["closed_after"])
 
     def test_outbound_reply_dry_run_does_not_send(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -610,18 +641,22 @@ class _RecordingExecutor:
         self,
         *,
         ticket_status: str = "open",
+        ticket_state: str | None = None,
         ticket_tags: list[str] | None = None,
         raise_on_get: bool = False,
         reply_status_codes: list[int] | None = None,
         force_dry_run: bool = False,
+        update_status_after: list[str | None] | None = None,
     ) -> None:
         self.calls: list[dict[str, Any]] = []
         self.ticket_status = ticket_status
+        self.ticket_state = ticket_state
         self.ticket_tags = ticket_tags or []
         self.raise_on_get = raise_on_get
         self.reply_status_codes = reply_status_codes or [202]
         self._reply_index = 0
         self.force_dry_run = force_dry_run
+        self.update_status_after = update_status_after if update_status_after is not None else ["CLOSED"]
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         effective_dry_run = self.force_dry_run or kwargs.get("dry_run", False)
@@ -631,7 +666,7 @@ class _RecordingExecutor:
         if method.upper() == "GET" and path.startswith("/v1/tickets/") and "/add-tags" not in path:
             if self.raise_on_get:
                 raise TransportError("simulated ticket read failure")
-            body = json.dumps({"status": self.ticket_status, "tags": self.ticket_tags}).encode("utf-8")
+            body = json.dumps({"status": self.ticket_status, "state": self.ticket_state, "tags": self.ticket_tags}).encode("utf-8")
             return RichpanelResponse(
                 status_code=200,
                 headers={"content-type": "application/json"},
@@ -639,6 +674,21 @@ class _RecordingExecutor:
                 url=path,
                 dry_run=kwargs.get("dry_run", False),
             )
+
+        if method.upper() == "PUT" and "/add-tags" in path:
+            return RichpanelResponse(
+                status_code=202,
+                headers={},
+                body=b"",
+                url=path,
+                dry_run=effective_dry_run,
+            )
+
+        if method.upper() == "PUT" and path.startswith("/v1/tickets/") and "/add-tags" not in path:
+            if self._reply_index < len(self.update_status_after):
+                new_status = self.update_status_after[self._reply_index]
+                if new_status:
+                    self.ticket_status = new_status
 
         status_code = (
             self.reply_status_codes[self._reply_index]

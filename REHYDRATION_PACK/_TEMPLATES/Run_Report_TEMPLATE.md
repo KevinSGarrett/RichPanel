@@ -8,6 +8,8 @@
 - **Branch:** `<branch-name>`
 - **PR:** `#<number>` or none
 - **PR merge strategy:** merge commit
+- **Risk label:** `risk:R<#>-<level>` (R0-docs / R1-low / R2-medium / R3-high / R4-critical)
+- **Risk justification:** <Why this risk level was chosen>
 
 ## Objective + stop conditions
 - **Objective:** <FILL_ME>
@@ -53,30 +55,66 @@
 
 ## PR Health Check (required for PRs)
 
-### Bugbot Findings
+### Risk and gate status
+- **Risk label applied:** `risk:R<#>-<level>`
+- **Required gates for this risk level:**
+  - R0: CI optional, no Bugbot/Codecov/Claude/E2E
+  - R1: CI required, Codecov advisory, Bugbot optional, Claude optional
+  - R2: CI + Codecov patch + Bugbot + Claude required
+  - R3: CI + Codecov (patch+project) + Bugbot (stale-rerun) + Claude (security, stale-rerun) + E2E if outbound
+  - R4: All R3 gates + double-review + rollback plan
+- **Gate lifecycle labels applied:** `gates:ready` → `gates:passed` (or `gates:stale` if re-run needed)
+
+### CI validation (R1+ required)
+- **CI validate status:** pass/fail
+- **Local CI-equivalent run:** `python scripts/run_ci_checks.py --ci` → <PASS/FAIL>
+- **CI run link:** <GITHUB_ACTIONS_RUN_URL>
+
+### Bugbot Findings (R2+ required)
+- **Bugbot required for risk level:** yes/no
 - **Bugbot triggered:** yes/no (`@cursor review` or `bugbot run`)
 - **Bugbot comment link:** <LINK_TO_PR_COMMENT> or "quota exceeded, fallback to manual review"
 - **Findings summary:**
   - <FINDING_1>: <fixed | deferred | not applicable>
   - <FINDING_2>: <fixed | deferred | not applicable>
 - **Action taken:** <description of fixes or deferral rationale>
+- **Manual review (if quota exhausted):** <description of manual review process and findings>
 
-### Codecov Findings
-- **Codecov patch status:** pass/fail (<percentage>)
-- **Codecov project status:** pass/fail (<percentage change>)
+### Codecov Findings (R2+ required)
+- **Codecov required for risk level:** yes/no (patch for R2+, patch+project for R3+)
+- **Codecov patch status:** pass/fail (<percentage>) or "N/A for R0/R1"
+- **Codecov project status:** pass/fail (<percentage change>) or "N/A for R0/R1/R2"
 - **Coverage issues identified:**
   - <ISSUE_1>: <fixed | acceptable as-is | deferred>
   - <ISSUE_2>: <fixed | acceptable as-is | deferred>
 - **Action taken:** <description of test additions or rationale>
 
-### E2E Proof (if applicable)
-- **E2E required:** yes/no (yes if changes touch outbound/automation)
+### Claude Review (R2+ required)
+- **Claude required for risk level:** yes/no (required for R2/R3/R4, optional for R0/R1)
+- **Claude triggered:** yes/no (method: GitHub comment | manual review | API call)
+- **Claude review link:** <LINK_TO_REVIEW_OUTPUT> or "manual review documented below"
+- **Claude verdict:** PASS | CONCERNS | FAIL | "manual review: no blocking issues"
+- **Security prompt used (R3/R4):** yes/no
+- **Findings:**
+  - <FINDING_1>: <fixed | waived with justification>
+  - <FINDING_2>: <fixed | waived with justification>
+- **Action taken:** <description of fixes or waivers>
+- **Waiver applied:** yes/no (if yes, `waiver:active` label applied and justification below)
+- **Waiver justification (if applicable):** <reason for waiver + alternate evidence>
+
+### E2E Proof (R3/R4 or outbound changes)
+- **E2E required:** yes/no (yes if changes touch outbound/automation OR risk R3/R4)
 - **E2E test run:** <workflow-name> or "not applicable"
 - **E2E run URL:** <GITHUB_ACTIONS_RUN_URL> or "N/A"
 - **E2E result:** pass/fail or "N/A"
 - **Evidence:** <link to TEST_MATRIX.md section> or "N/A"
 
-**Gate compliance:** All Bugbot/Codecov/E2E requirements addressed: yes/no
+### Staleness check (R2+ required)
+- **New commits after gates:** yes/no
+- **If yes, gates re-run:** yes/no
+- **Label transition:** `gates:ready` → `gates:stale` → `gates:passed` (if applicable)
+
+**Gate compliance:** All required gates for risk level addressed and non-stale: yes/no
 
 ## Docs impact (summary)
 - **Docs updated:** <list or none>

@@ -23,6 +23,7 @@ class TicketMetadata:
     tags: Set[str]
     status_code: Optional[int] = None
     dry_run: bool = False
+    state: Optional[str] = None
 
 
 def _normalize_status(value: Any) -> Optional[str]:
@@ -85,6 +86,7 @@ def get_ticket_metadata(
         payload = {}
 
     status = _normalize_status(payload.get("status") or payload.get("state"))
+    state = _normalize_status(payload.get("state") or payload.get("status"))
     tags = dedupe_tags(payload.get("tags"))
 
     return TicketMetadata(
@@ -92,6 +94,7 @@ def get_ticket_metadata(
         tags=tags,
         status_code=response.status_code,
         dry_run=response.dry_run,
+        state=state,
     )
 
 

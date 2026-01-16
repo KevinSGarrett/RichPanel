@@ -1,0 +1,293 @@
+name: Gated Quality
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull Request number to run gated checks for"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: gated-quality-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.ctx.outputs.should_run }}
+      pr_number: ${{ steps.ctx.outputs.pr_number }}
+      head_sha: ${{ steps.ctx.outputs.head_sha }}
+      head_repo_full_name: ${{ steps.ctx.outputs.head_repo_full_name }}
+      labels_json: ${{ steps.ctx.outputs.labels_json }}
+      risk: ${{ steps.ctx.outputs.risk }}
+      require_coverage: ${{ steps.ctx.outputs.require_coverage }}
+      require_claude: ${{ steps.ctx.outputs.require_claude }}
+      require_bugbot: ${{ steps.ctx.outputs.require_bugbot }}
+      same_repo: ${{ steps.ctx.outputs.same_repo }}
+    steps:
+      - name: Resolve PR context
+        id: ctx
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const isDispatch = context.eventName === 'workflow_dispatch';
+            const isLabeled = context.eventName === 'pull_request' && context.payload.action === 'labeled';
+            const labelName = String(context.payload.label?.name || '');
+
+            let prNumberRaw = '';
+            if (isDispatch) {
+              prNumberRaw = String(context.payload.inputs?.pr_number ?? '').trim();
+            } else {
+              prNumberRaw = String(context.payload.pull_request?.number ?? '').trim();
+            }
+
+            const prNumber = Number(prNumberRaw);
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              core.setFailed(`Invalid PR number: "${prNumberRaw}"`);
+              return;
+            }
+
+            const prResp = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const pr = prResp.data;
+
+            const labels = (pr.labels || []).map(l => String(l.name));
+
+            // Determine whether to run:
+            // - Label-based trigger: only when `gates:ready` label is added
+            // - Manual dispatch: always runs
+            const shouldRun = isDispatch || (isLabeled && labelName === 'gates:ready');
+
+            const headSha = String(pr.head.sha);
+            const headRepoFullName = String(pr.head.repo?.full_name || 'unknown');
+            const sameRepo = pr.head.repo && headRepoFullName === `${owner}/${repo}`;
+
+            // Risk label parsing: highest wins if multiple
+            const riskMap = {
+              'risk:R0-docs': 0,
+              'risk:R1-low': 1,
+              'risk:R2-medium': 2,
+              'risk:R3-high': 3,
+              'risk:R4-critical': 4,
+            };
+            let risk = null;
+            for (const [name, val] of Object.entries(riskMap)) {
+              if (labels.includes(name)) risk = Math.max(risk ?? -1, val);
+            }
+
+            // Default: treat missing risk label as R2 (medium) so gates still run,
+            // but Policy Gate will later enforce that a risk label exists.
+            if (risk === null) risk = 2;
+
+            const requireCoverage = risk >= 2;
+            const requireClaude = risk >= 3;
+            const requireBugbot = risk >= 3;
+
+            core.setOutput('should_run', String(shouldRun));
+            core.setOutput('pr_number', String(prNumber));
+            core.setOutput('head_sha', headSha);
+            core.setOutput('head_repo_full_name', headRepoFullName);
+            core.setOutput('same_repo', String(sameRepo));
+            core.setOutput('labels_json', JSON.stringify(labels));
+            core.setOutput('risk', String(risk));
+            core.setOutput('require_coverage', String(requireCoverage));
+            core.setOutput('require_claude', String(requireClaude));
+            core.setOutput('require_bugbot', String(requireBugbot));
+
+            core.info(`Gated Quality context: pr=${prNumber} sha=${headSha} labels=${labels.join(',')}`);
+            core.info(`should_run=${shouldRun} risk=R${risk} same_repo=${sameRepo}`);
+
+  coverage-codecov:
+    name: coverage-codecov
+    needs: context
+    if: >
+      needs.context.outputs.should_run == 'true' &&
+      needs.context.outputs.same_repo == 'true' &&
+      needs.context.outputs.require_coverage == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (PR head)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.context.outputs.head_sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage
+
+      - name: Run unit tests with coverage
+        run: |
+          coverage run -m unittest discover -s scripts -p "test_*.py"
+          coverage xml
+          coverage report -m
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          flags: gated
+          fail_ci_if_error: true
+
+      - name: Upload coverage.xml artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
+
+  claude-review:
+    name: claude-review
+    needs: context
+    if: >
+      needs.context.outputs.should_run == 'true' &&
+      needs.context.outputs.same_repo == 'true' &&
+      needs.context.outputs.require_claude == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Claude review (PR)
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: "/review"
+          claude_args: |
+            --max-turns 6
+
+  bugbot-trigger:
+    name: bugbot-trigger
+    needs: context
+    if: >
+      needs.context.outputs.should_run == 'true' &&
+      needs.context.outputs.same_repo == 'true' &&
+      needs.context.outputs.require_bugbot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Bugbot trigger comment (@cursor review)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = Number('${{ needs.context.outputs.pr_number }}');
+            const headSha = String('${{ needs.context.outputs.head_sha }}');
+
+            const marker = `<!-- bugbot-trigger sha:${headSha} -->`;
+
+            // Avoid duplicate trigger comments for the same SHA.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const already = comments.some(c => String(c.body || '').includes(marker));
+            if (already) {
+              core.info('Bugbot already triggered for this SHA; skipping duplicate comment.');
+              return;
+            }
+
+            const body = [
+              '@cursor review',
+              '',
+              marker,
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body,
+            });
+
+            core.info('Posted Bugbot trigger comment.');
+
+  mark-gates:
+    name: mark-gates
+    needs: [context, coverage-codecov, claude-review, bugbot-trigger]
+    if: always() && needs.context.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply gate state labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = Number('${{ needs.context.outputs.pr_number }}');
+
+            const risk = Number('${{ needs.context.outputs.risk }}');
+            const requireCoverage = String('${{ needs.context.outputs.require_coverage }}') === 'true';
+            const requireClaude = String('${{ needs.context.outputs.require_claude }}') === 'true';
+            const requireBugbot = String('${{ needs.context.outputs.require_bugbot }}') === 'true';
+
+            const results = {
+              coverage: '${{ needs["coverage-codecov"].result }}',
+              claude: '${{ needs["claude-review"].result }}',
+              bugbot: '${{ needs["bugbot-trigger"].result }}',
+            };
+
+            const requiredOk = [
+              (!requireCoverage || results.coverage === 'success'),
+              (!requireClaude || results.claude === 'success'),
+              (!requireBugbot || results.bugbot === 'success'),
+            ].every(Boolean);
+
+            // Label state logic:
+            // - Always remove gates:ready after gate run (run is complete)
+            // - Always remove gates:stale after gate run (run is fresh for current commit)
+            // - If gates pass: add gates:passed, remove gates:failed
+            // - If gates fail: add gates:failed, remove gates:passed
+            const labelsToAdd = [];
+            const labelsToRemove = ['gates:ready', 'gates:stale'];
+
+            if (requiredOk) {
+              labelsToAdd.push('gates:passed');
+              labelsToRemove.push('gates:failed');
+            } else {
+              labelsToAdd.push('gates:failed');
+              labelsToRemove.push('gates:passed');
+            }
+
+            // Fetch current labels (to avoid API errors when removing non-existent labels)
+            const prResp = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const current = new Set((prResp.data.labels || []).map(l => String(l.name)));
+
+            const add = labelsToAdd.filter(l => !current.has(l));
+            const remove = labelsToRemove.filter(l => current.has(l));
+
+            if (add.length) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: add });
+            }
+
+            for (const name of remove) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
+            }
+
+            core.info(`Gated Quality finished for PR #${prNumber} risk=R${risk}`);
+            core.info(`Results: ${JSON.stringify(results)}`);
+            if (!requiredOk) {
+              core.setFailed('One or more required gated checks failed.');
+            }

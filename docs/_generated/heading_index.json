@@ -1471,6 +1471,36 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-16 - run_20260116_0724z (runbook label guidance + run artifacts)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160724z-runbook-label-guidance-run-artifacts"
+    }
+  ],
+  "2026-01-16 - run_20260116_1443z (b40 close probe + pipeline fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601161443z-b40-close-probe-pipeline-fix"
+    }
+  ],
+  "2026-01-16 - run_20260116_0236z (newworkflows phase 1: labels, staleness, optional claude gate)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
+    }
+  ],
+  "2026-01-16 - run_20260116_0114z (newworkflows phase 1 delta: bugbot findings fixed)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160114z-newworkflows-phase-1-delta-bugbot-findings-fixed"
+    }
+  ],
+  "2026-01-15 - run_20260115_2224z (newworkflows phase 1: risk labels + gate matrix + claude optional gate)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-15-run202601152224z-newworkflows-phase-1-risk-labels-gate-matrix-claude-optional-gate"
+    }
+  ],
   "2026-01-14 - run_20260114_0707z (dev outbound toggle workflow + auto-revert)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12193,46 +12223,82 @@
       "anchor": "merge-policy-auditability"
     }
   ],
-  "4) pr health check (required before merge)": [
+  "4) risk labels and gate requirements (newworkflows)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "4-pr-health-check-required-before-merge"
+      "anchor": "4-risk-labels-and-gate-requirements-newworkflows"
     }
   ],
-  "4.0 wait-for-green gate (mandatory)": [
+  "4.0.1 risk label taxonomy": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "40-wait-for-green-gate-mandatory"
+      "anchor": "401-risk-label-taxonomy"
     }
   ],
-  "4.1 bugbot review": [
+  "4.0.2 gate lifecycle labels (optional but recommended)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "41-bugbot-review"
+      "anchor": "402-gate-lifecycle-labels-optional-but-recommended"
     }
   ],
-  "4.2 codecov status verification": [
+  "4.0.3 risk labels + seeded gate labels": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "42-codecov-status-verification"
+      "anchor": "403-risk-labels-seeded-gate-labels"
     }
   ],
-  "4.3 e2e proof (when applicable)": [
+  "4.0.4 cost-aware gate strategy (two-phase approach)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "43-e2e-proof-when-applicable"
+      "anchor": "404-cost-aware-gate-strategy-two-phase-approach"
     }
   ],
-  "4.4 pr health check cli reference card": [
+  "5) pr health check (required before merge)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "44-pr-health-check-cli-reference-card"
+      "anchor": "5-pr-health-check-required-before-merge"
     }
   ],
-  "5) when github actions fails (red status)": [
+  "5.0 wait-for-green gate (mandatory)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "5-when-github-actions-fails-red-status"
+      "anchor": "50-wait-for-green-gate-mandatory"
+    }
+  ],
+  "5.1 bugbot review": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "51-bugbot-review"
+    }
+  ],
+  "5.2 codecov status verification": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "52-codecov-status-verification"
+    }
+  ],
+  "5.3 claude review (semantic review agent)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "53-claude-review-semantic-review-agent"
+    }
+  ],
+  "5.4 e2e proof (when applicable)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "54-e2e-proof-when-applicable"
+    }
+  ],
+  "5.5 pr health check cli reference card": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "55-pr-health-check-cli-reference-card"
+    }
+  ],
+  "6) when github actions fails (red status)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "6-when-github-actions-fails-red-status"
     }
   ],
   "step 1 — identify the failing job": [
@@ -12271,10 +12337,10 @@
       "anchor": "step-6-push-and-verify-green"
     }
   ],
-  "6) dev e2e smoke workflow": [
+  "7) dev e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "6-dev-e2e-smoke-workflow"
+      "anchor": "7-dev-e2e-smoke-workflow"
     }
   ],
   "when to run it": [
@@ -12317,16 +12383,16 @@
       "anchor": "evidence-expectations"
     }
   ],
-  "7) staging e2e smoke workflow": [
+  "8) staging e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "7-staging-e2e-smoke-workflow"
+      "anchor": "8-staging-e2e-smoke-workflow"
     }
   ],
-  "8) prod promotion checklist (no prod deploy without explicit go/no-go)": [
+  "9) prod promotion checklist (no prod deploy without explicit go/no-go)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "8-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+      "anchor": "9-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
     }
   ],
   "checklist": [
@@ -12341,10 +12407,10 @@
       "anchor": "powershell-safe-commands"
     }
   ],
-  "9) common causes (initial list)": [
+  "10) common causes (initial list)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-common-causes-initial-list"
+      "anchor": "10-common-causes-initial-list"
     }
   ],
   "dynamodb: `typeerror: float types are not supported`": [
@@ -12353,10 +12419,10 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "10) codecov coverage reporting and gating": [
+  "11) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-codecov-coverage-reporting-and-gating"
+      "anchor": "11-codecov-coverage-reporting-and-gating"
     }
   ],
   "current state (2026-01-11)": [
@@ -12387,10 +12453,10 @@
       "anchor": "troubleshooting-codecov-failures"
     }
   ],
-  "11) lint/type enforcement roadmap": [
+  "12) lint/type enforcement roadmap": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "11-linttype-enforcement-roadmap"
+      "anchor": "12-linttype-enforcement-roadmap"
     }
   ],
   "operational plan (phased enforcement)": [
@@ -12405,16 +12471,16 @@
       "anchor": "tracking"
     }
   ],
-  "12) if you cannot fix quickly": [
+  "13) if you cannot fix quickly": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "12-if-you-cannot-fix-quickly"
+      "anchor": "13-if-you-cannot-fix-quickly"
     }
   ],
-  "13) seed secrets manager (dev/staging)": [
+  "14) seed secrets manager (dev/staging)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "13-seed-secrets-manager-devstaging"
+      "anchor": "14-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
@@ -12847,6 +12913,150 @@
     {
       "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
       "anchor": "automated-guardrails"
+    }
+  ],
+  "quality gates and risk labels — quick reference": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "quality-gates-and-risk-labels-quick-reference"
+    }
+  ],
+  "1) risk-based quality philosophy": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "1-risk-based-quality-philosophy"
+    }
+  ],
+  "2) risk label taxonomy (r0–r4)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "2-risk-label-taxonomy-r0r4"
+    }
+  ],
+  "r0 — `risk:r0-docs` (docs-only / non-functional)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r0-riskr0-docs-docs-only-non-functional"
+    }
+  ],
+  "r1 — `risk:r1-low` (low risk, localized changes)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r1-riskr1-low-low-risk-localized-changes"
+    }
+  ],
+  "r2 — `risk:r2-medium` (behavior changes, non-trivial logic)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r2-riskr2-medium-behavior-changes-non-trivial-logic"
+    }
+  ],
+  "r3 — `risk:r3-high` (high blast radius, security-sensitive)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r3-riskr3-high-high-blast-radius-security-sensitive"
+    }
+  ],
+  "r4 — `risk:r4-critical` (production emergency, security incident)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r4-riskr4-critical-production-emergency-security-incident"
+    }
+  ],
+  "3) critical zones (auto-upgrade to r2 minimum)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "3-critical-zones-auto-upgrade-to-r2-minimum"
+    }
+  ],
+  "4) gate lifecycle (pr workflow states)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "4-gate-lifecycle-pr-workflow-states"
+    }
+  ],
+  "gate state labels": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "gate-state-labels"
+    }
+  ],
+  "staleness rule (critical for ai-only workflow)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "staleness-rule-critical-for-ai-only-workflow"
+    }
+  ],
+  "5) two-phase workflow (cost control)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "5-two-phase-workflow-cost-control"
+    }
+  ],
+  "phase a: build & stabilize (local iteration)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "phase-a-build-stabilize-local-iteration"
+    }
+  ],
+  "phase b: gate execution (pr-level, once per stable state)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "phase-b-gate-execution-pr-level-once-per-stable-state"
+    }
+  ],
+  "6) evidence requirements (per risk level)": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "6-evidence-requirements-per-risk-level"
+    }
+  ],
+  "r0 / r1 evidence": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r0-r1-evidence"
+    }
+  ],
+  "r2+ evidence": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r2-evidence"
+    }
+  ],
+  "r3 / r4 additional evidence": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "r3-r4-additional-evidence"
+    }
+  ],
+  "7) gate reference matrix": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "7-gate-reference-matrix"
+    }
+  ],
+  "8) quick cli reference": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "8-quick-cli-reference"
+    }
+  ],
+  "9) waivers and exceptions": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "9-waivers-and-exceptions"
+    }
+  ],
+  "10) merge readiness rule": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "10-merge-readiness-rule"
+    }
+  ],
+  "11) related documents": [
+    {
+      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
+      "anchor": "11-related-documents"
     }
   ],
   "repository conventions": [
