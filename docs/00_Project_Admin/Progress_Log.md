@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-16 - RUN_20260116_0236Z.
+Last verified: 2026-01-16 - RUN_20260116_0724Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-16 - RUN_20260116_0724Z (Runbook label guidance + run artifacts)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0724Z
+- Added PowerShell-safe risk label and `gate:claude` examples to the CI runbook.
+- Regenerated doc registries and produced RUN_20260116_0724Z artifacts for agents A/B/C.
 
 ### 2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260116_0236Z

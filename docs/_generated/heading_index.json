@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-16 - run_20260116_0724z (runbook label guidance + run artifacts)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-16-run202601160724z-runbook-label-guidance-run-artifacts"
+    }
+  ],
   "2026-01-16 - run_20260116_0236z (newworkflows phase 1: labels, staleness, optional claude gate)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

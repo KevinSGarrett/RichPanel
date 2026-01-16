@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-16 - RUN_20260116_0724Z (Runbook label guidance + run artifacts)",
+        "anchor": "2026-01-16-run202601160724z-runbook-label-guidance-run-artifacts"
+      },
+      {
+        "level": 3,
         "text": "2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)",
         "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
       },

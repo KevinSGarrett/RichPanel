@@ -196,10 +196,14 @@ Risk and gate labels are seeded via a workflow so every repo has the same taxono
 gh workflow run seed-gate-labels.yml --ref main
 ```
 
-#### PowerShell-safe label examples
+#### PowerShell-safe label examples (risk + gate)
 ```powershell
-# Apply a risk label (required)
+# Apply exactly one risk label (required)
+gh pr edit <PR_NUMBER> --add-label "risk:R0-docs"
+gh pr edit <PR_NUMBER> --add-label "risk:R1-low"
 gh pr edit <PR_NUMBER> --add-label "risk:R2-medium"
+gh pr edit <PR_NUMBER> --add-label "risk:R3-high"
+gh pr edit <PR_NUMBER> --add-label "risk:R4-critical"
 
 # Trigger optional Claude review
 gh pr edit <PR_NUMBER> --add-label "gate:claude"
