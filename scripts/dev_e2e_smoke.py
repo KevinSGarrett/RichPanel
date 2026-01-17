@@ -1433,6 +1433,47 @@ def _build_followup_payload(
     return followup_payload
 
 
+def _prepare_followup_proof(
+    followup_event_id: Optional[str],
+    *,
+    followup_item: Optional[Dict[str, Any]],
+    followup_tags_added: List[str],
+    followup_tags_removed: List[str],
+    followup_skip_tags_added: List[str],
+    followup_middleware_tags: List[str],
+    followup_status_after: Optional[str],
+    followup_message_count_delta: Optional[int],
+    followup_updated_at_delta: Optional[float],
+    followup_reply_sent: Optional[bool],
+    followup_reply_reason: Optional[str],
+    followup_routed_support: Optional[bool],
+) -> Tuple[Optional[str], Dict[str, Any]]:
+    """Build the follow-up proof block and compute its fingerprint."""
+    followup_event_id_fingerprint = _fingerprint_event_id(followup_event_id)
+    followup_idempotency_record = None
+    if followup_item:
+        followup_idempotency_record = {
+            "status": followup_item.get("status"),
+            "mode": followup_item.get("mode"),
+        }
+
+    return followup_event_id_fingerprint, {
+        "performed": bool(followup_event_id),
+        "event_id_fingerprint": followup_event_id_fingerprint,
+        "idempotency_record": followup_idempotency_record,
+        "tags_added": followup_tags_added,
+        "tags_removed": followup_tags_removed,
+        "skip_tags_added": followup_skip_tags_added,
+        "middleware_tags_added": followup_middleware_tags,
+        "status_after": followup_status_after,
+        "message_count_delta": followup_message_count_delta,
+        "updated_at_delta_seconds": followup_updated_at_delta,
+        "reply_sent": followup_reply_sent,
+        "reply_reason": followup_reply_reason,
+        "routed_to_support": followup_routed_support,
+    }
+
+
 def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
     env_label = env_name.strip() or "dev"
     # Title-case the environment label without mutating characters like hyphens.
@@ -1591,6 +1632,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     applied_winning_candidate = False
     fallback_used = False
     followup_event_id: Optional[str] = None
+    followup_event_id_fingerprint: Optional[str] = None
     followup_item: Optional[Dict[str, Any]] = None
     followup_ticket: Optional[Dict[str, Any]] = None
     followup_tags_added: List[str] = []
@@ -1774,7 +1816,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     ]
 
     event_id_fingerprint = _fingerprint_event_id(event_id)
-    followup_event_id_fingerprint = _fingerprint_event_id(followup_event_id)
     audit_sort_key = _sanitize_ts_action_id(audit_item.get("ts_action_id") if audit_item else None)
 
     summary_data = {
@@ -2127,6 +2168,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             followup_reply_sent = False
             followup_reply_reason = "followup_skipped_status_not_resolved"
 
+    followup_event_id_fingerprint, followup_proof = _prepare_followup_proof(
+        followup_event_id=followup_event_id,
+        followup_item=followup_item,
+        followup_tags_added=followup_tags_added,
+        followup_tags_removed=followup_tags_removed,
+        followup_skip_tags_added=followup_skip_tags_added,
+        followup_middleware_tags=followup_middleware_tags,
+        followup_status_after=followup_status_after,
+        followup_message_count_delta=followup_message_count_delta,
+        followup_updated_at_delta=followup_updated_at_delta,
+        followup_reply_sent=followup_reply_sent,
+        followup_reply_reason=followup_reply_reason,
+        followup_routed_support=followup_routed_support,
+    )
+    summary_data["followup_event_id_fingerprint"] = followup_event_id_fingerprint
+
     if args.summary_path:
         append_summary(args.summary_path, env_name=env_name, data=summary_data)
 
@@ -2409,26 +2466,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "success_tag_added_this_run": bool(middleware_tag_ok) if order_status_mode else None,
             "skip_or_escalation_tags_added_this_run": bool(skip_tags_present) if order_status_mode else None,
         },
-        "followup": {
-            "performed": bool(followup_event_id),
-            "event_id_fingerprint": followup_event_id_fingerprint,
-            "idempotency_record": {
-                "status": followup_item.get("status") if followup_item else None,
-                "mode": followup_item.get("mode") if followup_item else None,
-            }
-            if followup_item
-            else None,
-            "tags_added": followup_tags_added,
-            "tags_removed": followup_tags_removed,
-            "skip_tags_added": followup_skip_tags_added,
-            "middleware_tags_added": followup_middleware_tags,
-            "status_after": followup_status_after,
-            "message_count_delta": followup_message_count_delta,
-            "updated_at_delta_seconds": followup_updated_at_delta,
-            "reply_sent": followup_reply_sent,
-            "reply_reason": followup_reply_reason,
-            "routed_to_support": followup_routed_support,
-        },
+        "followup": followup_proof,
         "result": {
             "status": result_status,
             "classification": classification,

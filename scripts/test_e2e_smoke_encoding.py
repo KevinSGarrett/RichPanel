@@ -31,6 +31,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _build_followup_payload,
+    _prepare_followup_proof,
     _redact_command,
     _order_status_no_tracking_payload,
     _apply_fallback_close,
@@ -372,6 +374,78 @@ class PIISafetyTests(unittest.TestCase):
             sanitized,
             f"2026-01-17T00:00:00Z#fingerprint:{_fingerprint('evt:abc12345')}",
         )
+
+
+class FollowupProofTests(unittest.TestCase):
+    def test_followup_payload_inherits_parent_and_sets_followup_fields(self) -> None:
+        base = {
+            "event_id": "evt:primary:1234",
+            "scenario_name": "order_status",
+            "customer_message": "orig",
+        }
+        followup = _build_followup_payload(
+            base_payload=base, followup_message="follow-up ping", scenario_variant="order_status_tracking"
+        )
+
+        self.assertNotEqual(followup["event_id"], base["event_id"])
+        self.assertTrue(followup["event_id"].startswith("evt:followup:"))
+        self.assertEqual(followup["parent_event_id"], base["event_id"])
+        self.assertTrue(followup["followup"])
+        self.assertEqual(followup["customer_message"], "follow-up ping")
+        self.assertEqual(followup["scenario"], "order_status_tracking_followup")
+        self.assertEqual(followup["scenario_name"], "order_status_followup")
+        self.assertIn("message_id", followup)
+        self.assertIn("nonce", followup)
+
+    def test_followup_fingerprint_populated_when_performed(self) -> None:
+        followup_event_id = "evt:followup:abc12345"
+        followup_item = {"status": "performed", "mode": "safe"}
+        fingerprint, proof = _prepare_followup_proof(
+            followup_event_id=followup_event_id,
+            followup_item=followup_item,
+            followup_tags_added=["mw-reply-sent"],
+            followup_tags_removed=[],
+            followup_skip_tags_added=[],
+            followup_middleware_tags=["mw-reply-sent"],
+            followup_status_after="resolved",
+            followup_message_count_delta=1,
+            followup_updated_at_delta=2.5,
+            followup_reply_sent=True,
+            followup_reply_reason="auto_reply_sent",
+            followup_routed_support=False,
+        )
+
+        self.assertEqual(fingerprint, _fingerprint(followup_event_id))
+        self.assertTrue(proof["performed"])
+        self.assertEqual(proof["event_id_fingerprint"], fingerprint)
+        self.assertEqual(proof["idempotency_record"], {"status": "performed", "mode": "safe"})
+        self.assertEqual(proof["message_count_delta"], 1)
+        self.assertEqual(proof["updated_at_delta_seconds"], 2.5)
+        self.assertTrue(proof["reply_sent"])
+        self.assertEqual(proof["reply_reason"], "auto_reply_sent")
+
+    def test_followup_proof_handles_missing_event(self) -> None:
+        fingerprint, proof = _prepare_followup_proof(
+            followup_event_id=None,
+            followup_item=None,
+            followup_tags_added=[],
+            followup_tags_removed=[],
+            followup_skip_tags_added=[],
+            followup_middleware_tags=[],
+            followup_status_after=None,
+            followup_message_count_delta=None,
+            followup_updated_at_delta=None,
+            followup_reply_sent=None,
+            followup_reply_reason=None,
+            followup_routed_support=None,
+        )
+
+        self.assertIsNone(fingerprint)
+        self.assertFalse(proof["performed"])
+        self.assertIsNone(proof["event_id_fingerprint"])
+        self.assertIsNone(proof["idempotency_record"])
+        self.assertIsNone(proof["status_after"])
+        self.assertIsNone(proof["reply_sent"])
 
 
 class FallbackCloseTests(unittest.TestCase):
