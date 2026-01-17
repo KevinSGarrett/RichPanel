@@ -13,10 +13,27 @@
 - Pipeline order lookup propagates `allow_network` so enrichment works in shadow mode without weakening outbound gates.
 - New offline-safe tests (`scripts/test_read_only_shadow_mode.py`) and CI runner updated to include them.
 
+## Diffstat
+- backend/src/lambda_handlers/worker/handler.py
+- backend/src/richpanel_middleware/integrations/richpanel/client.py
+- backend/src/richpanel_middleware/automation/pipeline.py
+- scripts/test_worker_handler_flag_wiring.py
+- scripts/test_richpanel_client.py
+- scripts/test_read_only_shadow_mode.py
+- scripts/run_ci_checks.py
+- docs/_generated/* (regen only)
+- REHYDRATION_PACK/RUNS/RUN_20260117_0212Z/C/* (artifacts)
+
+## Files Changed
+- Worker allow_network wiring, Richpanel client write guard, pipeline allow_network propagation.
+- Added dedicated read-only shadow tests and CI wiring.
+- Added run artifacts for RUN_20260117_0212Z and regenerated doc registries.
+
 ## Commands Executed
 - `python scripts/run_ci_checks.py --ci`
 
-## Test/Proof Snapshot
+## Tests / Proof
 - All suites in `scripts/run_ci_checks.py --ci` passed locally with a clean git tree after regen.
 - Read-only shadow tests confirm: worker wiring honors `MW_ALLOW_NETWORK_READS`, client blocks writes when disabled, pipeline does not issue mutations when outbound is off.
+- New run artifacts recorded in this folder; CI passing locally, GitHub Actions/Codecov/Bugbot pending.
 
