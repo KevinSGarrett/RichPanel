@@ -416,11 +416,138 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 ### Evidence expectations
 - Copy the GitHub Actions run URL and the job summary block (ingress URL, queue URL, DynamoDB tables, log group, CloudWatch Logs) into `REHYDRATION_PACK/RUNS/<RUN_ID>/C/TEST_MATRIX.md`.
 - Record the explicit confirmations from the summary that idempotency, conversation state, and audit records were written (event_id + conversation_id observed) and link the DynamoDB consoles for each table.
-- Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state “no dashboards/alarms surfaced”.
+- Capture the CloudWatch dashboard name (`rp-mw-<env>-ops`) and alarm names (`rp-mw-<env>-dlq-depth`, `rp-mw-<env>-worker-errors`, `rp-mw-<env>-worker-throttles`, `rp-mw-<env>-ingress-errors`) from the summary; if the stack is missing any, state "no dashboards/alarms surfaced".
 - Paste the smoke summary lines that confirm routing category/tags and the order_status_draft_reply plan + draft_replies count (safe fields only; no message bodies).
 - For order_status, note classification (PASS_STRONG vs PASS_WEAK) plus the evidence that status changed to resolved/closed and reply evidence was observed (message_count delta or last_message_source=middleware).
 - If the workflow fails, include the failure log excerpt plus the remediation plan in `RUN_SUMMARY.md`.
 - For CLI proofs, attach the proof JSON path (e.g., `REHYDRATION_PACK/RUNS/<RUN_ID>/B/e2e_outbound_proof.json`), the exact command used, and confirm that `mw-smoke:<RUN_ID>` appears in tags_added with updated_at delta > 0.
+
+### Order Status Proof (canonical requirements)
+
+**Scope:** All PRs touching order status automation, order lookup logic, or Shopify/Richpanel integration for order data.
+
+#### Required scenarios
+
+Run both scenarios to validate tracking and no-tracking paths:
+
+**1. Order status with tracking:**
+
+```powershell
+$runId = "RUN_<YYYYMMDD>_<HHMMZ>"
+$ticketNumber = "<dev-richpanel-ticket-number>"
+python scripts/dev_e2e_smoke.py `
+  --env dev `
+  --region us-east-2 `
+  --stack-name RichpanelMiddleware-dev `
+  --wait-seconds 120 `
+  --profile <aws-profile> `
+  --ticket-number $ticketNumber `
+  --confirm-test-ticket `
+  --diagnose-ticket-update `
+  --run-id $runId `
+  --scenario order_status_tracking `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_order_status_tracking_proof.json"
+```
+
+**2. Order status without tracking (ETA-based):**
+
+```powershell
+$runId = "RUN_<YYYYMMDD>_<HHMMZ>"
+$ticketNumber = "<dev-richpanel-ticket-number>"
+python scripts/dev_e2e_smoke.py `
+  --env dev `
+  --region us-east-2 `
+  --stack-name RichpanelMiddleware-dev `
+  --wait-seconds 120 `
+  --profile <aws-profile> `
+  --ticket-number $ticketNumber `
+  --confirm-test-ticket `
+  --diagnose-ticket-update `
+  --run-id $runId `
+  --scenario order_status_no_tracking `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_order_status_no_tracking_proof.json"
+```
+
+#### Follow-up behavior verification (optional but recommended)
+
+To prove loop prevention (follow-ups after auto-reply are routed, not auto-replied again):
+
+```powershell
+# After running order_status_tracking or order_status_no_tracking:
+$runId = "RUN_<YYYYMMDD>_<HHMMZ>"
+$ticketNumber = "<same-ticket-number-as-above>"
+python scripts/dev_e2e_smoke.py `
+  --env dev `
+  --region us-east-2 `
+  --stack-name RichpanelMiddleware-dev `
+  --wait-seconds 90 `
+  --profile <aws-profile> `
+  --ticket-number $ticketNumber `
+  --confirm-test-ticket `
+  --run-id $runId `
+  --scenario followup_after_auto_reply `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_followup_proof.json"
+```
+
+**Expected outcome:**
+- Worker routes the follow-up to Email Support Team
+- Tags applied: `route-email-support-team`, `mw-escalated-human`, `mw-skip-followup-after-auto-reply`
+- **No duplicate auto-reply sent**
+- Proof JSON records `routed_to_support=true` and no reply evidence
+
+#### PASS criteria
+
+**PASS_STRONG** (required for merge):
+- Webhook accepted (HTTP 200/202)
+- Idempotency + conversation_state + audit records observed in DynamoDB
+- Routing intent is `order_status_tracking` or `order_status_no_tracking`
+- Ticket status changed to `resolved` or `closed` **AND** reply evidence observed:
+  - `message_count` delta > 0, OR
+  - `last_message_source=middleware`, OR
+  - Status change metadata shows middleware attribution
+- Middleware tags applied: `mw-auto-replied`, `mw-order-status-answered`, or similar positive tags
+- **No skip/escalation tags added this run:** `mw-skip-*`, `route-email-support-team`, `mw-escalated-human`
+- Proof JSON is PII-safe (ticket IDs hashed, paths redacted, no email/phone in proof)
+
+**PASS_WEAK** (only allowed if Richpanel refuses status changes but tags succeed):
+- All criteria above except ticket status may remain unchanged
+- Must document why status change failed (e.g., Richpanel API limitation, ticket already resolved)
+- Classification recorded in proof JSON as `PASS_WEAK`
+
+**FAIL:**
+- Any skip/escalation tag added this run
+- No reply evidence observed (message_count unchanged, no middleware attribution)
+- Status did not change to resolved/closed (unless PASS_WEAK documented)
+- PII detected in proof JSON (fails safety assertion)
+
+#### Required evidence artifacts
+
+Capture in `REHYDRATION_PACK/RUNS/<RUN_ID>/B/TEST_MATRIX.md`:
+
+- [ ] Proof JSON paths for both scenarios (tracking + no-tracking)
+- [ ] Exact commands used (with redacted ticket numbers for public artifacts)
+- [ ] PASS classification (PASS_STRONG or PASS_WEAK) for each scenario
+- [ ] DynamoDB evidence (idempotency/state/audit record links)
+- [ ] CloudWatch Logs links (worker execution, routing decision, reply sent)
+- [ ] Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)
+- [ ] Message count delta or `last_message_source` evidence
+- [ ] PII scan result (confirm proof JSON is safe)
+- [ ] Follow-up behavior (if tested): confirm no duplicate reply, routing tags applied
+
+#### Redaction and PII safety
+
+All proof JSON must be PII-safe:
+
+- **Ticket IDs:** Hashed to `ticket_id_fingerprint` (12-char SHA256 prefix)
+- **API paths:** Redacted with `<redacted>` placeholders (e.g., `/v1/tickets/<redacted>/add-tags`)
+- **No raw emails, phone numbers, addresses, or Richpanel conversation IDs**
+- Safety assertion: script scans proof JSON and fails if it detects `%40`, `mail.`, `%3C`, `%3E`, or `@`
+
+#### Links to related runbooks
+
+- **Production Read-Only Shadow Mode:** `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md` (zero-write validation)
+- **Order Status Automation Spec:** `docs/05_FAQ_Automation/Order_Status_Automation.md` (safety constraints)
+- **Dev E2E Smoke Script:** `scripts/dev_e2e_smoke.py` (scenario reference)
 
 ## 7) Staging E2E smoke workflow
 

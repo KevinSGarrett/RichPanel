@@ -3025,6 +3025,60 @@
       "anchor": "roadmap-remaining"
     }
   ],
+  "order status deployment readiness (chk-012a)": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "order-status-deployment-readiness-chk-012a"
+    }
+  ],
+  "e2e proof requirements": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "e2e-proof-requirements"
+    }
+  ],
+  "read-only production shadow mode": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "read-only-production-shadow-mode"
+    }
+  ],
+  "observability and monitoring": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "observability-and-monitoring"
+    }
+  ],
+  "code quality and ci gates": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "code-quality-and-ci-gates"
+    }
+  ],
+  "documentation and runbooks": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "documentation-and-runbooks"
+    }
+  ],
+  "deployment gates": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "deployment-gates"
+    }
+  ],
+  "post-deployment validation": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "post-deployment-validation"
+    }
+  ],
+  "completion criteria": [
+    {
+      "path": "00_Project_Admin/To_Do/MASTER_CHECKLIST.md",
+      "anchor": "completion-criteria"
+    }
+  ],
   "midpoint audit checklist (waveaudit ??? repo tasks)": [
     {
       "path": "00_Project_Admin/To_Do/MIDPOINT_AUDIT_CHECKLIST.md",
@@ -7514,6 +7568,10 @@
     },
     {
       "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "goal"
+    },
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
       "anchor": "goal"
     },
     {
@@ -12329,6 +12387,12 @@
       "anchor": "evidence-expectations"
     }
   ],
+  "order status proof (canonical requirements)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "order-status-proof-canonical-requirements"
+    }
+  ],
   "7) staging e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -12835,6 +12899,280 @@
     {
       "path": "08_Engineering/OpenAI_Model_Plan.md",
       "anchor": "see-also"
+    }
+  ],
+  "production read-only shadow mode runbook": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "production-read-only-shadow-mode-runbook"
+    }
+  ],
+  "required environment variables": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "required-environment-variables"
+    }
+  ],
+  "core read-only flags": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "core-read-only-flags"
+    }
+  ],
+  "optional safety flags": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "optional-safety-flags"
+    }
+  ],
+  "verification checklist": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "verification-checklist"
+    }
+  ],
+  "how to enable shadow mode": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "how-to-enable-shadow-mode"
+    }
+  ],
+  "option 1: github actions workflow (recommended for dev/staging)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-1-github-actions-workflow-recommended-for-devstaging"
+    }
+  ],
+  "option 2: manual aws console (production)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-2-manual-aws-console-production"
+    },
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-2-manual-aws-console-production"
+    }
+  ],
+  "option 3: infrastructure-as-code (cdk)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-3-infrastructure-as-code-cdk"
+    }
+  ],
+  "prove zero writes (audit procedure)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "prove-zero-writes-audit-procedure"
+    }
+  ],
+  "step 1: review cloudwatch logs": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "step-1-review-cloudwatch-logs"
+    }
+  ],
+  "step 2: audit middleware request logs": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "step-2-audit-middleware-request-logs"
+    }
+  ],
+  "step 3: verify write-disabled errors are logged": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "step-3-verify-write-disabled-errors-are-logged"
+    }
+  ],
+  "step 4: check for outbound communications": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "step-4-check-for-outbound-communications"
+    }
+  ],
+  "configure middleware to hard-fail on non-get calls": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "configure-middleware-to-hard-fail-on-non-get-calls"
+    }
+  ],
+  "enforcement in code": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "enforcement-in-code"
+    }
+  ],
+  "testing the hard-fail behavior": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "testing-the-hard-fail-behavior"
+    }
+  ],
+  "what shadow mode allows (read-only operations)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "what-shadow-mode-allows-read-only-operations"
+    }
+  ],
+  "richpanel (read-only)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "richpanel-read-only"
+    }
+  ],
+  "shopify (read-only)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "shopify-read-only"
+    }
+  ],
+  "shipstation (read-only)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "shipstation-read-only"
+    }
+  ],
+  "internal operations (always allowed)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "internal-operations-always-allowed"
+    }
+  ],
+  "what shadow mode blocks (write operations)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "what-shadow-mode-blocks-write-operations"
+    }
+  ],
+  "richpanel (writes)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "richpanel-writes"
+    }
+  ],
+  "shopify (writes)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "shopify-writes"
+    }
+  ],
+  "outbound communications": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "outbound-communications"
+    }
+  ],
+  "automation": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "automation"
+    }
+  ],
+  "use cases for shadow mode": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "use-cases-for-shadow-mode"
+    }
+  ],
+  "1. validate production data structures": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "1-validate-production-data-structures"
+    }
+  ],
+  "2. test routing accuracy without customer impact": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "2-test-routing-accuracy-without-customer-impact"
+    }
+  ],
+  "3. validate order lookup behavior": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "3-validate-order-lookup-behavior"
+    }
+  ],
+  "risks and mitigations": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "risks-and-mitigations"
+    }
+  ],
+  "risk 1: flag misconfiguration allows writes": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "risk-1-flag-misconfiguration-allows-writes"
+    }
+  ],
+  "risk 2: read operations cause rate limiting or cost spikes": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "risk-2-read-operations-cause-rate-limiting-or-cost-spikes"
+    }
+  ],
+  "risk 3: logging exposes pii": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "risk-3-logging-exposes-pii"
+    }
+  ],
+  "risk 4: shadow mode left enabled indefinitely": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "risk-4-shadow-mode-left-enabled-indefinitely"
+    }
+  ],
+  "disable shadow mode": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "disable-shadow-mode"
+    }
+  ],
+  "option 1: github actions workflow (dev/staging)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-1-github-actions-workflow-devstaging"
+    }
+  ],
+  "option 3: auto-revert (dev-only)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "option-3-auto-revert-dev-only"
+    }
+  ],
+  "evidence requirements": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "evidence-requirements"
+    }
+  ],
+  "before enabling": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "before-enabling"
+    }
+  ],
+  "during shadow mode": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "during-shadow-mode"
+    }
+  ],
+  "after disabling": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "after-disabling"
+    }
+  ],
+  "related documentation": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "related-documentation"
+    }
+  ],
+  "checklist: production shadow mode validation (complete workflow)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "checklist-production-shadow-mode-validation-complete-workflow"
     }
   ],
   "protected paths and safe deletion rules": [
