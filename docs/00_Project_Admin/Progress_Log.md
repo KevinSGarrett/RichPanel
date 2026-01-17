@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-16 - RUN_20260116_1755Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,40 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-16 - RUN_20260116_1755Z (Read-only shadow mode + network-read decoupling)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_1755Z
+- Decoupled worker network reads via `MW_ALLOW_NETWORK_READS` (shadow mode).
+- Added Richpanel client write block with `RICHPANEL_WRITE_DISABLED` (fail-closed).
+- Kept pipeline mutations gated on `outbound_enabled`; reads allowed for metadata/order summaries.
+- Added offline-safe tests and wired CI to run them; generated full C artifacts and stub A/B folders.
+- CI `--ci` tests pass; gating blocked only by pre-existing dirty workspace in main tree.
+
+### 2026-01-16 - RUN_20260116_1443Z (B40 close probe + pipeline fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_1443Z
+- Added required alias `scripts/dev_richpanel_ticket_close_probe.py` + PII-safe proof path; probe on ticket 1033 confirmed winning payload `ticket.state=closed` + `ticket.status=CLOSED`.
+- Updated order_status pipeline to prefer the winning payload and require post-update status confirmation before succeeding; added offline tests to avoid 2xx false positives.
+- Ran dev E2E order_status smoke on ticket 1036 with diagnostic apply — PASS_STRONG (OPEN→CLOSED); proofs stored under run C alongside ticket_close_probe.json.
+- Authored close-probe runbook (`docs/98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md`); registries regenerated.
+
+### 2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0236Z
+- Replaced PR template with risk labels, PR health check, and optional Claude section.
+- Added seed-gate-labels, gates-staleness, and claude-review workflows under `.github/workflows`.
+- Updated CI runbook with label seeding and optional Claude trigger guidance.
+
+### 2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260116_0114Z
+- Fixed 3 Bugbot Medium findings from PR #112: label handling logic in gated-quality.yml, check-run selection in policy-gate.yml, unified label taxonomy.
+- Updated drop-in workflows to use gates:stale (not stale:gates) and risk:R#-level labels (risk:R0-docs, risk:R1-low, etc.) matching repo docs.
+- Fixed gate state transitions: always remove gates:ready and gates:stale after run, properly handle gates:passed/gates:failed based on outcome.
+
+### 2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260115_2224Z
+- Operationalized NewWorkflows strategy (Bugbot + Codecov + Claude + risk gating) in repo docs and templates.
+- Created `docs/08_Engineering/Quality_Gates_and_Risk_Labels.md` reference card defining R0-R4 risk labels and gate requirements.
+- Updated `docs/08_Engineering/CI_and_Actions_Runbook.md` with risk label taxonomy, gate lifecycle labels, two-phase workflow, and Claude review procedures.
+- Enhanced agent prompt and run report templates with risk classification requirements, gate checklists, and evidence sections.
+- Updated MASTER_CHECKLIST, TASK_BOARD, and Progress_Log to track NewWorkflows Phase 1 adoption.
 
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z

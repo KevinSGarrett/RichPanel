@@ -144,6 +144,10 @@ class RichpanelRequestError(Exception):
         self.response = response
 
 
+class RichpanelWriteDisabledError(RichpanelRequestError):
+    """Raised when a Richpanel write is attempted while writes are disabled."""
+
+
 class Transport(Protocol):
     def send(self, request: TransportRequest) -> TransportResponse:
         ...
@@ -239,6 +243,13 @@ class RichpanelClient:
         dry_run: Optional[bool] = None,
         log_body_excerpt: bool = True,
     ) -> RichpanelResponse:
+        method_upper = method.upper()
+        if self._writes_disabled() and method_upper != "GET":
+            self._logger.warning(
+                "richpanel.write_blocked",
+                extra={"method": method_upper},
+            )
+            raise RichpanelWriteDisabledError("Richpanel writes are disabled; request blocked")
         use_dry_run = self.dry_run if dry_run is None else bool(dry_run)
         url = self._build_url(path, params)
         body_bytes = self._encode_body(json_body)
@@ -405,9 +416,11 @@ class RichpanelClient:
 
         if not secret_value:
             raise SecretLoadError("Richpanel API key secret is empty")
+        assert isinstance(secret_value, str)
 
         self._api_key = secret_value
-        return self._api_key
+        assert self._api_key is not None
+        return str(self._api_key)
 
     def _secrets_client(self):
         if self._secrets_client_obj is None:
@@ -486,6 +499,10 @@ class RichpanelClient:
         return not enabled
 
     @staticmethod
+    def _writes_disabled() -> bool:
+        return _to_bool(os.environ.get("RICHPANEL_WRITE_DISABLED"), default=False)
+
+    @staticmethod
     def redact_headers(headers: Dict[str, str]) -> Dict[str, str]:
         redacted = dict(headers or {})
         if "x-richpanel-key" in redacted:
@@ -546,6 +563,7 @@ __all__ = [
     "TransportError",
     "SecretLoadError",
     "RichpanelRequestError",
+    "RichpanelWriteDisabledError",
     "HttpTransport",
 ]
 
