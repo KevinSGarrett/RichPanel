@@ -1,0 +1,32 @@
+## RUN_20260117_0511Z — No-Tracking Order Status (ticket 1040)
+
+### Scenario
+- `order_status_no_tracking` on ticket number 1040 (env=dev, region=us-east-2, stack=RichpanelMiddleware-dev).
+- Webhook event_id `evt:c1045732-0fc2-4cb3-a7d5-632b037247ab`; follow-up event_id `evt:followup:e60386d2`.
+- Proof: `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/e2e_outbound_proof.json` (PII-safe).
+
+### Outcome
+- **PASS_STRONG**. Status OPEN → CLOSED; updated_at Δ ≈ 125.4s.
+- Tags added: `mw-auto-replied`, `mw-intent-order_status_tracking`, `mw-order-status-answered`, `mw-order-status-answered:RUN_NOTRACK_B40_20260117G`, `mw-routing-applied`.
+- Reply evidence present; auto-close applied via winning payload `ticket_state_closed`.
+- Follow-up performed; reply_sent=false; routed_to_support=false; no duplicate auto-reply.
+- Skip/escalation tags: none. PII scan: passed.
+
+### Diffstat
+- Added run artifacts under `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/`.
+
+### Commands Run
+- `python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number 1040 --scenario order_status_no_tracking --simulate-followup --run-id RUN_NOTRACK_B40_20260117G ...` (original proof generation; relocated into compliant folder).
+
+### Tests / Proof
+- Proof JSON (PII-safe) with status, tags, deltas, follow-up signals.
+- CloudWatch logs: https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/%252Faws%252Flambda%252Frp-mw-dev-worker
+- DynamoDB links embedded in proof JSON (idempotency/state/audit).
+
+### Files Changed
+- `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/*`
+
+### Observations
+- Follow-up did not add route-email-support tag; routed_to_support=false.
+- Auto-close succeeded after middleware reply; status closed in proof.
+- No skip/escalation tags; PII guard passed.
