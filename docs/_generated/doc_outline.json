@@ -1234,28 +1234,8 @@
       },
       {
         "level": 3,
-        "text": "2026-01-16 - RUN_20260116_1755Z (Read-only shadow mode + network-read decoupling)",
-        "anchor": "2026-01-16-run202601161755z-read-only-shadow-mode-network-read-decoupling"
-      },
-      {
-        "level": 3,
-        "text": "2026-01-16 - RUN_20260116_1443Z (B40 close probe + pipeline fix)",
-        "anchor": "2026-01-16-run202601161443z-b40-close-probe-pipeline-fix"
-      },
-      {
-        "level": 3,
-        "text": "2026-01-16 - RUN_20260116_0236Z (NewWorkflows Phase 1: labels, staleness, optional Claude gate)",
-        "anchor": "2026-01-16-run202601160236z-newworkflows-phase-1-labels-staleness-optional-claude-gate"
-      },
-      {
-        "level": 3,
-        "text": "2026-01-16 - RUN_20260116_0114Z (NewWorkflows Phase 1 delta: Bugbot findings fixed)",
-        "anchor": "2026-01-16-run202601160114z-newworkflows-phase-1-delta-bugbot-findings-fixed"
-      },
-      {
-        "level": 3,
-        "text": "2026-01-15 - RUN_20260115_2224Z (NewWorkflows Phase 1: risk labels + gate matrix + Claude optional gate)",
-        "anchor": "2026-01-15-run202601152224z-newworkflows-phase-1-risk-labels-gate-matrix-claude-optional-gate"
+        "text": "2026-01-17 - RUN_20260117_0212Z (B40 read-only shadow mode closeout)",
+        "anchor": "2026-01-17-run202601170212z-b40-read-only-shadow-mode-closeout"
       },
       {
         "level": 3,
