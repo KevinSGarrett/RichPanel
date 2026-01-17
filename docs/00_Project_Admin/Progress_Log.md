@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-14 - RUN_20260114_0707Z.
+Last verified: 2026-01-17 - RUN_20260117_0212Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-17 - RUN_20260117_0212Z (B40 read-only shadow mode closeout)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260117_0212Z
+- Added run artifacts and evidence for B40: shadow reads via `MW_ALLOW_NETWORK_READS`, Richpanel write block via `RICHPANEL_WRITE_DISABLED`/`RichpanelWriteDisabledError`, pipeline `allow_network` propagation.
+- CI: `python scripts/run_ci_checks.py --ci` passing on clean tree; Codecov patch and Cursor Bugbot green on PR #113.
+- Docs impact: regenerated registries only; Progress_Log updated.
 
 ### 2026-01-14 - RUN_20260114_0707Z (Dev outbound toggle workflow + auto-revert)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260114_0707Z
