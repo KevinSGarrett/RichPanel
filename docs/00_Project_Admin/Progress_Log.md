@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-16 - RUN_20260116_1755Z.
+Last verified: 2026-01-17 - RUN_20260117_0212Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-17 - RUN_20260117_0212Z (B40 corrective: read-only shadow mode PR #113)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260117_0212Z
+- Worker `allow_network` now honors `MW_ALLOW_NETWORK_READS`; Richpanel client blocks non-GETs when `RICHPANEL_WRITE_DISABLED=true`; pipeline order lookup propagates `allow_network`.
+- Added offline-safe tests (`test_read_only_shadow_mode`) and CI wiring in `run_ci_checks.py`; doc registries regenerated.
+- CI `--ci` clean locally; PR #113 open with auto-merge enabled; Codecov/Bugbot pending.
+
 ### 2026-01-16 - RUN_20260116_1755Z (Read-only shadow mode + network-read decoupling)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260116_1755Z
 - Decoupled worker network reads via `MW_ALLOW_NETWORK_READS` (shadow mode).
