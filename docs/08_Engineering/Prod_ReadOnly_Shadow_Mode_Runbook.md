@@ -160,12 +160,13 @@ const workerLambda = new lambda.Function(this, 'WorkerFunction', {
     RICHPANEL_WRITE_DISABLED: 'true',
     SHOPIFY_WRITE_DISABLED: 'true',
     RICHPANEL_OUTBOUND_ENABLED: 'false',
-    AUTOMATION_ENABLED: 'false',
+    // Note: automation_enabled is controlled via SSM parameters, not Lambda env vars
+    // Use set-runtime-flags.yml workflow to set automation_enabled=false
   },
 });
 ```
 
-**Note:** CDK changes require a full stack deployment; use runtime workflows for quick toggles.
+**Note:** CDK changes require a full stack deployment; use runtime workflows for quick toggles (especially for SSM parameters).
 
 ---
 
