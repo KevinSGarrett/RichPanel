@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-17 - run_20260117_0212z (b40 corrective: read-only shadow mode pr #113)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-17-run202601170212z-b40-corrective-read-only-shadow-mode-pr-113"
+    }
+  ],
   "2026-01-16 - run_20260116_1755z (read-only shadow mode + network-read decoupling)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
