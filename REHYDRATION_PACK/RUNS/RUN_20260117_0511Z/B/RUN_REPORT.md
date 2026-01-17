@@ -25,7 +25,7 @@
 
 ### PR Health Check
 - Remediation PR: [#116](https://github.com/KevinSGarrett/RichPanel/pull/116) (merge-commit strategy).
-- Codecov: pending rerun after follow-up fingerprint coverage addition — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/116
+- Codecov: PASS (patch 95.45%, target 78.09%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/116
 - Bugbot: PASS ([review](https://github.com/KevinSGarrett/RichPanel/pull/116#pullrequestreview-3673532377)).
 - CI: PASS (`python scripts/run_ci_checks.py --ci`) — log: `REHYDRATION_PACK/RUNS/RUN_20260117_0510Z/B/CI_RUN_LOG_PR116.txt`
 - GitHub Actions: validate workflow run https://github.com/KevinSGarrett/RichPanel/actions/runs/21089806610
