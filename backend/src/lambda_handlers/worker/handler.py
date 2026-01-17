@@ -70,7 +70,7 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
     failures: List[Dict[str, str]] = []
     safe_mode, automation_enabled = _load_kill_switches()
     outbound_enabled = _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False)
-    allow_network = bool(outbound_enabled)
+    allow_network = outbound_enabled or _to_bool(os.environ.get("MW_ALLOW_NETWORK_READS"), default=False)
 
     for record in event.get("Records", []):
         message_id = record.get("messageId", "unknown")

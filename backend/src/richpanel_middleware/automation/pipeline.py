@@ -257,7 +257,7 @@ def plan_actions(
                 envelope,
                 safe_mode=safe_mode,
                 automation_enabled=automation_enabled,
-                allow_network=False,
+                allow_network=allow_network,
             )
             ticket_created_at = (
                 payload.get("ticket_created_at")
