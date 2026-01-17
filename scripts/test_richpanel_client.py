@@ -14,6 +14,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelClient,
     RichpanelExecutor,
     RichpanelRequestError,
+    RichpanelWriteDisabledError,
     TransportError,
     TransportRequest,
     TransportResponse,
@@ -51,6 +52,7 @@ class RichpanelClientTests(unittest.TestCase):
         os.environ.pop("RICHPANEL_API_KEY_OVERRIDE", None)
         os.environ.pop("RICHPANEL_ENV", None)
         os.environ.pop("RICH_PANEL_ENV", None)
+        os.environ.pop("RICHPANEL_WRITE_DISABLED", None)
 
     def test_dry_run_default_skips_transport(self) -> None:
         transport = _FailingTransport()
@@ -163,6 +165,26 @@ class RichpanelClientTests(unittest.TestCase):
 
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 202)
+        self.assertEqual(len(transport.requests), 1)
+
+    def test_writes_blocked_when_write_disabled_env_set(self) -> None:
+        os.environ["RICHPANEL_WRITE_DISABLED"] = "true"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b'{"ok": true}')]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        response = client.request("GET", "/v1/ping", dry_run=False)
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 1)
+
+        for method in ("PUT", "POST", "PATCH", "DELETE"):
+            with self.assertRaises(RichpanelWriteDisabledError):
+                client.request(method, "/v1/blocked", json_body={"x": 1}, dry_run=False)
+
+        # Transport should only have been called for the GET.
         self.assertEqual(len(transport.requests), 1)
 
     def test_get_ticket_metadata_handles_ticket_dict(self) -> None:

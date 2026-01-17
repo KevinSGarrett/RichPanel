@@ -451,6 +451,7 @@ Legend:
 - 📎 [Living Docs Update Policy](98_Agent_Ops/Policies/POL-LIVE-001__Living_Docs_Update_Policy.md)  (`98_Agent_Ops/Policies/POL-LIVE-001__Living_Docs_Update_Policy.md`)
 - 📎 [POL-OVR-001 — Project Overrides (Agent Rules)](98_Agent_Ops/Policies/POL-OVR-001__Project_Overrides_(Agent_Rules).md)  (`98_Agent_Ops/Policies/POL-OVR-001__Project_Overrides_(Agent_Rules).md`)
 - 📎 [Adaptive Project Manager Mode (ChatGPT Browser)](98_Agent_Ops/Policies/POL-PM-001__Adaptive_Project_Manager_Mode_(ChatGPT_Browser).md)  (`98_Agent_Ops/Policies/POL-PM-001__Adaptive_Project_Manager_Mode_(ChatGPT_Browser).md`)
+- 📎 [RichPanel API Close Ticket Probe Runbook](98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md)  (`98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md`)
 - 📎 [File/Code/Folder Layout Policy](98_Agent_Ops/Policies/POL-STRUCT-001__File-Code-Folder_Layout_Policy.md)  (`98_Agent_Ops/Policies/POL-STRUCT-001__File-Code-Folder_Layout_Policy.md`)
 - 📎 [Agent Testing Policy](98_Agent_Ops/Policies/POL-TEST-001__Agent_Testing_Policy.md)  (`98_Agent_Ops/Policies/POL-TEST-001__Agent_Testing_Policy.md`)
 - ✅ [Agent Ops (Policies, Templates, and Run Protocols)](98_Agent_Ops/README.md)  (`98_Agent_Ops/README.md`)

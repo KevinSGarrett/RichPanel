@@ -33,6 +33,7 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "true"
+        os.environ.pop("MW_ALLOW_NETWORK_READS", None)
 
     def test_plan_actions_receives_allow_network_and_outbound_flags(self) -> None:
         envelope = SimpleNamespace(
@@ -126,6 +127,55 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
+            outbound_enabled=False,
+        )
+
+    def test_allow_network_enabled_when_shadow_reads_allowed(self) -> None:
+        os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "false"
+        os.environ["MW_ALLOW_NETWORK_READS"] = "true"
+        envelope = SimpleNamespace(
+            event_id="evt-3",
+            conversation_id="c-3",
+            payload={},
+            message_id="m3",
+            dedupe_id="m3",
+            group_id=None,
+            source="test",
+            received_at="2024-01-01T00:00:00Z",
+        )
+        fake_plan = mock.Mock()
+        fake_plan.safe_mode = False
+        fake_plan.automation_enabled = True
+        fake_plan.mode = "automation_candidate"
+        fake_plan.actions = []
+        fake_execution = mock.Mock(dry_run=True)
+
+        with mock.patch.object(worker, "_load_kill_switches", return_value=(False, True)), mock.patch.object(
+            worker, "normalize_event", return_value=envelope
+        ), mock.patch.object(worker, "plan_actions", return_value=fake_plan) as plan_mock, mock.patch.object(
+            worker, "_persist_idempotency"
+        ), mock.patch.object(
+            worker, "_execute_and_record", return_value=fake_execution
+        ), mock.patch.object(
+            worker,
+            "_maybe_execute_outbound_reply",
+            return_value={"sent": False, "reason": "skipped"},
+        ):
+            event = {
+                "Records": [
+                    {
+                        "messageId": "m3",
+                        "body": json.dumps({"payload": {"ticket_id": "t-3", "message_id": "m3"}}),
+                    }
+                ]
+            }
+            worker.lambda_handler(event, None)
+
+        plan_mock.assert_called_once_with(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
             outbound_enabled=False,
         )
 
