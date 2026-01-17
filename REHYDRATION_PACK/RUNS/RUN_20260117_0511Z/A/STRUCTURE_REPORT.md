@@ -1,0 +1,11 @@
+Contents for RUN_20260117_0511Z/B:
+- `e2e_outbound_proof.json` — full PII-safe proof payload for no-tracking scenario.
+- `RUN_REPORT.md` — scenario, outcome, commands, tests/proof, diffstat, files changed.
+- `RUN_SUMMARY.md` — quick outcome recap.
+- `TEST_MATRIX.md` — result table for this scenario.
+- `DOCS_IMPACT_MAP.md` — docs impact declaration.
+- `FIX_REPORT.md` — notes on fixes (none applied).
+- Agent folders A/ and C/ present alongside B/ as required.
+- Proof captures idempotency/state/audit links and follow-up evidence.
+- All files live under `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/`.
+- Proof generated via run RUN_NOTRACK_B40_20260117G and stored here for regex compliance.

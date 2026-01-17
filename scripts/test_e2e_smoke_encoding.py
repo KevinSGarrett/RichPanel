@@ -16,6 +16,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -27,8 +28,10 @@ if str(SCRIPTS) not in sys.path:
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _check_pii_safe,
+    _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _order_status_no_tracking_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -140,6 +143,17 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertNotIn("%40", serialized)
         self.assertNotIn("mail.", serialized)
 
+    def test_order_status_no_tracking_shape(self) -> None:
+        payload = _order_status_no_tracking_payload("RUN_NT", conversation_id="conv-no-track-1")
+
+        self.assertEqual(payload["scenario"], "order_status_no_tracking")
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIn("shipping_method", payload)
+        self.assertIn("order_created_at", payload)
+        self.assertIsNone(payload.get("tracking_number"))
+        self.assertIsNone(payload.get("tracking_url"))
+        self.assertEqual(payload["tracking"]["status"], "label_pending")
+
 
 class DiagnosticsTests(unittest.TestCase):
     class _MockResponse:
@@ -163,7 +177,7 @@ class DiagnosticsTests(unittest.TestCase):
     def test_diagnose_skips_without_confirm(self) -> None:
         executor = self._MockExecutor()
         result = _diagnose_ticket_update(
-            executor,
+            executor,  # type: ignore[arg-type]
             "ticket-123",
             allow_network=True,
             confirm_test_ticket=False,
@@ -176,7 +190,7 @@ class DiagnosticsTests(unittest.TestCase):
     def test_diagnose_selects_first_successful_candidate(self) -> None:
         executor = self._MockExecutor(status_code=200)
         result = _diagnose_ticket_update(
-            executor,
+            executor,  # type: ignore[arg-type]
             "ticket-123",
             allow_network=True,
             confirm_test_ticket=True,
@@ -253,6 +267,52 @@ class ReplyEvidenceTests(unittest.TestCase):
         self.assertIn("reply_update_success:ticket_state_closed", reason)
 
 
+class ClassificationTests(unittest.TestCase):
+    def test_pass_strong_requires_success_tag(self) -> None:
+        strong, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=False,
+            failed=[],
+        )
+        self.assertEqual(strong, "PASS_STRONG")
+        self.assertIsNone(reason)
+
+        weak, weak_reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=True,
+            middleware_tag_ok=False,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=False,
+            failed=[],
+        )
+        self.assertEqual(weak, "PASS_WEAK")
+        self.assertEqual(weak_reason, "status_or_success_tag_missing")
+
+    def test_skip_tags_fail(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=False,
+            fallback_used=False,
+            failed=["no_skip_tags"],
+        )
+        self.assertEqual(result, "FAIL")
+        self.assertEqual(reason, "skip_or_escalation_tags_present")
+
+
+class PIISafetyTests(unittest.TestCase):
+    def test_pii_scan_detects_email(self) -> None:
+        self.assertIsNotNone(_check_pii_safe('{"email":"user@example.com"}'))
+        self.assertIsNotNone(_check_pii_safe('{"encoded":"foo%40bar.com"}'))
+
+
 class FallbackCloseTests(unittest.TestCase):
     class _Resp:
         def __init__(self, status_code: int, dry_run: bool, url: str) -> None:
@@ -278,7 +338,7 @@ class FallbackCloseTests(unittest.TestCase):
         ]
         execu = self._Exec(responses)
         result = _apply_fallback_close(
-            ticket_executor=execu,
+            ticket_executor=execu,  # type: ignore[arg-type]
             ticket_ref="1025",
             ticket_id_for_fallback="id123",
             fallback_comment={"body": "test", "type": "public", "source": "middleware"},

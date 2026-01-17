@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-17 - RUN_20260117_0511Z (Order-status tracking + no-tracking PASS_STRONG + follow-up)
+- Sources: `REHYDRATION_PACK/RUNS/RUN_20260117_0510Z` (tracking ticket 1039) and `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z` (no-tracking ticket 1040).
+- Middleware outbound enabled; automation on; both runs PASS_STRONG with mw-auto-replied + mw-order-status-answered tags and auto-close applied.
+- Follow-up webhooks sent; no duplicate replies; route-to-support tag not added (routed_to_support=false) but no skip/escalation tags.
+- Proofs PII-safe and include DynamoDB/log links and follow-up evidence.
+- Run artifacts: RUN_REPORT/RUN_SUMMARY/TEST_MATRIX/STRUCTURE_REPORT/DOCS_IMPACT_MAP in each run folder (A/B/C).
 ### 2026-01-17 - RUN_20260117_0212Z (B40 read-only shadow mode closeout)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260117_0212Z
 - Added run artifacts and evidence for B40: shadow reads via `MW_ALLOW_NETWORK_READS`, Richpanel write block via `RICHPANEL_WRITE_DISABLED`/`RichpanelWriteDisabledError`, pipeline `allow_network` propagation.
