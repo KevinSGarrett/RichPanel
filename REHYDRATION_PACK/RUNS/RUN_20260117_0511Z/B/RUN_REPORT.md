@@ -23,6 +23,13 @@
 - CloudWatch logs: https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/%252Faws%252Flambda%252Frp-mw-dev-worker
 - DynamoDB links embedded in proof JSON (idempotency/state/audit).
 
+### PR Health Check
+- Remediation PR: [#116](https://github.com/KevinSGarrett/RichPanel/pull/116) (merge-commit strategy).
+- Codecov: PASS (patch 86.21%, delta +0.14%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/116
+- Bugbot: PASS ([review](https://github.com/KevinSGarrett/RichPanel/pull/116#pullrequestreview-3673532377)).
+- CI: PASS (`python scripts/run_ci_checks.py --ci`) — `[OK] REHYDRATION_PACK validated (mode=build).` / `[OK] CI-equivalent checks passed.`
+- GitHub Actions: validate workflow run https://github.com/KevinSGarrett/RichPanel/actions/runs/21089806610
+
 ### Files Changed
 - `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/*`
 
