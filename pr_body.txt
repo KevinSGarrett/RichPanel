@@ -1,0 +1,52 @@
+## Mission
+Make Order Status operationally shippable by creating runbooks and deployment readiness documentation.
+
+## Run ID
+RUN_20260117_1751Z
+
+## Deliverables
+
+### A) Production Read-Only Shadow Mode Runbook
+**File:** docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md (NEW, 628 lines)
+
+- Zero-write production validation procedures
+- Required env vars: MW_ALLOW_NETWORK_READS, RICHPANEL_WRITE_DISABLED, SHOPIFY_WRITE_DISABLED, RICHPANEL_OUTBOUND_ENABLED, AUTOMATION_ENABLED
+- CloudWatch Logs audit procedures (prove zero POST/PUT/PATCH/DELETE calls)
+- Middleware hard-fail verification (RichpanelWriteDisabledError)
+- Use cases, risks, evidence requirements
+- Operational checklists for shadow mode validation
+
+### B) CI and Actions Runbook Update
+**File:** docs/08_Engineering/CI_and_Actions_Runbook.md (+89 lines)
+
+- Order Status Proof canonical requirements
+- Required scenarios: order_status_tracking, order_status_no_tracking, followup_after_auto_reply
+- PASS_STRONG criteria: ticket closed + reply evidence + middleware tags + no skip tags + PII-safe
+- PASS_WEAK criteria (for cases where Richpanel refuses status changes)
+- Required evidence artifacts (proof JSON, DynamoDB links, CloudWatch logs, message count delta)
+- Redaction and PII safety requirements
+
+### C) MASTER_CHECKLIST Update
+**File:** docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md (+165 lines)
+
+- CHK-012A Order Status Deployment Readiness epic
+- 7 checklist categories: E2E Proofs, Shadow Mode, Observability, CI Gates, Docs, Deployment, Post-Deployment
+- Completion criteria: all proofs PASS_STRONG, shadow validated, CI passing, staging green, PM approval, prod deployed
+
+### D) Documentation Registry Regeneration
+- 403 docs indexed (+1)
+- 640 checklist items extracted
+- All registries and plan checklists auto-regenerated
+
+## Tests
+- All 126 CI checks passed (pipeline, clients, order lookup, routing, shadow mode, encoding)
+- Doc hygiene, plan sync, secret inventory, admin logs, GPT-5.x enforcement all passed
+
+## Evidence
+Run artifacts: REHYDRATION_PACK/RUNS/RUN_20260117_1751Z/A/ (RUN_REPORT, RUN_SUMMARY, TEST_MATRIX, DOCS_IMPACT_MAP, STRUCTURE_REPORT)
+
+## Alignment
+Cross-referenced with Agent B + C implementations: RUN_20260117_0510Z, RUN_20260117_0511Z, RUN_20260117_0212Z
+
+## Impact
+Docs-only PR - no code changes, no customer impact, no deployment required.
