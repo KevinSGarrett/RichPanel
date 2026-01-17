@@ -470,30 +470,31 @@ python scripts/dev_e2e_smoke.py `
 
 #### Follow-up behavior verification (optional but recommended)
 
-To prove loop prevention (follow-ups after auto-reply are routed, not auto-replied again):
+To prove loop prevention (follow-ups after auto-reply are routed, not auto-replied again), add `--simulate-followup` to the order_status scenario command:
 
 ```powershell
-# After running order_status_tracking or order_status_no_tracking:
 $runId = "RUN_<YYYYMMDD>_<HHMMZ>"
-$ticketNumber = "<same-ticket-number-as-above>"
+$ticketNumber = "<dev-richpanel-ticket-number>"
 python scripts/dev_e2e_smoke.py `
   --env dev `
   --region us-east-2 `
   --stack-name RichpanelMiddleware-dev `
-  --wait-seconds 90 `
+  --wait-seconds 120 `
   --profile <aws-profile> `
   --ticket-number $ticketNumber `
   --confirm-test-ticket `
+  --diagnose-ticket-update `
   --run-id $runId `
-  --scenario followup_after_auto_reply `
-  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_followup_proof.json"
+  --scenario order_status_tracking `
+  --simulate-followup `
+  --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_order_status_tracking_proof.json"
 ```
 
 **Expected outcome:**
-- Worker routes the follow-up to Email Support Team
-- Tags applied: `route-email-support-team`, `mw-escalated-human`, `mw-skip-followup-after-auto-reply`
-- **No duplicate auto-reply sent**
-- Proof JSON records `routed_to_support=true` and no reply evidence
+- Initial webhook: auto-reply sent, ticket resolved/closed
+- Follow-up webhook: worker routes to Email Support Team (no duplicate auto-reply)
+- Follow-up tags applied: `route-email-support-team`, `mw-escalated-human`, `mw-skip-followup-after-auto-reply`
+- Proof JSON includes `followup` section with `routed_to_support=true` and no reply evidence
 
 #### PASS criteria
 

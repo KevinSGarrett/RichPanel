@@ -87,10 +87,11 @@ OK: docs + reference validation passed
 
 **Note:** The `[FAIL]` is expected for docs-only PRs that regenerate registries. This will be resolved by committing the regenerated files.
 
-## GitHub Actions (pending PR creation)
+## GitHub Actions
 
 **CI workflow:** `.github/workflows/ci.yml`  
-**Expected result:** ✅ PASS (all blocking steps)
+**Run URL:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21098848008  
+**Result:** ✅ PASS (all blocking steps, 45s)
 
 **Steps:**
 1. Python 3.11 + tooling setup
@@ -102,39 +103,32 @@ OK: docs + reference validation passed
 7. Coverage run + upload to Codecov (advisory)
 8. Coverage artifact upload
 
-**Expected:** Steps 1-3 pass, steps 4-7 advisory (no issues expected for docs-only), step 8 uploads (no coverage change expected).
+**Actual result:** Steps 1-3 passed, steps 4-7 advisory (no issues), step 8 uploaded successfully.
 
-## Codecov (pending PR creation)
+## Codecov
 
-**Expected status:** Patch N/A or 0% (no code changes), Project PASS (no coverage drop)
+**URL:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/117  
+**Status:** ✅ PASS (Patch: N/A, Project: PASS)
 
 **Justification:** Docs-only PR, no Python code modified, no coverage impact.
 
-## Bugbot (pending PR creation)
+## Bugbot
 
-**Trigger:** `@cursor review` (will post as PR comment after creation)
-
-**Expected findings:** Low/Medium for docs clarity, formatting, or link validation (if any). No High/Critical expected.
-
-**Approach:** Address all findings or document rationale in RUN_REPORT.md.
+**Review URL:** https://github.com/KevinSGarrett/RichPanel/pull/117#pullrequestreview-3674311992  
+**Status:** ✅ PASS (2m48s)  
+**Findings:** 2 Codex comments (formatting/organization suggestions, addressed in closeout commits)
 
 ## Wait-for-Green Gate
 
-**Status:** Not yet executed (PR not created)
+**Status:** ✅ EXECUTED AND PASSED
 
-**Plan:**
-1. Create PR with auto-merge enabled
-2. Trigger Bugbot: `gh pr comment <PR#> -b '@cursor review'`
-3. Poll checks every 120-240s:
-   ```powershell
-   do {
-     gh pr checks <PR#>
-     Start-Sleep -Seconds (Get-Random -Minimum 120 -Maximum 240)
-   } while (gh pr checks <PR#> | Select-String -Pattern 'Pending|In progress|Queued')
-   ```
-4. Verify Codecov and Bugbot contexts completed/green
-5. Address any findings
-6. Document final status in RUN_REPORT.md
+**Execution summary:**
+1. ✅ Created PR #117 with auto-merge enabled
+2. ✅ Triggered Bugbot: `gh pr comment 117 -b '@cursor review'`
+3. ✅ Polled checks with 120-240s intervals (multiple iterations)
+4. ✅ Verified Codecov and Bugbot contexts completed/green (final check: 2026-01-17 18:25 UTC)
+5. ✅ Addressed rehydration pack validation findings (12 iterative commits to fix stub artifacts)
+6. ✅ Final status: All checks PASS (validate, Cursor Bugbot, codecov/patch)
 
 ## Summary
 

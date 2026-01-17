@@ -11634,18 +11634,18 @@
       },
       {
         "level": 2,
-        "text": "Required environment variables",
-        "anchor": "required-environment-variables"
+        "text": "Required configuration",
+        "anchor": "required-configuration"
       },
       {
         "level": 3,
-        "text": "Core read-only flags",
-        "anchor": "core-read-only-flags"
+        "text": "Runtime kill switches (safe_mode + automation_enabled)",
+        "anchor": "runtime-kill-switches-safemode-automationenabled"
       },
       {
         "level": 3,
-        "text": "Optional safety flags",
-        "anchor": "optional-safety-flags"
+        "text": "Lambda environment variables",
+        "anchor": "lambda-environment-variables"
       },
       {
         "level": 3,
@@ -11659,13 +11659,13 @@
       },
       {
         "level": 3,
-        "text": "Option 1: GitHub Actions workflow (recommended for dev/staging)",
-        "anchor": "option-1-github-actions-workflow-recommended-for-devstaging"
+        "text": "Step 1: Set runtime kill switches (SSM)",
+        "anchor": "step-1-set-runtime-kill-switches-ssm"
       },
       {
         "level": 3,
-        "text": "Option 2: Manual AWS Console (production)",
-        "anchor": "option-2-manual-aws-console-production"
+        "text": "Step 2: Set Lambda environment variables",
+        "anchor": "step-2-set-lambda-environment-variables"
       },
       {
         "level": 3,
@@ -11814,13 +11814,13 @@
       },
       {
         "level": 3,
-        "text": "Option 1: GitHub Actions workflow (dev/staging)",
-        "anchor": "option-1-github-actions-workflow-devstaging"
+        "text": "Step 1: Re-enable runtime kill switches (SSM)",
+        "anchor": "step-1-re-enable-runtime-kill-switches-ssm"
       },
       {
         "level": 3,
-        "text": "Option 2: Manual AWS Console (production)",
-        "anchor": "option-2-manual-aws-console-production"
+        "text": "Step 2: Re-enable Lambda environment variables",
+        "anchor": "step-2-re-enable-lambda-environment-variables"
       },
       {
         "level": 3,

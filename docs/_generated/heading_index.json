@@ -12913,22 +12913,22 @@
       "anchor": "production-read-only-shadow-mode-runbook"
     }
   ],
-  "required environment variables": [
+  "required configuration": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "required-environment-variables"
+      "anchor": "required-configuration"
     }
   ],
-  "core read-only flags": [
+  "runtime kill switches (safe_mode + automation_enabled)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "core-read-only-flags"
+      "anchor": "runtime-kill-switches-safemode-automationenabled"
     }
   ],
-  "optional safety flags": [
+  "lambda environment variables": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "optional-safety-flags"
+      "anchor": "lambda-environment-variables"
     }
   ],
   "verification checklist": [
@@ -12943,20 +12943,16 @@
       "anchor": "how-to-enable-shadow-mode"
     }
   ],
-  "option 1: github actions workflow (recommended for dev/staging)": [
+  "step 1: set runtime kill switches (ssm)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "option-1-github-actions-workflow-recommended-for-devstaging"
+      "anchor": "step-1-set-runtime-kill-switches-ssm"
     }
   ],
-  "option 2: manual aws console (production)": [
+  "step 2: set lambda environment variables": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "option-2-manual-aws-console-production"
-    },
-    {
-      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "option-2-manual-aws-console-production"
+      "anchor": "step-2-set-lambda-environment-variables"
     }
   ],
   "option 3: infrastructure-as-code (cdk)": [
@@ -13133,10 +13129,16 @@
       "anchor": "disable-shadow-mode"
     }
   ],
-  "option 1: github actions workflow (dev/staging)": [
+  "step 1: re-enable runtime kill switches (ssm)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "option-1-github-actions-workflow-devstaging"
+      "anchor": "step-1-re-enable-runtime-kill-switches-ssm"
+    }
+  ],
+  "step 2: re-enable lambda environment variables": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "step-2-re-enable-lambda-environment-variables"
     }
   ],
   "option 3: auto-revert (dev-only)": [

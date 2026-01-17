@@ -16,11 +16,38 @@ Validate production data shapes and integration behavior **without any writes or
 
 ---
 
-## Required environment variables
+## Required configuration
 
-To enable production read-only shadow mode, configure the following environment variables on the worker Lambda:
+To enable production read-only shadow mode, you must configure both **runtime kill switches (SSM)** and **Lambda environment variables**:
 
-### Core read-only flags
+### Runtime kill switches (safe_mode + automation_enabled)
+
+The worker reads `safe_mode` and `automation_enabled` from **SSM Parameter Store** (not direct Lambda env vars).
+
+**Preferred method (all environments):** Use the `set-runtime-flags.yml` workflow to update SSM parameters:
+
+```powershell
+# Set SSM parameters for shadow mode
+gh workflow run set-runtime-flags.yml `
+  --ref main `
+  -f environment=<dev|staging|prod> `
+  -f safe_mode=true `
+  -f automation_enabled=false
+```
+
+**DEV-only fallback (env override):** For rapid iteration in DEV, you can override SSM values with Lambda env vars (requires BOTH override vars):
+
+```bash
+MW_ALLOW_ENV_FLAG_OVERRIDE=true
+MW_SAFE_MODE_OVERRIDE=true
+MW_AUTOMATION_ENABLED_OVERRIDE=false
+```
+
+**Note:** If `MW_ALLOW_ENV_FLAG_OVERRIDE=true` but either override var is missing, the override does NOT apply (system fails closed to SSM values).
+
+### Lambda environment variables
+
+Set these on the worker Lambda directly (AWS Console, CDK, or workflow):
 
 ```bash
 # Allow network reads for Richpanel/Shopify/ShipStation APIs
@@ -34,27 +61,15 @@ SHOPIFY_WRITE_DISABLED=true
 
 # Disable ALL outbound communications (email, SMS, push notifications)
 RICHPANEL_OUTBOUND_ENABLED=false
-
-# Disable automation execution (prevents auto-replies, auto-close, etc.)
-AUTOMATION_ENABLED=false
-```
-
-### Optional safety flags
-
-```bash
-# If your stack supports these flags, enable them for additional safety:
-SAFE_MODE=true                    # Enables fail-safe behaviors and extra validation
-DRY_RUN=true                      # Logs what would happen without executing writes
 ```
 
 ### Verification checklist
 
 Before enabling shadow mode in production:
 
-- [ ] Confirm `RICHPANEL_WRITE_DISABLED=true` is set
-- [ ] Confirm `RICHPANEL_OUTBOUND_ENABLED=false` is set  
-- [ ] Confirm `AUTOMATION_ENABLED=false` is set
-- [ ] Confirm `MW_ALLOW_NETWORK_READS=true` is set (to enable API reads)
+- [ ] Confirm SSM parameters are set: `safe_mode=true`, `automation_enabled=false` (via workflow or SSM console)
+- [ ] Confirm Lambda env vars are set: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
+- [ ] (Optional) Confirm `SHOPIFY_WRITE_DISABLED=true` is set
 - [ ] Review CloudWatch logs to confirm no write operations are attempted
 - [ ] Run the "Prove zero writes" audit (see below)
 
@@ -62,26 +77,46 @@ Before enabling shadow mode in production:
 
 ## How to enable shadow mode
 
-### Option 1: GitHub Actions workflow (recommended for dev/staging)
+### Step 1: Set runtime kill switches (SSM)
 
-For **dev** and **staging** environments, use the runtime flags workflow:
+Use the `set-runtime-flags.yml` workflow to update SSM parameters:
 
 ```powershell
-# Set flags via GitHub Actions
+gh workflow run set-runtime-flags.yml `
+  --ref main `
+  -f environment=<dev|staging|prod> `
+  -f safe_mode=true `
+  -f automation_enabled=false
+```
+
+Verify SSM parameters were set:
+
+```powershell
+# View SSM parameter values (requires AWS CLI + appropriate role)
+aws ssm get-parameters `
+  --names "/rp-mw/<env>/safe_mode" "/rp-mw/<env>/automation_enabled" `
+  --region us-east-2 `
+  --query 'Parameters[*].[Name,Value]' `
+  --output table
+```
+
+### Step 2: Set Lambda environment variables
+
+**Option A: GitHub Actions workflow (recommended for dev/staging)**
+
+```powershell
+# Note: This sets Lambda env vars; SSM parameters are separate (Step 1)
 gh workflow run set-runtime-flags.yml `
   --ref main `
   -f environment=staging `
-  -f safe_mode=true `
-  -f automation_enabled=false `
   -f richpanel_write_disabled=true `
   -f richpanel_outbound_enabled=false `
   -f mw_allow_network_reads=true
 ```
 
-Verify the flags were applied:
+Verify Lambda env vars were applied:
 
 ```powershell
-# View current Lambda environment variables (requires AWS CLI + appropriate role)
 aws lambda get-function-configuration `
   --function-name rp-mw-staging-worker `
   --region us-east-2 `
@@ -89,15 +124,23 @@ aws lambda get-function-configuration `
   --output json
 ```
 
-### Option 2: Manual AWS Console (production)
+**Option B: Manual AWS Console (production)**
 
-For **production**, manual flag changes require explicit PM/lead approval and change control:
+For **production**, manual changes require explicit PM/lead approval and change control:
 
+**Set Lambda env vars:**
 1. Navigate to: AWS Console → Lambda → `rp-mw-prod-worker` → Configuration → Environment variables
 2. Click **Edit**
-3. Add/update the required flags (see "Required environment variables" above)
+3. Add/update: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`, `SHOPIFY_WRITE_DISABLED=true`
 4. Click **Save**
-5. Document the change in `docs/00_Project_Admin/Progress_Log.md` with approval timestamp
+
+**Set SSM parameters:**
+1. Navigate to: AWS Console → Systems Manager → Parameter Store
+2. Update `/rp-mw/prod/safe_mode` → `true`
+3. Update `/rp-mw/prod/automation_enabled` → `false`
+
+**Document the change:**
+5. Record change in `docs/00_Project_Admin/Progress_Log.md` with PM/lead approval timestamp and incident response plan
 
 **Do not enable shadow mode in production without:**
 - Explicit PM/lead sign-off recorded in Progress Log
@@ -419,27 +462,45 @@ When shadow mode is enabled, the following operations **are blocked**:
 
 To return to normal operation (writes enabled):
 
-### Option 1: GitHub Actions workflow (dev/staging)
+### Step 1: Re-enable runtime kill switches (SSM)
+
+**Option A: GitHub Actions workflow (recommended)**
 
 ```powershell
 gh workflow run set-runtime-flags.yml `
   --ref main `
-  -f environment=staging `
+  -f environment=<dev|staging|prod> `
   -f safe_mode=false `
-  -f automation_enabled=true `
+  -f automation_enabled=true
+```
+
+**Option B: Manual AWS Console**
+
+1. Navigate to: AWS Console → Systems Manager → Parameter Store
+2. Update `/rp-mw/<env>/safe_mode` → `false`
+3. Update `/rp-mw/<env>/automation_enabled` → `true`
+
+### Step 2: Re-enable Lambda environment variables
+
+**Option A: GitHub Actions workflow**
+
+```powershell
+gh workflow run set-runtime-flags.yml `
+  --ref main `
+  -f environment=<dev|staging|prod> `
   -f richpanel_write_disabled=false `
   -f richpanel_outbound_enabled=true `
   -f mw_allow_network_reads=true
 ```
 
-### Option 2: Manual AWS Console (production)
+**Option B: Manual AWS Console**
 
-1. Navigate to: AWS Console → Lambda → `rp-mw-prod-worker` → Configuration → Environment variables
+1. Navigate to: AWS Console → Lambda → `rp-mw-<env>-worker` → Configuration → Environment variables
 2. Click **Edit**
 3. Set:
    - `RICHPANEL_WRITE_DISABLED=false`
    - `RICHPANEL_OUTBOUND_ENABLED=true`
-   - `AUTOMATION_ENABLED=true`
+   - (Optional) Remove `SHOPIFY_WRITE_DISABLED` or set to `false`
 4. Click **Save**
 5. Document the change in Progress Log with timestamp
 
