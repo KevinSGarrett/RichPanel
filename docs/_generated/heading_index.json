@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-17 - run_20260117_1751z (agent a b40: order status ops + docs)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-17-run202601171751z-agent-a-b40-order-status-ops-docs"
+    }
+  ],
   "2026-01-17 - run_20260117_0511z (order-status tracking + no-tracking pass_strong + follow-up)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

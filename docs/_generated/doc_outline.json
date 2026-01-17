@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-17 - RUN_20260117_1751Z (Agent A B40: Order Status Ops + Docs)",
+        "anchor": "2026-01-17-run202601171751z-agent-a-b40-order-status-ops-docs"
+      },
+      {
+        "level": 3,
         "text": "2026-01-17 - RUN_20260117_0511Z (Order-status tracking + no-tracking PASS_STRONG + follow-up)",
         "anchor": "2026-01-17-run202601170511z-order-status-tracking-no-tracking-passstrong-follow-up"
       },
