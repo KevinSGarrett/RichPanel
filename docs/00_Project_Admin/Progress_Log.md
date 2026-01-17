@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-17 - RUN_20260117_0212Z.
+Last verified: 2026-01-17 - RUN_20260117_1751Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,15 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-17 - RUN_20260117_1751Z (Agent A B40: Order Status Ops + Docs)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260117_1751Z
+- Docs-only PR to make Order Status operationally shippable.
+- NEW: docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md (628 lines) — zero-write production validation procedures.
+- UPDATED: docs/08_Engineering/CI_and_Actions_Runbook.md (+89 lines) — Order Status proof canonical requirements (tracking + no-tracking + follow-up scenarios).
+- UPDATED: docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md (+165 lines) — CHK-012A Order Status Deployment Readiness epic with 7 checklist categories.
+- All 126 CI checks passed; docs registry regenerated (403 docs, 640 checklist items).
+- Run artifacts: RUN_REPORT/RUN_SUMMARY/TEST_MATRIX/DOCS_IMPACT_MAP/STRUCTURE_REPORT in A/B/C folders (B/C stubs).
+
 ### 2026-01-17 - RUN_20260117_0511Z (Order-status tracking + no-tracking PASS_STRONG + follow-up)
 - Sources: `REHYDRATION_PACK/RUNS/RUN_20260117_0510Z` (tracking ticket fingerprint 00037f39cf87) and `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z` (no-tracking ticket fingerprint 0d21ae129a64).
 - Middleware outbound enabled; automation on; both runs PASS_STRONG with mw-auto-replied + mw-order-status-answered tags and auto-close applied.
