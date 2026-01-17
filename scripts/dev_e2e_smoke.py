@@ -24,6 +24,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -207,6 +208,46 @@ def _seconds_delta(before: Optional[str], after: Optional[str]) -> Optional[floa
 def _fingerprint(value: str, length: int = 12) -> str:
     digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
     return digest[:length]
+
+
+def _fingerprint_event_id(event_id: Optional[str]) -> Optional[str]:
+    if not event_id:
+        return None
+    return _fingerprint(event_id)
+
+
+def _sanitize_ts_action_id(ts_action_id: Optional[str]) -> Optional[str]:
+    if not ts_action_id:
+        return None
+    prefix, separator, tail = ts_action_id.partition("#")
+    if separator and tail:
+        return f"{prefix}#fingerprint:{_fingerprint(tail)}"
+    return f"fingerprint:{_fingerprint(ts_action_id)}"
+
+
+def _redact_command(argv: List[str]) -> str:
+    """Return a PII-safe representation of the executed command."""
+    redacted: List[str] = []
+    skip_next = False
+    sensitive_flags = {"--ticket-number", "--event-id"}
+    for arg in argv:
+        if skip_next:
+            skip_next = False
+            continue
+
+        if arg in sensitive_flags:
+            redacted.append(f"{arg} <redacted>")
+            skip_next = True
+            continue
+
+        if any(arg.startswith(f"{flag}=") for flag in sensitive_flags):
+            flag, _, _ = arg.partition("=")
+            redacted.append(f"{flag}=<redacted>")
+            continue
+
+        redacted.append(arg)
+
+    return "python " + " ".join(redacted)
 
 
 def _truncate_text(text: str, limit: int = 256) -> str:
@@ -421,6 +462,13 @@ _PII_PATTERNS = [
     "mail.",     # email domain fragment
     "@",         # literal @
     "<",         # literal < (except in redacted placeholders)
+    "evt:",      # raw event identifiers
+]
+
+_PII_REGEX_PATTERNS = [
+    r"evt:[a-zA-Z0-9:-]{6,}",        # webhook/followup event identifiers
+    r"--ticket-number(?:\s+|=)\d+",  # command-line ticket numbers
+    r"ticket\s+number\s+\d+",        # human readable ticket numbers
 ]
 
 
@@ -446,6 +494,10 @@ def _check_pii_safe(payload_json: str) -> Optional[str]:
     for pattern in _PII_PATTERNS:
         if pattern in safe_json:
             return f"PII pattern '{pattern}' detected in proof payload"
+
+    for regex in _PII_REGEX_PATTERNS:
+        if re.search(regex, safe_json):
+            return f"PII pattern '{regex}' detected in proof payload"
     return None
 
 
@@ -1387,7 +1439,7 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
     env_heading = env_label.replace("_", " ").title()
     lines = [
         f"## {env_heading} E2E Smoke",
-        f"- Event ID: `{data['event_id']}`",
+        f"- Event fingerprint: `{data.get('event_id_fingerprint', 'n/a')}`",
         f"- Endpoint: {data['endpoint']}/webhook",
         f"- Queue URL: {data['queue_url']}",
         f"- Idempotency record observed in `{data['ddb_table']}` "
@@ -1411,14 +1463,14 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
     if data.get("conversation_state_table"):
         lines.append(
             "- Conversation state record observed for "
-            f"`{data['conversation_id']}` in `{data['conversation_state_table']}`"
+            f"`{data.get('conversation_id', 'unknown')}` in `{data['conversation_state_table']}`"
         )
         lines.append(f"- Conversation state console: {data['conversation_state_console']}")
     if data.get("audit_trail_table"):
         audit_sort_key = data.get("audit_sort_key") or "n/a"
         lines.append(
             "- Audit record observed for "
-            f"`{data['conversation_id']}` (sort_key={audit_sort_key}) "
+            f"`{data.get('conversation_id', 'unknown')}` (sort_key={audit_sort_key}) "
             f"in `{data['audit_trail_table']}`"
         )
         lines.append(f"- Audit console: {data['audit_console']}")
@@ -1638,6 +1690,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     conversation_label = (
         conversation_id if conversation_id and "@" not in conversation_id else _fingerprint(conversation_id)
     )
+    conversation_fingerprint = _fingerprint(conversation_id) if conversation_id else None
+    safe_conversation_id = (
+        conversation_id
+        if conversation_id and isinstance(conversation_id, str) and conversation_id.startswith("conv-")
+        else None
+    )
 
     state_item = wait_for_conversation_state_record(
         ddb_resource,
@@ -1715,8 +1773,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         f"rp-mw-{env_name}-ingress-errors",
     ]
 
+    event_id_fingerprint = _fingerprint_event_id(event_id)
+    followup_event_id_fingerprint = _fingerprint_event_id(followup_event_id)
+    audit_sort_key = _sanitize_ts_action_id(audit_item.get("ts_action_id") if audit_item else None)
+
     summary_data = {
-        "event_id": event_id,
+        "event_id_fingerprint": event_id_fingerprint,
         "scenario": args.scenario,
         "endpoint": artifacts.endpoint_url,
         "queue_url": artifacts.queue_url,
@@ -1728,10 +1790,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "conversation_state_console": console_links["conversation_ddb"],
         "audit_trail_table": artifacts.audit_trail_table,
         "audit_console": console_links["audit_ddb"],
-        "conversation_id": conversation_label,
+        "conversation_id": conversation_fingerprint or conversation_label,
         "idempotency_status": item.get("status", "observed"),
         "idempotency_mode": mode or "unknown",
-        "audit_sort_key": audit_item.get("ts_action_id"),
+        "audit_sort_key": audit_sort_key,
         "dashboard_name": dashboard_name,
         "alarm_names": alarm_names,
         "routing_category": routing_state["category"],
@@ -1741,6 +1803,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "draft_action_present": draft_action_present,
         "draft_reply_count": len(draft_replies),
         "draft_replies_safe": safe_draft_replies,
+        "followup_event_id_fingerprint": followup_event_id_fingerprint,
     }
 
     tags_added: List[str] = []
@@ -1885,6 +1948,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
         # If middleware replied but did not close the ticket, perform a deterministic close to satisfy PASS_STRONG.
         # This uses the same diagnostics helper used elsewhere, but applies the winning payload when found.
+        # Networked execution; exclude from coverage.  # pragma: no cover
         if (
             order_status_mode
             and allow_network
@@ -2068,12 +2132,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     safe_pre_ticket = _sanitize_ticket_snapshot(pre_ticket)
     safe_post_ticket = _sanitize_ticket_snapshot(post_ticket)
-    conversation_fingerprint = _fingerprint(conversation_id) if conversation_id else None
-    safe_conversation_id = (
-        conversation_id
-        if conversation_id and isinstance(conversation_id, str) and conversation_id.startswith("conv-")
-        else None
-    )
 
     ticket_lookup_ok = bool(pre_ticket) if ticket_ref else None
     intent_ok = intent_matches_order_status if order_status_mode else None
@@ -2285,12 +2343,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "ticket_ref_fingerprint": _fingerprint(ticket_ref) if ticket_ref else None,
             "apply_test_tag": args.apply_test_tag,
             "test_tag_value": test_tag_value if args.apply_test_tag else None,
-            "command": "python " + " ".join(sys.argv),
+            "command": _redact_command(sys.argv),
         },
         "webhook": {
             "endpoint": f"{artifacts.endpoint_url}/webhook",
             "queue_url": artifacts.queue_url,
-            "event_id": event_id,
+            "event_id_fingerprint": event_id_fingerprint,
             "conversation_id": safe_conversation_id,
             "conversation_id_fingerprint": conversation_fingerprint,
             "accepted": True,
@@ -2320,7 +2378,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "audit_record": {
                 "routing": routing_audit,
                 "recorded_at": audit_item.get("recorded_at"),
-                "ts_action_id": audit_item.get("ts_action_id"),
+                "ts_action_fingerprint": audit_sort_key,
             },
         },
         "richpanel": {
@@ -2353,7 +2411,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         },
         "followup": {
             "performed": bool(followup_event_id),
-            "event_id": followup_event_id,
+            "event_id_fingerprint": followup_event_id_fingerprint,
             "idempotency_record": {
                 "status": followup_item.get("status") if followup_item else None,
                 "mode": followup_item.get("mode") if followup_item else None,

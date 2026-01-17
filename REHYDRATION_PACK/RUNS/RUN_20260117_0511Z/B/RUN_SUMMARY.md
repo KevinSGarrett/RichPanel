@@ -1,6 +1,6 @@
 ### Summary
 - Run ID: RUN_20260117_0511Z (no-tracking proof folder with PASS_STRONG evidence).
-- Ticket 1040: OPEN → CLOSED; success tags applied; no skip/escalation tags.
+- Ticket fingerprint 0d21ae129a64: OPEN → CLOSED; success tags applied; no skip/escalation tags.
 - Middleware reply evidenced; auto-close applied.
 - Follow-up executed; no duplicate reply; routed_to_support=false.
 - PII guard passed; proof JSON present.

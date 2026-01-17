@@ -1,7 +1,7 @@
 ## Test Matrix
 | Scenario                   | Ticket | Status change | Success tag added | Skip/escalation tags | Follow-up reply sent | Routed to support | Result      |
 |----------------------------|--------|---------------|-------------------|----------------------|----------------------|-------------------|-------------|
-| order_status_tracking + FU | 1039   | OPEN→CLOSED   | Yes               | No                   | No                   | No                | PASS_STRONG |
+| order_status_tracking + FU | 00037f39cf87   | OPEN→CLOSED   | Yes               | No                   | No                   | No                | PASS_STRONG |
 
 Notes:
 - Evidence captured in `e2e_outbound_proof.json` (PII-safe).

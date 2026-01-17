@@ -1,7 +1,7 @@
 ### Summary
 - Run ID: RUN_20260117_0510Z (tracking).
 - PASS_STRONG end-to-end in dev us-east-2.
-- Ticket 1039: OPEN → CLOSED; success tags applied; no skip/escalation tags.
+- Ticket fingerprint 00037f39cf87: OPEN → CLOSED; success tags applied; no skip/escalation tags.
 - Middleware reply evidenced via tags; auto-close applied.
 - Follow-up executed; no duplicate reply; routed_to_support=false.
 - PII guard passed; proof JSON present.

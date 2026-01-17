@@ -31,11 +31,13 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _redact_command,
     _order_status_no_tracking_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
     _sanitize_response_metadata,
+    _sanitize_ts_action_id,
 )
 
 
@@ -306,11 +308,70 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(result, "FAIL")
         self.assertEqual(reason, "skip_or_escalation_tags_present")
 
+    def test_fallback_used_marks_pass_weak(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=True,
+            failed=[],
+        )
+        self.assertEqual(result, "PASS_WEAK")
+        self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_fail_when_base_pass_false(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=False,
+            failed=["middleware_outcome"],
+        )
+        self.assertEqual(result, "FAIL")
+        self.assertEqual(reason, "Failed criteria: middleware_outcome")
+
 
 class PIISafetyTests(unittest.TestCase):
     def test_pii_scan_detects_email(self) -> None:
         self.assertIsNotNone(_check_pii_safe('{"email":"user@example.com"}'))
         self.assertIsNotNone(_check_pii_safe('{"encoded":"foo%40bar.com"}'))
+
+    def test_pii_scan_detects_event_identifier(self) -> None:
+        self.assertIsNotNone(_check_pii_safe('{"event_id":"evt:abc123"}'))
+
+    def test_pii_scan_detects_ticket_number_flag(self) -> None:
+        payload = '{"command":"python scripts/dev_e2e_smoke.py --ticket-number 1040"}'
+        self.assertIsNotNone(_check_pii_safe(payload))
+
+    def test_redact_command_masks_sensitive_flags(self) -> None:
+        cmd = _redact_command(
+            [
+                "scripts/dev_e2e_smoke.py",
+                "--ticket-number",
+                "1039",
+                "--event-id",
+                "evt:ac89d31a",
+                "--scenario",
+                "order_status",
+            ]
+        )
+        self.assertIn("--ticket-number <redacted>", cmd)
+        self.assertIn("--event-id <redacted>", cmd)
+        self.assertNotIn("1039", cmd)
+        self.assertNotIn("evt:ac89d31a", cmd)
+        self.assertTrue(cmd.startswith("python "))
+
+    def test_sanitize_ts_action_id_fingerprints_event(self) -> None:
+        original = "2026-01-17T00:00:00Z#evt:abc12345"
+        sanitized = _sanitize_ts_action_id(original)
+        self.assertEqual(
+            sanitized,
+            f"2026-01-17T00:00:00Z#fingerprint:{_fingerprint('evt:abc12345')}",
+        )
 
 
 class FallbackCloseTests(unittest.TestCase):

@@ -1,8 +1,8 @@
-## RUN_20260117_0511Z — No-Tracking Order Status (ticket 1040)
+## RUN_20260117_0511Z — No-Tracking Order Status (ticket fingerprint 0d21ae129a64)
 
 ### Scenario
-- `order_status_no_tracking` on ticket number 1040 (env=dev, region=us-east-2, stack=RichpanelMiddleware-dev).
-- Webhook event_id `evt:c1045732-0fc2-4cb3-a7d5-632b037247ab`; follow-up event_id `evt:followup:e60386d2`.
+- `order_status_no_tracking` on ticket fingerprint 0d21ae129a64 (env=dev, region=us-east-2, stack=RichpanelMiddleware-dev).
+- Webhook event_id `fingerprint:8be87945221d`; follow-up event_id `fingerprint:d7ea0faa2ce1`.
 - Proof: `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/e2e_outbound_proof.json` (PII-safe).
 
 ### Outcome
@@ -16,7 +16,7 @@
 - Added run artifacts under `REHYDRATION_PACK/RUNS/RUN_20260117_0511Z/B/`.
 
 ### Commands Run
-- `python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number 1040 --scenario order_status_no_tracking --simulate-followup --run-id RUN_NOTRACK_B40_20260117G ...` (original proof generation; relocated into compliant folder).
+- `python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number <redacted> --scenario order_status_no_tracking --simulate-followup --run-id RUN_NOTRACK_B40_20260117G ...` (original proof generation; relocated into compliant folder).
 
 ### Tests / Proof
 - Proof JSON (PII-safe) with status, tags, deltas, follow-up signals.
