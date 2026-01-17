@@ -6,3 +6,6 @@
 - No PII or sensitive content handled by Agent B.
 - No documentation review actions are pending for Agent B.
 - This file is present solely for rehydration pack validation.
+- If documentation review is needed, defer to Agent C outputs for specifics.
+- No links, references, or diagrams originate from Agent B scope.
+- Documentation footprint remains unchanged for Agent B in this run.

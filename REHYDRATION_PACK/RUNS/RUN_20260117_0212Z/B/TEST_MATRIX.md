@@ -7,3 +7,5 @@
 | Notes | Agent B relies on CI run by Agent C; no code owned here | n/a |
 | Data writes | None | n/a |
 | PII review | Not applicable; no changes made | n/a |
+| Bugbot | Triggered via PR body `@cursor review` | Pending (tracked by Agent C) |
+| Codecov | Covered by PR #113 patch check | Pending |
