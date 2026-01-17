@@ -6,7 +6,7 @@
 - Doc registries regenerated as part of the CI suite; no manual docs authored.
 - Run artifacts recorded under `REHYDRATION_PACK/RUNS/RUN_20260117_0212Z/C/` with report, summary, test matrix, fix report, structure and docs impact maps.
 - Agent folders A/ and B/ present for validation; no deliverables required for those agents in this run.
-- Codecov patch and Bugbot review pending; @cursor review already requested in PR body.
+- Codecov patch ✅ and Cursor Bugbot ✅ on PR #113; @cursor review already requested in PR body.
 - No data writes occur in read-only shadow mode: writes blocked by env flag and outbound gates remain intact.
-- Recommended next steps: monitor GitHub Actions, Codecov, and Bugbot checks; merge when all gates green.
+- Next steps: monitor auto-merge completion after required checks stay green.
 - No follow-up hotfixes required based on current test coverage and CI results. 

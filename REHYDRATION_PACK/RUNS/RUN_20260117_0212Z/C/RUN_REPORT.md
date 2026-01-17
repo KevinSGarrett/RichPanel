@@ -35,5 +35,6 @@
 ## Tests / Proof
 - All suites in `scripts/run_ci_checks.py --ci` passed locally with a clean git tree after regen.
 - Read-only shadow tests confirm: worker wiring honors `MW_ALLOW_NETWORK_READS`, client blocks writes when disabled, pipeline does not issue mutations when outbound is off.
-- New run artifacts recorded in this folder; CI passing locally, GitHub Actions/Codecov/Bugbot pending.
+- PR checks: validate ✅, codecov/patch ✅ (90.21% diff hit), Cursor Bugbot ✅ (see PR #113 checks).
+- New run artifacts recorded in this folder; CI passing locally and on PR checks.
 
