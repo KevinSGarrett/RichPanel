@@ -8,3 +8,4 @@
   - `docs/_generated/heading_index.json`
 - No manual documentation authored; regen only, consistent with automated workflows.
 - No PII introduced; content is generated indices only.
+- No additional docs require review; Codecov/Bugbot scopes remain unaffected by doc regen.
