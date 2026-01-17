@@ -14,4 +14,6 @@ All test results are in Agent A scope (CI checks, doc validation, plan sync, etc
 
 See `../A/TEST_MATRIX.md` for full test matrix and results.
 
+All CI checks, validation results, and test evidence are documented in Agent A scope (126 tests passed).
+
 Agent B work will resume in a future run when Order Status E2E proofs or implementation work is needed.
