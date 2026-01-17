@@ -14,4 +14,6 @@ All structural changes are in Agent A scope (new docs/08_Engineering/Prod_ReadOn
 
 See `../A/STRUCTURE_REPORT.md` for full structural impact analysis.
 
+All folder structure changes, documentation organization, and cross-reference updates are documented in Agent A scope.
+
 Agent C work will resume in a future run when Order Status implementation, outbound testing, or observability work is needed.
