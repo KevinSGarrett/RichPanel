@@ -705,8 +705,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 574,
-    "approx_tokens": 746,
+    "word_count": 541,
+    "approx_tokens": 703,
     "last_updated": ""
   },
   {
@@ -1925,9 +1925,9 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 5463,
-    "approx_tokens": 7101,
-    "last_updated": "2026-01-16"
+    "word_count": 4319,
+    "approx_tokens": 5614,
+    "last_updated": "2026-01-11"
   },
   {
     "path": "08_Engineering/Developer_Guide.md",
@@ -1978,16 +1978,6 @@
     "word_count": 132,
     "approx_tokens": 171,
     "last_updated": "2025-12-29"
-  },
-  {
-    "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-    "title": "Quality Gates and Risk Labels — Quick Reference",
-    "section": "08_Engineering",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 1440,
-    "approx_tokens": 1872,
-    "last_updated": ""
   },
   {
     "path": "08_Engineering/Repository_Conventions.md",
@@ -3620,16 +3610,6 @@
     "last_updated": ""
   },
   {
-    "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-    "title": "RichPanel API Close Ticket Probe Runbook",
-    "section": "98_Agent_Ops",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 406,
-    "approx_tokens": 527,
-    "last_updated": ""
-  },
-  {
     "path": "98_Agent_Ops/Policies/POL-STRUCT-001__File-Code-Folder_Layout_Policy.md",
     "title": "File/Code/Folder Layout Policy",
     "section": "98_Agent_Ops",
@@ -3855,8 +3835,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10701,
-    "approx_tokens": 13911,
+    "word_count": 10688,
+    "approx_tokens": 13894,
     "last_updated": ""
   },
   {

@@ -3943,10 +3943,6 @@
       "anchor": "purpose"
     },
     {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "purpose"
-    },
-    {
       "path": "98_Agent_Ops/Rehydration_Pack_Spec.md",
       "anchor": "purpose"
     },
@@ -12227,82 +12223,46 @@
       "anchor": "merge-policy-auditability"
     }
   ],
-  "4) risk labels and gate requirements (newworkflows)": [
+  "4) pr health check (required before merge)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "4-risk-labels-and-gate-requirements-newworkflows"
+      "anchor": "4-pr-health-check-required-before-merge"
     }
   ],
-  "4.0.1 risk label taxonomy": [
+  "4.0 wait-for-green gate (mandatory)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "401-risk-label-taxonomy"
+      "anchor": "40-wait-for-green-gate-mandatory"
     }
   ],
-  "4.0.2 gate lifecycle labels (optional but recommended)": [
+  "4.1 bugbot review": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "402-gate-lifecycle-labels-optional-but-recommended"
+      "anchor": "41-bugbot-review"
     }
   ],
-  "4.0.3 risk labels + seeded gate labels": [
+  "4.2 codecov status verification": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "403-risk-labels-seeded-gate-labels"
+      "anchor": "42-codecov-status-verification"
     }
   ],
-  "4.0.4 cost-aware gate strategy (two-phase approach)": [
+  "4.3 e2e proof (when applicable)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "404-cost-aware-gate-strategy-two-phase-approach"
+      "anchor": "43-e2e-proof-when-applicable"
     }
   ],
-  "5) pr health check (required before merge)": [
+  "4.4 pr health check cli reference card": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "5-pr-health-check-required-before-merge"
+      "anchor": "44-pr-health-check-cli-reference-card"
     }
   ],
-  "5.0 wait-for-green gate (mandatory)": [
+  "5) when github actions fails (red status)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "50-wait-for-green-gate-mandatory"
-    }
-  ],
-  "5.1 bugbot review": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "51-bugbot-review"
-    }
-  ],
-  "5.2 codecov status verification": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "52-codecov-status-verification"
-    }
-  ],
-  "5.3 claude review (semantic review agent)": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "53-claude-review-semantic-review-agent"
-    }
-  ],
-  "5.4 e2e proof (when applicable)": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "54-e2e-proof-when-applicable"
-    }
-  ],
-  "5.5 pr health check cli reference card": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "55-pr-health-check-cli-reference-card"
-    }
-  ],
-  "6) when github actions fails (red status)": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "6-when-github-actions-fails-red-status"
+      "anchor": "5-when-github-actions-fails-red-status"
     }
   ],
   "step 1 — identify the failing job": [
@@ -12341,10 +12301,10 @@
       "anchor": "step-6-push-and-verify-green"
     }
   ],
-  "7) dev e2e smoke workflow": [
+  "6) dev e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "7-dev-e2e-smoke-workflow"
+      "anchor": "6-dev-e2e-smoke-workflow"
     }
   ],
   "when to run it": [
@@ -12387,16 +12347,16 @@
       "anchor": "evidence-expectations"
     }
   ],
-  "8) staging e2e smoke workflow": [
+  "7) staging e2e smoke workflow": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "8-staging-e2e-smoke-workflow"
+      "anchor": "7-staging-e2e-smoke-workflow"
     }
   ],
-  "9) prod promotion checklist (no prod deploy without explicit go/no-go)": [
+  "8) prod promotion checklist (no prod deploy without explicit go/no-go)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "9-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+      "anchor": "8-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
     }
   ],
   "checklist": [
@@ -12411,10 +12371,10 @@
       "anchor": "powershell-safe-commands"
     }
   ],
-  "10) common causes (initial list)": [
+  "9) common causes (initial list)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "10-common-causes-initial-list"
+      "anchor": "9-common-causes-initial-list"
     }
   ],
   "dynamodb: `typeerror: float types are not supported`": [
@@ -12423,10 +12383,10 @@
       "anchor": "dynamodb-typeerror-float-types-are-not-supported"
     }
   ],
-  "11) codecov coverage reporting and gating": [
+  "10) codecov coverage reporting and gating": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "11-codecov-coverage-reporting-and-gating"
+      "anchor": "10-codecov-coverage-reporting-and-gating"
     }
   ],
   "current state (2026-01-11)": [
@@ -12457,10 +12417,10 @@
       "anchor": "troubleshooting-codecov-failures"
     }
   ],
-  "12) lint/type enforcement roadmap": [
+  "11) lint/type enforcement roadmap": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "12-linttype-enforcement-roadmap"
+      "anchor": "11-linttype-enforcement-roadmap"
     }
   ],
   "operational plan (phased enforcement)": [
@@ -12475,16 +12435,16 @@
       "anchor": "tracking"
     }
   ],
-  "13) if you cannot fix quickly": [
+  "12) if you cannot fix quickly": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "13-if-you-cannot-fix-quickly"
+      "anchor": "12-if-you-cannot-fix-quickly"
     }
   ],
-  "14) seed secrets manager (dev/staging)": [
+  "13) seed secrets manager (dev/staging)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "14-seed-secrets-manager-devstaging"
+      "anchor": "13-seed-secrets-manager-devstaging"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
@@ -12544,10 +12504,6 @@
   "troubleshooting": [
     {
       "path": "08_Engineering/Developer_Guide.md",
-      "anchor": "troubleshooting"
-    },
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
       "anchor": "troubleshooting"
     },
     {
@@ -12921,150 +12877,6 @@
     {
       "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
       "anchor": "automated-guardrails"
-    }
-  ],
-  "quality gates and risk labels — quick reference": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "quality-gates-and-risk-labels-quick-reference"
-    }
-  ],
-  "1) risk-based quality philosophy": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "1-risk-based-quality-philosophy"
-    }
-  ],
-  "2) risk label taxonomy (r0–r4)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "2-risk-label-taxonomy-r0r4"
-    }
-  ],
-  "r0 — `risk:r0-docs` (docs-only / non-functional)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r0-riskr0-docs-docs-only-non-functional"
-    }
-  ],
-  "r1 — `risk:r1-low` (low risk, localized changes)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r1-riskr1-low-low-risk-localized-changes"
-    }
-  ],
-  "r2 — `risk:r2-medium` (behavior changes, non-trivial logic)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r2-riskr2-medium-behavior-changes-non-trivial-logic"
-    }
-  ],
-  "r3 — `risk:r3-high` (high blast radius, security-sensitive)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r3-riskr3-high-high-blast-radius-security-sensitive"
-    }
-  ],
-  "r4 — `risk:r4-critical` (production emergency, security incident)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r4-riskr4-critical-production-emergency-security-incident"
-    }
-  ],
-  "3) critical zones (auto-upgrade to r2 minimum)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "3-critical-zones-auto-upgrade-to-r2-minimum"
-    }
-  ],
-  "4) gate lifecycle (pr workflow states)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "4-gate-lifecycle-pr-workflow-states"
-    }
-  ],
-  "gate state labels": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "gate-state-labels"
-    }
-  ],
-  "staleness rule (critical for ai-only workflow)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "staleness-rule-critical-for-ai-only-workflow"
-    }
-  ],
-  "5) two-phase workflow (cost control)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "5-two-phase-workflow-cost-control"
-    }
-  ],
-  "phase a: build & stabilize (local iteration)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "phase-a-build-stabilize-local-iteration"
-    }
-  ],
-  "phase b: gate execution (pr-level, once per stable state)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "phase-b-gate-execution-pr-level-once-per-stable-state"
-    }
-  ],
-  "6) evidence requirements (per risk level)": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "6-evidence-requirements-per-risk-level"
-    }
-  ],
-  "r0 / r1 evidence": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r0-r1-evidence"
-    }
-  ],
-  "r2+ evidence": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r2-evidence"
-    }
-  ],
-  "r3 / r4 additional evidence": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "r3-r4-additional-evidence"
-    }
-  ],
-  "7) gate reference matrix": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "7-gate-reference-matrix"
-    }
-  ],
-  "8) quick cli reference": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "8-quick-cli-reference"
-    }
-  ],
-  "9) waivers and exceptions": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "9-waivers-and-exceptions"
-    }
-  ],
-  "10) merge readiness rule": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "10-merge-readiness-rule"
-    }
-  ],
-  "11) related documents": [
-    {
-      "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-      "anchor": "11-related-documents"
     }
   ],
   "repository conventions": [
@@ -20701,48 +20513,6 @@
     {
       "path": "98_Agent_Ops/Policies/POL-PM-001__Adaptive_Project_Manager_Mode_(ChatGPT_Browser).md",
       "anchor": "adaptive-project-manager-mode-chatgpt-browser"
-    }
-  ],
-  "richpanel api close ticket probe runbook": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "richpanel-api-close-ticket-probe-runbook"
-    }
-  ],
-  "safety + pii rules": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "safety-pii-rules"
-    }
-  ],
-  "prerequisites": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "prerequisites"
-    }
-  ],
-  "how to run the close probe (required path/cli)": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "how-to-run-the-close-probe-required-pathcli"
-    }
-  ],
-  "strong e2e proof (open→closed)": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "strong-e2e-proof-openclosed"
-    }
-  ],
-  "interpreting output": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "interpreting-output"
-    }
-  ],
-  "evidence to archive (per run)": [
-    {
-      "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-      "anchor": "evidence-to-archive-per-run"
     }
   ],
   "file/code/folder layout policy": [

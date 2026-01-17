@@ -11024,68 +11024,38 @@
       },
       {
         "level": 2,
-        "text": "4) Risk labels and gate requirements (NewWorkflows)",
-        "anchor": "4-risk-labels-and-gate-requirements-newworkflows"
+        "text": "4) PR Health Check (required before merge)",
+        "anchor": "4-pr-health-check-required-before-merge"
       },
       {
         "level": 3,
-        "text": "4.0.1 Risk label taxonomy",
-        "anchor": "401-risk-label-taxonomy"
+        "text": "4.0 Wait-for-green gate (mandatory)",
+        "anchor": "40-wait-for-green-gate-mandatory"
       },
       {
         "level": 3,
-        "text": "4.0.2 Gate lifecycle labels (optional but recommended)",
-        "anchor": "402-gate-lifecycle-labels-optional-but-recommended"
+        "text": "4.1 Bugbot review",
+        "anchor": "41-bugbot-review"
       },
       {
         "level": 3,
-        "text": "4.0.3 Risk labels + seeded gate labels",
-        "anchor": "403-risk-labels-seeded-gate-labels"
+        "text": "4.2 Codecov status verification",
+        "anchor": "42-codecov-status-verification"
       },
       {
         "level": 3,
-        "text": "4.0.4 Cost-aware gate strategy (two-phase approach)",
-        "anchor": "404-cost-aware-gate-strategy-two-phase-approach"
+        "text": "4.3 E2E proof (when applicable)",
+        "anchor": "43-e2e-proof-when-applicable"
+      },
+      {
+        "level": 3,
+        "text": "4.4 PR Health Check CLI reference card",
+        "anchor": "44-pr-health-check-cli-reference-card"
       },
       {
         "level": 2,
-        "text": "5) PR Health Check (required before merge)",
-        "anchor": "5-pr-health-check-required-before-merge"
-      },
-      {
-        "level": 3,
-        "text": "5.0 Wait-for-green gate (mandatory)",
-        "anchor": "50-wait-for-green-gate-mandatory"
-      },
-      {
-        "level": 3,
-        "text": "5.1 Bugbot review",
-        "anchor": "51-bugbot-review"
-      },
-      {
-        "level": 3,
-        "text": "5.2 Codecov status verification",
-        "anchor": "52-codecov-status-verification"
-      },
-      {
-        "level": 3,
-        "text": "5.3 Claude review (Semantic Review Agent)",
-        "anchor": "53-claude-review-semantic-review-agent"
-      },
-      {
-        "level": 3,
-        "text": "5.4 E2E proof (when applicable)",
-        "anchor": "54-e2e-proof-when-applicable"
-      },
-      {
-        "level": 3,
-        "text": "5.5 PR Health Check CLI reference card",
-        "anchor": "55-pr-health-check-cli-reference-card"
-      },
-      {
-        "level": 2,
-        "text": "6) When GitHub Actions fails (red status)",
-        "anchor": "6-when-github-actions-fails-red-status"
+        "text": "5) When GitHub Actions fails (red status)",
+        "anchor": "5-when-github-actions-fails-red-status"
       },
       {
         "level": 3,
@@ -11119,8 +11089,8 @@
       },
       {
         "level": 2,
-        "text": "7) Dev E2E smoke workflow",
-        "anchor": "7-dev-e2e-smoke-workflow"
+        "text": "6) Dev E2E smoke workflow",
+        "anchor": "6-dev-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -11144,8 +11114,8 @@
       },
       {
         "level": 2,
-        "text": "8) Staging E2E smoke workflow",
-        "anchor": "8-staging-e2e-smoke-workflow"
+        "text": "7) Staging E2E smoke workflow",
+        "anchor": "7-staging-e2e-smoke-workflow"
       },
       {
         "level": 3,
@@ -11164,8 +11134,8 @@
       },
       {
         "level": 2,
-        "text": "9) Prod promotion checklist (no prod deploy without explicit go/no-go)",
-        "anchor": "9-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
+        "text": "8) Prod promotion checklist (no prod deploy without explicit go/no-go)",
+        "anchor": "8-prod-promotion-checklist-no-prod-deploy-without-explicit-gono-go"
       },
       {
         "level": 3,
@@ -11179,8 +11149,8 @@
       },
       {
         "level": 2,
-        "text": "10) Common causes (initial list)",
-        "anchor": "10-common-causes-initial-list"
+        "text": "9) Common causes (initial list)",
+        "anchor": "9-common-causes-initial-list"
       },
       {
         "level": 3,
@@ -11189,8 +11159,8 @@
       },
       {
         "level": 2,
-        "text": "11) Codecov coverage reporting and gating",
-        "anchor": "11-codecov-coverage-reporting-and-gating"
+        "text": "10) Codecov coverage reporting and gating",
+        "anchor": "10-codecov-coverage-reporting-and-gating"
       },
       {
         "level": 3,
@@ -11214,8 +11184,8 @@
       },
       {
         "level": 2,
-        "text": "12) Lint/Type enforcement roadmap",
-        "anchor": "12-linttype-enforcement-roadmap"
+        "text": "11) Lint/Type enforcement roadmap",
+        "anchor": "11-linttype-enforcement-roadmap"
       },
       {
         "level": 3,
@@ -11234,13 +11204,13 @@
       },
       {
         "level": 2,
-        "text": "13) If you cannot fix quickly",
-        "anchor": "13-if-you-cannot-fix-quickly"
+        "text": "12) If you cannot fix quickly",
+        "anchor": "12-if-you-cannot-fix-quickly"
       },
       {
         "level": 2,
-        "text": "14) Seed Secrets Manager (dev/staging)",
-        "anchor": "14-seed-secrets-manager-devstaging"
+        "text": "13) Seed Secrets Manager (dev/staging)",
+        "anchor": "13-seed-secrets-manager-devstaging"
       },
       {
         "level": 3,
@@ -11631,131 +11601,6 @@
         "level": 2,
         "text": "Automated guardrails",
         "anchor": "automated-guardrails"
-      }
-    ]
-  },
-  {
-    "path": "08_Engineering/Quality_Gates_and_Risk_Labels.md",
-    "outline": [
-      {
-        "level": 1,
-        "text": "Quality Gates and Risk Labels — Quick Reference",
-        "anchor": "quality-gates-and-risk-labels-quick-reference"
-      },
-      {
-        "level": 2,
-        "text": "1) Risk-based quality philosophy",
-        "anchor": "1-risk-based-quality-philosophy"
-      },
-      {
-        "level": 2,
-        "text": "2) Risk label taxonomy (R0–R4)",
-        "anchor": "2-risk-label-taxonomy-r0r4"
-      },
-      {
-        "level": 3,
-        "text": "R0 — `risk:R0-docs` (Docs-only / non-functional)",
-        "anchor": "r0-riskr0-docs-docs-only-non-functional"
-      },
-      {
-        "level": 3,
-        "text": "R1 — `risk:R1-low` (Low risk, localized changes)",
-        "anchor": "r1-riskr1-low-low-risk-localized-changes"
-      },
-      {
-        "level": 3,
-        "text": "R2 — `risk:R2-medium` (Behavior changes, non-trivial logic)",
-        "anchor": "r2-riskr2-medium-behavior-changes-non-trivial-logic"
-      },
-      {
-        "level": 3,
-        "text": "R3 — `risk:R3-high` (High blast radius, security-sensitive)",
-        "anchor": "r3-riskr3-high-high-blast-radius-security-sensitive"
-      },
-      {
-        "level": 3,
-        "text": "R4 — `risk:R4-critical` (Production emergency, security incident)",
-        "anchor": "r4-riskr4-critical-production-emergency-security-incident"
-      },
-      {
-        "level": 2,
-        "text": "3) Critical zones (auto-upgrade to R2 minimum)",
-        "anchor": "3-critical-zones-auto-upgrade-to-r2-minimum"
-      },
-      {
-        "level": 2,
-        "text": "4) Gate lifecycle (PR workflow states)",
-        "anchor": "4-gate-lifecycle-pr-workflow-states"
-      },
-      {
-        "level": 3,
-        "text": "Gate state labels",
-        "anchor": "gate-state-labels"
-      },
-      {
-        "level": 3,
-        "text": "Staleness rule (critical for AI-only workflow)",
-        "anchor": "staleness-rule-critical-for-ai-only-workflow"
-      },
-      {
-        "level": 2,
-        "text": "5) Two-phase workflow (cost control)",
-        "anchor": "5-two-phase-workflow-cost-control"
-      },
-      {
-        "level": 3,
-        "text": "Phase A: Build & stabilize (local iteration)",
-        "anchor": "phase-a-build-stabilize-local-iteration"
-      },
-      {
-        "level": 3,
-        "text": "Phase B: Gate execution (PR-level, once per stable state)",
-        "anchor": "phase-b-gate-execution-pr-level-once-per-stable-state"
-      },
-      {
-        "level": 2,
-        "text": "6) Evidence requirements (per risk level)",
-        "anchor": "6-evidence-requirements-per-risk-level"
-      },
-      {
-        "level": 3,
-        "text": "R0 / R1 evidence",
-        "anchor": "r0-r1-evidence"
-      },
-      {
-        "level": 3,
-        "text": "R2+ evidence",
-        "anchor": "r2-evidence"
-      },
-      {
-        "level": 3,
-        "text": "R3 / R4 additional evidence",
-        "anchor": "r3-r4-additional-evidence"
-      },
-      {
-        "level": 2,
-        "text": "7) Gate reference matrix",
-        "anchor": "7-gate-reference-matrix"
-      },
-      {
-        "level": 2,
-        "text": "8) Quick CLI reference",
-        "anchor": "8-quick-cli-reference"
-      },
-      {
-        "level": 2,
-        "text": "9) Waivers and exceptions",
-        "anchor": "9-waivers-and-exceptions"
-      },
-      {
-        "level": 2,
-        "text": "10) Merge readiness rule",
-        "anchor": "10-merge-readiness-rule"
-      },
-      {
-        "level": 2,
-        "text": "11) Related documents",
-        "anchor": "11-related-documents"
       }
     ]
   },
@@ -20371,56 +20216,6 @@
         "level": 1,
         "text": "Adaptive Project Manager Mode (ChatGPT Browser)",
         "anchor": "adaptive-project-manager-mode-chatgpt-browser"
-      }
-    ]
-  },
-  {
-    "path": "98_Agent_Ops/Policies/POL-RP-004__RichPanel_API_Close_Ticket_Probe_Runbook.md",
-    "outline": [
-      {
-        "level": 1,
-        "text": "RichPanel API Close Ticket Probe Runbook",
-        "anchor": "richpanel-api-close-ticket-probe-runbook"
-      },
-      {
-        "level": 2,
-        "text": "Purpose",
-        "anchor": "purpose"
-      },
-      {
-        "level": 2,
-        "text": "Safety + PII rules",
-        "anchor": "safety-pii-rules"
-      },
-      {
-        "level": 2,
-        "text": "Prerequisites",
-        "anchor": "prerequisites"
-      },
-      {
-        "level": 2,
-        "text": "How to run the close probe (required path/CLI)",
-        "anchor": "how-to-run-the-close-probe-required-pathcli"
-      },
-      {
-        "level": 2,
-        "text": "Strong E2E proof (OPEN→CLOSED)",
-        "anchor": "strong-e2e-proof-openclosed"
-      },
-      {
-        "level": 2,
-        "text": "Interpreting output",
-        "anchor": "interpreting-output"
-      },
-      {
-        "level": 2,
-        "text": "Troubleshooting",
-        "anchor": "troubleshooting"
-      },
-      {
-        "level": 2,
-        "text": "Evidence to archive (per run)",
-        "anchor": "evidence-to-archive-per-run"
       }
     ]
   },
