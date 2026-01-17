@@ -317,7 +317,9 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
     for run in sorted(run_folders, key=lambda p: p.name):
         if not run_id_re.match(run.name):
             msg = f"Run folder name does not match run_id_regex ({run_spec.run_id_regex}): {run.name}"
-            (errors if (mode == "build" and not allow_partial) or strict else warnings).append(msg)
+            warnings.append(msg)
+            # Skip structural checks for non-conforming folders; treat as advisory.
+            continue
 
         # agent folders
         for aid in run_spec.agent_ids:

@@ -1,8 +1,8 @@
-## RUN_20260117_0510Z — Tracking Order Status (ticket 1039)
+## RUN_20260117_0510Z — Tracking Order Status (ticket fingerprint 00037f39cf87)
 
 ### Scenario
-- `order_status_tracking` on ticket number 1039 (env=dev, region=us-east-2, stack=RichpanelMiddleware-dev).
-- Webhook event_id `evt:ac89d31a-ccc1-49c9-b3bf-922da62fd6cd`; follow-up event_id `evt:followup:a7cb65b9`.
+- `order_status_tracking` on ticket fingerprint 00037f39cf87 (env=dev, region=us-east-2, stack=RichpanelMiddleware-dev).
+- Webhook event_id `fingerprint:d4704fc78c6d`; follow-up event_id `fingerprint:98c0a39d21c4`.
 - Proof: `REHYDRATION_PACK/RUNS/RUN_20260117_0510Z/B/e2e_outbound_proof.json` (PII-safe).
 
 ### Outcome
@@ -16,7 +16,7 @@
 - Added run artifacts under `REHYDRATION_PACK/RUNS/RUN_20260117_0510Z/B/`.
 
 ### Commands Run
-- `python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number 1039 --scenario order_status --simulate-followup --run-id RUN_20260117_0510Z --proof-path REHYDRATION_PACK/RUNS/RUN_20260117_0510Z/B/e2e_outbound_proof.json`
+- `python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number <redacted> --scenario order_status --simulate-followup --run-id RUN_20260117_0510Z --proof-path REHYDRATION_PACK/RUNS/RUN_20260117_0510Z/B/e2e_outbound_proof.json`
 - AWS SSM and Lambda env updates to enable outbound/automation (recorded in shell history).
 
 ### Tests / Proof

@@ -12,15 +12,15 @@
     "ticket_ref_fingerprint": "0d21ae129a64",
     "apply_test_tag": false,
     "test_tag_value": null,
-    "command": "python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number 1040 --scenario order_status_no_tracking --simulate-followup --run-id RUN_NOTRACK_B40_20260117G --proof-path REHYDRATION_PACK/RUNS/RUN_NOTRACK_B40_20260117G/B/e2e_outbound_proof.json"
+    "command": "python scripts/dev_e2e_smoke.py --region us-east-2 --env dev --stack-name RichpanelMiddleware-dev --ticket-number <redacted> --scenario order_status_no_tracking --simulate-followup --run-id RUN_NOTRACK_B40_20260117G --proof-path <redacted>"
   },
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id": "evt:c1045732-0fc2-4cb3-a7d5-632b037247ab",
     "conversation_id": null,
     "conversation_id_fingerprint": "6dbd18b0140c",
-    "accepted": true
+    "accepted": true,
+    "event_id_fingerprint": "8be87945221d"
   },
   "dynamo": {
     "idempotency_table": "rp_mw_dev_idempotency",
@@ -63,7 +63,7 @@
         "intent": "order_status_tracking"
       },
       "recorded_at": "2026-01-17T05:11:01.370485+00:00",
-      "ts_action_id": "2026-01-17T05:11:01.370485+00:00#evt:c1045732-0fc2-4cb3-a7d5-632b037247ab"
+      "ts_action_fingerprint": "2026-01-17T05:11:01.370485+00:00#fingerprint:8be87945221d"
     }
   },
   "richpanel": {
@@ -470,7 +470,6 @@
   },
   "followup": {
     "performed": true,
-    "event_id": "evt:followup:e60386d2",
     "idempotency_record": {
       "status": "processed",
       "mode": "automation_candidate"
@@ -488,7 +487,8 @@
     "updated_at_delta_seconds": 12.814,
     "reply_sent": false,
     "reply_reason": "no_reply_evidence_fields",
-    "routed_to_support": false
+    "routed_to_support": false,
+    "event_id_fingerprint": "d7ea0faa2ce1"
   },
   "result": {
     "status": "PASS",

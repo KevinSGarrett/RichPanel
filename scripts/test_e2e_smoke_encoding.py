@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 from typing import Any
 
@@ -31,11 +32,16 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _build_followup_payload,
+    _prepare_followup_proof,
+    append_summary,
+    _redact_command,
     _order_status_no_tracking_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
     _sanitize_response_metadata,
+    _sanitize_ts_action_id,
 )
 
 
@@ -306,11 +312,183 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(result, "FAIL")
         self.assertEqual(reason, "skip_or_escalation_tags_present")
 
+    def test_fallback_used_marks_pass_weak(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=True,
+            failed=[],
+        )
+        self.assertEqual(result, "PASS_WEAK")
+        self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_fail_when_base_pass_false(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            fallback_used=False,
+            failed=["middleware_outcome"],
+        )
+        self.assertEqual(result, "FAIL")
+        self.assertEqual(reason, "Failed criteria: middleware_outcome")
+
 
 class PIISafetyTests(unittest.TestCase):
     def test_pii_scan_detects_email(self) -> None:
         self.assertIsNotNone(_check_pii_safe('{"email":"user@example.com"}'))
         self.assertIsNotNone(_check_pii_safe('{"encoded":"foo%40bar.com"}'))
+
+    def test_pii_scan_detects_event_identifier(self) -> None:
+        self.assertIsNotNone(_check_pii_safe('{"event_id":"evt:abc123"}'))
+
+    def test_pii_scan_detects_ticket_number_flag(self) -> None:
+        payload = '{"command":"python scripts/dev_e2e_smoke.py --ticket-number 1040"}'
+        self.assertIsNotNone(_check_pii_safe(payload))
+
+    def test_redact_command_masks_sensitive_flags(self) -> None:
+        cmd = _redact_command(
+            [
+                "scripts/dev_e2e_smoke.py",
+                "--ticket-number",
+                "1039",
+                "--event-id",
+                "evt:ac89d31a",
+                "--scenario",
+                "order_status",
+            ]
+        )
+        self.assertIn("--ticket-number <redacted>", cmd)
+        self.assertIn("--event-id <redacted>", cmd)
+        self.assertNotIn("1039", cmd)
+        self.assertNotIn("evt:ac89d31a", cmd)
+        self.assertTrue(cmd.startswith("python "))
+
+    def test_sanitize_ts_action_id_fingerprints_event(self) -> None:
+        original = "2026-01-17T00:00:00Z#evt:abc12345"
+        sanitized = _sanitize_ts_action_id(original)
+        self.assertEqual(
+            sanitized,
+            f"2026-01-17T00:00:00Z#fingerprint:{_fingerprint('evt:abc12345')}",
+        )
+
+
+class FollowupProofTests(unittest.TestCase):
+    def test_followup_payload_inherits_parent_and_sets_followup_fields(self) -> None:
+        base = {
+            "event_id": "evt:primary:1234",
+            "scenario_name": "order_status",
+            "customer_message": "orig",
+        }
+        followup = _build_followup_payload(
+            base_payload=base, followup_message="follow-up ping", scenario_variant="order_status_tracking"
+        )
+
+        self.assertNotEqual(followup["event_id"], base["event_id"])
+        self.assertTrue(followup["event_id"].startswith("evt:followup:"))
+        self.assertEqual(followup["parent_event_id"], base["event_id"])
+        self.assertTrue(followup["followup"])
+        self.assertEqual(followup["customer_message"], "follow-up ping")
+        self.assertEqual(followup["scenario"], "order_status_tracking_followup")
+        self.assertEqual(followup["scenario_name"], "order_status_followup")
+        self.assertIn("message_id", followup)
+        self.assertIn("nonce", followup)
+
+    def test_followup_fingerprint_populated_when_performed(self) -> None:
+        followup_event_id = "evt:followup:abc12345"
+        followup_item = {"status": "performed", "mode": "safe"}
+        fingerprint, proof = _prepare_followup_proof(
+            followup_event_id=followup_event_id,
+            followup_item=followup_item,
+            followup_tags_added=["mw-reply-sent"],
+            followup_tags_removed=[],
+            followup_skip_tags_added=[],
+            followup_middleware_tags=["mw-reply-sent"],
+            followup_status_after="resolved",
+            followup_message_count_delta=1,
+            followup_updated_at_delta=2.5,
+            followup_reply_sent=True,
+            followup_reply_reason="auto_reply_sent",
+            followup_routed_support=False,
+        )
+
+        self.assertEqual(fingerprint, _fingerprint(followup_event_id))
+        self.assertTrue(proof["performed"])
+        self.assertEqual(proof["event_id_fingerprint"], fingerprint)
+        self.assertEqual(proof["idempotency_record"], {"status": "performed", "mode": "safe"})
+        self.assertEqual(proof["message_count_delta"], 1)
+        self.assertEqual(proof["updated_at_delta_seconds"], 2.5)
+        self.assertTrue(proof["reply_sent"])
+        self.assertEqual(proof["reply_reason"], "auto_reply_sent")
+
+    def test_followup_proof_handles_missing_event(self) -> None:
+        fingerprint, proof = _prepare_followup_proof(
+            followup_event_id=None,
+            followup_item=None,
+            followup_tags_added=[],
+            followup_tags_removed=[],
+            followup_skip_tags_added=[],
+            followup_middleware_tags=[],
+            followup_status_after=None,
+            followup_message_count_delta=None,
+            followup_updated_at_delta=None,
+            followup_reply_sent=None,
+            followup_reply_reason=None,
+            followup_routed_support=None,
+        )
+
+        self.assertIsNone(fingerprint)
+        self.assertFalse(proof["performed"])
+        self.assertIsNone(proof["event_id_fingerprint"])
+        self.assertIsNone(proof["idempotency_record"])
+        self.assertIsNone(proof["status_after"])
+        self.assertIsNone(proof["reply_sent"])
+
+
+class SummaryAppendTests(unittest.TestCase):
+    def test_append_summary_writes_expected_sections(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "summary.md"
+            data = {
+                "event_id_fingerprint": "fingerprint:abc123",
+                "endpoint": "https://example.com",
+                "queue_url": "https://sqs.example.com/queue",
+                "ddb_table": "ddb-table",
+                "ddb_console_url": "https://console.aws.amazon.com/ddb",
+                "routing_category": "order_status",
+                "routing_tags": ["mw-routing", "mw-auto"],
+                "draft_action_present": True,
+                "draft_reply_count": 1,
+                "draft_replies_safe": [
+                    {"reason": "test", "prompt_fingerprint": "pfp", "dry_run": True}
+                ],
+                "logs_group": "/aws/lambda/rp-mw-dev-worker",
+                "logs_console_url": "https://console.aws.amazon.com/cloudwatch",
+                "idempotency_mode": "applied",
+                "idempotency_status": "observed",
+                "conversation_state_table": "state-table",
+                "conversation_state_console": "https://console.aws.amazon.com/state",
+                "audit_trail_table": "audit-table",
+                "audit_console": "https://console.aws.amazon.com/audit",
+                "conversation_id": "conv-123",
+                "audit_sort_key": "ts#123",
+                "dashboard_name": "rp-mw-dev-ops",
+                "alarm_names": ["alarm-one", "alarm-two"],
+            }
+
+            append_summary(str(path), env_name="dev", data=data)
+
+            content = path.read_text(encoding="utf-8")
+            self.assertIn("## Dev E2E Smoke", content)
+            self.assertIn("fingerprint:abc123", content)
+            self.assertIn("CloudWatch alarms: `alarm-one`, `alarm-two`", content)
+            self.assertIn("Draft replies (safe fields)", content)
+            self.assertIn("audit-table", content)
 
 
 class FallbackCloseTests(unittest.TestCase):
