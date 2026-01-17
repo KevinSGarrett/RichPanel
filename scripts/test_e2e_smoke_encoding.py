@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 from typing import Any
 
@@ -33,6 +34,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _compute_reply_evidence,
     _build_followup_payload,
     _prepare_followup_proof,
+    append_summary,
     _redact_command,
     _order_status_no_tracking_payload,
     _apply_fallback_close,
@@ -446,6 +448,47 @@ class FollowupProofTests(unittest.TestCase):
         self.assertIsNone(proof["idempotency_record"])
         self.assertIsNone(proof["status_after"])
         self.assertIsNone(proof["reply_sent"])
+
+
+class SummaryAppendTests(unittest.TestCase):
+    def test_append_summary_writes_expected_sections(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "summary.md"
+            data = {
+                "event_id_fingerprint": "fingerprint:abc123",
+                "endpoint": "https://example.com",
+                "queue_url": "https://sqs.example.com/queue",
+                "ddb_table": "ddb-table",
+                "ddb_console_url": "https://console.aws.amazon.com/ddb",
+                "routing_category": "order_status",
+                "routing_tags": ["mw-routing", "mw-auto"],
+                "draft_action_present": True,
+                "draft_reply_count": 1,
+                "draft_replies_safe": [
+                    {"reason": "test", "prompt_fingerprint": "pfp", "dry_run": True}
+                ],
+                "logs_group": "/aws/lambda/rp-mw-dev-worker",
+                "logs_console_url": "https://console.aws.amazon.com/cloudwatch",
+                "idempotency_mode": "applied",
+                "idempotency_status": "observed",
+                "conversation_state_table": "state-table",
+                "conversation_state_console": "https://console.aws.amazon.com/state",
+                "audit_trail_table": "audit-table",
+                "audit_console": "https://console.aws.amazon.com/audit",
+                "conversation_id": "conv-123",
+                "audit_sort_key": "ts#123",
+                "dashboard_name": "rp-mw-dev-ops",
+                "alarm_names": ["alarm-one", "alarm-two"],
+            }
+
+            append_summary(str(path), env_name="dev", data=data)
+
+            content = path.read_text(encoding="utf-8")
+            self.assertIn("## Dev E2E Smoke", content)
+            self.assertIn("fingerprint:abc123", content)
+            self.assertIn("CloudWatch alarms: `alarm-one`, `alarm-two`", content)
+            self.assertIn("Draft replies (safe fields)", content)
+            self.assertIn("audit-table", content)
 
 
 class FallbackCloseTests(unittest.TestCase):
