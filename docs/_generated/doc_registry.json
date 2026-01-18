@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2257,
-    "approx_tokens": 2934,
+    "word_count": 2358,
+    "approx_tokens": 3065,
     "last_updated": ""
   },
   {
@@ -705,8 +705,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 541,
-    "approx_tokens": 703,
+    "word_count": 1340,
+    "approx_tokens": 1742,
     "last_updated": ""
   },
   {
@@ -745,8 +745,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 10246,
-    "approx_tokens": 13319,
+    "word_count": 10846,
+    "approx_tokens": 14099,
     "last_updated": ""
   },
   {
@@ -755,8 +755,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 75,
-    "approx_tokens": 97,
+    "word_count": 79,
+    "approx_tokens": 102,
     "last_updated": ""
   },
   {
@@ -1925,8 +1925,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 4319,
-    "approx_tokens": 5614,
+    "word_count": 4966,
+    "approx_tokens": 6455,
     "last_updated": "2026-01-11"
   },
   {
@@ -1968,6 +1968,16 @@
     "word_count": 1724,
     "approx_tokens": 2241,
     "last_updated": ""
+  },
+  {
+    "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+    "title": "Production Read-Only Shadow Mode Runbook",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 2467,
+    "approx_tokens": 3207,
+    "last_updated": "2026-01-17"
   },
   {
     "path": "08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md",
@@ -3835,8 +3845,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10670,
-    "approx_tokens": 13871,
+    "word_count": 10682,
+    "approx_tokens": 13886,
     "last_updated": ""
   },
   {

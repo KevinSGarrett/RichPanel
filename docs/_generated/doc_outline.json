@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-17 - RUN_20260117_1751Z (Agent A B40: Order Status Ops + Docs)",
+        "anchor": "2026-01-17-run202601171751z-agent-a-b40-order-status-ops-docs"
+      },
+      {
+        "level": 3,
         "text": "2026-01-17 - RUN_20260117_0511Z (Order-status tracking + no-tracking PASS_STRONG + follow-up)",
         "anchor": "2026-01-17-run202601170511z-order-status-tracking-no-tracking-passstrong-follow-up"
       },
@@ -2926,6 +2931,51 @@
         "level": 2,
         "text": "Roadmap (remaining)",
         "anchor": "roadmap-remaining"
+      },
+      {
+        "level": 2,
+        "text": "Order Status Deployment Readiness (CHK-012A)",
+        "anchor": "order-status-deployment-readiness-chk-012a"
+      },
+      {
+        "level": 3,
+        "text": "E2E Proof Requirements",
+        "anchor": "e2e-proof-requirements"
+      },
+      {
+        "level": 3,
+        "text": "Read-Only Production Shadow Mode",
+        "anchor": "read-only-production-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "Observability and Monitoring",
+        "anchor": "observability-and-monitoring"
+      },
+      {
+        "level": 3,
+        "text": "Code Quality and CI Gates",
+        "anchor": "code-quality-and-ci-gates"
+      },
+      {
+        "level": 3,
+        "text": "Documentation and Runbooks",
+        "anchor": "documentation-and-runbooks"
+      },
+      {
+        "level": 3,
+        "text": "Deployment Gates",
+        "anchor": "deployment-gates"
+      },
+      {
+        "level": 3,
+        "text": "Post-Deployment Validation",
+        "anchor": "post-deployment-validation"
+      },
+      {
+        "level": 3,
+        "text": "Completion Criteria",
+        "anchor": "completion-criteria"
       }
     ]
   },
@@ -11098,6 +11148,11 @@
         "anchor": "evidence-expectations"
       },
       {
+        "level": 3,
+        "text": "Order Status Proof (canonical requirements)",
+        "anchor": "order-status-proof-canonical-requirements"
+      },
+      {
         "level": 2,
         "text": "7) Staging E2E smoke workflow",
         "anchor": "7-staging-e2e-smoke-workflow"
@@ -11561,6 +11616,246 @@
         "level": 2,
         "text": "See Also",
         "anchor": "see-also"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Production Read-Only Shadow Mode Runbook",
+        "anchor": "production-read-only-shadow-mode-runbook"
+      },
+      {
+        "level": 2,
+        "text": "Goal",
+        "anchor": "goal"
+      },
+      {
+        "level": 2,
+        "text": "Required configuration",
+        "anchor": "required-configuration"
+      },
+      {
+        "level": 3,
+        "text": "Runtime kill switches (safe_mode + automation_enabled)",
+        "anchor": "runtime-kill-switches-safemode-automationenabled"
+      },
+      {
+        "level": 3,
+        "text": "Lambda environment variables",
+        "anchor": "lambda-environment-variables"
+      },
+      {
+        "level": 3,
+        "text": "Verification checklist",
+        "anchor": "verification-checklist"
+      },
+      {
+        "level": 2,
+        "text": "How to enable shadow mode",
+        "anchor": "how-to-enable-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "Step 1: Set runtime kill switches (SSM)",
+        "anchor": "step-1-set-runtime-kill-switches-ssm"
+      },
+      {
+        "level": 3,
+        "text": "Step 2: Set Lambda environment variables",
+        "anchor": "step-2-set-lambda-environment-variables"
+      },
+      {
+        "level": 3,
+        "text": "Option 3: Infrastructure-as-Code (CDK)",
+        "anchor": "option-3-infrastructure-as-code-cdk"
+      },
+      {
+        "level": 2,
+        "text": "Prove zero writes (audit procedure)",
+        "anchor": "prove-zero-writes-audit-procedure"
+      },
+      {
+        "level": 3,
+        "text": "Step 1: Review CloudWatch Logs",
+        "anchor": "step-1-review-cloudwatch-logs"
+      },
+      {
+        "level": 3,
+        "text": "Step 2: Audit middleware request logs",
+        "anchor": "step-2-audit-middleware-request-logs"
+      },
+      {
+        "level": 3,
+        "text": "Step 3: Verify write-disabled errors are logged",
+        "anchor": "step-3-verify-write-disabled-errors-are-logged"
+      },
+      {
+        "level": 3,
+        "text": "Step 4: Check for outbound communications",
+        "anchor": "step-4-check-for-outbound-communications"
+      },
+      {
+        "level": 2,
+        "text": "Configure middleware to hard-fail on non-GET calls",
+        "anchor": "configure-middleware-to-hard-fail-on-non-get-calls"
+      },
+      {
+        "level": 3,
+        "text": "Enforcement in code",
+        "anchor": "enforcement-in-code"
+      },
+      {
+        "level": 3,
+        "text": "Testing the hard-fail behavior",
+        "anchor": "testing-the-hard-fail-behavior"
+      },
+      {
+        "level": 2,
+        "text": "What shadow mode allows (read-only operations)",
+        "anchor": "what-shadow-mode-allows-read-only-operations"
+      },
+      {
+        "level": 3,
+        "text": "Richpanel (read-only)",
+        "anchor": "richpanel-read-only"
+      },
+      {
+        "level": 3,
+        "text": "Shopify (read-only)",
+        "anchor": "shopify-read-only"
+      },
+      {
+        "level": 3,
+        "text": "ShipStation (read-only)",
+        "anchor": "shipstation-read-only"
+      },
+      {
+        "level": 3,
+        "text": "Internal operations (always allowed)",
+        "anchor": "internal-operations-always-allowed"
+      },
+      {
+        "level": 2,
+        "text": "What shadow mode blocks (write operations)",
+        "anchor": "what-shadow-mode-blocks-write-operations"
+      },
+      {
+        "level": 3,
+        "text": "Richpanel (writes)",
+        "anchor": "richpanel-writes"
+      },
+      {
+        "level": 3,
+        "text": "Shopify (writes)",
+        "anchor": "shopify-writes"
+      },
+      {
+        "level": 3,
+        "text": "Outbound communications",
+        "anchor": "outbound-communications"
+      },
+      {
+        "level": 3,
+        "text": "Automation",
+        "anchor": "automation"
+      },
+      {
+        "level": 2,
+        "text": "Use cases for shadow mode",
+        "anchor": "use-cases-for-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "1. Validate production data structures",
+        "anchor": "1-validate-production-data-structures"
+      },
+      {
+        "level": 3,
+        "text": "2. Test routing accuracy without customer impact",
+        "anchor": "2-test-routing-accuracy-without-customer-impact"
+      },
+      {
+        "level": 3,
+        "text": "3. Validate order lookup behavior",
+        "anchor": "3-validate-order-lookup-behavior"
+      },
+      {
+        "level": 2,
+        "text": "Risks and mitigations",
+        "anchor": "risks-and-mitigations"
+      },
+      {
+        "level": 3,
+        "text": "Risk 1: Flag misconfiguration allows writes",
+        "anchor": "risk-1-flag-misconfiguration-allows-writes"
+      },
+      {
+        "level": 3,
+        "text": "Risk 2: Read operations cause rate limiting or cost spikes",
+        "anchor": "risk-2-read-operations-cause-rate-limiting-or-cost-spikes"
+      },
+      {
+        "level": 3,
+        "text": "Risk 3: Logging exposes PII",
+        "anchor": "risk-3-logging-exposes-pii"
+      },
+      {
+        "level": 3,
+        "text": "Risk 4: Shadow mode left enabled indefinitely",
+        "anchor": "risk-4-shadow-mode-left-enabled-indefinitely"
+      },
+      {
+        "level": 2,
+        "text": "Disable shadow mode",
+        "anchor": "disable-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "Step 1: Re-enable runtime kill switches (SSM)",
+        "anchor": "step-1-re-enable-runtime-kill-switches-ssm"
+      },
+      {
+        "level": 3,
+        "text": "Step 2: Re-enable Lambda environment variables",
+        "anchor": "step-2-re-enable-lambda-environment-variables"
+      },
+      {
+        "level": 3,
+        "text": "Option 3: Auto-revert (dev-only)",
+        "anchor": "option-3-auto-revert-dev-only"
+      },
+      {
+        "level": 2,
+        "text": "Evidence requirements",
+        "anchor": "evidence-requirements"
+      },
+      {
+        "level": 3,
+        "text": "Before enabling",
+        "anchor": "before-enabling"
+      },
+      {
+        "level": 3,
+        "text": "During shadow mode",
+        "anchor": "during-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "After disabling",
+        "anchor": "after-disabling"
+      },
+      {
+        "level": 2,
+        "text": "Related documentation",
+        "anchor": "related-documentation"
+      },
+      {
+        "level": 2,
+        "text": "Checklist: Production shadow mode validation (complete workflow)",
+        "anchor": "checklist-production-shadow-mode-validation-complete-workflow"
       }
     ]
   },
