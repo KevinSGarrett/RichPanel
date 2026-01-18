@@ -85,12 +85,11 @@ It stays intentionally short; atomic tasks live in `PLAN_CHECKLIST.md` (and gene
 ### Read-Only Production Shadow Mode
 
 - [ ] **Read-only production shadow mode verified (zero writes)**
-  - Required env vars documented and tested:
-    - `MW_ALLOW_NETWORK_READS=true`
-    - `RICHPANEL_WRITE_DISABLED=true`
-    - `SHOPIFY_WRITE_DISABLED=true`
-    - `RICHPANEL_OUTBOUND_ENABLED=false`
-    - `AUTOMATION_ENABLED=false`
+  - Shadow mode control configured:
+    - SSM parameters: `safe_mode=true`, `automation_enabled=false` (via set-runtime-flags.yml workflow)
+    - Lambda env vars: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
+    - Optional: `SHOPIFY_WRITE_DISABLED=true`
+    - DEV override (if needed): `MW_ALLOW_ENV_FLAG_OVERRIDE=true`, `MW_AUTOMATION_ENABLED_OVERRIDE=false`, `MW_SAFE_MODE_OVERRIDE=true`
   - CloudWatch Logs audit confirms zero POST/PUT/PATCH/DELETE calls to Richpanel/Shopify
   - Middleware hard-fails on write attempts (raises `RichpanelWriteDisabledError`)
   - Test write operation confirmed to fail (no tags/comments/status changes in Richpanel)
