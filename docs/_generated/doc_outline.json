@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-18 - RUN_20260118_1628Z (B41 corrective: PR gate bug fixes)",
+        "anchor": "2026-01-18-run202601181628z-b41-corrective-pr-gate-bug-fixes"
+      },
+      {
+        "level": 3,
         "text": "2026-01-18 - RUN_20260118_1526Z (PR Risk Labels + Claude Gate Enforcement)",
         "anchor": "2026-01-18-run202601181526z-pr-risk-labels-claude-gate-enforcement"
       },

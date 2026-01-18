@@ -27,10 +27,11 @@ jobs:
 
             const { owner, repo } = context.repo;
             const issue_number = pr.number;
+            const pull_number = pr.number;
             const requiredTitle = "Claude Review (gate:claude)";
-            const passToken = "PASS";
+            const passPattern = /\bPASS\b/;
 
-            const comments = await github.paginate(
+            const issueComments = await github.paginate(
               github.rest.issues.listComments,
               {
                 owner,
@@ -40,9 +41,31 @@ jobs:
               }
             );
 
-            const hasPassComment = comments.some((comment) => {
-              const body = comment.body || "";
-              return body.includes(requiredTitle) && body.includes(passToken);
+            const reviewComments = await github.paginate(
+              github.rest.pulls.listReviewComments,
+              {
+                owner,
+                repo,
+                pull_number,
+                per_page: 100,
+              }
+            );
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+
+            const allComments = [
+              ...issueComments.map((comment) => comment.body || ""),
+              ...reviewComments.map((comment) => comment.body || ""),
+              ...reviews.map((review) => review.body || ""),
+            ];
+
+            const hasPassComment = allComments.some((body) => {
+              return body.includes(requiredTitle) && passPattern.test(body);
             });
 
             if (!hasPassComment) {

@@ -27,14 +27,19 @@ jobs:
             }
 
             const labels = (pr.labels || []).map((label) => label.name);
-            const hasRiskLabel = labels.some((label) => requiredLabels.includes(label));
+            const present = labels.filter((label) => requiredLabels.includes(label));
 
-            if (!hasRiskLabel) {
+            if (present.length === 0) {
               core.setFailed(
-                `Missing risk label. Apply one of: ${requiredLabels.join(", ")}.`
+                "PR must have exactly one risk label (risk:R0-docs, risk:R1-low, risk:R2-medium, risk:R3-high, risk:R4-critical)"
+              );
+              return;
+            }
+            if (present.length > 1) {
+              core.setFailed(
+                `PR has multiple risk labels: ${present.join(", ")}. Only one risk label is allowed.`
               );
               return;
             }
 
-            const present = labels.filter((label) => requiredLabels.includes(label));
-            core.info(`Risk label present: ${present.join(", ")}`);
+            core.info(`Risk label valid: ${present[0]}`);

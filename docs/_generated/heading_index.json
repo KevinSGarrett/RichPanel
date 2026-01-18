@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-18 - run_20260118_1628z (b41 corrective: pr gate bug fixes)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-18-run202601181628z-b41-corrective-pr-gate-bug-fixes"
+    }
+  ],
   "2026-01-18 - run_20260118_1526z (pr risk labels + claude gate enforcement)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
