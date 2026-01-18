@@ -16,12 +16,11 @@ Created comprehensive operational documentation for Order Status deployment read
 
 **Contents:**
 - Goal: validate production data shapes without writes/customer contact
-- Required env vars (matches Agent C implementation):
-  - `MW_ALLOW_NETWORK_READS=true`
-  - `RICHPANEL_WRITE_DISABLED=true`
-  - `SHOPIFY_WRITE_DISABLED=true`
-  - `RICHPANEL_OUTBOUND_ENABLED=false`
-  - `AUTOMATION_ENABLED=false`
+- Required shadow mode control (matches Agent C implementation):
+  - SSM parameters: `safe_mode=true`, `automation_enabled=false` (via set-runtime-flags.yml)
+  - Lambda env vars: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
+  - Optional: `SHOPIFY_WRITE_DISABLED=true`
+  - DEV override: `MW_ALLOW_ENV_FLAG_OVERRIDE=true` + `MW_AUTOMATION_ENABLED_OVERRIDE=false`
 - "Prove zero writes" audit procedures:
   - CloudWatch Logs queries for non-GET calls
   - Middleware hard-fail verification (`RichpanelWriteDisabledError`)
@@ -44,7 +43,7 @@ Created comprehensive operational documentation for Order Status deployment read
 - Required scenarios:
   1. `order_status_tracking` (with tracking URL/number)
   2. `order_status_no_tracking` (ETA-based)
-  3. `followup_after_auto_reply` (loop prevention)
+  3. Follow-up proof: Add `--simulate-followup` flag to order_status scenarios (loop prevention)
 - PASS_STRONG criteria:
   - Webhook accepted, DynamoDB records observed
   - Ticket status changed to resolved/closed

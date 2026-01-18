@@ -33,19 +33,18 @@ Line 11: Validate production data shapes and integration behavior **without any 
 ```
 **Verification:** File contains explicit goal statement matching requirement exactly.
 
-### ✅ REQUIREMENT: Required env vars (must match Agent C implementation)
+### ✅ REQUIREMENT: Required shadow mode configuration (must match Agent C implementation)
 
-**EVIDENCE - All 5 env vars documented:**
-1. **MW_ALLOW_NETWORK_READS=true** - Found 35 mentions total in file
-2. **RICHPANEL_WRITE_DISABLED=true** - Found in 35 matches
-3. **SHOPIFY_WRITE_DISABLED=true** - Found in 35 matches  
-4. **RICHPANEL_OUTBOUND_ENABLED=false** - Found in 35 matches
-5. **AUTOMATION_ENABLED=false** - Found in 35 matches
+**EVIDENCE - SSM parameters and Lambda env vars documented:**
+- **SSM parameters:** `safe_mode=true`, `automation_enabled=false` (via set-runtime-flags.yml workflow)
+- **Lambda env vars:** `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
+- **Optional:** `SHOPIFY_WRITE_DISABLED=true`
+- **DEV override:** `MW_ALLOW_ENV_FLAG_OVERRIDE=true` + `MW_AUTOMATION_ENABLED_OVERRIDE=false`
 
 **Verification command:**
 ```powershell
-Select-String -Pattern "MW_ALLOW_NETWORK_READS|RICHPANEL_WRITE_DISABLED|..." 
-# Returns: 35 total matches across all 5 env vars
+Select-String -Pattern "MW_ALLOW_NETWORK_READS|RICHPANEL_WRITE_DISABLED|safe_mode|automation_enabled" 
+# Returns: Multiple matches confirming SSM-based automation control
 ```
 
 **Explicit documentation locations:**
@@ -114,13 +113,14 @@ python scripts/dev_e2e_smoke.py `
   --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_order_status_no_tracking_proof.json"
 ```
 
-**3. followup_after_auto_reply (follow-up simulation):**
+**3. Follow-up simulation (loop prevention):**
 ```powershell
-# Lines 476-489
+# Add --simulate-followup flag to order_status scenario
 python scripts/dev_e2e_smoke.py `
   --env dev `
   --region us-east-2 `
-  --scenario followup_after_auto_reply `
+  --scenario order_status_tracking `
+  --simulate-followup `
   --proof-path "REHYDRATION_PACK/RUNS/$runId/B/e2e_followup_proof.json"
 ```
 
@@ -204,12 +204,9 @@ python scripts/dev_e2e_smoke.py `
 **EVIDENCE:** Lines 87-101
 ```
 - [ ] **Read-only production shadow mode verified (zero writes)**
-  - Required env vars documented and tested:
-    - `MW_ALLOW_NETWORK_READS=true`
-    - `RICHPANEL_WRITE_DISABLED=true`
-    - `SHOPIFY_WRITE_DISABLED=true`
-    - `RICHPANEL_OUTBOUND_ENABLED=false`
-    - `AUTOMATION_ENABLED=false`
+  - SSM parameters: `safe_mode=true`, `automation_enabled=false` (via set-runtime-flags.yml)
+  - Lambda env vars: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
+  - Optional: `SHOPIFY_WRITE_DISABLED=true`
   - CloudWatch Logs audit confirms zero POST/PUT/PATCH/DELETE calls to Richpanel/Shopify
   - Middleware hard-fails on write attempts (raises `RichpanelWriteDisabledError`)
   - Test write operation confirmed to fail

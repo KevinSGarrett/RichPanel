@@ -48,7 +48,8 @@
 
 **Changes:**
 - Added "Order Status Proof (canonical requirements)" section under Dev E2E smoke workflow
-- Documented required scenarios: order_status_tracking, order_status_no_tracking, followup_after_auto_reply
+- Documented required scenarios: order_status_tracking, order_status_no_tracking
+- Documented follow-up proof: Add `--simulate-followup` flag to order_status scenarios (loop prevention)
 - Defined PASS_STRONG criteria (webhook accepted, DynamoDB records, ticket closed, reply evidence, no skip tags, PII-safe)
 - Defined PASS_WEAK criteria (for cases where Richpanel refuses status changes)
 - Specified required evidence artifacts (proof JSON paths, DynamoDB links, CloudWatch logs, message count delta)
