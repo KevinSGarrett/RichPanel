@@ -6,11 +6,11 @@
 - **Date (UTC):** 2026-01-18
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260118_1628Z-B`
-- **PR:** not created yet (update after PR creation)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/119
 - **PR merge strategy:** merge commit
 - **Risk label:** `risk:R2-medium`
 - **gate:claude label:** yes
-- **Claude PASS comment:** not posted yet (update after PR creation)
+- **Claude PASS comment:** https://github.com/KevinSGarrett/RichPanel/pull/119#issuecomment-3765820539
 
 ## Objective + stop conditions
 - **Objective:** Fix Bugbot issues in PR gate workflows (exactly one risk label, PASS word-boundary match, review comment/submission coverage) and capture evidence.
@@ -29,7 +29,7 @@
 
 ## Diffstat (required)
 ```
-<pending>
+pending (update after latest commit)
 ```
 
 ## Files Changed (required)
@@ -48,7 +48,22 @@ node -e "const required=['risk:R0-docs','risk:R1-low','risk:R2-medium','risk:R3-
 # risk:R0-docs,risk:R1-low,risk:R2-medium => FAIL:multi
 
 # Claude PASS word-boundary cases
-node _tmp_claude_pass_check.js
+$passPath = \"_tmp_claude_pass_check.js\"
+@'
+const requiredTitle = \"Claude Review (gate:claude)\";
+const passPattern = /\\bPASS\\b/;
+const cases = [
+  \"Claude Review (gate:claude) - PASS\",
+  \"Claude Review (gate:claude) - FAIL\",
+  \"Claude Review (gate:claude) - PASSWORD\",
+  \"Claude Review (gate:claude) - BYPASS\",
+];
+for (const body of cases) {
+  console.log(body, \"=>\", body.includes(requiredTitle) && passPattern.test(body));
+}
+'@ | Set-Content -Path $passPath
+node $passPath
+Remove-Item $passPath
 # output:
 # Claude Review (gate:claude) - PASS => true
 # Claude Review (gate:claude) - FAIL => false
@@ -56,7 +71,38 @@ node _tmp_claude_pass_check.js
 # Claude Review (gate:claude) - BYPASS => false
 
 # Claude PASS across comment sources
-node _tmp_claude_sources_check.js
+$sourcesPath = \"_tmp_claude_sources_check.js\"
+@'
+const requiredTitle = \"Claude Review (gate:claude)\";
+const passPattern = /\\bPASS\\b/;
+const cases = [
+  {
+    name: \"Issue comment PASS\",
+    issue: [\"Claude Review (gate:claude) - PASS\"],
+    reviewComments: [],
+    reviews: [],
+  },
+  {
+    name: \"Review comment PASS\",
+    issue: [],
+    reviewComments: [\"Claude Review (gate:claude) - PASS\"],
+    reviews: [],
+  },
+  {
+    name: \"Review submission PASS\",
+    issue: [],
+    reviewComments: [],
+    reviews: [\"Claude Review (gate:claude) - PASS\"],
+  },
+];
+for (const c of cases) {
+  const all = [...c.issue, ...c.reviewComments, ...c.reviews];
+  const hasPass = all.some((body) => body.includes(requiredTitle) && passPattern.test(body));
+  console.log(`${c.name} => ${hasPass}`);
+}
+'@ | Set-Content -Path $sourcesPath
+node $sourcesPath
+Remove-Item $sourcesPath
 # output:
 # Issue comment PASS => true
 # Review comment PASS => true
