@@ -244,7 +244,9 @@ def build_no_tracking_reply(
         inquiry_date,
     )
 
-    order_id = str(order_summary.get("order_id") or order_summary.get("id") or "your order")
+    raw_order_id = order_summary.get("order_id") or order_summary.get("id")
+    order_id = str(raw_order_id).strip() if raw_order_id is not None else ""
+    has_order_id = bool(order_id) and order_id.lower() not in {"unknown", "your order"}
 
     if estimate:
         order_date_human = estimate["order_created_date"]
@@ -255,8 +257,9 @@ def build_no_tracking_reply(
         else:
             eta_sentence = f"It should arrive in about {estimate['eta_human']}."
 
+        order_label = f"Order {order_id}" if has_order_id else "Your order"
         body = (
-            f"Thanks for your patience. Order {order_id} was placed on {order_date_human}. "
+            f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
             f"With {method_label} shipping, {eta_sentence} "
             "We'll send tracking as soon as it ships."
         )
@@ -268,12 +271,16 @@ def build_no_tracking_reply(
             "is_late": estimate["is_late"],
         }
 
-    fallback_body = (
-        f"Thanks for your patience. We have order {order_id} on file, "
-        "but we don't have tracking updates to share yet. We're checking on it and will send "
-        "tracking details as soon as they're ready. If you need to update the shipping address "
-        "or have a specific concern, reply here and we'll help."
-    )
+    if not has_order_id:
+        fallback_body = (
+            "Thanks for reaching out. We don't have tracking details available yet. "
+            "A support agent will follow up shortly."
+        )
+    else:
+        fallback_body = (
+            "Thanks for your patience. We don't have tracking updates yet. "
+            "We'll send tracking as soon as it's ready."
+        )
 
     return {
         "body": fallback_body.strip(),

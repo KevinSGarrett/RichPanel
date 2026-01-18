@@ -79,7 +79,13 @@ class PipelineTests(unittest.TestCase):
 
     def test_plan_allows_automation_candidate(self) -> None:
         envelope = build_event_envelope(
-            {"ticket_id": "t-789", "order_id": "ord-789", "message": "Where is my order?"}
+            {
+                "ticket_id": "t-789",
+                "order_id": "ord-789",
+                "created_at": "2025-01-01T00:00:00Z",
+                "shipping_method": "2 business days",
+                "message": "Where is my order?",
+            }
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
@@ -107,6 +113,7 @@ class PipelineTests(unittest.TestCase):
                 "order_id": "ord-321",
                 "tracking_number": "1Z999",
                 "carrier": "UPS",
+                "created_at": "2025-01-01T00:00:00Z",
                 "message": "Where is my order?",
             }
         )
@@ -121,26 +128,44 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("Tracking link:", draft_reply["body"])
         self.assertNotIn("We'll send tracking as soon as it ships.", draft_reply["body"])
 
-    def test_plan_generates_fallback_when_eta_missing(self) -> None:
+    def test_plan_suppresses_when_order_context_missing(self) -> None:
         envelope = build_event_envelope(
             {
                 "ticket_id": "t-noeta",
-                "order_id": "ord-noeta",
                 "message": "Where is my order?",
                 # No tracking number, shipping method, or order dates to compute ETA.
             }
         )
         plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
 
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_context_missing", plan.reasons)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertIn("route-email-support-team", routing.tags)
+        self.assertIn("mw-order-lookup-failed", routing.tags)
+        self.assertIn("mw-order-status-suppressed", routing.tags)
+        self.assertIn("mw-order-lookup-missing:order_id", routing.tags)
+
+    def test_plan_generates_eta_reply_when_context_present(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-eta",
+                "order_id": "ord-eta",
+                "created_at": "2025-01-01T00:00:00Z",
+                "shipping_method": "Standard 3-5 business days",
+                "message": "Where is my order?",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
         order_actions = [action for action in plan.actions if action["type"] == "order_status_draft_reply"]
         self.assertEqual(len(order_actions), 1)
-        draft_reply = order_actions[0]["parameters"].get("draft_reply")
-
-        self.assertIsNotNone(draft_reply)
-        assert isinstance(draft_reply, dict)
-        self.assertTrue(draft_reply.get("body"))
-        self.assertNotIn("business day", draft_reply["body"].lower())
-        self.assertNotIn("None", draft_reply["body"])
+        draft_reply = order_actions[0]["parameters"].get("draft_reply", {})
+        self.assertIn("body", draft_reply)
+        self.assertTrue(draft_reply["body"])
 
     def test_routing_classifies_returns(self) -> None:
         envelope = build_event_envelope(
@@ -722,6 +747,9 @@ def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests))
+    backend_tests = ROOT / "backend" / "tests"
+    if backend_tests.exists():
+        suite.addTests(unittest.defaultTestLoader.discover(str(backend_tests)))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

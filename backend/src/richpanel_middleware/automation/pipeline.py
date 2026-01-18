@@ -12,6 +12,7 @@ from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
     compute_delivery_estimate,
+    normalize_shipping_method,
 )
 from richpanel_middleware.automation.router import RoutingDecision, extract_customer_message
 from richpanel_middleware.automation.llm_routing import (
@@ -51,6 +52,9 @@ REPLY_SENT_TAG = "mw-reply-sent"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
+ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
+ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
+ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 _ESCALATION_REASONS = {"followup_after_auto_reply"}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
@@ -66,6 +70,95 @@ def _is_closed_status(value: Optional[str]) -> bool:
         return False
     normalized = str(value).strip().lower()
     return normalized in {"resolved", "closed", "solved"}
+
+
+def _is_valid_order_id(value: Any, *, conversation_id: str) -> bool:
+    if value is None:
+        return False
+    try:
+        normalized = str(value).strip()
+    except Exception:
+        return False
+    if not normalized or normalized.lower() == "unknown":
+        return False
+    if conversation_id and normalized == str(conversation_id):
+        return False
+    return True
+
+
+def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
+    if not isinstance(order_summary, dict):
+        return False
+    for key in ("tracking_number", "tracking", "tracking_no", "trackingCode"):
+        if order_summary.get(key):
+            return True
+    for key in ("tracking_url", "tracking_link", "status_url"):
+        if order_summary.get(key):
+            return True
+    for key in ("carrier", "shipping_carrier", "carrier_name", "carrierName"):
+        if order_summary.get(key):
+            return True
+    return False
+
+
+def _missing_order_context(
+    order_summary: Optional[Dict[str, Any]],
+    envelope: EventEnvelope,
+    payload: Dict[str, Any],
+) -> List[str]:
+    summary = order_summary or {}
+    missing: List[str] = []
+
+    order_id = (
+        summary.get("order_id")
+        or summary.get("id")
+        or payload.get("order_id")
+        or payload.get("orderId")
+        or payload.get("order_number")
+        or payload.get("orderNumber")
+        or payload.get("id")
+    )
+    if not _is_valid_order_id(order_id, conversation_id=envelope.conversation_id):
+        missing.append("order_id")
+
+    created_at = (
+        summary.get("created_at")
+        or summary.get("order_created_at")
+        or payload.get("created_at")
+        or payload.get("order_created_at")
+        or payload.get("ordered_at")
+        or payload.get("order_date")
+    )
+    if not created_at:
+        missing.append("created_at")
+
+    tracking_present = _tracking_signal_present(summary)
+    shipping_method = (
+        summary.get("shipping_method")
+        or summary.get("shipping_method_name")
+        or payload.get("shipping_method")
+        or payload.get("shipping_method_name")
+        or payload.get("shipping_service")
+        or payload.get("shipping_option")
+    )
+    shipping_bucket = normalize_shipping_method(shipping_method) is not None
+    if not tracking_present and not shipping_bucket:
+        missing.append("tracking_or_shipping_method" if not shipping_method else "shipping_method_bucket")
+
+    return missing
+
+
+def _missing_context_reason_tag(missing_fields: List[str]) -> Optional[str]:
+    for field in missing_fields:
+        if field == "order_id":
+            return f"{ORDER_LOOKUP_MISSING_PREFIX}:order_id"
+        if field == "created_at":
+            return f"{ORDER_LOOKUP_MISSING_PREFIX}:created_at"
+        if field == "tracking_or_shipping_method":
+            return f"{ORDER_LOOKUP_MISSING_PREFIX}:tracking_or_shipping_method"
+        if field == "shipping_method_bucket":
+            return f"{ORDER_LOOKUP_MISSING_PREFIX}:shipping_method_bucket"
+    return None
 
 
 
@@ -259,6 +352,43 @@ def plan_actions(
                 automation_enabled=automation_enabled,
                 allow_network=allow_network,
             )
+            missing_fields = _missing_order_context(order_summary, envelope, payload)
+            if missing_fields:
+                reasons.append("order_context_missing")
+                reason_tag = _missing_context_reason_tag(missing_fields)
+                if routing:
+                    extra_tags = [
+                        EMAIL_SUPPORT_ROUTE_TAG,
+                        ORDER_LOOKUP_FAILED_TAG,
+                        ORDER_STATUS_SUPPRESSED_TAG,
+                    ]
+                    if reason_tag:
+                        extra_tags.append(reason_tag)
+                    routing.tags = sorted(dedupe_tags((routing.tags or []) + extra_tags))
+                    if actions:
+                        actions[0]["routing"] = asdict(routing)
+                ticket_number = payload.get("ticket_number") or payload.get("conversation_no")
+                LOGGER.info(
+                    "automation.order_status_context_missing",
+                    extra={
+                        "event_id": envelope.event_id,
+                        "conversation_id": envelope.conversation_id,
+                        "ticket_id": envelope.conversation_id,
+                        "ticket_number": ticket_number,
+                        "order_lookup_result": "missing_context",
+                        "missing_fields": missing_fields,
+                    },
+                )
+                return ActionPlan(
+                    event_id=envelope.event_id,
+                    mode=mode,
+                    safe_mode=safe_mode,
+                    automation_enabled=automation_enabled,
+                    actions=actions,
+                    reasons=reasons,
+                    routing=routing,
+                    routing_artifact=routing_artifact,
+                )
             ticket_created_at = (
                 payload.get("ticket_created_at")
                 or payload.get("created_at")

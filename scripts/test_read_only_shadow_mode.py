@@ -48,7 +48,13 @@ class ReadOnlyShadowModeTests(unittest.TestCase):
         with mock.patch.object(
             pipeline, "compute_dual_routing", return_value=(routing, artifact)
         ), mock.patch.object(
-            pipeline, "lookup_order_summary", return_value={"order_id": "123"}
+            pipeline,
+            "lookup_order_summary",
+            return_value={
+                "order_id": "123",
+                "created_at": "2024-01-01T00:00:00Z",
+                "shipping_method": "2 business days",
+            },
         ) as lookup_mock:
             plan = pipeline.plan_actions(
                 envelope,
