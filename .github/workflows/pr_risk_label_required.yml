@@ -1,0 +1,45 @@
+name: PR Risk Label Required
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
+
+jobs:
+  risk-label-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate risk label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requiredLabels = [
+              "risk:R0-docs",
+              "risk:R1-low",
+              "risk:R2-medium",
+              "risk:R3-high",
+              "risk:R4-critical",
+            ];
+
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setFailed("No pull_request payload found for this event.");
+              return;
+            }
+
+            const labels = (pr.labels || []).map((label) => label.name);
+            const present = labels.filter((label) => requiredLabels.includes(label));
+
+            if (present.length === 0) {
+              core.setFailed(
+                "PR must have exactly one risk label (risk:R0-docs, risk:R1-low, risk:R2-medium, risk:R3-high, risk:R4-critical)"
+              );
+              return;
+            }
+            if (present.length > 1) {
+              core.setFailed(
+                `PR has multiple risk labels: ${present.join(", ")}. Only one risk label is allowed.`
+              );
+              return;
+            }
+
+            core.info(`Risk label valid: ${present[0]}`);

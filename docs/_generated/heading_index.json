@@ -1471,6 +1471,18 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-18 - run_20260118_1628z (b41 corrective: pr gate bug fixes)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-18-run202601181628z-b41-corrective-pr-gate-bug-fixes"
+    }
+  ],
+  "2026-01-18 - run_20260118_1526z (pr risk labels + claude gate enforcement)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-18-run202601181526z-pr-risk-labels-claude-gate-enforcement"
+    }
+  ],
   "2026-01-17 - run_20260117_1751z (agent a b40: order status ops + docs)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -12267,6 +12279,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "merge-policy-auditability"
+    }
+  ],
+  "3.5) risk labels + claude gate": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "35-risk-labels-claude-gate"
     }
   ],
   "4) pr health check (required before merge)": [

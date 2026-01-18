@@ -1234,6 +1234,16 @@
       },
       {
         "level": 3,
+        "text": "2026-01-18 - RUN_20260118_1628Z (B41 corrective: PR gate bug fixes)",
+        "anchor": "2026-01-18-run202601181628z-b41-corrective-pr-gate-bug-fixes"
+      },
+      {
+        "level": 3,
+        "text": "2026-01-18 - RUN_20260118_1526Z (PR Risk Labels + Claude Gate Enforcement)",
+        "anchor": "2026-01-18-run202601181526z-pr-risk-labels-claude-gate-enforcement"
+      },
+      {
+        "level": 3,
         "text": "2026-01-17 - RUN_20260117_1751Z (Agent A B40: Order Status Ops + Docs)",
         "anchor": "2026-01-17-run202601171751z-agent-a-b40-order-status-ops-docs"
       },
@@ -11056,6 +11066,11 @@
         "level": 3,
         "text": "Merge policy (auditability)",
         "anchor": "merge-policy-auditability"
+      },
+      {
+        "level": 2,
+        "text": "3.5) Risk Labels + Claude Gate",
+        "anchor": "35-risk-labels-claude-gate"
       },
       {
         "level": 2,

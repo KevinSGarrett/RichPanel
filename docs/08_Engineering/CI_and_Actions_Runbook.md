@@ -140,6 +140,28 @@ We require **merge commits only** for auditability and traceability.
 
 ---
 
+## 3.5) Risk Labels + Claude Gate
+
+Every PR must carry exactly one risk label from the approved set. CI enforces this and will fail if missing.
+
+**Risk labels (required):**
+- `risk:R0-docs`
+- `risk:R1-low`
+- `risk:R2-medium`
+- `risk:R3-high`
+- `risk:R4-critical`
+
+**Claude gate (label-driven):**
+- Apply `gate:claude` for **risk ≥ R2** or whenever a PM/lead explicitly requires it.
+- When `gate:claude` is present, the PR must include a comment containing:
+  - `Claude Review (gate:claude)`
+  - `PASS`
+- This comment is the **Claude PASS evidence** and must be linked in `RUN_REPORT.md`.
+
+**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **both Codecov and Bugbot are green** (see PR Health Check).
+
+---
+
 ## 4) PR Health Check (required before merge)
 
 Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.

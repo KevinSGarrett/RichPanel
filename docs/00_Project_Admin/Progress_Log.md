@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-17 - RUN_20260117_1751Z.
+Last verified: 2026-01-18 - RUN_20260118_1628Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,19 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-18 - RUN_20260118_1628Z (B41 corrective: PR gate bug fixes)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260118_1628Z
+- Fixed PR gate workflows: enforce exactly one risk label, require PASS word boundary, and scan issue/review comments + review submissions.
+- Added corrective run artifacts and updated evidence for PR #118 successor.
+
+### 2026-01-18 - RUN_20260118_1526Z (PR Risk Labels + Claude Gate Enforcement)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260118_1526Z
+- Added PR workflows enforcing required risk labels and label-driven Claude PASS gates.
+- Updated CI runbook with Risk Labels + Claude Gate section and merge safety reminders.
+- Updated rehydration templates to capture risk label, gate:claude status, and Claude PASS evidence.
+- Regenerated doc registries and plan checklist outputs.
+- PR #118: Codecov + Bugbot + new gate workflows green; Claude PASS comment posted.
+
 ### 2026-01-17 - RUN_20260117_1751Z (Agent A B40: Order Status Ops + Docs)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260117_1751Z
 - Docs-only PR to make Order Status operationally shippable.
