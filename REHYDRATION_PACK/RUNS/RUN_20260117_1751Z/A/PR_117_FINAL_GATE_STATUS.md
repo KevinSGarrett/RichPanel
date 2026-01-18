@@ -1,19 +1,19 @@
 # PR #117 - FINAL GATE STATUS ✅
 ## Agent A (B40): Order Status Ops + Docs - COMPLETE
 
-**Verification Time:** 2026-01-17 19:50 UTC  
-**Final HEAD Commit:** `9e8b724` - "Add run artifacts README summarizing completion"  
+**Verification Time:** 2026-01-18 16:40 UTC  
+**Final HEAD Commit:** `833bc6a` - "PR #117 Final Consistency Pass: Fix automation control & follow-up proof docs"  
 **PR Status:** OPEN, MERGEABLE, AUTO-MERGE ENABLED  
 
 ---
 
-## 🎯 ALL HARD GATES GREEN (Final Verification)
+## 🎯 ALL HARD GATES GREEN (Final Verification on Latest HEAD)
 
 | Gate | Status | Duration | Link |
 |------|--------|----------|------|
-| **validate** | ✅ PASS | 43s | https://github.com/KevinSGarrett/RichPanel/actions/runs/21103512007 |
+| **validate** | ✅ PASS | 50s | https://github.com/KevinSGarrett/RichPanel/actions/runs/21114999966 |
 | **codecov/patch** | ✅ PASS | 0s | https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/117 |
-| **Cursor Bugbot** | ✅ PASS | 3m26s | https://cursor.com |
+| **Cursor Bugbot** | ✅ PASS | 7m19s | https://cursor.com |
 | **CI-equivalent** | ✅ PASS | Local | 126 tests, 639 items, exit 0 |
 
 **Verification command:**
@@ -24,6 +24,40 @@ gh pr checks 117
 # codecov/patch    pass    0        https://app.codecov.io/...
 # validate         pass    43s      https://github.com/...
 ```
+
+**Verification command:**
+```powershell
+gh pr checks 117
+# Output:
+# Cursor Bugbot    pass    7m19s    https://cursor.com
+# codecov/patch    pass    0        https://app.codecov.io/...
+# validate         pass    50s      https://github.com/...
+```
+
+**Latest HEAD Commit SHA:** `833bc6a1b7e0ecf1efa4adf5271d5615d5a1133a`
+
+---
+
+## 📝 Final Consistency Pass (Commit 833bc6a)
+
+**Applied fixes to run artifacts:**
+
+1. **RUN_SUMMARY.md:**
+   - ✅ Replaced `AUTOMATION_ENABLED=false` env var with SSM-based approach: `automation_enabled=false` (via set-runtime-flags.yml)
+   - ✅ Replaced `followup_after_auto_reply` scenario with `--simulate-followup` flag
+
+2. **EVIDENCE_PACKAGE_100_PERCENT_COMPLETE.md:**
+   - ✅ Updated shadow mode config to SSM parameters + Lambda env vars
+   - ✅ Fixed follow-up proof command to use `--simulate-followup` flag
+
+3. **DOCS_IMPACT_MAP.md:**
+   - ✅ Corrected follow-up scenario description
+
+4. **PR #117 Description:**
+   - ✅ Updated deliverables section with correct automation control mechanism
+   - ✅ Updated follow-up proof description
+
+**Result:** All artifacts now accurately describe the SSM-based automation control and `--simulate-followup` flag approach.
 
 ---
 
