@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-18 - RUN_20260118_1717Z (B41: Order-status missing-context gate + evidence)",
+        "anchor": "2026-01-18-run202601181717z-b41-order-status-missing-context-gate-evidence"
+      },
+      {
+        "level": 3,
         "text": "2026-01-18 - RUN_20260118_1628Z (B41 corrective: PR gate bug fixes)",
         "anchor": "2026-01-18-run202601181628z-b41-corrective-pr-gate-bug-fixes"
       },

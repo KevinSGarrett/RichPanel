@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-18 - run_20260118_1717z (b41: order-status missing-context gate + evidence)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-18-run202601181717z-b41-order-status-missing-context-gate-evidence"
+    }
+  ],
   "2026-01-18 - run_20260118_1628z (b41 corrective: pr gate bug fixes)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
