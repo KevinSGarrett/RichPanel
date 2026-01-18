@@ -1,0 +1,56 @@
+name: PR Claude Gate Required
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
+
+jobs:
+  claude-gate-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Claude gate comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require("@actions/core");
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setFailed("No pull_request payload found for this event.");
+              return;
+            }
+
+            const labels = (pr.labels || []).map((label) => label.name);
+            const gateLabel = "gate:claude";
+            if (!labels.includes(gateLabel)) {
+              core.info("gate:claude label not present. Skipping gate check.");
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = pr.number;
+            const requiredTitle = "Claude Review (gate:claude)";
+            const passToken = "PASS";
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number,
+                per_page: 100,
+              }
+            );
+
+            const hasPassComment = comments.some((comment) => {
+              const body = comment.body || "";
+              return body.includes(requiredTitle) && body.includes(passToken);
+            });
+
+            if (!hasPassComment) {
+              core.setFailed(
+                'Missing Claude PASS comment. Add a PR comment containing "Claude Review (gate:claude)" and "PASS" to satisfy gate:claude.'
+              );
+              return;
+            }
+
+            core.info("Claude PASS comment found.");

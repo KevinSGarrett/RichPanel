@@ -12269,6 +12269,12 @@
       "anchor": "merge-policy-auditability"
     }
   ],
+  "3.5) risk labels + claude gate": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "35-risk-labels-claude-gate"
+    }
+  ],
   "4) pr health check (required before merge)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",

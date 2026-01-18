@@ -8,6 +8,9 @@
 - **Branch:** `<branch-name>`
 - **PR:** `#<number>` or none
 - **PR merge strategy:** merge commit
+- **Risk label:** `<risk:R0-docs | risk:R1-low | risk:R2-medium | risk:R3-high | risk:R4-critical>`
+- **gate:claude label:** yes/no
+- **Claude PASS comment:** <LINK> or "N/A"
 
 ## Objective + stop conditions
 - **Objective:** <FILL_ME>
@@ -68,6 +71,11 @@
   - <ISSUE_1>: <fixed | acceptable as-is | deferred>
   - <ISSUE_2>: <fixed | acceptable as-is | deferred>
 - **Action taken:** <description of test additions or rationale>
+
+### Claude Gate (if applicable)
+- **gate:claude label present:** yes/no
+- **Claude PASS comment link:** <LINK> or "N/A"
+- **Gate status:** pass/fail or "N/A"
 
 ### E2E Proof (if applicable)
 - **E2E required:** yes/no (yes if changes touch outbound/automation)

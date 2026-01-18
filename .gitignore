@@ -39,6 +39,8 @@ secrets/
 /package-lock.json
 /trust-*.json
 /trust-ci-*.json
+/PR_117_FINAL_GATE_STATUS.md
+/final_pr_comment.md
 
 # Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
 artifacts/*

@@ -39,6 +39,13 @@
 - Include **commands + outputs** in `RUN_REPORT.md` (not just ???ran tests???).
 - CI also enforces **minimum non-empty line counts** for the latest run???s artifacts (see `python scripts/verify_rehydration_pack.py`).
 
+## Risk label + Claude gate (required for PRs)
+- **Risk label:** `<risk:R0-docs | risk:R1-low | risk:R2-medium | risk:R3-high | risk:R4-critical>`
+- **gate:claude applied:** yes/no (required for risk ≥ R2 or when explicitly requested)
+- **Evidence:**
+  - PR labels: `gh pr view <PR#> --json labels --jq '.labels[].name'`
+  - Claude PASS comment link (required if gate:claude): <URL>
+
 ## Required run artifacts (write to your agent folder)
 Write to:
 - `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/`
@@ -166,6 +173,11 @@ Before claiming a PR as "done", agents must complete the following health checks
 - [ ] Verified Codecov patch status (`codecov/patch`) is passing or acceptable
 - [ ] Verified Codecov project status (`codecov/project`) is passing or acceptable
 - [ ] **Action required**: If Codecov flags coverage drop or insufficient patch coverage, either add tests to improve coverage OR document why coverage is acceptable as-is
+
+### Claude Gate (required when `gate:claude` label is present)
+- [ ] `gate:claude` label applied when required (risk ≥ R2 or PM/lead request)
+- [ ] Claude review comment posted with `Claude Review (gate:claude)` and `PASS`
+- [ ] Claude PASS comment link captured in `RUN_REPORT.md`
 
 ### E2E Proof (required if applicable)
 - [ ] **Required when**: Changes touch outbound integrations (Richpanel API, Shopify, ShipStation, email/SMS) or automation logic

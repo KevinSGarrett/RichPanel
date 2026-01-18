@@ -11059,6 +11059,11 @@
       },
       {
         "level": 2,
+        "text": "3.5) Risk Labels + Claude Gate",
+        "anchor": "35-risk-labels-claude-gate"
+      },
+      {
+        "level": 2,
         "text": "4) PR Health Check (required before merge)",
         "anchor": "4-pr-health-check-required-before-merge"
       },
