@@ -1,10 +1,42 @@
 # FINAL STATE VERIFICATION - PR #117
 ## RUN_20260117_1751Z - Agent A (B40) - COMPLETE
 
-**Verification Date:** 2026-01-17 19:42 UTC  
-**HEAD Commit:** `a4157ec` - "Finalize run artifacts with final PR state and all hard gate links"  
+**Verification Date:** 2026-01-18 16:50 UTC  
+**HEAD Commit:** `8e6fdc5` - "Update PR_117_FINAL_GATE_STATUS with latest HEAD verification"  
+**Previous Consistency Pass Commit:** `833bc6a` - "PR #117 Final Consistency Pass: Fix automation control & follow-up proof docs"  
 **PR:** https://github.com/KevinSGarrett/RichPanel/pull/117  
-**Status:** ✅ **ALL HARD GATES GREEN - READY FOR AUTO-MERGE**
+**Status:** ✅ **ALL HARD GATES GREEN - AUTO-MERGE ENABLED - WAITING FOR LATEST CHECKS**
+
+---
+
+## Final Consistency Pass Applied (Commit 833bc6a)
+
+**Fixes applied to run artifacts and PR description:**
+
+1. **RUN_SUMMARY.md:**
+   - ✅ Replaced `AUTOMATION_ENABLED=false` Lambda env var with SSM-based approach
+   - ✅ SSM parameters: `safe_mode=true`, `automation_enabled=false` (via set-runtime-flags.yml)
+   - ✅ Replaced `followup_after_auto_reply` scenario with `--simulate-followup` flag
+
+2. **EVIDENCE_PACKAGE_100_PERCENT_COMPLETE.md:**
+   - ✅ Updated shadow mode configuration to match canonical docs (SSM + Lambda env vars)
+   - ✅ Fixed follow-up proof command to use `--simulate-followup` flag
+
+3. **DOCS_IMPACT_MAP.md:**
+   - ✅ Corrected follow-up scenario description
+
+4. **PR #117 Description:**
+   - ✅ Updated deliverables section with correct automation control mechanism
+   - ✅ Updated follow-up proof description to use `--simulate-followup`
+
+**Result:** All artifacts now accurately reflect:
+- Automation control via SSM `automation_enabled` parameter (set-runtime-flags.yml workflow)
+- Follow-up proof via `--simulate-followup` flag (not as a separate scenario)
+
+**Verification on commit 833bc6a:**
+- ✅ validate: PASS (50s) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21114999966
+- ✅ codecov/patch: PASS
+- ✅ Cursor Bugbot: PASS (7m19s)
 
 ---
 
@@ -189,23 +221,61 @@ f084543 - RUN:RUN_20260117_1751Z Agent A (B40) Order Status Ops + Docs (initial)
 
 ---
 
+## Merge Status & Resolution
+
+**Auto-merge configuration:** ✅ ENABLED (merge method: MERGE)  
+**Enabled at:** 2026-01-17 17:57:10Z  
+**Current state:** OPEN, MERGEABLE  
+**Merge state status:** BEHIND (branch needs update with main, auto-merge will handle)
+
+**Latest commits:**
+- `8e6fdc5` - Update PR_117_FINAL_GATE_STATUS with latest HEAD verification
+- `833bc6a` - PR #117 Final Consistency Pass: Fix automation control & follow-up proof docs
+
+**Checks on commit 833bc6a (consistency pass):**
+- ✅ validate: PASS (50s) - https://github.com/KevinSGarrett/RichPanel/actions/runs/21114999966
+- ✅ codecov/patch: PASS
+- ✅ Cursor Bugbot: PASS (7m19s)
+
+**Checks on commit 8e6fdc5 (gate status update):**
+- ⏳ validate: IN_PROGRESS
+- ⏳ Cursor Bugbot: IN_PROGRESS
+
+**Expected merge behavior:**
+1. When checks complete on `8e6fdc5`, auto-merge will activate
+2. GitHub will update branch with latest main
+3. Checks will re-run on merged state
+4. PR will auto-merge when all checks pass
+
+**Blocker status:** ✅ NO BLOCKER DETECTED
+
+Auto-merge is properly configured. The PR will merge automatically once:
+- Current checks complete successfully
+- Branch is updated with main (auto-merge handles this)
+- All required status checks pass
+
+**No manual intervention required.** The auto-merge queue will handle the merge.
+
+---
+
 ## Summary
 
 **PR #117 is fully closed out and ready for auto-merge:**
 
-✅ All hard gates GREEN (validate, Codecov, Bugbot)  
+✅ All hard gates GREEN on consistency pass commit (833bc6a)  
 ✅ CI-equivalent checks PASS (126 tests, all validations)  
-✅ Documentation accurate (describes real SSM-based system)  
-✅ Follow-up instructions correct (uses --simulate-followup)  
-✅ Run artifacts complete (0 TBD placeholders, all links present)  
+✅ Documentation accuracy verified (SSM-based automation control documented)  
+✅ Follow-up proof mechanism corrected (--simulate-followup flag)  
+✅ Run artifacts updated (no stale AUTOMATION_ENABLED or followup_after_auto_reply references)  
+✅ PR description updated with correct deliverables  
 ✅ Auto-merge enabled (MERGE method)  
 ✅ No PII exposure (docs-only PR)
 
-**The PR will auto-merge when all checks remain green.**
+**The PR will auto-merge when checks on latest HEAD complete successfully.**
 
 ---
 
 **Finalized by:** Cursor Agent A  
-**Finalization date:** 2026-01-17 19:42 UTC  
-**Final commit:** a4157ec  
-**PR comment:** https://github.com/KevinSGarrett/RichPanel/pull/117#issuecomment-3764535839
+**Finalization date:** 2026-01-18 16:50 UTC  
+**Latest commit:** 8e6fdc5  
+**Consistency pass commit:** 833bc6a (all gates green)
