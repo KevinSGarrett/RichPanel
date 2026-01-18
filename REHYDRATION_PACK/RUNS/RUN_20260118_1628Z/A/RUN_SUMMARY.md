@@ -1,6 +1,6 @@
 # Run Summary
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260118_1628Z  
 **Agent:** A  
 **Date:** 2026-01-18
 
@@ -15,8 +15,8 @@ No Agent A work. Agent B handled the workflow fixes and evidence.
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260118_1628Z-B
-- PR: <pending>
-- CI status at end of run: <pending>
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/119
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 

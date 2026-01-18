@@ -29,7 +29,53 @@
 
 ## Diffstat (required)
 ```
-pending (update after latest commit)
+.github/workflows/pr_claude_gate_required.yml | +78 -0
+.github/workflows/pr_risk_label_required.yml | +45 -0
+.gitignore | +2 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/DOCS_IMPACT_MAP.md | +25 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/FIX_REPORT.md | +21 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/RUN_REPORT.md | +219 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/RUN_SUMMARY.md | +42 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/STRUCTURE_REPORT.md | +36 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/A/TEST_MATRIX.md | +15 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/DOCS_IMPACT_MAP.md | +23 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/README.md | +9 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/RUN_REPORT.md | +46 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/RUN_SUMMARY.md | +31 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/STRUCTURE_REPORT.md | +25 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/B/TEST_MATRIX.md | +14 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/DOCS_IMPACT_MAP.md | +23 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/README.md | +9 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/RUN_REPORT.md | +46 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/RUN_SUMMARY.md | +31 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/STRUCTURE_REPORT.md | +25 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1526Z/C/TEST_MATRIX.md | +14 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/A/DOCS_IMPACT_MAP.md | +22 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/A/RUN_REPORT.md | +41 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/A/RUN_SUMMARY.md | +31 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/A/STRUCTURE_REPORT.md | +25 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/A/TEST_MATRIX.md | +14 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/DOCS_IMPACT_MAP.md | +22 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/FIX_REPORT.md | +22 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/RUN_REPORT.md | +172 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/RUN_SUMMARY.md | +35 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/STRUCTURE_REPORT.md | +29 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/B/TEST_MATRIX.md | +19 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/C/DOCS_IMPACT_MAP.md | +22 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/C/RUN_REPORT.md | +41 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/C/RUN_SUMMARY.md | +31 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/C/STRUCTURE_REPORT.md | +25 -0
+REHYDRATION_PACK/RUNS/RUN_20260118_1628Z/C/TEST_MATRIX.md | +14 -0
+REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md | +12 -0
+REHYDRATION_PACK/_TEMPLATES/Run_Report_TEMPLATE.md | +8 -0
+docs/00_Project_Admin/Progress_Log.md | +14 -1
+docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md | +9 -9
+docs/00_Project_Admin/To_Do/_generated/plan_checklist.json | +9 -9
+docs/08_Engineering/CI_and_Actions_Runbook.md | +22 -0
+docs/_generated/doc_outline.json | +15 -0
+docs/_generated/doc_registry.compact.json | +1 -1
+docs/_generated/doc_registry.json | +4 -4
+docs/_generated/heading_index.json | +18 -0
 ```
 
 ## Files Changed (required)
@@ -46,6 +92,12 @@ node -e "const required=['risk:R0-docs','risk:R1-low','risk:R2-medium','risk:R3-
 # risk:R2-medium => PASS
 # risk:R1-low,risk:R2-medium => FAIL:multi
 # risk:R0-docs,risk:R1-low,risk:R2-medium => FAIL:multi
+
+# PR label evidence
+gh pr view 119 --json labels --jq '.labels[].name'
+# output:
+# risk:R2-medium
+# gate:claude
 
 # Claude PASS word-boundary cases
 $passPath = \"_tmp_claude_pass_check.js\"
@@ -108,44 +160,77 @@ Remove-Item $sourcesPath
 # Review comment PASS => true
 # Review submission PASS => true
 
+# PR checks (gate workflows + CI + Codecov + Bugbot)
+gh pr checks 119
+# output:
+# Cursor Bugbot	pass	4m35s	https://cursor.com
+# claude-gate-check	pass	6s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21119788843/job/60730742931
+# codecov/patch	pass	0	https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/119
+# risk-label-check	pass	4s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21119788851/job/60730742982
+# validate	pass	52s	https://github.com/KevinSGarrett/RichPanel/actions/runs/21119784978/job/60730734477
+
+# Auto-merge enabled
+gh pr merge 119 --auto --merge --delete-branch
+gh pr view 119 --json autoMergeRequest,mergeStateStatus --jq '{autoMergeRequest: .autoMergeRequest, mergeStateStatus: .mergeStateStatus}'
+# output:
+# {"autoMergeRequest":{"enabledAt":"2026-01-18T22:32:56Z","mergeMethod":"MERGE"},"mergeStateStatus":"UNKNOWN"}
+
 # CI-equivalent checks
 python scripts/run_ci_checks.py --ci
 # output:
-# <pending>
+# OK: regenerated registry for 403 docs.
+# OK: reference registry regenerated (365 files)
+# [OK] Extracted 639 checklist items.
+# [OK] Prompt-Repeat-Override present; skipping repeat guard.
+# [OK] REHYDRATION_PACK validated (mode=build).
+# [OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
+# OK: docs + reference validation passed
+# [OK] Secret inventory is in sync with code defaults.
+# [verify_admin_logs_sync] Checking admin logs sync...
+#   Latest run folder: RUN_20260118_1628Z
+# [OK] RUN_20260118_1628Z is referenced in Progress_Log.md
+# [OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
+# ... pipeline + client + routing + encoding test suites passed ...
+# [OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+# [OK] CI-equivalent checks passed.
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci`
 - **Evidence location:** Local output in this RUN_REPORT.md
-- **Results:** pending (update after CI run)
+- **Results:** PASS (CI-equivalent checks passed).
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** Yes (120–240s intervals)
 - **Status timestamps:** 2026-01-18 (after checks completed)
-- **Check rollup proof:** pending
-- **GitHub Actions runs:** pending
-- **Codecov status:** pending
-- **Bugbot status:** pending
+- **Check rollup proof:** All checks SUCCESS (risk-label-check, claude-gate-check, validate, codecov/patch, Cursor Bugbot)
+- **GitHub Actions runs:**
+  - Risk label check: https://github.com/KevinSGarrett/RichPanel/actions/runs/21119788851/job/60730742982
+  - Claude gate check: https://github.com/KevinSGarrett/RichPanel/actions/runs/21119788843/job/60730742931
+  - CI validate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21119784978/job/60730734477
+- **Codecov status:** PASS - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/119
+- **Bugbot status:** PASS (Cursor Bugbot check) - https://cursor.com
 
 ## PR Health Check (required for PRs)
 
 ### Bugbot Findings
-- **Bugbot triggered:** pending
-- **Bugbot comment link:** pending
-- **Findings summary:** pending
-- **Action taken:** pending
+- **Bugbot triggered:** Yes (`@cursor review` comment: https://github.com/KevinSGarrett/RichPanel/pull/119#issuecomment-3765820612)
+- **Bugbot comment link:** None posted; Cursor Bugbot check green (see PR checks)
+- **Findings summary:** No findings reported; check status PASS.
+- **Action taken:** N/A
 
 ### Codecov Findings
-- **Codecov patch status:** pending
-- **Codecov project status:** pending
-- **Codecov link:** pending
-- **Coverage issues identified:** pending
-- **Action taken:** pending
+- **Codecov patch status:** PASS
+- **Codecov project status:** PASS (coverage not affected)
+- **Codecov link:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/119
+- **Codecov comment:** https://github.com/KevinSGarrett/RichPanel/pull/119#issuecomment-3765824295
+- **Coverage issues identified:** None
+- **Action taken:** N/A
 
 ### Claude Gate (if applicable)
 - **gate:claude label present:** yes
-- **Claude PASS comment link:** pending
-- **Gate status:** pending
+- **Claude PASS comment link:** https://github.com/KevinSGarrett/RichPanel/pull/119#issuecomment-3765820539
+- **Gate status:** pass (claude-gate-check green)
 
 ### E2E Proof (if applicable)
 - **E2E required:** No (workflow-only changes)
@@ -154,7 +239,7 @@ python scripts/run_ci_checks.py --ci
 - **E2E result:** N/A
 - **Evidence:** N/A
 
-**Gate compliance:** pending
+**Gate compliance:** All Bugbot/Codecov/Claude requirements addressed: YES
 
 ## Docs impact (summary)
 - **Docs updated:** None (workflow-only changes)
