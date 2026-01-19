@@ -335,6 +335,62 @@ FINDINGS:
         finally:
             os.environ.pop("GITHUB_TOKEN", None)
 
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_runs_when_forced_even_without_label(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that script runs when CLAUDE_GATE_FORCE=true even if label not in API response."""
+        # Mock PR data WITHOUT gate:claude label (race condition scenario)
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "risk:R1"}],  # No gate:claude
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = {
+            "id": "msg_test123",
+            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+        
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+        
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+            os.environ["CLAUDE_GATE_FORCE"] = "true"
+            
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo", "test/repo",
+                "--pr-number", "123",
+            ]
+            
+            result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            
+            # Verify it did NOT skip
+            with open(output_path, "r") as f:
+                content = f.read()
+            self.assertIn("skip=false", content)
+            self.assertIn("verdict=PASS", content)
+            
+            # Verify Anthropic was called despite missing label
+            mock_anthropic.assert_called_once()
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            os.environ.pop("CLAUDE_GATE_FORCE", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+
 
 if __name__ == "__main__":
     unittest.main()

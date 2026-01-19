@@ -283,10 +283,17 @@ def main() -> int:
     pr_data = _fetch_json(pr_url, github_token)
     labels = [label.get("name", "") for label in pr_data.get("labels", [])]
 
-    if GATE_LABEL not in labels:
+    # Check if workflow is forcing the gate to run (prevents race condition)
+    force_gate = os.environ.get("CLAUDE_GATE_FORCE", "").lower() in ("true", "1", "yes")
+    
+    if not force_gate and GATE_LABEL not in labels:
         print("gate:claude label not present; skipping Claude gate.")
         _write_output("skip", "true")
         return 0
+    
+    if force_gate and GATE_LABEL not in labels:
+        print("WARNING: gate:claude label not detected in API response, but CLAUDE_GATE_FORCE=true")
+        print("Proceeding with gate review (workflow guarantees label was applied).")
 
     risk = _normalize_risk(labels)
     model = MODEL_BY_RISK[risk]
