@@ -77,7 +77,9 @@ def build_event_envelope(
     """
 
     payload = payload or {}
-    cleaned_payload: Dict[str, Any] = payload if isinstance(payload, dict) else {"data": payload}
+    cleaned_payload: Dict[str, Any] = (
+        payload if isinstance(payload, dict) else {"data": payload}
+    )
 
     event_id = _coerce_str(cleaned_payload.get("event_id")) or f"evt:{uuid.uuid4()}"
     received_at = _coerce_str(cleaned_payload.get("received_at")) or _iso_now()
@@ -90,11 +92,14 @@ def build_event_envelope(
         or default_group_id
     )
     message_id = _coerce_str(
-        cleaned_payload.get("message_id") or cleaned_payload.get("dedupe_id") or event_id
+        cleaned_payload.get("message_id")
+        or cleaned_payload.get("dedupe_id")
+        or event_id
     )
     dedupe_id = _shorten(message_id or event_id, MAX_DEDUPE_ID_LENGTH)
     group_id = _sanitize_group_id(
-        _coerce_str(cleaned_payload.get("group_id")) or conversation_id, default_group_id
+        _coerce_str(cleaned_payload.get("group_id")) or conversation_id,
+        default_group_id,
     )
     source_value = _coerce_str(cleaned_payload.get("source")) or source
 
@@ -124,7 +129,12 @@ def normalize_envelope(
     if not isinstance(data, dict):
         data = {"payload": data}
 
-    payload_obj = data.get("payload") if isinstance(data.get("payload"), dict) else {}
+    payload_raw = data.get("payload")
+    payload_obj: Dict[str, Any]
+    if isinstance(payload_raw, dict):
+        payload_obj = payload_raw
+    else:
+        payload_obj = {}
 
     event_id = (
         _coerce_str(data.get("event_id"))
@@ -150,13 +160,16 @@ def normalize_envelope(
         or payload_obj.get("dedupe_id")
     )
     dedupe_id = _shorten(
-        _coerce_str(data.get("dedupe_id")) or message_id or event_id, MAX_DEDUPE_ID_LENGTH
+        _coerce_str(data.get("dedupe_id")) or message_id or event_id,
+        MAX_DEDUPE_ID_LENGTH,
     )
     group_id = _sanitize_group_id(
         _coerce_str(data.get("group_id")) or conversation_id, default_group_id
     )
     source_value = (
-        _coerce_str(data.get("source")) or _coerce_str(payload_obj.get("source")) or source
+        _coerce_str(data.get("source"))
+        or _coerce_str(payload_obj.get("source"))
+        or source
     )
 
     return EventEnvelope(

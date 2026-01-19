@@ -23,4 +23,3 @@ __all__ = [
     "dedupe_tags",
     "get_ticket_metadata",
 ]
-

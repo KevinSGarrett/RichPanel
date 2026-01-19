@@ -130,7 +130,6 @@ def ordinal_label(idx: int) -> str:
     return f"{idx + 1}th newest"
 
 
-
 def latest_run_id() -> Optional[str]:
     """
     Determine the latest RUN_* folder (lexicographic by RUN_YYYYMMDD_HHMMZ).
@@ -190,11 +189,12 @@ def main() -> int:
             print(f"[FAIL] Matching archive fingerprint: {archive_fp}")
             return 1
 
-    print(f"[OK] Current prompts differ from the last {len(archives_to_check)} archive(s).")
+    print(
+        f"[OK] Current prompts differ from the last {len(archives_to_check)} archive(s)."
+    )
     print(f"[INFO] Prompt set fingerprint: {current_fp}")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

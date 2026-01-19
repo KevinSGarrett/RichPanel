@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-18 - RUN_20260118_1628Z.
+Last verified: 2026-01-18 - RUN_20260118_1717Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-18 - RUN_20260118_1717Z (B41: Order-status missing-context gate + evidence)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260118_1717Z
+- Added order-context gate to fail closed when order_id/created_at/tracking-or-shipping are missing.
+- Updated no-tracking fallback copy, added unit tests, and refreshed order-status docs.
+- Regenerated doc registries and captured run artifacts for the PR workflow.
+
 ### 2026-01-18 - RUN_20260118_1628Z (B41 corrective: PR gate bug fixes)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260118_1628Z
 - Fixed PR gate workflows: enforce exactly one risk label, require PASS word boundary, and scan issue/review comments + review submissions.

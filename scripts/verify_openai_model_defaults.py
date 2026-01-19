@@ -11,7 +11,6 @@ Fail if GPT-4 family defaults creep into backend/src or config.
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
 from typing import Iterable, List, Tuple
 

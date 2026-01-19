@@ -1,2 +1,1 @@
 """Ingress Lambda handler package."""
-

@@ -6,7 +6,7 @@ import logging
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import (
     ChatCompletionRequest,
@@ -18,12 +18,14 @@ from richpanel_middleware.integrations.openai import (
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_MODEL = os.environ.get("OPENAI_REPLY_REWRITE_MODEL") or os.environ.get(
+DEFAULT_MODEL = os.environ.get("OPENAI_REPLY_REWRITE_MODEL", "") or os.environ.get(
     "OPENAI_MODEL", "gpt-5.2-chat-latest"
 )
 DEFAULT_TEMPERATURE = 0.0
 DEFAULT_MAX_TOKENS = int(os.environ.get("OPENAI_REPLY_REWRITE_MAX_TOKENS", 400))
-DEFAULT_CONFIDENCE_THRESHOLD = float(os.environ.get("OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD", 0.7))
+DEFAULT_CONFIDENCE_THRESHOLD = float(
+    os.environ.get("OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD", 0.7)
+)
 DEFAULT_MAX_CHARS = int(os.environ.get("OPENAI_REPLY_REWRITE_MAX_CHARS", 1000))
 DEFAULT_ENABLED = False
 
@@ -87,7 +89,10 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         "to risk_flags and keep the original tone."
     )
     user = f"Rewrite this reply safely:\n\n{trimmed}"
-    return [ChatMessage(role="system", content=system), ChatMessage(role="user", content=user)]
+    return [
+        ChatMessage(role="system", content=system),
+        ChatMessage(role="user", content=user),
+    ]
 
 
 def _parse_response(
@@ -181,8 +186,12 @@ def rewrite_reply(
     Fail-closed: if any gate fails or the model output is low-confidence/unsafe,
     the original reply is returned untouched.
     """
-    enabled = rewrite_enabled if rewrite_enabled is not None else _to_bool(
-        os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
+    enabled = (
+        rewrite_enabled
+        if rewrite_enabled is not None
+        else _to_bool(
+            os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
+        )
     )
     fingerprint = _fingerprint(reply_body or "")
     gating_reason = _gating_reason(
@@ -275,7 +284,9 @@ def rewrite_reply(
             risk_flags=risk_flags,
         )
 
-    if confidence < DEFAULT_CONFIDENCE_THRESHOLD or ("suspicious_content" in risk_flags):
+    if confidence < DEFAULT_CONFIDENCE_THRESHOLD or (
+        "suspicious_content" in risk_flags
+    ):
         LOGGER.info(
             "reply_rewrite.fallback",
             extra={
@@ -289,7 +300,11 @@ def rewrite_reply(
         return ReplyRewriteResult(
             body=reply_body,
             rewritten=False,
-            reason="low_confidence" if confidence < DEFAULT_CONFIDENCE_THRESHOLD else "risk_flagged",
+            reason=(
+                "low_confidence"
+                if confidence < DEFAULT_CONFIDENCE_THRESHOLD
+                else "risk_flagged"
+            ),
             model=response.model,
             confidence=confidence,
             dry_run=response.dry_run,
@@ -322,4 +337,3 @@ def rewrite_reply(
 
 
 __all__ = ["rewrite_reply", "ReplyRewriteResult"]
-

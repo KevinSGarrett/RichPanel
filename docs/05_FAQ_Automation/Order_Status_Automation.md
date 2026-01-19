@@ -33,6 +33,12 @@ These are **hard rules** (fail closed):
 
 4) Auto-close only for whitelisted, deflection-safe templates (CR-001 adds order-status ETA exception) tickets.
 
+5) **Order context required** before any order-status auto-reply:
+   - order_id (stable identifier) + order created_at
+   - and either tracking signals OR a normalized shipping-method window
+   - if missing: suppress auto-reply, route to Email Support Team, tag `mw-order-lookup-failed` + `mw-order-status-suppressed`,
+     and log the missing fields for audit/debug.
+
 These constraints align with the common issue: “wrong order → privacy leak” (`CommonIssues/10-order-status-pitfalls.md`).
 
 ---
@@ -83,6 +89,12 @@ Secondary (future):
      - send `t_order_status_ask_order_number` (Tier 1)  
      - route to Email Support Team (or your order support queue)
      - tag `mw-order-lookup-needed`
+
+3b) **Order context gate**
+   - Require: order_id + created_at + (tracking signal OR normalized shipping-method window).
+   - If missing: do not auto-reply or auto-close.
+   - Route to Email Support Team and apply: `route-email-support-team`, `mw-order-lookup-failed`, `mw-order-status-suppressed`
+     (optionally add a reason tag like `mw-order-lookup-missing:order_id`).
 
 4) **Select response template**
    - If fulfillment/tracking is present → `t_order_status_verified`

@@ -62,13 +62,25 @@ ORDER_STATUS_KEYWORDS = (
     "package",
     "fulfillment",
 )
-SHIPPING_DELAY_KEYWORDS = ("label created", "not shipped", "no movement", "pre-shipment")
+SHIPPING_DELAY_KEYWORDS = (
+    "label created",
+    "not shipped",
+    "no movement",
+    "pre-shipment",
+)
 RETURN_KEYWORDS = ("return", "returning", "rma")
 EXCHANGE_KEYWORDS = ("exchange", "swap")
 REFUND_KEYWORDS = ("refund", "refund me", "money back")
 CANCEL_ORDER_KEYWORDS = ("cancel my order", "cancel order", "stop shipment")
 SUBSCRIPTION_KEYWORDS = ("subscription", "unsubscribe", "cancel subscription")
-BILLING_KEYWORDS = ("charge", "charged", "billing", "payment", "invoice", "unauthorized")
+BILLING_KEYWORDS = (
+    "charge",
+    "charged",
+    "billing",
+    "payment",
+    "invoice",
+    "unauthorized",
+)
 TECHNICAL_KEYWORDS = (
     "login",
     "log in",
@@ -100,7 +112,14 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
     if not isinstance(payload, dict):
         return default
 
-    for key in ("customer_message", "message", "body", "text", "customer_note", "content"):
+    for key in (
+        "customer_message",
+        "message",
+        "body",
+        "text",
+        "customer_note",
+        "content",
+    ):
         value = payload.get(key)
         if value is None:
             continue
@@ -232,4 +251,3 @@ def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
         category="general",
         reason="no strong intent keyword detected",
     )
-

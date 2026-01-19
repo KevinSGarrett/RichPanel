@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -44,7 +43,9 @@ DEFAULT_CODE_DIRS = [
 
 _DOC_SECRET_RE = re.compile(r"rp-mw/<env>/[a-z0-9_/-]+", re.IGNORECASE)
 _CODE_FSTRING_SECRET_RE = re.compile(r"rp-mw/\{[^}]+\}/[a-z0-9_/-]+", re.IGNORECASE)
-_CODE_LITERAL_SECRET_RE = re.compile(r"rp-mw/(?:dev|staging|prod|local)/[a-z0-9_/-]+", re.IGNORECASE)
+_CODE_LITERAL_SECRET_RE = re.compile(
+    r"rp-mw/(?:dev|staging|prod|local)/[a-z0-9_/-]+", re.IGNORECASE
+)
 _SECRET_PATH_CALL_RE = re.compile(r"\bsecretPath\s*\((?P<args>[^)]*)\)", re.IGNORECASE)
 _STRING_LITERAL_RE = re.compile(r"""(["'])(?P<val>.*?)(?<!\\)\1""")
 
@@ -67,7 +68,9 @@ def _normalize_secret_id(raw: str) -> str:
 
 
 def extract_doc_secret_ids(doc_text: str) -> set[str]:
-    found = {_normalize_secret_id(m.group(0)) for m in _DOC_SECRET_RE.finditer(doc_text)}
+    found = {
+        _normalize_secret_id(m.group(0)) for m in _DOC_SECRET_RE.finditer(doc_text)
+    }
     return found
 
 
@@ -80,7 +83,9 @@ def _extract_secret_path_calls(text: str) -> set[str]:
     for match in _SECRET_PATH_CALL_RE.finditer(text):
         args = match.group("args") or ""
         segments = [m.group("val") for m in _STRING_LITERAL_RE.finditer(args)]
-        segments = [s.strip().strip("/").replace("\\", "/") for s in segments if s.strip()]
+        segments = [
+            s.strip().strip("/").replace("\\", "/") for s in segments if s.strip()
+        ]
         if not segments:
             continue
         found.add(_normalize_secret_id("rp-mw/<env>/" + "/".join(segments)))
@@ -96,7 +101,12 @@ def extract_code_secret_ids_from_text(text: str) -> set[str]:
     for m in _CODE_LITERAL_SECRET_RE.finditer(text):
         # Literal dev/staging/prod/local is normalized to <env> so docs can stay env-agnostic.
         literal = _normalize_secret_id(m.group(0))
-        literal = re.sub(r"^rp-mw/(dev|staging|prod|local)/", "rp-mw/<env>/", literal, flags=re.IGNORECASE)
+        literal = re.sub(
+            r"^rp-mw/(dev|staging|prod|local)/",
+            "rp-mw/<env>/",
+            literal,
+            flags=re.IGNORECASE,
+        )
         found.add(literal)
 
     found |= _extract_secret_path_calls(text)
@@ -173,7 +183,9 @@ def main() -> int:
             for sid in missing_in_code:
                 print(f"  - {sid}")
 
-        print("\nFix by updating the inventory doc and/or the integration default secret IDs.")
+        print(
+            "\nFix by updating the inventory doc and/or the integration default secret IDs."
+        )
         return 1
 
     print("[OK] Secret inventory is in sync with code defaults.")
@@ -182,5 +194,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

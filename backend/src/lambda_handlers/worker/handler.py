@@ -6,7 +6,7 @@ import os
 import time
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 try:
     import boto3  # type: ignore
@@ -44,13 +44,17 @@ IDEMPOTENCY_TABLE_NAME = os.environ["IDEMPOTENCY_TABLE_NAME"]
 SAFE_MODE_PARAM = os.environ["SAFE_MODE_PARAM"]
 AUTOMATION_ENABLED_PARAM = os.environ["AUTOMATION_ENABLED_PARAM"]
 FLAG_CACHE_TTL_SECONDS = int(os.environ.get("FLAG_CACHE_TTL_SECONDS", "30"))
-IDEMPOTENCY_TTL_SECONDS = int(os.environ.get("IDEMPOTENCY_TTL_SECONDS", str(30 * 24 * 60 * 60)))
+IDEMPOTENCY_TTL_SECONDS = int(
+    os.environ.get("IDEMPOTENCY_TTL_SECONDS", str(30 * 24 * 60 * 60))
+)
 CONVERSATION_STATE_TABLE_NAME = os.environ.get("CONVERSATION_STATE_TABLE_NAME")
 CONVERSATION_STATE_TTL_SECONDS = int(
     os.environ.get("CONVERSATION_STATE_TTL_SECONDS", str(90 * 24 * 60 * 60))
 )
 AUDIT_TRAIL_TABLE_NAME = os.environ.get("AUDIT_TRAIL_TABLE_NAME")
-AUDIT_TRAIL_TTL_SECONDS = int(os.environ.get("AUDIT_TRAIL_TTL_SECONDS", str(60 * 24 * 60 * 60)))
+AUDIT_TRAIL_TTL_SECONDS = int(
+    os.environ.get("AUDIT_TRAIL_TTL_SECONDS", str(60 * 24 * 60 * 60))
+)
 
 MW_ALLOW_ENV_FLAG_OVERRIDE = "MW_ALLOW_ENV_FLAG_OVERRIDE"
 MW_SAFE_MODE_OVERRIDE = "MW_SAFE_MODE_OVERRIDE"
@@ -69,15 +73,21 @@ _TABLE_CACHE: Dict[str, Any] = {}
 def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
     failures: List[Dict[str, str]] = []
     safe_mode, automation_enabled = _load_kill_switches()
-    outbound_enabled = _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False)
-    allow_network = outbound_enabled or _to_bool(os.environ.get("MW_ALLOW_NETWORK_READS"), default=False)
+    outbound_enabled = _to_bool(
+        os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False
+    )
+    allow_network = outbound_enabled or _to_bool(
+        os.environ.get("MW_ALLOW_NETWORK_READS"), default=False
+    )
 
     for record in event.get("Records", []):
         message_id = record.get("messageId", "unknown")
         try:
             body = json.loads(record["body"])
         except (KeyError, json.JSONDecodeError):
-            LOGGER.exception("worker.body_parse_failed", extra={"message_id": message_id})
+            LOGGER.exception(
+                "worker.body_parse_failed", extra={"message_id": message_id}
+            )
             failures.append({"itemIdentifier": message_id})
             continue
 
@@ -90,7 +100,7 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
                 allow_network=allow_network,
                 outbound_enabled=outbound_enabled,
             )
-            persisted = _persist_idempotency(envelope, plan)
+            _persist_idempotency(envelope, plan)
             execution = _execute_and_record(envelope, plan)
             outbound_result = _maybe_execute_outbound_reply(
                 envelope,
@@ -175,20 +185,23 @@ def _maybe_execute_outbound_reply(
     except Exception:
         LOGGER.exception(
             "worker.outbound_unexpected_failure",
-            extra={"event_id": envelope.event_id, "conversation_id": envelope.conversation_id},
+            extra={
+                "event_id": envelope.event_id,
+                "conversation_id": envelope.conversation_id,
+            },
         )
         return {"sent": False, "reason": "exception"}
 
 
-def _persist_idempotency(
-    envelope: EventEnvelope, plan: ActionPlan
-) -> Dict[str, Any]:
+def _persist_idempotency(envelope: EventEnvelope, plan: ActionPlan) -> Dict[str, Any]:
     event_id = str(envelope.event_id or f"evt:{int(time.time() * 1000)}")
     received_at = envelope.received_at or datetime.now(timezone.utc).isoformat()
     payload = envelope.payload or {}
     payload_fingerprint = _fingerprint(payload)
     payload_field_count = len(payload) if isinstance(payload, dict) else 0
-    conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
+    conversation_id = _safe_str(
+        envelope.conversation_id or envelope.group_id or "unknown"
+    )
     source_message_id = _safe_str(envelope.message_id or envelope.dedupe_id)
     expires_at = _now_epoch_seconds() + max(IDEMPOTENCY_TTL_SECONDS, 0)
 
@@ -228,7 +241,9 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
         if not CONVERSATION_STATE_TABLE_NAME:
             return
         item = dict(record)
-        item["expires_at"] = _now_epoch_seconds() + max(CONVERSATION_STATE_TTL_SECONDS, 0)
+        item["expires_at"] = _now_epoch_seconds() + max(
+            CONVERSATION_STATE_TTL_SECONDS, 0
+        )
         item = _ddb_sanitize(item)
         _table(CONVERSATION_STATE_TABLE_NAME).put_item(Item=item)
 
@@ -236,7 +251,9 @@ def _execute_and_record(envelope: EventEnvelope, plan: ActionPlan) -> ExecutionR
         if not AUDIT_TRAIL_TABLE_NAME:
             return
         item = dict(record)
-        recorded_at = str(record.get("recorded_at") or datetime.now(timezone.utc).isoformat())
+        recorded_at = str(
+            record.get("recorded_at") or datetime.now(timezone.utc).isoformat()
+        )
         event_id = str(record.get("event_id") or envelope.event_id)
         item["ts_action_id"] = f"{recorded_at}#{event_id}"
         item["expires_at"] = _now_epoch_seconds() + max(AUDIT_TRAIL_TTL_SECONDS, 0)
@@ -322,7 +339,10 @@ def _load_kill_switches() -> tuple[bool, bool]:
         response = _ssm_client().get_parameters(
             Names=[SAFE_MODE_PARAM, AUTOMATION_ENABLED_PARAM], WithDecryption=False
         )
-        values = {param["Name"]: param.get("Value") for param in response.get("Parameters", [])}
+        values = {
+            param["Name"]: param.get("Value")
+            for param in response.get("Parameters", [])
+        }
         if response.get("InvalidParameters"):
             LOGGER.warning(
                 "worker.flag_missing",
@@ -330,7 +350,9 @@ def _load_kill_switches() -> tuple[bool, bool]:
             )
 
         safe_mode = _to_bool(values.get(SAFE_MODE_PARAM), default=False)
-        automation_enabled = _to_bool(values.get(AUTOMATION_ENABLED_PARAM), default=True)
+        automation_enabled = _to_bool(
+            values.get(AUTOMATION_ENABLED_PARAM), default=True
+        )
     except Exception:
         LOGGER.exception("worker.flag_load_failed")
         safe_mode = True
@@ -367,15 +389,15 @@ def _load_kill_switches_from_env_override() -> Optional[tuple[bool, bool]]:
         return None
 
     safe_mode = _to_bool(safe_mode_raw, default=True)
-    automation_enabled_raw = _to_bool(automation_enabled_raw, default=False)
+    automation_enabled_override = _to_bool(automation_enabled_raw, default=False)
     # Enforce the same safety constraint used by _load_kill_switches so logs match effective behavior.
-    automation_enabled = False if safe_mode else automation_enabled_raw
+    automation_enabled = False if safe_mode else automation_enabled_override
     LOGGER.info(
         "worker.flags_env_override_active",
         extra={
             "safe_mode": safe_mode,
             "automation_enabled": automation_enabled,
-            "automation_enabled_raw": automation_enabled_raw,
+            "automation_enabled_raw": automation_enabled_override,
         },
     )
     return safe_mode, automation_enabled
@@ -425,11 +447,16 @@ def _dynamodb_resource():
     global _DDB_RESOURCE
     if _DDB_RESOURCE is None:
         if boto3 is None:
+
             class _InMemoryTable:
                 def __init__(self):
                     self.items: List[Dict[str, Any]] = []
 
-                def put_item(self, Item: Dict[str, Any], ConditionExpression: Optional[str] = None):
+                def put_item(
+                    self,
+                    Item: Dict[str, Any],
+                    ConditionExpression: Optional[str] = None,
+                ):
                     # No-op for conditional expressions in offline mode; we only need deterministic behavior.
                     self.items.append(Item)
                     return {"ResponseMetadata": {"HTTPStatusCode": 200}}
@@ -447,4 +474,3 @@ def _dynamodb_resource():
         else:
             _DDB_RESOURCE = boto3.resource("dynamodb")
     return _DDB_RESOURCE
-

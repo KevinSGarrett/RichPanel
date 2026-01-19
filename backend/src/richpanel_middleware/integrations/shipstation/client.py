@@ -77,15 +77,18 @@ class ShipStationResponse:
 
     def json(self) -> Any:
         try:
-            payload = self.body.decode("utf-8") if isinstance(self.body, (bytes, bytearray)) else self.body
+            payload = (
+                self.body.decode("utf-8")
+                if isinstance(self.body, (bytes, bytearray))
+                else self.body
+            )
             return json.loads(payload)
         except Exception:
             return None
 
 
 class Transport(Protocol):
-    def send(self, request: TransportRequest) -> TransportResponse:
-        ...
+    def send(self, request: TransportRequest) -> TransportResponse: ...
 
 
 class TransportError(Exception):
@@ -95,7 +98,9 @@ class TransportError(Exception):
 class ShipStationRequestError(Exception):
     """Raised when ShipStation replies with repeated failures."""
 
-    def __init__(self, message: str, *, response: Optional[ShipStationResponse] = None) -> None:
+    def __init__(
+        self, message: str, *, response: Optional[ShipStationResponse] = None
+    ) -> None:
         super().__init__(message)
         self.response = response
 
@@ -120,7 +125,9 @@ class HttpTransport:
             body = exc.read() if hasattr(exc, "read") else b""
             headers = dict(exc.headers.items()) if exc.headers else {}
             return TransportResponse(status_code=exc.code, headers=headers, body=body)
-        except urllib.error.URLError as exc:  # pragma: no cover - exercised via higher-level tests
+        except (
+            urllib.error.URLError
+        ) as exc:  # pragma: no cover - exercised via higher-level tests
             raise TransportError(str(exc)) from exc
 
 
@@ -186,14 +193,24 @@ class ShipStationClient:
             if allow_network is None
             else bool(allow_network)
         )
-        self.timeout_seconds = float(timeout_seconds or os.environ.get("SHIPSTATION_HTTP_TIMEOUT_SECONDS") or 5.0)
-        self.max_attempts = max(1, int(os.environ.get("SHIPSTATION_HTTP_MAX_ATTEMPTS", max_attempts)))
-        self.backoff_seconds = float(os.environ.get("SHIPSTATION_HTTP_BACKOFF_SECONDS", backoff_seconds))
-        self.backoff_max_seconds = float(os.environ.get("SHIPSTATION_HTTP_BACKOFF_MAX_SECONDS", backoff_max_seconds))
+        self.timeout_seconds = float(
+            timeout_seconds or os.environ.get("SHIPSTATION_HTTP_TIMEOUT_SECONDS") or 5.0
+        )
+        self.max_attempts = max(
+            1, int(os.environ.get("SHIPSTATION_HTTP_MAX_ATTEMPTS", max_attempts))
+        )
+        self.backoff_seconds = float(
+            os.environ.get("SHIPSTATION_HTTP_BACKOFF_SECONDS", backoff_seconds)
+        )
+        self.backoff_max_seconds = float(
+            os.environ.get("SHIPSTATION_HTTP_BACKOFF_MAX_SECONDS", backoff_max_seconds)
+        )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
         self._api_key = api_key or os.environ.get("SHIPSTATION_API_KEY_OVERRIDE")
-        self._api_secret = api_secret or os.environ.get("SHIPSTATION_API_SECRET_OVERRIDE")
+        self._api_secret = api_secret or os.environ.get(
+            "SHIPSTATION_API_SECRET_OVERRIDE"
+        )
         self._base_secret_loaded = False
         self._secrets_client_obj = secrets_client
         self._sleeper = sleeper or time.sleep
@@ -220,17 +237,26 @@ class ShipStationClient:
         if reason:
             self._logger.info(
                 "shipstation.dry_run",
-                extra={"method": method.upper(), "url": url, "reason": reason, "dry_run": True},
+                extra={
+                    "method": method.upper(),
+                    "url": url,
+                    "reason": reason,
+                    "dry_run": True,
+                },
             )
             return self._dry_run_response(url, reason)
 
         api_key, api_secret, credential_reason = self._load_credentials()
         if not api_key or not api_secret:
             reason = credential_reason or "missing_credentials"
-            self._logger.warning("shipstation.missing_credentials", extra={"url": url, "reason": reason})
+            self._logger.warning(
+                "shipstation.missing_credentials", extra={"url": url, "reason": reason}
+            )
             return self._dry_run_response(url, "missing_credentials")
 
-        request_headers = self._build_headers(headers, api_key, api_secret, has_body=body_bytes is not None)
+        request_headers = self._build_headers(
+            headers, api_key, api_secret, has_body=body_bytes is not None
+        )
         attempt = 1
         last_response: Optional[ShipStationResponse] = None
 
@@ -318,7 +344,9 @@ class ShipStationClient:
             reason=reason,
         )
 
-    def _to_response(self, transport_response: TransportResponse, url: str) -> ShipStationResponse:
+    def _to_response(
+        self, transport_response: TransportResponse, url: str
+    ) -> ShipStationResponse:
         return ShipStationResponse(
             status_code=transport_response.status_code,
             headers=transport_response.headers,
@@ -327,7 +355,9 @@ class ShipStationClient:
             dry_run=False,
         )
 
-    def _should_retry(self, response: ShipStationResponse, attempt: int) -> Tuple[bool, float]:
+    def _should_retry(
+        self, response: ShipStationResponse, attempt: int
+    ) -> Tuple[bool, float]:
         if response.status_code == 429 or 500 <= response.status_code < 600:
             delay = self._compute_backoff(attempt, response.headers.get("Retry-After"))
             return True, delay
@@ -342,7 +372,9 @@ class ShipStationClient:
             except (TypeError, ValueError):
                 pass
 
-        base = min(self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds)
+        base = min(
+            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        )
         jitter = base * 0.25 * self._rng()
         return min(base + jitter, self.backoff_max_seconds)
 
@@ -374,14 +406,18 @@ class ShipStationClient:
             if base_value:
                 self._base_url = base_value.rstrip("/")
             elif error:
-                self._logger.info("shipstation.base_secret_unavailable", extra={"reason": error})
+                self._logger.info(
+                    "shipstation.base_secret_unavailable", extra={"reason": error}
+                )
 
         if self._api_key and self._api_secret:
             return self._api_key, self._api_secret, None
 
         return None, None, reasons[0] if reasons else "missing_credentials"
 
-    def _fetch_secret_value(self, secret_id: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    def _fetch_secret_value(
+        self, secret_id: Optional[str]
+    ) -> Tuple[Optional[str], Optional[str]]:
         if not secret_id:
             return None, "secret_id_missing"
         client = self._secrets_client_obj
@@ -400,7 +436,9 @@ class ShipStationClient:
         secret_value = response.get("SecretString")
         if secret_value is None and response.get("SecretBinary") is not None:
             try:
-                secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+                secret_value = base64.b64decode(response["SecretBinary"]).decode(
+                    "utf-8"
+                )
             except Exception:
                 return None, "secret_decode_failed"
 
@@ -412,7 +450,9 @@ class ShipStationClient:
     def _secrets_client(self):
         if self._secrets_client_obj is None:
             if boto3 is None:
-                raise ShipStationRequestError("boto3 is required to create a secretsmanager client.")
+                raise ShipStationRequestError(
+                    "boto3 is required to create a secretsmanager client."
+                )
             self._secrets_client_obj = boto3.client("secretsmanager")
         return self._secrets_client_obj
 
@@ -424,7 +464,9 @@ class ShipStationClient:
         *,
         has_body: bool,
     ) -> Dict[str, str]:
-        token = base64.b64encode(f"{api_key}:{api_secret}".encode("utf-8")).decode("utf-8")
+        token = base64.b64encode(f"{api_key}:{api_secret}".encode("utf-8")).decode(
+            "utf-8"
+        )
         merged: Dict[str, str] = {
             "accept": "application/json",
             "authorization": f"Basic {token}",
@@ -444,7 +486,9 @@ class ShipStationClient:
             return json_body
         if isinstance(json_body, str):
             return json_body.encode("utf-8")
-        return json.dumps(json_body, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return json.dumps(json_body, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
 
     def _build_url(self, path: str, params: Optional[Dict[str, str]]) -> str:
         normalized_path = path if path.startswith("/") else f"/{path}"
@@ -489,7 +533,9 @@ class ShipStationClient:
             return bool(override)
         return not self.allow_network
 
-    def _short_circuit_reason(self, safe_mode: bool, automation_enabled: bool, dry_run: bool) -> Optional[str]:
+    def _short_circuit_reason(
+        self, safe_mode: bool, automation_enabled: bool, dry_run: bool
+    ) -> Optional[str]:
         if safe_mode:
             return "safe_mode"
         if not automation_enabled:
@@ -525,7 +571,9 @@ class ShipStationExecutor:
     def execute(self, method: str, path: str, **kwargs: Any) -> ShipStationResponse:
         requested_dry_run = kwargs.pop("dry_run", None)
         effective_dry_run = (
-            not self._outbound_enabled if requested_dry_run is None else bool(requested_dry_run)
+            not self._outbound_enabled
+            if requested_dry_run is None
+            else bool(requested_dry_run)
         )
         return self._client.request(method, path, dry_run=effective_dry_run, **kwargs)
 
@@ -546,5 +594,3 @@ __all__ = [
     "TransportError",
     "HttpTransport",
 ]
-
-

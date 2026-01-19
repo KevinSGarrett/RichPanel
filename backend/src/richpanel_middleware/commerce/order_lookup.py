@@ -137,7 +137,9 @@ def lookup_order_summary(
     return summary
 
 
-def _should_enrich(order_id: str, allow_network: bool, safe_mode: bool, automation_enabled: bool) -> bool:
+def _should_enrich(
+    order_id: str, allow_network: bool, safe_mode: bool, automation_enabled: bool
+) -> bool:
     if not order_id or order_id == "unknown":
         return False
     return allow_network and not safe_mode and automation_enabled
@@ -202,26 +204,36 @@ def _lookup_shipstation(
 def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
     payload = envelope.payload or {}
     order_id = _extract_order_id(payload, envelope.conversation_id)
-    status = _coerce_str(
-        payload.get("status")
-        or payload.get("fulfillment_status")
-        or payload.get("order_status")
-    ) or "unknown"
-    carrier = _coerce_str(payload.get("carrier") or payload.get("shipping_carrier")) or ""
+    status = (
+        _coerce_str(
+            payload.get("status")
+            or payload.get("fulfillment_status")
+            or payload.get("order_status")
+        )
+        or "unknown"
+    )
+    carrier = (
+        _coerce_str(payload.get("carrier") or payload.get("shipping_carrier")) or ""
+    )
     tracking = (
         _coerce_str(payload.get("tracking_number"))
         or _coerce_str(payload.get("trackingNumber"))
         or _coerce_str(payload.get("tracking"))
         or ""
     )
-    updated_at = _coerce_str(payload.get("updated_at") or payload.get("fulfillment_updated_at")) or envelope.received_at
+    updated_at = (
+        _coerce_str(payload.get("updated_at") or payload.get("fulfillment_updated_at"))
+        or envelope.received_at
+    )
     items = payload.get("items")
     items_count = _coerce_int(payload.get("items_count") or payload.get("itemsCount"))
     if items_count is None and isinstance(items, list):
         items_count = len(items)
     if items_count is None:
         items_count = 0
-    total_price = _coerce_price(payload.get("total_price") or payload.get("amount") or payload.get("price"))
+    total_price = _coerce_price(
+        payload.get("total_price") or payload.get("amount") or payload.get("price")
+    )
     created_at = _coerce_str(
         payload.get("created_at")
         or payload.get("order_created_at")
@@ -258,7 +270,9 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
         return {}
 
     # Start with shapes that mirror Shopify and ShipStation responses.
-    summary = _merge_summary(_extract_shipstation_fields(payload), _extract_shopify_fields(payload))
+    summary = _merge_summary(
+        _extract_shipstation_fields(payload), _extract_shopify_fields(payload)
+    )
 
     status = summary.get("status") or _coerce_str(
         payload.get("fulfillment_status")
@@ -371,7 +385,9 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
     items_count = summary.get("items_count")
     if items_count is None:
         items_count = _coerce_int(
-            payload.get("items_count") or payload.get("itemsCount") or payload.get("line_items_count")
+            payload.get("items_count")
+            or payload.get("itemsCount")
+            or payload.get("line_items_count")
         )
         if items_count is None:
             items = payload.get("items")
@@ -431,7 +447,9 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
     )
     created_at = _coerce_str(payload.get("created_at") or payload.get("processed_at"))
     updated_at = _coerce_str(payload.get("updated_at"))
-    total_price = _coerce_price(payload.get("total_price") or payload.get("current_total_price"))
+    total_price = _coerce_price(
+        payload.get("total_price") or payload.get("current_total_price")
+    )
 
     tracking_number = ""
     carrier = ""
@@ -494,7 +512,9 @@ def _extract_shipstation_fields(payload: Dict[str, Any]) -> OrderSummary:
             if not isinstance(entry, dict):
                 continue
             shipment_payload = entry
-            tracking_candidate = _coerce_str(entry.get("trackingNumber") or entry.get("tracking_number"))
+            tracking_candidate = _coerce_str(
+                entry.get("trackingNumber") or entry.get("tracking_number")
+            )
             if tracking_candidate:
                 break
 
@@ -542,10 +562,18 @@ def _extract_shipstation_fields(payload: Dict[str, Any]) -> OrderSummary:
         or payload.get("orderDate")
     )
     items = source.get("items")
-    items_count = len(items) if isinstance(items, list) else _coerce_int(source.get("items_count"))
+    items_count = (
+        len(items)
+        if isinstance(items, list)
+        else _coerce_int(source.get("items_count"))
+    )
     if items_count is None:
         fallback_items = payload.get("items")
-        items_count = len(fallback_items) if isinstance(fallback_items, list) else _coerce_int(payload.get("items_count"))
+        items_count = (
+            len(fallback_items)
+            if isinstance(fallback_items, list)
+            else _coerce_int(payload.get("items_count"))
+        )
     total_price = _coerce_price(
         source.get("orderTotal")
         or source.get("amountPaid")
@@ -615,4 +643,3 @@ def _first_str(values: Any) -> Optional[str]:
     if isinstance(values, list) and values:
         return _coerce_str(values[0])
     return _coerce_str(values)
-

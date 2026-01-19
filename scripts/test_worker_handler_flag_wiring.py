@@ -28,7 +28,9 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
     def setUp(self) -> None:
         # Keep tests offline/deterministic.
         worker.boto3 = None  # type: ignore
-        worker._FLAG_CACHE.update({"safe_mode": True, "automation_enabled": False, "expires_at": 0.0})
+        worker._FLAG_CACHE.update(
+            {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}
+        )
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
@@ -53,9 +55,13 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         fake_plan.actions = []
         fake_execution = mock.Mock(dry_run=True)
 
-        with mock.patch.object(worker, "_load_kill_switches", return_value=(False, True)), mock.patch.object(
+        with mock.patch.object(
+            worker, "_load_kill_switches", return_value=(False, True)
+        ), mock.patch.object(
             worker, "normalize_event", return_value=envelope
-        ), mock.patch.object(worker, "plan_actions", return_value=fake_plan) as plan_mock, mock.patch.object(
+        ), mock.patch.object(
+            worker, "plan_actions", return_value=fake_plan
+        ) as plan_mock, mock.patch.object(
             worker, "_persist_idempotency"
         ), mock.patch.object(
             worker, "_execute_and_record", return_value=fake_execution
@@ -68,7 +74,9 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
                 "Records": [
                     {
                         "messageId": "m1",
-                        "body": json.dumps({"payload": {"ticket_id": "t-1", "message_id": "m1"}}),
+                        "body": json.dumps(
+                            {"payload": {"ticket_id": "t-1", "message_id": "m1"}}
+                        ),
                     }
                 ]
             }
@@ -101,9 +109,13 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         fake_plan.actions = []
         fake_execution = mock.Mock(dry_run=True)
 
-        with mock.patch.object(worker, "_load_kill_switches", return_value=(False, True)), mock.patch.object(
+        with mock.patch.object(
+            worker, "_load_kill_switches", return_value=(False, True)
+        ), mock.patch.object(
             worker, "normalize_event", return_value=envelope
-        ), mock.patch.object(worker, "plan_actions", return_value=fake_plan) as plan_mock, mock.patch.object(
+        ), mock.patch.object(
+            worker, "plan_actions", return_value=fake_plan
+        ) as plan_mock, mock.patch.object(
             worker, "_persist_idempotency"
         ), mock.patch.object(
             worker, "_execute_and_record", return_value=fake_execution
@@ -116,7 +128,9 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
                 "Records": [
                     {
                         "messageId": "m2",
-                        "body": json.dumps({"payload": {"ticket_id": "t-2", "message_id": "m2"}}),
+                        "body": json.dumps(
+                            {"payload": {"ticket_id": "t-2", "message_id": "m2"}}
+                        ),
                     }
                 ]
             }
@@ -150,9 +164,13 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         fake_plan.actions = []
         fake_execution = mock.Mock(dry_run=True)
 
-        with mock.patch.object(worker, "_load_kill_switches", return_value=(False, True)), mock.patch.object(
+        with mock.patch.object(
+            worker, "_load_kill_switches", return_value=(False, True)
+        ), mock.patch.object(
             worker, "normalize_event", return_value=envelope
-        ), mock.patch.object(worker, "plan_actions", return_value=fake_plan) as plan_mock, mock.patch.object(
+        ), mock.patch.object(
+            worker, "plan_actions", return_value=fake_plan
+        ) as plan_mock, mock.patch.object(
             worker, "_persist_idempotency"
         ), mock.patch.object(
             worker, "_execute_and_record", return_value=fake_execution
@@ -165,7 +183,9 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
                 "Records": [
                     {
                         "messageId": "m3",
-                        "body": json.dumps({"payload": {"ticket_id": "t-3", "message_id": "m3"}}),
+                        "body": json.dumps(
+                            {"payload": {"ticket_id": "t-3", "message_id": "m3"}}
+                        ),
                     }
                 ]
             }

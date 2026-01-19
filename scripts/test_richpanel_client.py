@@ -91,7 +91,9 @@ class RichpanelClientTests(unittest.TestCase):
         sleeps = []
         transport = _RecordingTransport(
             [
-                TransportResponse(status_code=429, headers={"Retry-After": "1"}, body=b""),
+                TransportResponse(
+                    status_code=429, headers={"Retry-After": "1"}, body=b""
+                ),
                 TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
             ]
         )
@@ -138,14 +140,18 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertGreaterEqual(sleeps[0], client.backoff_seconds)
 
     def test_redaction_masks_api_key(self) -> None:
-        redacted = RichpanelClient.redact_headers({"x-richpanel-key": "secret", "ok": "1"})
+        redacted = RichpanelClient.redact_headers(
+            {"x-richpanel-key": "secret", "ok": "1"}
+        )
 
         self.assertEqual(redacted["x-richpanel-key"], "***")
         self.assertEqual(redacted["ok"], "1")
 
     def test_executor_defaults_to_dry_run(self) -> None:
         transport = _FailingTransport()
-        executor = RichpanelExecutor(client=RichpanelClient(api_key="test-key", transport=transport))
+        executor = RichpanelExecutor(
+            client=RichpanelClient(api_key="test-key", transport=transport)
+        )
 
         response = executor.execute("POST", "/v1/tickets/abc", json_body={"foo": "bar"})
 
@@ -157,11 +163,15 @@ class RichpanelClientTests(unittest.TestCase):
             [TransportResponse(status_code=202, headers={}, body=b"accepted")]
         )
         executor = RichpanelExecutor(
-            client=RichpanelClient(api_key="test-key", transport=transport, dry_run=True),
+            client=RichpanelClient(
+                api_key="test-key", transport=transport, dry_run=True
+            ),
             outbound_enabled=True,
         )
 
-        response = executor.execute("PUT", "/v1/tickets/abc/add-tags", json_body={"tags": ["vip"]})
+        response = executor.execute(
+            "PUT", "/v1/tickets/abc/add-tags", json_body={"tags": ["vip"]}
+        )
 
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 202)
@@ -188,7 +198,9 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(len(transport.requests), 1)
 
     def test_get_ticket_metadata_handles_ticket_dict(self) -> None:
-        body = b'{"ticket": {"status": "OPEN", "tags": ["vip"], "conversation_no": 123}}'
+        body = (
+            b'{"ticket": {"status": "OPEN", "tags": ["vip"], "conversation_no": 123}}'
+        )
         transport = _RecordingTransport(
             [TransportResponse(status_code=200, headers={}, body=body)]
         )
@@ -235,4 +247,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

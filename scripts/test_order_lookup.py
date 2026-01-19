@@ -6,23 +6,23 @@ import sys
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from richpanel_middleware.commerce.order_lookup import (
+from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     lookup_order_summary,
-    SHOPIFY_ORDER_FIELDS,
 )
-from richpanel_middleware.ingest.envelope import EventEnvelope
-from richpanel_middleware.integrations.shopify import (
+from richpanel_middleware.ingest.envelope import EventEnvelope  # noqa: E402
+from richpanel_middleware.integrations.shopify import (  # noqa: E402
     ShopifyClient,
     TransportRequest as ShopifyTransportRequest,
     TransportResponse as ShopifyTransportResponse,
 )
-from richpanel_middleware.integrations.shipstation import (
+from richpanel_middleware.integrations.shipstation import (  # noqa: E402
     ShipStationClient,
     TransportRequest as ShipStationTransportRequest,
     TransportResponse as ShipStationTransportResponse,
@@ -59,7 +59,17 @@ class _FailingShipStationClient:
 
     def list_shipments(self, *args, **kwargs):
         self.called = True
-        raise AssertionError("ShipStation should not be invoked when network is disabled")
+        raise AssertionError(
+            "ShipStation should not be invoked when network is disabled"
+        )
+
+
+def _failing_shopify_client() -> _FailingShopifyClient:
+    return _FailingShopifyClient()
+
+
+def _failing_shipstation_client() -> _FailingShipStationClient:
+    return _FailingShipStationClient()
 
 
 def _load_fixture(name: str) -> dict:
@@ -76,7 +86,9 @@ def _envelope(payload: dict) -> EventEnvelope:
         dedupe_id="dedupe-1",
         payload=payload,
         source="test",
-        conversation_id=str(payload.get("conversation_id") or payload.get("order_id") or "conv-1"),
+        conversation_id=str(
+            payload.get("conversation_id") or payload.get("order_id") or "conv-1"
+        ),
     )
 
 
@@ -89,8 +101,8 @@ class OrderLookupTests(unittest.TestCase):
             os.environ.pop(key, None)
 
     def test_offline_lookup_does_not_call_transports(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         envelope = _envelope({"order_id": "A-1", "status": "pending"})
 
         summary = lookup_order_summary(
@@ -98,8 +110,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["order_id"], "A-1")
@@ -108,8 +120,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_only_summary_when_network_disabled(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = _load_fixture("payload_order_summary.json")
         envelope = _envelope(payload)
 
@@ -118,8 +130,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "trk_123")
@@ -132,8 +144,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_only_summary_skips_network_when_enabled(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = _load_fixture("payload_order_summary.json")
         envelope = _envelope(payload)
 
@@ -142,8 +154,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "trk_123")
@@ -156,8 +168,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_missing_shipping_signals_offline_returns_baseline(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         envelope = _envelope({"order_id": "B-1"})
 
         summary = lookup_order_summary(
@@ -165,8 +177,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["order_id"], "B-1")
@@ -175,8 +187,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_tracking_dict_number_is_used_not_stringified(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {"order_id": "T-1", "tracking": {"number": "ABC123"}}
         envelope = _envelope(payload)
 
@@ -185,8 +197,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "ABC123")
@@ -195,8 +207,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_tracking_dict_id_fallback(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {"order_id": "T-2", "tracking": {"id": "ABC999"}}
         envelope = _envelope(payload)
 
@@ -205,8 +217,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "ABC999")
@@ -214,12 +226,15 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_orders_list_candidate_is_used(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {
             "orders": [
                 {
-                    "shipment": {"carrierCode": "orders_carrier", "serviceCode": "orders_ground"},
+                    "shipment": {
+                        "carrierCode": "orders_carrier",
+                        "serviceCode": "orders_ground",
+                    },
                     "tracking": {"number": "ORD-123"},
                 }
             ]
@@ -231,8 +246,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "ORD-123")
@@ -242,8 +257,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_shipment_dict_used_for_carrier_and_service(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {
             "order_id": "SHIP-1",
             "shipment": {"carrierCode": "ship_demo", "serviceCode": "priority_ship"},
@@ -255,8 +270,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["carrier"], "ship_demo")
@@ -265,12 +280,15 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_payload_fulfillments_list_used_for_tracking_and_carrier(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {
             "order_id": "FUL-1",
             "fulfillments": [
-                {"tracking_company": "fulfill_carrier", "tracking_numbers": ["FUL-TRACK-1"]}
+                {
+                    "tracking_company": "fulfill_carrier",
+                    "tracking_numbers": ["FUL-TRACK-1"],
+                }
             ],
         }
         envelope = _envelope(payload)
@@ -280,8 +298,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=False,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "FUL-TRACK-1")
@@ -290,8 +308,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_nested_order_tracking_string_is_extracted(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {"order": {"tracking": "STR-123"}}
         envelope = _envelope(payload)
 
@@ -300,8 +318,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "STR-123")
@@ -309,8 +327,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shipstation.called)
 
     def test_nested_order_tracking_numeric_is_extracted(self) -> None:
-        shopify = _FailingShopifyClient()
-        shipstation = _FailingShipStationClient()
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
         payload = {"order": {"tracking": 12345}}
         envelope = _envelope(payload)
 
@@ -319,8 +337,8 @@ class OrderLookupTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
             allow_network=True,
-            shopify_client=shopify,
-            shipstation_client=shipstation,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
         )
 
         self.assertEqual(summary["tracking_number"], "12345")
@@ -343,7 +361,7 @@ class OrderLookupTests(unittest.TestCase):
             allow_network=True,
             transport=transport,
         )
-        shipstation_client = _FailingShipStationClient()
+        shipstation_client = _failing_shipstation_client()
 
         envelope = _envelope({"order_id": "A-100"})
 
@@ -353,7 +371,7 @@ class OrderLookupTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             shopify_client=shopify_client,
-            shipstation_client=shipstation_client,
+            shipstation_client=cast(ShipStationClient, shipstation_client),
         )
 
         self.assertEqual(summary["status"], "fulfilled")
@@ -382,7 +400,7 @@ class OrderLookupTests(unittest.TestCase):
             allow_network=True,
             transport=transport,
         )
-        shipstation_client = _FailingShipStationClient()
+        shipstation_client = _failing_shipstation_client()
 
         envelope = _envelope({"order_id": "A-200"})
 
@@ -392,7 +410,7 @@ class OrderLookupTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             shopify_client=shopify_client,
-            shipstation_client=shipstation_client,
+            shipstation_client=cast(ShipStationClient, shipstation_client),
         )
 
         self.assertEqual(summary["tracking_number"], "1Z999")
@@ -469,4 +487,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

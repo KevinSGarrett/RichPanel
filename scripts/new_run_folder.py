@@ -52,8 +52,14 @@ def utc_run_id_now() -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("run_id", nargs="?", help="RUN_<YYYYMMDD>_<HHMMZ> (UTC)")
-    parser.add_argument("--now", action="store_true", help="Generate RUN_ID from current UTC time")
-    parser.add_argument("--force", action="store_true", help="Overwrite existing run folder if it exists")
+    parser.add_argument(
+        "--now", action="store_true", help="Generate RUN_ID from current UTC time"
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing run folder if it exists",
+    )
     args = parser.parse_args()
 
     if args.now:
@@ -66,7 +72,10 @@ def main() -> int:
         return 2
 
     if not RUN_ID_RE.match(run_id):
-        print(f"ERROR: invalid RUN_ID '{run_id}'. Must match {RUN_ID_RE.pattern}", file=sys.stderr)
+        print(
+            f"ERROR: invalid RUN_ID '{run_id}'. Must match {RUN_ID_RE.pattern}",
+            file=sys.stderr,
+        )
         return 2
 
     repo_root = Path(__file__).resolve().parents[1]
@@ -84,7 +93,10 @@ def main() -> int:
 
     if run_root.exists():
         if not args.force:
-            print(f"ERROR: run folder already exists: {run_root} (use --force to overwrite)", file=sys.stderr)
+            print(
+                f"ERROR: run folder already exists: {run_root} (use --force to overwrite)",
+                file=sys.stderr,
+            )
             return 2
         shutil.rmtree(run_root)
 
@@ -106,7 +118,10 @@ def main() -> int:
             src = find_template(src_name)
             if src is None:
                 looked = ", ".join(str(d) for d in templates_dirs)
-                print(f"WARN: template missing: {src_name} (looked in: {looked})", file=sys.stderr)
+                print(
+                    f"WARN: template missing: {src_name} (looked in: {looked})",
+                    file=sys.stderr,
+                )
                 continue
             shutil.copyfile(src, agent_dir / dst_name)
 
@@ -122,7 +137,10 @@ def main() -> int:
         archived += current_prompts.read_text(encoding="utf-8", errors="replace")
         archive_dst.write_text(archived, encoding="utf-8")
     else:
-        print(f"WARN: missing current prompts file; cannot archive: {current_prompts}", file=sys.stderr)
+        print(
+            f"WARN: missing current prompts file; cannot archive: {current_prompts}",
+            file=sys.stderr,
+        )
 
     # Create a simple run meta file at the run root
     meta = run_root / "RUN_META.md"

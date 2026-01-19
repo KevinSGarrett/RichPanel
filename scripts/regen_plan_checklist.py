@@ -112,14 +112,16 @@ def extract_tasks(md_path: Path, docs_root: Path) -> List[Task]:
         heading_path = " > ".join(hp_parts) if hp_parts else "(no heading)"
 
         tid = stable_id(rel_path, heading_path, text)
-        tasks.append(Task(
-            id=tid,
-            checked=checked,
-            text=text,
-            source_path=f"docs/{rel_path}",
-            line=idx,
-            heading_path=heading_path,
-        ))
+        tasks.append(
+            Task(
+                id=tid,
+                checked=checked,
+                text=text,
+                source_path=f"docs/{rel_path}",
+                line=idx,
+                heading_path=heading_path,
+            )
+        )
     return tasks
 
 
@@ -134,14 +136,16 @@ def group_tasks(tasks: List[Task]) -> Dict[str, Dict[str, List[Task]]]:
 def write_json(out_path: Path, tasks: List[Task]) -> None:
     out = []
     for t in tasks:
-        out.append({
-            "id": t.id,
-            "checked": t.checked,
-            "text": t.text,
-            "source_path": t.source_path,
-            "line": t.line,
-            "heading_path": t.heading_path,
-        })
+        out.append(
+            {
+                "id": t.id,
+                "checked": t.checked,
+                "text": t.text,
+                "source_path": t.source_path,
+                "line": t.line,
+                "heading_path": t.heading_path,
+            }
+        )
     out_path.write_text(json.dumps(out, indent=2, sort_keys=True), encoding="utf-8")
 
 
@@ -155,7 +159,9 @@ def write_extracted_md(out_path: Path, tasks: List[Task]) -> None:
     md.append("# PLAN CHECKLIST — Extracted (Generated)")
     md.append("")
     md.append("Generated: (deterministic; see git history)  ")
-    md.append("Source: markdown checkboxes across docs/ (excluding Agent Ops and To_Do outputs)")
+    md.append(
+        "Source: markdown checkboxes across docs/ (excluding Agent Ops and To_Do outputs)"
+    )
     md.append("")
     md.append(f"Counts: total={total}, checked={checked}, unchecked={unchecked}")
     md.append("")
@@ -183,6 +189,7 @@ def write_extracted_md(out_path: Path, tasks: List[Task]) -> None:
 
 def write_summary_md(out_path: Path, tasks: List[Task]) -> None:
     """Write a small summary grouped by top-level docs section."""
+
     def top_section(source_path: str) -> str:
         # source_path is like docs/06_Security_Privacy_Compliance/...
         rel = source_path.removeprefix("docs/")
@@ -208,7 +215,9 @@ def write_summary_md(out_path: Path, tasks: List[Task]) -> None:
         lines.append(f"| `{sec}` | {total} | {checked} | {total - checked} |")
     lines.append("")
     lines.append("Full extracted list:")
-    lines.append("- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`")
+    lines.append(
+        "- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`"
+    )
     lines.append("")
     out_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 

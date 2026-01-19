@@ -1,6 +1,6 @@
 # Run Summary
 
-**Run ID:** $runId  
+**Run ID:** `RUN_20260118_1628Z`  
 **Agent:** B  
 **Date:** 2026-01-18
 
@@ -19,8 +19,8 @@ Fix Bugbot-identified workflow issues for PR gate enforcement and capture eviden
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260118_1628Z-B
-- PR: <pending>
-- CI status at end of run: <pending>
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/119
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 

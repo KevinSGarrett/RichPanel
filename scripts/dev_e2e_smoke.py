@@ -45,8 +45,7 @@ except ImportError:  # pragma: no cover - enforced in CI
     boto3 = None  # type: ignore
     Key = None  # type: ignore
 
-    class _MissingBoto3(Exception):
-        ...
+    class _MissingBoto3(Exception): ...
 
     BotoCoreError = ClientError = _MissingBoto3  # type: ignore
 
@@ -56,7 +55,7 @@ BACKEND_SRC = ROOT / "backend" / "src"
 if str(BACKEND_SRC) not in sys.path:
     sys.path.insert(0, str(BACKEND_SRC))
 
-from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
+from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
     RichpanelClient,
     RichpanelExecutor,
     RichpanelRequestError,
@@ -119,13 +118,21 @@ def _compute_middleware_outcome(
     - Skip/error tags (mw-skip-status-read-failed, route-email-support-team) are NOT valid.
     - Smoke tags (mw-smoke:<RUN_ID>) are ignored for PASS purposes.
     """
-    normalized_status = status_after.strip().lower() if isinstance(status_after, str) else None
-    status_resolved = normalized_status in {"resolved", "closed"} if normalized_status else False
+    normalized_status = (
+        status_after.strip().lower() if isinstance(status_after, str) else None
+    )
+    status_resolved = (
+        normalized_status in {"resolved", "closed"} if normalized_status else False
+    )
     skip_tags_added = [tag for tag in tags_added if tag in _SKIP_MIDDLEWARE_TAGS]
-    positive_tags_added = [tag for tag in tags_added if _is_positive_middleware_tag(tag)]
+    positive_tags_added = [
+        tag for tag in tags_added if _is_positive_middleware_tag(tag)
+    ]
     middleware_tag_added = bool(positive_tags_added)
     middleware_tag_present = middleware_tag_added
-    middleware_outcome = (status_resolved or middleware_tag_added) and not bool(skip_tags_added)
+    middleware_outcome = (status_resolved or middleware_tag_added) and not bool(
+        skip_tags_added
+    )
     return {
         "status_resolved": status_resolved,
         "middleware_tag_present": middleware_tag_present,
@@ -151,7 +158,9 @@ def _classify_order_status_result(
     PASS_WEAK is allowed when middleware outcome is positive but success tag missing.
     Any skip/escalation tag causes FAIL.
     """
-    failed_reason = f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
+    failed_reason = (
+        f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
+    )
 
     if skip_tags_present_ok is False:
         return "FAIL", "skip_or_escalation_tags_present"
@@ -164,6 +173,8 @@ def _classify_order_status_result(
     if middleware_ok:
         return "PASS_WEAK", "status_or_success_tag_missing"
     return "FAIL", failed_reason
+
+
 @dataclass
 class StackArtifacts:
     endpoint_url: str
@@ -176,7 +187,9 @@ class StackArtifacts:
 
 def _setup_boto_session(region: str, profile: Optional[str]) -> Any:
     if boto3 is None:
-        raise SmokeFailure("boto3 is required to run dev_e2e_smoke.py; install it with `pip install boto3`.")
+        raise SmokeFailure(
+            "boto3 is required to run dev_e2e_smoke.py; install it with `pip install boto3`."
+        )
     if profile:
         boto3.setup_default_session(profile_name=profile, region_name=region)
     return boto3.session.Session(region_name=region, profile_name=profile)
@@ -287,7 +300,9 @@ def _extract_endpoint_variant(path: Optional[str]) -> Optional[str]:
     return "unknown"
 
 
-def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+def _sanitize_ticket_snapshot(
+    snapshot: Optional[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
     if not snapshot:
         return None
     sanitized = dict(snapshot)
@@ -307,7 +322,9 @@ def _sanitize_ticket_snapshot(snapshot: Optional[Dict[str, Any]]) -> Optional[Di
     return sanitized
 
 
-def _sanitize_tag_result(tag_result: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+def _sanitize_tag_result(
+    tag_result: Optional[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
     """Sanitize the tag application result to remove PII from paths."""
     if not tag_result:
         return None
@@ -328,8 +345,12 @@ def _order_status_scenario_payload(
     order_created_at = (now - timedelta(days=5)).isoformat()
     ticket_created_at = (now - timedelta(days=1)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
-    tracking_number = f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
+    seeded_order_id = (
+        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
+    )
+    tracking_number = (
+        f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
+    )
     tracking_url = f"https://tracking.example.com/track/{tracking_number}"
     shipping_method = "Standard (3-5 business days)"
     carrier = "UPS"
@@ -399,7 +420,9 @@ def _order_status_no_tracking_payload(
     eta_start = (now + timedelta(days=3)).isoformat()
     eta_end = (now + timedelta(days=5)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
+    seeded_order_id = (
+        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
+    )
     shipping_method = "Standard (3-5 Business Days)"
 
     base_order = {
@@ -415,7 +438,11 @@ def _order_status_no_tracking_payload(
         "created_at": order_created_at,
         "updated_at": ticket_created_at,
         "items": [
-            {"sku": "SMOKE-OS-NO-TRACK", "name": "Smoke Test No-Tracking Tee", "quantity": 1}
+            {
+                "sku": "SMOKE-OS-NO-TRACK",
+                "name": "Smoke Test No-Tracking Tee",
+                "quantity": 1,
+            }
         ],
         "eta_window": {"start": eta_start, "end": eta_end},
     }
@@ -450,25 +477,29 @@ def _order_status_no_tracking_payload(
             "orderNumber": seeded_order_id,
             "shipDate": ticket_created_at,
         },
-        "eta_window": {"start": eta_start, "end": eta_end, "shipping_method": shipping_method},
+        "eta_window": {
+            "start": eta_start,
+            "end": eta_end,
+            "shipping_method": shipping_method,
+        },
     }
 
 
 # PII patterns that must not appear in proof JSON
 _PII_PATTERNS = [
-    "%40",       # URL-encoded @
-    "%3C",       # URL-encoded <
-    "%3E",       # URL-encoded >
-    "mail.",     # email domain fragment
-    "@",         # literal @
-    "<",         # literal < (except in redacted placeholders)
-    "evt:",      # raw event identifiers
+    "%40",  # URL-encoded @
+    "%3C",  # URL-encoded <
+    "%3E",  # URL-encoded >
+    "mail.",  # email domain fragment
+    "@",  # literal @
+    "<",  # literal < (except in redacted placeholders)
+    "evt:",  # raw event identifiers
 ]
 
 _PII_REGEX_PATTERNS = [
-    r"evt:[a-zA-Z0-9:-]{6,}",        # webhook/followup event identifiers
+    r"evt:[a-zA-Z0-9:-]{6,}",  # webhook/followup event identifiers
     r"--ticket-number(?:\s+|=)\d+",  # command-line ticket numbers
-    r"ticket\s+number\s+\d+",        # human readable ticket numbers
+    r"ticket\s+number\s+\d+",  # human readable ticket numbers
 ]
 
 
@@ -554,7 +585,9 @@ def _fetch_ticket_snapshot(
             or payload.get("message_count")
             or payload.get("messagesCount")
         )
-        last_message_source = payload.get("last_message_source") or payload.get("lastMessageSource")
+        last_message_source = payload.get("last_message_source") or payload.get(
+            "lastMessageSource"
+        )
 
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
@@ -569,8 +602,7 @@ def _fetch_ticket_snapshot(
         }
 
     raise SmokeFailure(
-        "Ticket lookup failed; attempted paths: "
-        + "; ".join(errors or attempts)
+        "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
     )
 
 
@@ -591,10 +623,14 @@ def _apply_test_tag(
             log_body_excerpt=False,
         )
     except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-        raise SmokeFailure(f"Failed to apply test tag to ticket {ticket_id}: {exc}") from exc
+        raise SmokeFailure(
+            f"Failed to apply test tag to ticket {ticket_id}: {exc}"
+        ) from exc
 
     if response.dry_run:
-        raise SmokeFailure("Test tag was not applied because Richpanel client is in dry-run mode.")
+        raise SmokeFailure(
+            "Test tag was not applied because Richpanel client is in dry-run mode."
+        )
 
     if response.status_code < 200 or response.status_code >= 300:
         body = response.json()
@@ -680,14 +716,38 @@ def _diagnose_ticket_update(
         ("ticket_state_closed", {"ticket": {"state": "closed"}}),
         ("ticket_status_resolved", {"ticket": {"status": "resolved"}}),
         ("ticket_state_resolved", {"ticket": {"state": "resolved"}}),
-        ("ticket_status_closed_with_comment", {"ticket": {"status": "closed", "comment": comment}}),
-        ("ticket_state_closed_with_comment", {"ticket": {"state": "closed", "comment": comment}}),
-        ("ticket_status_resolved_with_comment", {"ticket": {"status": "resolved", "comment": comment}}),
-        ("ticket_state_resolved_with_comment", {"ticket": {"state": "resolved", "comment": comment}}),
-        ("ticket_state_CLOSED_with_comment", {"ticket": {"state": "CLOSED", "comment": comment}}),
-        ("ticket_state_RESOLVED_with_comment", {"ticket": {"state": "RESOLVED", "comment": comment}}),
-        ("ticket_state_closed_and_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment}}),
-        ("ticket_state_CLOSED_and_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment}}),
+        (
+            "ticket_status_closed_with_comment",
+            {"ticket": {"status": "closed", "comment": comment}},
+        ),
+        (
+            "ticket_state_closed_with_comment",
+            {"ticket": {"state": "closed", "comment": comment}},
+        ),
+        (
+            "ticket_status_resolved_with_comment",
+            {"ticket": {"status": "resolved", "comment": comment}},
+        ),
+        (
+            "ticket_state_resolved_with_comment",
+            {"ticket": {"state": "resolved", "comment": comment}},
+        ),
+        (
+            "ticket_state_CLOSED_with_comment",
+            {"ticket": {"state": "CLOSED", "comment": comment}},
+        ),
+        (
+            "ticket_state_RESOLVED_with_comment",
+            {"ticket": {"state": "RESOLVED", "comment": comment}},
+        ),
+        (
+            "ticket_state_closed_and_status_CLOSED",
+            {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment}},
+        ),
+        (
+            "ticket_state_CLOSED_and_status_CLOSED",
+            {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment}},
+        ),
     ]
 
     results: List[Dict[str, Any]] = []
@@ -713,7 +773,11 @@ def _diagnose_ticket_update(
                     **_sanitize_response_metadata(response),
                 }
             )
-            if 200 <= response.status_code < 300 and not response.dry_run and winning_payload is None:
+            if (
+                200 <= response.status_code < 300
+                and not response.dry_run
+                and winning_payload is None
+            ):
                 winning_payload = payload
                 winning_candidate = name
         except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
@@ -748,7 +812,8 @@ def _diagnose_ticket_update(
     return {
         "performed": True,
         "ticket_fingerprint": _fingerprint(ticket_id),
-        "winning_candidate": winning_candidate or (winning.get("candidate") if winning else None),
+        "winning_candidate": winning_candidate
+        or (winning.get("candidate") if winning else None),
         "winning_payload": winning_payload,
         "results": results,
         "apply_result": apply_result,
@@ -765,7 +830,11 @@ def _apply_fallback_close(
     allow_network: bool,
 ) -> Dict[str, Any]:
     primary_path = f"/v1/tickets/{urllib.parse.quote(ticket_id_for_fallback, safe='')}"
-    secondary_path = f"/v1/tickets/number/{urllib.parse.quote(str(ticket_ref), safe='')}" if ticket_ref else None
+    secondary_path = (
+        f"/v1/tickets/number/{urllib.parse.quote(str(ticket_ref), safe='')}"
+        if ticket_ref
+        else None
+    )
 
     def _put(path: str, body: Dict[str, Any]) -> RichpanelResponse:
         return ticket_executor.execute(
@@ -791,7 +860,9 @@ def _apply_fallback_close(
     resp_close_alt = None
     if secondary_path:
         resp_alt = _put(secondary_path, combined_close_payload)
-        resp_close_alt = _put(secondary_path, {"ticket": {"state": "closed", "status": "CLOSED"}})
+        resp_close_alt = _put(
+            secondary_path, {"ticket": {"state": "closed", "status": "CLOSED"}}
+        )
 
     return {
         "status_code": resp.status_code,
@@ -825,7 +896,10 @@ def _compute_reply_evidence(
             reasons.append(f"message_count_delta={message_count_delta}")
         else:
             reasons.append(f"message_count_delta={message_count_delta}")
-    if isinstance(last_message_source_after, str) and last_message_source_after.lower() == "middleware":
+    if (
+        isinstance(last_message_source_after, str)
+        and last_message_source_after.lower() == "middleware"
+    ):
         reply_evidence = True
         reasons.append("last_message_source=middleware")
     if any(_is_positive_middleware_tag(tag) for tag in tags_added or []):
@@ -837,7 +911,12 @@ def _compute_reply_evidence(
         if reply_update_candidate:
             reason = f"{reason}:{reply_update_candidate}"
         reasons.append(reason)
-    if status_changed and not reply_evidence and updated_at_delta is not None and updated_at_delta > 0:
+    if (
+        status_changed
+        and not reply_evidence
+        and updated_at_delta is not None
+        and updated_at_delta > 0
+    ):
         # Status change alone is not sufficient, but we record it as a reason when no other evidence exists.
         reasons.append(f"status_changed_delta={updated_at_delta}")
     if not reasons:
@@ -859,9 +938,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the Richpanel dev environment end-to-end smoke test."
     )
-    parser.add_argument("--env", default="dev", help="Target environment name (default: dev).")
     parser.add_argument(
-        "--region", required=True, help="AWS region that hosts the stack (e.g. us-east-2)."
+        "--env", default="dev", help="Target environment name (default: dev)."
+    )
+    parser.add_argument(
+        "--region",
+        required=True,
+        help="AWS region that hosts the stack (e.g. us-east-2).",
     )
     parser.add_argument(
         "--stack-name",
@@ -905,7 +988,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--scenario",
-        choices=["baseline", "order_status", "order_status_tracking", "order_status_no_tracking"],
+        choices=[
+            "baseline",
+            "order_status",
+            "order_status_tracking",
+            "order_status_no_tracking",
+        ],
         default="baseline",
         help="Scenario to run (default: baseline).",
     )
@@ -972,7 +1060,9 @@ def load_stack_artifacts(
     if not stacks:
         raise SmokeFailure(f"Stack '{stack_name}' was not found.")
 
-    outputs = {item["OutputKey"]: item["OutputValue"] for item in stacks[0].get("Outputs", [])}
+    outputs = {
+        item["OutputKey"]: item["OutputValue"] for item in stacks[0].get("Outputs", [])
+    }
 
     endpoint = outputs.get("IngressEndpointUrl")
     queue_url = outputs.get("EventsQueueUrl")
@@ -1072,7 +1162,9 @@ def derive_ingress_endpoint(
                     if api_id:
                         return build_http_api_endpoint(api_id, region)
     except ClientError as exc:
-        raise SmokeFailure(f"Unable to enumerate HTTP APIs in region {region}: {exc}") from exc
+        raise SmokeFailure(
+            f"Unable to enumerate HTTP APIs in region {region}: {exc}"
+        ) from exc
 
     resource_summary = ", ".join(
         f"{res.get('LogicalResourceId','<unknown>')} ({res.get('ResourceType','?')})"
@@ -1114,7 +1206,9 @@ def load_webhook_token(secrets_client, namespace: str) -> str:
     try:
         response = secrets_client.get_secret_value(SecretId=secret_name)
     except ClientError as exc:
-        raise SmokeFailure(f"Unable to read webhook token secret '{secret_name}': {exc}") from exc
+        raise SmokeFailure(
+            f"Unable to read webhook token secret '{secret_name}': {exc}"
+        ) from exc
 
     if "SecretString" in response and response["SecretString"]:
         return response["SecretString"]
@@ -1149,7 +1243,9 @@ def send_webhook(endpoint: str, token: str, payload: Dict[str, Any]) -> Dict[str
             f"Webhook request failed with status {exc.code}: {detail or exc.reason}"
         ) from exc
     except URLError as exc:
-        raise SmokeFailure(f"Webhook request could not reach {target_url}: {exc.reason}") from exc
+        raise SmokeFailure(
+            f"Webhook request could not reach {target_url}: {exc.reason}"
+        ) from exc
 
     if status_code != 200 or parsed.get("status") != "accepted":
         raise SmokeFailure(
@@ -1173,7 +1269,9 @@ def wait_for_dynamodb_record(
         try:
             response = table.get_item(Key={"event_id": event_id})
         except (BotoCoreError, ClientError) as exc:
-            raise SmokeFailure(f"Failed to query DynamoDB table '{table_name}': {exc}") from exc
+            raise SmokeFailure(
+                f"Failed to query DynamoDB table '{table_name}': {exc}"
+            ) from exc
 
         item = response.get("Item")
         if item:
@@ -1186,11 +1284,15 @@ def wait_for_dynamodb_record(
     )
 
 
-def validate_idempotency_item(item: Dict[str, Any], *, fallback_payload: Optional[Dict[str, Any]] = None) -> str:
+def validate_idempotency_item(
+    item: Dict[str, Any], *, fallback_payload: Optional[Dict[str, Any]] = None
+) -> str:
     required = ["event_id", "mode", "safe_mode", "automation_enabled", "status"]
     missing = [key for key in required if key not in item]
     if missing:
-        raise SmokeFailure(f"Idempotency item missing required fields: {', '.join(missing)}")
+        raise SmokeFailure(
+            f"Idempotency item missing required fields: {', '.join(missing)}"
+        )
 
     fingerprint = item.get("payload_fingerprint")
     field_count = item.get("payload_field_count")
@@ -1216,13 +1318,17 @@ def validate_idempotency_item(item: Dict[str, Any], *, fallback_payload: Optiona
                 fingerprint = None
 
     if not isinstance(fingerprint, str) or not fingerprint.strip():
-        raise SmokeFailure("Idempotency item payload_fingerprint was not present or empty.")
+        raise SmokeFailure(
+            "Idempotency item payload_fingerprint was not present or empty."
+        )
     fingerprint = fingerprint.strip()
     if field_count is None:
         field_count = 0
     # field_count might be plain int (from resource API) or DynamoDB Decimal
     if not isinstance(field_count, (int, Decimal)):
-        raise SmokeFailure(f"Idempotency item payload_field_count was not an integer (got {type(field_count).__name__}).")
+        raise SmokeFailure(
+            f"Idempotency item payload_field_count was not an integer (got {type(field_count).__name__})."
+        )
     field_count = int(field_count)
     item.setdefault("payload_field_count", field_count)
 
@@ -1264,12 +1370,17 @@ def has_order_status_draft_action(actions: Any) -> bool:
     if not isinstance(actions, list):
         return False
     for action in actions:
-        if isinstance(action, dict) and action.get("type") == "order_status_draft_reply":
+        if (
+            isinstance(action, dict)
+            and action.get("type") == "order_status_draft_reply"
+        ):
             return True
     return False
 
 
-def extract_draft_replies(record: Dict[str, Any], *, label: str) -> List[Dict[str, Any]]:
+def extract_draft_replies(
+    record: Dict[str, Any], *, label: str
+) -> List[Dict[str, Any]]:
     replies = record.get("draft_replies")
     if replies is None:
         return []
@@ -1281,7 +1392,9 @@ def extract_draft_replies(record: Dict[str, Any], *, label: str) -> List[Dict[st
     return replies
 
 
-def extract_draft_replies_from_actions(actions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def extract_draft_replies_from_actions(
+    actions: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     """Fallback extractor for draft_reply stored inside action parameters."""
     replies: List[Dict[str, Any]] = []
     for action in actions or []:
@@ -1295,19 +1408,29 @@ def extract_draft_replies_from_actions(actions: List[Dict[str, Any]]) -> List[Di
             # Handle redacted storage (fingerprint-only format)
             elif params.get("has_draft_reply") or params.get("draft_reply_fingerprint"):
                 # Create a placeholder dict to satisfy the check
-                replies.append({
-                    "reason": "redacted",
-                    "prompt_fingerprint": params.get("prompt_fingerprint"),
-                    "dry_run": action.get("dry_run"),
-                })
+                replies.append(
+                    {
+                        "reason": "redacted",
+                        "prompt_fingerprint": params.get("prompt_fingerprint"),
+                        "dry_run": action.get("dry_run"),
+                    }
+                )
     return replies
 
 
 def sanitize_draft_replies(replies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    allowed_fields = ("reason", "prompt_fingerprint", "dry_run", "tracking_number", "carrier")
+    allowed_fields = (
+        "reason",
+        "prompt_fingerprint",
+        "dry_run",
+        "tracking_number",
+        "carrier",
+    )
     sanitized: List[Dict[str, Any]] = []
     for reply in replies:
-        sanitized.append({field: reply.get(field) for field in allowed_fields if field in reply})
+        sanitized.append(
+            {field: reply.get(field) for field in allowed_fields if field in reply}
+        )
     return sanitized
 
 
@@ -1359,7 +1482,9 @@ def wait_for_audit_record(
                 ScanIndexForward=False,
             )
         except (BotoCoreError, ClientError) as exc:
-            raise SmokeFailure(f"Failed to query audit table '{table_name}': {exc}") from exc
+            raise SmokeFailure(
+                f"Failed to query audit table '{table_name}': {exc}"
+            ) from exc
 
         items = response.get("Items") or []
         for item in items:
@@ -1399,9 +1524,13 @@ def build_payload(
     if _is_order_status_scenario(scenario):
         scenario_variant = _ORDER_STATUS_VARIANTS.get(scenario, "order_status_tracking")
         scenario_payload = (
-            _order_status_no_tracking_payload(run_id or "smoke", conversation_id=conversation_id)
+            _order_status_no_tracking_payload(
+                run_id or "smoke", conversation_id=conversation_id
+            )
             if scenario_variant == "order_status_no_tracking"
-            else _order_status_scenario_payload(run_id or "smoke", conversation_id=conversation_id)
+            else _order_status_scenario_payload(
+                run_id or "smoke", conversation_id=conversation_id
+            )
         )
         payload["scenario_name"] = scenario
         # Merge scenario fields at top level for middleware visibility
@@ -1428,7 +1557,9 @@ def _build_followup_payload(
     followup_payload["followup"] = True
     followup_payload["parent_event_id"] = base_payload.get("event_id")
     followup_payload["scenario"] = f"{scenario_variant}_followup"
-    followup_payload["scenario_name"] = f"{base_payload.get('scenario_name', scenario_variant)}_followup"
+    followup_payload["scenario_name"] = (
+        f"{base_payload.get('scenario_name', scenario_variant)}_followup"
+    )
     followup_payload.setdefault("intent", "order_status_tracking")
     return followup_payload
 
@@ -1495,18 +1626,23 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
     ]
     if data.get("draft_reply_count"):
         safe_drafts = data.get("draft_replies_safe") or []
-        formatted_drafts = "; ".join(
-            f"reason={entry.get('reason', '?')}, prompt_fingerprint={entry.get('prompt_fingerprint', '?')}, "
-            f"dry_run={entry.get('dry_run')}"
-            for entry in safe_drafts
-        ) or "none"
+        formatted_drafts = (
+            "; ".join(
+                f"reason={entry.get('reason', '?')}, prompt_fingerprint={entry.get('prompt_fingerprint', '?')}, "
+                f"dry_run={entry.get('dry_run')}"
+                for entry in safe_drafts
+            )
+            or "none"
+        )
         lines.append(f"- Draft replies (safe fields): {formatted_drafts}")
     if data.get("conversation_state_table"):
         lines.append(
             "- Conversation state record observed for "
             f"`{data.get('conversation_id', 'unknown')}` in `{data['conversation_state_table']}`"
         )
-        lines.append(f"- Conversation state console: {data['conversation_state_console']}")
+        lines.append(
+            f"- Conversation state console: {data['conversation_state_console']}"
+        )
     if data.get("audit_trail_table"):
         audit_sort_key = data.get("audit_sort_key") or "n/a"
         lines.append(
@@ -1518,7 +1654,9 @@ def append_summary(path: str, *, env_name: str, data: Dict[str, Any]) -> None:
     lines.append(f"- CloudWatch dashboard: `{data['dashboard_name']}`")
     alarms = data.get("alarm_names") or []
     if alarms:
-        lines.append(f"- CloudWatch alarms: {', '.join(f'`{name}`' for name in alarms)}")
+        lines.append(
+            f"- CloudWatch alarms: {', '.join(f'`{name}`' for name in alarms)}"
+        )
     else:
         lines.append("- CloudWatch alarms: none surfaced")
     with open(path, "a", encoding="utf-8") as handle:
@@ -1581,7 +1719,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     if order_status_mode:
         ticket_ref_for_scenario = args.ticket_id or args.ticket_number
         if not ticket_ref_for_scenario:
-            raise SmokeFailure("--scenario order_status* requires --ticket-id or --ticket-number.")
+            raise SmokeFailure(
+                "--scenario order_status* requires --ticket-id or --ticket-number."
+            )
 
     session = _setup_boto_session(region, args.profile)
     cfn_client = session.client("cloudformation")
@@ -1598,9 +1738,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         env_name,
         region,
     )
-    dynamo_table = args.idempotency_table or artifacts.idempotency_table or default_idempotency_table
+    dynamo_table = (
+        args.idempotency_table
+        or artifacts.idempotency_table
+        or default_idempotency_table
+    )
     if not artifacts.conversation_state_table:
-        raise SmokeFailure("ConversationStateTableName output was missing from the stack.")
+        raise SmokeFailure(
+            "ConversationStateTableName output was missing from the stack."
+        )
     if not artifacts.audit_trail_table:
         raise SmokeFailure("AuditTrailTableName output was missing from the stack.")
 
@@ -1629,7 +1775,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     tag_result: Optional[Dict[str, Any]] = None
     tag_error: Optional[str] = None
     diagnostic_result: Optional[Dict[str, Any]] = None
-    applied_winning_candidate = False
     fallback_used = False
     followup_event_id: Optional[str] = None
     followup_event_id_fingerprint: Optional[str] = None
@@ -1655,7 +1800,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             allow_network=allow_network,
             api_key_secret_id=args.richpanel_secret_id,
         )
-        pre_ticket = _fetch_ticket_snapshot(ticket_executor, ticket_ref, allow_network=allow_network)
+        pre_ticket = _fetch_ticket_snapshot(
+            ticket_executor, ticket_ref, allow_network=allow_network
+        )
         print(
             f"[INFO] Resolved ticket for smoke proof (path={pre_ticket['path']}, "
             f"id_fingerprint={_fingerprint(pre_ticket['ticket_id'])})."
@@ -1679,9 +1826,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 )
                 apply_result = diagnostic_result.get("apply_result") or {}
                 if apply_result:
-                    applied_winning_candidate = bool(
-                        200 <= (apply_result.get("status_code") or 0) < 300 and not apply_result.get("dry_run", True)
-                    )
                     print(
                         f"[INFO] Applied winning candidate payload to ticket "
                         f"(status={apply_result.get('status_code')}, dry_run={apply_result.get('dry_run')})."
@@ -1707,7 +1851,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     payload["automation_enabled"] = True
     payload["outbound_reason"] = "dev_smoke_proof"
     event_id = payload["event_id"]
-    print(f"[INFO] Sending synthetic webhook with event_id={event_id} (run_id={run_id})")
+    print(
+        f"[INFO] Sending synthetic webhook with event_id={event_id} (run_id={run_id})"
+    )
 
     response = send_webhook(artifacts.endpoint_url, token, payload)
     returned_event_id = response.get("event_id")
@@ -1723,19 +1869,29 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         event_id=event_id,
         timeout_seconds=args.wait_seconds,
     )
-    payload_fingerprint = validate_idempotency_item(item, fallback_payload=payload.get("payload"))
+    payload_fingerprint = validate_idempotency_item(
+        item, fallback_payload=payload.get("payload")
+    )
     mode = item.get("mode")
     print(f"[OK] Event '{event_id}' observed in table '{dynamo_table}' (mode={mode}).")
-    print(f"[OK] Idempotency payload_fingerprint captured ({payload_fingerprint[:12]}...).")
+    print(
+        f"[OK] Idempotency payload_fingerprint captured ({payload_fingerprint[:12]}...)."
+    )
     print(f"[INFO] DynamoDB console: {console_links['ddb']}")
     conversation_id = item.get("conversation_id") or payload["conversation_id"]
     conversation_label = (
-        conversation_id if conversation_id and "@" not in conversation_id else _fingerprint(conversation_id)
+        conversation_id
+        if conversation_id and "@" not in conversation_id
+        else _fingerprint(conversation_id)
     )
-    conversation_fingerprint = _fingerprint(conversation_id) if conversation_id else None
+    conversation_fingerprint = (
+        _fingerprint(conversation_id) if conversation_id else None
+    )
     safe_conversation_id = (
         conversation_id
-        if conversation_id and isinstance(conversation_id, str) and conversation_id.startswith("conv-")
+        if conversation_id
+        and isinstance(conversation_id, str)
+        and conversation_id.startswith("conv-")
         else None
     )
 
@@ -1767,7 +1923,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     combined_actions: List[Dict[str, Any]] = []
     for action_list in (state_item.get("actions"), audit_item.get("actions")):
         if isinstance(action_list, list):
-            combined_actions.extend([action for action in action_list if isinstance(action, dict)])
+            combined_actions.extend(
+                [action for action in action_list if isinstance(action, dict)]
+            )
 
     draft_action_present = has_order_status_draft_action(combined_actions)
     draft_replies = extract_draft_replies(
@@ -1816,7 +1974,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     ]
 
     event_id_fingerprint = _fingerprint_event_id(event_id)
-    audit_sort_key = _sanitize_ts_action_id(audit_item.get("ts_action_id") if audit_item else None)
+    audit_sort_key = _sanitize_ts_action_id(
+        audit_item.get("ts_action_id") if audit_item else None
+    )
 
     summary_data = {
         "event_id_fingerprint": event_id_fingerprint,
@@ -1891,7 +2051,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         post_ticket_data: Dict[str, Any] = post_ticket or {}
         fallback_used = False
 
-        def _recompute_deltas(pre_data: Dict[str, Any], post_data: Dict[str, Any]) -> Tuple[
+        def _recompute_deltas(
+            pre_data: Dict[str, Any], post_data: Dict[str, Any]
+        ) -> Tuple[
             List[str],
             List[str],
             Optional[float],
@@ -1916,38 +2078,57 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 pre_data.get("updated_at"),
                 post_data.get("updated_at"),
             )
-            test_tag_verified_local = (
-                test_tag_value in (post_data.get("tags") or [])
-                if args.apply_test_tag and not tag_error
-                else (False if tag_error else None)
-            )
             status_before_val_local = pre_data.get("status") or pre_data.get("state")
             status_after_val_local = post_data.get("status") or post_data.get("state")
-            status_before_local = status_before_val_local.strip().lower() if isinstance(status_before_val_local, str) else None
-            status_after_local = status_after_val_local.strip().lower() if isinstance(status_after_val_local, str) else None
-            status_resolved_local = status_after_local in {"resolved", "closed"} if status_after_local else False
+            status_before_local = (
+                status_before_val_local.strip().lower()
+                if isinstance(status_before_val_local, str)
+                else None
+            )
+            status_after_local = (
+                status_after_val_local.strip().lower()
+                if isinstance(status_after_val_local, str)
+                else None
+            )
+            status_resolved_local = (
+                status_after_local in {"resolved", "closed"}
+                if status_after_local
+                else False
+            )
             status_changed_local = (
-                status_before_local != status_after_local if status_after_local or status_before_local else None
+                status_before_local != status_after_local
+                if status_after_local or status_before_local
+                else None
             )
             message_count_before_local = _safe_int(pre_data.get("message_count"))
             message_count_after_local = _safe_int(post_data.get("message_count"))
             message_count_delta_local = None
-            if message_count_before_local is not None and message_count_after_local is not None:
-                message_count_delta_local = message_count_after_local - message_count_before_local
+            if (
+                message_count_before_local is not None
+                and message_count_after_local is not None
+            ):
+                message_count_delta_local = (
+                    message_count_after_local - message_count_before_local
+                )
             last_message_source_before_local = pre_data.get("last_message_source")
             last_message_source_after_local = post_data.get("last_message_source")
             middleware_tags_added_local = [
-                tag for tag in tags_added_local if tag and not tag.startswith("mw-smoke:")
+                tag
+                for tag in tags_added_local
+                if tag and not tag.startswith("mw-smoke:")
             ]
-            skip_tags_added_local = [tag for tag in tags_added_local if tag in _SKIP_MIDDLEWARE_TAGS]
+            skip_tags_added_local = [
+                tag for tag in tags_added_local if tag in _SKIP_MIDDLEWARE_TAGS
+            ]
             outcome_local = _compute_middleware_outcome(
                 status_after=status_after_local,
                 tags_added=tags_added_local,
                 post_tags=post_data.get("tags") or [],
             )
-            middleware_tag_present_local = outcome_local["middleware_tag_present"] if post_data else None
+            middleware_tag_present_local = (
+                outcome_local["middleware_tag_present"] if post_data else None
+            )
             middleware_outcome_local = outcome_local if post_data else None
-            skip_tags_present_local = outcome_local["skip_tags_present"] if post_data else None
             return (
                 tags_added_local,
                 tags_removed_local,
@@ -1985,7 +2166,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             middleware_tag_present,
             middleware_outcome,
         ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
-        skip_tags_present = middleware_outcome.get("skip_tags_present") if middleware_outcome else None
+        skip_tags_present = (
+            middleware_outcome.get("skip_tags_present") if middleware_outcome else None
+        )
 
         # If middleware replied but did not close the ticket, perform a deterministic close to satisfy PASS_STRONG.
         # This uses the same diagnostics helper used elsewhere, but applies the winning payload when found.
@@ -2007,7 +2190,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     diagnostic_message="smoke_auto_close",
                     apply_winning=True,
                 )
-                auto_close_applied = bool(auto_close_result.get("performed") and auto_close_result.get("winning_candidate"))
+                auto_close_applied = bool(
+                    auto_close_result.get("performed")
+                    and auto_close_result.get("winning_candidate")
+                )
             except Exception as exc:  # pragma: no cover - defensive logging
                 auto_close_result = {"error": str(exc)}
                 auto_close_applied = False
@@ -2035,7 +2221,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     middleware_tag_present,
                     middleware_outcome,
                 ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
-                skip_tags_present = middleware_outcome.get("skip_tags_present") if middleware_outcome else None
+                skip_tags_present = (
+                    middleware_outcome.get("skip_tags_present")
+                    if middleware_outcome
+                    else None
+                )
 
         reply_fallback_result: Optional[Dict[str, Any]] = None
         if (
@@ -2047,7 +2237,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             and args.apply_fallback_close
         ):
             if not args.confirm_test_ticket:
-                reply_fallback_result = {"error": "confirm_test_ticket_not_set", "candidate": "fallback_comment_and_close"}
+                reply_fallback_result = {
+                    "error": "confirm_test_ticket_not_set",
+                    "candidate": "fallback_comment_and_close",
+                }
             else:
                 try:
                     fallback_comment = {
@@ -2062,7 +2255,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                             f"mw-order-status-answered:{run_id}",
                         }
                     )
-                    ticket_id_for_fallback = (pre_ticket or {}).get("ticket_id") or payload_conversation or str(ticket_ref)
+                    ticket_id_for_fallback = (
+                        (pre_ticket or {}).get("ticket_id")
+                        or payload_conversation
+                        or str(ticket_ref)
+                    )
                     reply_fallback_result = _apply_fallback_close(
                         ticket_executor=ticket_executor,
                         ticket_ref=ticket_ref,
@@ -2071,10 +2268,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         fallback_tags=fallback_tags,
                         allow_network=allow_network,
                     )
-                    fallback_success = 200 <= (reply_fallback_result.get("status_code") or 0) < 300 and not reply_fallback_result.get("dry_run")
+                    fallback_success = 200 <= (
+                        reply_fallback_result.get("status_code") or 0
+                    ) < 300 and not reply_fallback_result.get("dry_run")
                     fallback_used = bool(fallback_success)
                     post_ticket = _fetch_ticket_snapshot(
-                        ticket_executor, payload_conversation, allow_network=allow_network
+                        ticket_executor,
+                        payload_conversation,
+                        allow_network=allow_network,
                     )
                     post_ticket_data = post_ticket or {}
                     (
@@ -2095,9 +2296,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         middleware_tag_present,
                         middleware_outcome,
                     ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
-                    skip_tags_present = middleware_outcome.get("skip_tags_present") if middleware_outcome else None
+                    skip_tags_present = (
+                        middleware_outcome.get("skip_tags_present")
+                        if middleware_outcome
+                        else None
+                    )
                 except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-                    reply_fallback_result = {"error": str(exc), "candidate": "fallback_comment_and_close"}
+                    reply_fallback_result = {
+                        "error": str(exc),
+                        "candidate": "fallback_comment_and_close",
+                    }
 
         print(
             f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
@@ -2117,11 +2325,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             followup_payload["automation_enabled"] = True
             followup_payload["outbound_reason"] = "dev_smoke_followup"
             followup_event_id = followup_payload["event_id"]
-            print(f"[INFO] Sending follow-up webhook with event_id={followup_event_id} (run_id={run_id})")
+            print(
+                f"[INFO] Sending follow-up webhook with event_id={followup_event_id} (run_id={run_id})"
+            )
 
-            followup_response = send_webhook(artifacts.endpoint_url, token, followup_payload)
+            followup_response = send_webhook(
+                artifacts.endpoint_url, token, followup_payload
+            )
             returned_followup_event_id = followup_response.get("event_id")
-            if returned_followup_event_id and returned_followup_event_id != followup_event_id:
+            if (
+                returned_followup_event_id
+                and returned_followup_event_id != followup_event_id
+            ):
                 raise SmokeFailure(
                     f"Follow-up webhook response event_id mismatch (got={returned_followup_event_id}, expected={followup_event_id})."
                 )
@@ -2157,7 +2372,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             ) = _recompute_deltas(post_ticket_data, followup_ticket_data)
 
             followup_reply_sent, followup_reply_reason = _compute_reply_evidence(
-                status_changed=bool(followup_status_after and followup_status_after != status_after),
+                status_changed=bool(
+                    followup_status_after and followup_status_after != status_after
+                ),
                 updated_at_delta=followup_updated_at_delta,
                 message_count_delta=followup_message_count_delta,
                 last_message_source_after=followup_last_message_source_after,
@@ -2193,11 +2410,23 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     ticket_lookup_ok = bool(pre_ticket) if ticket_ref else None
     intent_ok = intent_matches_order_status if order_status_mode else None
     middleware_ok = (
-        middleware_outcome.get("middleware_outcome") if isinstance(middleware_outcome, dict) else None
-    ) if order_status_mode else None
+        (
+            middleware_outcome.get("middleware_outcome")
+            if isinstance(middleware_outcome, dict)
+            else None
+        )
+        if order_status_mode
+        else None
+    )
     middleware_tag_ok = (
-        middleware_outcome.get("middleware_tag_present") if isinstance(middleware_outcome, dict) else None
-    ) if order_status_mode else None
+        (
+            middleware_outcome.get("middleware_tag_present")
+            if isinstance(middleware_outcome, dict)
+            else None
+        )
+        if order_status_mode
+        else None
+    )
     status_resolved_ok = bool(status_resolved) if order_status_mode else None
     skip_tags_present = (
         middleware_outcome.get("skip_tags_present")
@@ -2212,8 +2441,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     reply_evidence_reason = None
     if order_status_mode and ticket_executor and post_ticket:
         reply_update_success = bool(middleware_tags_added)
-        reply_update_candidate = middleware_tags_added[0] if middleware_tags_added else None
-        if diagnostic_result and diagnostic_result.get("performed") and diagnostic_result.get("winning_candidate"):
+        reply_update_candidate = (
+            middleware_tags_added[0] if middleware_tags_added else None
+        )
+        if (
+            diagnostic_result
+            and diagnostic_result.get("performed")
+            and diagnostic_result.get("winning_candidate")
+        ):
             winning_candidate = diagnostic_result.get("winning_candidate")
             winner_ok = any(
                 entry.get("candidate") == winning_candidate and entry.get("ok")
@@ -2222,9 +2457,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             if winner_ok:
                 reply_update_success = True
                 reply_update_candidate = winning_candidate
-        if reply_fallback_result and 200 <= (reply_fallback_result.get("status_code") or 0) < 300:
+        if (
+            reply_fallback_result
+            and 200 <= (reply_fallback_result.get("status_code") or 0) < 300
+        ):
             reply_update_success = True
-            reply_update_candidate = reply_update_candidate or reply_fallback_result.get("candidate")
+            reply_update_candidate = (
+                reply_update_candidate or reply_fallback_result.get("candidate")
+            )
         reply_evidence, reply_evidence_reason = _compute_reply_evidence(
             status_changed=status_changed or False,
             updated_at_delta=updated_at_delta,
@@ -2237,7 +2477,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     if followup_event_id and followup_reply_sent is None:
         followup_reply_sent = False
-        followup_reply_reason = followup_reply_reason or "reply evidence absent after follow-up"
+        followup_reply_reason = (
+            followup_reply_reason or "reply evidence absent after follow-up"
+        )
     if not followup_event_id and not followup_reply_reason:
         followup_reply_sent = False
         followup_reply_reason = "followup_not_performed"
@@ -2343,7 +2585,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             }
         )
 
-    failed = [item["name"] for item in criteria_details if item.get("required") and not item.get("value")]
+    failed = [
+        item["name"]
+        for item in criteria_details
+        if item.get("required") and not item.get("value")
+    ]
     base_pass = all(required_checks) and not failed
     classification = "FAIL"
     classification_reason = None
@@ -2361,14 +2607,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         classification = "PASS_STRONG" if base_pass else "FAIL"
         if not base_pass:
             classification_reason = (
-                f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
+                f"Failed criteria: {', '.join(failed)}"
+                if failed
+                else "criteria_not_met"
             )
 
     result_status = "PASS" if classification in {"PASS_STRONG", "PASS_WEAK"} else "FAIL"
     failure_reason = None
     if result_status != "PASS":
         failure_reason = classification_reason or (
-            f"Failed criteria: {', '.join(failed)}" if failed else "One or more criteria failed."
+            f"Failed criteria: {', '.join(failed)}"
+            if failed
+            else "One or more criteria failed."
         )
 
     criteria["pii_safe"] = True
@@ -2461,10 +2711,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "auto_close_applied": auto_close_applied,
             "auto_close_result": auto_close_result,
             "reply_update_success": reply_update_success if order_status_mode else None,
-            "reply_update_candidate": reply_update_candidate if order_status_mode else None,
+            "reply_update_candidate": (
+                reply_update_candidate if order_status_mode else None
+            ),
             "reply_fallback": reply_fallback_result if order_status_mode else None,
-            "success_tag_added_this_run": bool(middleware_tag_ok) if order_status_mode else None,
-            "skip_or_escalation_tags_added_this_run": bool(skip_tags_present) if order_status_mode else None,
+            "success_tag_added_this_run": (
+                bool(middleware_tag_ok) if order_status_mode else None
+            ),
+            "skip_or_escalation_tags_added_this_run": (
+                bool(skip_tags_present) if order_status_mode else None
+            ),
         },
         "followup": followup_proof,
         "result": {
@@ -2524,4 +2780,3 @@ if __name__ == "__main__":
     except SmokeFailure as exc:
         print(f"[FAIL] Dev E2E smoke test failed: {exc}")
         raise SystemExit(1)
-

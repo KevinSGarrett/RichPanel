@@ -12,8 +12,6 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.integrations.shopify import (  # noqa: E402
     ShopifyClient,
-    ShopifyRequestError,
-    TransportError,
     TransportRequest,
     TransportResponse,
 )
@@ -140,7 +138,9 @@ class ShopifyClientTests(unittest.TestCase):
         sleeps = []
         transport = _RecordingTransport(
             [
-                TransportResponse(status_code=429, headers={"Retry-After": "1"}, body=b""),
+                TransportResponse(
+                    status_code=429, headers={"Retry-After": "1"}, body=b""
+                ),
                 TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
             ]
         )
@@ -175,7 +175,9 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(redacted["X-Shopify-Access-Token"], "***")
         self.assertEqual(redacted["Authorization"], "***")
         self.assertEqual(redacted["ok"], "1")
-        self.assertEqual(headers["X-Shopify-Access-Token"], "secret")  # original untouched
+        self.assertEqual(
+            headers["X-Shopify-Access-Token"], "secret"
+        )  # original untouched
 
     def test_env_namespace_is_reflected_in_secret_path(self) -> None:
         os.environ["RICH_PANEL_ENV"] = "Staging"
@@ -183,8 +185,12 @@ class ShopifyClientTests(unittest.TestCase):
         client = ShopifyClient(access_token="test-token")
 
         self.assertEqual(client.environment, "staging")
-        self.assertEqual(client.access_token_secret_id, "rp-mw/staging/shopify/admin_api_token")
-        self.assertIn("rp-mw/staging/shopify/access_token", client._secret_id_candidates)
+        self.assertEqual(
+            client.access_token_secret_id, "rp-mw/staging/shopify/admin_api_token"
+        )
+        self.assertIn(
+            "rp-mw/staging/shopify/access_token", client._secret_id_candidates
+        )
 
     def test_falls_back_to_legacy_secret_when_canonical_missing(self) -> None:
         canonical = "rp-mw/local/shopify/admin_api_token"
@@ -217,7 +223,9 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertFalse(response.dry_run)
         self.assertEqual(client.access_token_secret_id, legacy)
         self.assertEqual(secrets.calls, [canonical, legacy])
-        self.assertEqual(transport.requests[0].headers["x-shopify-access-token"], "legacy-token")
+        self.assertEqual(
+            transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
+        )
 
     def test_missing_secret_short_circuits(self) -> None:
         transport = _FailingTransport()
@@ -236,7 +244,10 @@ class ShopifyClientTests(unittest.TestCase):
         )
 
         self.assertTrue(response.dry_run)
-        self.assertIn(response.reason, {"missing_access_token", "secret_lookup_failed", "boto3_unavailable"})
+        self.assertIn(
+            response.reason,
+            {"missing_access_token", "secret_lookup_failed", "boto3_unavailable"},
+        )
         self.assertFalse(transport.called)
 
 
@@ -248,4 +259,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
