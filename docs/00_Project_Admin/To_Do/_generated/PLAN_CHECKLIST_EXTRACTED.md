@@ -814,23 +814,23 @@ Counts: total=639, checked=115, unchecked=524
 
 ### 5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)
 - [ ] PLN-115DD100F4 — DynamoDB evidence (idempotency/state/audit record links)  
-  - Source line: 553
+  - Source line: 560
 - [ ] PLN-38B7D770B9 — Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)  
-  - Source line: 555
+  - Source line: 562
 - [ ] PLN-5C795D71FE — CloudWatch Logs links (worker execution, routing decision, reply sent)  
-  - Source line: 554
+  - Source line: 561
 - [ ] PLN-6664EFC4CE — Follow-up behavior (if tested): confirm no duplicate reply, routing tags applied  
-  - Source line: 558
+  - Source line: 565
 - [ ] PLN-9F3622A347 — Message count delta or `last_message_source` evidence  
-  - Source line: 556
+  - Source line: 563
 - [ ] PLN-B3684CA430 — PII scan result (confirm proof JSON is safe)  
-  - Source line: 557
+  - Source line: 564
 - [ ] PLN-B8C9C5E794 — Exact commands used (with redacted ticket numbers for public artifacts)  
-  - Source line: 551
+  - Source line: 558
 - [ ] PLN-D470EB41BB — PASS classification (PASS_STRONG or PASS_WEAK) for each scenario  
-  - Source line: 552
+  - Source line: 559
 - [ ] PLN-F363631DD5 — Proof JSON paths for both scenarios (tracking + no-tracking)  
-  - Source line: 550
+  - Source line: 557
 
 
 ## docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md

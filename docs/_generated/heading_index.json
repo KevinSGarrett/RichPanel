@@ -12523,10 +12523,10 @@
       "anchor": "12-if-you-cannot-fix-quickly"
     }
   ],
-  "13) seed secrets manager (dev/staging)": [
+  "13) seed secrets manager (dev/staging/prod)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "13-seed-secrets-manager-devstaging"
+      "anchor": "13-seed-secrets-manager-devstagingprod"
     }
   ],
   "github secrets required (repo settings → secrets and variables → actions)": [
