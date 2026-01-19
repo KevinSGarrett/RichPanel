@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-19 - run_20260119_0255z (b41: secrets + environments documentation)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-19-run202601190255z-b41-secrets-environments-documentation"
+    }
+  ],
   "2026-01-18 - run_20260118_1717z (b41: order-status missing-context gate + evidence)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -13199,6 +13205,10 @@
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
       "anchor": "related-documentation"
+    },
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "related-documentation"
     }
   ],
   "checklist: production shadow mode validation (complete workflow)": [
@@ -13265,6 +13275,204 @@
     {
       "path": "08_Engineering/Repository_Conventions.md",
       "anchor": "source-of-truth-rules"
+    }
+  ],
+  "secrets and environments": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "secrets-and-environments"
+    }
+  ],
+  "table of contents": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "table-of-contents"
+    }
+  ],
+  "overview": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "overview"
+    }
+  ],
+  "environment configuration": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "environment-configuration"
+    }
+  ],
+  "supported environments": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "supported-environments"
+    }
+  ],
+  "aws secrets manager (canonical)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "aws-secrets-manager-canonical"
+    }
+  ],
+  "production secrets": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "production-secrets"
+    }
+  ],
+  "staging secrets": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "staging-secrets"
+    }
+  ],
+  "development secrets": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "development-secrets"
+    }
+  ],
+  "shopify legacy path (compatibility)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-legacy-path-compatibility"
+    }
+  ],
+  "github actions secrets": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "github-actions-secrets"
+    }
+  ],
+  "current github secrets (repository settings → secrets and variables → actions)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "current-github-secrets-repository-settings-secrets-and-variables-actions"
+    }
+  ],
+  "⚠️ production secret policy": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "production-secret-policy"
+    }
+  ],
+  "environment variable overrides": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "environment-variable-overrides"
+    }
+  ],
+  "richpanel client overrides": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "richpanel-client-overrides"
+    }
+  ],
+  "shopify client overrides": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-client-overrides"
+    }
+  ],
+  "openai client overrides": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "openai-client-overrides"
+    }
+  ],
+  "security constraints": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "security-constraints"
+    }
+  ],
+  "richpanel production safety": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "richpanel-production-safety"
+    }
+  ],
+  "shopify production safety": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-production-safety"
+    }
+  ],
+  "code references": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "code-references"
+    }
+  ],
+  "secret path naming convention": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "secret-path-naming-convention"
+    }
+  ],
+  "richpanel client secret loading": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "richpanel-client-secret-loading"
+    }
+  ],
+  "webhook token loading (ingress lambda)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "webhook-token-loading-ingress-lambda"
+    }
+  ],
+  "cdk secret wiring": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "cdk-secret-wiring"
+    }
+  ],
+  "secrets manager policy": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "secrets-manager-policy"
+    }
+  ],
+  "secret rotation": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "secret-rotation"
+    }
+  ],
+  "rotation policy": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "rotation-policy"
+    }
+  ],
+  "rotation procedure": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "rotation-procedure"
+    }
+  ],
+  "github actions secret rotation": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "github-actions-secret-rotation"
+    }
+  ],
+  "appendix: quick reference tables": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "appendix-quick-reference-tables"
+    }
+  ],
+  "environment → aws account mapping": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "environment-aws-account-mapping"
+    }
+  ],
+  "secret path templates": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "secret-path-templates"
     }
   ],
   "analytics data model and exports (wave 08)": [

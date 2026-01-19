@@ -285,8 +285,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 2530,
-    "approx_tokens": 3289,
+    "word_count": 2615,
+    "approx_tokens": 3399,
     "last_updated": ""
   },
   {
@@ -1998,6 +1998,16 @@
     "word_count": 127,
     "approx_tokens": 165,
     "last_updated": ""
+  },
+  {
+    "path": "08_Engineering/Secrets_and_Environments.md",
+    "title": "Secrets and Environments",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 1573,
+    "approx_tokens": 2044,
+    "last_updated": "2026-01-19"
   },
   {
     "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
@@ -3845,8 +3855,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10682,
-    "approx_tokens": 13886,
+    "word_count": 10691,
+    "approx_tokens": 13898,
     "last_updated": ""
   },
   {

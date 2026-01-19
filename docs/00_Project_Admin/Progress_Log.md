@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-18 - RUN_20260118_1717Z.
+Last verified: 2026-01-19 - RUN_20260119_0255Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,16 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-19 - RUN_20260119_0255Z (B41: Secrets + Environments Documentation)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260119_0255Z
+- Created canonical secrets documentation: docs/08_Engineering/Secrets_and_Environments.md
+- Documented AWS Secrets Manager paths for all environments (dev/staging/prod)
+- Documented GitHub Actions secrets guidance (dev/staging only, never prod)
+- Added environment variable overrides, security constraints, and code references with validated line numbers
+- Verified CI_and_Actions_Runbook.md already references new doc (section 1.5)
+- Verified REHYDRATION_PACK templates already include "Secrets consulted" sections
+- Run artifacts: RUN_REPORT/RUN_SUMMARY/TEST_MATRIX/DOCS_IMPACT_MAP/STRUCTURE_REPORT in C folder (A/B placeholders)
+
 ### 2026-01-18 - RUN_20260118_1717Z (B41: Order-status missing-context gate + evidence)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260118_1717Z
 - Added order-context gate to fail closed when order_id/created_at/tracking-or-shipping are missing.
