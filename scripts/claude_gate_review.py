@@ -11,22 +11,13 @@ import urllib.request
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
-# Preferred (user-requested) 4.5 models; may 404 if not yet available in Anthropic API.
-MODEL_PRIMARY_BY_RISK = {
+# Claude 4.5 models ONLY - no fallbacks
+MODEL_BY_RISK = {
     "risk:R0": "claude-haiku-4-5-20251015",
     "risk:R1": "claude-sonnet-4-5-20250929",
     "risk:R2": "claude-opus-4-5-20251124",
     "risk:R3": "claude-opus-4-5-20251124",
     "risk:R4": "claude-opus-4-5-20251124",
-}
-
-# Fallback models that are currently available and tested to avoid 404s.
-MODEL_FALLBACK_BY_RISK = {
-    "risk:R0": "claude-3-haiku-20240307",
-    "risk:R1": "claude-3-sonnet-20240229",
-    "risk:R2": "claude-3-opus-20240229",
-    "risk:R3": "claude-3-opus-20240229",
-    "risk:R4": "claude-3-opus-20240229",
 }
 
 DEFAULT_MAX_DIFF_CHARS = 60000
@@ -112,46 +103,40 @@ def _normalize_risk(labels):
     return unique[0]
 
 
-def _anthropic_request(payload: dict, api_key: str, *, model_candidates: list[str]) -> dict:
+def _anthropic_request(payload: dict, api_key: str) -> dict:
     url = "https://api.anthropic.com/v1/messages"
-    backoff = 5
-    for model in model_candidates:
-        payload["model"] = model
-        data = json.dumps(payload).encode("utf-8")
-        request = urllib.request.Request(url, data=data, method="POST")
-        request.add_header("content-type", "application/json")
-        request.add_header("x-api-key", api_key)
-        request.add_header("anthropic-version", "2023-06-01")
+    data = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(url, data=data, method="POST")
+    request.add_header("content-type", "application/json")
+    request.add_header("x-api-key", api_key)
+    request.add_header("anthropic-version", "2023-06-01")
 
-        for attempt in range(4):
-            try:
-                with urllib.request.urlopen(request, timeout=90) as response:
-                    return json.loads(response.read().decode("utf-8"))
-            except urllib.error.HTTPError as exc:
-                body = exc.read().decode("utf-8", "replace")
-                # Retry with next model if 404 (not found) on this model.
-                if exc.code == 404:
-                    break
-                if exc.code in (429, 500, 502, 503, 504) and attempt < 3:
-                    retry_after = exc.headers.get("retry-after") if exc.headers else None
-                    if retry_after and retry_after.isdigit():
-                        sleep_for = min(int(retry_after), 30)
-                    else:
-                        sleep_for = min(backoff, 30)
-                        backoff = min(backoff * 2, 30)
-                    time.sleep(sleep_for)
-                    continue
-                raise RuntimeError(f"Anthropic API error {exc.code}: {body[:300]}") from exc
-            except urllib.error.URLError as exc:
-                if attempt < 2:
-                    time.sleep(backoff)
-                    backoff *= 2
-                    continue
-                raise RuntimeError(f"Anthropic API request failed: {exc}") from exc
-            except json.JSONDecodeError as exc:
-                raise RuntimeError("Anthropic API returned invalid JSON.") from exc
-        # try next model candidate on 404 or exhausted retries
-    raise RuntimeError("Anthropic API request failed after retries / model fallbacks.")
+    backoff = 5
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", "replace")
+            if exc.code in (429, 500, 502, 503, 504) and attempt < 3:
+                retry_after = exc.headers.get("retry-after") if exc.headers else None
+                if retry_after and retry_after.isdigit():
+                    sleep_for = min(int(retry_after), 30)
+                else:
+                    sleep_for = min(backoff, 30)
+                    backoff = min(backoff * 2, 30)
+                time.sleep(sleep_for)
+                continue
+            raise RuntimeError(f"Anthropic API error {exc.code}: {body[:300]}") from exc
+        except urllib.error.URLError as exc:
+            if attempt < 2:
+                time.sleep(backoff)
+                backoff *= 2
+                continue
+            raise RuntimeError(f"Anthropic API request failed: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("Anthropic API returned invalid JSON.") from exc
+    raise RuntimeError("Anthropic API request failed after retries.")
 
 
 def _extract_text(response_json: dict) -> str:
