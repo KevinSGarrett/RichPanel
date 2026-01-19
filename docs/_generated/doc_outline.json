@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-19 - RUN_20260119_0255Z (B41: Secrets + Environments Documentation)",
+        "anchor": "2026-01-19-run202601190255z-b41-secrets-environments-documentation"
+      },
+      {
+        "level": 3,
         "text": "2026-01-18 - RUN_20260118_1717Z (B41: Order-status missing-context gate + evidence)",
         "anchor": "2026-01-18-run202601181717z-b41-order-status-missing-context-gate-evidence"
       },
@@ -11936,6 +11941,181 @@
         "level": 2,
         "text": "Source-of-truth rules",
         "anchor": "source-of-truth-rules"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/Secrets_and_Environments.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Secrets and Environments",
+        "anchor": "secrets-and-environments"
+      },
+      {
+        "level": 2,
+        "text": "Table of Contents",
+        "anchor": "table-of-contents"
+      },
+      {
+        "level": 2,
+        "text": "Overview",
+        "anchor": "overview"
+      },
+      {
+        "level": 2,
+        "text": "Environment Configuration",
+        "anchor": "environment-configuration"
+      },
+      {
+        "level": 3,
+        "text": "Supported Environments",
+        "anchor": "supported-environments"
+      },
+      {
+        "level": 2,
+        "text": "AWS Secrets Manager (Canonical)",
+        "anchor": "aws-secrets-manager-canonical"
+      },
+      {
+        "level": 3,
+        "text": "Production Secrets",
+        "anchor": "production-secrets"
+      },
+      {
+        "level": 3,
+        "text": "Staging Secrets",
+        "anchor": "staging-secrets"
+      },
+      {
+        "level": 3,
+        "text": "Development Secrets",
+        "anchor": "development-secrets"
+      },
+      {
+        "level": 3,
+        "text": "Shopify Legacy Path (Compatibility)",
+        "anchor": "shopify-legacy-path-compatibility"
+      },
+      {
+        "level": 2,
+        "text": "GitHub Actions Secrets",
+        "anchor": "github-actions-secrets"
+      },
+      {
+        "level": 3,
+        "text": "Current GitHub Secrets (Repository Settings → Secrets and Variables → Actions)",
+        "anchor": "current-github-secrets-repository-settings-secrets-and-variables-actions"
+      },
+      {
+        "level": 3,
+        "text": "⚠️ Production Secret Policy",
+        "anchor": "production-secret-policy"
+      },
+      {
+        "level": 2,
+        "text": "Environment Variable Overrides",
+        "anchor": "environment-variable-overrides"
+      },
+      {
+        "level": 3,
+        "text": "Richpanel Client Overrides",
+        "anchor": "richpanel-client-overrides"
+      },
+      {
+        "level": 3,
+        "text": "Shopify Client Overrides",
+        "anchor": "shopify-client-overrides"
+      },
+      {
+        "level": 3,
+        "text": "OpenAI Client Overrides",
+        "anchor": "openai-client-overrides"
+      },
+      {
+        "level": 2,
+        "text": "Security Constraints",
+        "anchor": "security-constraints"
+      },
+      {
+        "level": 3,
+        "text": "Richpanel Production Safety",
+        "anchor": "richpanel-production-safety"
+      },
+      {
+        "level": 3,
+        "text": "Shopify Production Safety",
+        "anchor": "shopify-production-safety"
+      },
+      {
+        "level": 2,
+        "text": "Code References",
+        "anchor": "code-references"
+      },
+      {
+        "level": 3,
+        "text": "Secret Path Naming Convention",
+        "anchor": "secret-path-naming-convention"
+      },
+      {
+        "level": 3,
+        "text": "Richpanel Client Secret Loading",
+        "anchor": "richpanel-client-secret-loading"
+      },
+      {
+        "level": 3,
+        "text": "Webhook Token Loading (Ingress Lambda)",
+        "anchor": "webhook-token-loading-ingress-lambda"
+      },
+      {
+        "level": 3,
+        "text": "CDK Secret Wiring",
+        "anchor": "cdk-secret-wiring"
+      },
+      {
+        "level": 3,
+        "text": "Secrets Manager Policy",
+        "anchor": "secrets-manager-policy"
+      },
+      {
+        "level": 2,
+        "text": "Secret Rotation",
+        "anchor": "secret-rotation"
+      },
+      {
+        "level": 3,
+        "text": "Rotation Policy",
+        "anchor": "rotation-policy"
+      },
+      {
+        "level": 3,
+        "text": "Rotation Procedure",
+        "anchor": "rotation-procedure"
+      },
+      {
+        "level": 3,
+        "text": "GitHub Actions Secret Rotation",
+        "anchor": "github-actions-secret-rotation"
+      },
+      {
+        "level": 2,
+        "text": "Related Documentation",
+        "anchor": "related-documentation"
+      },
+      {
+        "level": 2,
+        "text": "Appendix: Quick Reference Tables",
+        "anchor": "appendix-quick-reference-tables"
+      },
+      {
+        "level": 3,
+        "text": "Environment → AWS Account Mapping",
+        "anchor": "environment-aws-account-mapping"
+      },
+      {
+        "level": 3,
+        "text": "Secret Path Templates",
+        "anchor": "secret-path-templates"
       }
     ]
   },
