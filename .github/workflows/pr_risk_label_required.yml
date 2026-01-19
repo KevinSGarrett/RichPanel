@@ -19,7 +19,7 @@ jobs:
             }
 
             const labels = (pr.labels || []).map((label) => label.name);
-            const riskPattern = /^risk:(R[0-4])(?:$|[-_])/;
+            const riskPattern = /^risk:(R[0-4])(?:$|[-_].+)/;
             const present = labels.filter((label) => riskPattern.test(label));
             const normalized = Array.from(
               new Set(
