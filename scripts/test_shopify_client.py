@@ -4,6 +4,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -180,17 +181,25 @@ class ShopifyClientTests(unittest.TestCase):
         )  # original untouched
 
     def test_env_namespace_is_reflected_in_secret_path(self) -> None:
-        os.environ["RICH_PANEL_ENV"] = "Staging"
+        with mock.patch.dict(
+            os.environ,
+            {
+                "RICHPANEL_ENV": "Staging",
+                "RICH_PANEL_ENV": "Staging",
+                "MW_ENV": "Staging",
+                "ENVIRONMENT": "Staging",
+            },
+            clear=True,
+        ):
+            client = ShopifyClient(access_token="test-token")
 
-        client = ShopifyClient(access_token="test-token")
-
-        self.assertEqual(client.environment, "staging")
-        self.assertEqual(
-            client.access_token_secret_id, "rp-mw/staging/shopify/admin_api_token"
-        )
-        self.assertIn(
-            "rp-mw/staging/shopify/access_token", client._secret_id_candidates
-        )
+            self.assertEqual(client.environment, "staging")
+            self.assertEqual(
+                client.access_token_secret_id, "rp-mw/staging/shopify/admin_api_token"
+            )
+            self.assertIn(
+                "rp-mw/staging/shopify/access_token", client._secret_id_candidates
+            )
 
     def test_falls_back_to_legacy_secret_when_canonical_missing(self) -> None:
         canonical = "rp-mw/local/shopify/admin_api_token"
@@ -207,25 +216,35 @@ class ShopifyClientTests(unittest.TestCase):
             ]
         )
 
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "RICHPANEL_ENV": "local",
+                "RICH_PANEL_ENV": "local",
+                "MW_ENV": "local",
+                "ENVIRONMENT": "local",
+            },
+            clear=True,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+            )
 
-        response = client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
 
-        self.assertFalse(response.dry_run)
-        self.assertEqual(client.access_token_secret_id, legacy)
-        self.assertEqual(secrets.calls, [canonical, legacy])
-        self.assertEqual(
-            transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
-        )
+            self.assertFalse(response.dry_run)
+            self.assertEqual(client.access_token_secret_id, legacy)
+            self.assertEqual(secrets.calls, [canonical, legacy])
+            self.assertEqual(
+                transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
+            )
 
     def test_missing_secret_short_circuits(self) -> None:
         transport = _FailingTransport()

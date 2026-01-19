@@ -1,0 +1,25 @@
+(.venv) PS C:\RichPanel_GIT> cd C:\RichPanel_GIT
+(.venv) PS C:\RichPanel_GIT> Remove-Item Env:RICHPANEL_API_KEY_SECRET_ID -ErrorAction SilentlyContinue
+(.venv) PS C:\RichPanel_GIT> $env:RICHPANEL_API_KEY_OVERRIDE="ZOqYYo13UYF5ogHO"
+(.venv) PS C:\RichPanel_GIT> $env:SHOPIFY_SHOP_DOMAIN="scentimen-t.myshopify.com"
+(.venv) PS C:\RichPanel_GIT> $env:SHOPIFY_ACCESS_TOKEN_OVERRIDE=$env:DEV_SHOPIFY_ADMIN_API_TOKEN
+(.venv) PS C:\RichPanel_GIT> $env:MW_ALLOW_NETWORK_READS="true"
+(.venv) PS C:\RichPanel_GIT> $env:RICHPANEL_OUTBOUND_ENABLED="false"
+(.venv) PS C:\RichPanel_GIT> $env:RICHPANEL_WRITE_DISABLED="true"
+(.venv) PS C:\RichPanel_GIT> python scripts/live_readonly_shadow_eval.py --ticket-id 1042 --shop-domain scentimen-t.myshopify.com
+2026-01-19 11:57:14,545 WARNING richpanel.write_blocked
+2026-01-19 11:57:14,545 INFO Write block self-check: PASSED (RichpanelWriteDisabledError raised)
+2026-01-19 11:57:14,952 INFO richpanel.response
+2026-01-19 11:57:15,338 INFO richpanel.response
+2026-01-19 11:57:15,571 INFO richpanel.response
+2026-01-19 11:57:15,571 WARNING Conversation fetch skipped
+2026-01-19 11:57:15,572 INFO llm_routing.gated
+2026-01-19 11:57:15,573 INFO Planned response (PII-safe preview):
+2026-01-19 11:57:15,573 INFO {
+  "actions": [
+    "analyze"
+  ],
+  "has_draft_reply": false
+}
+2026-01-19 11:57:15,573 INFO Artifact written to C:\RichPanel_GIT\artifacts\readonly_shadow\20260119T175715Z_1042.json
+(.venv) PS C:\RichPanel_GIT>

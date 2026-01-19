@@ -73,6 +73,33 @@ Before enabling shadow mode in production:
 - [ ] Review CloudWatch logs to confirm no write operations are attempted
 - [ ] Run the "Prove zero writes" audit (see below)
 
+### Live read-only shadow eval script (local)
+
+- Script: `scripts/live_readonly_shadow_eval.py`
+- Required secrets (AWS Secrets Manager): `rp-mw/prod/richpanel/api_key`, `rp-mw/prod/shopify/admin_api_token`
+- Required env vars (the script enforces/fails-closed): `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_OUTBOUND_ENABLED=false`, `RICHPANEL_WRITE_DISABLED=true`
+- Optional overrides: `SHOPIFY_SHOP_DOMAIN` (or `--shop-domain` flag) to target the correct store; `RICHPANEL_API_KEY_SECRET_ID` can be overridden with `--richpanel-secret-id`
+- Run locally (PowerShell example, requires AWS creds with secrets access):
+
+```powershell
+python scripts/live_readonly_shadow_eval.py `
+  --ticket-id <ticket-or-conversation-id> `
+  --richpanel-secret-id rp-mw/prod/richpanel/api_key `
+  --shop-domain <myshop.myshopify.com>
+```
+
+What it does:
+- Forces the read-only env flags above, then verifies a write-block self-check (expects `RichpanelWriteDisabledError`)
+- Reads ticket + conversation, performs order lookup (Shopify fallback) with `allow_network` gated to reads only
+- Builds a dry-run action plan and prints a PII-safe preview of the planned response (no posts/tags)
+- Writes a PII-safe artifact to `artifacts/readonly_shadow/<timestamp>_<ticket>.json` containing: ticket id, redacted customer identifiers, routing/intent, whether tracking was found, and ETA window (if no tracking)
+
+Success evidence for PRs:
+- Command used (including flags)
+- Confirmation that the self-check logged `Write block self-check: PASSED`
+- Path to the generated artifact JSON
+- Cross-reference Shopify data expectations in `docs/SHOPIFY_STRATEGY/` for store-specific nuances
+
 ---
 
 ## How to enable shadow mode

@@ -11,12 +11,13 @@ import urllib.request
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
+# Claude 4.5 models ONLY - no fallbacks
 MODEL_BY_RISK = {
     "risk:R0": "claude-haiku-4-5-20251015",
     "risk:R1": "claude-sonnet-4-5-20250929",
-    "risk:R2": "claude-opus-4-5-20251124",
-    "risk:R3": "claude-opus-4-5-20251124",
-    "risk:R4": "claude-opus-4-5-20251124",
+    "risk:R2": "claude-sonnet-4-5-20250929",
+    "risk:R3": "claude-sonnet-4-5-20250929",
+    "risk:R4": "claude-sonnet-4-5-20250929",
 }
 
 DEFAULT_MAX_DIFF_CHARS = 60000
