@@ -25,6 +25,24 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Ensure gate:claude label exists and is applied
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Check if gate:claude label exists in the repo
+          if ! gh label list --json name --jq '.[].name' | grep -qx "gate:claude"; then
+            echo "Creating gate:claude label..."
+            gh label create "gate:claude" --description "PR requires Claude gate review" --color "d73a4a"
+          fi
+          # Apply gate:claude to this PR if not present
+          if ! gh pr view "${{ github.event.pull_request.number }}" --json labels --jq '.labels[].name' | grep -qx "gate:claude"; then
+            echo "Applying gate:claude label to PR..."
+            gh pr edit "${{ github.event.pull_request.number }}" --add-label "gate:claude"
+          else
+            echo "gate:claude label already present."
+          fi
+
       - name: Run Claude gate review
         id: claude_gate
         continue-on-error: true

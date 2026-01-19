@@ -151,21 +151,42 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 - `risk:R3`
 - `risk:R4`
 
-**Claude gate (API-based, label-driven):**
-- Apply `gate:claude` for **risk ≥ R2** or whenever a PM/lead explicitly requires it.
-- When `gate:claude` is present, the Claude gate workflow:
+**Claude gate (API-based, mandatory):**
+- The `gate:claude` label is **automatically applied** to every PR by the workflow (no manual action needed).
+- The Claude gate is **unskippable** and runs on every PR with concrete proof requirements.
+- When the gate runs, the workflow:
   - fetches PR title/body, changed files, and unified diff
-  - selects the model by risk (`R0` -> haiku, `R1` -> sonnet, `R2+` -> opus)
+  - selects the model by risk:
+    * `R0` → Haiku 3.5 (`claude-haiku-4-5-20251015`)
+    * `R1` → Sonnet 4.5 (`claude-sonnet-4-5-20250929`)
+    * `R2/R3/R4` → Opus 4.5 (`claude-opus-4-5-20251101`)
   - calls the Anthropic Messages API using `ANTHROPIC_API_KEY`
-  - posts a PR comment with `CLAUDE_REVIEW: PASS|FAIL`, model, risk, and top findings
+  - posts a PR comment with:
+    * `CLAUDE_REVIEW: PASS|FAIL`
+    * Risk label and model used
+    * **Anthropic Response ID** (e.g., `msg_abc123xyz`) for audit trail
+    * **Token usage** (input/output tokens) for cost tracking
+    * Top findings from the review
   - fails the check if verdict is FAIL or the API key is missing
   - required secret: `ANTHROPIC_API_KEY` (Actions repo secret)
 
-**PR requirements (merge blockers):**
-- Labels: exactly one `risk:R?`, plus `gate:claude` when required
-- Checks green: unit tests, lint, typecheck, Codecov, Bugbot, and Claude gate (when applicable)
+**Claude gate proof requirements:**
+- Every PR comment MUST include the Anthropic response/message ID (format: `msg_` prefix)
+- Token usage (input/output) MUST be displayed for cost transparency
+- This creates concrete, audit-friendly evidence that a real Anthropic API call happened
+- Cross-check response IDs in the Anthropic dashboard for verification
 
-**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **Codecov, Bugbot, and Claude gate** are green (see PR Health Check).
+**PR requirements (merge blockers):**
+- Labels: exactly one `risk:R?` (required), `gate:claude` is auto-applied
+- Checks green: unit tests, lint, typecheck, Codecov, Bugbot, and **Claude gate (always required)**
+- Claude gate MUST show Anthropic response ID and token usage in the PR comment
+
+**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **Codecov, Bugbot, and Claude gate** are green. The Claude gate is now **mandatory and unskippable** for all PRs (see PR Health Check).
+
+**Claude gate cannot be bypassed:**
+- The workflow automatically creates and applies the `gate:claude` label if missing
+- The gate will fail closed if `ANTHROPIC_API_KEY` is not configured
+- Every run must produce an Anthropic response ID for audit purposes
 
 ---
 
