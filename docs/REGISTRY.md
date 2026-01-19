@@ -477,6 +477,10 @@ Legend:
 - 📎 [Glossary](99_Appendices/Glossary.md)  (`99_Appendices/Glossary.md`)
 - 📎 [References](99_Appendices/References.md)  (`99_Appendices/References.md`)
 
+## SHOPIFY_STRATEGY
+
+- 📎 [Shopify Strategy Notes (reference)](SHOPIFY_STRATEGY/README.md)  (`SHOPIFY_STRATEGY/README.md`)
+
 ## Waves
 
 - 🗄️ [Waves (Historical Notes)](Waves/README.md)  (`Waves/README.md`)

@@ -1,0 +1,36 @@
+{
+  "ticket_id": "1042",
+  "timestamp": "2026-01-19T17:57:15.572410+00:00",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false",
+    "RICHPANEL_WRITE_DISABLED": "true"
+  },
+  "write_block_self_check": true,
+  "customer": {
+    "email": "redacted:25edb07c2a9e",
+    "phone": null,
+    "name": "redacted:9182f8ce95b8"
+  },
+  "routing": {
+    "intent": "unknown_other",
+    "department": "Email Support Team",
+    "reason": "no strong intent keyword detected",
+    "mode": "automation_candidate",
+    "reasons": [
+      "no strong intent keyword detected"
+    ]
+  },
+  "order": {
+    "order_id_redacted": null,
+    "tracking_found": false,
+    "eta_window": null,
+    "delivery_estimate": null
+  },
+  "plan_preview": {
+    "actions": [
+      "analyze"
+    ],
+    "has_draft_reply": false
+  }
+}

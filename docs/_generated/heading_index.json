@@ -12967,6 +12967,12 @@
       "anchor": "verification-checklist"
     }
   ],
+  "live read-only shadow eval script (local)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "live-read-only-shadow-eval-script-local"
+    }
+  ],
   "how to enable shadow mode": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
@@ -22063,6 +22069,12 @@
       "anchor": "99appendices"
     }
   ],
+  "shopify_strategy": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "shopifystrategy"
+    }
+  ],
   "waves": [
     {
       "path": "REGISTRY.md",
@@ -22091,6 +22103,12 @@
     {
       "path": "ROADMAP.md",
       "anchor": "next-step-switch-to-build-mode"
+    }
+  ],
+  "shopify strategy notes (reference)": [
+    {
+      "path": "SHOPIFY_STRATEGY/README.md",
+      "anchor": "shopify-strategy-notes-reference"
     }
   ],
   "waves (historical notes)": [

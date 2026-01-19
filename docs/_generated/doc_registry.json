@@ -1975,8 +1975,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2467,
-    "approx_tokens": 3207,
+    "word_count": 2680,
+    "approx_tokens": 3484,
     "last_updated": "2026-01-17"
   },
   {
@@ -3855,8 +3855,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10691,
-    "approx_tokens": 13898,
+    "word_count": 10702,
+    "approx_tokens": 13912,
     "last_updated": ""
   },
   {
@@ -3867,6 +3867,16 @@
     "in_index": true,
     "word_count": 171,
     "approx_tokens": 222,
+    "last_updated": ""
+  },
+  {
+    "path": "SHOPIFY_STRATEGY/README.md",
+    "title": "Shopify Strategy Notes (reference)",
+    "section": "SHOPIFY_STRATEGY",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 99,
+    "approx_tokens": 128,
     "last_updated": ""
   },
   {

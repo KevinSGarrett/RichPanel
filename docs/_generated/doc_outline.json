@@ -11678,6 +11678,11 @@
         "anchor": "verification-checklist"
       },
       {
+        "level": 3,
+        "text": "Live read-only shadow eval script (local)",
+        "anchor": "live-read-only-shadow-eval-script-local"
+      },
+      {
         "level": 2,
         "text": "How to enable shadow mode",
         "anchor": "how-to-enable-shadow-mode"
@@ -21694,6 +21699,11 @@
       },
       {
         "level": 2,
+        "text": "SHOPIFY_STRATEGY",
+        "anchor": "shopifystrategy"
+      },
+      {
+        "level": 2,
         "text": "Waves",
         "anchor": "waves"
       }
@@ -21721,6 +21731,16 @@
         "level": 2,
         "text": "Next step (switch to build mode)",
         "anchor": "next-step-switch-to-build-mode"
+      }
+    ]
+  },
+  {
+    "path": "SHOPIFY_STRATEGY/README.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Shopify Strategy Notes (reference)",
+        "anchor": "shopify-strategy-notes-reference"
       }
     ]
   },
