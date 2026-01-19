@@ -47,7 +47,9 @@ def aws_env(region: str) -> dict[str, str]:
     return env
 
 
-def run_aws_command(args: Sequence[str], *, env_vars: dict[str, str], redact_output: bool) -> str:
+def run_aws_command(
+    args: Sequence[str], *, env_vars: dict[str, str], redact_output: bool
+) -> str:
     cmd = ["aws", *args]
     try:
         proc = subprocess.run(
@@ -154,9 +156,7 @@ def check_secrets(*, env_name: str, env_vars: dict[str, str]) -> None:
             missing.append(secret)
 
     if missing:
-        raise SmokeTestError(
-            f"Missing Secrets Manager entries: {', '.join(missing)}"
-        )
+        raise SmokeTestError(f"Missing Secrets Manager entries: {', '.join(missing)}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -198,4 +198,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

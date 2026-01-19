@@ -3,8 +3,6 @@ import json
 import logging
 import os
 import time
-import uuid
-from datetime import datetime, timezone
 from typing import Any, Dict
 
 try:
@@ -157,4 +155,3 @@ def _sqs_client():
             raise RuntimeError("boto3 is required to create an sqs client.")
         _SQS_CLIENT = boto3.client("sqs")
     return _SQS_CLIENT
-

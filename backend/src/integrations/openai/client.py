@@ -108,8 +108,7 @@ class TransportResponse:
 
 
 class Transport(Protocol):
-    def send(self, request: TransportRequest) -> TransportResponse:
-        ...
+    def send(self, request: TransportRequest) -> TransportResponse: ...
 
 
 class TransportError(Exception):
@@ -119,7 +118,9 @@ class TransportError(Exception):
 class OpenAIRequestError(Exception):
     """Raised when the OpenAI request fails after retries."""
 
-    def __init__(self, message: str, *, response: Optional[ChatCompletionResponse] = None) -> None:
+    def __init__(
+        self, message: str, *, response: Optional[ChatCompletionResponse] = None
+    ) -> None:
         super().__init__(message)
         self.response = response
 
@@ -148,7 +149,9 @@ class HttpTransport:
             body = exc.read() if hasattr(exc, "read") else b""
             headers = dict(exc.headers.items()) if exc.headers else {}
             return TransportResponse(status_code=exc.code, headers=headers, body=body)
-        except urllib.error.URLError as exc:  # pragma: no cover - exercised via higher-level tests
+        except (
+            urllib.error.URLError
+        ) as exc:  # pragma: no cover - exercised via higher-level tests
             raise TransportError(str(exc)) from exc
 
 
@@ -182,9 +185,9 @@ class OpenAIClient:
         secrets_client: Optional[Any] = None,
     ) -> None:
         self.environment = _resolve_env_name()
-        self.base_url = (base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip(
-            "/"
-        )
+        self.base_url = (
+            base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1"
+        ).rstrip("/")
         self.api_key_secret_id = (
             api_key_secret_id
             or os.environ.get("OPENAI_API_KEY_SECRET_ID")
@@ -197,10 +200,18 @@ class OpenAIClient:
             if allow_network is None
             else bool(allow_network)
         )
-        self.timeout_seconds = float(timeout_seconds or os.environ.get("OPENAI_TIMEOUT_SECONDS") or 10.0)
-        self.max_attempts = max(1, int(os.environ.get("OPENAI_MAX_ATTEMPTS", max_attempts)))
-        self.backoff_seconds = float(os.environ.get("OPENAI_BACKOFF_SECONDS", backoff_seconds))
-        self.backoff_max_seconds = float(os.environ.get("OPENAI_BACKOFF_MAX_SECONDS", backoff_max_seconds))
+        self.timeout_seconds = float(
+            timeout_seconds or os.environ.get("OPENAI_TIMEOUT_SECONDS") or 10.0
+        )
+        self.max_attempts = max(
+            1, int(os.environ.get("OPENAI_MAX_ATTEMPTS", max_attempts))
+        )
+        self.backoff_seconds = float(
+            os.environ.get("OPENAI_BACKOFF_SECONDS", backoff_seconds)
+        )
+        self.backoff_max_seconds = float(
+            os.environ.get("OPENAI_BACKOFF_MAX_SECONDS", backoff_max_seconds)
+        )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
         self._sleeper = sleeper or time.sleep
@@ -217,7 +228,9 @@ class OpenAIClient:
         url = self._build_url("/chat/completions")
         reason = self._short_circuit_reason(safe_mode, automation_enabled)
         if reason:
-            self._logger.info("openai.short_circuit", extra={"url": url, "reason": reason})
+            self._logger.info(
+                "openai.short_circuit", extra={"url": url, "reason": reason}
+            )
             return ChatCompletionResponse(
                 model=request.model,
                 message=None,
@@ -233,7 +246,11 @@ class OpenAIClient:
             reason = load_reason or "missing_api_key"
             self._logger.warning(
                 "openai.missing_api_key",
-                extra={"url": url, "reason": reason, "secret_id": self.api_key_secret_id},
+                extra={
+                    "url": url,
+                    "reason": reason,
+                    "secret_id": self.api_key_secret_id,
+                },
             )
             return ChatCompletionResponse(
                 model=request.model,
@@ -282,7 +299,9 @@ class OpenAIClient:
             last_response = response
 
             should_retry, delay = self._should_retry(response, attempt)
-            self._log_response(response, latency_ms, attempt, delay if should_retry else None)
+            self._log_response(
+                response, latency_ms, attempt, delay if should_retry else None
+            )
 
             if should_retry and attempt < self.max_attempts:
                 self._sleep(delay)
@@ -302,7 +321,9 @@ class OpenAIClient:
             response=last_response,
         )
 
-    def _short_circuit_reason(self, safe_mode: bool, automation_enabled: bool) -> Optional[str]:
+    def _short_circuit_reason(
+        self, safe_mode: bool, automation_enabled: bool
+    ) -> Optional[str]:
         if safe_mode:
             return "safe_mode"
         if not automation_enabled:
@@ -329,7 +350,9 @@ class OpenAIClient:
         secret_value = response.get("SecretString")
         if secret_value is None and response.get("SecretBinary") is not None:
             try:
-                secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+                secret_value = base64.b64decode(response["SecretBinary"]).decode(
+                    "utf-8"
+                )
             except Exception:
                 return None, "secret_decode_failed"
 
@@ -342,12 +365,17 @@ class OpenAIClient:
     def _secrets_client(self):
         if self._secrets_client_obj is None:
             if boto3 is None:
-                raise OpenAIConfigError("boto3 is required to create a secretsmanager client.")
+                raise OpenAIConfigError(
+                    "boto3 is required to create a secretsmanager client."
+                )
             self._secrets_client_obj = boto3.client("secretsmanager")
         return self._secrets_client_obj
 
     def _build_headers(self, *, has_body: bool) -> Dict[str, str]:
-        headers = {"authorization": f"Bearer {self.api_key}", "accept": "application/json"}
+        headers = {
+            "authorization": f"Bearer {self.api_key}",
+            "accept": "application/json",
+        }
         if has_body:
             headers["content-type"] = "application/json"
         return headers
@@ -386,11 +414,15 @@ class OpenAIClient:
             dry_run=False,
         )
 
-    def _should_retry(self, response: ChatCompletionResponse, attempt: int) -> Tuple[bool, float]:
+    def _should_retry(
+        self, response: ChatCompletionResponse, attempt: int
+    ) -> Tuple[bool, float]:
         if response.status_code == 429 or 500 <= response.status_code < 600:
             retry_after = None
             if response.raw:
-                retry_after = response.raw.get("retry_after") or response.raw.get("Retry-After")
+                retry_after = response.raw.get("retry_after") or response.raw.get(
+                    "Retry-After"
+                )
             delay = self._compute_backoff(attempt, retry_after)
             return True, delay
         return False, 0.0
@@ -403,7 +435,9 @@ class OpenAIClient:
                     return min(parsed, self.backoff_max_seconds)
             except (TypeError, ValueError):
                 pass
-        base = min(self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds)
+        base = min(
+            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        )
         jitter = base * 0.25 * self._rng()
         return min(base + jitter, self.backoff_max_seconds)
 
@@ -462,5 +496,3 @@ __all__ = [
     "TransportRequest",
     "TransportResponse",
 ]
-
-

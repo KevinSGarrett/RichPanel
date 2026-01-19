@@ -113,7 +113,21 @@ def normalize_shipping_method(raw: Optional[str]) -> Optional[Dict[str, Any]]:
         }
 
     keyword_windows = [
-        (("priority", "overnight", "next day", "next-day", "express", "rush", "rushed", "1-day", "1 day"), (1, 1), "Priority"),
+        (
+            (
+                "priority",
+                "overnight",
+                "next day",
+                "next-day",
+                "express",
+                "rush",
+                "rushed",
+                "1-day",
+                "1 day",
+            ),
+            (1, 1),
+            "Priority",
+        ),
         (("2-day", "2 day", "two day"), (2, 2), "Priority"),
         (("standard", "ground"), (3, 5), "Standard"),
         (("economy", "free", "postal", "mail"), (5, 7), "Standard"),
@@ -164,7 +178,11 @@ def compute_delivery_estimate(
     remaining_min = max(0, window["min_days"] - elapsed)
     remaining_max = max(0, window["max_days"] - elapsed)
     is_late = elapsed >= window["max_days"]
-    eta_human = "should arrive any day now" if is_late else format_eta_window(remaining_min, remaining_max)
+    eta_human = (
+        "should arrive any day now"
+        if is_late
+        else format_eta_window(remaining_min, remaining_max)
+    )
 
     return {
         "bucket": window["bucket"],
@@ -180,6 +198,7 @@ def compute_delivery_estimate(
         "eta_human": eta_human,
         "is_late": is_late,
     }
+
 
 def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
@@ -230,7 +249,7 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
 
 
 def build_no_tracking_reply(
-    order_summary: Dict[str, Any],
+    order_summary: Optional[Dict[str, Any]],
     *,
     inquiry_date: Any,
     delivery_estimate: Optional[Dict[str, Any]] = None,
@@ -238,13 +257,14 @@ def build_no_tracking_reply(
     """
     Construct a deterministic draft reply for no-tracking order status cases.
     """
+    summary = order_summary if isinstance(order_summary, dict) else {}
     estimate = delivery_estimate or compute_delivery_estimate(
-        order_summary.get("created_at") or order_summary.get("order_created_at"),
-        order_summary.get("shipping_method") or order_summary.get("shipping_method_name"),
+        summary.get("created_at") or summary.get("order_created_at"),
+        summary.get("shipping_method") or summary.get("shipping_method_name"),
         inquiry_date,
     )
 
-    raw_order_id = order_summary.get("order_id") or order_summary.get("id")
+    raw_order_id = summary.get("order_id") or summary.get("id")
     order_id = str(raw_order_id).strip() if raw_order_id is not None else ""
     has_order_id = bool(order_id) and order_id.lower() not in {"unknown", "your order"}
 
@@ -299,5 +319,3 @@ __all__ = [
     "format_eta_window",
     "normalize_shipping_method",
 ]
-
-

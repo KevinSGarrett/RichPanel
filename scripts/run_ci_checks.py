@@ -48,7 +48,9 @@ def git_available(cwd: Path) -> bool:
 
 
 def git_status_porcelain(cwd: Path) -> str:
-    p = subprocess.run(["git", "status", "--short"], cwd=str(cwd), capture_output=True, text=True)
+    p = subprocess.run(
+        ["git", "status", "--short"], cwd=str(cwd), capture_output=True, text=True
+    )
     if p.returncode != 0:
         return ""
     return p.stdout.strip()

@@ -45,7 +45,11 @@ def extract_local_links(index_md: str) -> List[str]:
             continue
 
         # ignore external links
-        if target.startswith("http://") or target.startswith("https://") or target.startswith("mailto:"):
+        if (
+            target.startswith("http://")
+            or target.startswith("https://")
+            or target.startswith("mailto:")
+        ):
             continue
 
         # normalize
@@ -78,7 +82,9 @@ def scan_file(path: Path) -> List[Tuple[str, int, str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--strict", action="store_true", help="Fail if hygiene issues found")
+    ap.add_argument(
+        "--strict", action="store_true", help="Fail if hygiene issues found"
+    )
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]
@@ -112,7 +118,9 @@ def main() -> int:
         all_issues.extend(scan_file(f))
 
     if not all_issues:
-        print("[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).")
+        print(
+            "[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs)."
+        )
         return 0
 
     print("WARN: Doc hygiene issues found in INDEX-linked docs:")

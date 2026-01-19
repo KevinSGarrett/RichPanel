@@ -7,4 +7,3 @@ with offline-friendly defaults.
 
 # Expose submodules for convenience.
 __all__ = ["openai", "shopify"]
-

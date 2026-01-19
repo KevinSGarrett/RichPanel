@@ -7,9 +7,6 @@ from typing import Any, Optional, Set
 
 from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
-    RichpanelRequestError,
-    SecretLoadError,
-    TransportError,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -96,4 +93,3 @@ def get_ticket_metadata(
 
 
 __all__ = ["TicketMetadata", "dedupe_tags", "get_ticket_metadata"]
-

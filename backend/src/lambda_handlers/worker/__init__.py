@@ -1,2 +1,1 @@
 """Worker Lambda handler package."""
-

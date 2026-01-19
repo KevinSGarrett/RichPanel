@@ -173,7 +173,9 @@ def _build_routing_prompt(customer_message: str) -> List[ChatMessage]:
     )
 
     # Truncate customer message to prevent prompt injection and reduce tokens
-    truncated_message = customer_message[:2000] if len(customer_message) > 2000 else customer_message
+    truncated_message = (
+        customer_message[:2000] if len(customer_message) > 2000 else customer_message
+    )
 
     return [
         ChatMessage(role="system", content=system_content),
@@ -226,7 +228,9 @@ def _llm_routing_gating_check(
 # ============================================================================
 
 
-def _parse_llm_response(response: ChatCompletionResponse) -> Tuple[Dict[str, Any], Optional[str]]:
+def _parse_llm_response(
+    response: ChatCompletionResponse,
+) -> Tuple[Dict[str, Any], Optional[str]]:
     """
     Parse and validate the LLM response JSON.
 
@@ -278,8 +282,13 @@ def _parse_llm_response(response: ChatCompletionResponse) -> Tuple[Dict[str, Any
     if department not in DEPARTMENTS:
         parsed["_original_department"] = department
         # Map intent to department if possible
-        parsed["department"] = INTENT_TO_DEPARTMENT.get(parsed["intent"], "Email Support Team")
-        parsed["_validation_note"] = parsed.get("_validation_note", "") + f"; department '{department}' not in allowlist"
+        parsed["department"] = INTENT_TO_DEPARTMENT.get(
+            parsed["intent"], "Email Support Team"
+        )
+        parsed["_validation_note"] = (
+            parsed.get("_validation_note", "")
+            + f"; department '{department}' not in allowlist"
+        )
 
     return parsed, None
 
@@ -478,6 +487,7 @@ def compute_dual_routing(
 
     # Extract customer message for LLM
     from richpanel_middleware.automation.router import extract_customer_message
+
     customer_message = extract_customer_message(payload, default="")
 
     # Step 2: LLM routing suggestion

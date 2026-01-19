@@ -14,7 +14,10 @@ from richpanel_middleware.automation.delivery_estimate import (
     compute_delivery_estimate,
     normalize_shipping_method,
 )
-from richpanel_middleware.automation.router import RoutingDecision, extract_customer_message
+from richpanel_middleware.automation.router import (
+    RoutingDecision,
+    extract_customer_message,
+)
 from richpanel_middleware.automation.llm_routing import (
     RoutingArtifact,
     compute_dual_routing,
@@ -63,8 +66,6 @@ _SKIP_REASON_TAGS = {
 }
 
 
-
-
 def _is_closed_status(value: Optional[str]) -> bool:
     if value is None:
         return False
@@ -92,7 +93,7 @@ def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
     for key in ("tracking_number", "tracking", "tracking_no", "trackingCode"):
         if order_summary.get(key):
             return True
-    for key in ("tracking_url", "tracking_link", "status_url"):
+    for key in ("tracking_url", "trackingUrl", "tracking_link", "status_url"):
         if order_summary.get(key):
             return True
     for key in ("carrier", "shipping_carrier", "carrier_name", "carrierName"):
@@ -143,24 +144,26 @@ def _missing_order_context(
     )
     shipping_bucket = normalize_shipping_method(shipping_method) is not None
     if not tracking_present and not shipping_bucket:
-        missing.append("tracking_or_shipping_method" if not shipping_method else "shipping_method_bucket")
+        missing.append(
+            "tracking_or_shipping_method"
+            if not shipping_method
+            else "shipping_method_bucket"
+        )
 
     return missing
 
 
 def _missing_context_reason_tag(missing_fields: List[str]) -> Optional[str]:
-    for field in missing_fields:
-        if field == "order_id":
+    for missing_field in missing_fields:
+        if missing_field == "order_id":
             return f"{ORDER_LOOKUP_MISSING_PREFIX}:order_id"
-        if field == "created_at":
+        if missing_field == "created_at":
             return f"{ORDER_LOOKUP_MISSING_PREFIX}:created_at"
-        if field == "tracking_or_shipping_method":
+        if missing_field == "tracking_or_shipping_method":
             return f"{ORDER_LOOKUP_MISSING_PREFIX}:tracking_or_shipping_method"
-        if field == "shipping_method_bucket":
+        if missing_field == "shipping_method_bucket":
             return f"{ORDER_LOOKUP_MISSING_PREFIX}:shipping_method_bucket"
     return None
-
-
 
 
 @dataclass
@@ -221,12 +224,18 @@ def _redact_actions_for_storage(actions: List[Dict[str, Any]]) -> List[Dict[str,
         if "prompt_fingerprint" in params:
             redacted_params["prompt_fingerprint"] = params.get("prompt_fingerprint")
         if "order_summary" in params:
-            redacted_params["order_summary_fingerprint"] = _fingerprint(params.get("order_summary"))
+            redacted_params["order_summary_fingerprint"] = _fingerprint(
+                params.get("order_summary")
+            )
         if "draft_reply" in params:
-            redacted_params["draft_reply_fingerprint"] = _fingerprint(params.get("draft_reply"))
+            redacted_params["draft_reply_fingerprint"] = _fingerprint(
+                params.get("draft_reply")
+            )
             redacted_params["has_draft_reply"] = bool(params.get("draft_reply"))
         if "delivery_estimate" in params:
-            redacted_params["delivery_estimate_present"] = bool(params.get("delivery_estimate"))
+            redacted_params["delivery_estimate_present"] = bool(
+                params.get("delivery_estimate")
+            )
         if redacted_params:
             safe_action["parameters"] = redacted_params
         sanitized.append({k: v for k, v in safe_action.items() if v is not None})
@@ -277,7 +286,6 @@ def _resolve_target_ticket_id(
         except (RichpanelRequestError, SecretLoadError, TransportError):
             pass
     return str(envelope.conversation_id)
-
 
 
 def plan_actions(
@@ -364,10 +372,14 @@ def plan_actions(
                     ]
                     if reason_tag:
                         extra_tags.append(reason_tag)
-                    routing.tags = sorted(dedupe_tags((routing.tags or []) + extra_tags))
+                    routing.tags = sorted(
+                        dedupe_tags((routing.tags or []) + extra_tags)
+                    )
                     if actions:
                         actions[0]["routing"] = asdict(routing)
-                ticket_number = payload.get("ticket_number") or payload.get("conversation_no")
+                ticket_number = payload.get("ticket_number") or payload.get(
+                    "conversation_no"
+                )
                 LOGGER.info(
                     "automation.order_status_context_missing",
                     extra={
@@ -524,14 +536,16 @@ def execute_plan(
         mode=plan.mode,
         dry_run=dry_run,
         actions=actions_for_storage,
-        routing=plan.routing
-        if plan.routing
-        else RoutingDecision(
-            category="general",
-            tags=[],
-            reason="routing missing",
-            department="Email Support Team",
-            intent="unknown",
+        routing=(
+            plan.routing
+            if plan.routing
+            else RoutingDecision(
+                category="general",
+                tags=[],
+                reason="routing missing",
+                department="Email Support Team",
+                intent="unknown",
+            )
         ),
         state_record=state_record,
         audit_record=audit_record,
@@ -646,7 +660,10 @@ def execute_order_status_reply(
         )
 
     executor = richpanel_executor or RichpanelExecutor(
-        outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
+        outbound_enabled=outbound_enabled
+        and allow_network
+        and automation_enabled
+        and not safe_mode
     )
 
     responses: List[Dict[str, Any]] = []
@@ -672,7 +689,9 @@ def execute_order_status_reply(
         run_id = None
         if isinstance(envelope.payload, dict):
             run_id = envelope.payload.get("run_id") or envelope.payload.get("RUN_ID")
-        run_specific_reply_tag = f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
+        run_specific_reply_tag = (
+            f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
+        )
 
         ticket_metadata = _safe_ticket_metadata_fetch(
             target_id,
@@ -680,7 +699,9 @@ def execute_order_status_reply(
             allow_network=allow_network,
         )
 
-        def _route_email_support(reason: str, ticket_status: Optional[str] = None) -> Dict[str, Any]:
+        def _route_email_support(
+            reason: str, ticket_status: Optional[str] = None
+        ) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
             skip_tag = _SKIP_REASON_TAGS.get(reason)
             if skip_tag:
@@ -729,10 +750,19 @@ def execute_order_status_reply(
             return _route_email_support("already_resolved", ticket_status=ticket_status)
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
-            return _route_email_support("followup_after_auto_reply", ticket_status=ticket_status)
+            return _route_email_support(
+                "followup_after_auto_reply", ticket_status=ticket_status
+            )
 
         tags_to_apply = sorted(
-            dedupe_tags([loop_prevention_tag, ORDER_STATUS_REPLY_TAG, REPLY_SENT_TAG, run_specific_reply_tag])
+            dedupe_tags(
+                [
+                    loop_prevention_tag,
+                    ORDER_STATUS_REPLY_TAG,
+                    REPLY_SENT_TAG,
+                    run_specific_reply_tag,
+                ]
+            )
         )
         tag_response = executor.execute(
             "PUT",
@@ -749,22 +779,136 @@ def execute_order_status_reply(
         )
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         update_candidates = [
-            ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}}),
-            ("state_closed", {"state": "closed", "comment": comment_payload, "tags": tags_to_apply}),
-            ("status_closed", {"status": "closed", "comment": comment_payload, "tags": tags_to_apply}),
-            ("state_resolved", {"state": "resolved", "comment": comment_payload, "tags": tags_to_apply}),
-            ("status_resolved", {"status": "resolved", "comment": comment_payload, "tags": tags_to_apply}),
-            ("state_CLOSED", {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}),
-            ("status_CLOSED", {"status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply}),
-            ("state_RESOLVED", {"state": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
-            ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload, "tags": tags_to_apply}),
+            (
+                "ticket_state_closed_status_CLOSED",
+                {
+                    "ticket": {
+                        "state": "closed",
+                        "status": "CLOSED",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_state_CLOSED_status_CLOSED",
+                {
+                    "ticket": {
+                        "state": "CLOSED",
+                        "status": "CLOSED",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_state_CLOSED",
+                {
+                    "ticket": {
+                        "state": "CLOSED",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_state_RESOLVED",
+                {
+                    "ticket": {
+                        "state": "RESOLVED",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_state_closed",
+                {
+                    "ticket": {
+                        "state": "closed",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_state_resolved",
+                {
+                    "ticket": {
+                        "state": "resolved",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_status_closed",
+                {
+                    "ticket": {
+                        "status": "closed",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "ticket_status_resolved",
+                {
+                    "ticket": {
+                        "status": "resolved",
+                        "comment": comment_payload,
+                        "tags": tags_to_apply,
+                    }
+                },
+            ),
+            (
+                "state_closed",
+                {"state": "closed", "comment": comment_payload, "tags": tags_to_apply},
+            ),
+            (
+                "status_closed",
+                {"status": "closed", "comment": comment_payload, "tags": tags_to_apply},
+            ),
+            (
+                "state_resolved",
+                {
+                    "state": "resolved",
+                    "comment": comment_payload,
+                    "tags": tags_to_apply,
+                },
+            ),
+            (
+                "status_resolved",
+                {
+                    "status": "resolved",
+                    "comment": comment_payload,
+                    "tags": tags_to_apply,
+                },
+            ),
+            (
+                "state_CLOSED",
+                {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply},
+            ),
+            (
+                "status_CLOSED",
+                {"status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply},
+            ),
+            (
+                "state_RESOLVED",
+                {
+                    "state": "RESOLVED",
+                    "comment": comment_payload,
+                    "tags": tags_to_apply,
+                },
+            ),
+            (
+                "status_RESOLVED",
+                {
+                    "status": "RESOLVED",
+                    "comment": comment_payload,
+                    "tags": tags_to_apply,
+                },
+            ),
         ]
 
         update_success = None
@@ -775,7 +919,9 @@ def execute_order_status_reply(
                 json_body=payload,
                 dry_run=not allow_network,
             )
-            candidate_success = 200 <= reply_response.status_code < 300 and not reply_response.dry_run
+            candidate_success = (
+                200 <= reply_response.status_code < 300 and not reply_response.dry_run
+            )
             responses.append(
                 {
                     "action": "reply_and_resolve",
@@ -801,7 +947,9 @@ def execute_order_status_reply(
             extra={
                 "event_id": envelope.event_id,
                 "conversation_id": envelope.conversation_id,
-                "statuses": [entry["status"] for entry in responses if "status" in entry],
+                "statuses": [
+                    entry["status"] for entry in responses if "status" in entry
+                ],
                 "dry_run": any(entry.get("dry_run") for entry in responses),
                 "loop_tag": loop_prevention_tag,
                 "update_candidate": update_success,
@@ -817,6 +965,7 @@ def execute_order_status_reply(
             },
         )
         return {"sent": False, "reason": "exception"}
+
 
 def _routing_tags_block_reason(
     *,
@@ -888,7 +1037,10 @@ def execute_routing_tags(
         return {"applied": False, "reason": reason}
 
     executor = richpanel_executor or RichpanelExecutor(
-        outbound_enabled=outbound_enabled and allow_network and automation_enabled and not safe_mode
+        outbound_enabled=outbound_enabled
+        and allow_network
+        and automation_enabled
+        and not safe_mode
     )
 
     target_id = _resolve_target_ticket_id(
@@ -929,4 +1081,3 @@ def execute_routing_tags(
             },
         )
         return {"applied": False, "reason": "exception"}
-

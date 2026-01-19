@@ -75,7 +75,9 @@ def prompt_fingerprint(contract: PromptContract) -> str:
         "max_tokens": contract.max_tokens,
         "metadata": contract.metadata,
     }
-    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
     return hashlib.sha256(serialized).hexdigest()
 
 
@@ -172,4 +174,3 @@ __all__ = [
     "prompt_fingerprint",
     "run_offline_order_status_eval",
 ]
-

@@ -21,5 +21,3 @@ __all__ = [
     "TransportError",
     "HttpTransport",
 ]
-
-

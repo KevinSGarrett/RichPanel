@@ -26,10 +26,9 @@ from __future__ import annotations
 import argparse
 import ast
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -82,7 +81,9 @@ class RunArtifactSpec:
 
 def _strip_quotes(s: str) -> str:
     s = s.strip()
-    if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
+    if (s.startswith("'") and s.endswith("'")) or (
+        s.startswith('"') and s.endswith('"')
+    ):
         return s[1:-1]
     return s
 
@@ -118,7 +119,12 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
     run_spec = RunArtifactSpec(
         run_id_regex=r"^RUN_\d{8}_\d{4}Z$",
         agent_ids=["A", "B", "C"],
-        required_files_per_agent=["RUN_SUMMARY.md", "STRUCTURE_REPORT.md", "DOCS_IMPACT_MAP.md", "TEST_MATRIX.md"],
+        required_files_per_agent=[
+            "RUN_SUMMARY.md",
+            "STRUCTURE_REPORT.md",
+            "DOCS_IMPACT_MAP.md",
+            "TEST_MATRIX.md",
+        ],
         optional_files_per_agent=["FIX_REPORT.md"],
     )
 
@@ -170,9 +176,11 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
                 current.when = m.group(1).strip()
                 continue
 
-            m = re.match(r"^required:\s*(true|false)\s*$", stripped, flags=re.IGNORECASE)
+            m = re.match(
+                r"^required:\s*(true|false)\s*$", stripped, flags=re.IGNORECASE
+            )
             if m:
-                current.required = (m.group(1).lower() == "true")
+                current.required = m.group(1).lower() == "true"
                 continue
 
             m = re.match(r"^role:\s*(.+?)\s*$", stripped)
@@ -213,7 +221,9 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
                     # Accept YAML-ish inline list: ['A', 'B', 'C']
                     try:
                         parsed = ast.literal_eval(value)
-                        if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
+                        if isinstance(parsed, list) and all(
+                            isinstance(x, str) for x in parsed
+                        ):
                             run_spec.agent_ids = parsed
                     except Exception:
                         pass
@@ -255,7 +265,9 @@ def check_manifest_completeness(entries: List[ManifestEntry]) -> List[str]:
     return missing
 
 
-def check_paths(entries: List[ManifestEntry], mode: str, strict: bool) -> Tuple[List[str], List[str]]:
+def check_paths(
+    entries: List[ManifestEntry], mode: str, strict: bool
+) -> Tuple[List[str], List[str]]:
     """
     Returns (errors, warnings)
     """
@@ -289,7 +301,9 @@ def check_paths(entries: List[ManifestEntry], mode: str, strict: bool) -> Tuple[
     return errors, warnings
 
 
-def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool) -> Tuple[List[str], List[str]]:
+def check_runs(
+    run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial: bool
+) -> Tuple[List[str], List[str]]:
     """
     Validate RUNS structure.
     - build mode: strict by default, unless allow_partial is enabled.
@@ -311,8 +325,13 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
     run_folders = [p for p in runs_dir.iterdir() if p.is_dir()]
     if not run_folders:
         if mode == "build":
-            errors.append("RUNS/ is empty (no RUN_* folders found yet). In build mode, at least one RUN_* folder is required.")
-        return (errors if not strict else errors + [f"(strict) {w}" for w in warnings], [] if strict else warnings)
+            errors.append(
+                "RUNS/ is empty (no RUN_* folders found yet). In build mode, at least one RUN_* folder is required."
+            )
+        return (
+            errors if not strict else errors + [f"(strict) {w}" for w in warnings],
+            [] if strict else warnings,
+        )
 
     for run in sorted(run_folders, key=lambda p: p.name):
         if not run_id_re.match(run.name):
@@ -351,7 +370,11 @@ def check_runs(run_spec: RunArtifactSpec, mode: str, strict: bool, allow_partial
 
 
 def _count_non_empty_lines(text: str) -> int:
-    return sum(1 for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n") if line.strip())
+    return sum(
+        1
+        for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+        if line.strip()
+    )
 
 
 def _run_report_missing_required_sections(run_report_text: str) -> List[str]:
@@ -368,14 +391,19 @@ def _run_report_missing_required_sections(run_report_text: str) -> List[str]:
     heading_like = [
         ln
         for ln in lines
-        if ln.startswith("#") or (ln.startswith("**") and ln.endswith("**") and len(ln) >= 4)
+        if ln.startswith("#")
+        or (ln.startswith("**") and ln.endswith("**") and len(ln) >= 4)
     ]
 
     required = {
         "Diffstat": re.compile(r"diff\s*stat", flags=re.IGNORECASE),
         "Commands Run": re.compile(r"\bcommands\b", flags=re.IGNORECASE),
-        "Tests / Proof": re.compile(r"\b(tests?|proof|evidence)\b", flags=re.IGNORECASE),
-        "Files Changed": re.compile(r"\bfiles?\b.*\b(changed|modified|touched)\b", flags=re.IGNORECASE),
+        "Tests / Proof": re.compile(
+            r"\b(tests?|proof|evidence)\b", flags=re.IGNORECASE
+        ),
+        "Files Changed": re.compile(
+            r"\bfiles?\b.*\b(changed|modified|touched)\b", flags=re.IGNORECASE
+        ),
     }
 
     missing: List[str] = []
@@ -387,7 +415,9 @@ def _run_report_missing_required_sections(run_report_text: str) -> List[str]:
 
 
 def _latest_run_dir(runs_dir: Path, run_id_re) -> Optional[Path]:
-    candidates = [p for p in runs_dir.iterdir() if p.is_dir() and run_id_re.match(p.name)]
+    candidates = [
+        p for p in runs_dir.iterdir() if p.is_dir() and run_id_re.match(p.name)
+    ]
     if not candidates:
         return None
     # Run IDs are lexicographically sortable due to RUN_YYYYMMDD_HHMMZ format.
@@ -424,7 +454,9 @@ def check_latest_run_populated(
     run_id_re = re.compile(run_spec.run_id_regex)
     latest = _latest_run_dir(runs_dir, run_id_re)
     if latest is None:
-        errors.append(f"RUNS/ must contain at least one run folder matching: {run_spec.run_id_regex}")
+        errors.append(
+            f"RUNS/ must contain at least one run folder matching: {run_spec.run_id_regex}"
+        )
         return errors, warnings
 
     required_with_min_lines = {
@@ -491,7 +523,11 @@ def check_latest_run_populated(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as failures (useful for CI).")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Treat warnings as failures (useful for CI).",
+    )
     parser.add_argument(
         "--allow-partial",
         action="store_true",
@@ -526,7 +562,9 @@ def main() -> int:
     entries, run_spec = parse_manifest(manifest_text)
 
     if not entries:
-        print("[FAIL] Could not parse any entries from MANIFEST.yaml (expected 'paths:' section)")
+        print(
+            "[FAIL] Could not parse any entries from MANIFEST.yaml (expected 'paths:' section)"
+        )
         return 1
 
     # Manifest must declare the baseline invariants
@@ -542,7 +580,9 @@ def main() -> int:
     allow_partial = args.allow_partial
 
     errors, warnings = check_paths(entries, mode=mode, strict=strict)
-    run_errors, run_warnings = check_runs(run_spec, mode=mode, strict=strict, allow_partial=allow_partial)
+    run_errors, run_warnings = check_runs(
+        run_spec, mode=mode, strict=strict, allow_partial=allow_partial
+    )
 
     errors.extend(run_errors)
     warnings.extend(run_warnings)
@@ -560,8 +600,8 @@ def main() -> int:
 
     if errors:
         print("[FAIL] REHYDRATION_PACK validation failed:")
-        for e in errors:
-            print(f"  - {e}")
+        for error_message in errors:
+            print(f"  - {error_message}")
         return 1
 
     print(f"[OK] REHYDRATION_PACK validated (mode={mode}).")

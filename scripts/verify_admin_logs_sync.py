@@ -24,7 +24,6 @@ Exit codes:
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
 
 
@@ -45,7 +44,8 @@ def find_latest_run() -> str | None:
         return None
 
     run_folders = [
-        p.name for p in RUNS_DIR.iterdir()
+        p.name
+        for p in RUNS_DIR.iterdir()
         if p.is_dir() and RUN_ID_PATTERN.match(p.name)
     ]
 
@@ -75,7 +75,9 @@ def main() -> int:
 
     if latest_run is None:
         print("[SKIP] No RUN_* folders found under REHYDRATION_PACK/RUNS/")
-        print("       (This is OK if you're still in foundation mode or haven't started build runs yet.)")
+        print(
+            "       (This is OK if you're still in foundation mode or haven't started build runs yet.)"
+        )
         return 0
 
     print(f"  Latest run folder: {latest_run}")
@@ -88,10 +90,14 @@ def main() -> int:
         print(f"[OK] {latest_run} is referenced in Progress_Log.md")
         return 0
     else:
-        print(f"[FAIL] {latest_run} is NOT referenced in docs/00_Project_Admin/Progress_Log.md")
+        print(
+            f"[FAIL] {latest_run} is NOT referenced in docs/00_Project_Admin/Progress_Log.md"
+        )
         print()
         print("To fix:")
-        print(f"  1. Add an entry for {latest_run} in docs/00_Project_Admin/Progress_Log.md")
+        print(
+            f"  1. Add an entry for {latest_run} in docs/00_Project_Admin/Progress_Log.md"
+        )
         print("  2. Commit and push the update")
         print()
         print("Example entry:")
@@ -102,4 +108,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

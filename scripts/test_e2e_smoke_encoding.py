@@ -11,12 +11,11 @@ import hashlib
 import json
 import sys
 import unittest
-import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,8 +56,12 @@ def _order_status_scenario_payload(run_id: str, *, conversation_id: str | None) 
     order_created_at = (now - timedelta(days=5)).isoformat()
     ticket_created_at = (now - timedelta(days=1)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
-    tracking_number = f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
+    seeded_order_id = (
+        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
+    )
+    tracking_number = (
+        f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
+    )
     tracking_url = f"https://tracking.example.com/track/{tracking_number}"
     shipping_method = "Standard (3-5 business days)"
     carrier = "UPS"
@@ -118,7 +121,9 @@ def _order_status_scenario_payload(run_id: str, *, conversation_id: str | None) 
 class ScenarioPayloadTests(unittest.TestCase):
     def test_order_status_scenario_includes_required_fields(self) -> None:
         """Ensure order_status scenario payload includes all required fields."""
-        payload = _order_status_scenario_payload("TEST_RUN", conversation_id="test-conv-123")
+        payload = _order_status_scenario_payload(
+            "TEST_RUN", conversation_id="test-conv-123"
+        )
 
         # Required fields for offline order summary
         self.assertEqual(payload["scenario"], "order_status")
@@ -143,14 +148,15 @@ class ScenarioPayloadTests(unittest.TestCase):
         """Scenario payload must not contain PII patterns."""
         payload = _order_status_scenario_payload("TEST", conversation_id="test-123")
 
-        import json
         serialized = json.dumps(payload)
         self.assertNotIn("@", serialized)
         self.assertNotIn("%40", serialized)
         self.assertNotIn("mail.", serialized)
 
     def test_order_status_no_tracking_shape(self) -> None:
-        payload = _order_status_no_tracking_payload("RUN_NT", conversation_id="conv-no-track-1")
+        payload = _order_status_no_tracking_payload(
+            "RUN_NT", conversation_id="conv-no-track-1"
+        )
 
         self.assertEqual(payload["scenario"], "order_status_no_tracking")
         self.assertEqual(payload["intent"], "order_status_tracking")
@@ -177,7 +183,9 @@ class DiagnosticsTests(unittest.TestCase):
             self.calls: list[dict] = []
 
         def execute(self, method: str, path: str, json_body: dict, dry_run: bool, log_body_excerpt: bool) -> "DiagnosticsTests._MockResponse":  # type: ignore[override]  # noqa: E501
-            self.calls.append({"method": method, "path": path, "body": json_body, "dry_run": dry_run})
+            self.calls.append(
+                {"method": method, "path": path, "body": json_body, "dry_run": dry_run}
+            )
             return DiagnosticsTests._MockResponse(self.status_code, dry_run, path)
 
     def test_diagnose_skips_without_confirm(self) -> None:
@@ -209,7 +217,9 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertTrue(any(entry["ok"] for entry in result["results"]))
         self.assertIsNotNone(result.get("apply_result"))
         # Ensure response metadata redaction works
-        sanitized = _sanitize_response_metadata(self._MockResponse(200, False, "/v1/tickets/abc"))
+        sanitized = _sanitize_response_metadata(
+            self._MockResponse(200, False, "/v1/tickets/abc")
+        )
         self.assertEqual(sanitized["endpoint_variant"], "id")
 
 
@@ -386,7 +396,9 @@ class FollowupProofTests(unittest.TestCase):
             "customer_message": "orig",
         }
         followup = _build_followup_payload(
-            base_payload=base, followup_message="follow-up ping", scenario_variant="order_status_tracking"
+            base_payload=base,
+            followup_message="follow-up ping",
+            scenario_variant="order_status_tracking",
         )
 
         self.assertNotEqual(followup["event_id"], base["event_id"])
@@ -420,7 +432,9 @@ class FollowupProofTests(unittest.TestCase):
         self.assertEqual(fingerprint, _fingerprint(followup_event_id))
         self.assertTrue(proof["performed"])
         self.assertEqual(proof["event_id_fingerprint"], fingerprint)
-        self.assertEqual(proof["idempotency_record"], {"status": "performed", "mode": "safe"})
+        self.assertEqual(
+            proof["idempotency_record"], {"status": "performed", "mode": "safe"}
+        )
         self.assertEqual(proof["message_count_delta"], 1)
         self.assertEqual(proof["updated_at_delta_seconds"], 2.5)
         self.assertTrue(proof["reply_sent"])
@@ -503,7 +517,9 @@ class FallbackCloseTests(unittest.TestCase):
             self.responses = responses
             self.calls: list[tuple[str, str, dict[str, Any]]] = []
 
-        def execute(self, method: str, path: str, **kwargs: Any) -> "FallbackCloseTests._Resp":
+        def execute(
+            self, method: str, path: str, **kwargs: Any
+        ) -> "FallbackCloseTests._Resp":
             self.calls.append((method, path, kwargs))
             return self.responses.pop(0)
 
@@ -657,7 +673,7 @@ class URLEncodingTests(unittest.TestCase):
         mock_executor.execute.return_value = mock_response
 
         # Execute with mocked executor
-        result = execute_routing_tags(
+        execute_routing_tags(
             envelope,
             plan,
             safe_mode=False,
@@ -670,7 +686,9 @@ class URLEncodingTests(unittest.TestCase):
         # Assert executor.execute was called with URL-encoded path
         self.assertTrue(mock_executor.execute.called)
         call_args = mock_executor.execute.call_args
-        path_arg = call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("path")
+        path_arg = (
+            call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("path")
+        )
 
         # Path should be URL-encoded (no raw <, >, @)
         self.assertNotIn("<", path_arg)
@@ -721,7 +739,7 @@ class URLEncodingTests(unittest.TestCase):
         mock_response.dry_run = False
         mock_executor.execute.return_value = mock_response
 
-        result = execute_routing_tags(
+        execute_routing_tags(
             envelope,
             plan,
             safe_mode=False,
@@ -732,7 +750,9 @@ class URLEncodingTests(unittest.TestCase):
         )
 
         call_args = mock_executor.execute.call_args
-        path_arg = call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("path")
+        path_arg = (
+            call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("path")
+        )
 
         # + should be encoded as %2B
         self.assertNotIn("+", path_arg)

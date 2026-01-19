@@ -51,7 +51,9 @@ class DeliveryEstimateTests(unittest.TestCase):
         assert estimate is not None
         self.assertTrue(estimate["is_late"])
         self.assertEqual(estimate["eta_human"], "should arrive any day now")
-        self.assertGreaterEqual(estimate["elapsed_business_days"], estimate["window_max_days"])
+        self.assertGreaterEqual(
+            estimate["elapsed_business_days"], estimate["window_max_days"]
+        )
 
     def test_shipping_method_normalization_handles_ranges(self) -> None:
         window = normalize_shipping_method("Standard Shipping (5-7 Business Days)")
@@ -78,4 +80,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

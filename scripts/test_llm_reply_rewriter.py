@@ -4,6 +4,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -15,12 +16,15 @@ from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
 )
 from richpanel_middleware.integrations.openai import (  # noqa: E402
     ChatCompletionResponse,
+    OpenAIClient,
     OpenAIRequestError,
 )
 
 
 class _FakeClient:
-    def __init__(self, *, response: ChatCompletionResponse, raise_error: bool = False) -> None:
+    def __init__(
+        self, *, response: ChatCompletionResponse, raise_error: bool = False
+    ) -> None:
         self.response = response
         self.raise_error = raise_error
         self.calls = 0
@@ -30,6 +34,12 @@ class _FakeClient:
         if self.raise_error:
             raise OpenAIRequestError("simulated failure")
         return self.response
+
+
+def _fake_client(
+    *, response: ChatCompletionResponse, raise_error: bool = False
+) -> _FakeClient:
+    return _FakeClient(response=response, raise_error=raise_error)
 
 
 class ReplyRewriteTests(unittest.TestCase):
@@ -43,7 +53,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
         result = rewrite_reply(
             "deterministic reply",
             conversation_id="t-1",
@@ -52,7 +62,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertFalse(result.rewritten)
@@ -68,7 +78,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
 
         result = rewrite_reply(
             "deterministic reply",
@@ -78,7 +88,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertTrue(result.rewritten)
@@ -94,7 +104,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
 
         result = rewrite_reply(
             "deterministic reply",
@@ -104,7 +114,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=False,
             outbound_enabled=True,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertFalse(result.rewritten)
@@ -120,7 +130,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
 
         result = rewrite_reply(
             "deterministic reply",
@@ -130,7 +140,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=False,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertFalse(result.rewritten)
@@ -146,7 +156,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
 
         result = rewrite_reply(
             "original body",
@@ -156,7 +166,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertFalse(result.rewritten)
@@ -171,7 +181,7 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
 
         result = rewrite_reply(
             "original body",
@@ -181,7 +191,7 @@ class ReplyRewriteTests(unittest.TestCase):
             automation_enabled=True,
             allow_network=True,
             outbound_enabled=True,
-            client=client,
+            client=cast(OpenAIClient, client),
         )
 
         self.assertFalse(result.rewritten)
@@ -196,10 +206,12 @@ class ReplyRewriteTests(unittest.TestCase):
             status_code=200,
             url="https://example.com",
         )
-        client = _FakeClient(response=response)
+        client = _fake_client(response=response)
         reply_body = "Sensitive customer info 12345"
 
-        with self.assertLogs("richpanel_middleware.automation.llm_reply_rewriter", level="INFO") as captured:
+        with self.assertLogs(
+            "richpanel_middleware.automation.llm_reply_rewriter", level="INFO"
+        ) as captured:
             result = rewrite_reply(
                 reply_body,
                 conversation_id="t-4",
@@ -208,7 +220,7 @@ class ReplyRewriteTests(unittest.TestCase):
                 automation_enabled=True,
                 allow_network=True,
                 outbound_enabled=True,
-                client=client,
+                client=cast(OpenAIClient, client),
             )
 
         combined_logs = " ".join(captured.output)
@@ -224,4 +236,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

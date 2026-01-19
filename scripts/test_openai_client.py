@@ -50,7 +50,9 @@ class _RecordingTransport:
 
 
 class _StubSecretsClient:
-    def __init__(self, response: Optional[dict] = None, exc: Optional[Exception] = None):
+    def __init__(
+        self, response: Optional[dict] = None, exc: Optional[Exception] = None
+    ):
         self.calls = 0
         self.response = response or {}
         self.exc = exc
@@ -76,13 +78,17 @@ class OpenAIClientTests(unittest.TestCase):
 
     def test_safe_mode_short_circuits_transport(self) -> None:
         transport = _FailingTransport()
-        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        client = OpenAIClient(
+            api_key="test-key", allow_network=True, transport=transport
+        )
 
         request = ChatCompletionRequest(
             model="gpt-5.2-chat-latest",
             messages=[ChatMessage(role="user", content="hi")],
         )
-        response = client.chat_completion(request, safe_mode=True, automation_enabled=True)
+        response = client.chat_completion(
+            request, safe_mode=True, automation_enabled=True
+        )
 
         self.assertTrue(response.dry_run)
         self.assertEqual(response.reason, "safe_mode")
@@ -90,13 +96,17 @@ class OpenAIClientTests(unittest.TestCase):
 
     def test_automation_disabled_short_circuits_transport(self) -> None:
         transport = _FailingTransport()
-        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        client = OpenAIClient(
+            api_key="test-key", allow_network=True, transport=transport
+        )
 
         request = ChatCompletionRequest(
             model="gpt-5.2-chat-latest",
             messages=[ChatMessage(role="user", content="hi there")],
         )
-        response = client.chat_completion(request, safe_mode=False, automation_enabled=False)
+        response = client.chat_completion(
+            request, safe_mode=False, automation_enabled=False
+        )
 
         self.assertTrue(response.dry_run)
         self.assertEqual(response.reason, "automation_disabled")
@@ -118,14 +128,18 @@ class OpenAIClientTests(unittest.TestCase):
 
         self.assertEqual(contract_one.messages, contract_two.messages)
         self.assertEqual(contract_one.messages[0].content, expected_system)
-        self.assertEqual(prompt_fingerprint(contract_one), prompt_fingerprint(contract_two))
+        self.assertEqual(
+            prompt_fingerprint(contract_one), prompt_fingerprint(contract_two)
+        )
 
     def test_offline_eval_runs_without_network(self) -> None:
         fixtures = load_order_status_fixtures(FIXTURES)
         self.assertTrue(fixtures)
 
         transport = _FailingTransport()
-        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        client = OpenAIClient(
+            api_key="test-key", allow_network=True, transport=transport
+        )
         results = run_offline_order_status_eval(
             fixtures, client=client, safe_mode=True, automation_enabled=False
         )
@@ -142,7 +156,9 @@ class OpenAIClientTests(unittest.TestCase):
             model="gpt-5.2-chat-latest",
             messages=[ChatMessage(role="user", content="hello")],
         )
-        response = client.chat_completion(request, safe_mode=False, automation_enabled=True)
+        response = client.chat_completion(
+            request, safe_mode=False, automation_enabled=True
+        )
 
         self.assertTrue(response.dry_run)
         self.assertEqual(response.reason, "network_blocked")
@@ -159,13 +175,17 @@ class OpenAIClientTests(unittest.TestCase):
     def test_missing_secret_short_circuits_to_dry_run(self) -> None:
         secrets_client = _StubSecretsClient(response={})
         transport = _FailingTransport()
-        client = OpenAIClient(allow_network=True, transport=transport, secrets_client=secrets_client)
+        client = OpenAIClient(
+            allow_network=True, transport=transport, secrets_client=secrets_client
+        )
 
         request = ChatCompletionRequest(
             model="gpt-5.2-chat-latest",
             messages=[ChatMessage(role="user", content="hello")],
         )
-        response = client.chat_completion(request, safe_mode=False, automation_enabled=True)
+        response = client.chat_completion(
+            request, safe_mode=False, automation_enabled=True
+        )
 
         self.assertTrue(response.dry_run)
         self.assertEqual(response.reason, "missing_api_key")
@@ -203,4 +223,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

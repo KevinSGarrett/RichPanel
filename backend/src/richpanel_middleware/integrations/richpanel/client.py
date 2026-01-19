@@ -75,7 +75,11 @@ class RichpanelResponse:
 
     def json(self) -> Any:
         try:
-            payload = self.body.decode("utf-8") if isinstance(self.body, (bytes, bytearray)) else self.body
+            payload = (
+                self.body.decode("utf-8")
+                if isinstance(self.body, (bytes, bytearray))
+                else self.body
+            )
             return json.loads(payload)
         except Exception:
             return None
@@ -139,7 +143,9 @@ class SecretLoadError(Exception):
 class RichpanelRequestError(Exception):
     """Raised when a Richpanel request fails after retries."""
 
-    def __init__(self, message: str, *, response: Optional[RichpanelResponse] = None) -> None:
+    def __init__(
+        self, message: str, *, response: Optional[RichpanelResponse] = None
+    ) -> None:
         super().__init__(message)
         self.response = response
 
@@ -149,8 +155,7 @@ class RichpanelWriteDisabledError(RichpanelRequestError):
 
 
 class Transport(Protocol):
-    def send(self, request: TransportRequest) -> TransportResponse:
-        ...
+    def send(self, request: TransportRequest) -> TransportResponse: ...
 
 
 class HttpTransport:
@@ -204,7 +209,9 @@ class RichpanelClient:
         rng: Optional[Callable[[], float]] = None,
     ) -> None:
         self.base_url = (
-            base_url or os.environ.get("RICHPANEL_API_BASE_URL") or "https://api.richpanel.com"
+            base_url
+            or os.environ.get("RICHPANEL_API_BASE_URL")
+            or "https://api.richpanel.com"
         ).rstrip("/")
         self.environment = _resolve_env_name()
         self.api_key_secret_id = (
@@ -217,7 +224,9 @@ class RichpanelClient:
         self.timeout_seconds = float(
             timeout_seconds or os.environ.get("RICHPANEL_HTTP_TIMEOUT_SECONDS") or 5.0
         )
-        self.max_attempts = max(1, int(os.environ.get("RICHPANEL_HTTP_MAX_ATTEMPTS", max_attempts)))
+        self.max_attempts = max(
+            1, int(os.environ.get("RICHPANEL_HTTP_MAX_ATTEMPTS", max_attempts))
+        )
         self.backoff_seconds = float(
             os.environ.get("RICHPANEL_HTTP_BACKOFF_SECONDS", backoff_seconds)
         )
@@ -249,7 +258,9 @@ class RichpanelClient:
                 "richpanel.write_blocked",
                 extra={"method": method_upper},
             )
-            raise RichpanelWriteDisabledError("Richpanel writes are disabled; request blocked")
+            raise RichpanelWriteDisabledError(
+                "Richpanel writes are disabled; request blocked"
+            )
         use_dry_run = self.dry_run if dry_run is None else bool(dry_run)
         url = self._build_url(path, params)
         body_bytes = self._encode_body(json_body)
@@ -268,7 +279,9 @@ class RichpanelClient:
             )
 
         api_key = self._load_api_key()
-        request_headers = self._merge_headers(headers, api_key, has_body=body_bytes is not None)
+        request_headers = self._merge_headers(
+            headers, api_key, has_body=body_bytes is not None
+        )
         attempt = 1
         last_response: Optional[RichpanelResponse] = None
 
@@ -304,7 +317,14 @@ class RichpanelClient:
             last_response = response
 
             should_retry, delay = self._should_retry(response, attempt)
-            self._log_response(method.upper(), response, latency_ms, attempt, delay if should_retry else None, log_body_excerpt=log_body_excerpt)
+            self._log_response(
+                method.upper(),
+                response,
+                latency_ms,
+                attempt,
+                delay if should_retry else None,
+                log_body_excerpt=log_body_excerpt,
+            )
 
             if should_retry and attempt < self.max_attempts:
                 self._sleep(delay)
@@ -324,7 +344,9 @@ class RichpanelClient:
             response=last_response,
         )
 
-    def get_ticket_metadata(self, ticket_id: str, *, dry_run: Optional[bool] = None) -> TicketMetadata:
+    def get_ticket_metadata(
+        self, ticket_id: str, *, dry_run: Optional[bool] = None
+    ) -> TicketMetadata:
         """
         Fetch PII-safe ticket metadata for safety checks.
 
@@ -360,9 +382,16 @@ class RichpanelClient:
                 conversation_no = int(conversation_no)
             except (TypeError, ValueError):
                 conversation_no = None
-        return TicketMetadata(ticket_id=str(ticket_id), status=status, tags=tags, conversation_no=conversation_no)
+        return TicketMetadata(
+            ticket_id=str(ticket_id),
+            status=status,
+            tags=tags,
+            conversation_no=conversation_no,
+        )
 
-    def _to_response(self, transport_response: TransportResponse, url: str) -> RichpanelResponse:
+    def _to_response(
+        self, transport_response: TransportResponse, url: str
+    ) -> RichpanelResponse:
         return RichpanelResponse(
             status_code=transport_response.status_code,
             headers=transport_response.headers,
@@ -371,7 +400,9 @@ class RichpanelClient:
             dry_run=False,
         )
 
-    def _should_retry(self, response: RichpanelResponse, attempt: int) -> Tuple[bool, float]:
+    def _should_retry(
+        self, response: RichpanelResponse, attempt: int
+    ) -> Tuple[bool, float]:
         if response.status_code == 429 or 500 <= response.status_code < 600:
             delay = self._compute_backoff(attempt, response.headers.get("Retry-After"))
             return True, delay
@@ -386,7 +417,9 @@ class RichpanelClient:
             except (TypeError, ValueError):
                 pass
 
-        base = min(self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds)
+        base = min(
+            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        )
         jitter = base * 0.25 * self._rng()
         return min(base + jitter, self.backoff_max_seconds)
 
@@ -406,9 +439,13 @@ class RichpanelClient:
             )
 
         try:
-            response = self._secrets_client().get_secret_value(SecretId=self.api_key_secret_id)
+            response = self._secrets_client().get_secret_value(
+                SecretId=self.api_key_secret_id
+            )
         except (BotoCoreError, ClientError) as exc:
-            raise SecretLoadError("Unable to load Richpanel API key from Secrets Manager") from exc
+            raise SecretLoadError(
+                "Unable to load Richpanel API key from Secrets Manager"
+            ) from exc
 
         secret_value = response.get("SecretString")
         if secret_value is None and response.get("SecretBinary") is not None:
@@ -425,11 +462,15 @@ class RichpanelClient:
     def _secrets_client(self):
         if self._secrets_client_obj is None:
             if boto3 is None:
-                raise SecretLoadError("boto3 is required to create a secretsmanager client.")
+                raise SecretLoadError(
+                    "boto3 is required to create a secretsmanager client."
+                )
             self._secrets_client_obj = boto3.client("secretsmanager")
         return self._secrets_client_obj
 
-    def _merge_headers(self, headers: Optional[Dict[str, str]], api_key: str, has_body: bool) -> Dict[str, str]:
+    def _merge_headers(
+        self, headers: Optional[Dict[str, str]], api_key: str, has_body: bool
+    ) -> Dict[str, str]:
         merged: Dict[str, str] = {
             "accept": "application/json",
             "x-richpanel-key": api_key,
@@ -533,16 +574,26 @@ class RichpanelExecutor:
         requested_dry_run = kwargs.pop("dry_run", None)
         log_body_excerpt = kwargs.pop("log_body_excerpt", True)
         effective_dry_run = (
-            not self._outbound_enabled if requested_dry_run is None else bool(requested_dry_run)
+            not self._outbound_enabled
+            if requested_dry_run is None
+            else bool(requested_dry_run)
         )
         return self._client.request(
-            method, path, dry_run=effective_dry_run, log_body_excerpt=log_body_excerpt, **kwargs
+            method,
+            path,
+            dry_run=effective_dry_run,
+            log_body_excerpt=log_body_excerpt,
+            **kwargs,
         )
 
-    def get_ticket_metadata(self, ticket_id: str, *, dry_run: Optional[bool] = None) -> TicketMetadata:
+    def get_ticket_metadata(
+        self, ticket_id: str, *, dry_run: Optional[bool] = None
+    ) -> TicketMetadata:
         requested_dry_run = dry_run
         effective_dry_run = (
-            not self._outbound_enabled if requested_dry_run is None else bool(requested_dry_run)
+            not self._outbound_enabled
+            if requested_dry_run is None
+            else bool(requested_dry_run)
         )
         return self._client.get_ticket_metadata(ticket_id, dry_run=effective_dry_run)
 
@@ -566,4 +617,3 @@ __all__ = [
     "RichpanelWriteDisabledError",
     "HttpTransport",
 ]
-
