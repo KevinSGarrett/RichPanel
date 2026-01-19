@@ -743,13 +743,22 @@ class OutboundRoutingTagsTests(unittest.TestCase):
         self.assertFalse(call["kwargs"]["dry_run"])
 
 
-def main() -> int:
+def _build_suite() -> unittest.TestSuite:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests))
     backend_tests = ROOT / "backend" / "tests"
     if backend_tests.exists():
         suite.addTests(unittest.defaultTestLoader.discover(str(backend_tests)))
+    return suite
+
+
+def load_tests(loader: unittest.TestLoader, tests: unittest.TestSuite, pattern: str) -> unittest.TestSuite:
+    return _build_suite()
+
+
+def main() -> int:
+    suite = _build_suite()
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

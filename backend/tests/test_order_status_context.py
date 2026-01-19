@@ -49,6 +49,29 @@ class OrderStatusContextGateTests(unittest.TestCase):
         self.assertIn("mw-order-status-suppressed", routing.tags)
         self.assertIn("mw-order-lookup-missing:order_id", routing.tags)
 
+    def test_missing_created_at_no_reply(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-missing-created-at",
+                "order_id": "ord-missing-created",
+                "tracking_number": "1Z333",
+                "carrier": "UPS",
+                "message": "Where is my order?",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_context_missing", plan.reasons)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertIn("route-email-support-team", routing.tags)
+        self.assertIn("mw-order-lookup-failed", routing.tags)
+        self.assertIn("mw-order-status-suppressed", routing.tags)
+        self.assertIn("mw-order-lookup-missing:created_at", routing.tags)
+
     def test_missing_tracking_and_shipping_method_no_reply(self) -> None:
         envelope = build_event_envelope(
             {
@@ -70,6 +93,29 @@ class OrderStatusContextGateTests(unittest.TestCase):
         self.assertIn("mw-order-lookup-failed", routing.tags)
         self.assertIn("mw-order-status-suppressed", routing.tags)
         self.assertIn("mw-order-lookup-missing:tracking_or_shipping_method", routing.tags)
+
+    def test_missing_shipping_method_bucket_no_reply(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-missing-bucket",
+                "order_id": "ord-missing-bucket",
+                "created_at": "2025-01-01T00:00:00Z",
+                "shipping_method": "quantum courier",
+                "message": "Where is my order?",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_context_missing", plan.reasons)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertIn("route-email-support-team", routing.tags)
+        self.assertIn("mw-order-lookup-failed", routing.tags)
+        self.assertIn("mw-order-status-suppressed", routing.tags)
+        self.assertIn("mw-order-lookup-missing:shipping_method_bucket", routing.tags)
 
     def test_full_context_proceeds_normally(self) -> None:
         envelope = build_event_envelope(
