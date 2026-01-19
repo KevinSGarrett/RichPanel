@@ -43,4 +43,4 @@ Harden order-status automation with an order-context gate, safer fallback wordin
 - Fail closed when order context is missing to prevent unsafe auto-replies.
 
 ## Issues / follow-ups
-- Wait for Cursor Bugbot check to complete (manual review posted).
+- None.

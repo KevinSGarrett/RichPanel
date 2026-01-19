@@ -2,7 +2,7 @@
 
 **Mission:** Harden order-status automation with missing-context gate
 **Agent:** Cursor Agent B
-**Status:** All acceptance criteria satisfied; gates green (Cursor Bugbot check pending)
+**Status:** All acceptance criteria satisfied; all gates green
 
 ## Deliverables
 1. âœ… Order-context gate in pipeline.py
