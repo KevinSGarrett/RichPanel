@@ -749,7 +749,11 @@ def _build_suite() -> unittest.TestSuite:
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests))
     backend_tests = ROOT / "backend" / "tests"
     if backend_tests.exists():
-        suite.addTests(unittest.defaultTestLoader.discover(str(backend_tests)))
+        suite.addTests(
+            unittest.defaultTestLoader.discover(
+                str(backend_tests), pattern="test_*.py", top_level_dir=str(ROOT)
+            )
+        )
     return suite
 
 
