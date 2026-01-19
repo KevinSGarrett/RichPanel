@@ -12,14 +12,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const requiredLabels = [
-              "risk:R0-docs",
-              "risk:R1-low",
-              "risk:R2-medium",
-              "risk:R3-high",
-              "risk:R4-critical",
-            ];
-
             const pr = context.payload.pull_request;
             if (!pr) {
               core.setFailed("No pull_request payload found for this event.");
@@ -27,19 +19,28 @@ jobs:
             }
 
             const labels = (pr.labels || []).map((label) => label.name);
-            const present = labels.filter((label) => requiredLabels.includes(label));
+            const riskPattern = /^risk:(R[0-4])(?:$|[-_])/;
+            const present = labels.filter((label) => riskPattern.test(label));
+            const normalized = Array.from(
+              new Set(
+                present
+                  .map((label) => label.match(/^risk:(R[0-4])/))
+                  .filter(Boolean)
+                  .map((match) => `risk:${match[1]}`)
+              )
+            );
 
-            if (present.length === 0) {
+            if (normalized.length === 0) {
               core.setFailed(
-                "PR must have exactly one risk label (risk:R0-docs, risk:R1-low, risk:R2-medium, risk:R3-high, risk:R4-critical)"
+                "PR must have exactly one risk label (risk:R0, risk:R1, risk:R2, risk:R3, risk:R4)"
               );
               return;
             }
-            if (present.length > 1) {
+            if (normalized.length > 1) {
               core.setFailed(
-                `PR has multiple risk labels: ${present.join(", ")}. Only one risk label is allowed.`
+                `PR has multiple risk labels: ${normalized.join(", ")}. Only one risk label is allowed.`
               );
               return;
             }
 
-            core.info(`Risk label valid: ${present[0]}`);
+            core.info(`Risk label valid: ${normalized[0]}`);

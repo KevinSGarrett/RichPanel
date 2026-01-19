@@ -145,20 +145,27 @@ We require **merge commits only** for auditability and traceability.
 Every PR must carry exactly one risk label from the approved set. CI enforces this and will fail if missing.
 
 **Risk labels (required):**
-- `risk:R0-docs`
-- `risk:R1-low`
-- `risk:R2-medium`
-- `risk:R3-high`
-- `risk:R4-critical`
+- `risk:R0`
+- `risk:R1`
+- `risk:R2`
+- `risk:R3`
+- `risk:R4`
 
-**Claude gate (label-driven):**
+**Claude gate (API-based, label-driven):**
 - Apply `gate:claude` for **risk ≥ R2** or whenever a PM/lead explicitly requires it.
-- When `gate:claude` is present, the PR must include a comment containing:
-  - `Claude Review (gate:claude)`
-  - `PASS`
-- This comment is the **Claude PASS evidence** and must be linked in `RUN_REPORT.md`.
+- When `gate:claude` is present, the Claude gate workflow:
+  - fetches PR title/body, changed files, and unified diff
+  - selects the model by risk (`R0` -> haiku, `R1` -> sonnet, `R2+` -> opus)
+  - calls the Anthropic Messages API using `ANTHROPIC_API_KEY`
+  - posts a PR comment with `CLAUDE_REVIEW: PASS|FAIL`, model, risk, and top findings
+  - fails the check if verdict is FAIL or the API key is missing
+  - required secret: `ANTHROPIC_API_KEY` (Actions repo secret)
 
-**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **both Codecov and Bugbot are green** (see PR Health Check).
+**PR requirements (merge blockers):**
+- Labels: exactly one `risk:R?`, plus `gate:claude` when required
+- Checks green: unit tests, lint, typecheck, Codecov, Bugbot, and Claude gate (when applicable)
+
+**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **Codecov, Bugbot, and Claude gate** are green (see PR Health Check).
 
 ---
 
@@ -167,7 +174,7 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.
 
 ### 4.0 Wait-for-green gate (mandatory)
-- **No “done” until green:** Do not declare a run complete or enable auto-merge until Codecov and Bugbot checks have finished and are green (or an explicitly documented fallback is recorded).
+- **No “done” until green:** Do not declare a run complete or enable auto-merge until unit tests, lint, typecheck, Codecov, Bugbot, and Claude gate (if `gate:claude`) are green (or an explicitly documented fallback is recorded).
 - **Wait loop:** After pushing and triggering Bugbot, poll checks every 120–240 seconds until the PR status rollup (and `gh pr checks <PR#>`) shows Codecov + Bugbot contexts completed/green.
   ```powershell
   $pr = <PR#>
@@ -753,7 +760,7 @@ and include:
 - attempted fixes
 - proposed next actions
 
-## 13) Seed Secrets Manager (dev/staging)
+## 13) Seed Secrets Manager (dev/staging/prod)
 Optional workflow to upsert Secrets Manager entries without using the console.
 
 - Workflow: `.github/workflows/seed-secrets.yml`
@@ -765,14 +772,21 @@ Optional workflow to upsert Secrets Manager entries without using the console.
 - `DEV_RICHPANEL_WEBHOOK_TOKEN`
 - `DEV_RICHPANEL_API_KEY`
 - `DEV_OPENAI_API_KEY`
+- `DEV_SHOPIFY_ADMIN_API_TOKEN`
 - `STAGING_RICHPANEL_WEBHOOK_TOKEN`
 - `STAGING_RICHPANEL_API_KEY`
 - `STAGING_OPENAI_API_KEY`
+- `STAGING_SHOPIFY_ADMIN_API_TOKEN`
+- `PROD_RICHPANEL_WEBHOOK_TOKEN`
+- `PROD_RICHPANEL_API_KEY`
+- `PROD_OPENAI_API_KEY`
+- `PROD_SHOPIFY_ADMIN_API_TOKEN`
 
 ### AWS secret IDs written (when the matching GitHub secret is present)
 - `rp-mw/<env>/richpanel/webhook_token`
 - `rp-mw/<env>/richpanel/api_key`
 - `rp-mw/<env>/openai/api_key`
+- `rp-mw/<env>/shopify/admin_api_token`
 
 ### How to run (PowerShell-safe)
 ```powershell

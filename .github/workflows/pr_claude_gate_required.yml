@@ -4,75 +4,57 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled, edited]
 
+concurrency:
+  group: claude-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
 jobs:
   claude-gate-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate Claude gate comment
-        uses: actions/github-script@v7
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          script: |
-            const pr = context.payload.pull_request;
-            if (!pr) {
-              core.setFailed("No pull_request payload found for this event.");
-              return;
-            }
+          python-version: "3.11"
 
-            const labels = (pr.labels || []).map((label) => label.name);
-            const gateLabel = "gate:claude";
-            if (!labels.includes(gateLabel)) {
-              core.info("gate:claude label not present. Skipping gate check.");
-              return;
-            }
+      - name: Run Claude gate review
+        id: claude_gate
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/claude_gate_review.py \
+            --repo "${{ github.repository }}" \
+            --pr-number "${{ github.event.pull_request.number }}"
 
-            const { owner, repo } = context.repo;
-            const issue_number = pr.number;
-            const pull_number = pr.number;
-            const requiredTitle = "Claude Review (gate:claude)";
-            const passPattern = /\bPASS\b/;
+      - name: Post Claude review comment
+        if: steps.claude_gate.outcome == 'success' && steps.claude_gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            -f body=@${{ steps.claude_gate.outputs.comment_path }}
 
-            const issueComments = await github.paginate(
-              github.rest.issues.listComments,
-              {
-                owner,
-                repo,
-                issue_number,
-                per_page: 100,
-              }
-            );
-
-            const reviewComments = await github.paginate(
-              github.rest.pulls.listReviewComments,
-              {
-                owner,
-                repo,
-                pull_number,
-                per_page: 100,
-              }
-            );
-
-            const reviews = await github.paginate(github.rest.pulls.listReviews, {
-              owner,
-              repo,
-              pull_number,
-              per_page: 100,
-            });
-
-            const allComments = [
-              ...issueComments.map((comment) => comment.body || ""),
-              ...reviewComments.map((comment) => comment.body || ""),
-              ...reviews.map((review) => review.body || ""),
-            ];
-
-            const hasPassComment = allComments.some((body) => {
-              return body.includes(requiredTitle) && passPattern.test(body);
-            });
-
-            if (!hasPassComment) {
-              core.setFailed(
-                'Missing Claude PASS comment. Add a PR comment containing "Claude Review (gate:claude)" and "PASS" to satisfy gate:claude.'
-              );
-              return;
-            }
-
-            core.info("Claude PASS comment found.");
+      - name: Enforce Claude gate verdict
+        if: steps.claude_gate.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
+            echo "::error::Claude gate failed to run. Check logs above for details."
+            exit 1
+          fi
+          if [ "${{ steps.claude_gate.outputs.verdict }}" != "PASS" ]; then
+            echo "::error::Claude gate verdict FAIL."
+            exit 1
+          fi
