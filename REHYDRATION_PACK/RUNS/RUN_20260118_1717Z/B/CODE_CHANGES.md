@@ -159,11 +159,21 @@ Rationale: Avoids claiming "we have order X on file" when order_id is unknown.
 
 **Key Test Cases:**
 
-- **Line 28-51:** `test_missing_order_id_no_reply` (no reply + handoff tags)
-- **Line 52-72:** `test_missing_tracking_and_shipping_method_no_reply` (no reply + handoff tags)
-- **Line 74-91:** `test_full_context_proceeds_normally` (draft reply generated)
+- **Line 29-50:** `test_missing_order_id_no_reply` (no reply + handoff tags)
+- **Line 52-73:** `test_missing_created_at_no_reply` (no reply + handoff tags)
+- **Line 75-95:** `test_missing_tracking_and_shipping_method_no_reply` (no reply + handoff tags)
+- **Line 97-118:** `test_missing_shipping_method_bucket_no_reply` (no reply + handoff tags)
+- **Line 120-137:** `test_full_context_proceeds_normally` (draft reply generated)
 
-### 4. docs/05_FAQ_Automation/Order_Status_Automation.md
+### 4. backend/tests/test_delivery_estimate_fallback.py (NEW FILE)
+
+**Purpose:** Validate fallback wording when no tracking and no ETA can be computed
+
+**Key Test Cases:**
+- **Line 18-23:** `test_no_tracking_reply_without_order_id`
+- **Line 25-30:** `test_no_tracking_reply_with_order_id`
+
+### 5. docs/05_FAQ_Automation/Order_Status_Automation.md
 
 **Purpose:** Document the order-context gate
 
@@ -176,7 +186,9 @@ Rationale: Avoids claiming "we have order X on file" when order_id is unknown.
 
 **scripts/test_pipeline_handlers.py**
 - Updated fixtures to include required order context and verify suppression behavior.
+- Added `load_tests()` so backend tests are included in coverage runs.
 - **Line 80-169:** Added order_id/created_at/shipping_method inputs and missing-context assertions.
+- **Line 746-763:** Centralized suite build + backend test discovery for coverage.
 
 **scripts/test_read_only_shadow_mode.py**
 - Updated mocked order summary with order_id/created_at/shipping_method for gate compliance.
