@@ -19,7 +19,7 @@ MODEL_BY_RISK = {
     "risk:R4": "claude-opus-4-5-20251124",
 }
 
-DEFAULT_MAX_DIFF_CHARS = 120000
+DEFAULT_MAX_DIFF_CHARS = 60000
 DEFAULT_MAX_BODY_CHARS = 8000
 DEFAULT_MAX_FILES = 200
 DEFAULT_MAX_FINDINGS = 5
@@ -110,16 +110,21 @@ def _anthropic_request(payload: dict, api_key: str) -> dict:
     request.add_header("x-api-key", api_key)
     request.add_header("anthropic-version", "2023-06-01")
 
-    backoff = 2
-    for attempt in range(3):
+    backoff = 5
+    for attempt in range(4):
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", "replace")
-            if exc.code in (429, 500, 502, 503, 504) and attempt < 2:
-                time.sleep(backoff)
-                backoff *= 2
+            if exc.code in (429, 500, 502, 503, 504) and attempt < 3:
+                retry_after = exc.headers.get("retry-after") if exc.headers else None
+                if retry_after and retry_after.isdigit():
+                    sleep_for = min(int(retry_after), 30)
+                else:
+                    sleep_for = min(backoff, 30)
+                    backoff = min(backoff * 2, 30)
+                time.sleep(sleep_for)
                 continue
             raise RuntimeError(f"Anthropic API error {exc.code}: {body[:300]}") from exc
         except urllib.error.URLError as exc:
