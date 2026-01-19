@@ -43,8 +43,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          comment_body="$(cat "${{ steps.claude_gate.outputs.comment_path }}")"
           gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            -f body=@${{ steps.claude_gate.outputs.comment_path }}
+            -f body="$comment_body"
 
       - name: Enforce Claude gate verdict
         if: steps.claude_gate.outputs.skip != 'true'
