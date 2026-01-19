@@ -36,6 +36,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     append_summary,
     _redact_command,
     _order_status_no_tracking_payload,
+    _order_status_no_tracking_short_window_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -165,6 +166,30 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertIsNone(payload.get("tracking_number"))
         self.assertIsNone(payload.get("tracking_url"))
         self.assertEqual(payload["tracking"]["status"], "label_pending")
+
+    def test_order_status_no_tracking_short_window_shape(self) -> None:
+        payload = _order_status_no_tracking_short_window_payload(
+            "RUN_NT_SHORT", conversation_id="conv-no-track-short-1"
+        )
+
+        self.assertEqual(
+            payload["scenario"], "order_status_no_tracking_short_window"
+        )
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIn("shipping_method", payload)
+        self.assertIsNone(payload.get("tracking_number"))
+        self.assertIsNone(payload.get("tracking_url"))
+        self.assertIn("standard (3-5 business days)", payload["shipping_method"].lower())
+
+        order_date = datetime.fromisoformat(payload["order_created_at"])
+        ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        business_days = 0
+        cursor = order_date
+        while cursor < ticket_date:
+            cursor += timedelta(days=1)
+            if cursor.weekday() < 5:
+                business_days += 1
+        self.assertEqual(business_days, 2)
 
 
 class DiagnosticsTests(unittest.TestCase):
