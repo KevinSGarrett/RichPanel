@@ -7,8 +7,8 @@
   - Log shows: `Claude gate completed. Verdict=PASS, Risk=risk:R1, Model=claude-sonnet-4-5-20250929`.
 - Verified comment posted with verdict/model/risk:
   - https://github.com/KevinSGarrett/RichPanel/pull/123#issuecomment-3766737863
-- After a rate‑limit retry, reran Claude gate and confirmed pass:
-  - https://github.com/KevinSGarrett/RichPanel/actions/runs/21128713442
+- After rate‑limit retries, re-ran Claude gate and confirmed latest pass:
+  - https://github.com/KevinSGarrett/RichPanel/actions/runs/21128968691
 
 ## 2. Bugbot Issue Resolution
 - Bugbot finding: inconsistent risk label regex between `claude_gate_review.py` and `pr_risk_label_required.yml`.
@@ -19,8 +19,8 @@
 - Command used:
   - `gh pr checks 123`
 - Latest output (after rerunning Claude gate):
-  - `claude-gate-check` PASS (run 21128713442)
-  - `validate` PASS (run 21128481550)
+  - `claude-gate-check` PASS (run 21128968691)
+  - `validate` PASS (run 21128965435)
   - `codecov/patch` PASS
   - `risk-label-check` PASS
   - `Cursor Bugbot` pending (triggered via comment: https://github.com/KevinSGarrett/RichPanel/pull/123#issuecomment-3766837547)

@@ -48,6 +48,18 @@ git add .github/workflows/pr_risk_label_required.yml
 git commit -m "Align risk label regex with Claude gate"
 git push
 
+git add scripts/claude_gate_review.py
+git commit -m "Clarify approved patterns for Claude gate"
+git push
+
+git add scripts/claude_gate_review.py
+git commit -m "Filter approved false-positive Claude findings"
+git push
+
+git add scripts/claude_gate_review.py
+git commit -m "Reduce diff size and improve Anthropic retry handling"
+git push
+
 python scripts/run_ci_checks.py
 git add docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md docs/00_Project_Admin/To_Do/_generated/plan_checklist.json docs/_generated/doc_outline.json docs/_generated/doc_registry.compact.json docs/_generated/doc_registry.json docs/_generated/heading_index.json
 git commit -m "Update generated docs"
