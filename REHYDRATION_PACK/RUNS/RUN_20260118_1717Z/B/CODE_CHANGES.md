@@ -190,6 +190,9 @@ Rationale: Avoids claiming "we have order X on file" when order_id is unknown.
 - **Line 80-169:** Added order_id/created_at/shipping_method inputs and missing-context assertions.
 - **Line 746-763:** Centralized suite build + backend test discovery for coverage.
 
+**backend/tests/__init__.py**
+- Package marker to make backend tests importable for unittest discovery.
+
 **scripts/test_read_only_shadow_mode.py**
 - Updated mocked order summary with order_id/created_at/shipping_method for gate compliance.
 - **Line 48-57:** Added order context in lookup_order_summary mock.
