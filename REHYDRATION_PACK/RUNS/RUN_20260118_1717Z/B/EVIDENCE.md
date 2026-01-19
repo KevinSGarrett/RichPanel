@@ -30,7 +30,7 @@ Key Output:
 [OK] CI-equivalent checks passed.
 ```
 GitHub Actions Link:
-https://github.com/KevinSGarrett/RichPanel/actions/runs/21121701385/job/60735593690
+https://github.com/KevinSGarrett/RichPanel/actions/runs/21121767521/job/60735763618
 
 ### Codecov
 Status: âœ… GREEN (codecov/patch)  

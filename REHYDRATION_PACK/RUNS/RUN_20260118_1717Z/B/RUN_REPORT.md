@@ -88,7 +88,7 @@ git diff --stat
 - **Wait loop executed:** yes (polled `gh pr checks`)
 - **Status timestamps:** 2026-01-19 (see PR checks rollup)
 - **Check rollup proof:** `REHYDRATION_PACK/RUNS/RUN_20260118_1717Z/B/PR_CHECKS.txt`
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21121701385/job/60735593690
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21121767521/job/60735763618
 - **Codecov status:** pass (codecov/patch) https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/120
 - **Bugbot status:** pending (Cursor Bugbot check); manual review comment posted
 
