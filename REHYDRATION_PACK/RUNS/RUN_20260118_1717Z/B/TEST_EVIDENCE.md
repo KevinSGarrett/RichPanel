@@ -9,7 +9,7 @@
 **Summary:**
 - All tests PASSED
 - No uncommitted changes warning
-- Coverage check: not emitted in local CI log (Codecov pending once PR opens)
+- Coverage check: Codecov patch coverage 93.68932% (check pass)
 
 **CI Evidence (excerpt):**
 ```
@@ -90,4 +90,4 @@ test_plan_actions_propagates_allow_network_for_shadow_reads (__main__.ReadOnlySh
 - backend/tests/test_order_status_context.py (Lines added: 141)
 - backend/tests/test_delivery_estimate_fallback.py (Lines added: 34)
 **Modified file coverage:** backend/src/richpanel_middleware/automation/pipeline.py
-**Lines covered:** Pending Codecov report after PR is opened
+**Lines covered:** Codecov patch 88.23% for `pipeline.py` (8 missing lines); overall patch 93.68932% (Codecov check pass)
