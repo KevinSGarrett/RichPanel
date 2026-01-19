@@ -26,6 +26,36 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(business_days_between(friday, monday), 1)
         self.assertEqual(add_business_days(friday, 1), monday)
 
+    def test_standard_shipping_canonical_remaining_window(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",  # Monday
+            shipping_method="Standard shipping",
+            inquiry_date="2024-01-03",  # Wednesday
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["elapsed_business_days"], 2)
+        self.assertEqual(estimate["remaining_min_days"], 1)
+        self.assertEqual(estimate["remaining_max_days"], 3)
+        self.assertEqual(estimate["eta_human"], "1-3 business days")
+        self.assertFalse(estimate["is_late"])
+
+    def test_weekend_crossing_remaining_window(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-05",  # Friday
+            shipping_method="Standard (3-5 business days)",
+            inquiry_date="2024-01-09",  # Tuesday (crosses weekend)
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["elapsed_business_days"], 2)
+        self.assertEqual(estimate["remaining_min_days"], 1)
+        self.assertEqual(estimate["remaining_max_days"], 3)
+        self.assertEqual(estimate["eta_human"], "1-3 business days")
+        self.assertFalse(estimate["is_late"])
+
     def test_remaining_window_allows_zero_minimum(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",

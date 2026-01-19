@@ -1,0 +1,19 @@
+# B42 - ETA Tests Run Commands
+# Timestamp: 2026-01-19
+
+# Unit tests
+python scripts/test_delivery_estimate.py
+python scripts/test_pipeline_handlers.py
+python scripts/test_e2e_smoke_encoding.py
+
+# CI equivalent
+python scripts/run_ci_checks.py --ci
+
+# Smoke test
+python scripts/dev_e2e_smoke.py \
+  --region us-east-2 \
+  --stack-name RichpanelMiddleware-dev \
+  --scenario order_status_no_tracking_short_window \
+  --ticket-id 1041 \
+  --run-id short-window-eta \
+  --profile rp-admin-kevin

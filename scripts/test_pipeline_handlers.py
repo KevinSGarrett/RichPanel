@@ -30,6 +30,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     execute_plan,
     normalize_event,
     plan_actions,
+    build_no_tracking_reply,
 )
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
@@ -141,6 +142,23 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn(
             "We'll send tracking as soon as it ships.", draft_reply["body"]
         )
+
+    def test_no_tracking_reply_includes_remaining_window(self) -> None:
+        inquiry_date = "2024-01-03"
+        order_summary = {
+            "order_id": "ord-no-track",
+            "order_created_at": "2024-01-01",
+            "shipping_method": "Standard",
+        }
+
+        reply = build_no_tracking_reply(order_summary, inquiry_date=inquiry_date)
+
+        self.assertIsNotNone(reply)
+        assert reply is not None
+        self.assertEqual(reply["eta_human"], "1-3 business days")
+        body_lower = reply["body"].lower()
+        self.assertIn("1-3 business days", body_lower)
+        self.assertIn("standard (3-5 business days)", body_lower)
 
     def test_plan_suppresses_when_order_context_missing(self) -> None:
         envelope = build_event_envelope(

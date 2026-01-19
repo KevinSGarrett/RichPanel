@@ -31,11 +31,14 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
     append_summary,
     _redact_command,
+    _iso_business_days_before,
     _order_status_no_tracking_payload,
+    _order_status_no_tracking_short_window_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -165,6 +168,45 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertIsNone(payload.get("tracking_number"))
         self.assertIsNone(payload.get("tracking_url"))
         self.assertEqual(payload["tracking"]["status"], "label_pending")
+
+    def test_order_status_no_tracking_short_window_shape(self) -> None:
+        payload = _order_status_no_tracking_short_window_payload(
+            "RUN_NT_SHORT", conversation_id="conv-no-track-short-1"
+        )
+
+        self.assertEqual(
+            payload["scenario"], "order_status_no_tracking_short_window"
+        )
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIn("shipping_method", payload)
+        self.assertIsNone(payload.get("tracking_number"))
+        self.assertIsNone(payload.get("tracking_url"))
+        self.assertIn("standard (3-5 business days)", payload["shipping_method"].lower())
+
+        order_date = datetime.fromisoformat(payload["order_created_at"])
+        ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        business_days = 0
+        cursor = order_date
+        while cursor < ticket_date:
+            cursor += timedelta(days=1)
+            if cursor.weekday() < 5:
+                business_days += 1
+        self.assertEqual(business_days, 2)
+
+    def test_business_day_anchor_skips_weekend(self) -> None:
+        saturday = datetime(2024, 1, 6, 12, tzinfo=timezone.utc)
+        monday = _business_day_anchor(saturday)
+
+        self.assertEqual(monday.weekday(), 0)
+        self.assertEqual(monday.date(), datetime(2024, 1, 8, tzinfo=timezone.utc).date())
+
+    def test_iso_business_days_before_validation(self) -> None:
+        anchor = datetime(2024, 1, 8, 12, tzinfo=timezone.utc)
+        before_two = _iso_business_days_before(anchor, 2)
+
+        self.assertTrue(before_two.startswith("2024-01-04"))
+        with self.assertRaises(ValueError):
+            _iso_business_days_before(anchor, -1)
 
 
 class DiagnosticsTests(unittest.TestCase):
