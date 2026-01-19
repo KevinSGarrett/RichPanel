@@ -113,10 +113,10 @@ git diff --stat
 
 ### E2E Proof (if applicable)
 - **E2E required:** no (unit-test changes only; outbound gating unchanged)
-- **E2E test run:** N/A
-- **E2E run URL:** N/A
-- **E2E result:** N/A
-- **Evidence:** N/A
+- **E2E test run:** Not applicable
+- **E2E run URL:** Not applicable
+- **E2E result:** Not applicable
+- **Evidence:** Not applicable
 
 **Gate compliance:** partial (Cursor Bugbot check pending)
 

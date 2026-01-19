@@ -47,7 +47,7 @@ Bugbot Comment Link: https://github.com/KevinSGarrett/RichPanel/pull/120#issueco
 
 Findings: 0 blocking issues (manual Bugbot-style review posted)
 
-Issues Addressed: N/A
+Issues Addressed: None.
 
 ### Claude Review Gate
 Status: âœ… PASS  
