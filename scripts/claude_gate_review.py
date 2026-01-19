@@ -12,11 +12,12 @@ GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
 MODEL_BY_RISK = {
-    "risk:R0": "claude-haiku-4-5-20251015",
-    "risk:R1": "claude-sonnet-4-5-20250929",
-    "risk:R2": "claude-opus-4-5-20251124",
-    "risk:R3": "claude-opus-4-5-20251124",
-    "risk:R4": "claude-opus-4-5-20251124",
+    # Use currently available Claude 3.x models to avoid 404s in gate checks.
+    "risk:R0": "claude-3-haiku-20240307",
+    "risk:R1": "claude-3-sonnet-20240229",
+    "risk:R2": "claude-3-5-sonnet-20240620",
+    "risk:R3": "claude-3-5-sonnet-20240620",
+    "risk:R4": "claude-3-5-sonnet-20240620",
 }
 
 DEFAULT_MAX_DIFF_CHARS = 60000
