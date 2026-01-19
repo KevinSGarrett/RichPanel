@@ -15,9 +15,9 @@ RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 MODEL_BY_RISK = {
     "risk:R0": "claude-haiku-4-5-20251015",
     "risk:R1": "claude-sonnet-4-5-20250929",
-    "risk:R2": "claude-sonnet-4-5-20250929",
-    "risk:R3": "claude-sonnet-4-5-20250929",
-    "risk:R4": "claude-sonnet-4-5-20250929",
+    "risk:R2": "claude-opus-4-5-20251101",
+    "risk:R3": "claude-opus-4-5-20251101",
+    "risk:R4": "claude-opus-4-5-20251101",
 }
 
 DEFAULT_MAX_DIFF_CHARS = 60000
@@ -223,16 +223,22 @@ def _build_prompt(title: str, body: str, risk: str, files_summary: str, diff_tex
     )
 
 
-def _format_comment(verdict: str, risk: str, model: str, findings) -> str:
+def _format_comment(verdict: str, risk: str, model: str, findings, response_id: str = "", usage: dict = None) -> str:
     findings_block = "\n".join(f"- {item}" for item in findings)
-    return (
+    comment = (
         "Claude Review (gate:claude)\n"
         f"CLAUDE_REVIEW: {verdict}\n"
         f"Risk: {risk}\n"
-        f"Model: {model}\n\n"
-        "Top findings:\n"
-        f"{findings_block}\n"
+        f"Model: {model}\n"
     )
+    if response_id:
+        comment += f"Anthropic Response ID: {response_id}\n"
+    if usage:
+        input_tokens = usage.get("input_tokens", 0)
+        output_tokens = usage.get("output_tokens", 0)
+        comment += f"Token Usage: input={input_tokens}, output={output_tokens}\n"
+    comment += f"\nTop findings:\n{findings_block}\n"
+    return comment
 
 
 def _resolve_pr_number(args) -> int | None:
@@ -277,10 +283,17 @@ def main() -> int:
     pr_data = _fetch_json(pr_url, github_token)
     labels = [label.get("name", "") for label in pr_data.get("labels", [])]
 
-    if GATE_LABEL not in labels:
+    # Check if workflow is forcing the gate to run (prevents race condition)
+    force_gate = os.environ.get("CLAUDE_GATE_FORCE", "").lower() in ("true", "1", "yes")
+    
+    if not force_gate and GATE_LABEL not in labels:
         print("gate:claude label not present; skipping Claude gate.")
         _write_output("skip", "true")
         return 0
+    
+    if force_gate and GATE_LABEL not in labels:
+        print("WARNING: gate:claude label not detected in API response, but CLAUDE_GATE_FORCE=true")
+        print("Proceeding with gate review (workflow guarantees label was applied).")
 
     risk = _normalize_risk(labels)
     model = MODEL_BY_RISK[risk]
@@ -343,6 +356,10 @@ def main() -> int:
 
     response_json = _anthropic_request(payload, api_key)
     response_text = _extract_text(response_json)
+    
+    # Extract Anthropic response ID and usage for audit trail
+    response_id = response_json.get("id", "")
+    usage = response_json.get("usage", {})
 
     verdict = _parse_verdict(response_text)
     findings = _extract_findings(response_text, args.max_findings)
@@ -352,7 +369,7 @@ def main() -> int:
         verdict = "PASS"
         findings = ["No issues found."]
 
-    comment_body = _format_comment(verdict, risk, model, findings)
+    comment_body = _format_comment(verdict, risk, model, findings, response_id, usage)
     with open(args.comment_path, "w", encoding="utf-8") as handle:
         handle.write(comment_body)
 
@@ -360,9 +377,10 @@ def main() -> int:
     _write_output("verdict", verdict)
     _write_output("model", model)
     _write_output("risk", risk)
+    _write_output("response_id", response_id)
     _write_output("comment_path", args.comment_path)
 
-    print(f"Claude gate completed. Verdict={verdict}, Risk={risk}, Model={model}")
+    print(f"Claude gate completed. Verdict={verdict}, Risk={risk}, Model={model}, ResponseID={response_id}")
     return 0
 
 
