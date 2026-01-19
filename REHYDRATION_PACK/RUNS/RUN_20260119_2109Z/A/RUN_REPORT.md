@@ -114,6 +114,83 @@ Harden the Claude PR gate so we can no longer have the situation: "Claude review
 - [x] All gates green (Codecov ✅, Claude ✅, CI ✅) + Bugbot manual review clean
 - [ ] PR merged to main (ready for merge)
 
+## Diffstat
+```
+ .github/workflows/pr_claude_gate_required.yml             |  22 +++++-
+ docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md | 66 ++++----
+ docs/00_Project_Admin/To_Do/_generated/plan_checklist.json         | 66 ++++----
+ docs/08_Engineering/CI_and_Actions_Runbook.md             |  40 +++---
+ docs/_generated/doc_registry.compact.json                 |   2 +-
+ docs/_generated/doc_registry.json                         |  36 ++---
+ scripts/claude_gate_review.py                             |  15 +++
+ scripts/test_claude_gate_review.py                        | 214 ++++++++++++++++++++++++
+ 8 files changed, 429 insertions(+), 40 deletions(-)
+```
+
+## Commands Run
+```bash
+# Create branch
+git checkout -b agent-a/b46-claude-gate-evidence
+
+# Implement changes to workflow, script, and tests
+# (edited files directly)
+
+# Run local tests
+python scripts/test_claude_gate_review.py
+
+# Run CI checks
+python scripts/run_ci_checks.py --ci
+
+# Commit initial implementation
+git add -A
+git commit -m "B46: Harden Claude PR gate with audit-friendly evidence..."
+git push -u origin agent-a/b46-claude-gate-evidence
+
+# Create PR
+gh pr create --title "B46: Harden Claude PR gate with audit-friendly evidence" \
+  --label "risk:R2" --label "gate:claude" ...
+
+# Trigger Bugbot
+gh pr comment 126 -b '@cursor review'
+
+# Fix Bugbot issues (race conditions)
+git add .github/workflows/pr_claude_gate_required.yml scripts/claude_gate_review.py scripts/test_claude_gate_review.py
+git commit -m "Fix Bugbot issues: race conditions in label handling..."
+git push
+
+# Add run artifacts
+git add REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/
+git commit -m "Add B46 run artifacts and documentation..."
+git push
+
+# Add missing required files
+git add REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/STRUCTURE_REPORT.md \
+        REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/DOCS_IMPACT_MAP.md
+git commit -m "Add required STRUCTURE_REPORT and DOCS_IMPACT_MAP for B46..."
+git push
+```
+
+## Files Changed
+### Created
+- `scripts/test_claude_gate_review.py` - 214 lines, 30+ unit tests
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/RUN_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/TEST_MATRIX.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/FIX_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/RUN_SUMMARY.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/GATE_STATUS.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/BUGBOT_RESOLUTION.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/STRUCTURE_REPORT.md`
+- `REHYDRATION_PACK/RUNS/RUN_20260119_2109Z/A/DOCS_IMPACT_MAP.md`
+
+### Modified
+- `.github/workflows/pr_claude_gate_required.yml` - Added auto-apply label step, force flag, sleep for API propagation
+- `scripts/claude_gate_review.py` - Updated model mapping (Opus for R2+), added response ID + token usage extraction
+- `docs/08_Engineering/CI_and_Actions_Runbook.md` - Updated Claude gate documentation, proof requirements
+- `docs/_generated/doc_registry.json` - Regenerated
+- `docs/_generated/doc_registry.compact.json` - Regenerated
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md` - Regenerated
+- `docs/00_Project_Admin/To_Do/_generated/plan_checklist.json` - Regenerated
+
 ## Notes
 - The workflow will auto-apply `gate:claude` label, demonstrating the unskippable behavior
 - This PR itself will serve as proof that the enhanced gate works
