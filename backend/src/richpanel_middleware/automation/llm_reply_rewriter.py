@@ -118,8 +118,24 @@ def _extract_json_object(content: str) -> Optional[str]:
     if start == -1:
         return None
     depth = 0
+    in_string = False
+    escape = False
     for idx in range(start, len(content)):
         char = content[idx]
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if char == "\\":
+                escape = True
+                continue
+            if char == "\"":
+                in_string = False
+            continue
+
+        if char == "\"":
+            in_string = True
+            continue
         if char == "{":
             depth += 1
         elif char == "}":
