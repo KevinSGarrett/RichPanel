@@ -16,4 +16,4 @@
 
 ## Local Checks
 - `python scripts/test_e2e_smoke_encoding.py` — PASS
-- `python scripts/run_ci_checks.py --ci` — (see latest status after CI run)
+- `python scripts/run_ci_checks.py --ci` — PASS (warnings remain for legacy run folder naming)
