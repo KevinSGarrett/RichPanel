@@ -6449,6 +6449,31 @@
       },
       {
         "level": 2,
+        "text": "Order-status intent eval harness (PII-safe)",
+        "anchor": "order-status-intent-eval-harness-pii-safe"
+      },
+      {
+        "level": 3,
+        "text": "Local golden-set run",
+        "anchor": "local-golden-set-run"
+      },
+      {
+        "level": 3,
+        "text": "Live shadow run (read-only)",
+        "anchor": "live-shadow-run-read-only"
+      },
+      {
+        "level": 3,
+        "text": "Success thresholds (initial)",
+        "anchor": "success-thresholds-initial"
+      },
+      {
+        "level": 3,
+        "text": "Evidence required for 95+ review",
+        "anchor": "evidence-required-for-95-review"
+      },
+      {
+        "level": 2,
         "text": "Open questions (can be answered later)",
         "anchor": "open-questions-can-be-answered-later"
       }

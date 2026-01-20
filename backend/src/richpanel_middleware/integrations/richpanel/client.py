@@ -199,6 +199,7 @@ class RichpanelClient:
         api_key: Optional[str] = None,
         api_key_secret_id: Optional[str] = None,
         dry_run: Optional[bool] = None,
+        read_only: Optional[bool] = None,
         timeout_seconds: Optional[float] = None,
         max_attempts: int = 3,
         backoff_seconds: float = 0.5,
@@ -221,6 +222,7 @@ class RichpanelClient:
             or f"rp-mw/{self.environment}/richpanel/api_key"
         )
         self.dry_run = self._resolve_dry_run(dry_run)
+        self.read_only = self._resolve_read_only(read_only)
         self.timeout_seconds = float(
             timeout_seconds or os.environ.get("RICHPANEL_HTTP_TIMEOUT_SECONDS") or 5.0
         )
@@ -253,10 +255,17 @@ class RichpanelClient:
         log_body_excerpt: bool = True,
     ) -> RichpanelResponse:
         method_upper = method.upper()
-        if self._writes_disabled() and method_upper != "GET":
+        if (self.read_only or self._writes_disabled()) and method_upper not in {
+            "GET",
+            "HEAD",
+        }:
             self._logger.warning(
                 "richpanel.write_blocked",
-                extra={"method": method_upper},
+                extra={
+                    "method": method_upper,
+                    "read_only": self.read_only,
+                    "write_disabled": self._writes_disabled(),
+                },
             )
             raise RichpanelWriteDisabledError(
                 "Richpanel writes are disabled; request blocked"
@@ -538,6 +547,15 @@ class RichpanelClient:
             return bool(override)
         enabled = _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False)
         return not enabled
+
+    def _resolve_read_only(self, override: Optional[bool]) -> bool:
+        if override is not None:
+            return bool(override)
+        return _to_bool(
+            os.environ.get("RICHPANEL_READ_ONLY")
+            or os.environ.get("RICH_PANEL_READ_ONLY"),
+            default=False,
+        )
 
     @staticmethod
     def _writes_disabled() -> bool:

@@ -1,0 +1,188 @@
+{
+  "generated_at": "2026-01-20T20:16:01.348064+00:00",
+  "counts": {
+    "total": 20,
+    "with_expected": 20,
+    "llm_called": 0
+  },
+  "metrics": {
+    "deterministic": {
+      "tp": 10,
+      "fp": 0,
+      "tn": 10,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "llm": {
+      "available": false,
+      "reason": "llm_not_called"
+    }
+  },
+  "results": [
+    {
+      "id": "order-status-01",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-02",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-03",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-04",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-05",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-06",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-07",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-08",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-09",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "order-status-10",
+      "expected": "order_status",
+      "predicted": "order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-01",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-02",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-03",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-04",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-05",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-06",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-07",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-08",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-09",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    },
+    {
+      "id": "non-order-10",
+      "expected": "non_order_status",
+      "predicted": "non_order_status",
+      "llm_called": false,
+      "model": "deterministic",
+      "confidence": null
+    }
+  ],
+  "source": {
+    "type": "dataset",
+    "path": "scripts\\fixtures\\intent_eval\\order_status_golden.jsonl"
+  }
+}

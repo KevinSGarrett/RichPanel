@@ -18,7 +18,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -100,7 +100,8 @@ def _build_richpanel_client(
     return RichpanelClient(
         api_key_secret_id=richpanel_secret,
         base_url=base_url,
-        dry_run=False,  # allow GETs; writes are still blocked by RICHPANEL_WRITE_DISABLED
+        dry_run=False,  # allow GETs; writes are still blocked by read-only + env guard
+        read_only=True,
     )
 
 
@@ -151,6 +152,8 @@ def _redact_path(path: str) -> str:
 
 
 class _HttpTrace:
+    _original_urlopen: Any
+
     def __init__(self) -> None:
         self.entries: list[Dict[str, str]] = []
         self._original_urlopen = None
@@ -172,7 +175,7 @@ class _HttpTrace:
 
     def capture(self) -> "_HttpTrace":
         original = urllib.request.urlopen
-        self._original_urlopen = original
+        self._original_urlopen = original  # type: ignore
 
         def _wrapped_urlopen(req, *args, **kwargs):
             try:
@@ -185,17 +188,18 @@ class _HttpTrace:
                 LOGGER.warning("HTTP trace capture failed", exc_info=True)
             return original(req, *args, **kwargs)
 
-        urllib.request.urlopen = _wrapped_urlopen
+        urllib.request.urlopen = _wrapped_urlopen  # type: ignore
         return self
 
     def stop(self) -> None:
         if self._original_urlopen is not None:
-            urllib.request.urlopen = self._original_urlopen
+            urllib.request.urlopen = self._original_urlopen  # type: ignore
             self._original_urlopen = None
 
     def assert_get_only(self, *, context: str, trace_path: Path) -> None:
-        non_get = [entry for entry in self.entries if entry["method"] != "GET"]
-        if non_get:
+        allowed = {"GET", "HEAD"}
+        non_allowed = [entry for entry in self.entries if entry["method"] not in allowed]
+        if non_allowed:
             raise SystemExit(
                 f"Non-GET request detected during {context}. Trace: {trace_path}"
             )

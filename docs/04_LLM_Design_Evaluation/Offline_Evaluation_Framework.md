@@ -104,6 +104,38 @@ Docs remain the source of truth; prototypes exist only to validate feasibility a
 
 ---
 
+## Order-status intent eval harness (PII-safe)
+This repo ships a lightweight, repeatable harness for order-status intent checks:
+- Script: `scripts/eval_order_status_intent.py`
+- Golden set: `scripts/fixtures/intent_eval/order_status_golden.jsonl`
+
+### Local golden-set run
+```
+python scripts/eval_order_status_intent.py --dataset scripts/fixtures/intent_eval/order_status_golden.jsonl --output artifacts/intent_eval_golden_results.json
+```
+
+### Live shadow run (read-only)
+```
+$env:MW_ALLOW_NETWORK_READS="true"
+$env:RICHPANEL_OUTBOUND_ENABLED="true"
+$env:RICHPANEL_WRITE_DISABLED="true"
+python scripts/eval_order_status_intent.py --from-richpanel --limit 25 --output artifacts/intent_eval_live_shadow_results.json
+```
+- The script uses `RichpanelClient(read_only=True)` and blocks non-GET/HEAD requests.
+- For OpenAI routing, pass `--use-openai` and set `OPENAI_ALLOW_NETWORK=true`.
+
+### Success thresholds (initial)
+- Order-status precision ≥ 0.90 on the golden set.
+- Any live-shadow false positives must be manually inspected.
+
+### Evidence required for 95+ review
+- Golden dataset file.
+- Eval output JSONs (golden + live shadow if run).
+- A short precision/recall table in the run artifacts.
+- CI output snippet showing `python scripts/run_ci_checks.py --ci` succeeded.
+
+---
+
 ## Open questions (can be answered later)
 - Final golden-set sampling strategy and adjudication workflow
 - Whether we need language-specific or channel-specific models
