@@ -70,11 +70,28 @@ seed job completed successfully
 gh run view 21159596248 --json url,status,conclusion
 # output:
 success https://github.com/KevinSGarrett/RichPanel/actions/runs/21159596248
+
+$env:AWS_PROFILE="rp-admin-prod"
+$env:AWS_SDK_LOAD_CONFIG="1"
+$env:RICHPANEL_ENV="prod"
+$env:MW_ENV="prod"
+$env:MW_ALLOW_NETWORK_READS="true"
+$env:RICHPANEL_OUTBOUND_ENABLED="true"
+$env:RICHPANEL_WRITE_DISABLED="true"
+$env:SHOPIFY_SHOP_DOMAIN="scentimen-t.myshopify.com"
+Remove-Item Env:RICHPANEL_API_KEY_OVERRIDE -ErrorAction SilentlyContinue
+python scripts/live_readonly_shadow_eval.py --ticket-id 91608 --richpanel-secret-id rp-mw/prod/richpanel/api_key --shop-domain scentimen-t.myshopify.com
+# output:
+Artifact written to C:\RichPanel_GIT\artifacts\readonly_shadow\20260120T044002Z_26807bb6042a.json
+HTTP trace written to C:\RichPanel_GIT\artifacts\prod_readonly_shadow_eval_http_trace.json
+
+Copy-Item -Force artifacts\readonly_shadow\20260120T044002Z_26807bb6042a.json REHYDRATION_PACK\RUNS\B46_AGENT_C\EVIDENCE\readonly_shadow\20260120T044002Z_26807bb6042a.json
+Copy-Item -Force artifacts\prod_readonly_shadow_eval_http_trace.json REHYDRATION_PACK\RUNS\B46_AGENT_C\EVIDENCE\prod_readonly_shadow_eval_http_trace.json
 ```
 
 ## Tests / Proof
 - **Tests run:** `python -m unittest scripts.test_live_readonly_shadow_eval` (PASS)
-- **Production eval run:** failed (missing Secrets Manager access or prod key override)
+- **Production eval run:** success (prod AWS profile + Secrets Manager access)
 - **Secrets seeded:** `seed-secrets.yml` (prod) — https://github.com/KevinSGarrett/RichPanel/actions/runs/21159596248 (success)
 - **Planned prod command (PowerShell):**
 ```powershell
@@ -88,10 +105,9 @@ python scripts/live_readonly_shadow_eval.py `
   --richpanel-secret-id rp-mw/prod/richpanel/api_key `
   --shop-domain <myshop.myshopify.com>
 ```
-- **Expected evidence outputs (after prod run):**
-  - `artifacts/readonly_shadow/<timestamp>_<ticket_hash>.json`
-  - `artifacts/prod_readonly_shadow_eval_http_trace.json`
+- **Evidence outputs:**
+  - `REHYDRATION_PACK/RUNS/B46_AGENT_C/EVIDENCE/readonly_shadow/20260120T044002Z_26807bb6042a.json`
+  - `REHYDRATION_PACK/RUNS/B46_AGENT_C/EVIDENCE/prod_readonly_shadow_eval_http_trace.json`
 
 ## Follow-ups
-- Run `python -m unittest scripts.test_live_readonly_shadow_eval` locally.
-- Execute prod eval command and attach artifacts to `REHYDRATION_PACK/RUNS/B46_AGENT_C/EVIDENCE/`.
+- None.

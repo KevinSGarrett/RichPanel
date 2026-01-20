@@ -1,0 +1,37 @@
+{
+  "ticket_id_redacted": "redacted:26807bb6042a",
+  "timestamp": "2026-01-20T04:40:02.965292+00:00",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "true",
+    "RICHPANEL_WRITE_DISABLED": "true"
+  },
+  "prod_target": true,
+  "http_trace_path": "C:\\RichPanel_GIT\\artifacts\\prod_readonly_shadow_eval_http_trace.json",
+  "customer": {
+    "email": "redacted:a34d155221c7",
+    "phone": null,
+    "name": "redacted:56a949b223fc"
+  },
+  "routing": {
+    "intent": "unknown_other",
+    "department": "Email Support Team",
+    "reason": "no strong intent keyword detected",
+    "mode": "automation_candidate",
+    "reasons": [
+      "no strong intent keyword detected"
+    ]
+  },
+  "order": {
+    "order_id_redacted": null,
+    "tracking_found": false,
+    "eta_window": null,
+    "delivery_estimate": null
+  },
+  "plan_preview": {
+    "actions": [
+      "analyze"
+    ],
+    "has_draft_reply": false
+  }
+}
