@@ -237,10 +237,11 @@ def _record_openai_rewrite_evidence(
         return
 
     sanitized = _ddb_sanitize(evidence)
+    conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
 
     if CONVERSATION_STATE_TABLE_NAME:
         _table(CONVERSATION_STATE_TABLE_NAME).update_item(
-            Key={"conversation_id": envelope.conversation_id},
+            Key={"conversation_id": conversation_id},
             UpdateExpression="SET openai_rewrite = :val",
             ExpressionAttributeValues={":val": sanitized},
         )
@@ -257,7 +258,7 @@ def _record_openai_rewrite_evidence(
             ts_action_id = f"{recorded_at}#{event_id}"
             _table(AUDIT_TRAIL_TABLE_NAME).update_item(
                 Key={
-                    "conversation_id": envelope.conversation_id,
+                    "conversation_id": conversation_id,
                     "ts_action_id": ts_action_id,
                 },
                 UpdateExpression="SET openai_rewrite = :val",
@@ -268,7 +269,7 @@ def _record_openai_rewrite_evidence(
         "openai_rewrite.recorded",
         extra={
             "event_id": envelope.event_id,
-            "conversation_id": envelope.conversation_id,
+            "conversation_id": conversation_id,
             "keys": sorted(sanitized.keys()),
         },
     )

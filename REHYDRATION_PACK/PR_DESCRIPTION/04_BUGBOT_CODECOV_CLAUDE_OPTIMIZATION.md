@@ -1,126 +1,142 @@
-# Optimizing PR Descriptions for Bugbot, Codecov, and Claude
+# Making Bugbot + Codecov + Claude “Smarter” via PR Metadata
 
-This guide explains **what each tool needs** and how to write PR descriptions that make them “smarter”.
+These tools don’t actually “understand your repo” by magic. They infer intent and correctness from:
+- the PR title/body
+- the diff context
+- the tests + evidence you point them to
+
+This document explains exactly what to write in PR metadata so each tool produces higher-signal output.
 
 ---
 
 ## 1) Bugbot optimization
 
-Bugbot reviews the PR diff and surrounding context. It becomes dramatically more useful when the PR description provides:
+Bugbot is strongest when it has **ground truth**:
+- what you intended
+- what must not regress
+- where to look (scope/hotspots)
 
-### A) Explicit intent
-Write the intent in unambiguous language:
+### A) Write declarative intent (not vibes)
+Prefer:
+- “Default OFF. Enabled only when `FLAG=true`.”
+- “Shadow mode must never issue POST/PUT/PATCH/DELETE.”
+- “If context missing, fail-closed and route to Email Support Team.”
 
-- “This must never log PII.”
-- “Default must be OFF.”
-- “Production must fail-closed.”
-- “Shadow mode must be GET-only.”
-
-Bugbot can then evaluate your diff against those requirements.
-
-### B) Invariants as checkable bullets
-Good invariants are:
-
-- Specific
-- Testable or auditable
-- Tied to code paths
-
-Bad invariants are subjective:
-
+Avoid:
 - “Should be safe”
-- “Seems correct”
+- “Probably works”
+- “Seems fine”
 
-### C) “Tool focus” section
-Bugbot will sometimes comment on generated files, formatting, or low-value diffs.
-Use:
+### B) Invariants are Bugbot’s review checklist
+Bugbot can comment on what it thinks is wrong, but invariants tell it what would be *actually wrong* for your feature.
 
-- “Please ignore: generated registries unless CI fails.”
-- “Please focus: `pipeline.plan_actions()` gating logic and the new tests proving it.”
+Include invariants like:
+- “No PII in artifacts”
+- “GET-only HTTP trace”
+- “Fail-closed when env flags missing”
 
-### D) Threat model hints (R3/R4)
-If risk is high, include:
+### C) Give Bugbot a review map
+Add 2–6 bullets under “Please double-check”:
+- core files/functions
+- edge cases
+- safety gates
 
-- what attacker/user behavior you’re guarding against
-- what data must not be written/logged
-- what happens if flags are missing
+And 2–6 bullets under “Please ignore”:
+- generated registries
+- rehydration pack artifacts except specific proof JSONs
+
+This reduces noisy comments on non-critical diffs.
 
 ---
 
 ## 2) Codecov optimization
 
-Codecov is only “smart” if the PR description helps humans interpret coverage results.
+Codecov reports missing lines. PR metadata helps you:
+- interpret what matters
+- fix missing coverage faster
 
-### A) Explicit coverage expectation
-Include a statement like:
+### A) Include “coverage hotspots” in the PR body
+In “Results & evidence”, add:
 
-- “Patch coverage must be green; new branches in `X` are covered by tests A/B/C.”
+- “Codecov hotspots expected: `backend/src/integrations/openai/client.py` and `llm_reply_rewriter.py`.”
+- “New branches added: fallback acceptance path; ensure tests cover both success and fallback.”
 
-### B) Link tests to lines/branches
-Write:
+This makes the Codecov report easier to act on.
 
-- “New branch: `if missing_order_context:` covered by `test_missing_order_id_no_reply`.”
-
-### C) Declare intentional exclusions
-If a line is intentionally untested (rare), state:
-
-- “This error path is unreachable in production because X; we assert via integration test Y.”
-
-(Prefer adding tests instead of exclusions.)
-
----
-
-## 3) Claude review optimization
-
-Your Claude gate is risk-tiered. Claude becomes more reliable when your PR body includes:
-
-### A) A correctness contract
-- define acceptance criteria
-- define what constitutes “correct” vs “wrong”
+### B) Tie tests to acceptance criteria
+In “What changed” or “Test plan”, explicitly link:
+- AC → file/function → test file/test name
 
 Example:
+- “AC: OpenAI rewrite fallback counts as satisfied → `llm_reply_rewriter.py` → `scripts/test_llm_reply_rewriter.py::test_fallback_counts_as_evidence`”
 
-- “Correct: no auto-reply when order context is missing; route to support team.”
-- “Incorrect: any path that auto-closes without verified context.”
+### C) When Codecov fails, update PR metadata
+If patch coverage is red:
+- add a short “Codecov plan” section (1–3 bullets) to PR body:
+  - which files have missing lines
+  - which tests you will add
+  - which branches must be covered
 
-### B) Explicit edge cases
-List the known tricky cases:
-
-- missing order_id
-- empty string values
-- weekend-crossing ETA calculations
-- retry behaviors
-- safe_mode true
-
-### C) Safety / PII declaration with proof
-- “PII-safe artifacts only — proof JSON stores fingerprints, no raw emails.”
-
-and link:
-
-- PII scan output
-- artifact file paths
-
-### D) Minimal reviewer search cost
-Claude and humans should not need to infer “where to look”. Provide:
-
-- hotspot files
-- key functions
-- tests that prove invariants
+This keeps the PR auditable and prevents loops.
 
 ---
 
-## 4) Writing style that improves all tools
+## 3) Claude gate optimization (risk-tiered)
 
-### A) Prefer declarative statements
-- “Default OFF. Enabled only when `FLAG=true`.”
+Claude review quality improves when you supply:
+- risk framing
+- explicit invariants
+- evidence pointers
+- reviewer focus (what to verify)
 
-### B) Prefer exact commands and exact paths
-- `python scripts/run_ci_checks.py --ci`
-- `REHYDRATION_PACK/RUNS/.../e2e_outbound_proof.json`
+### A) Put the risk rationale in one sentence
+Example:
+- “`risk:R2` because this changes GPT-5 request payload construction and rewrite gating in order-status automation.”
 
-### C) Tie each claim to an evidence pointer
-- Claim: “GET-only”
-- Evidence: `artifacts/prod_readonly_shadow_eval_http_trace.json` contains only GET.
+Avoid:
+- “R2 ???”
+- “maybe risky”
 
-### D) Reduce noise
-If your repo regenerates indices, say so and direct tools to focus on non-generated files.
+### B) Put “what would be a failure” in the PR body
+Claude can reason about correctness better if you state:
+- “If OpenAI call fails, deterministic reply must still be intact.”
+- “Fallback must be recorded with `error_class`.”
+
+### C) Avoid metadata mistakes that trigger false FAILs
+Common gate failures caused by PR metadata:
+- risk label typos
+- missing evidence links
+- escape-sequence corruption (`\risk`, `\backend`, etc.)
+- placeholders (`???`)
+
+Use the minimum score gate (08) to prevent these.
+
+---
+
+## 4) Universal PR-metadata “power moves”
+
+### A) Add a minimal proof snippet (PII-safe)
+1–6 lines that prove the claim, e.g.:
+```text
+openai.routing.llm_called=true, response_id=...
+openai.rewrite.rewrite_attempted=true, fallback_used=true
+```
+
+### B) Keep “pending” anchored
+Always write:
+- `CI: pending — <link>`
+Not:
+- “CI pending”
+
+### C) Use backticks for anything that looks like code
+- file paths
+- env vars
+- commands
+- secret names
+
+This avoids parsing confusion.
+
+### D) Include a hidden self-score block
+The `PR_QUALITY` HTML comment (08) is not for humans; it is for **process reliability**.
+It makes it easy to spot metadata regressions and enforce the 95+ bar.
 

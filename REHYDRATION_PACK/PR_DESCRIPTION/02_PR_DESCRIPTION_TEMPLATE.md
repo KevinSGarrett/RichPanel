@@ -1,18 +1,22 @@
-# PR Description Template
+# PR Description Template (Copy/Paste)
 
-Use this template verbatim. Replace placeholders.
+Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`, or empty sections.
 
-> **Rule:** The PR description must be **complete before requesting review**.
+> Rule: the PR description must be **complete before requesting review**.  
 > If something is pending, include a **link to the pending run**.
 
 ---
 
 ## Standard template (risk:R1–R4)
 
+```html
+<!-- PR_QUALITY: title_score=__/100; body_score=__/100; rubric_title=07; rubric_body=03; risk=risk:R#; p0_ok=true; timestamp=YYYY-MM-DD -->
+```
+
 **Run ID:** `RUN_YYYYMMDD_HHMMZ`  
 **Agents:** A / B / C (or single agent)  
 **Risk:** `risk:R#`  
-**Claude gate:** (Haiku / Sonnet 4.5 / Opus 4.5)  
+**Claude gate:** Haiku / Sonnet 4.5 / Opus 4.5  
 
 ### 1) Summary
 - 
@@ -20,9 +24,9 @@ Use this template verbatim. Replace placeholders.
 - 
 
 ### 2) Why
-- **Problem / risk:**
-- **Pre-change failure mode:**
-- **Why this approach:**
+- **Problem / risk:**  
+- **Pre-change failure mode:**  
+- **Why this approach:**  
 
 ### 3) Expected behavior & invariants
 **Must hold (invariants):**
@@ -32,55 +36,66 @@ Use this template verbatim. Replace placeholders.
 
 **Non-goals (explicitly not changed):**
 - 
+- 
 
 ### 4) What changed
 **Core changes:**
 - 
+- 
+- 
 
 **Design decisions (why this way):**
+- 
 - 
 
 ### 5) Scope / files touched
 **Runtime code:**
 - `path/to/file.py`
+- 
 
 **Tests:**
 - `path/to/test_file.py`
+- 
 
 **CI / workflows:**
-- `path/to/workflow.yml`
+- (None) or list files
+- 
 
-**Docs:**
-- `docs/...`
+**Docs / artifacts:**
+- `REHYDRATION_PACK/RUNS/.../RUN_REPORT.md`
+- 
 
 ### 6) Test plan
-**Local:**
+**Local / CI-equivalent:**
 - `python scripts/run_ci_checks.py --ci`
-- 
+- (List the exact commands you ran)
 
-**CI:**
-- (list relevant workflows)
+**E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
+- `python scripts/dev_e2e_smoke.py ... --ticket-number <redacted> ...`
 
 ### 7) Results & evidence
-**CI:** <GitHub Actions run link>  
-**Codecov:** <Codecov PR link or checks page link>  
-**Bugbot:** <Bugbot comment link OR "pending" + link to the PR comment that triggers it>  
+**CI:** pending — `<link>`  
+**Codecov:** pending — `<direct Codecov PR link>`  
+**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
 
 **Artifacts / proof:**
-- `REHYDRATION_PACK/.../RUN_REPORT.md`
-- `REHYDRATION_PACK/.../TEST_MATRIX.md`
-- `REHYDRATION_PACK/.../EVIDENCE/...json`
+- `REHYDRATION_PACK/RUNS/.../e2e_outbound_proof.json`
+- 
+
+**Proof snippet(s) (PII-safe):**
+```text
+<minimal lines proving the claim; no raw ticket bodies/emails>
+```
 
 ### 8) Risk & rollback
-**Risk rationale:** (why this is R#)
-- 
+**Risk rationale:** `risk:R#` — (one crisp sentence explaining why)
 
-**Failure impact:**
-- 
+**Failure impact:** (what breaks if wrong)
 
 **Rollback plan:**
-- Revert this PR.
-- Cleanup: (if applicable)
+- Revert PR
+- Any cleanup/redeploy steps
+- Re-run the minimal proof to confirm rollback
 
 ### 9) Reviewer + tool focus
 **Please double-check:**
@@ -89,13 +104,17 @@ Use this template verbatim. Replace placeholders.
 
 **Please ignore:**
 - Generated registries / line number shifts unless CI fails.
-- Rehydration pack artifacts except for referenced proof files.
+- Rehydration pack artifacts except referenced proof files.
 
 ---
 
 ## R0 compact template (docs-only)
 
-**Risk:** `risk:R0` (docs only)  
+```html
+<!-- PR_QUALITY: title_score=__/100; body_score=__/100; rubric_title=07; rubric_body=03; risk=risk:R0; p0_ok=true; timestamp=YYYY-MM-DD -->
+```
+
+**Risk:** `risk:R0` (docs-only)
 
 ### Summary
 - 
@@ -104,16 +123,21 @@ Use this template verbatim. Replace placeholders.
 - 
 
 ### Invariants
-- No runtime code changes.
-- No production behavior changes.
+- No runtime behavior changed.
+- No secrets/PII included.
 
 ### Scope
-- Docs: `docs/...`
+- Docs touched:
+  - `docs/...`
 
 ### Evidence
-- Doc hygiene: <CI link>
-- Registry regen: `docs/_generated/...`
+- CI: N/A or pending — `<link>` (use checks link if it will run)
+- Codecov: N/A
+- Bugbot: N/A (unless requested)
 
 ### Reviewer focus
-- Confirm doc accuracy and that no code paths were modified.
+- Double-check:
+  - doc correctness and links
+- Ignore:
+  - generated registries unless CI fails
 
