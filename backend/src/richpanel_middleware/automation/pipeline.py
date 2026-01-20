@@ -767,29 +767,6 @@ def execute_order_status_reply(
                 }
             )
 
-        tags_to_apply = sorted(
-            dedupe_tags(
-                [
-                    loop_prevention_tag,
-                    ORDER_STATUS_REPLY_TAG,
-                    REPLY_SENT_TAG,
-                    run_specific_reply_tag,
-                ]
-            )
-        )
-        tag_response = executor.execute(
-            "PUT",
-            f"/v1/tickets/{encoded_id}/add-tags",
-            json_body={"tags": tags_to_apply},
-            dry_run=not allow_network,
-        )
-        responses.append(
-            {
-                "action": "add_tag",
-                "status": tag_response.status_code,
-                "dry_run": tag_response.dry_run,
-            }
-        )
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         # Try minimal working payloads first (state-only), then add status/comment variants.
         update_candidates = [
@@ -813,17 +790,44 @@ def execute_order_status_reply(
             ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload}),
         ]
 
+        def _strip_comment(payload: Dict[str, Any]) -> Dict[str, Any]:
+            if not isinstance(payload, dict):
+                return payload
+            sanitized = dict(payload)
+            if "comment" in sanitized:
+                sanitized.pop("comment", None)
+            ticket_payload = sanitized.get("ticket")
+            if isinstance(ticket_payload, dict):
+                ticket_payload = dict(ticket_payload)
+                ticket_payload.pop("comment", None)
+                sanitized["ticket"] = ticket_payload
+            return sanitized
+
+        def _payload_has_comment(payload: Dict[str, Any]) -> bool:
+            if not isinstance(payload, dict):
+                return False
+            if payload.get("comment"):
+                return True
+            ticket_payload = payload.get("ticket")
+            return isinstance(ticket_payload, dict) and bool(ticket_payload.get("comment"))
+
         update_success = None
+        comment_sent = False
         for candidate_name, payload in update_candidates:
+            payload_to_send = payload
+            if comment_sent:
+                payload_to_send = _strip_comment(payload)
             reply_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{encoded_id}",
-                json_body=payload,
+                json_body=payload_to_send,
                 dry_run=not allow_network,
             )
             candidate_success = (
                 200 <= reply_response.status_code < 300 and not reply_response.dry_run
             )
+            if candidate_success and _payload_has_comment(payload_to_send):
+                comment_sent = True
             closed_after = None
             if candidate_success:
                 refreshed = _safe_ticket_metadata_fetch(
@@ -867,6 +871,30 @@ def execute_order_status_reply(
                 "reason": "reply_update_failed",
                 "responses": responses,
             }
+
+        tags_to_apply = sorted(
+            dedupe_tags(
+                [
+                    loop_prevention_tag,
+                    ORDER_STATUS_REPLY_TAG,
+                    REPLY_SENT_TAG,
+                    run_specific_reply_tag,
+                ]
+            )
+        )
+        tag_response = executor.execute(
+            "PUT",
+            f"/v1/tickets/{encoded_id}/add-tags",
+            json_body={"tags": tags_to_apply},
+            dry_run=not allow_network,
+        )
+        responses.append(
+            {
+                "action": "add_tag",
+                "status": tag_response.status_code,
+                "dry_run": tag_response.dry_run,
+            }
+        )
 
         LOGGER.info(
             "automation.order_status_reply.sent",

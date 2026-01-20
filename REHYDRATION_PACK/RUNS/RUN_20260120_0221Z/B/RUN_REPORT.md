@@ -16,6 +16,7 @@
 ## What changed (high-level)
 - Hardened order_status proof criteria + follow-up routing requirements in `dev_e2e_smoke.py`.
 - Fixed middleware close payloads and follow-up routing behavior; added closure verification + logging in `pipeline.py`.
+- Avoided duplicate customer comments by stripping comment on retries; moved tags after successful close.
 - Added harness wait for loop-prevention/closed status before follow-up; updated tests accordingly.
 
 ## Diffstat

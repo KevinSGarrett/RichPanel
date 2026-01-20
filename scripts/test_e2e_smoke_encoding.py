@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +44,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _sanitize_decimals,
     _sanitize_response_metadata,
     _sanitize_ts_action_id,
+    _wait_for_ticket_ready,
 )
 
 
@@ -592,6 +593,46 @@ class SummaryAppendTests(unittest.TestCase):
             self.assertIn("CloudWatch alarms: `alarm-one`, `alarm-two`", content)
             self.assertIn("Draft replies (safe fields)", content)
             self.assertIn("audit-table", content)
+
+
+class WaitForTicketReadyTests(unittest.TestCase):
+    def test_wait_for_ticket_ready_returns_snapshot(self) -> None:
+        snapshots = [
+            {"status": "open", "tags": []},
+            {"status": "closed", "tags": ["mw-auto-replied"]},
+        ]
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot", side_effect=snapshots
+        ) as fetch_mock:
+            result = _wait_for_ticket_ready(
+                MagicMock(),
+                "conv-1",
+                allow_network=True,
+                required_tags=["mw-auto-replied"],
+                required_statuses=["resolved", "closed"],
+                timeout_seconds=5,
+                poll_interval=0.0,
+            )
+
+        self.assertEqual(fetch_mock.call_count, 2)
+        self.assertEqual(result, snapshots[-1])
+
+    def test_wait_for_ticket_ready_times_out(self) -> None:
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot",
+            return_value={"status": "open", "tags": []},
+        ):
+            result = _wait_for_ticket_ready(
+                MagicMock(),
+                "conv-2",
+                allow_network=True,
+                required_tags=["mw-auto-replied"],
+                required_statuses=["resolved", "closed"],
+                timeout_seconds=0,
+                poll_interval=0.0,
+            )
+
+        self.assertIsNone(result)
 
 
 class FallbackCloseTests(unittest.TestCase):

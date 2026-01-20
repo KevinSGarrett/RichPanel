@@ -530,7 +530,25 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("/v1/tickets/", get_call["path"])
         self.assertNotIn("/add-tags", get_call["path"])
 
-        tag_call = executor.calls[1]
+        update_call = executor.calls[1]
+        self.assertEqual(update_call["method"], "PUT")
+        self.assertIn("/v1/tickets/", update_call["path"])
+        self.assertNotIn("/add-tags", update_call["path"])
+        body = update_call["kwargs"]["json_body"]
+        self.assertIn("ticket", body)
+        ticket_payload = body["ticket"]
+        self.assertIn(
+            ticket_payload.get("state"), {"closed", "resolved", "CLOSED", "RESOLVED"}
+        )
+        self.assertIn("comment", ticket_payload)
+        self.assertEqual(ticket_payload["comment"]["type"], "public")
+        self.assertFalse(update_call["kwargs"]["dry_run"])
+
+        verify_call = executor.calls[2]
+        self.assertEqual(verify_call["method"], "GET")
+        self.assertIn("/v1/tickets/", verify_call["path"])
+
+        tag_call = executor.calls[3]
         self.assertEqual(tag_call["method"], "PUT")
         self.assertIn("/add-tags", tag_call["path"])
         tags_payload = tag_call["kwargs"]["json_body"]["tags"]
@@ -541,17 +559,6 @@ class OutboundOrderStatusTests(unittest.TestCase):
             ["mw-auto-replied", "mw-order-status-answered", "mw-reply-sent"],
         )
         self.assertFalse(tag_call["kwargs"]["dry_run"])
-
-        reply_call = executor.calls[2]
-        body = reply_call["kwargs"]["json_body"]
-        self.assertIn("ticket", body)
-        ticket_payload = body["ticket"]
-        self.assertIn(
-            ticket_payload.get("state"), {"closed", "resolved", "CLOSED", "RESOLVED"}
-        )
-        self.assertIn("comment", ticket_payload)
-        self.assertEqual(ticket_payload["comment"]["type"], "public")
-        self.assertFalse(reply_call["kwargs"]["dry_run"])
 
     def test_outbound_skips_when_ticket_already_resolved(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -596,8 +603,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
         self.assertFalse(result["sent"])
         self.assertEqual(result["reason"], "reply_update_failed")
-        # Expect GET + add-tags + at least one reply attempt
-        self.assertGreaterEqual(len(executor.calls), 3)
+        # Expect GET + at least one reply attempt; no tags should be applied.
+        self.assertGreaterEqual(len(executor.calls), 2)
+        add_tag_calls = [c for c in executor.calls if "/add-tags" in c["path"]]
+        self.assertEqual(add_tag_calls, [])
 
     def test_outbound_reply_dry_run_does_not_send(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -625,6 +634,42 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertGreaterEqual(len(reply_calls), 1)
         for call in reply_calls:
             self.assertTrue(call["kwargs"].get("dry_run", False))
+
+    def test_outbound_retries_do_not_duplicate_comment(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _CommentRetryExecutor()
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertTrue(result["sent"])
+        update_calls = [
+            (idx, call)
+            for idx, call in enumerate(executor.calls)
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertGreaterEqual(len(update_calls), 2)
+        first_update_payload = update_calls[0][1]["kwargs"]["json_body"]
+        second_update_payload = update_calls[1][1]["kwargs"]["json_body"]
+        self.assertTrue(_payload_contains_comment(first_update_payload))
+        self.assertFalse(_payload_contains_comment(second_update_payload))
+
+        add_tag_indices = [
+            idx
+            for idx, call in enumerate(executor.calls)
+            if call["method"] == "PUT" and "/add-tags" in call["path"]
+        ]
+        self.assertTrue(add_tag_indices)
+        self.assertGreater(add_tag_indices[0], update_calls[1][0])
 
     def test_outbound_followup_after_auto_reply_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -707,6 +752,15 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertNotIn(reply_body, combined_logs)
 
 
+def _payload_contains_comment(payload: dict[str, Any]) -> bool:
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("comment"):
+        return True
+    ticket_payload = payload.get("ticket")
+    return isinstance(ticket_payload, dict) and bool(ticket_payload.get("comment"))
+
+
 class _RecordingExecutor:
     def __init__(
         self,
@@ -771,6 +825,77 @@ class _RecordingExecutor:
 
         return RichpanelResponse(
             status_code=status_code,
+            headers={},
+            body=b"",
+            url=path,
+            dry_run=effective_dry_run,
+        )
+
+
+class _CommentRetryExecutor:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+        self.ticket_status = "open"
+        self.ticket_tags: list[str] = []
+        self.reply_status_codes = [202, 202]
+        self._reply_index = 0
+        self._update_calls = 0
+
+    def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+        effective_dry_run = kwargs.get("dry_run", False)
+        kwargs["dry_run"] = effective_dry_run
+        self.calls.append({"method": method, "path": path, "kwargs": kwargs})
+
+        if method.upper() == "GET" and path.startswith("/v1/tickets/"):
+            body = json.dumps(
+                {"status": self.ticket_status, "tags": self.ticket_tags}
+            ).encode("utf-8")
+            return RichpanelResponse(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                body=body,
+                url=path,
+                dry_run=effective_dry_run,
+            )
+
+        if method.upper() == "PUT" and "/add-tags" in path:
+            tags = kwargs.get("json_body", {}).get("tags") or []
+            self.ticket_tags = sorted(set(self.ticket_tags + tags))
+            return RichpanelResponse(
+                status_code=200,
+                headers={},
+                body=b"",
+                url=path,
+                dry_run=effective_dry_run,
+            )
+
+        if method.upper() == "PUT" and path.startswith("/v1/tickets/"):
+            status_code = (
+                self.reply_status_codes[self._reply_index]
+                if self._reply_index < len(self.reply_status_codes)
+                else self.reply_status_codes[-1]
+            )
+            self._reply_index += 1
+            if self._update_calls >= 1:
+                payload = kwargs.get("json_body") or {}
+                ticket_payload = payload.get("ticket") or {}
+                status = ticket_payload.get("status") or payload.get("status")
+                state = ticket_payload.get("state") or payload.get("state")
+                if status:
+                    self.ticket_status = str(status).lower()
+                if state:
+                    self.ticket_status = str(state).lower()
+            self._update_calls += 1
+            return RichpanelResponse(
+                status_code=status_code,
+                headers={},
+                body=b"",
+                url=path,
+                dry_run=effective_dry_run,
+            )
+
+        return RichpanelResponse(
+            status_code=500,
             headers={},
             body=b"",
             url=path,
