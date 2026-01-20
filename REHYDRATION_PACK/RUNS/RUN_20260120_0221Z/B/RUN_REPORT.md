@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-20
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b46-order-status-proof`
-- **PR:** pending
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/127
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
