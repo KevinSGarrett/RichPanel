@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-01-20T04:40:02.963913+00:00",
+  "entries": [
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:26807bb6042a",
+      "service": "richpanel"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:26807bb6042a",
+      "service": "richpanel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:26807bb6042a",
+      "service": "richpanel"
+    }
+  ],
+  "note": "Captured via urllib.request.urlopen; AWS SDK calls are not included."
+}

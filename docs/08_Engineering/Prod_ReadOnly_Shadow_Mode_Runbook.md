@@ -77,11 +77,23 @@ Before enabling shadow mode in production:
 
 - Script: `scripts/live_readonly_shadow_eval.py`
 - Required secrets (AWS Secrets Manager): `rp-mw/prod/richpanel/api_key`, `rp-mw/prod/shopify/admin_api_token`
-- Required env vars (the script enforces/fails-closed): `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_OUTBOUND_ENABLED=false`, `RICHPANEL_WRITE_DISABLED=true`
-- Optional overrides: `SHOPIFY_SHOP_DOMAIN` (or `--shop-domain` flag) to target the correct store; `RICHPANEL_API_KEY_SECRET_ID` can be overridden with `--richpanel-secret-id`
+- Required env vars (the script enforces/fails-closed):
+  - `MW_ALLOW_NETWORK_READS=true`
+  - `RICHPANEL_OUTBOUND_ENABLED=true` (required for real GETs; still read-only)
+  - `RICHPANEL_WRITE_DISABLED=true`
+- Note: This is **local script** configuration. Production worker shadow mode should still keep `RICHPANEL_OUTBOUND_ENABLED=false`.
+- Optional overrides:
+  - `RICHPANEL_API_KEY_OVERRIDE` (set to `PROD_RICHPANEL_API_KEY` for prod runs)
+  - `SHOPIFY_SHOP_DOMAIN` (or `--shop-domain` flag) to target the correct store
+  - `RICHPANEL_API_KEY_SECRET_ID` can be overridden with `--richpanel-secret-id`
 - Run locally (PowerShell example, requires AWS creds with secrets access):
 
 ```powershell
+$env:RICHPANEL_API_KEY_OVERRIDE = $env:PROD_RICHPANEL_API_KEY
+$env:MW_ALLOW_NETWORK_READS = "true"
+$env:RICHPANEL_OUTBOUND_ENABLED = "true"
+$env:RICHPANEL_WRITE_DISABLED = "true"
+
 python scripts/live_readonly_shadow_eval.py `
   --ticket-id <ticket-or-conversation-id> `
   --richpanel-secret-id rp-mw/prod/richpanel/api_key `
@@ -89,15 +101,16 @@ python scripts/live_readonly_shadow_eval.py `
 ```
 
 What it does:
-- Forces the read-only env flags above, then verifies a write-block self-check (expects `RichpanelWriteDisabledError`)
+- Requires the read-only env flags above (fails closed if missing or incorrect)
 - Reads ticket + conversation, performs order lookup (Shopify fallback) with `allow_network` gated to reads only
 - Builds a dry-run action plan and prints a PII-safe preview of the planned response (no posts/tags)
-- Writes a PII-safe artifact to `artifacts/readonly_shadow/<timestamp>_<ticket>.json` containing: ticket id, redacted customer identifiers, routing/intent, whether tracking was found, and ETA window (if no tracking)
+- Writes a PII-safe artifact to `artifacts/readonly_shadow/<timestamp>_<ticket_hash>.json` containing: redacted ticket id, redacted customer identifiers, routing/intent, whether tracking was found, and ETA window (if no tracking)
+- Captures a redacted HTTP trace to `artifacts/prod_readonly_shadow_eval_http_trace.json` and fails if any non-GET calls are observed
 
 Success evidence for PRs:
 - Command used (including flags)
-- Confirmation that the self-check logged `Write block self-check: PASSED`
 - Path to the generated artifact JSON
+- Path to the HTTP trace JSON (should contain only GET requests)
 - Cross-reference Shopify data expectations in `docs/SHOPIFY_STRATEGY/` for store-specific nuances
 
 ---

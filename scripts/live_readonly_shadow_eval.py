@@ -3,8 +3,8 @@
 Live Read-Only Shadow Evaluation
 
 Reads real Richpanel + Shopify data for a single ticket without allowing any writes.
-Fails closed via environment enforcement + explicit Richpanel write-block self-check.
-Produces a PII-safe JSON artifact under artifacts/readonly_shadow/.
+Fails closed via environment guards + GET-only request tracing.
+Produces PII-safe JSON artifacts under artifacts/.
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import logging
 import os
 import sys
 import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -29,7 +30,6 @@ from richpanel_middleware.automation.router import extract_customer_message  # t
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     RichpanelClient,
     RichpanelRequestError,
-    RichpanelWriteDisabledError,
     SecretLoadError,
     TransportError,
 )
@@ -39,9 +39,11 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
 )
 
+PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
+
 REQUIRED_FLAGS = {
     "MW_ALLOW_NETWORK_READS": "true",
-    "RICHPANEL_OUTBOUND_ENABLED": "false",
+    "RICHPANEL_OUTBOUND_ENABLED": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
 }
 
@@ -60,40 +62,151 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     return f"redacted:{_fingerprint(text)}"
 
 
-def _enforce_required_env() -> Dict[str, str]:
-    """Force the required read-only env settings (fail closed if drift is detected)."""
+def _resolve_env_name() -> str:
+    raw = (
+        os.environ.get("RICHPANEL_ENV")
+        or os.environ.get("RICH_PANEL_ENV")
+        or os.environ.get("MW_ENV")
+        or os.environ.get("ENVIRONMENT")
+        or "local"
+    )
+    return str(raw).strip().lower() or "local"
+
+
+def _resolve_richpanel_base_url() -> str:
+    return (os.environ.get("RICHPANEL_API_BASE_URL") or PROD_RICHPANEL_BASE_URL).rstrip("/")
+
+
+def _require_env_flag(key: str, expected: str, *, context: str) -> None:
+    actual = os.environ.get(key)
+    if actual is None:
+        raise SystemExit(f"{key} must be {expected} for {context} (unset)")
+    if str(actual).strip().lower() != expected:
+        raise SystemExit(f"{key} must be {expected} for {context} (found {actual})")
+
+
+def _require_env_flags(context: str) -> Dict[str, str]:
+    """Require the read-only env settings (fail-closed; do not mutate env)."""
     applied: Dict[str, str] = {}
     for key, expected in REQUIRED_FLAGS.items():
-        os.environ[key] = expected
+        _require_env_flag(key, expected, context=context)
         applied[key] = expected
-        actual = os.environ.get(key, "").lower()
-        if actual != expected:
-            raise SystemExit(f"{key} must be {expected} (found {actual})")
     return applied
 
 
-def _build_richpanel_client(*, richpanel_secret: Optional[str]) -> RichpanelClient:
+def _build_richpanel_client(
+    *, richpanel_secret: Optional[str], base_url: str
+) -> RichpanelClient:
     return RichpanelClient(
         api_key_secret_id=richpanel_secret,
+        base_url=base_url,
         dry_run=False,  # allow GETs; writes are still blocked by RICHPANEL_WRITE_DISABLED
     )
 
 
-def _assert_write_blocked(client: RichpanelClient) -> None:
-    """Attempt a known write path and assert it is blocked."""
-    try:
-        client.request(
-            "PUT",
-            "/v1/tickets/readonly-proof/add-tags",
-            json_body={"tags": ["readonly-proof"]},
-            dry_run=False,
-        )
-    except RichpanelWriteDisabledError:
-        LOGGER.info("Write block self-check: PASSED (RichpanelWriteDisabledError raised)")
-        return
-    raise SystemExit(
-        "Write block self-check FAILED: RichpanelWriteDisabledError was not raised."
+def _is_prod_target(*, richpanel_base_url: str, richpanel_secret_id: Optional[str]) -> bool:
+    env_name = _resolve_env_name()
+    if env_name in {"prod", "production"}:
+        return True
+    if richpanel_secret_id and "/prod/" in richpanel_secret_id.lower():
+        return True
+    prod_key_present = bool(
+        os.environ.get("PROD_RICHPANEL_API_KEY")
+        or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
     )
+    is_prod_base = richpanel_base_url.rstrip("/") == PROD_RICHPANEL_BASE_URL
+    return prod_key_present and is_prod_base
+
+
+def _redact_path(path: str) -> str:
+    if not path:
+        return "/"
+    segments = [segment for segment in path.split("/") if segment]
+    safe_segments = {
+        "api",
+        "v1",
+        "v2",
+        "v3",
+        "tickets",
+        "ticket",
+        "conversations",
+        "conversation",
+        "orders",
+        "order",
+        "number",
+        "shipments",
+        "shipment",
+    }
+    redacted_segments: list[str] = []
+    for segment in segments:
+        lowered = segment.lower()
+        if lowered in safe_segments or (segment.startswith("v") and segment[1:].isdigit()):
+            redacted_segments.append(segment)
+            continue
+        if segment.isalpha() and len(segment) <= 32:
+            redacted_segments.append(segment)
+            continue
+        redacted_segments.append(_redact_identifier(segment) or "redacted")
+    return "/" + "/".join(redacted_segments)
+
+
+class _HttpTrace:
+    def __init__(self) -> None:
+        self.entries: list[Dict[str, str]] = []
+        self._original_urlopen = None
+
+    def record(self, method: str, url: str) -> None:
+        parsed = urllib.parse.urlparse(url)
+        path = _redact_path(parsed.path)
+        service = "unknown"
+        hostname = parsed.hostname or ""
+        if hostname.endswith("richpanel.com"):
+            service = "richpanel"
+        elif hostname.endswith("myshopify.com"):
+            service = "shopify"
+        elif hostname.endswith("shipstation.com"):
+            service = "shipstation"
+        self.entries.append(
+            {"method": method.upper(), "path": path, "service": service}
+        )
+
+    def capture(self) -> "_HttpTrace":
+        original = urllib.request.urlopen
+        self._original_urlopen = original
+
+        def _wrapped_urlopen(req, *args, **kwargs):
+            try:
+                method = (
+                    req.get_method() if hasattr(req, "get_method") else "GET"
+                )
+                url = req.full_url if hasattr(req, "full_url") else str(req)
+                self.record(method, url)
+            except Exception:
+                LOGGER.warning("HTTP trace capture failed", exc_info=True)
+            return original(req, *args, **kwargs)
+
+        urllib.request.urlopen = _wrapped_urlopen
+        return self
+
+    def stop(self) -> None:
+        if self._original_urlopen is not None:
+            urllib.request.urlopen = self._original_urlopen
+            self._original_urlopen = None
+
+    def assert_get_only(self, *, context: str, trace_path: Path) -> None:
+        non_get = [entry for entry in self.entries if entry["method"] != "GET"]
+        if non_get:
+            raise SystemExit(
+                f"Non-GET request detected during {context}. Trace: {trace_path}"
+            )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "entries": list(self.entries),
+            "note": "Captured via urllib.request.urlopen; AWS SDK calls are not included.",
+        }
+
 
 
 def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
@@ -120,7 +233,10 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
         payload = payload if isinstance(payload, dict) else {}
         payload["__source_path"] = path
         return payload
-    raise SystemExit(f"Ticket lookup failed for {ticket_ref}: {'; '.join(errors)}")
+    redacted_ref = _redact_identifier(ticket_ref) or "redacted"
+    raise SystemExit(
+        f"Ticket lookup failed for {redacted_ref}: {'; '.join(errors)}"
+    )
 
 
 def _fetch_conversation(client: RichpanelClient, ticket_id: str) -> Dict[str, Any]:
@@ -217,11 +333,17 @@ def _tracking_present(order_summary: Dict[str, Any]) -> bool:
 
 
 def _build_artifact_path(ticket_id: str) -> Path:
-    safe_id = "".join(ch for ch in ticket_id if ch.isalnum() or ch in ("-", "_"))
+    safe_id = _fingerprint(ticket_id)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = ROOT / "artifacts" / "readonly_shadow"
     out_dir.mkdir(parents=True, exist_ok=True)
     return out_dir / f"{timestamp}_{safe_id}.json"
+
+
+def _build_trace_path() -> Path:
+    out_dir = ROOT / "artifacts"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir / "prod_readonly_shadow_eval_http_trace.json"
 
 
 def main() -> int:
@@ -241,50 +363,83 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    enforced_env = _enforce_required_env()
+    richpanel_base_url = _resolve_richpanel_base_url()
+    is_prod_target = _is_prod_target(
+        richpanel_base_url=richpanel_base_url,
+        richpanel_secret_id=args.richpanel_secret_id,
+    )
+    if is_prod_target:
+        _require_env_flag(
+            "RICHPANEL_WRITE_DISABLED",
+            "true",
+            context="production Richpanel access",
+        )
+    enforced_env = _require_env_flags("read-only shadow evaluation")
     if args.shop_domain:
         os.environ["SHOPIFY_SHOP_DOMAIN"] = args.shop_domain
-    rp_client = _build_richpanel_client(richpanel_secret=args.richpanel_secret_id)
+    trace = _HttpTrace().capture()
+    try:
+        rp_client = _build_richpanel_client(
+            richpanel_secret=args.richpanel_secret_id,
+            base_url=richpanel_base_url,
+        )
 
-    _assert_write_blocked(rp_client)
+        ticket_payload = _fetch_ticket(rp_client, args.ticket_id)
+        convo_payload = _fetch_conversation(rp_client, args.ticket_id)
+        order_payload = _extract_order_payload(ticket_payload, convo_payload)
+        customer_ids = _extract_customer_identifiers(ticket_payload, convo_payload)
 
-    ticket_payload = _fetch_ticket(rp_client, args.ticket_id)
-    convo_payload = _fetch_conversation(rp_client, args.ticket_id)
-    order_payload = _extract_order_payload(ticket_payload, convo_payload)
-    customer_ids = _extract_customer_identifiers(ticket_payload, convo_payload)
+        customer_message = extract_customer_message(
+            order_payload, default="(not provided)"
+        )
+        event_payload = dict(order_payload)
+        event_payload.update(
+            {
+                "ticket_id": args.ticket_id,
+                "conversation_id": args.ticket_id,
+                "customer_message": customer_message,
+            }
+        )
 
-    customer_message = extract_customer_message(order_payload, default="(not provided)")
-    event_payload = dict(order_payload)
-    event_payload.update(
-        {
-            "ticket_id": args.ticket_id,
-            "conversation_id": args.ticket_id,
-            "customer_message": customer_message,
-        }
-    )
+        envelope = normalize_event({"payload": event_payload})
+        # Keep outbound disabled to avoid any outbound messaging/LLM calls.
+        plan = plan_actions(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+        )
 
-    envelope = normalize_event({"payload": event_payload})
-    plan = plan_actions(
-        envelope,
-        safe_mode=False,
-        automation_enabled=True,
-        allow_network=True,
-        outbound_enabled=False,
-    )
-
-    order_action = next(
-        (a for a in plan.actions if a.get("type") == "order_status_draft_reply"), None
-    )
-    parameters = order_action.get("parameters", {}) if isinstance(order_action, dict) else {}
-    order_summary = parameters.get("order_summary") if isinstance(parameters, dict) else {}
-    delivery_estimate = parameters.get("delivery_estimate") if isinstance(parameters, dict) else None
-    tracking_found = _tracking_present(order_summary or {})
+        order_action = next(
+            (a for a in plan.actions if a.get("type") == "order_status_draft_reply"),
+            None,
+        )
+        parameters = (
+            order_action.get("parameters", {}) if isinstance(order_action, dict) else {}
+        )
+        order_summary = (
+            parameters.get("order_summary") if isinstance(parameters, dict) else {}
+        )
+        delivery_estimate = (
+            parameters.get("delivery_estimate") if isinstance(parameters, dict) else None
+        )
+        tracking_found = _tracking_present(order_summary or {})
+    finally:
+        trace.stop()
+        trace_path = _build_trace_path()
+        with trace_path.open("w", encoding="utf-8") as fh:
+            json.dump(trace.to_dict(), fh, ensure_ascii=False, indent=2)
+        trace.assert_get_only(
+            context="read-only shadow evaluation", trace_path=trace_path
+        )
 
     artifact = {
-        "ticket_id": args.ticket_id,
+        "ticket_id_redacted": _redact_identifier(args.ticket_id),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "env_flags": enforced_env,
-        "write_block_self_check": True,
+        "prod_target": is_prod_target,
+        "http_trace_path": str(_build_trace_path()),
         "customer": customer_ids,
         "routing": {
             "intent": getattr(plan.routing, "intent", None),
@@ -321,6 +476,7 @@ def main() -> int:
     LOGGER.info("Planned response (PII-safe preview):")
     LOGGER.info(json.dumps(artifact["plan_preview"], indent=2))
     LOGGER.info("Artifact written to %s", out_path)
+    LOGGER.info("HTTP trace written to %s", _build_trace_path())
     return 0
 
 
