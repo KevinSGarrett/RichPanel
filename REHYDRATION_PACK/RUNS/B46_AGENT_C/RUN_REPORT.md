@@ -54,11 +54,28 @@ $env:RICHPANEL_API_KEY_OVERRIDE=$env:PROD_RICHPANEL_API_KEY
 python scripts/live_readonly_shadow_eval.py --ticket-id 91608 --richpanel-secret-id rp-mw/prod/richpanel/api_key --shop-domain scentimen-t.myshopify.com
 # output:
 Ticket lookup failed for redacted:26807bb6042a: /v1/tickets/91608: Unable to load Richpanel API key from Secrets Manager; /v1/tickets/number/91608: Unable to load Richpanel API key from Secrets Manager
+
+gh workflow run seed-secrets.yml -f environment=prod
+# output:
+(workflow dispatch)
+
+gh run list --workflow seed-secrets.yml --limit 1
+# output:
+queued Seed Secrets main workflow_dispatch 21159596248
+
+gh run watch 21159596248 --exit-status
+# output:
+seed job completed successfully
+
+gh run view 21159596248 --json url,status,conclusion
+# output:
+success https://github.com/KevinSGarrett/RichPanel/actions/runs/21159596248
 ```
 
 ## Tests / Proof
 - **Tests run:** `python -m unittest scripts.test_live_readonly_shadow_eval` (PASS)
 - **Production eval run:** failed (missing Secrets Manager access or prod key override)
+- **Secrets seeded:** `seed-secrets.yml` (prod) — https://github.com/KevinSGarrett/RichPanel/actions/runs/21159596248 (success)
 - **Planned prod command (PowerShell):**
 ```powershell
 $env:RICHPANEL_API_KEY_OVERRIDE = $env:PROD_RICHPANEL_API_KEY
