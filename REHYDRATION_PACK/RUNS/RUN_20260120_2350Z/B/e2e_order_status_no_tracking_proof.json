@@ -1,7 +1,7 @@
 {
   "meta": {
     "run_id": "RUN_20260120_2350Z",
-    "timestamp": "2026-01-20T14:48:16.181547+00:00",
+    "timestamp": "2026-01-20T15:05:20.855947+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status_no_tracking",
@@ -9,7 +9,7 @@
   },
   "inputs": {
     "ticket_ref": null,
-    "ticket_ref_fingerprint": "11382b8de6b4",
+    "ticket_ref_fingerprint": "eab8ff114cc6",
     "apply_test_tag": false,
     "test_tag_value": null,
     "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number <redacted> --confirm-test-ticket --diagnose-ticket-update --run-id RUN_20260120_2350Z --scenario order_status_no_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_no_tracking_proof.json"
@@ -17,9 +17,9 @@
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id_fingerprint": "eb973f75ae7c",
+    "event_id_fingerprint": "2d49a5eff45e",
     "conversation_id": null,
-    "conversation_id_fingerprint": "f7bf0c048591",
+    "conversation_id_fingerprint": "d1989e4ff953",
     "accepted": true
   },
   "dynamo": {
@@ -50,7 +50,7 @@
         "intent": "order_status_tracking"
       },
       "action_count": 2,
-      "updated_at": "2026-01-20T14:48:10.536124+00:00"
+      "updated_at": "2026-01-20T15:04:12.099891+00:00"
     },
     "audit_record": {
       "routing": {
@@ -62,8 +62,8 @@
         "reason": "matched order status keyword",
         "intent": "order_status_tracking"
       },
-      "recorded_at": "2026-01-20T14:48:10.536124+00:00",
-      "ts_action_fingerprint": "2026-01-20T14:48:10.536124+00:00#fingerprint:eb973f75ae7c"
+      "recorded_at": "2026-01-20T15:04:12.099891+00:00",
+      "ts_action_fingerprint": "2026-01-20T15:04:12.099891+00:00#fingerprint:2d49a5eff45e"
     }
   },
   "openai": {
@@ -92,20 +92,13 @@
     "pre": {
       "status": "OPEN",
       "state": null,
-      "tags": [
-        "mw-intent-order_status_tracking",
-        "mw-routing-applied",
-        "mw-auto-replied",
-        "mw-order-status-answered",
-        "mw-order-status-answered:RUN_20260119_B46",
-        "mw-reply-sent"
-      ],
-      "updated_at": "2026-01-20T14:38:51.648Z",
+      "tags": [],
+      "updated_at": "2026-01-20T14:53:44.178Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "f7bf0c048591",
+      "ticket_id_fingerprint": "d1989e4ff953",
       "endpoint_variant": "number",
       "path_redacted": "/v1/tickets/number/<redacted>"
     },
@@ -115,32 +108,30 @@
       "tags": [
         "mw-intent-order_status_tracking",
         "mw-routing-applied",
-        "mw-auto-replied",
-        "mw-order-status-answered",
-        "mw-order-status-answered:RUN_20260119_B46",
-        "mw-reply-sent",
-        "mw-skip-followup-after-auto-reply",
+        "mw-skip-order-status-closed",
         "route-email-support-team"
       ],
-      "updated_at": "2026-01-20T14:48:11.934Z",
+      "updated_at": "2026-01-20T15:04:13.648Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "f7bf0c048591",
+      "ticket_id_fingerprint": "d1989e4ff953",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
     "tags_added": [
-      "mw-skip-followup-after-auto-reply",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied",
+      "mw-skip-order-status-closed",
       "route-email-support-team"
     ],
     "tags_removed": [],
     "skip_tags_added": [
-      "mw-skip-followup-after-auto-reply",
+      "mw-skip-order-status-closed",
       "route-email-support-team"
     ],
-    "updated_at_delta_seconds": 560.286,
+    "updated_at_delta_seconds": 629.47,
     "status_before": "open",
     "status_after": "closed",
     "status_changed": true,
@@ -150,7 +141,9 @@
     "last_message_source_before": null,
     "last_message_source_after": null,
     "middleware_tags_added": [
-      "mw-skip-followup-after-auto-reply",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied",
+      "mw-skip-order-status-closed",
       "route-email-support-team"
     ],
     "test_tag_verified": null,
@@ -158,7 +151,7 @@
     "tag_error": null,
     "diagnostics": {
       "performed": true,
-      "ticket_fingerprint": "f7bf0c048591",
+      "ticket_fingerprint": "d1989e4ff953",
       "winning_candidate": "ticket_state_closed",
       "results": [
         {
