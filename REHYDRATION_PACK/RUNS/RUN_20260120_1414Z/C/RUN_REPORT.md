@@ -20,18 +20,12 @@ python scripts/run_ci_checks.py --ci
 
 ## CI snippet
 ```text
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Uncommitted changes:
-M docs/_generated/doc_outline.json
-M docs/_generated/doc_registry.compact.json
-M docs/_generated/doc_registry.json
-M docs/_generated/heading_index.json
-?? REHYDRATION_PACK/RUNS/RUN_20260120_1414Z/
+$ python scripts/run_ci_checks.py --ci
+[OK] CI-equivalent checks passed.
 ```
 
 ## Notes
 - Live shadow eval (`--from-richpanel`) was not executed in this run.
-- CI failure is due to the repo needing a clean git status in `--ci` mode after regen.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/RUN_20260120_1414Z/C/EVAL_REPORT.md`
