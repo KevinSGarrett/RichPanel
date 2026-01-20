@@ -28,6 +28,7 @@ $ python scripts/run_ci_checks.py --ci
 ## Notes
 - Live shadow eval (`--from-richpanel`) was not executed in this run.
 - Trace validation now permits GET/HEAD to match read-only behavior.
+- LLM confidence parsing now handles None safely in the eval harness.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/RUN_20260120_1414Z/C/EVAL_REPORT.md`

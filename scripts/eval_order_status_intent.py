@@ -326,7 +326,11 @@ def _evaluate_examples(
             )
             llm_called = suggestion.llm_called
             llm_model = suggestion.model
-            llm_confidence = float(suggestion.confidence)
+            llm_confidence = (
+                float(suggestion.confidence)
+                if suggestion.confidence is not None
+                else None
+            )
             llm_label = _label_from_intent(suggestion.intent)
             if llm_called:
                 llm_called_count += 1

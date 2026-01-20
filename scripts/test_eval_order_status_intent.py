@@ -217,6 +217,7 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
         self.assertEqual(summary["counts"]["llm_called"], 1)
 
         suggestion.llm_called = False
+        suggestion.confidence = None
         with mock.patch.object(
             intent_eval, "suggest_llm_routing", return_value=suggestion
         ):
