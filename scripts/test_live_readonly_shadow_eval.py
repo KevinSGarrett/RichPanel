@@ -5,6 +5,8 @@ import sys
 import unittest
 from pathlib import Path
 from unittest import mock
+from types import SimpleNamespace
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = ROOT / "scripts"
@@ -12,6 +14,37 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import live_readonly_shadow_eval as shadow_eval  # noqa: E402
+
+
+class _StubResponse:
+    def __init__(self, payload: dict, status_code: int = 200, dry_run: bool = False):
+        self.status_code = status_code
+        self.dry_run = dry_run
+        self._payload = payload
+
+    def json(self) -> dict:
+        return self._payload
+
+
+class _StubClient:
+    def __init__(self) -> None:
+        self.requests: list[tuple[str, str]] = []
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        self.requests.append((method, path))
+        if path.startswith("/v1/tickets/"):
+            payload = {
+                "ticket": {
+                    "id": "t-123",
+                    "order": {"order_id": "order-123", "tracking_number": "TN123"},
+                    "customer": {"email": "customer@example.com", "name": "Test User"},
+                }
+            }
+            return _StubResponse(payload)
+        if path.startswith("/api/v1/conversations/"):
+            payload = {"customer_profile": {"phone": "555-1212"}}
+            return _StubResponse(payload)
+        return _StubResponse({}, status_code=404)
 
 
 class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
@@ -119,6 +152,64 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(calls)
         self.assertTrue(trace.entries)
         self.assertEqual(trace.entries[0]["service"], "richpanel")
+
+    def test_main_runs_with_stubbed_client(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        plan = SimpleNamespace(
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "order_summary": {
+                            "order_id": "order-123",
+                            "tracking_number": "TN123",
+                        },
+                        "delivery_estimate": {"eta_human": "2-4 days"},
+                        "draft_reply": {"body": "stubbed"},
+                    },
+                }
+            ],
+            routing=SimpleNamespace(
+                intent="order_status_tracking",
+                department="Email Support Team",
+                reason="stubbed",
+            ),
+            mode="automation_candidate",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--shop-domain",
+                "example.myshopify.com",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval, "_build_trace_path", return_value=trace_path
+            ), mock.patch.object(
+                shadow_eval, "_build_artifact_path", return_value=artifact_path
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ):
+                result = shadow_eval.main()
+                self.assertEqual(result, 0)
+                self.assertTrue(trace_path.exists())
+                self.assertTrue(artifact_path.exists())
 
 
 def main() -> int:
