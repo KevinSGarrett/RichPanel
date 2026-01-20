@@ -792,6 +792,13 @@ class OpenAIRewriteWaitTests(unittest.TestCase):
         self.assertTrue(item["openai_rewrite"]["rewrite_attempted"])
 
     def test_wait_for_openai_rewrite_audit_record(self) -> None:
+        class _FakeKey:
+            def __init__(self, name: str) -> None:
+                self.name = name
+
+            def eq(self, value: str) -> dict[str, str]:
+                return {"name": self.name, "value": value}
+
         table = MagicMock()
         table.query.return_value = {
             "Items": [
@@ -804,7 +811,7 @@ class OpenAIRewriteWaitTests(unittest.TestCase):
         ddb = MagicMock()
         ddb.Table.return_value = table
 
-        with patch("dev_e2e_smoke.time.sleep"):
+        with patch("dev_e2e_smoke.time.sleep"), patch("dev_e2e_smoke.Key", _FakeKey):
             item = wait_for_openai_rewrite_audit_record(
                 ddb,
                 table_name="audit-table",
