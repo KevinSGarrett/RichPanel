@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import unittest
@@ -226,6 +227,35 @@ class ReplyRewriteTests(unittest.TestCase):
 
         self.assertTrue(result.rewritten)
         self.assertEqual(result.body, "Hello} there")
+        self.assertEqual(result.reason, "applied")
+
+    def test_parse_response_brace_and_escape_inside_string(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        body_text = 'Escaped "quote" and brace } ok \\\\ tail'
+        payload = json.dumps(
+            {"body": body_text, "confidence": 0.9, "risk_flags": []}
+        )
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=f"Note: {payload}",
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-escape",
+            event_id="evt-escape",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.body, body_text)
         self.assertEqual(result.reason, "applied")
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
