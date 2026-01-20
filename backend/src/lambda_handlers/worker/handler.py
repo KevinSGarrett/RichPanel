@@ -110,6 +110,9 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
                 allow_network=allow_network,
                 outbound_enabled=outbound_enabled,
             )
+            _record_openai_rewrite_evidence(
+                envelope, execution, outbound_result=outbound_result
+            )
             LOGGER.info(
                 "worker.processed",
                 extra={
@@ -191,6 +194,84 @@ def _maybe_execute_outbound_reply(
             },
         )
         return {"sent": False, "reason": "exception"}
+
+
+def _default_rewrite_model() -> str:
+    return (
+        os.environ.get("OPENAI_REPLY_REWRITE_MODEL")
+        or os.environ.get("OPENAI_MODEL")
+        or "gpt-5.2-chat-latest"
+    )
+
+
+def _resolve_openai_rewrite_evidence(
+    outbound_result: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    if not isinstance(outbound_result, dict):
+        return None
+    evidence = outbound_result.get("openai_rewrite")
+    if isinstance(evidence, dict):
+        return evidence
+    reason = outbound_result.get("reason")
+    reason_value = str(reason) if reason else "not_attempted"
+    return {
+        "rewrite_attempted": False,
+        "rewrite_applied": False,
+        "model": _default_rewrite_model(),
+        "response_id": None,
+        "response_id_unavailable_reason": reason_value,
+        "fallback_used": False,
+        "reason": reason_value,
+        "error_class": None,
+    }
+
+
+def _record_openai_rewrite_evidence(
+    envelope: EventEnvelope,
+    execution: ExecutionResult,
+    *,
+    outbound_result: Dict[str, Any],
+) -> None:
+    evidence = _resolve_openai_rewrite_evidence(outbound_result)
+    if not evidence:
+        return
+
+    sanitized = _ddb_sanitize(evidence)
+
+    if CONVERSATION_STATE_TABLE_NAME:
+        _table(CONVERSATION_STATE_TABLE_NAME).update_item(
+            Key={"conversation_id": envelope.conversation_id},
+            UpdateExpression="SET openai_rewrite = :val",
+            ExpressionAttributeValues={":val": sanitized},
+        )
+
+    if AUDIT_TRAIL_TABLE_NAME:
+        audit_record = (
+            execution.audit_record
+            if isinstance(getattr(execution, "audit_record", None), dict)
+            else {}
+        )
+        recorded_at = audit_record.get("recorded_at")
+        event_id = envelope.event_id
+        if recorded_at and event_id:
+            ts_action_id = f"{recorded_at}#{event_id}"
+            _table(AUDIT_TRAIL_TABLE_NAME).update_item(
+                Key={
+                    "conversation_id": envelope.conversation_id,
+                    "ts_action_id": ts_action_id,
+                },
+                UpdateExpression="SET openai_rewrite = :val",
+                ExpressionAttributeValues={":val": sanitized},
+            )
+
+    LOGGER.info(
+        "openai_rewrite.recorded",
+        extra={
+            "event_id": envelope.event_id,
+            "conversation_id": envelope.conversation_id,
+            "keys": sorted(sanitized.keys()),
+        },
+    )
 
 
 def _persist_idempotency(envelope: EventEnvelope, plan: ActionPlan) -> Dict[str, Any]:
@@ -459,6 +540,33 @@ def _dynamodb_resource():
                 ):
                     # No-op for conditional expressions in offline mode; we only need deterministic behavior.
                     self.items.append(Item)
+                    return {"ResponseMetadata": {"HTTPStatusCode": 200}}
+
+                def update_item(  # type: ignore[no-untyped-def]
+                    self,
+                    Key: Dict[str, Any],
+                    UpdateExpression: str,
+                    ExpressionAttributeValues: Dict[str, Any],
+                ):
+                    target = None
+                    for item in self.items:
+                        if all(item.get(k) == v for k, v in Key.items()):
+                            target = item
+                            break
+                    if target is None:
+                        target = dict(Key)
+                        self.items.append(target)
+
+                    if UpdateExpression and UpdateExpression.strip().upper().startswith("SET "):
+                        assignments = UpdateExpression.strip()[4:].split(",")
+                        for assignment in assignments:
+                            if "=" not in assignment:
+                                continue
+                            attr, token = assignment.split("=", 1)
+                            attr = attr.strip()
+                            token = token.strip()
+                            if token in ExpressionAttributeValues:
+                                target[attr] = ExpressionAttributeValues[token]
                     return {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
             class _InMemoryDynamo:

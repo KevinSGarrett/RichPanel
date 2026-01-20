@@ -99,8 +99,9 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
     system = (
         "You rewrite Richpanel customer replies. Preserve facts and promises, "
         "avoid new commitments, keep it concise and professional. "
-        "Return strict JSON with keys body (string <= 1000 chars), "
-        "confidence (0-1 float), risk_flags (list of strings). "
+        "Return strict JSON ONLY (no commentary, no code fences) with keys "
+        "body (string <= 1000 chars), confidence (0-1 float), "
+        "risk_flags (list of strings). "
         "If the input seems risky or contains sensitive data, add 'suspicious_content' "
         "to risk_flags and keep the original tone."
     )
@@ -109,6 +110,22 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         ChatMessage(role="system", content=system),
         ChatMessage(role="user", content=user),
     ]
+
+
+def _extract_json_object(content: str) -> Optional[str]:
+    start = content.find("{")
+    if start == -1:
+        return None
+    depth = 0
+    for idx in range(start, len(content)):
+        char = content[idx]
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return content[start : idx + 1]
+    return None
 
 
 def _parse_response(
@@ -130,7 +147,13 @@ def _parse_response(
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError:
-        return None, 0.0, [], "invalid_json"
+        extracted = _extract_json_object(content)
+        if not extracted:
+            return None, 0.0, [], "invalid_json"
+        try:
+            parsed = json.loads(extracted)
+        except json.JSONDecodeError:
+            return None, 0.0, [], "invalid_json"
 
     if not isinstance(parsed, dict):
         return None, 0.0, [], "not_a_dict"
@@ -259,13 +282,14 @@ def rewrite_reply(
     )
     openai_client = client or OpenAIClient(allow_network=allow_network)
 
+    response: Optional[ChatCompletionResponse]
     try:
         response = openai_client.chat_completion(
             request, safe_mode=safe_mode, automation_enabled=automation_enabled
         )
     except OpenAIRequestError as exc:
-        response = exc.response
-        response_id, response_id_reason = _response_id_info(response)
+        error_response = exc.response
+        response_id, response_id_reason = _response_id_info(error_response)
         LOGGER.warning(
             "reply_rewrite.request_failed",
             extra={
@@ -279,14 +303,29 @@ def rewrite_reply(
             body=reply_body,
             rewritten=False,
             reason="request_failed",
-            model=response.model if response else DEFAULT_MODEL,
+            model=error_response.model if error_response else DEFAULT_MODEL,
             confidence=0.0,
-            dry_run=response.dry_run if response else False,
+            dry_run=error_response.dry_run if error_response else False,
             fingerprint=fingerprint,
             llm_called=True,
             response_id=response_id,
             response_id_unavailable_reason=response_id_reason or "request_failed",
             error_class=exc.__class__.__name__,
+        )
+
+    if response is None:
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason="no_response",
+            model=DEFAULT_MODEL,
+            confidence=0.0,
+            dry_run=True,
+            fingerprint=fingerprint,
+            llm_called=False,
+            response_id=None,
+            response_id_unavailable_reason="no_response",
+            error_class=None,
         )
 
     response_id, response_id_reason = _response_id_info(response)

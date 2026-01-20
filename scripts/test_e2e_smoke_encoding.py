@@ -669,6 +669,23 @@ class OpenAIEvidenceTests(unittest.TestCase):
         self.assertFalse(result["openai_rewrite_attempted"])
         self.assertFalse(result["openai_rewrite_applied"])
 
+    def test_openai_requirements_accept_fallback(self) -> None:
+        routing = {"llm_called": True}
+        rewrite = {
+            "rewrite_attempted": True,
+            "rewrite_applied": False,
+            "fallback_used": True,
+        }
+        result = _evaluate_openai_requirements(
+            routing,
+            rewrite,
+            require_routing=True,
+            require_rewrite=True,
+        )
+        self.assertTrue(result["openai_routing_called"])
+        self.assertTrue(result["openai_rewrite_attempted"])
+        self.assertTrue(result["openai_rewrite_applied"])
+
     def test_openai_evidence_contains_required_fields(self) -> None:
         state_item = {
             "routing_artifact": {

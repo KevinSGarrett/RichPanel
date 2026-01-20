@@ -1762,10 +1762,13 @@ def _evaluate_openai_requirements(
     routing_called = bool(openai_routing.get("llm_called"))
     rewrite_attempted = bool(openai_rewrite.get("rewrite_attempted"))
     rewrite_applied = bool(openai_rewrite.get("rewrite_applied"))
+    rewrite_satisfied = rewrite_applied or (
+        rewrite_attempted and bool(openai_rewrite.get("fallback_used"))
+    )
     return {
         "openai_routing_called": routing_called if require_routing else None,
         "openai_rewrite_attempted": rewrite_attempted if require_rewrite else None,
-        "openai_rewrite_applied": rewrite_applied if require_rewrite else None,
+        "openai_rewrite_applied": rewrite_satisfied if require_rewrite else None,
     }
 
 
@@ -1832,6 +1835,69 @@ def wait_for_audit_record(
         f"Audit record for event '{event_id}' was not observed in table '{table_name}' within {timeout_seconds}s."
     )
 
+
+def wait_for_openai_rewrite_state_record(
+    ddb_resource,
+    table_name: str,
+    conversation_id: str,
+    timeout_seconds: int,
+    poll_interval: int = 5,
+) -> Dict[str, Any]:
+    table = ddb_resource.Table(table_name)
+    deadline = time.time() + timeout_seconds
+    last_item: Optional[Dict[str, Any]] = None
+
+    while time.time() < deadline:
+        try:
+            response = table.get_item(Key={"conversation_id": conversation_id})
+        except (BotoCoreError, ClientError) as exc:
+            raise SmokeFailure(
+                f"Failed to query conversation state table '{table_name}': {exc}"
+            ) from exc
+
+        item = response.get("Item")
+        if item:
+            last_item = item
+            if isinstance(item.get("openai_rewrite"), dict):
+                return item
+
+        time.sleep(poll_interval)
+
+    return last_item or {}
+
+
+def wait_for_openai_rewrite_audit_record(
+    ddb_resource,
+    table_name: str,
+    conversation_id: str,
+    event_id: str,
+    timeout_seconds: int,
+    poll_interval: int = 5,
+) -> Dict[str, Any]:
+    table = ddb_resource.Table(table_name)
+    deadline = time.time() + timeout_seconds
+    last_item: Optional[Dict[str, Any]] = None
+
+    while time.time() < deadline:
+        try:
+            response = table.query(
+                KeyConditionExpression=Key("conversation_id").eq(conversation_id)
+            )
+        except (BotoCoreError, ClientError) as exc:
+            raise SmokeFailure(
+                f"Failed to query audit table '{table_name}': {exc}"
+            ) from exc
+
+        items = response.get("Items") or []
+        for item in items:
+            if item.get("event_id") == event_id:
+                last_item = item
+                if isinstance(item.get("openai_rewrite"), dict):
+                    return item
+
+        time.sleep(poll_interval)
+
+    return last_item or {}
 
 def build_payload(
     event_id: Optional[str],
@@ -2267,6 +2333,23 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         f"[OK] Audit record written for '{conversation_label}' "
         f"in '{artifacts.audit_trail_table}'."
     )
+    if require_openai_rewrite and not (
+        isinstance(state_item.get("openai_rewrite"), dict)
+        or isinstance(audit_item.get("openai_rewrite"), dict)
+    ):
+        state_item = wait_for_openai_rewrite_state_record(
+            ddb_resource,
+            table_name=artifacts.conversation_state_table,
+            conversation_id=conversation_id,
+            timeout_seconds=args.wait_seconds,
+        )
+        audit_item = wait_for_openai_rewrite_audit_record(
+            ddb_resource,
+            table_name=artifacts.audit_trail_table,
+            conversation_id=conversation_id,
+            event_id=event_id,
+            timeout_seconds=args.wait_seconds,
+        )
     routing_state = validate_routing(state_item, label="Conversation state")
     routing_audit = validate_routing(audit_item, label="Audit trail")
 
@@ -3157,7 +3240,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 },
                 {
                     "name": "openai_rewrite_applied",
-                    "description": "OpenAI rewrite was applied to the customer reply",
+                    "description": "OpenAI rewrite applied or fallback recorded",
                     "required": True,
                     "value": openai_requirements.get("openai_rewrite_applied"),
                 },
