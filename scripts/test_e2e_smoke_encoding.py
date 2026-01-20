@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +44,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _sanitize_decimals,
     _sanitize_response_metadata,
     _sanitize_ts_action_id,
+    _wait_for_ticket_ready,
 )
 
 
@@ -333,6 +334,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=[],
         )
@@ -345,6 +347,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=False,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=[],
         )
@@ -358,6 +361,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=False,
+            auto_close_applied=False,
             fallback_used=False,
             failed=["no_skip_tags"],
         )
@@ -371,11 +375,26 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=False,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=True,
             failed=[],
         )
         self.assertEqual(result, "PASS_WEAK")
         self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_fallback_used_with_failed_criteria_marks_fail_debug(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=False,
+            skip_tags_present_ok=True,
+            auto_close_applied=False,
+            fallback_used=True,
+            failed=["status_resolved_or_closed"],
+        )
+        self.assertEqual(result, "FAIL_DEBUG")
+        self.assertEqual(reason, "fallback_close_used_but_criteria_failed")
 
     def test_fail_when_base_pass_false(self) -> None:
         result, reason = _classify_order_status_result(
@@ -384,11 +403,40 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=["middleware_outcome"],
         )
         self.assertEqual(result, "FAIL")
         self.assertEqual(reason, "Failed criteria: middleware_outcome")
+
+    def test_auto_close_applied_degrades_to_pass_weak(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            auto_close_applied=True,
+            fallback_used=False,
+            failed=[],
+        )
+        self.assertEqual(result, "PASS_WEAK")
+        self.assertEqual(reason, "debug_auto_close_applied")
+
+    def test_auto_close_fail_debug_when_criteria_missing(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=False,
+            skip_tags_present_ok=True,
+            auto_close_applied=True,
+            fallback_used=False,
+            failed=["status_resolved_or_closed"],
+        )
+        self.assertEqual(result, "FAIL_DEBUG")
+        self.assertEqual(reason, "debug_auto_close_applied_but_criteria_failed")
 
 
 class PIISafetyTests(unittest.TestCase):
@@ -545,6 +593,46 @@ class SummaryAppendTests(unittest.TestCase):
             self.assertIn("CloudWatch alarms: `alarm-one`, `alarm-two`", content)
             self.assertIn("Draft replies (safe fields)", content)
             self.assertIn("audit-table", content)
+
+
+class WaitForTicketReadyTests(unittest.TestCase):
+    def test_wait_for_ticket_ready_returns_snapshot(self) -> None:
+        snapshots = [
+            {"status": "open", "tags": []},
+            {"status": "closed", "tags": ["mw-auto-replied"]},
+        ]
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot", side_effect=snapshots
+        ) as fetch_mock:
+            result = _wait_for_ticket_ready(
+                MagicMock(),
+                "conv-1",
+                allow_network=True,
+                required_tags=["mw-auto-replied"],
+                required_statuses=["resolved", "closed"],
+                timeout_seconds=5,
+                poll_interval=0.0,
+            )
+
+        self.assertEqual(fetch_mock.call_count, 2)
+        self.assertEqual(result, snapshots[-1])
+
+    def test_wait_for_ticket_ready_times_out(self) -> None:
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot",
+            return_value={"status": "open", "tags": []},
+        ):
+            result = _wait_for_ticket_ready(
+                MagicMock(),
+                "conv-2",
+                allow_network=True,
+                required_tags=["mw-auto-replied"],
+                required_statuses=["resolved", "closed"],
+                timeout_seconds=0,
+                poll_interval=0.0,
+            )
+
+        self.assertIsNone(result)
 
 
 class FallbackCloseTests(unittest.TestCase):

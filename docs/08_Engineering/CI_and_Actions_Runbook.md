@@ -543,8 +543,9 @@ python scripts/dev_e2e_smoke.py `
 **Expected outcome:**
 - Initial webhook: auto-reply sent, ticket resolved/closed
 - Follow-up webhook: worker routes to Email Support Team (no duplicate auto-reply)
-- Follow-up tags applied: `route-email-support-team`, `mw-escalated-human`, `mw-skip-followup-after-auto-reply`
+- Follow-up tags applied: `route-email-support-team`, `mw-skip-followup-after-auto-reply`
 - Proof JSON includes `followup` section with `routed_to_support=true` and no reply evidence
+- When running with `--simulate-followup` (or `--send-followup`), the harness requires deterministic routing to support (route-email-support-team + mw-skip-followup-after-auto-reply) with no additional middleware reply for a passing result.
 
 #### PASS criteria
 
@@ -559,6 +560,7 @@ python scripts/dev_e2e_smoke.py `
 - Middleware tags applied: `mw-auto-replied`, `mw-order-status-answered`, or similar positive tags
 - **No skip/escalation tags added this run:** `mw-skip-*`, `route-email-support-team`, `mw-escalated-human`
 - Proof JSON is PII-safe (ticket IDs hashed, paths redacted, no email/phone in proof)
+- The harness enforces `status_resolved_or_closed` as a required criterion for order-status scenarios; unresolved tickets fail (no PASS_STRONG without real closure).
 
 **PASS_WEAK** (only allowed if Richpanel refuses status changes but tags succeed):
 - All criteria above except ticket status may remain unchanged
