@@ -54,6 +54,23 @@ def _fingerprint(text: str, *, length: int = 12) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
 
 
+def _response_id_info(
+    response: Optional[ChatCompletionResponse],
+) -> Tuple[Optional[str], Optional[str]]:
+    if response is None:
+        return None, "no_response"
+    has_raw = isinstance(response.raw, dict)
+    raw = response.raw if has_raw else {}
+    response_id = None
+    if raw:
+        response_id = raw.get("id") or raw.get("response_id")
+    if response_id:
+        return str(response_id), None
+    if response.dry_run and response.reason:
+        return None, response.reason
+    return None, "response_id_missing" if has_raw else "raw_missing"
+
+
 def _gating_reason(
     *,
     rewrite_enabled: bool,
@@ -83,8 +100,9 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
     system = (
         "You rewrite Richpanel customer replies. Preserve facts and promises, "
         "avoid new commitments, keep it concise and professional. "
-        "Return strict JSON with keys body (string <= 1000 chars), "
-        "confidence (0-1 float), risk_flags (list of strings). "
+        "Return strict JSON ONLY (no commentary, no code fences) with keys "
+        "body (string <= 1000 chars), confidence (0-1 float), "
+        "risk_flags (list of strings). "
         "If the input seems risky or contains sensitive data, add 'suspicious_content' "
         "to risk_flags and keep the original tone."
     )
@@ -93,6 +111,22 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         ChatMessage(role="system", content=system),
         ChatMessage(role="user", content=user),
     ]
+
+
+def _extract_json_object(content: str) -> Optional[str]:
+    start = content.find("{")
+    if start == -1:
+        return None
+    depth = 0
+    for idx in range(start, len(content)):
+        char = content[idx]
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return content[start : idx + 1]
+    return None
 
 
 def _parse_response(
@@ -114,7 +148,13 @@ def _parse_response(
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError:
-        return None, 0.0, [], "invalid_json"
+        extracted = _extract_json_object(content)
+        if not extracted:
+            return None, 0.0, [], "invalid_json"
+        try:
+            parsed = json.loads(extracted)
+        except json.JSONDecodeError:
+            return None, 0.0, [], "invalid_json"
 
     if not isinstance(parsed, dict):
         return None, 0.0, [], "not_a_dict"
@@ -164,6 +204,10 @@ class ReplyRewriteResult:
     confidence: float
     dry_run: bool
     fingerprint: str
+    llm_called: bool = False
+    response_id: Optional[str] = None
+    response_id_unavailable_reason: Optional[str] = None
+    error_class: Optional[str] = None
     risk_flags: List[str] = field(default_factory=list)
     gated_reason: Optional[str] = None
 
@@ -222,6 +266,10 @@ def rewrite_reply(
             confidence=0.0,
             dry_run=True,
             fingerprint=fingerprint,
+            llm_called=False,
+            response_id=None,
+            response_id_unavailable_reason=gating_reason,
+            error_class=None,
             gated_reason=gating_reason,
         )
 
@@ -235,11 +283,14 @@ def rewrite_reply(
     )
     openai_client = client or OpenAIClient(allow_network=allow_network)
 
+    response: Optional[ChatCompletionResponse]
     try:
         response = openai_client.chat_completion(
             request, safe_mode=safe_mode, automation_enabled=automation_enabled
         )
     except OpenAIRequestError as exc:
+        error_response: Optional[ChatCompletionResponse] = exc.response
+        response_id, response_id_reason = _response_id_info(error_response)
         LOGGER.warning(
             "reply_rewrite.request_failed",
             extra={
@@ -253,12 +304,33 @@ def rewrite_reply(
             body=reply_body,
             rewritten=False,
             reason="request_failed",
-            model=DEFAULT_MODEL,
+            model=error_response.model if error_response else DEFAULT_MODEL,
             confidence=0.0,
-            dry_run=False,
+            dry_run=error_response.dry_run if error_response else False,
             fingerprint=fingerprint,
+            llm_called=True,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason or "request_failed",
+            error_class=exc.__class__.__name__,
         )
 
+    if response is None:
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason="no_response",
+            model=DEFAULT_MODEL,
+            confidence=0.0,
+            dry_run=True,
+            fingerprint=fingerprint,
+            llm_called=False,
+            response_id=None,
+            response_id_unavailable_reason="no_response",
+            error_class=None,
+        )
+
+    response_id, response_id_reason = _response_id_info(response)
+    llm_called = not response.dry_run
     rewritten_body, confidence, risk_flags, parse_error = _parse_response(
         response, fingerprint=fingerprint
     )
@@ -281,6 +353,9 @@ def rewrite_reply(
             confidence=confidence,
             dry_run=response.dry_run,
             fingerprint=fingerprint,
+            llm_called=llm_called,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
             risk_flags=risk_flags,
         )
 
@@ -309,6 +384,9 @@ def rewrite_reply(
             confidence=confidence,
             dry_run=response.dry_run,
             fingerprint=fingerprint,
+            llm_called=llm_called,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
             risk_flags=risk_flags,
         )
 
@@ -332,6 +410,9 @@ def rewrite_reply(
         confidence=confidence,
         dry_run=response.dry_run,
         fingerprint=fingerprint,
+        llm_called=llm_called,
+        response_id=response_id,
+        response_id_unavailable_reason=response_id_reason,
         risk_flags=risk_flags,
     )
 

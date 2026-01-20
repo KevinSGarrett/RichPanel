@@ -6,7 +6,6 @@ import sys
 import unittest
 from pathlib import Path
 from unittest import mock
-from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -22,6 +21,9 @@ os.environ.setdefault("CONVERSATION_STATE_TABLE_NAME", "local-conversation-state
 os.environ.setdefault("AUDIT_TRAIL_TABLE_NAME", "local-audit-trail")
 
 from lambda_handlers.worker import handler as worker  # noqa: E402
+from richpanel_middleware.automation.pipeline import ExecutionResult  # noqa: E402
+from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
+from richpanel_middleware.ingest.envelope import EventEnvelope  # noqa: E402
 
 
 class WorkerHandlerFlagWiringTests(unittest.TestCase):
@@ -38,15 +40,15 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         os.environ.pop("MW_ALLOW_NETWORK_READS", None)
 
     def test_plan_actions_receives_allow_network_and_outbound_flags(self) -> None:
-        envelope = SimpleNamespace(
+        envelope = EventEnvelope(
             event_id="evt-1",
-            conversation_id="c-1",
-            payload={},
-            message_id="m1",
-            dedupe_id="m1",
-            group_id=None,
-            source="test",
             received_at="2024-01-01T00:00:00Z",
+            group_id="group-1",
+            dedupe_id="m1",
+            payload={},
+            source="test",
+            conversation_id="c-1",
+            message_id="m1",
         )
         fake_plan = mock.Mock()
         fake_plan.safe_mode = False
@@ -92,15 +94,15 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
 
     def test_plan_actions_receives_off_path_flags_when_outbound_disabled(self) -> None:
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "false"
-        envelope = SimpleNamespace(
+        envelope = EventEnvelope(
             event_id="evt-2",
-            conversation_id="c-2",
-            payload={},
-            message_id="m2",
-            dedupe_id="m2",
-            group_id=None,
-            source="test",
             received_at="2024-01-01T00:00:00Z",
+            group_id="group-2",
+            dedupe_id="m2",
+            payload={},
+            source="test",
+            conversation_id="c-2",
+            message_id="m2",
         )
         fake_plan = mock.Mock()
         fake_plan.safe_mode = False
@@ -147,15 +149,15 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
     def test_allow_network_enabled_when_shadow_reads_allowed(self) -> None:
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "false"
         os.environ["MW_ALLOW_NETWORK_READS"] = "true"
-        envelope = SimpleNamespace(
+        envelope = EventEnvelope(
             event_id="evt-3",
-            conversation_id="c-3",
-            payload={},
-            message_id="m3",
-            dedupe_id="m3",
-            group_id=None,
-            source="test",
             received_at="2024-01-01T00:00:00Z",
+            group_id="group-3",
+            dedupe_id="m3",
+            payload={},
+            source="test",
+            conversation_id="c-3",
+            message_id="m3",
         )
         fake_plan = mock.Mock()
         fake_plan.safe_mode = False
@@ -198,6 +200,105 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
             allow_network=True,
             outbound_enabled=False,
         )
+
+    def test_record_openai_rewrite_evidence_updates_tables(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-9",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-9",
+            dedupe_id="dedupe-9",
+            payload={},
+            source="test",
+            conversation_id="conv-9",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-9",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"},
+        )
+        outbound_result = {
+            "openai_rewrite": {
+                "rewrite_attempted": True,
+                "rewrite_applied": False,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": None,
+                "response_id_unavailable_reason": "dry_run",
+                "fallback_used": True,
+                "reason": "dry_run",
+                "error_class": "OpenAIDryRun",
+            }
+        }
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_openai_rewrite_evidence(
+                envelope,
+                execution,
+                outbound_result=outbound_result,
+            )
+
+        self.assertGreaterEqual(table.update_item.call_count, 2)
+
+    def test_record_openai_rewrite_evidence_uses_group_id_fallback(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-10",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-10",
+            dedupe_id="dedupe-10",
+            payload={},
+            source="test",
+            conversation_id="",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-10",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"},
+        )
+        outbound_result = {
+            "openai_rewrite": {
+                "rewrite_attempted": True,
+                "rewrite_applied": False,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": None,
+                "response_id_unavailable_reason": "dry_run",
+                "fallback_used": True,
+                "reason": "dry_run",
+                "error_class": "OpenAIDryRun",
+            }
+        }
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_openai_rewrite_evidence(
+                envelope,
+                execution,
+                outbound_result=outbound_result,
+            )
+
+        keys = [
+            call.kwargs.get("Key", {}) for call in table.update_item.mock_calls
+        ]
+        self.assertTrue(any(key.get("conversation_id") == "group-10" for key in keys))
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-20 - RUN_20260120_2350Z (B48: OpenAI Evidence in Order Status Proof)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260120_2350Z
+- Added OpenAI routing + rewrite evidence to dev_e2e_smoke proof JSON and require-openai flags
+- Captured response_id metadata in llm_routing + llm_reply_rewriter; worker persists openai_rewrite evidence to state/audit
+- Updated CI_and_Actions_Runbook.md with OpenAI evidence requirements
+- Tests: python scripts/test_e2e_smoke_encoding.py
+
 ### 2026-01-20 - RUN_20260120_0221Z (B46: Order Status PASS_STRONG + Follow-up Routing Proofs)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260120_0221Z
 - Enforced PASS_STRONG for order_status scenarios to require actual closure + follow-up routing evidence

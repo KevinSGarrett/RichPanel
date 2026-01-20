@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-20 - RUN_20260120_2350Z (B48: OpenAI Evidence in Order Status Proof)",
+        "anchor": "2026-01-20-run202601202350z-b48-openai-evidence-in-order-status-proof"
+      },
+      {
+        "level": 3,
         "text": "2026-01-20 - RUN_20260120_0221Z (B46: Order Status PASS_STRONG + Follow-up Routing Proofs)",
         "anchor": "2026-01-20-run202601200221z-b46-order-status-passstrong-follow-up-routing-proofs"
       },

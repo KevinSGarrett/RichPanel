@@ -53,6 +53,10 @@ def _resolve_env_name() -> str:
     return value
 
 
+def _uses_max_completion_tokens(model: str) -> bool:
+    return model.strip().lower().startswith("gpt-5")
+
+
 @dataclass
 class ChatMessage:
     role: str
@@ -72,10 +76,20 @@ class ChatCompletionRequest:
         payload: Dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": m.role, "content": m.content} for m in self.messages],
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
         }
-        if self.metadata:
+        if self.temperature is not None:
+            if not _uses_max_completion_tokens(self.model):
+                payload["temperature"] = self.temperature
+            elif float(self.temperature) != 0.0:
+                payload["temperature"] = self.temperature
+        if self.max_tokens is not None:
+            if self.max_tokens <= 0:
+                raise ValueError("max_tokens must be a positive integer")
+            if _uses_max_completion_tokens(self.model):
+                payload["max_completion_tokens"] = self.max_tokens
+            else:
+                payload["max_tokens"] = self.max_tokens
+        if self.metadata and not _uses_max_completion_tokens(self.model):
             payload["metadata"] = self.metadata
         return payload
 

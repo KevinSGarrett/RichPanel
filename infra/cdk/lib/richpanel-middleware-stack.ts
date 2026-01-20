@@ -280,6 +280,7 @@ export class RichpanelMiddlewareStack extends Stack {
     this.runtimeFlags.safeMode.grantRead(workerFunction);
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
     this.secrets.richpanelApiKey.grantRead(workerFunction);
+    this.secrets.openaiApiKey.grantRead(workerFunction);
 
     workerFunction.addEventSource(
       new SqsEventSource(eventsQueue, {

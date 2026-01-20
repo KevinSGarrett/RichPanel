@@ -11,7 +11,7 @@ Counts by docs section:
 | `05_FAQ_Automation` | 19 | 0 | 19 |
 | `06_Security_Privacy_Compliance` | 165 | 0 | 165 |
 | `07_Reliability_Scaling` | 24 | 24 | 0 |
-| `08_Engineering` | 38 | 0 | 38 |
+| `08_Engineering` | 39 | 0 | 39 |
 | `08_Observability_Analytics` | 21 | 15 | 6 |
 | `08_Testing_Quality` | 17 | 17 | 0 |
 | `09_Deployment_Operations` | 43 | 0 | 43 |

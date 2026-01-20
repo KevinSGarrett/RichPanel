@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import unittest
@@ -43,9 +44,11 @@ class _RecordingTransport:
     def __init__(self, response: TransportResponse):
         self.calls = 0
         self.response = response
+        self.last_request: Optional[TransportRequest] = None
 
     def send(self, request: TransportRequest) -> TransportResponse:
         self.calls += 1
+        self.last_request = request
         return self.response
 
 
@@ -213,6 +216,89 @@ class OpenAIClientTests(unittest.TestCase):
 
     def test_integrations_namespace_alias(self) -> None:
         self.assertIs(OpenAIClient, BoundaryOpenAIClient)
+
+    def test_gpt5_payload_uses_max_completion_tokens(self) -> None:
+        response = TransportResponse(
+            status_code=200,
+            headers={"content-type": "application/json"},
+            body=(
+                b'{"choices":[{"message":{"content":"{\\"body\\":\\"ok\\",\\"confidence\\":0.9,\\"risk_flags\\":[]}"}}]}'
+            ),
+        )
+        transport = _RecordingTransport(response=response)
+        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        request = ChatCompletionRequest(
+            model="gpt-5.2-chat-latest",
+            messages=[ChatMessage(role="user", content="hello")],
+            temperature=0.0,
+            max_tokens=128,
+            metadata={"conversation_id": "c-1", "event_id": "evt-1"},
+        )
+        client.chat_completion(request, safe_mode=False, automation_enabled=True)
+
+        self.assertIsNotNone(transport.last_request)
+        payload = json.loads(transport.last_request.body.decode("utf-8"))
+        self.assertIn("max_completion_tokens", payload)
+        self.assertNotIn("max_tokens", payload)
+        self.assertNotIn("temperature", payload)
+        self.assertNotIn("metadata", payload)
+
+    def test_gpt5_payload_allows_nonzero_temperature(self) -> None:
+        response = TransportResponse(
+            status_code=200,
+            headers={"content-type": "application/json"},
+            body=(
+                b'{"choices":[{"message":{"content":"{\\"body\\":\\"ok\\",\\"confidence\\":0.9,\\"risk_flags\\":[]}"}}]}'
+            ),
+        )
+        transport = _RecordingTransport(response=response)
+        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        request = ChatCompletionRequest(
+            model="gpt-5.2-chat-latest",
+            messages=[ChatMessage(role="user", content="hello")],
+            temperature=0.7,
+            max_tokens=64,
+        )
+        client.chat_completion(request, safe_mode=False, automation_enabled=True)
+
+        self.assertIsNotNone(transport.last_request)
+        payload = json.loads(transport.last_request.body.decode("utf-8"))
+        self.assertEqual(payload.get("temperature"), 0.7)
+
+    def test_non_gpt5_payload_uses_max_tokens_and_metadata(self) -> None:
+        response = TransportResponse(
+            status_code=200,
+            headers={"content-type": "application/json"},
+            body=(
+                b'{"choices":[{"message":{"content":"{\\"body\\":\\"ok\\",\\"confidence\\":0.9,\\"risk_flags\\":[]}"}}]}'
+            ),
+        )
+        transport = _RecordingTransport(response=response)
+        client = OpenAIClient(api_key="test-key", allow_network=True, transport=transport)
+        request = ChatCompletionRequest(
+            model="gpt-4o-mini",
+            messages=[ChatMessage(role="user", content="hello")],
+            temperature=0.2,
+            max_tokens=64,
+            metadata={"conversation_id": "c-2", "event_id": "evt-2"},
+        )
+        client.chat_completion(request, safe_mode=False, automation_enabled=True)
+
+        self.assertIsNotNone(transport.last_request)
+        payload = json.loads(transport.last_request.body.decode("utf-8"))
+        self.assertIn("max_tokens", payload)
+        self.assertNotIn("max_completion_tokens", payload)
+        self.assertEqual(payload.get("temperature"), 0.2)
+        self.assertIn("metadata", payload)
+
+    def test_max_tokens_must_be_positive(self) -> None:
+        request = ChatCompletionRequest(
+            model="gpt-5.2-chat-latest",
+            messages=[ChatMessage(role="user", content="hello")],
+            max_tokens=0,
+        )
+        with self.assertRaises(ValueError):
+            request.to_payload()
 
 
 def main() -> int:

@@ -247,6 +247,46 @@ class PrimaryFlagOnTests(unittest.TestCase):
         self.assertEqual(artifact.primary_source, "deterministic")
 
 
+class ResponseIdReasonTests(unittest.TestCase):
+    class _RawlessClient:
+        def __init__(self):
+            self.calls = 0
+
+        def chat_completion(self, request, *, safe_mode, automation_enabled):
+            self.calls += 1
+            return ChatCompletionResponse(
+                model=request.model,
+                message=json.dumps(
+                    {
+                        "intent": "order_status_tracking",
+                        "department": "Email Support Team",
+                        "confidence": 0.9,
+                    }
+                ),
+                status_code=200,
+                url="test",
+                raw={},
+                dry_run=False,
+            )
+
+    def test_response_id_reason_when_raw_empty(self):
+        client = self._RawlessClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.calls, 1)
+        self.assertEqual(
+            suggestion.response_id_unavailable_reason, "response_id_missing"
+        )
+
+
 class SuggestionTests(unittest.TestCase):
     def test_is_valid_with_valid_data(self):
         s = LLMRoutingSuggestion(
@@ -298,6 +338,7 @@ def main():
     suite.addTests(loader.loadTestsFromTestCase(ArtifactTests))
     suite.addTests(loader.loadTestsFromTestCase(PrimaryFlagTests))
     suite.addTests(loader.loadTestsFromTestCase(PrimaryFlagOnTests))
+    suite.addTests(loader.loadTestsFromTestCase(ResponseIdReasonTests))
     suite.addTests(loader.loadTestsFromTestCase(SuggestionTests))
     suite.addTests(loader.loadTestsFromTestCase(ThresholdTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)

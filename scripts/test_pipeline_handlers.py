@@ -32,6 +32,9 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     plan_actions,
     build_no_tracking_reply,
 )
+from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
+    ReplyRewriteResult,
+)
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 from lambda_handlers.worker import handler as worker  # noqa: E402
@@ -607,6 +610,49 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertGreaterEqual(len(executor.calls), 2)
         add_tag_calls = [c for c in executor.calls if "/add-tags" in c["path"]]
         self.assertEqual(add_tag_calls, [])
+
+    def test_outbound_exception_includes_openai_rewrite(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+
+        class _ExceptionExecutor(_RecordingExecutor):
+            def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+                if method.upper() == "PUT" and path.startswith("/v1/tickets/"):
+                    raise TransportError("simulated write failure")
+                return super().execute(method, path, **kwargs)
+
+        executor = _ExceptionExecutor(ticket_status="open")
+        rewrite_result = ReplyRewriteResult(
+            body="rewritten",
+            rewritten=False,
+            reason="dry_run",
+            model="gpt-5.2-chat-latest",
+            confidence=0.0,
+            dry_run=True,
+            fingerprint="fp",
+            llm_called=True,
+            response_id=None,
+            response_id_unavailable_reason="dry_run",
+            error_class="OpenAIDryRun",
+        )
+
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.rewrite_reply",
+            return_value=rewrite_result,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "exception")
+        self.assertIn("openai_rewrite", result)
+        self.assertTrue(result["openai_rewrite"]["rewrite_attempted"])
 
     def test_outbound_reply_dry_run_does_not_send(self) -> None:
         envelope, plan = self._build_order_status_plan()
