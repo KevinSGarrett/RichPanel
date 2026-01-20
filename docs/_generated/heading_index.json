@@ -5011,6 +5011,10 @@
     {
       "path": "08_Engineering/OpenAI_Model_Plan.md",
       "anchor": "change-control"
+    },
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "change-control"
     }
   ],
   "attachments playbook": [
@@ -12985,6 +12989,280 @@
       "anchor": "see-also"
     }
   ],
+  "order status openai contract": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "order-status-openai-contract"
+    }
+  ],
+  "executive summary": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "executive-summary"
+    }
+  ],
+  "flow diagram": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "flow-diagram"
+    }
+  ],
+  "code map": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "code-map"
+    }
+  ],
+  "1. openai routing (intent classification)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "1-openai-routing-intent-classification"
+    }
+  ],
+  "2. openai reply rewrite (unique message generation)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "2-openai-reply-rewrite-unique-message-generation"
+    }
+  ],
+  "3. pipeline orchestration": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "3-pipeline-orchestration"
+    }
+  ],
+  "configuration map": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "configuration-map"
+    }
+  ],
+  "environment variables": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "environment-variables"
+    }
+  ],
+  "aws secrets manager": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "aws-secrets-manager"
+    }
+  ],
+  "pii policy": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "pii-policy"
+    }
+  ],
+  "routing (intent classification)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "routing-intent-classification"
+    }
+  ],
+  "reply rewrite (unique message generation)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "reply-rewrite-unique-message-generation"
+    }
+  ],
+  "production-read-only shadow mode": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "production-read-only-shadow-mode"
+    }
+  ],
+  "shadow mode behavior": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "shadow-mode-behavior"
+    }
+  ],
+  "proof requirements": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "proof-requirements"
+    }
+  ],
+  "order status proof must show openai usage": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "order-status-proof-must-show-openai-usage"
+    }
+  ],
+  "required evidence in proof json": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "required-evidence-in-proof-json"
+    }
+  ],
+  "validation harness": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "validation-harness"
+    }
+  ],
+  "openai usage compliance": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "openai-usage-compliance"
+    }
+  ],
+  "model evolution": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "model-evolution"
+    }
+  ],
+  "cost management": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "cost-management"
+    }
+  ],
+  "rate limiting": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "rate-limiting"
+    }
+  ],
+  "monitoring & observability": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "monitoring-observability"
+    }
+  ],
+  "cloudwatch metrics (proposed)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "cloudwatch-metrics-proposed"
+    }
+  ],
+  "cloudwatch logs": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "cloudwatch-logs"
+    }
+  ],
+  "incident response": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "incident-response"
+    }
+  ],
+  "scenario: openai outage": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "scenario-openai-outage"
+    }
+  ],
+  "scenario: pii leak": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "scenario-pii-leak"
+    }
+  ],
+  "scenario: cost spike": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "scenario-cost-spike"
+    }
+  ],
+  "adding new openai calls": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "adding-new-openai-calls"
+    }
+  ],
+  "changing openai models": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "changing-openai-models"
+    }
+  ],
+  "disabling openai (emergency)": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "disabling-openai-emergency"
+    }
+  ],
+  "related documentation": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "related-documentation"
+    },
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "related-documentation"
+    },
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "related-documentation"
+    },
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "related-documentation"
+    }
+  ],
+  "revision history": [
+    {
+      "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+      "anchor": "revision-history"
+    },
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "revision-history"
+    }
+  ],
+  "pr review checklist": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "pr-review-checklist"
+    }
+  ],
+  "required labels": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "required-labels"
+    }
+  ],
+  "required reviews": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "required-reviews"
+    }
+  ],
+  "required ci checks": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "required-ci-checks"
+    }
+  ],
+  "order status changes (special requirements)": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "order-status-changes-special-requirements"
+    }
+  ],
+  "evidence artifacts": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "evidence-artifacts"
+    }
+  ],
+  "final checks": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "final-checks"
+    }
+  ],
+  "merge policy": [
+    {
+      "path": "08_Engineering/PR_Review_Checklist.md",
+      "anchor": "merge-policy"
+    }
+  ],
   "production read-only shadow mode runbook": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
@@ -13253,16 +13531,6 @@
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
       "anchor": "after-disabling"
-    }
-  ],
-  "related documentation": [
-    {
-      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "related-documentation"
-    },
-    {
-      "path": "08_Engineering/Secrets_and_Environments.md",
-      "anchor": "related-documentation"
     }
   ],
   "checklist: production shadow mode validation (complete workflow)": [
