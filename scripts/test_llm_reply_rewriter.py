@@ -23,7 +23,10 @@ from richpanel_middleware.integrations.openai import (  # noqa: E402
 
 class _FakeClient:
     def __init__(
-        self, *, response: ChatCompletionResponse, raise_error: bool = False
+        self,
+        *,
+        response: ChatCompletionResponse | None,
+        raise_error: bool = False,
     ) -> None:
         self.response = response
         self.raise_error = raise_error
@@ -37,7 +40,7 @@ class _FakeClient:
 
 
 def _fake_client(
-    *, response: ChatCompletionResponse, raise_error: bool = False
+    *, response: ChatCompletionResponse | None, raise_error: bool = False
 ) -> _FakeClient:
     return _FakeClient(response=response, raise_error=raise_error)
 
@@ -173,6 +176,31 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "invalid_json")
 
+    def test_parse_response_extracts_embedded_json(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='Here is JSON: {"body": "cleaned", "confidence": 0.9, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-embed",
+            event_id="evt-embed",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.body, "cleaned")
+        self.assertEqual(result.reason, "applied")
+
     def test_fallback_on_low_confidence_preserves_original(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
@@ -197,6 +225,24 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertFalse(result.rewritten)
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "low_confidence")
+
+    def test_no_response_returns_fallback(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        client = _fake_client(response=None)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-none",
+            event_id="evt-none",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.reason, "no_response")
 
     def test_logs_do_not_include_body(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"

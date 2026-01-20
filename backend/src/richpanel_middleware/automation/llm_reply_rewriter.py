@@ -288,7 +288,7 @@ def rewrite_reply(
             request, safe_mode=safe_mode, automation_enabled=automation_enabled
         )
     except OpenAIRequestError as exc:
-        error_response = exc.response
+        error_response: Optional[ChatCompletionResponse] = exc.response
         response_id, response_id_reason = _response_id_info(error_response)
         LOGGER.warning(
             "reply_rewrite.request_failed",

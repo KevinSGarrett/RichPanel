@@ -1,7 +1,7 @@
 {
   "meta": {
     "run_id": "RUN_20260120_2350Z",
-    "timestamp": "2026-01-20T16:19:29.666860+00:00",
+    "timestamp": "2026-01-20T16:51:51.235386+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status_tracking",
@@ -9,7 +9,7 @@
   },
   "inputs": {
     "ticket_ref": null,
-    "ticket_ref_fingerprint": "337b02741a95",
+    "ticket_ref_fingerprint": "bcce03f625c2",
     "apply_test_tag": false,
     "test_tag_value": null,
     "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number <redacted> --run-id RUN_20260120_2350Z --scenario order_status_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_tracking_proof.json"
@@ -17,9 +17,9 @@
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id_fingerprint": "d6d26c8127ab",
+    "event_id_fingerprint": "f160eb12789f",
     "conversation_id": null,
-    "conversation_id_fingerprint": "7c6b2bdc707f",
+    "conversation_id_fingerprint": "bce603915fc2",
     "accepted": true
   },
   "dynamo": {
@@ -50,7 +50,7 @@
         "intent": "order_status_tracking"
       },
       "action_count": 2,
-      "updated_at": "2026-01-20T16:19:11.430068+00:00"
+      "updated_at": "2026-01-20T16:51:38.030641+00:00"
     },
     "audit_record": {
       "routing": {
@@ -62,16 +62,16 @@
         "reason": "matched order status keyword",
         "intent": "order_status_tracking"
       },
-      "recorded_at": "2026-01-20T16:19:11.430068+00:00",
-      "ts_action_fingerprint": "2026-01-20T16:19:11.430068+00:00#fingerprint:d6d26c8127ab"
+      "recorded_at": "2026-01-20T16:51:38.030641+00:00",
+      "ts_action_fingerprint": "2026-01-20T16:51:38.030641+00:00#fingerprint:f160eb12789f"
     }
   },
   "openai": {
     "routing": {
       "llm_called": true,
       "model": "gpt-5.2-chat-latest",
-      "confidence": 0.94,
-      "response_id": "chatcmpl-D08jdCTU3lxBD0X9xEImygKt2hcr2",
+      "confidence": 0.95,
+      "response_id": "chatcmpl-D09F1lRQon8ESnDyOtztnlB2OQPzy",
       "response_id_unavailable_reason": null,
       "final_intent": "order_status_tracking",
       "primary_source": "deterministic",
@@ -79,13 +79,13 @@
     },
     "rewrite": {
       "rewrite_attempted": true,
-      "rewrite_applied": false,
+      "rewrite_applied": true,
       "model": "gpt-5.2-chat-latest",
-      "response_id": "chatcmpl-D08jh28mQQ4olqGZM3pmqswbExP0z",
+      "response_id": "chatcmpl-D09F5mqoUfoM3JKuDpm6kquJcsGtw",
       "response_id_unavailable_reason": null,
-      "fallback_used": true,
-      "reason": "dry_run",
-      "error_class": "OpenAIDryRun"
+      "fallback_used": false,
+      "reason": "applied",
+      "error_class": null
     }
   },
   "richpanel": {
@@ -93,12 +93,12 @@
       "status": "OPEN",
       "state": null,
       "tags": [],
-      "updated_at": "2026-01-20T15:59:11.406Z",
+      "updated_at": "2026-01-20T15:59:13.641Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "7c6b2bdc707f",
+      "ticket_id_fingerprint": "bce603915fc2",
       "endpoint_variant": "number",
       "path_redacted": "/v1/tickets/number/<redacted>"
     },
@@ -113,12 +113,12 @@
         "mw-order-status-answered:RUN_20260120_2350Z",
         "mw-reply-sent"
       ],
-      "updated_at": "2026-01-20T16:19:23.818Z",
+      "updated_at": "2026-01-20T16:51:47.413Z",
       "message_count": null,
       "last_message_source": null,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "7c6b2bdc707f",
+      "ticket_id_fingerprint": "bce603915fc2",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
@@ -132,7 +132,7 @@
     ],
     "tags_removed": [],
     "skip_tags_added": [],
-    "updated_at_delta_seconds": 1212.412,
+    "updated_at_delta_seconds": 3153.772,
     "status_before": "open",
     "status_after": "closed",
     "status_changed": true,

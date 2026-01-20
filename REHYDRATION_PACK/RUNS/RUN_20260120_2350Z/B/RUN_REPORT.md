@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-20
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b48-openai-proof-evidence`
-- **PR:** not created (local branch only)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/129
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -18,6 +18,8 @@
 - Captured response_id + call metadata in `llm_routing` and `llm_reply_rewriter`.
 - Persisted rewrite evidence to worker state/audit records for proof consumption.
 - Updated smoke encoding tests and runbook guidance.
+- Fixed OpenAI rewrite evidence propagation on outbound exceptions in `pipeline.py`.
+- Added tests for GPT-5 payload shaping, rewrite parsing, worker evidence recording, and proof waits.
 
 ## Diffstat
 - Diffstat not captured in this run; use `git diff --stat` for details.
@@ -37,11 +39,14 @@
 - `python scripts/test_openai_client.py`
 - `python scripts/test_llm_reply_rewriter.py`
 - `python scripts/test_llm_routing.py`
+- `python scripts/test_pipeline_handlers.py`
+- `python scripts/test_worker_handler_flag_wiring.py`
 
 ### CI
 - `python scripts/run_ci_checks.py --ci` (see TEST_MATRIX)
 
 ### Deployments
+- `npm run build` (infra/cdk)
 - `npx cdk deploy RichpanelMiddleware-dev --require-approval never -c env=dev --profile rp-admin-kevin`
 
 ### Dev E2E proofs (failed: skip tags present)
@@ -57,8 +62,8 @@
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1067 --confirm-test-ticket --diagnose-ticket-update --run-id RUN_20260120_2350Z --scenario order_status_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_tracking_proof.json`
 
 ### Dev E2E proofs (PASS_STRONG)
-- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1075 --run-id RUN_20260120_2350Z --scenario order_status_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_tracking_proof.json`
-- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1076 --run-id RUN_20260120_2350Z --scenario order_status_no_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_no_tracking_proof.json`
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1077 --run-id RUN_20260120_2350Z --scenario order_status_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_tracking_proof.json`
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1078 --run-id RUN_20260120_2350Z --scenario order_status_no_tracking --proof-path REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_no_tracking_proof.json`
 
 ## Tests / Proof
 - `REHYDRATION_PACK/RUNS/RUN_20260120_2350Z/B/e2e_order_status_tracking_proof.json`

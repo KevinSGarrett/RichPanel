@@ -1001,7 +1001,10 @@ def execute_order_status_reply(
                 "conversation_id": envelope.conversation_id,
             },
         )
-        return {"sent": False, "reason": "exception"}
+        result = {"sent": False, "reason": "exception"}
+        if openai_rewrite is not None:
+            result["openai_rewrite"] = openai_rewrite
+        return result
 
 
 def _routing_tags_block_reason(

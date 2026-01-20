@@ -199,6 +199,34 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
             outbound_enabled=False,
         )
 
+    def test_record_openai_rewrite_evidence_updates_tables(self) -> None:
+        envelope = SimpleNamespace(
+            event_id="evt-9",
+            conversation_id="conv-9",
+        )
+        execution = SimpleNamespace(
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"}
+        )
+        outbound_result = {
+            "openai_rewrite": {
+                "rewrite_attempted": True,
+                "rewrite_applied": False,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": None,
+                "response_id_unavailable_reason": "dry_run",
+                "fallback_used": True,
+                "reason": "dry_run",
+                "error_class": "OpenAIDryRun",
+            }
+        }
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_openai_rewrite_evidence(
+                envelope, execution, outbound_result=outbound_result
+            )
+
+        self.assertGreaterEqual(table.update_item.call_count, 2)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()  # pragma: no cover

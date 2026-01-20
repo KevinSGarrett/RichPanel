@@ -48,6 +48,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _sanitize_response_metadata,
     _sanitize_ts_action_id,
     _wait_for_ticket_ready,
+    wait_for_openai_rewrite_state_record,
+    wait_for_openai_rewrite_audit_record,
 )
 
 
@@ -767,6 +769,52 @@ class WaitForTicketReadyTests(unittest.TestCase):
             )
 
         self.assertIsNone(result)
+
+
+class OpenAIRewriteWaitTests(unittest.TestCase):
+    def test_wait_for_openai_rewrite_state_record(self) -> None:
+        table = MagicMock()
+        table.get_item.return_value = {
+            "Item": {"openai_rewrite": {"rewrite_attempted": True}}
+        }
+        ddb = MagicMock()
+        ddb.Table.return_value = table
+
+        with patch("dev_e2e_smoke.time.sleep"):
+            item = wait_for_openai_rewrite_state_record(
+                ddb,
+                table_name="state-table",
+                conversation_id="conv-1",
+                timeout_seconds=1,
+                poll_interval=0,
+            )
+        self.assertIn("openai_rewrite", item)
+        self.assertTrue(item["openai_rewrite"]["rewrite_attempted"])
+
+    def test_wait_for_openai_rewrite_audit_record(self) -> None:
+        table = MagicMock()
+        table.query.return_value = {
+            "Items": [
+                {
+                    "event_id": "evt-1",
+                    "openai_rewrite": {"rewrite_attempted": True},
+                }
+            ]
+        }
+        ddb = MagicMock()
+        ddb.Table.return_value = table
+
+        with patch("dev_e2e_smoke.time.sleep"):
+            item = wait_for_openai_rewrite_audit_record(
+                ddb,
+                table_name="audit-table",
+                conversation_id="conv-1",
+                event_id="evt-1",
+                timeout_seconds=1,
+                poll_interval=0,
+            )
+        self.assertIn("openai_rewrite", item)
+        self.assertTrue(item["openai_rewrite"]["rewrite_attempted"])
 
 
 class FallbackCloseTests(unittest.TestCase):
