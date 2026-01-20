@@ -59,7 +59,8 @@ def _response_id_info(
 ) -> Tuple[Optional[str], Optional[str]]:
     if response is None:
         return None, "no_response"
-    raw = response.raw if isinstance(response.raw, dict) else {}
+    has_raw = isinstance(response.raw, dict)
+    raw = response.raw if has_raw else {}
     response_id = None
     if raw:
         response_id = raw.get("id") or raw.get("response_id")
@@ -67,7 +68,7 @@ def _response_id_info(
         return str(response_id), None
     if response.dry_run and response.reason:
         return None, response.reason
-    return None, "response_id_missing" if raw else "raw_missing"
+    return None, "response_id_missing" if has_raw else "raw_missing"
 
 
 def _gating_reason(

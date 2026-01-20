@@ -201,6 +201,30 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.body, "cleaned")
         self.assertEqual(result.reason, "applied")
 
+    def test_response_id_reason_set_when_raw_empty(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten", "confidence": 0.9, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+            raw={},
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-raw",
+            event_id="evt-raw",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertEqual(result.response_id_unavailable_reason, "response_id_missing")
+
     def test_fallback_on_low_confidence_preserves_original(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
