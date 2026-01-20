@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-19
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `agent-c/b46-prod-readonly-shadow-eval`
-- **PR:** none (not created)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/128
 - **PR merge strategy:** merge commit (required)
 - **Risk label:** risk:R2 (safety/production)
 - **gate:claude label:** intended (pending PR)
@@ -87,6 +87,14 @@ HTTP trace written to C:\RichPanel_GIT\artifacts\prod_readonly_shadow_eval_http_
 
 Copy-Item -Force artifacts\readonly_shadow\20260120T044002Z_26807bb6042a.json REHYDRATION_PACK\RUNS\B46_AGENT_C\EVIDENCE\readonly_shadow\20260120T044002Z_26807bb6042a.json
 Copy-Item -Force artifacts\prod_readonly_shadow_eval_http_trace.json REHYDRATION_PACK\RUNS\B46_AGENT_C\EVIDENCE\prod_readonly_shadow_eval_http_trace.json
+
+gh pr create --title "B46: Production read-only shadow evaluation (fail-closed)" --body <filled>
+# output:
+https://github.com/KevinSGarrett/RichPanel/pull/128
+
+gh pr edit 128 --add-label "risk:R2" --add-label "gate:claude"
+# output:
+labels applied
 ```
 
 ## Tests / Proof
