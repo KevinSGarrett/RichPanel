@@ -34,6 +34,9 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
+    _extract_openai_routing_evidence,
+    _extract_openai_rewrite_evidence,
+    _evaluate_openai_requirements,
     append_summary,
     _redact_command,
     _iso_business_days_before,
@@ -451,6 +454,10 @@ class PIISafetyTests(unittest.TestCase):
         payload = '{"command":"python scripts/dev_e2e_smoke.py --ticket-number 1040"}'
         self.assertIsNotNone(_check_pii_safe(payload))
 
+    def test_pii_scan_allows_openai_response_id(self) -> None:
+        payload = '{"openai":{"routing":{"response_id":"resp_abc123"}}}'
+        self.assertIsNone(_check_pii_safe(payload))
+
     def test_redact_command_masks_sensitive_flags(self) -> None:
         cmd = _redact_command(
             [
@@ -593,6 +600,116 @@ class SummaryAppendTests(unittest.TestCase):
             self.assertIn("CloudWatch alarms: `alarm-one`, `alarm-two`", content)
             self.assertIn("Draft replies (safe fields)", content)
             self.assertIn("audit-table", content)
+
+
+class OpenAIEvidenceTests(unittest.TestCase):
+    def test_openai_routing_evidence_maps_response_id(self) -> None:
+        state_item = {
+            "routing_artifact": {
+                "primary_source": "deterministic",
+                "llm_suggestion": {
+                    "llm_called": True,
+                    "model": "gpt-5.2-chat-latest",
+                    "confidence": 0.91,
+                    "response_id": "resp_123",
+                },
+            }
+        }
+        evidence = _extract_openai_routing_evidence(
+            state_item, {}, routing_intent="order_status_tracking"
+        )
+        self.assertTrue(evidence["llm_called"])
+        self.assertEqual(evidence["model"], "gpt-5.2-chat-latest")
+        self.assertEqual(evidence["response_id"], "resp_123")
+        self.assertEqual(evidence["final_intent"], "order_status_tracking")
+
+    def test_openai_routing_evidence_missing_response_id(self) -> None:
+        state_item = {
+            "routing_artifact": {
+                "llm_suggestion": {
+                    "llm_called": True,
+                    "model": "gpt-5.2-chat-latest",
+                    "confidence": 0.42,
+                }
+            }
+        }
+        evidence = _extract_openai_routing_evidence(
+            state_item, {}, routing_intent="order_status_tracking"
+        )
+        self.assertIsNone(evidence["response_id"])
+        self.assertEqual(evidence["response_id_unavailable_reason"], "response_id_missing")
+
+    def test_openai_rewrite_evidence_disabled(self) -> None:
+        state_item = {
+            "openai_rewrite": {
+                "rewrite_attempted": False,
+                "rewrite_applied": False,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": None,
+                "response_id_unavailable_reason": "rewrite_disabled",
+                "fallback_used": False,
+                "reason": "rewrite_disabled",
+                "error_class": None,
+            }
+        }
+        evidence = _extract_openai_rewrite_evidence(state_item, {})
+        self.assertFalse(evidence["rewrite_attempted"])
+        self.assertEqual(evidence["reason"], "disabled")
+
+    def test_openai_requirements_fail_when_missing(self) -> None:
+        routing = {"llm_called": False}
+        rewrite = {"rewrite_attempted": False, "rewrite_applied": False}
+        result = _evaluate_openai_requirements(
+            routing,
+            rewrite,
+            require_routing=True,
+            require_rewrite=True,
+        )
+        self.assertFalse(result["openai_routing_called"])
+        self.assertFalse(result["openai_rewrite_attempted"])
+        self.assertFalse(result["openai_rewrite_applied"])
+
+    def test_openai_evidence_contains_required_fields(self) -> None:
+        state_item = {
+            "routing_artifact": {
+                "llm_suggestion": {
+                    "llm_called": True,
+                    "model": "gpt-5.2-chat-latest",
+                    "confidence": 0.88,
+                    "response_id": "resp_abc",
+                }
+            },
+            "openai_rewrite": {
+                "rewrite_attempted": True,
+                "rewrite_applied": True,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": "resp_xyz",
+                "response_id_unavailable_reason": None,
+                "fallback_used": False,
+                "reason": "applied",
+                "error_class": None,
+            },
+        }
+        routing = _extract_openai_routing_evidence(
+            state_item, {}, routing_intent="order_status_tracking"
+        )
+        rewrite = _extract_openai_rewrite_evidence(state_item, {})
+        for key in (
+            "llm_called",
+            "model",
+            "confidence",
+            "response_id",
+            "final_intent",
+        ):
+            self.assertIn(key, routing)
+        for key in (
+            "rewrite_attempted",
+            "rewrite_applied",
+            "model",
+            "response_id",
+            "fallback_used",
+        ):
+            self.assertIn(key, rewrite)
 
 
 class WaitForTicketReadyTests(unittest.TestCase):
@@ -895,6 +1012,7 @@ def main() -> int:
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
     suite.addTests(loader.loadTestsFromTestCase(CriteriaTests))
+    suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

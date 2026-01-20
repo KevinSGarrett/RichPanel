@@ -6,7 +6,7 @@ import logging
 import urllib.parse
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
@@ -560,6 +560,65 @@ def _find_order_status_action(plan: ActionPlan) -> Optional[Dict[str, Any]]:
     return None
 
 
+_REWRITE_REASON_ERROR_CLASS = {
+    "request_failed": "OpenAIRequestError",
+    "invalid_json": "OpenAIResponseParseError",
+    "not_a_dict": "OpenAIResponseParseError",
+    "missing_body": "OpenAIResponseParseError",
+    "low_confidence": "OpenAILowConfidence",
+    "risk_flagged": "OpenAIRiskFlagged",
+    "dry_run": "OpenAIDryRun",
+}
+
+
+def _rewrite_error_class(
+    reason: Optional[str], error_class: Optional[str]
+) -> Optional[str]:
+    if error_class:
+        return error_class
+    if not reason:
+        return None
+    return _REWRITE_REASON_ERROR_CLASS.get(reason)
+
+
+def _build_openai_rewrite_evidence(
+    rewrite_result: Optional[ReplyRewriteResult],
+    *,
+    reason: Optional[str] = None,
+    error_class: Optional[str] = None,
+) -> Dict[str, Any]:
+    if rewrite_result:
+        rewrite_attempted = bool(rewrite_result.llm_called)
+        rewrite_applied = bool(rewrite_result.rewritten)
+        fallback_used = rewrite_attempted and not rewrite_applied
+        rewrite_reason = reason or rewrite_result.reason
+        final_error_class = (
+            _rewrite_error_class(rewrite_reason, rewrite_result.error_class)
+            if fallback_used
+            else None
+        )
+        return {
+            "rewrite_attempted": rewrite_attempted,
+            "rewrite_applied": rewrite_applied,
+            "model": rewrite_result.model,
+            "response_id": rewrite_result.response_id,
+            "response_id_unavailable_reason": rewrite_result.response_id_unavailable_reason,
+            "fallback_used": fallback_used,
+            "reason": rewrite_reason,
+            "error_class": final_error_class,
+        }
+    return {
+        "rewrite_attempted": False,
+        "rewrite_applied": False,
+        "model": None,
+        "response_id": None,
+        "response_id_unavailable_reason": reason or "not_attempted",
+        "fallback_used": False,
+        "reason": reason or "not_attempted",
+        "error_class": _rewrite_error_class(reason, error_class),
+    }
+
+
 def _outbound_block_reason(
     *,
     outbound_enabled: bool,
@@ -629,6 +688,7 @@ def execute_order_status_reply(
     )
 
     responses: List[Dict[str, Any]] = []
+    openai_rewrite: Optional[Dict[str, Any]] = None
     try:
         # URL-encode conversation_id for write operations (email IDs have special chars)
         target_id = _resolve_target_ticket_id(
@@ -744,7 +804,19 @@ def execute_order_status_reply(
             )
             if rewrite_result.rewritten and rewrite_result.body:
                 reply_body = rewrite_result.body
-        except Exception:
+            openai_rewrite = _build_openai_rewrite_evidence(rewrite_result)
+        except Exception as exc:
+            error_class = exc.__class__.__name__
+            openai_rewrite = {
+                "rewrite_attempted": True,
+                "rewrite_applied": False,
+                "model": None,
+                "response_id": None,
+                "response_id_unavailable_reason": "exception",
+                "fallback_used": True,
+                "reason": "exception",
+                "error_class": error_class,
+            }
             LOGGER.exception(
                 "automation.order_status_reply.rewrite_failed",
                 extra={
@@ -764,12 +836,16 @@ def execute_order_status_reply(
                     "model": rewrite_result.model,
                     "risk_flags": rewrite_result.risk_flags,
                     "fingerprint": rewrite_result.fingerprint,
+                    "llm_called": rewrite_result.llm_called,
+                    "response_id": rewrite_result.response_id,
+                    "response_id_unavailable_reason": rewrite_result.response_id_unavailable_reason,
+                    "error_class": rewrite_result.error_class,
                 }
             )
 
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         # Try minimal working payloads first (state-only), then add status/comment variants.
-        update_candidates = [
+        update_candidates: List[Tuple[str, Dict[str, Any]]] = [
             ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload}}),
             ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload}}),
             ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload}}),
@@ -790,9 +866,9 @@ def execute_order_status_reply(
             ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload}),
         ]
 
-        def _strip_comment(payload: Dict[str, Any]) -> Dict[str, Any]:
+        def _strip_comment(payload: Any) -> Dict[str, Any]:
             if not isinstance(payload, dict):
-                return payload
+                return {}
             sanitized = dict(payload)
             if "comment" in sanitized:
                 sanitized.pop("comment", None)
@@ -803,7 +879,7 @@ def execute_order_status_reply(
                 sanitized["ticket"] = ticket_payload
             return sanitized
 
-        def _payload_has_comment(payload: Dict[str, Any]) -> bool:
+        def _payload_has_comment(payload: Any) -> bool:
             if not isinstance(payload, dict):
                 return False
             if payload.get("comment"):
@@ -814,9 +890,10 @@ def execute_order_status_reply(
         update_success = None
         comment_sent = False
         for candidate_name, payload in update_candidates:
-            payload_to_send = payload
+            payload_dict = cast(Dict[str, Any], payload)
+            payload_to_send: Dict[str, Any] = payload_dict
             if comment_sent:
-                payload_to_send = _strip_comment(payload)
+                payload_to_send = _strip_comment(payload_dict)
             reply_response = executor.execute(
                 "PUT",
                 f"/v1/tickets/{encoded_id}",
@@ -866,11 +943,14 @@ def execute_order_status_reply(
                 break
 
         if update_success is None:
-            return {
+            result = {
                 "sent": False,
                 "reason": "reply_update_failed",
                 "responses": responses,
             }
+            if openai_rewrite is not None:
+                result["openai_rewrite"] = openai_rewrite
+            return result
 
         tags_to_apply = sorted(
             dedupe_tags(
@@ -909,7 +989,10 @@ def execute_order_status_reply(
                 "update_candidate": update_success,
             },
         )
-        return {"sent": True, "reason": "sent", "responses": responses}
+        result = {"sent": True, "reason": "sent", "responses": responses}
+        if openai_rewrite is not None:
+            result["openai_rewrite"] = openai_rewrite
+        return result
     except (RichpanelRequestError, SecretLoadError, TransportError):
         LOGGER.exception(
             "automation.order_status_reply.failed",

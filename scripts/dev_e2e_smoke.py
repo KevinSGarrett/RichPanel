@@ -732,6 +732,10 @@ def _fetch_ticket_snapshot(
             "path": path,
         }
 
+    raise SmokeFailure(
+        "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
+    )
+
 
 def _wait_for_ticket_ready(
     executor: RichpanelExecutor,
@@ -756,10 +760,6 @@ def _wait_for_ticket_ready(
             return snap
         time.sleep(poll_interval)
     return None
-
-    raise SmokeFailure(
-        "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
-    )
 
 
 def _apply_test_tag(
@@ -1154,6 +1154,32 @@ def parse_args() -> argparse.Namespace:
         default="baseline",
         help="Scenario to run (default: baseline).",
     )
+    parser.add_argument(
+        "--require-openai-routing",
+        dest="require_openai_routing",
+        action="store_true",
+        help="Require OpenAI routing evidence in proof output.",
+    )
+    parser.add_argument(
+        "--no-require-openai-routing",
+        dest="require_openai_routing",
+        action="store_false",
+        help="Disable OpenAI routing requirement.",
+    )
+    parser.set_defaults(require_openai_routing=None)
+    parser.add_argument(
+        "--require-openai-rewrite",
+        dest="require_openai_rewrite",
+        action="store_true",
+        help="Require OpenAI rewrite evidence in proof output.",
+    )
+    parser.add_argument(
+        "--no-require-openai-rewrite",
+        dest="require_openai_rewrite",
+        action="store_false",
+        help="Disable OpenAI rewrite requirement.",
+    )
+    parser.set_defaults(require_openai_rewrite=None)
     parser.add_argument(
         "--apply-test-tag",
         action="store_true",
@@ -1607,6 +1633,142 @@ def sanitize_draft_replies(replies: List[Dict[str, Any]]) -> List[Dict[str, Any]
     return sanitized
 
 
+def _extract_routing_artifact(
+    state_item: Dict[str, Any], audit_item: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    for record in (state_item, audit_item):
+        if isinstance(record, dict):
+            artifact = record.get("routing_artifact")
+            if isinstance(artifact, dict):
+                return artifact
+    return None
+
+
+def _extract_openai_routing_evidence(
+    state_item: Dict[str, Any],
+    audit_item: Dict[str, Any],
+    *,
+    routing_intent: Optional[str],
+) -> Dict[str, Any]:
+    artifact = _extract_routing_artifact(state_item, audit_item)
+    if not artifact:
+        return {
+            "llm_called": False,
+            "model": None,
+            "confidence": None,
+            "response_id": None,
+            "response_id_unavailable_reason": "routing_artifact_missing",
+            "final_intent": routing_intent,
+        }
+
+    llm = artifact.get("llm_suggestion")
+    llm_suggestion = llm if isinstance(llm, dict) else {}
+    llm_called = bool(llm_suggestion.get("llm_called"))
+    if "llm_called" not in llm_suggestion and llm_suggestion:
+        llm_called = not bool(llm_suggestion.get("dry_run")) and not bool(
+            llm_suggestion.get("gated_reason")
+        )
+
+    response_id = llm_suggestion.get("response_id")
+    response_id_reason = llm_suggestion.get("response_id_unavailable_reason")
+    if llm_called and not response_id and not response_id_reason:
+        response_id_reason = "response_id_missing"
+
+    model = (
+        llm_suggestion.get("model")
+        or os.environ.get("OPENAI_MODEL")
+        or "gpt-5.2-chat-latest"
+    )
+    confidence = llm_suggestion.get("confidence")
+    if isinstance(confidence, (int, float, Decimal)):
+        confidence = float(confidence)
+    else:
+        confidence = None
+
+    return {
+        "llm_called": llm_called,
+        "model": model,
+        "confidence": confidence,
+        "response_id": response_id,
+        "response_id_unavailable_reason": response_id_reason,
+        "final_intent": routing_intent,
+        "primary_source": artifact.get("primary_source"),
+        "gated_reason": llm_suggestion.get("gated_reason"),
+    }
+
+
+def _extract_openai_rewrite_evidence(
+    state_item: Dict[str, Any], audit_item: Dict[str, Any]
+) -> Dict[str, Any]:
+    record = None
+    for item in (state_item, audit_item):
+        if isinstance(item, dict) and isinstance(item.get("openai_rewrite"), dict):
+            record = item.get("openai_rewrite")
+            break
+
+    if not record:
+        return {
+            "rewrite_attempted": False,
+            "rewrite_applied": False,
+            "model": None,
+            "response_id": None,
+            "response_id_unavailable_reason": "openai_rewrite_missing",
+            "fallback_used": False,
+            "reason": "openai_rewrite_missing",
+            "error_class": None,
+        }
+
+    rewrite_attempted = bool(record.get("rewrite_attempted"))
+    if record.get("rewrite_attempted") is None and record.get("llm_called") is not None:
+        rewrite_attempted = bool(record.get("llm_called"))
+    rewrite_applied = bool(record.get("rewrite_applied"))
+    fallback_used = bool(record.get("fallback_used"))
+    reason = record.get("reason")
+    if reason == "rewrite_disabled":
+        reason = "disabled"
+
+    response_id = record.get("response_id")
+    response_id_reason = record.get("response_id_unavailable_reason")
+    if rewrite_attempted and not response_id and not response_id_reason:
+        response_id_reason = "response_id_missing"
+
+    model = (
+        record.get("model")
+        or os.environ.get("OPENAI_REPLY_REWRITE_MODEL")
+        or os.environ.get("OPENAI_MODEL")
+        or "gpt-5.2-chat-latest"
+    )
+    error_class = record.get("error_class") if fallback_used else None
+
+    return {
+        "rewrite_attempted": rewrite_attempted,
+        "rewrite_applied": rewrite_applied,
+        "model": model,
+        "response_id": response_id,
+        "response_id_unavailable_reason": response_id_reason,
+        "fallback_used": fallback_used,
+        "reason": reason,
+        "error_class": error_class,
+    }
+
+
+def _evaluate_openai_requirements(
+    openai_routing: Dict[str, Any],
+    openai_rewrite: Dict[str, Any],
+    *,
+    require_routing: bool,
+    require_rewrite: bool,
+) -> Dict[str, Optional[bool]]:
+    routing_called = bool(openai_routing.get("llm_called"))
+    rewrite_attempted = bool(openai_rewrite.get("rewrite_attempted"))
+    rewrite_applied = bool(openai_rewrite.get("rewrite_applied"))
+    return {
+        "openai_routing_called": routing_called if require_routing else None,
+        "openai_rewrite_attempted": rewrite_attempted if require_rewrite else None,
+        "openai_rewrite_applied": rewrite_applied if require_rewrite else None,
+    }
+
+
 def wait_for_conversation_state_record(
     ddb_resource,
     table_name: str,
@@ -1887,6 +2049,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     scenario_variant = _ORDER_STATUS_VARIANTS.get(args.scenario, args.scenario)
     run_id = args.run_id or os.environ.get("RUN_ID") or time.strftime("%Y%m%d%H%M%S")
     default_idempotency_table = f"rp_mw_{env_name}_idempotency"
+    require_openai_routing = (
+        args.require_openai_routing
+        if args.require_openai_routing is not None
+        else order_status_mode
+    )
+    require_openai_rewrite = (
+        args.require_openai_rewrite
+        if args.require_openai_rewrite is not None
+        else order_status_mode
+    )
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
@@ -2224,6 +2396,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "shipping_delay_not_shipped",
         "order_status_no_tracking",
     }
+    openai_routing = _extract_openai_routing_evidence(
+        state_item, audit_item, routing_intent=routing_intent
+    )
+    openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
 
     dashboard_name = f"rp-mw-{env_name}-ops"
     alarm_names = [
@@ -2840,6 +3016,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             reply_update_candidate=reply_update_candidate,
         )
 
+    openai_requirements = _evaluate_openai_requirements(
+        openai_routing,
+        openai_rewrite,
+        require_routing=require_openai_routing,
+        require_rewrite=require_openai_rewrite,
+    )
+
     if followup_event_id and followup_reply_sent is None:
         followup_reply_sent = False
         followup_reply_reason = (
@@ -2861,6 +3044,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
         "reply_evidence": reply_evidence,
+        "openai_routing_called": openai_requirements.get("openai_routing_called"),
+        "openai_rewrite_attempted": openai_requirements.get(
+            "openai_rewrite_attempted"
+        ),
+        "openai_rewrite_applied": openai_requirements.get("openai_rewrite_applied"),
         "followup_performed": followup_performed,
         "followup_no_reply": followup_no_reply,
         "followup_routed_support": followup_routed_ok,
@@ -2941,6 +3129,37 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
                     "required": False,
                     "value": reply_evidence,
+                },
+            ]
+        )
+
+    if require_openai_routing:
+        required_checks.append(bool(openai_requirements.get("openai_routing_called")))
+        criteria_details.append(
+            {
+                "name": "openai_routing_called",
+                "description": "OpenAI routing was invoked for intent detection",
+                "required": True,
+                "value": openai_requirements.get("openai_routing_called"),
+            }
+        )
+
+    if require_openai_rewrite:
+        required_checks.append(bool(openai_requirements.get("openai_rewrite_attempted")))
+        required_checks.append(bool(openai_requirements.get("openai_rewrite_applied")))
+        criteria_details.extend(
+            [
+                {
+                    "name": "openai_rewrite_attempted",
+                    "description": "OpenAI rewrite was attempted for the draft reply",
+                    "required": True,
+                    "value": openai_requirements.get("openai_rewrite_attempted"),
+                },
+                {
+                    "name": "openai_rewrite_applied",
+                    "description": "OpenAI rewrite was applied to the customer reply",
+                    "required": True,
+                    "value": openai_requirements.get("openai_rewrite_applied"),
                 },
             ]
         )
@@ -3104,6 +3323,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 "recorded_at": audit_item.get("recorded_at"),
                 "ts_action_fingerprint": audit_sort_key,
             },
+        },
+        "openai": {
+            "routing": openai_routing,
+            "rewrite": openai_rewrite,
         },
         "richpanel": {
             "pre": safe_pre_ticket,

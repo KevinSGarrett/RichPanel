@@ -476,9 +476,15 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 
 **Scope:** All PRs touching order status automation, order lookup logic, or Shopify/Richpanel integration for order data.
 
+**OpenAI evidence required for deployment readiness:** Proof JSON must show OpenAI routing and rewrite activity.
+- **Routing evidence:** `openai.routing.llm_called=true`, plus `model`, `confidence`, `final_intent`, and `response_id` (or `response_id_unavailable_reason` when missing).
+- **Rewrite evidence:** `openai.rewrite.rewrite_attempted=true` and `openai.rewrite.rewrite_applied=true`. If rewrite fails, `fallback_used=true` and `error_class` must be recorded (no message text).
+
 #### Required scenarios
 
 Run both scenarios to validate tracking and no-tracking paths:
+
+**Note:** `scripts/dev_e2e_smoke.py` defaults to requiring OpenAI routing + rewrite evidence for order_status scenarios. Use `--no-require-openai-routing` / `--no-require-openai-rewrite` only for debugging.
 
 **1. Order status with tracking:**
 
@@ -580,6 +586,7 @@ Capture in `REHYDRATION_PACK/RUNS/<RUN_ID>/B/TEST_MATRIX.md`:
 - [ ] Proof JSON paths for both scenarios (tracking + no-tracking)
 - [ ] Exact commands used (with redacted ticket numbers for public artifacts)
 - [ ] PASS classification (PASS_STRONG or PASS_WEAK) for each scenario
+- [ ] OpenAI evidence: `openai.routing.llm_called=true` and `openai.rewrite.rewrite_applied=true` (or recorded fallback with `fallback_used=true` + `error_class`)
 - [ ] DynamoDB evidence (idempotency/state/audit record links)
 - [ ] CloudWatch Logs links (worker execution, routing decision, reply sent)
 - [ ] Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)

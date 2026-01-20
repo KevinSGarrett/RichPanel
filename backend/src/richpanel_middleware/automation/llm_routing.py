@@ -97,6 +97,10 @@ class LLMRoutingSuggestion:
     reasoning: str = ""
     secondary_intents: List[str] = field(default_factory=list)
     raw_response: Dict[str, Any] = field(default_factory=dict)
+    model: str = DEFAULT_ROUTING_MODEL
+    llm_called: bool = False
+    response_id: Optional[str] = None
+    response_id_unavailable_reason: Optional[str] = None
     fingerprint: str = ""
     dry_run: bool = False
     gated_reason: Optional[str] = None
@@ -173,9 +177,7 @@ def _build_routing_prompt(customer_message: str) -> List[ChatMessage]:
     )
 
     # Truncate customer message to prevent prompt injection and reduce tokens
-    truncated_message = (
-        customer_message[:2000] if len(customer_message) > 2000 else customer_message
-    )
+    truncated_message = customer_message[:2000] if len(customer_message) > 2000 else customer_message
 
     return [
         ChatMessage(role="system", content=system_content),
@@ -193,6 +195,22 @@ def _compute_prompt_fingerprint(messages: List[ChatMessage], model: str) -> str:
     }
     serialized = json.dumps(payload, sort_keys=True).encode("utf-8")
     return hashlib.sha256(serialized).hexdigest()[:16]
+
+
+def _response_id_info(
+    response: Optional[ChatCompletionResponse],
+) -> Tuple[Optional[str], Optional[str]]:
+    if response is None:
+        return None, "no_response"
+    raw = response.raw if isinstance(response.raw, dict) else {}
+    response_id = None
+    if raw:
+        response_id = raw.get("id") or raw.get("response_id")
+    if response_id:
+        return str(response_id), None
+    if response.dry_run and response.reason:
+        return None, response.reason
+    return None, "response_id_missing" if raw else "raw_missing"
 
 
 # ============================================================================
@@ -228,9 +246,7 @@ def _llm_routing_gating_check(
 # ============================================================================
 
 
-def _parse_llm_response(
-    response: ChatCompletionResponse,
-) -> Tuple[Dict[str, Any], Optional[str]]:
+def _parse_llm_response(response: ChatCompletionResponse) -> Tuple[Dict[str, Any], Optional[str]]:
     """
     Parse and validate the LLM response JSON.
 
@@ -282,13 +298,8 @@ def _parse_llm_response(
     if department not in DEPARTMENTS:
         parsed["_original_department"] = department
         # Map intent to department if possible
-        parsed["department"] = INTENT_TO_DEPARTMENT.get(
-            parsed["intent"], "Email Support Team"
-        )
-        parsed["_validation_note"] = (
-            parsed.get("_validation_note", "")
-            + f"; department '{department}' not in allowlist"
-        )
+        parsed["department"] = INTENT_TO_DEPARTMENT.get(parsed["intent"], "Email Support Team")
+        parsed["_validation_note"] = parsed.get("_validation_note", "") + f"; department '{department}' not in allowlist"
 
     return parsed, None
 
@@ -354,6 +365,10 @@ def suggest_llm_routing(
             confidence=0.0,
             reasoning="",
             fingerprint=fingerprint,
+            model=model,
+            llm_called=False,
+            response_id=None,
+            response_id_unavailable_reason=gated_reason,
             dry_run=True,
             gated_reason=gated_reason,
         )
@@ -376,6 +391,8 @@ def suggest_llm_routing(
             automation_enabled=automation_enabled,
         )
     except OpenAIRequestError as exc:
+        error_response = exc.response
+        response_id, response_id_reason = _response_id_info(error_response)
         LOGGER.warning(
             "llm_routing.request_failed",
             extra={
@@ -391,11 +408,16 @@ def suggest_llm_routing(
             confidence=0.0,
             reasoning="llm_request_failed",
             fingerprint=fingerprint,
-            dry_run=False,
+            model=error_response.model if error_response else model,
+            llm_called=True,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason or "request_failed",
+            dry_run=error_response.dry_run if error_response else False,
             gated_reason="request_failed",
         )
 
     # Parse response (no secrets or full bodies in logs)
+    response_id, response_id_reason = _response_id_info(response)
     parsed, parse_error = _parse_llm_response(response)
 
     if parse_error:
@@ -415,6 +437,10 @@ def suggest_llm_routing(
             confidence=0.0,
             reasoning=f"parse_failed: {parse_error}",
             fingerprint=fingerprint,
+            model=response.model,
+            llm_called=not response.dry_run,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
             dry_run=response.dry_run,
             gated_reason=parse_error,
         )
@@ -432,6 +458,10 @@ def suggest_llm_routing(
             "dry_run": response.dry_run,
         },
         fingerprint=fingerprint,
+        model=response.model,
+        llm_called=not response.dry_run,
+        response_id=response_id,
+        response_id_unavailable_reason=response_id_reason,
         dry_run=response.dry_run,
     )
 
@@ -487,7 +517,6 @@ def compute_dual_routing(
 
     # Extract customer message for LLM
     from richpanel_middleware.automation.router import extract_customer_message
-
     customer_message = extract_customer_message(payload, default="")
 
     # Step 2: LLM routing suggestion
@@ -567,6 +596,10 @@ def compute_dual_routing(
             "department": llm_suggestion.department,
             "confidence": llm_suggestion.confidence,
             "is_valid": llm_suggestion.is_valid(),
+            "llm_called": llm_suggestion.llm_called,
+            "model": llm_suggestion.model,
+            "response_id": llm_suggestion.response_id,
+            "response_id_unavailable_reason": llm_suggestion.response_id_unavailable_reason,
             "dry_run": llm_suggestion.dry_run,
             "fingerprint": llm_suggestion.fingerprint,
             "gated_reason": llm_suggestion.gated_reason,
