@@ -11685,6 +11685,246 @@
     ]
   },
   {
+    "path": "08_Engineering/Order_Status_OpenAI_Contract.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status OpenAI Contract",
+        "anchor": "order-status-openai-contract"
+      },
+      {
+        "level": 2,
+        "text": "Executive Summary",
+        "anchor": "executive-summary"
+      },
+      {
+        "level": 2,
+        "text": "Flow Diagram",
+        "anchor": "flow-diagram"
+      },
+      {
+        "level": 2,
+        "text": "Code Map",
+        "anchor": "code-map"
+      },
+      {
+        "level": 3,
+        "text": "1. OpenAI Routing (Intent Classification)",
+        "anchor": "1-openai-routing-intent-classification"
+      },
+      {
+        "level": 3,
+        "text": "2. OpenAI Reply Rewrite (Unique Message Generation)",
+        "anchor": "2-openai-reply-rewrite-unique-message-generation"
+      },
+      {
+        "level": 3,
+        "text": "3. Pipeline Orchestration",
+        "anchor": "3-pipeline-orchestration"
+      },
+      {
+        "level": 2,
+        "text": "Configuration Map",
+        "anchor": "configuration-map"
+      },
+      {
+        "level": 3,
+        "text": "Environment Variables",
+        "anchor": "environment-variables"
+      },
+      {
+        "level": 3,
+        "text": "AWS Secrets Manager",
+        "anchor": "aws-secrets-manager"
+      },
+      {
+        "level": 2,
+        "text": "PII Policy",
+        "anchor": "pii-policy"
+      },
+      {
+        "level": 3,
+        "text": "Routing (Intent Classification)",
+        "anchor": "routing-intent-classification"
+      },
+      {
+        "level": 3,
+        "text": "Reply Rewrite (Unique Message Generation)",
+        "anchor": "reply-rewrite-unique-message-generation"
+      },
+      {
+        "level": 2,
+        "text": "Production-Read-Only Shadow Mode",
+        "anchor": "production-read-only-shadow-mode"
+      },
+      {
+        "level": 3,
+        "text": "Shadow Mode Behavior",
+        "anchor": "shadow-mode-behavior"
+      },
+      {
+        "level": 2,
+        "text": "Proof Requirements",
+        "anchor": "proof-requirements"
+      },
+      {
+        "level": 3,
+        "text": "Order Status Proof Must Show OpenAI Usage",
+        "anchor": "order-status-proof-must-show-openai-usage"
+      },
+      {
+        "level": 3,
+        "text": "Required Evidence in Proof JSON",
+        "anchor": "required-evidence-in-proof-json"
+      },
+      {
+        "level": 2,
+        "text": "Validation Harness",
+        "anchor": "validation-harness"
+      },
+      {
+        "level": 2,
+        "text": "OpenAI Usage Compliance",
+        "anchor": "openai-usage-compliance"
+      },
+      {
+        "level": 3,
+        "text": "Model Evolution",
+        "anchor": "model-evolution"
+      },
+      {
+        "level": 3,
+        "text": "Cost Management",
+        "anchor": "cost-management"
+      },
+      {
+        "level": 3,
+        "text": "Rate Limiting",
+        "anchor": "rate-limiting"
+      },
+      {
+        "level": 2,
+        "text": "Monitoring & Observability",
+        "anchor": "monitoring-observability"
+      },
+      {
+        "level": 3,
+        "text": "CloudWatch Metrics (Proposed)",
+        "anchor": "cloudwatch-metrics-proposed"
+      },
+      {
+        "level": 3,
+        "text": "CloudWatch Logs",
+        "anchor": "cloudwatch-logs"
+      },
+      {
+        "level": 2,
+        "text": "Incident Response",
+        "anchor": "incident-response"
+      },
+      {
+        "level": 3,
+        "text": "Scenario: OpenAI Outage",
+        "anchor": "scenario-openai-outage"
+      },
+      {
+        "level": 3,
+        "text": "Scenario: PII Leak",
+        "anchor": "scenario-pii-leak"
+      },
+      {
+        "level": 3,
+        "text": "Scenario: Cost Spike",
+        "anchor": "scenario-cost-spike"
+      },
+      {
+        "level": 2,
+        "text": "Change Control",
+        "anchor": "change-control"
+      },
+      {
+        "level": 3,
+        "text": "Adding New OpenAI Calls",
+        "anchor": "adding-new-openai-calls"
+      },
+      {
+        "level": 3,
+        "text": "Changing OpenAI Models",
+        "anchor": "changing-openai-models"
+      },
+      {
+        "level": 3,
+        "text": "Disabling OpenAI (Emergency)",
+        "anchor": "disabling-openai-emergency"
+      },
+      {
+        "level": 2,
+        "text": "Related Documentation",
+        "anchor": "related-documentation"
+      },
+      {
+        "level": 2,
+        "text": "Revision History",
+        "anchor": "revision-history"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/PR_Review_Checklist.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "PR Review Checklist",
+        "anchor": "pr-review-checklist"
+      },
+      {
+        "level": 2,
+        "text": "Required Labels",
+        "anchor": "required-labels"
+      },
+      {
+        "level": 2,
+        "text": "Required Reviews",
+        "anchor": "required-reviews"
+      },
+      {
+        "level": 2,
+        "text": "Required CI Checks",
+        "anchor": "required-ci-checks"
+      },
+      {
+        "level": 2,
+        "text": "Order Status Changes (Special Requirements)",
+        "anchor": "order-status-changes-special-requirements"
+      },
+      {
+        "level": 2,
+        "text": "Evidence Artifacts",
+        "anchor": "evidence-artifacts"
+      },
+      {
+        "level": 2,
+        "text": "Final Checks",
+        "anchor": "final-checks"
+      },
+      {
+        "level": 2,
+        "text": "Merge Policy",
+        "anchor": "merge-policy"
+      },
+      {
+        "level": 2,
+        "text": "Related Documentation",
+        "anchor": "related-documentation"
+      },
+      {
+        "level": 2,
+        "text": "Revision History",
+        "anchor": "revision-history"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "outline": [
       {

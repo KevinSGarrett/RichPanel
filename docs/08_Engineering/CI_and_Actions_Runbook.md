@@ -477,8 +477,16 @@ Proof JSON must never contain raw ticket IDs or Richpanel API paths that embed I
 **Scope:** All PRs touching order status automation, order lookup logic, or Shopify/Richpanel integration for order data.
 
 **OpenAI evidence required for deployment readiness:** Proof JSON must show OpenAI routing and rewrite activity.
+
+An order_status proof run is **NOT acceptable** if:
+- **Routing did NOT call OpenAI** (unless OpenAI is intentionally disabled AND explicitly documented)
+- **Reply rewrite did NOT call OpenAI** (if "unique message" requirement is in force)
+
+**Required evidence fields:**
 - **Routing evidence:** `openai.routing.llm_called=true`, plus `model`, `confidence`, `final_intent`, and `response_id` (or `response_id_unavailable_reason` when missing).
 - **Rewrite evidence:** `openai.rewrite.rewrite_attempted=true` and `openai.rewrite.rewrite_applied=true`. If rewrite fails, `fallback_used=true` and `error_class` must be recorded (no message text).
+
+**See:** `docs/08_Engineering/Order_Status_OpenAI_Contract.md` for full OpenAI integration details.
 
 #### Required scenarios
 
