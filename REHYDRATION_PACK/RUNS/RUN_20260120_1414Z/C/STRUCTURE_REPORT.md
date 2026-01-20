@@ -15,6 +15,7 @@
 - `backend/src/richpanel_middleware/integrations/richpanel/client.py`
 - `scripts/live_readonly_shadow_eval.py`
 - `scripts/run_ci_checks.py`
+- `scripts/test_live_readonly_shadow_eval.py`
 - `scripts/test_richpanel_client.py`
 - `docs/04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md`
 - `docs/08_Engineering/Secrets_and_Environments.md`
