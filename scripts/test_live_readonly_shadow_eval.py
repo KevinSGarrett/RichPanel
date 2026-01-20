@@ -162,6 +162,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_http_trace_records_and_asserts(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
+        trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
         trace.assert_get_only(context="test", trace_path=Path("trace.json"))
         self.assertEqual(trace.entries[0]["method"], "GET")
 

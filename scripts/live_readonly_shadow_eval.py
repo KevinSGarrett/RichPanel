@@ -197,8 +197,9 @@ class _HttpTrace:
             self._original_urlopen = None
 
     def assert_get_only(self, *, context: str, trace_path: Path) -> None:
-        non_get = [entry for entry in self.entries if entry["method"] != "GET"]
-        if non_get:
+        allowed = {"GET", "HEAD"}
+        non_allowed = [entry for entry in self.entries if entry["method"] not in allowed]
+        if non_allowed:
             raise SystemExit(
                 f"Non-GET request detected during {context}. Trace: {trace_path}"
             )
