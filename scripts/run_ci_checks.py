@@ -89,6 +89,7 @@ def main() -> int:
         ["python", "scripts/verify_openai_model_defaults.py"],
         ["python", "scripts/test_pipeline_handlers.py"],
         ["python", "scripts/test_richpanel_client.py"],
+        ["python", "scripts/test_eval_order_status_intent.py"],
         ["python", "scripts/test_openai_client.py"],
         ["python", "scripts/test_shopify_client.py"],
         ["python", "scripts/test_shipstation_client.py"],
