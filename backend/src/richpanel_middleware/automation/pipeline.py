@@ -58,7 +58,8 @@ SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
 ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
-_ESCALATION_REASONS = {"followup_after_auto_reply"}
+# Follow-up after auto-reply should route to support without escalation.
+_ESCALATION_REASONS: set[str] = set()
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
@@ -607,7 +608,7 @@ def execute_order_status_reply(
         allow_network=allow_network,
         has_action=order_action is not None,
     )
-    if reason:
+    if reason and reason != "missing_order_status_action":
         LOGGER.info(
             "automation.order_status_reply.skip",
             extra={
@@ -620,45 +621,6 @@ def execute_order_status_reply(
         )
         return {"sent": False, "reason": reason}
 
-    if order_action is None:
-        return {"sent": False, "reason": "missing_order_status_action"}
-
-    parameters = order_action.get("parameters") or {}
-    draft_reply = parameters.get("draft_reply") or {}
-    reply_body = draft_reply.get("body")
-    if not reply_body:
-        LOGGER.info(
-            "automation.order_status_reply.skip",
-            extra={
-                "event_id": envelope.event_id,
-                "conversation_id": envelope.conversation_id,
-                "reason": "missing_draft_reply",
-            },
-        )
-        return {"sent": False, "reason": "missing_draft_reply"}
-
-    rewrite_result: ReplyRewriteResult | None = None
-    try:
-        rewrite_result = rewrite_reply(
-            reply_body,
-            conversation_id=envelope.conversation_id,
-            event_id=envelope.event_id,
-            safe_mode=safe_mode,
-            automation_enabled=automation_enabled,
-            allow_network=allow_network,
-            outbound_enabled=outbound_enabled,
-        )
-        if rewrite_result.rewritten and rewrite_result.body:
-            reply_body = rewrite_result.body
-    except Exception:
-        LOGGER.exception(
-            "automation.order_status_reply.rewrite_failed",
-            extra={
-                "event_id": envelope.event_id,
-                "conversation_id": envelope.conversation_id,
-            },
-        )
-
     executor = richpanel_executor or RichpanelExecutor(
         outbound_enabled=outbound_enabled
         and allow_network
@@ -667,19 +629,6 @@ def execute_order_status_reply(
     )
 
     responses: List[Dict[str, Any]] = []
-    if rewrite_result:
-        responses.append(
-            {
-                "action": "reply_rewrite",
-                "rewritten": rewrite_result.rewritten,
-                "reason": rewrite_result.reason,
-                "confidence": rewrite_result.confidence,
-                "dry_run": rewrite_result.dry_run,
-                "model": rewrite_result.model,
-                "risk_flags": rewrite_result.risk_flags,
-                "fingerprint": rewrite_result.fingerprint,
-            }
-        )
     try:
         # URL-encode conversation_id for write operations (email IDs have special chars)
         target_id = _resolve_target_ticket_id(
@@ -746,12 +695,76 @@ def execute_order_status_reply(
 
         ticket_status = ticket_metadata.status
 
+        if loop_prevention_tag in (ticket_metadata.tags or set()):
+            # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
+            # no escalation). Preserve loop-prevention tag to avoid repeated replies,
+            # even if the ticket is already closed.
+            return _route_email_support(
+                "followup_after_auto_reply", ticket_status=ticket_status
+            )
+
+        if order_action is None:
+            LOGGER.info(
+                "automation.order_status_reply.skip",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "missing_order_status_action",
+                },
+            )
+            return {"sent": False, "reason": "missing_order_status_action"}
+
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)
 
-        if loop_prevention_tag in (ticket_metadata.tags or set()):
-            return _route_email_support(
-                "followup_after_auto_reply", ticket_status=ticket_status
+        parameters = order_action.get("parameters") or {}
+        draft_reply = parameters.get("draft_reply") or {}
+        reply_body = draft_reply.get("body")
+        if not reply_body:
+            LOGGER.info(
+                "automation.order_status_reply.skip",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "missing_draft_reply",
+                },
+            )
+            return {"sent": False, "reason": "missing_draft_reply"}
+
+        rewrite_result: ReplyRewriteResult | None = None
+        try:
+            rewrite_result = rewrite_reply(
+                reply_body,
+                conversation_id=envelope.conversation_id,
+                event_id=envelope.event_id,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                allow_network=allow_network,
+                outbound_enabled=outbound_enabled,
+            )
+            if rewrite_result.rewritten and rewrite_result.body:
+                reply_body = rewrite_result.body
+        except Exception:
+            LOGGER.exception(
+                "automation.order_status_reply.rewrite_failed",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                },
+            )
+
+        if rewrite_result:
+            responses.append(
+                {
+                    "action": "reply_rewrite",
+                    "rewritten": rewrite_result.rewritten,
+                    "reason": rewrite_result.reason,
+                    "confidence": rewrite_result.confidence,
+                    "dry_run": rewrite_result.dry_run,
+                    "model": rewrite_result.model,
+                    "risk_flags": rewrite_result.risk_flags,
+                    "fingerprint": rewrite_result.fingerprint,
+                }
             )
 
         tags_to_apply = sorted(
@@ -778,137 +791,26 @@ def execute_order_status_reply(
             }
         )
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
+        # Try minimal working payloads first (state-only), then add status/comment variants.
         update_candidates = [
-            (
-                "ticket_state_closed_status_CLOSED",
-                {
-                    "ticket": {
-                        "state": "closed",
-                        "status": "CLOSED",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_state_CLOSED_status_CLOSED",
-                {
-                    "ticket": {
-                        "state": "CLOSED",
-                        "status": "CLOSED",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_state_CLOSED",
-                {
-                    "ticket": {
-                        "state": "CLOSED",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_state_RESOLVED",
-                {
-                    "ticket": {
-                        "state": "RESOLVED",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_state_closed",
-                {
-                    "ticket": {
-                        "state": "closed",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_state_resolved",
-                {
-                    "ticket": {
-                        "state": "resolved",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_status_closed",
-                {
-                    "ticket": {
-                        "status": "closed",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "ticket_status_resolved",
-                {
-                    "ticket": {
-                        "status": "resolved",
-                        "comment": comment_payload,
-                        "tags": tags_to_apply,
-                    }
-                },
-            ),
-            (
-                "state_closed",
-                {"state": "closed", "comment": comment_payload, "tags": tags_to_apply},
-            ),
-            (
-                "status_closed",
-                {"status": "closed", "comment": comment_payload, "tags": tags_to_apply},
-            ),
-            (
-                "state_resolved",
-                {
-                    "state": "resolved",
-                    "comment": comment_payload,
-                    "tags": tags_to_apply,
-                },
-            ),
-            (
-                "status_resolved",
-                {
-                    "status": "resolved",
-                    "comment": comment_payload,
-                    "tags": tags_to_apply,
-                },
-            ),
-            (
-                "state_CLOSED",
-                {"state": "CLOSED", "comment": comment_payload, "tags": tags_to_apply},
-            ),
-            (
-                "status_CLOSED",
-                {"status": "CLOSED", "comment": comment_payload, "tags": tags_to_apply},
-            ),
-            (
-                "state_RESOLVED",
-                {
-                    "state": "RESOLVED",
-                    "comment": comment_payload,
-                    "tags": tags_to_apply,
-                },
-            ),
-            (
-                "status_RESOLVED",
-                {
-                    "status": "RESOLVED",
-                    "comment": comment_payload,
-                    "tags": tags_to_apply,
-                },
-            ),
+            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload}}),
+            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload}}),
+            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload}}),
+            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload}}),
+            ("state_closed", {"state": "closed", "comment": comment_payload}),
+            ("status_closed", {"status": "closed", "comment": comment_payload}),
+            ("state_resolved", {"state": "resolved", "comment": comment_payload}),
+            ("status_resolved", {"status": "resolved", "comment": comment_payload}),
+            ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload}}),
+            ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload}}),
+            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload}}),
+            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload}}),
+            ("ticket_state_resolved_status_RESOLVED", {"ticket": {"state": "resolved", "status": "RESOLVED", "comment": comment_payload}}),
+            ("ticket_status_resolved_state_RESOLVED", {"ticket": {"status": "resolved", "state": "RESOLVED", "comment": comment_payload}}),
+            ("state_CLOSED", {"state": "CLOSED", "comment": comment_payload}),
+            ("status_CLOSED", {"status": "CLOSED", "comment": comment_payload}),
+            ("state_RESOLVED", {"state": "RESOLVED", "comment": comment_payload}),
+            ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload}),
         ]
 
         update_success = None
@@ -922,6 +824,18 @@ def execute_order_status_reply(
             candidate_success = (
                 200 <= reply_response.status_code < 300 and not reply_response.dry_run
             )
+            closed_after = None
+            if candidate_success:
+                refreshed = _safe_ticket_metadata_fetch(
+                    target_id,
+                    executor=executor,
+                    allow_network=allow_network,
+                )
+                closed_after = (
+                    _is_closed_status(refreshed.status) if refreshed else None
+                )
+                if closed_after is not True:
+                    candidate_success = False
             responses.append(
                 {
                     "action": "reply_and_resolve",
@@ -929,7 +843,19 @@ def execute_order_status_reply(
                     "dry_run": reply_response.dry_run,
                     "candidate": candidate_name,
                     "update_success": candidate_success,
+                    "closed_after": closed_after,
                 }
+            )
+            LOGGER.info(
+                "automation.order_status_reply.update_candidate",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "candidate": candidate_name,
+                    "status": reply_response.status_code,
+                    "dry_run": reply_response.dry_run,
+                    "closed_after": closed_after,
+                },
             )
             if candidate_success:
                 update_success = candidate_name

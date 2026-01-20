@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-19 - RUN_20260119_2109Z.
+Last verified: 2026-01-20 - RUN_20260120_0221Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,15 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-20 - RUN_20260120_0221Z (B46: Order Status PASS_STRONG + Follow-up Routing Proofs)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260120_0221Z
+- Enforced PASS_STRONG for order_status scenarios to require actual closure + follow-up routing evidence
+- Updated pipeline close payloads and follow-up routing logic (route to Email Support Team without auto-reply)
+- Added harness waits for closure + loop-prevention tag prior to follow-up
+- Proofs: PASS_STRONG for order_status_no_tracking_short_window and order_status_tracking (dev sandbox only)
+- Docs: updated CI_and_Actions_Runbook.md for PASS_STRONG + follow-up requirements
+- Run artifacts: RUN_REPORT/RUN_SUMMARY/TEST_MATRIX/FIX_REPORT/STRUCTURE_REPORT/DOCS_IMPACT_MAP in A/B/C folders
+
 ### 2026-01-19 - RUN_20260119_2109Z (B46: Harden Claude PR Gate with Audit Evidence)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260119_2109Z
 - PR #126: https://github.com/KevinSGarrett/RichPanel/pull/126

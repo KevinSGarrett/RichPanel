@@ -86,6 +86,8 @@ _POSITIVE_MIDDLEWARE_TAGS = {
     "mw-order-status-answered",
 }
 
+_LOOP_PREVENTION_TAG = "mw-auto-replied"
+
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
     "order_status_tracking",
@@ -154,6 +156,7 @@ def _classify_order_status_result(
     middleware_tag_ok: Optional[bool],
     middleware_ok: Optional[bool],
     skip_tags_present_ok: Optional[bool],
+    auto_close_applied: bool,
     fallback_used: bool,
     failed: List[str],
 ) -> Tuple[str, Optional[str]]:
@@ -162,6 +165,7 @@ def _classify_order_status_result(
     PASS_STRONG requires resolved/closed AND success tag.
     PASS_WEAK is allowed when middleware outcome is positive but success tag missing.
     Any skip/escalation tag causes FAIL.
+    Debug auto-close attempts are never PASS_STRONG and degrade to PASS_WEAK/FAIL_DEBUG.
     """
     failed_reason = (
         f"Failed criteria: {', '.join(failed)}" if failed else "criteria_not_met"
@@ -170,13 +174,25 @@ def _classify_order_status_result(
     if skip_tags_present_ok is False:
         return "FAIL", "skip_or_escalation_tags_present"
     if fallback_used:
+        if not base_pass:
+            return "FAIL_DEBUG", "fallback_close_used_but_criteria_failed"
         return "PASS_WEAK", "fallback_close_used_by_harness"
+    if auto_close_applied:
+        if not base_pass:
+            return "FAIL_DEBUG", "debug_auto_close_applied_but_criteria_failed"
+        return "PASS_WEAK", "debug_auto_close_applied"
     if not base_pass:
+        return "FAIL", failed_reason
+    if not status_resolved_ok:
+        return "FAIL", "status_not_resolved_or_closed"
+    if not middleware_tag_ok:
+        # Middleware outcome should already be true when status_resolved_ok is True,
+        # but guard for clarity.
+        if middleware_ok:
+            return "PASS_WEAK", "status_or_success_tag_missing"
         return "FAIL", failed_reason
     if status_resolved_ok and middleware_tag_ok:
         return "PASS_STRONG", None
-    if middleware_ok:
-        return "PASS_WEAK", "status_or_success_tag_missing"
     return "FAIL", failed_reason
 
 
@@ -365,6 +381,17 @@ def _iso_business_days_before(anchor: datetime, days: int) -> str:
     return cursor.isoformat()
 
 
+def _seed_order_id(run_id: str, conversation_id: Optional[str]) -> str:
+    """
+    Derive a deterministic order identifier that never equals the conversation_id.
+    Richpanel rejects order_id equal to the ticket/conversation id; prefix and
+    fingerprint to keep PII-safe and deterministic.
+    """
+    if conversation_id:
+        return f"ORDER-{_fingerprint(conversation_id).upper()}"
+    return f"DEV-ORDER-{_fingerprint(run_id, length=8).upper()}"
+
+
 def _order_status_scenario_payload(
     run_id: str, *, conversation_id: Optional[str]
 ) -> Dict[str, Any]:
@@ -375,9 +402,7 @@ def _order_status_scenario_payload(
     order_created_at = (now - timedelta(days=5)).isoformat()
     ticket_created_at = (now - timedelta(days=1)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = (
-        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
-    )
+    seeded_order_id = _seed_order_id(order_seed, conversation_id)
     tracking_number = (
         f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
     )
@@ -450,9 +475,7 @@ def _order_status_no_tracking_payload(
     eta_start = (now + timedelta(days=3)).isoformat()
     eta_end = (now + timedelta(days=5)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = (
-        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
-    )
+    seeded_order_id = _seed_order_id(order_seed, conversation_id)
     shipping_method = "Standard (3-5 Business Days)"
 
     base_order = {
@@ -528,9 +551,7 @@ def _order_status_no_tracking_short_window_payload(
     eta_start = (anchor + timedelta(days=1)).isoformat()
     eta_end = (anchor + timedelta(days=3)).isoformat()
     order_seed = run_id or "order-status-smoke"
-    seeded_order_id = (
-        conversation_id or f"DEV-ORDER-{_fingerprint(order_seed, length=8).upper()}"
-    )
+    seeded_order_id = _seed_order_id(order_seed, conversation_id)
     shipping_method = "Standard (3-5 business days)"
 
     base_order = {
@@ -685,7 +706,8 @@ def _fetch_ticket_snapshot(
         payload = response.json() or {}
         if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
             payload = payload["ticket"]
-        status = payload.get("status") or payload.get("state")
+        status = payload.get("status")
+        state = payload.get("state")
         tags = _normalize_tags(payload.get("tags"))
         updated_at = payload.get("updated_at") or payload.get("updatedAt")
         message_count = _safe_int(
@@ -700,6 +722,7 @@ def _fetch_ticket_snapshot(
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
             "status": status.strip() if isinstance(status, str) else status,
+            "state": state.strip() if isinstance(state, str) else state,
             "tags": tags,
             "updated_at": updated_at,
             "message_count": message_count,
@@ -708,6 +731,31 @@ def _fetch_ticket_snapshot(
             "dry_run": response.dry_run,
             "path": path,
         }
+
+
+def _wait_for_ticket_ready(
+    executor: RichpanelExecutor,
+    ticket_ref: str,
+    *,
+    allow_network: bool,
+    required_tags: List[str],
+    required_statuses: List[str],
+    timeout_seconds: int,
+    poll_interval: float = 5.0,
+) -> Optional[Dict[str, Any]]:
+    deadline = time.time() + max(timeout_seconds, 0)
+    while time.time() < deadline:
+        snap = _fetch_ticket_snapshot(executor, ticket_ref, allow_network=allow_network)
+        tags = snap.get("tags") or []
+        status_val = snap.get("status") or snap.get("state")
+        status_norm = (
+            status_val.strip().lower() if isinstance(status_val, str) else None
+        )
+        has_tags = all(tag in tags for tag in required_tags)
+        if has_tags and status_norm in required_statuses:
+            return snap
+        time.sleep(poll_interval)
+    return None
 
     raise SmokeFailure(
         "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
@@ -1127,9 +1175,20 @@ def parse_args() -> argparse.Namespace:
         help="Opt-in fallback comment+close for order_status (requires --confirm-test-ticket; forces PASS_WEAK).",
     )
     parser.add_argument(
+        "--attempt-auto-close",
+        action="store_true",
+        help="DEBUG: attempt deterministic close if middleware replied but ticket stayed open (requires --confirm-test-ticket; forces PASS_WEAK/FAIL_DEBUG).",
+    )
+    parser.add_argument(
         "--simulate-followup",
         action="store_true",
         help="Send a follow-up webhook after resolution to ensure no duplicate auto-reply.",
+    )
+    parser.add_argument(
+        "--send-followup",
+        dest="simulate_followup",
+        action="store_true",
+        help="Alias for --simulate-followup (required for follow-up routing proof).",
     )
     parser.add_argument(
         "--followup-message",
@@ -1144,6 +1203,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--proof-path",
         help="Optional path to write a PII-safe proof JSON artifact.",
+    )
+    parser.add_argument(
+        "--json-out",
+        dest="proof_path",
+        help="Alias for --proof-path (PII-safe proof JSON artifact).",
     )
     parser.add_argument(
         "--richpanel-secret-id",
@@ -1889,6 +1953,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     tag_error: Optional[str] = None
     diagnostic_result: Optional[Dict[str, Any]] = None
     fallback_used = False
+    window_fallback_used = False
     followup_event_id: Optional[str] = None
     followup_event_id_fingerprint: Optional[str] = None
     followup_item: Optional[Dict[str, Any]] = None
@@ -2117,7 +2182,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         )
         if not found_window and expected_window and window_phrase in expected_window.lower():
             found_window = True
-            fallback_used = True
+            window_fallback_used = True
             print(
                 f"[INFO] Using computed expected window '{expected_window}' as fallback evidence (draft redacted)."
             )
@@ -2129,7 +2194,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             raise SmokeFailure(
                 "Short-window scenario draft reply did not include the normalized shipping method label."
             )
-        fallback_used = True
         print(
             f"[OK] Draft reply includes remaining window '{window_phrase}' "
             f"and method label '{method_phrase}'."
@@ -2245,6 +2309,27 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         )
         pre_ticket_data: Dict[str, Any] = pre_ticket or {}
         post_ticket_data: Dict[str, Any] = post_ticket or {}
+        if order_status_mode:
+            post_tags = post_ticket_data.get("tags") or []
+            status_val = post_ticket_data.get("status") or post_ticket_data.get("state")
+            status_norm = (
+                status_val.strip().lower() if isinstance(status_val, str) else None
+            )
+            if _LOOP_PREVENTION_TAG not in post_tags or status_norm not in {
+                "resolved",
+                "closed",
+            }:
+                waited = _wait_for_ticket_ready(
+                    ticket_executor,
+                    payload_conversation,
+                    allow_network=allow_network,
+                    required_tags=[_LOOP_PREVENTION_TAG],
+                    required_statuses=["resolved", "closed"],
+                    timeout_seconds=min(args.wait_seconds, 60),
+                )
+                if waited:
+                    post_ticket = waited
+                    post_ticket_data = waited
         fallback_used = bool(fallback_used)
 
         def _recompute_deltas(
@@ -2274,8 +2359,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 pre_data.get("updated_at"),
                 post_data.get("updated_at"),
             )
-            status_before_val_local = pre_data.get("status") or pre_data.get("state")
-            status_after_val_local = post_data.get("status") or post_data.get("state")
+            status_before_val_local = pre_data.get("status")
+            status_after_val_local = post_data.get("status")
+            state_before_val_local = pre_data.get("state")
+            state_after_val_local = post_data.get("state")
             status_before_local = (
                 status_before_val_local.strip().lower()
                 if isinstance(status_before_val_local, str)
@@ -2286,16 +2373,33 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 if isinstance(status_after_val_local, str)
                 else None
             )
-            status_resolved_local = (
-                status_after_local in {"resolved", "closed"}
-                if status_after_local
-                else False
-            )
-            status_changed_local = (
-                status_before_local != status_after_local
-                if status_after_local or status_before_local
+            state_before_local = (
+                state_before_val_local.strip().lower()
+                if isinstance(state_before_val_local, str)
                 else None
             )
+            state_after_local = (
+                state_after_val_local.strip().lower()
+                if isinstance(state_after_val_local, str)
+                else None
+            )
+            status_resolved_local = any(
+                value in {"resolved", "closed"}
+                for value in (status_after_local, state_after_local)
+                if value
+            )
+            if (
+                status_after_local
+                or status_before_local
+                or state_after_local
+                or state_before_local
+            ):
+                status_changed_local = (
+                    status_before_local != status_after_local
+                    or state_before_local != state_after_local
+                )
+            else:
+                status_changed_local = None
             message_count_before_local = _safe_int(pre_data.get("message_count"))
             message_count_after_local = _safe_int(post_data.get("message_count"))
             message_count_delta_local = None
@@ -2371,6 +2475,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         # Networked execution; exclude from coverage.  # pragma: no cover
         if (
             order_status_mode
+            and args.attempt_auto_close
+            and args.confirm_test_ticket
             and allow_network
             and ticket_executor
             and payload_conversation
@@ -2422,6 +2528,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     if middleware_outcome
                     else None
                 )
+
+        elif args.attempt_auto_close and not args.confirm_test_ticket:
+            auto_close_result = {"error": "confirm_test_ticket_not_set"}
 
         reply_fallback_result: Optional[Dict[str, Any]] = None
         if (
@@ -2503,27 +2612,71 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                         "candidate": "fallback_comment_and_close",
                     }
 
+        auto_close_applied = auto_close_applied or fallback_used
+
         print(
             f"[INFO] Ticket tag delta: +{tags_added}, -{tags_removed}; "
             f"updated_at_delta={updated_at_delta}s."
         )
 
         if args.simulate_followup and order_status_mode and status_resolved:
-            followup_payload = _build_followup_payload(
-                payload,
-                followup_message=args.followup_message,
-                scenario_variant=scenario_variant,
-            )
-            followup_payload["run_id"] = run_id
-            followup_payload["ticket_number"] = ticket_ref
-            followup_payload["outbound_enabled"] = True
-            followup_payload["allow_network"] = True
-            followup_payload["automation_enabled"] = True
-            followup_payload["outbound_reason"] = "dev_smoke_followup"
-            followup_event_id = followup_payload["event_id"]
-            print(
-                f"[INFO] Sending follow-up webhook with event_id={followup_event_id} (run_id={run_id})"
-            )
+            required_tags = [_LOOP_PREVENTION_TAG]
+            post_tags = post_ticket_data.get("tags") or []
+            if _LOOP_PREVENTION_TAG not in post_tags:
+                waited = _wait_for_ticket_ready(
+                    ticket_executor,
+                    payload_conversation,
+                    allow_network=allow_network,
+                    required_tags=required_tags,
+                    required_statuses=["resolved", "closed"],
+                    timeout_seconds=min(args.wait_seconds, 60),
+                )
+                if waited:
+                    post_ticket_data = waited
+                    (
+                        tags_added,
+                        tags_removed,
+                        updated_at_delta,
+                        status_before,
+                        status_after,
+                        status_resolved,
+                        status_changed,
+                        message_count_before,
+                        message_count_after,
+                        message_count_delta,
+                        last_message_source_before,
+                        last_message_source_after,
+                        middleware_tags_added,
+                        skip_tags_added,
+                        middleware_tag_present,
+                        middleware_outcome,
+                    ) = _recompute_deltas(pre_ticket_data, post_ticket_data)
+                    skip_tags_present = (
+                        middleware_outcome.get("skip_tags_present")
+                        if middleware_outcome
+                        else None
+                    )
+                else:
+                    followup_reply_sent = False
+                    followup_reply_reason = "followup_skipped_missing_loop_tag"
+                    followup_routed_support = False
+
+            if followup_reply_reason != "followup_skipped_missing_loop_tag":
+                followup_payload = _build_followup_payload(
+                    payload,
+                    followup_message=args.followup_message,
+                    scenario_variant=scenario_variant,
+                )
+                followup_payload["run_id"] = run_id
+                followup_payload["ticket_number"] = ticket_ref
+                followup_payload["outbound_enabled"] = True
+                followup_payload["allow_network"] = True
+                followup_payload["automation_enabled"] = True
+                followup_payload["outbound_reason"] = "dev_smoke_followup"
+                followup_event_id = followup_payload["event_id"]
+                print(
+                    f"[INFO] Sending follow-up webhook with event_id={followup_event_id} (run_id={run_id})"
+                )
 
             followup_response = send_webhook(
                 artifacts.endpoint_url, token, followup_payload
@@ -2580,6 +2733,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         elif args.simulate_followup and order_status_mode and not status_resolved:
             followup_reply_sent = False
             followup_reply_reason = "followup_skipped_status_not_resolved"
+            followup_routed_support = False
 
     followup_event_id_fingerprint, followup_proof = _prepare_followup_proof(
         followup_event_id=followup_event_id,
@@ -2596,6 +2750,21 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         followup_routed_support=followup_routed_support,
     )
     summary_data["followup_event_id_fingerprint"] = followup_event_id_fingerprint
+
+    followup_required = bool(args.simulate_followup)
+    followup_performed = bool(followup_event_id) if followup_required else None
+    followup_route_tag_present = (
+        "route-email-support-team" in (followup_skip_tags_added or [])
+        if followup_required
+        else None
+    )
+    followup_skip_followup_tag_present = (
+        "mw-skip-followup-after-auto-reply" in (followup_skip_tags_added or [])
+        if followup_required
+        else None
+    )
+    followup_routed_ok = bool(followup_routed_support) if followup_required else None
+    followup_no_reply = (followup_reply_sent is False) if followup_required else None
 
     if args.summary_path:
         append_summary(args.summary_path, env_name=env_name, data=summary_data)
@@ -2692,6 +2861,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
         "reply_evidence": reply_evidence,
+        "followup_performed": followup_performed,
+        "followup_no_reply": followup_no_reply,
+        "followup_routed_support": followup_routed_ok,
+        "followup_route_tag": followup_route_tag_present,
+        "followup_skip_followup_tag": followup_skip_followup_tag_present,
     }
 
     required_checks: List[bool] = [
@@ -2729,6 +2903,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         required_checks.append(bool(intent_ok))
         required_checks.append(bool(middleware_ok))
         required_checks.append(bool(skip_tags_present_ok))
+        required_checks.append(bool(status_resolved_ok))
         criteria_details.extend(
             [
                 {
@@ -2746,7 +2921,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 {
                     "name": "status_resolved_or_closed",
                     "description": "Post status is resolved/closed",
-                    "required": False,
+                    "required": True,
                     "value": status_resolved_ok,
                 },
                 {
@@ -2766,6 +2941,51 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
                     "required": False,
                     "value": reply_evidence,
+                },
+            ]
+        )
+
+    if followup_required:
+        required_checks.extend(
+            [
+                bool(followup_performed),
+                followup_no_reply is True,
+                bool(followup_routed_ok),
+                bool(followup_route_tag_present),
+                bool(followup_skip_followup_tag_present),
+            ]
+        )
+        criteria_details.extend(
+            [
+                {
+                    "name": "followup_performed",
+                    "description": "Follow-up webhook was sent when requested",
+                    "required": True,
+                    "value": followup_performed,
+                },
+                {
+                    "name": "followup_no_reply",
+                    "description": "Follow-up produced no additional middleware reply",
+                    "required": True,
+                    "value": followup_no_reply,
+                },
+                {
+                    "name": "followup_routed_support",
+                    "description": "Follow-up resulted in route-to-support outcome",
+                    "required": True,
+                    "value": followup_routed_ok,
+                },
+                {
+                    "name": "followup_route_tag",
+                    "description": "Follow-up applied route-email-support-team tag",
+                    "required": True,
+                    "value": followup_route_tag_present,
+                },
+                {
+                    "name": "followup_skip_followup_tag",
+                    "description": "Follow-up applied mw-skip-followup-after-auto-reply tag",
+                    "required": True,
+                    "value": followup_skip_followup_tag_present,
                 },
             ]
         )
@@ -2796,6 +3016,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             middleware_tag_ok=middleware_tag_ok,
             middleware_ok=middleware_ok,
             skip_tags_present_ok=skip_tags_present_ok,
+            auto_close_applied=auto_close_applied,
             fallback_used=fallback_used,
             failed=failed,
         )

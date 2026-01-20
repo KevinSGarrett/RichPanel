@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-20 - run_20260120_0221z (b46: order status pass_strong + follow-up routing proofs)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-20-run202601200221z-b46-order-status-passstrong-follow-up-routing-proofs"
+    }
+  ],
   "2026-01-19 - run_20260119_2109z (b46: harden claude pr gate with audit evidence)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

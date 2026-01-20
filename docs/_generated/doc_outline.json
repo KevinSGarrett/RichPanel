@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-20 - RUN_20260120_0221Z (B46: Order Status PASS_STRONG + Follow-up Routing Proofs)",
+        "anchor": "2026-01-20-run202601200221z-b46-order-status-passstrong-follow-up-routing-proofs"
+      },
+      {
+        "level": 3,
         "text": "2026-01-19 - RUN_20260119_2109Z (B46: Harden Claude PR Gate with Audit Evidence)",
         "anchor": "2026-01-19-run202601192109z-b46-harden-claude-pr-gate-with-audit-evidence"
       },

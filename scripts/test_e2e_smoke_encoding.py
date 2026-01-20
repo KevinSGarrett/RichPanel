@@ -333,6 +333,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=[],
         )
@@ -345,6 +346,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=False,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=[],
         )
@@ -358,6 +360,7 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=False,
+            auto_close_applied=False,
             fallback_used=False,
             failed=["no_skip_tags"],
         )
@@ -371,11 +374,26 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=False,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=True,
             failed=[],
         )
         self.assertEqual(result, "PASS_WEAK")
         self.assertEqual(reason, "fallback_close_used_by_harness")
+
+    def test_fallback_used_with_failed_criteria_marks_fail_debug(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=False,
+            skip_tags_present_ok=True,
+            auto_close_applied=False,
+            fallback_used=True,
+            failed=["status_resolved_or_closed"],
+        )
+        self.assertEqual(result, "FAIL_DEBUG")
+        self.assertEqual(reason, "fallback_close_used_but_criteria_failed")
 
     def test_fail_when_base_pass_false(self) -> None:
         result, reason = _classify_order_status_result(
@@ -384,11 +402,40 @@ class ClassificationTests(unittest.TestCase):
             middleware_tag_ok=True,
             middleware_ok=True,
             skip_tags_present_ok=True,
+            auto_close_applied=False,
             fallback_used=False,
             failed=["middleware_outcome"],
         )
         self.assertEqual(result, "FAIL")
         self.assertEqual(reason, "Failed criteria: middleware_outcome")
+
+    def test_auto_close_applied_degrades_to_pass_weak(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=True,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            auto_close_applied=True,
+            fallback_used=False,
+            failed=[],
+        )
+        self.assertEqual(result, "PASS_WEAK")
+        self.assertEqual(reason, "debug_auto_close_applied")
+
+    def test_auto_close_fail_debug_when_criteria_missing(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=False,
+            middleware_tag_ok=False,
+            middleware_ok=False,
+            skip_tags_present_ok=True,
+            auto_close_applied=True,
+            fallback_used=False,
+            failed=["status_resolved_or_closed"],
+        )
+        self.assertEqual(result, "FAIL_DEBUG")
+        self.assertEqual(reason, "debug_auto_close_applied_but_criteria_failed")
 
 
 class PIISafetyTests(unittest.TestCase):

@@ -523,7 +523,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertTrue(result["sent"])
-        self.assertEqual(len(executor.calls), 3)
+        self.assertEqual(len(executor.calls), 4)
 
         get_call = executor.calls[0]
         self.assertEqual(get_call["method"], "GET")
@@ -654,7 +654,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertEqual(route_tags, sorted(route_tags))
         self.assertIn("route-email-support-team", route_tags)
         self.assertIn("mw-skip-followup-after-auto-reply", route_tags)
-        self.assertIn("mw-escalated-human", route_tags)
+        self.assertNotIn("mw-escalated-human", route_tags)
 
     def test_outbound_status_read_failure_routes_to_email_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -747,6 +747,20 @@ class _RecordingExecutor:
                 url=path,
                 dry_run=kwargs.get("dry_run", False),
             )
+
+        if method.upper() == "PUT" and "/add-tags" in path:
+            tags = kwargs.get("json_body", {}).get("tags") or []
+            self.ticket_tags = sorted(set(self.ticket_tags + tags))
+
+        if method.upper() == "PUT" and path.startswith("/v1/tickets/"):
+            payload = kwargs.get("json_body") or {}
+            ticket_payload = payload.get("ticket") or {}
+            status = ticket_payload.get("status") or payload.get("status")
+            state = ticket_payload.get("state") or payload.get("state")
+            if status:
+                self.ticket_status = str(status).lower()
+            if state:
+                self.ticket_status = str(state).lower()
 
         status_code = (
             self.reply_status_codes[self._reply_index]
