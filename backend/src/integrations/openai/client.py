@@ -78,9 +78,13 @@ class ChatCompletionRequest:
             "messages": [{"role": m.role, "content": m.content} for m in self.messages],
         }
         if self.temperature is not None:
-            if not _uses_max_completion_tokens(self.model) or float(self.temperature) == 1.0:
+            if not _uses_max_completion_tokens(self.model):
+                payload["temperature"] = self.temperature
+            elif float(self.temperature) != 0.0:
                 payload["temperature"] = self.temperature
         if self.max_tokens is not None:
+            if self.max_tokens <= 0:
+                raise ValueError("max_tokens must be a positive integer")
             if _uses_max_completion_tokens(self.model):
                 payload["max_completion_tokens"] = self.max_tokens
             else:
