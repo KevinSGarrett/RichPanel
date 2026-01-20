@@ -7363,6 +7363,36 @@
       "anchor": "optional-reference-implementation"
     }
   ],
+  "order-status intent eval harness (pii-safe)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",
+      "anchor": "order-status-intent-eval-harness-pii-safe"
+    }
+  ],
+  "local golden-set run": [
+    {
+      "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",
+      "anchor": "local-golden-set-run"
+    }
+  ],
+  "live shadow run (read-only)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",
+      "anchor": "live-shadow-run-read-only"
+    }
+  ],
+  "success thresholds (initial)": [
+    {
+      "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",
+      "anchor": "success-thresholds-initial"
+    }
+  ],
+  "evidence required for 95+ review": [
+    {
+      "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",
+      "anchor": "evidence-required-for-95-review"
+    }
+  ],
   "open questions (can be answered later)": [
     {
       "path": "04_LLM_Design_Evaluation/Offline_Evaluation_Framework.md",

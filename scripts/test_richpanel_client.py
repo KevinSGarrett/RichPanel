@@ -197,6 +197,31 @@ class RichpanelClientTests(unittest.TestCase):
         # Transport should only have been called for the GET.
         self.assertEqual(len(transport.requests), 1)
 
+    def test_read_only_blocks_non_get(self) -> None:
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=200, headers={}, body=b""),
+                TransportResponse(status_code=200, headers={}, body=b""),
+            ]
+        )
+        client = RichpanelClient(
+            api_key="test-key", transport=transport, dry_run=False, read_only=True
+        )
+
+        response = client.request("GET", "/v1/ping", dry_run=False)
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+
+        response = client.request("HEAD", "/v1/ping", dry_run=False)
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+
+        with self.assertRaises(RichpanelWriteDisabledError):
+            client.request("POST", "/v1/blocked", json_body={"x": 1}, dry_run=False)
+
+        # Transport should only be called for GET/HEAD.
+        self.assertEqual(len(transport.requests), 2)
+
     def test_get_ticket_metadata_handles_ticket_dict(self) -> None:
         body = (
             b'{"ticket": {"status": "OPEN", "tags": ["vip"], "conversation_no": 123}}'

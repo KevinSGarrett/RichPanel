@@ -142,7 +142,8 @@ All integration clients support **environment variable overrides** for local dev
 | `RICHPANEL_API_KEY_OVERRIDE`         | Override API key (skip Secrets Manager)      | Uses AWS Secrets Manager if not set     |
 | `RICHPANEL_API_KEY_SECRET_ARN`       | Custom secret path                           | `rp-mw/<env>/richpanel/api_key`         |
 | `RICHPANEL_OUTBOUND_ENABLED`         | Enable outbound writes (default: dry-run)    | `false` (dry-run by default)            |
-| `RICHPANEL_WRITE_DISABLED`           | Hard block all non-GET requests              | `false` (write block off by default)    |
+| `RICHPANEL_WRITE_DISABLED`           | Hard block all non-GET/HEAD requests         | `false` (write block off by default)    |
+| `RICHPANEL_READ_ONLY`                | Force GET/HEAD-only requests                 | `false` (read-only off by default)      |
 
 **Code reference (secret path resolution):** `backend/src/richpanel_middleware/integrations/richpanel/client.py` L217-L221
 
@@ -180,7 +181,7 @@ All integration clients support **environment variable overrides** for local dev
 **Solution:** The middleware enforces **read-only "shadow mode"** in production via code-level write blocking:
 
 1. **Environment-based enforcement:** When `MW_ENV=prod`, the worker sets `RICHPANEL_WRITE_DISABLED=true`
-2. **Request-level blocking:** The `RichpanelClient.request()` method checks if the HTTP method is `GET`; all other methods (`POST`, `PUT`, `PATCH`, `DELETE`) raise `RichpanelWriteDisabledError` and are blocked **before** the network call
+2. **Request-level blocking:** The `RichpanelClient.request()` method checks for read-only or write-disabled mode; only `GET`/`HEAD` are allowed and all other methods (`POST`, `PUT`, `PATCH`, `DELETE`) raise `RichpanelWriteDisabledError` before the network call
 3. **Safety gates:** Worker logic checks `safe_mode` and `automation_enabled` SSM parameters before executing any automation
 
 **Code reference (write gate):** `backend/src/richpanel_middleware/integrations/richpanel/client.py` L255-L264

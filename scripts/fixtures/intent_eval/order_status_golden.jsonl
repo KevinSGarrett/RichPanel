@@ -1,0 +1,20 @@
+{"id":"order-status-01","text":"Where is my order?","expected":"order_status"}
+{"id":"order-status-02","text":"Can you send the tracking number for my shipment?","expected":"order_status"}
+{"id":"order-status-03","text":"What is the delivery status for my order?","expected":"order_status"}
+{"id":"order-status-04","text":"My package has not arrived yet, please update me.","expected":"order_status"}
+{"id":"order-status-05","text":"Tracking link is missing; need a shipping update.","expected":"order_status"}
+{"id":"order-status-06","text":"Order status update please.","expected":"order_status"}
+{"id":"order-status-07","text":"Has my order shipped yet? Need shipping status.","expected":"order_status"}
+{"id":"order-status-08","text":"Is my shipment on the way?","expected":"order_status"}
+{"id":"order-status-09","text":"I need a tracking update for my delivery.","expected":"order_status"}
+{"id":"order-status-10","text":"Label created but no movement yet.","expected":"order_status"}
+{"id":"non-order-01","text":"I want a refund for my purchase.","expected":"non_order_status"}
+{"id":"non-order-02","text":"The item is damaged and I need a replacement.","expected":"non_order_status"}
+{"id":"non-order-03","text":"Please exchange this size for a larger one.","expected":"non_order_status"}
+{"id":"non-order-04","text":"Cancel my order immediately.","expected":"non_order_status"}
+{"id":"non-order-05","text":"Update my billing address on my account.","expected":"non_order_status"}
+{"id":"non-order-06","text":"I was charged twice on my card.","expected":"non_order_status"}
+{"id":"non-order-07","text":"My promo code is not working at checkout.","expected":"non_order_status"}
+{"id":"non-order-08","text":"I'd like to start a return for this item.","expected":"non_order_status"}
+{"id":"non-order-09","text":"I need help logging into my account.","expected":"non_order_status"}
+{"id":"non-order-10","text":"This is spam about a giveaway, please ignore.","expected":"non_order_status"}

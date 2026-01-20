@@ -100,7 +100,8 @@ def _build_richpanel_client(
     return RichpanelClient(
         api_key_secret_id=richpanel_secret,
         base_url=base_url,
-        dry_run=False,  # allow GETs; writes are still blocked by RICHPANEL_WRITE_DISABLED
+        dry_run=False,  # allow GETs; writes are still blocked by read-only + env guard
+        read_only=True,
     )
 
 
