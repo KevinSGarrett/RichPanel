@@ -366,6 +366,35 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertTrue(evidence["rewrite_attempted"])
         self.assertEqual(evidence["response_id"], "resp-1")
 
+    def test_draft_reply_type_no_tracking(self) -> None:
+        ticket = {
+            "customer_message": "where is my order",
+            "order": {"order_id": "o-1"},
+        }
+        rp_client = _GuardedRichpanelClient(ticket, {})
+        shopify_client = _GuardedShopifyClient()
+        routing = SimpleNamespace(
+            intent="order_status_tracking",
+            department="Email Support Team",
+            reason="stubbed",
+        )
+        routing_artifact = SimpleNamespace(
+            primary_source="deterministic",
+            llm_suggestion={"confidence": 0.1, "model": "gpt-test"},
+        )
+        with mock.patch.object(
+            shadow, "compute_dual_routing", return_value=(routing, routing_artifact)
+        ):
+            result = shadow.run_ticket(
+                "t-4",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=False,
+                outbound_enabled=False,
+                rewrite_enabled=False,
+            )
+        self.assertEqual(result["order_status"]["draft_reply_type"], "no_tracking")
+
     def test_build_openai_evidence(self) -> None:
         rewrite_result = shadow.ReplyRewriteResult(
             body="x",
@@ -395,6 +424,9 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         info = shadow._build_route_info(routing, artifact)
         self.assertEqual(info["intent"], "order_status_tracking")
         self.assertEqual(info["primary_source"], "deterministic")
+        artifact = SimpleNamespace(primary_source="deterministic")
+        info = shadow._build_route_info(routing, artifact)
+        self.assertIsNone(info["confidence"])
 
     def test_extract_latest_customer_message(self) -> None:
         convo = {

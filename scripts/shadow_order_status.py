@@ -172,7 +172,6 @@ def _redact_path(path: str) -> str:
         "shipments",
         "shipment",
         "admin",
-        "api",
     }
     redacted_segments: list[str] = []
     for segment in segments:
@@ -541,7 +540,9 @@ def _build_event_envelope(payload: Dict[str, Any], *, ticket_id: str) -> EventEn
 def _build_route_info(
     routing: Any, routing_artifact: Any
 ) -> Dict[str, Optional[Any]]:
-    llm = routing_artifact.llm_suggestion if routing_artifact else {}
+    llm = getattr(routing_artifact, "llm_suggestion", None) if routing_artifact else None
+    if not isinstance(llm, dict):
+        llm = {}
     confidence = None
     if isinstance(llm, dict):
         confidence = llm.get("confidence")
@@ -586,7 +587,8 @@ def run_ticket(
     )
 
     route_info = _build_route_info(routing, routing_artifact)
-    is_order_status = routing.intent in ORDER_STATUS_INTENTS
+    intent = getattr(routing, "intent", None) if routing else None
+    is_order_status = intent in ORDER_STATUS_INTENTS
 
     result: Dict[str, Any] = {
         "ticket_id": ticket_id,
@@ -621,7 +623,10 @@ def run_ticket(
         or envelope.received_at
     )
     delivery_estimate = None
+    draft_reply_type = None
     draft_reply = build_tracking_reply(order_summary)
+    if draft_reply:
+        draft_reply_type = "tracking"
     if not draft_reply:
         order_created_at = (
             order_summary.get("created_at")
@@ -643,6 +648,8 @@ def run_ticket(
             inquiry_date=ticket_created_at,
             delivery_estimate=delivery_estimate,
         )
+        if draft_reply:
+            draft_reply_type = "no_tracking"
 
     openai_evidence = None
     if rewrite_enabled and draft_reply and draft_reply.get("body"):
@@ -682,7 +689,7 @@ def run_ticket(
             if isinstance(delivery_estimate, dict)
             else None,
             "draft_reply_generated": bool(draft_reply),
-            "draft_reply_type": "tracking" if tracking_present else "no_tracking",
+            "draft_reply_type": draft_reply_type,
         }
     )
 
