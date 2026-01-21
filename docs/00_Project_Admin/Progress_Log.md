@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-21 - RUN_20260121_2228Z (B50: Richpanel read only safety tests + docs)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260121_2228Z
+- PR: not created yet
+- Added Richpanel client safety tests for read only and write disabled behavior.
+- Documented explicit env var contract for read only shadow runs and go live.
+- Regenerated doc registries and added run artifacts for A/B/C.
+
 ### 2026-01-21 - RUN_20260121_1440Z (B50: gate:claude enforcement + PR description template lock-in)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260121_1440Z
 - PR #136: https://github.com/KevinSGarrett/RichPanel/pull/136
