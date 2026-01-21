@@ -11,7 +11,7 @@ Set these **before** running the script:
 
 - `RICHPANEL_READ_ONLY=true`
 - `RICHPANEL_WRITE_DISABLED=true`
-- `RICHANEL_ENV=staging` or `RICHANEL_ENV=prod` (required; script will set `RICHPANEL_ENV` to match)
+- `RICHPANEL_ENV=staging` or `RICHPANEL_ENV=prod` (required)
 - `MW_ALLOW_NETWORK_READS=true` (enables read-only Shopify + Richpanel reads)
 
 ## Optional Environment Variables
@@ -49,3 +49,4 @@ python scripts/shadow_order_status.py \
 - **DO NOT RUN WITHOUT READ-ONLY GUARDS.**
 - **Do not run in CI** (live keys are prohibited in CI).
 - Never add or expose raw ticket payloads in logs or output.
+- OpenAI calls only occur when both `RICHPANEL_OUTBOUND_ENABLED=true` and `OPENAI_ALLOW_NETWORK=true`.

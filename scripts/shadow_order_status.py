@@ -120,20 +120,24 @@ def _require_env_flag(key: str, expected: str, *, context: str) -> None:
 
 
 def _resolve_env_name() -> str:
-    value = os.environ.get("RICHANEL_ENV")
+    value = os.environ.get("RICHPANEL_ENV") or os.environ.get("RICH_PANEL_ENV")
     if value is None:
         raise SystemExit(
-            "RICHANEL_ENV must be set to 'staging' or 'prod' for shadow order status"
+            "RICHPANEL_ENV must be set to 'staging' or 'prod' for shadow order status"
         )
     normalized = str(value).strip().lower()
     if not normalized:
         raise SystemExit(
-            "RICHANEL_ENV must be set to 'staging' or 'prod' for shadow order status"
+            "RICHPANEL_ENV must be set to 'staging' or 'prod' for shadow order status"
         )
     return normalized
 
 
 def _resolve_shopify_secret_id(env_name: str) -> str:
+    if os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE"):
+        raise SystemExit(
+            "SHOPIFY_ACCESS_TOKEN_OVERRIDE is not allowed in shadow mode; use Secrets Manager"
+        )
     override = os.environ.get("SHOPIFY_ACCESS_TOKEN_SECRET_ID")
     if override:
         lowered = override.lower()
@@ -141,10 +145,6 @@ def _resolve_shopify_secret_id(env_name: str) -> str:
             return override
         raise SystemExit(
             "SHOPIFY_ACCESS_TOKEN_SECRET_ID must reference a Shopify admin_api_token/access_token secret"
-        )
-    if os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE"):
-        raise SystemExit(
-            "SHOPIFY_ACCESS_TOKEN_OVERRIDE is not allowed in shadow mode; use Secrets Manager"
         )
     return f"rp-mw/{env_name}/shopify/admin_api_token"
 
@@ -284,7 +284,7 @@ def _require_readonly_guards(*, confirm_live_readonly: bool) -> str:
     env_name = _resolve_env_name()
     if env_name not in ALLOWED_ENVS:
         raise SystemExit(
-            f"RICHANEL_ENV must be one of {sorted(ALLOWED_ENVS)} (found {env_name})"
+            f"RICHPANEL_ENV must be one of {sorted(ALLOWED_ENVS)} (found {env_name})"
         )
     if not confirm_live_readonly:
         raise SystemExit(
@@ -741,8 +741,8 @@ def main() -> int:
         allow_network=allow_network, env_name=env_name
     )
 
-    trace = _HttpTrace().capture()
     trace_path = _build_trace_path()
+    trace = _HttpTrace().capture()
     try:
         results: List[Dict[str, Any]] = []
         had_errors = False

@@ -53,10 +53,20 @@ class _GuardedShopifyClient:
         raise AssertionError("Shopify should not be called for payload-first summary")
 
 
+class _StubShopifyResponse:
+    def __init__(self, payload: dict, status_code: int = 200, dry_run: bool = False):
+        self.status_code = status_code
+        self.dry_run = dry_run
+        self._payload = payload
+
+    def json(self) -> dict:
+        return self._payload
+
+
 class ShadowOrderStatusGuardTests(unittest.TestCase):
     def test_requires_readonly_flags(self) -> None:
         env = {
-            "RICHANEL_ENV": "staging",
+            "RICHPANEL_ENV": "staging",
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
@@ -67,7 +77,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 
     def test_requires_confirm_flag(self) -> None:
         env = {
-            "RICHANEL_ENV": "staging",
+            "RICHPANEL_ENV": "staging",
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
@@ -79,7 +89,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 
     def test_env_must_be_staging_or_prod(self) -> None:
         env = {
-            "RICHANEL_ENV": "dev",
+            "RICHPANEL_ENV": "dev",
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
@@ -91,7 +101,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 
     def test_requires_network_read_flag(self) -> None:
         env = {
-            "RICHANEL_ENV": "staging",
+            "RICHPANEL_ENV": "staging",
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
@@ -100,7 +110,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("MW_ALLOW_NETWORK_READS", str(ctx.exception))
 
-    def test_requires_richanel_env(self) -> None:
+    def test_requires_richpanel_env(self) -> None:
         env = {
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
@@ -109,10 +119,23 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
-        self.assertIn("RICHANEL_ENV", str(ctx.exception))
+        self.assertIn("RICHPANEL_ENV", str(ctx.exception))
+
+    def test_resolve_env_name_prefers_richpanel_env(self) -> None:
+        env = {"RICHPANEL_ENV": "Staging", "RICH_PANEL_ENV": "prod"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(shadow._resolve_env_name(), "staging")
+
+    def test_resolve_env_name_fallback(self) -> None:
+        env = {"RICH_PANEL_ENV": "prod"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(shadow._resolve_env_name(), "prod")
 
     def test_shopify_secret_override_guard(self) -> None:
-        env = {"SHOPIFY_ACCESS_TOKEN_OVERRIDE": "tok"}
+        env = {
+            "SHOPIFY_ACCESS_TOKEN_OVERRIDE": "tok",
+            "SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/shopify/admin_api_token",
+        }
         with mock.patch.dict(os.environ, env, clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._resolve_shopify_secret_id("staging")
@@ -147,6 +170,15 @@ class ShadowOrderStatusRedactionTests(unittest.TestCase):
         self.assertEqual(redacted["phone"], "REDACTED")
         self.assertEqual(redacted["address"], "REDACTED")
 
+    def test_redact_path_variants(self) -> None:
+        self.assertEqual(shadow._redact_path(""), "/")
+        redacted = shadow._redact_path("/v1/tickets/91608")
+        self.assertIn("/v1/tickets/", redacted)
+        self.assertNotIn("91608", redacted)
+        redacted = shadow._redact_path("/api/v1/orders/ABC")
+        self.assertIn("/ABC", redacted)
+        self.assertNotIn("redacted:", redacted)
+
 
 class ShadowOrderStatusTraceTests(unittest.TestCase):
     def test_http_trace_blocks_non_get(self) -> None:
@@ -162,6 +194,42 @@ class ShadowOrderStatusTraceTests(unittest.TestCase):
         trace = shadow._HttpTrace()
         trace.record("POST", "https://api.openai.com/v1/chat/completions")
         trace.assert_read_only(allow_openai=True, trace_path=Path("trace.json"))
+
+    def test_http_trace_capture_restores_urlopen(self) -> None:
+        calls = []
+
+        def fake_urlopen(req, *args, **kwargs):
+            calls.append(req)
+
+            class _DummyResponse:
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, exc_type, exc, tb):
+                    return False
+
+                def read(self):
+                    return b""
+
+                @property
+                def headers(self):
+                    return {}
+
+                def getcode(self):
+                    return 200
+
+            return _DummyResponse()
+
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen) as patched:
+            trace = shadow._HttpTrace().capture()
+            request = shadow.urllib.request.Request(
+                "https://api.richpanel.com/v1/tickets/123", method="GET"
+            )
+            shadow.urllib.request.urlopen(request)
+            trace.stop()
+            self.assertIs(shadow.urllib.request.urlopen, patched)
+        self.assertTrue(calls)
+        self.assertTrue(trace.entries)
 
 
 class ShadowOrderStatusNoWriteTests(unittest.TestCase):
@@ -195,6 +263,150 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertEqual(result["order_status"]["tracking_number_last4"], "3456")
         self.assertEqual(result["customer"]["name"], "REDACTED")
 
+    def test_run_ticket_non_order_status(self) -> None:
+        ticket = {"customer_message": "refund my order"}
+        rp_client = _GuardedRichpanelClient(ticket, {})
+        shopify_client = _GuardedShopifyClient()
+        routing = SimpleNamespace(
+            intent="refund_request",
+            department="Returns Admin",
+            reason="stubbed",
+        )
+        routing_artifact = SimpleNamespace(
+            primary_source="deterministic",
+            llm_suggestion={"confidence": 0.2, "model": "gpt-test"},
+        )
+        with mock.patch.object(
+            shadow, "compute_dual_routing", return_value=(routing, routing_artifact)
+        ):
+            result = shadow.run_ticket(
+                "t-2",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=False,
+                outbound_enabled=False,
+                rewrite_enabled=False,
+            )
+        self.assertFalse(result["order_status"]["is_order_status"])
+        self.assertEqual(result["order_status"]["skipped_reason"], "route_not_order_status")
+
+    def test_run_ticket_openai_evidence(self) -> None:
+        ticket = {
+            "customer_message": "where is my order",
+            "order": {"tracking_number": "TN1234", "carrier": "UPS"},
+        }
+        rp_client = _GuardedRichpanelClient(ticket, {})
+        shopify_client = _GuardedShopifyClient()
+        routing = SimpleNamespace(
+            intent="order_status_tracking",
+            department="Email Support Team",
+            reason="stubbed",
+        )
+        routing_artifact = SimpleNamespace(
+            primary_source="deterministic",
+            llm_suggestion={"confidence": 0.8, "model": "gpt-test"},
+        )
+        rewrite_result = shadow.ReplyRewriteResult(
+            body="rewritten",
+            rewritten=True,
+            reason="ok",
+            model="gpt-test",
+            confidence=0.9,
+            dry_run=False,
+            fingerprint="fp",
+            llm_called=True,
+            response_id="resp-1",
+        )
+        with mock.patch.object(
+            shadow, "compute_dual_routing", return_value=(routing, routing_artifact)
+        ), mock.patch.object(
+            shadow, "rewrite_reply", return_value=rewrite_result
+        ):
+            result = shadow.run_ticket(
+                "t-3",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=True,
+                outbound_enabled=True,
+                rewrite_enabled=True,
+            )
+        evidence = result["order_status"]["openai_rewrite"]
+        self.assertTrue(evidence["rewrite_attempted"])
+        self.assertEqual(evidence["response_id"], "resp-1")
+
+    def test_lookup_order_summary_payload_first_shopify(self) -> None:
+        class _ShopifyClient:
+            def get_order(self, *args, **kwargs):
+                payload = {
+                    "order": {
+                        "created_at": "2024-01-01T00:00:00Z",
+                        "fulfillments": [
+                            {"tracking_number": "TN123", "tracking_company": "UPS"}
+                        ],
+                        "shipping_lines": [{"title": "Standard"}],
+                    }
+                }
+                return _StubShopifyResponse(payload)
+
+        envelope = shadow._build_event_envelope(
+            {"order_id": "o-1"}, ticket_id="t-1"
+        )
+        summary, source = shadow._lookup_order_summary_payload_first(
+            envelope, allow_network=True, shopify_client=_ShopifyClient()
+        )
+        self.assertEqual(source, "shopify")
+        self.assertEqual(summary.get("carrier"), "UPS")
+
+    def test_lookup_order_summary_payload_first_payload(self) -> None:
+        envelope = shadow._build_event_envelope(
+            {"order": {"tracking_number": "TN999"}}, ticket_id="t-9"
+        )
+        summary, source = shadow._lookup_order_summary_payload_first(
+            envelope, allow_network=False, shopify_client=_GuardedShopifyClient()
+        )
+        self.assertEqual(source, "payload")
+        self.assertEqual(summary.get("tracking_number"), "TN999")
+
+    def test_fetch_ticket_fallbacks(self) -> None:
+        class _SequenceClient:
+            def __init__(self):
+                self.calls = []
+
+            def request(self, method: str, path: str, **kwargs):
+                self.calls.append(path)
+                if path.endswith("/v1/tickets/123"):
+                    return _StubResponse({}, status_code=404)
+                if path.endswith("/v1/tickets/number/123"):
+                    return _StubResponse({"ticket": {"id": "t-123"}})
+                return _StubResponse({}, status_code=404)
+
+        ticket = shadow._fetch_ticket(_SequenceClient(), "123")
+        self.assertEqual(ticket.get("id"), "t-123")
+
+    def test_fetch_ticket_raises(self) -> None:
+        class _FailClient:
+            def request(self, method: str, path: str, **kwargs):
+                raise shadow.RichpanelRequestError("boom")
+
+        with self.assertRaises(SystemExit):
+            shadow._fetch_ticket(_FailClient(), "ticket-xyz")
+
+    def test_fetch_conversation_handles_error(self) -> None:
+        class _ErrorClient:
+            def request(self, method: str, path: str, **kwargs):
+                return _StubResponse({}, status_code=500)
+
+        result = shadow._fetch_conversation(_ErrorClient(), "t-1")
+        self.assertEqual(result, {})
+
+    def test_fetch_conversation_handles_exception(self) -> None:
+        class _BoomClient:
+            def request(self, method: str, path: str, **kwargs):
+                raise RuntimeError("boom")
+
+        result = shadow._fetch_conversation(_BoomClient(), "t-1")
+        self.assertEqual(result, {})
+
     def test_main_output_redacts_pii(self) -> None:
         ticket_payload = {
             "id": "t-1",
@@ -211,7 +423,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "shipping_address": {"line1": "123 Main"},
         }
         env = {
-            "RICHANEL_ENV": "staging",
+            "RICHPANEL_ENV": "staging",
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
