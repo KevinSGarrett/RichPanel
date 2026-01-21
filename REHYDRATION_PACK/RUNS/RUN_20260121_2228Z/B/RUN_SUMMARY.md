@@ -17,12 +17,13 @@ Harden Richpanel read only safety with tests, docs, and run evidence.
 - backend/tests/test_richpanel_client_safety.py
 - docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md
 - docs/_generated/* and docs/00_Project_Admin/To_Do/_generated/*
-- REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/*
+- docs/00_Project_Admin/Progress_Log.md
+- REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/*
 
 ## Git/GitHub status (required)
 - Working branch: b50/richpanel-readonly-tests-and-docs
-- PR: not created yet
-- CI status at end of run: not yet passing due to run artifacts
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/137 (merged)
+- CI status at end of run: local CI-equivalent pass; PR checks green; PR merged
 - Main updated: no
 - Branch cleanup done: no
 
@@ -34,4 +35,4 @@ Harden Richpanel read only safety with tests, docs, and run evidence.
 - Treat prod and staging as read only by default in Richpanel client.
 
 ## Issues / follow-ups
-- Create PR and complete gate checks.
+- None.

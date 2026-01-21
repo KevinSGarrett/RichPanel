@@ -6,12 +6,15 @@
 - Date (UTC): 2026-01-21
 - Worktree path: C:\RichPanel_GIT
 - Branch: b50/richpanel-readonly-tests-and-docs
-- PR: not created yet
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/137
+- Labels: risk:R2, gate:claude
+- Claude gate response id: msg_01W4k77iKeyxXRPMi48Eppe7 (https://github.com/KevinSGarrett/RichPanel/pull/137#issuecomment-3781483087)
+- PR status: merged
 - PR merge strategy: merge commit
 
 ## Objective + stop conditions
 - Objective: Harden Richpanel read only safety with tests, docs, and run evidence.
-- Stop conditions: Tests pass, docs updated, run artifacts complete, PR created.
+- Stop conditions: Tests pass, docs updated, run artifacts complete, PR created, gates recorded.
 
 ## What changed (high-level)
 - Added Richpanel safety tests for read only and write disabled behavior.
@@ -25,34 +28,58 @@
 - Write disabled behavior: RichpanelClient.request raises RichpanelWriteDisabledError before transport IO for non GET or HEAD.
 
 ## Diffstat
-33c13c7 Add Richpanel read-only safety tests and docs
- REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/RUN_REPORT.md        | 43 ++++++++++++
- backend/src/richpanel_middleware/integrations/richpanel/client.py | 12 ++--
- backend/tests/test_richpanel_client_safety.py      | 79 ++++++++++++++++++++++
- docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md | 58 ++++++++--------
- docs/00_Project_Admin/To_Do/_generated/plan_checklist.json           | 58 ++++++++--------
- docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md           | 17 +++++
- docs/_generated/doc_outline.json                   |  5 ++
- docs/_generated/doc_registry.compact.json          |  2 +-
- docs/_generated/doc_registry.json                  |  4 +-
- docs/_generated/heading_index.json                 |  6 ++
- 10 files changed, 219 insertions(+), 65 deletions(-)
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/A/DOCS_IMPACT_MAP.md   | 22 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/A/RUN_REPORT.md        | 42 ++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/A/RUN_SUMMARY.md       | 31 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/A/STRUCTURE_REPORT.md  | 25 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/A/TEST_MATRIX.md       | 14 +++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/DOCS_IMPACT_MAP.md   | 28 ++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/RUN_REPORT.md        | 82 ++++++++++++++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/RUN_SUMMARY.md       | 37 ++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/STRUCTURE_REPORT.md  | 39 ++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/TEST_MATRIX.md       | 15 ++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/C/DOCS_IMPACT_MAP.md   | 22 ++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/C/RUN_REPORT.md        | 42 ++++++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/C/RUN_SUMMARY.md       | 31 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/C/STRUCTURE_REPORT.md  | 25 +++++++
+REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/C/TEST_MATRIX.md       | 14 +++
+backend/src/richpanel_middleware/integrations/richpanel/client.py | 12 ++--
+backend/tests/test_richpanel_client_safety.py      | 79 +++++++++++++++++++++
+docs/00_Project_Admin/Progress_Log.md              |  7 ++
+docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md   | 58 +++++++--------
+docs/00_Project_Admin/To_Do/_generated/plan_checklist.json           | 58 +++++++--------
+docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md           | 17 +++++
+docs/_generated/doc_outline.json                   | 10 +++
+docs/_generated/doc_registry.compact.json          |  2 +-
+docs/_generated/doc_registry.json                  |  8 +--
+docs/_generated/heading_index.json                 | 12 ++++
+25 files changed, 665 insertions(+), 67 deletions(-)
 
 ## Files Changed
 - backend/src/richpanel_middleware/integrations/richpanel/client.py - read only resolution defaults for prod and staging.
 - backend/tests/test_richpanel_client_safety.py - safety contract unit tests.
 - docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md - explicit env var contract.
+- docs/00_Project_Admin/Progress_Log.md - added RUN_20260121_2228Z entry.
 - docs/_generated/* and docs/00_Project_Admin/To_Do/_generated/* - registry regeneration after doc changes.
-- REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/B/RUN_REPORT.md - run evidence.
+- REHYDRATION_PACK/RUNS/RUN_20260121_2228Z/* - run evidence for A, B, C.
 
 ## Commands Run
 - pytest -q
 - python scripts/run_ci_checks.py --ci
-- git show --stat --oneline HEAD
+- git diff --stat origin/b50/required-gate-claude-and-pr-desc-template..HEAD
+- git push -u origin b50/richpanel-readonly-tests-and-docs
+- gh pr create
+- gh pr edit
 
 ## Tests / Proof
 - pytest -q: 331 passed, 4 subtests passed in 19.76s
-- python scripts/run_ci_checks.py --ci: failed due to missing run artifacts for the latest run; rerun after artifacts are completed.
+- python scripts/run_ci_checks.py --ci: passed (CI-equivalent)
+
+Output snippet:
+pytest -q
+331 passed, 4 subtests passed in 19.76s
+
+[OK] CI-equivalent checks passed.
 
 ## Docs impact (summary)
 - Docs updated: docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md
@@ -75,8 +102,7 @@ Go live:
 - Ensure prod and staging default to read only when env override not provided.
 
 ## Blockers / open questions
-- PR not created yet; labels and gate response id pending.
+- None.
 
 ## Follow-ups (actionable)
-- Create PR, apply labels risk:R2 and gate:claude, and record gate response id.
-- Rerun python scripts/run_ci_checks.py --ci after run artifacts are complete.
+- None.
