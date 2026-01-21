@@ -1,0 +1,21 @@
+# RUN REPORT
+
+- Branch: b50/required-gate-claude-and-pr-desc-template
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/136
+- Labels: risk:R1, gate:claude
+- CI command: `python scripts/run_ci_checks.py --ci`
+- CI output (highlights):
+  - OK: regenerated doc/reference registries and plan checklist
+  - WARN (pre-existing): legacy run folders with non-matching names (B42_AGENT_C, B46_AGENT_C, RUN_20260119_B42)
+  - All validation suites passed; `[OK] CI-equivalent checks passed.`
+- Claude gate: PASS (no skip)
+  - Model: claude-sonnet-4-5-20250929
+  - Response ID: msg_013JdPWAb8ZrVPzkK6NTkDWi
+  - Comment: https://github.com/KevinSGarrett/RichPanel/pull/136#issuecomment-3781073138
+  - Workflow wrote comment body to `.claude_gate_comment.txt` on runner; enforcement step now fails if skip!=false or response_id/model is empty.
+- Workflow/process notes:
+  - `pr_risk_label_required.yml` now fails when `gate:claude` is missing (while keeping exactly-one risk label rule).
+  - `pr_claude_gate_required.yml` drops continue-on-error and enforces skip=false + response_id/model output to prevent silent passes.
+  - PR template and Cursor agent prompts now require `REHYDRATION_PACK/PR_DESCRIPTION/` compliance, risk+gate labels, and self-score gates; added short agent prompt template.
+- Bugbot: check run completed (neutral) with summary "1 potential issue" — see Cursor check run https://github.com/KevinSGarrett/RichPanel/runs/61069847337
+- Codecov: pass (patch) for PR #136.
