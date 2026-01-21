@@ -125,7 +125,14 @@ def _coerce_transit_int(value: Any) -> Optional[int]:
         return int(value) if value.is_integer() else None
     if isinstance(value, str):
         text = value.strip()
-        return int(text) if text.isdigit() else None
+        if not text:
+            return None
+        if text.isdecimal() and text.isascii():
+            try:
+                return int(text)
+            except ValueError:
+                return None
+        return None
     return None
 
 

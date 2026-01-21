@@ -116,6 +116,18 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(window["min_days"], 1)
         self.assertEqual(window["max_days"], 2)
 
+    def test_mapping_unicode_digit_strings_ignored(self) -> None:
+        custom_map = {"standard": ["²", "³"]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Standard Shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 3)
+        self.assertEqual(window["max_days"], 5)
+
     def test_mapping_single_value_list(self) -> None:
         custom_map = {"expedited": [2]}
         with mock.patch.dict(
