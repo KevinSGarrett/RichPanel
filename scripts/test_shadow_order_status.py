@@ -406,6 +406,14 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         message = shadow._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "need tracking")
 
+        convo = {
+            "messages": [
+                {"sender_type": " customer ", "body": "trimmed sender"},
+            ]
+        }
+        message = shadow._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "trimmed sender")
+
     def test_extract_order_payload(self) -> None:
         ticket = {"order": {"order_id": "o-1"}, "__source_path": "/v1/tickets/1"}
         convo = {"orders": [{"tracking_number": "TN123"}]}
