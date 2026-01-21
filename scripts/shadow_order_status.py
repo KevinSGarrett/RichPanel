@@ -34,6 +34,7 @@ from richpanel_middleware.automation.llm_reply_rewriter import (  # type: ignore
     rewrite_reply,
 )
 from richpanel_middleware.automation.llm_routing import (  # type: ignore
+    _to_bool,
     compute_dual_routing,
 )
 from richpanel_middleware.automation.router import (  # type: ignore
@@ -69,12 +70,6 @@ logging.basicConfig(
 
 ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
 ALLOWED_ENVS = {"staging", "prod"}
-
-
-def _to_bool(value: Optional[str], default: bool = False) -> bool:
-    if value is None:
-        return default
-    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
