@@ -270,14 +270,26 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         convo = {}
         rp_client = _GuardedRichpanelClient(ticket, convo)
         shopify_client = _GuardedShopifyClient()
-        result = shadow.run_ticket(
-            "t-1",
-            richpanel_client=rp_client,
-            shopify_client=shopify_client,
-            allow_network=True,
-            outbound_enabled=False,
-            rewrite_enabled=False,
+        routing = SimpleNamespace(
+            intent="order_status_tracking",
+            department="Email Support Team",
+            reason="stubbed",
         )
+        routing_artifact = SimpleNamespace(
+            primary_source="deterministic",
+            llm_suggestion={"confidence": 0.9, "model": "gpt-test"},
+        )
+        with mock.patch.object(
+            shadow, "compute_dual_routing", return_value=(routing, routing_artifact)
+        ):
+            result = shadow.run_ticket(
+                "t-1",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=True,
+                outbound_enabled=False,
+                rewrite_enabled=False,
+            )
         self.assertTrue(all(method in {"GET", "HEAD"} for method in rp_client.methods))
         self.assertFalse(shopify_client.called)
         self.assertEqual(result["order_status"]["tracking_number_last4"], "3456")
