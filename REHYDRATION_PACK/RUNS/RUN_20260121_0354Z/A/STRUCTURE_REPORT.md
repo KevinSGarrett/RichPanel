@@ -5,7 +5,7 @@
 **Date:** 2026-01-21
 
 ## Summary
-- Added mandatory PR metadata enforcement and run artifacts for gate auditability.
+- Added PR metadata enforcement and run artifacts for gate auditability.
 
 ## New files/folders added
 - REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/RUN_REPORT.md
@@ -21,6 +21,8 @@
 - .github/pull_request_template.md
 - REHYDRATION_PACK/PR_DESCRIPTION/*
 - .gitignore
+- docs/00_Project_Admin/Progress_Log.md
+- docs/_generated/*
 
 ## Files/folders removed
 - None
@@ -31,4 +33,4 @@ Run artifacts are required by erify_rehydration_pack.py to validate process com
 ## Navigation updates performed
 - docs/INDEX.md updated: no
 - docs/CODEMAP.md updated: no
-- registries regenerated: no
+- registries regenerated: yes

@@ -10,7 +10,7 @@ Goal: document what changed and where documentation must be updated.
 - None.
 
 ## Docs that should be updated next (if any)
-- None.
+- None
 
 ## Index/registry updates
 - docs/INDEX.md updated: no

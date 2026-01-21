@@ -16,8 +16,8 @@ Goal: document what changed and where documentation must be updated.
 ## Index/registry updates
 - docs/INDEX.md updated: no
 - docs/CODEMAP.md updated: no
-- docs/_generated/* regenerated: no
+- docs/_generated/* regenerated: yes
 - eference/_generated/* regenerated: no
 
 ## Notes
-No registry regeneration required; changes are policy/template focused.
+No additional docs required.
