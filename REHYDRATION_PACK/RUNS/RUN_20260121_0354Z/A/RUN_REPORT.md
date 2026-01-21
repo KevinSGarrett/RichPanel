@@ -1,14 +1,14 @@
 ﻿# Agent Run Report
 
 ## Metadata (required)
-- **Run ID:** $runId
+- **Run ID:** RUN_20260121_0354Z
 - **Agent:** A
 - **Date (UTC):** 2026-01-21
 - **Worktree path:** C:\RichPanel_GIT
-- **Branch:** $branch
+- **Branch:** b49/claude-gate-4_5-and-pr-template
 - **PR:** #133 https://github.com/KevinSGarrett/RichPanel/pull/133
 - **PR merge strategy:** merge commit
-- **Risk label:** isk:R2
+- **Risk label:** risk:R2
 - **gate:claude label:** yes
 - **Claude PASS comment:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
 
@@ -22,7 +22,7 @@
 - Update PR templates + PR_DESCRIPTION docs to require labels, self-scores, and Claude audit fields.
 
 ## Diffstat (required)
-`
+```
 .github/pull_request_template.md | +157 -0
 .github/workflows/pr_claude_gate_required.yml | +16 -3
 .gitignore | +5 -0
@@ -35,17 +35,17 @@ REHYDRATION_PACK/PR_DESCRIPTION/06_AGENT_INSTRUCTIONS_FOR_GENERATING_PR_BODIES.m
 REHYDRATION_PACK/PR_DESCRIPTION/08_PR_TITLE_AND_DESCRIPTION_SCORE_GATE.md | +6 -0
 REHYDRATION_PACK/PR_DESCRIPTION/README.md | +1 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/DOCS_IMPACT_MAP.md | +23 -0
-REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/RUN_REPORT.md | +126 -0
-REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/RUN_SUMMARY.md | +40 -0
-REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/STRUCTURE_REPORT.md | +34 -0
+REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/RUN_REPORT.md | +148 -0
+REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/RUN_SUMMARY.md | +42 -0
+REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/STRUCTURE_REPORT.md | +36 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/TEST_MATRIX.md | +18 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/DOCS_IMPACT_MAP.md | +22 -0
-REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/RUN_REPORT.md | +85 -0
+REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/RUN_REPORT.md | +88 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/RUN_SUMMARY.md | +31 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/STRUCTURE_REPORT.md | +25 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/B/TEST_MATRIX.md | +14 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/DOCS_IMPACT_MAP.md | +22 -0
-REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/RUN_REPORT.md | +85 -0
+REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/RUN_REPORT.md | +88 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/RUN_SUMMARY.md | +31 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/STRUCTURE_REPORT.md | +25 -0
 REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/C/TEST_MATRIX.md | +14 -0
@@ -56,20 +56,20 @@ docs/_generated/doc_registry.json | +2 -2
 docs/_generated/heading_index.json | +6 -0
 scripts/claude_gate_review.py | +31 -6
 scripts/test_claude_gate_review.py | +106 -0
-`
+```
 
 ## Files Changed (required)
-- .github/pull_request_template.md: enforce PR_DESCRIPTION template + score gate + Claude audit fields.
-- .github/workflows/pr_claude_gate_required.yml: strict gate enforcement + no edit-triggered loops.
-- .gitignore: ignore local PR draft artifacts.
-- REHYDRATION_PACK/PR_DESCRIPTION/*: require labels, self-scores, model/response id fields, and examples.
-- scripts/claude_gate_review.py: require response id; emit model_used/esponse_model outputs and logs.
-- scripts/test_claude_gate_review.py: add coverage for response-id missing + model mismatch branches.
-- docs/00_Project_Admin/Progress_Log.md: log RUN_20260121_0354Z.
-- docs/_generated/*: regenerated registries.
+- `.github/pull_request_template.md`: enforce PR_DESCRIPTION template + score gate + Claude audit fields.
+- `.github/workflows/pr_claude_gate_required.yml`: strict gate enforcement + no edit-triggered loops.
+- `.gitignore`: ignore local PR draft artifacts.
+- `REHYDRATION_PACK/PR_DESCRIPTION/*`: require labels, self-scores, model/response id fields, and examples.
+- `scripts/claude_gate_review.py`: require response id; emit model_used/response_model outputs and logs.
+- `scripts/test_claude_gate_review.py`: add coverage for response-id missing + model mismatch branches.
+- `docs/00_Project_Admin/Progress_Log.md`: log RUN_20260121_0354Z.
+- `docs/_generated/*`: regenerated registries.
 
 ## Commands Run (required)
-`ash
+```bash
 python scripts/run_ci_checks.py
 # output:
 [OK] CI-equivalent checks passed; warnings for legacy run folder names (B42/B46) not changed here.
@@ -89,7 +89,7 @@ Pre-existing type errors in scripts/test_openai_client.py, scripts/test_eval_ord
 python scripts/test_claude_gate_review.py
 # output:
 Ran 32 tests in 0.011s â€” OK.
-`
+```
 
 ## Tests / Proof (required)
 - **Tests run:** python scripts/run_ci_checks.py, python scripts/test_claude_gate_review.py
@@ -121,7 +121,7 @@ Ran 32 tests in 0.011s â€” OK.
 - **Claude PASS comment link:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
 - **Gate status:** pass
 - **Model used:** claude-opus-4-5-20251101
-- **Response id:** $claudeResponseId
+- **Response id:** msg_01X4dfjq617kLrpjL7HZ9KVY
 - **Gate run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21196888850
 
 ### E2E Proof (if applicable)

@@ -1,11 +1,11 @@
 ﻿# Run Summary
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260121_0354Z  
 **Agent:** A  
 **Date:** 2026-01-21
 
 ## Objective
-Harden Claude gate audit trail + PR metadata enforcement for isk:R2.
+Harden Claude gate audit trail + PR metadata enforcement for risk:R2.
 
 ## Work completed (bullets)
 - Required Anthropic response id and model_used outputs in Claude gate.
@@ -25,7 +25,7 @@ Harden Claude gate audit trail + PR metadata enforcement for isk:R2.
 - REHYDRATION_PACK/RUNS/RUN_20260121_0354Z/A/*
 
 ## Git/GitHub status (required)
-- Working branch: $branch
+- Working branch: b49/claude-gate-4_5-and-pr-template
 - PR: #133 https://github.com/KevinSGarrett/RichPanel/pull/133
 - CI status at end of run: green
 - Main updated: no

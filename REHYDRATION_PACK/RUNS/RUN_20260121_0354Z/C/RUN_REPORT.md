@@ -1,14 +1,14 @@
 ﻿# Agent Run Report
 
 ## Metadata (required)
-- **Run ID:** $runId
+- **Run ID:** RUN_20260121_0354Z
 - **Agent:** C
 - **Date (UTC):** 2026-01-21
 - **Worktree path:** C:\RichPanel_GIT
-- **Branch:** $branch
+- **Branch:** b49/claude-gate-4_5-and-pr-template
 - **PR:** #133 https://github.com/KevinSGarrett/RichPanel/pull/133
 - **PR merge strategy:** merge commit
-- **Risk label:** isk:R2
+- **Risk label:** risk:R2
 - **gate:claude label:** yes
 - **Claude PASS comment:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
 
@@ -20,17 +20,17 @@
 - None (agent not assigned).
 
 ## Diffstat (required)
-`
+```
 (no changes)
-`
+```
 
 ## Files Changed (required)
 - None.
 
 ## Commands Run (required)
-`ash
+```bash
 # No commands run for this agent.
-`
+```
 
 ## Tests / Proof (required)
 - **Tests run:** none
@@ -62,7 +62,7 @@
 - **Claude PASS comment link:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
 - **Gate status:** pass
 - **Model used:** claude-opus-4-5-20251101
-- **Response id:** $claudeResponseId
+- **Response id:** msg_01X4dfjq617kLrpjL7HZ9KVY
 - **Gate run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21196888850
 
 ### E2E Proof (if applicable)

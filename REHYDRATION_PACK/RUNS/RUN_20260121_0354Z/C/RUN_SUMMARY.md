@@ -1,6 +1,6 @@
 ﻿# Run Summary
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260121_0354Z  
 **Agent:** C  
 **Date:** 2026-01-21
 
@@ -14,7 +14,7 @@ No assigned work for this agent.
 - None.
 
 ## Git/GitHub status (required)
-- Working branch: $branch
+- Working branch: b49/claude-gate-4_5-and-pr-template
 - PR: #133 https://github.com/KevinSGarrett/RichPanel/pull/133
 - CI status at end of run: green
 - Main updated: no

@@ -1,6 +1,6 @@
 ﻿# Structure Report
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260121_0354Z  
 **Agent:** A  
 **Date:** 2026-01-21
 
@@ -28,7 +28,7 @@
 - None
 
 ## Rationale (why this structure change was needed)
-Run artifacts are required by erify_rehydration_pack.py to validate process compliance.
+Run artifacts are required by verify_rehydration_pack.py to validate process compliance.
 
 ## Navigation updates performed
 - docs/INDEX.md updated: no

@@ -1,6 +1,6 @@
 ﻿# Structure Report
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260121_0354Z  
 **Agent:** C  
 **Date:** 2026-01-21
 

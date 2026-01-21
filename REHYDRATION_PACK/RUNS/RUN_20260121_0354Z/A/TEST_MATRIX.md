@@ -1,6 +1,6 @@
 ﻿# Test Matrix
 
-**Run ID:** $runId  
+**Run ID:** RUN_20260121_0354Z  
 **Agent:** A  
 **Date:** 2026-01-21
 
@@ -10,8 +10,8 @@ List the tests you ran (or explicitly note none).
 |---|---|---|---|
 | CI-equivalent checks | python scripts/run_ci_checks.py | pass | https://github.com/KevinSGarrett/RichPanel/pull/133/checks |
 | Claude gate tests | python scripts/test_claude_gate_review.py | pass | local run |
-| Ruff | uff check backend/src scripts | fail (pre-existing) | local run |
-| Black | lack --check backend/src scripts | fail (pre-existing) | local run |
+| Ruff | ruff check backend/src scripts | fail (pre-existing) | local run |
+| Black | black --check backend/src scripts | fail (pre-existing) | local run |
 | Mypy | mypy --config-file mypy.ini | fail (pre-existing) | local run |
 
 ## Notes
