@@ -39,12 +39,16 @@
 - Include **commands + outputs** in `RUN_REPORT.md` (not just ???ran tests???).
 - CI also enforces **minimum non-empty line counts** for the latest run???s artifacts (see `python scripts/verify_rehydration_pack.py`).
 
-## Risk label + Claude gate (required for PRs)
-- **Risk label:** `<risk:R0-docs | risk:R1-low | risk:R2-medium | risk:R3-high | risk:R4-critical>`
-- **gate:claude applied:** yes/no (required for risk ≥ R2 or when explicitly requested)
+## Risk label + Claude gate (required for every PR)
+- **Risk label:** `<risk:R0-docs | risk:R1-low | risk:R2-medium | risk:R3-high | risk:R4-critical>` (apply exactly one)
+- **gate:claude applied:** yes — required on every PR (no skips)
+- **PR description quality:** Follow `REHYDRATION_PACK/PR_DESCRIPTION/` and include the hidden self-score block (08) meeting gates:
+  - R0/R1: title ≥95, body ≥95
+  - R2: title ≥95, body ≥97
+  - R3/R4: title ≥95, body ≥98
 - **Evidence:**
   - PR labels: `gh pr view <PR#> --json labels --jq '.labels[].name'`
-  - Claude PASS comment link (required if gate:claude): <URL>
+  - Claude PASS comment link with response_id: <URL>
 
 ## Required run artifacts (write to your agent folder)
 Write to:

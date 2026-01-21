@@ -49,7 +49,6 @@ jobs:
 
       - name: Run Claude gate review
         id: claude_gate
-        continue-on-error: true
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -74,13 +73,13 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          echo "Claude gate outputs: skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}"
+          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}"
           if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
             echo "::error::Claude gate failed to run. Check logs above for details."
             exit 1
           fi
-          if [ "${{ steps.claude_gate.outputs.skip }}" = "true" ]; then
-            echo "::error::Claude gate was skipped. This workflow requires a real Anthropic API call."
+          if [ "${{ steps.claude_gate.outputs.skip }}" != "false" ]; then
+            echo "::error::Claude gate was skipped or did not report skip=false. This workflow requires a real Anthropic API call."
             exit 1
           fi
           if [ -z "${{ steps.claude_gate.outputs.response_id }}" ]; then

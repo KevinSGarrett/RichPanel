@@ -1,23 +1,13 @@
 <!--
-Required: follow REHYDRATION_PACK/PR_DESCRIPTION/ for policy, scoring, and formatting.
-Minimum score gate:
+Follow REHYDRATION_PACK/PR_DESCRIPTION/ for policy, template, and scoring.
+Apply labels now: risk:R# and gate:claude.
+Self-score using rubrics 07 (title) and 03 (body); meet gates:
 - R0/R1: title >=95, body >=95
 - R2: title >=95, body >=97
 - R3/R4: title >=95, body >=98
-Required labels: risk:R#, gate:claude
-Claude gate model + Anthropic response id must be filled (or "pending — <link>") after the gate runs.
+Claude gate must run and produce response_id; Bugbot + Codecov must be green.
+Do not leave ???, TBD, or empty sections.
 -->
-
-# PR Description Template (Copy/Paste)
-
-Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`, or empty sections.
-
-> Rule: the PR description must be **complete before requesting review**.  
-> If something is pending, include a **link to the pending run**.
-
----
-
-## Standard template (risk:R1–R4)
 
 ```html
 <!-- PR_QUALITY: title_score=__/100; body_score=__/100; rubric_title=07; rubric_body=03; risk=risk:R#; p0_ok=true; timestamp=YYYY-MM-DD -->
@@ -29,6 +19,7 @@ Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`,
 **Risk:** `risk:R#`  
 **Claude gate model (used):** `claude-...` (Haiku/Sonnet/Opus 4.5 by risk)  
 **Anthropic response id:** `msg_...` (or `pending — <link>` until gate runs)  
+**Spec:** See `REHYDRATION_PACK/PR_DESCRIPTION/`  
 
 ### 1) Summary
 - 
@@ -118,6 +109,12 @@ Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`,
 - Generated registries / line number shifts unless CI fails.
 - Rehydration pack artifacts except referenced proof files.
 
+### Gate & quality checklist
+- [ ] PR body follows `REHYDRATION_PACK/PR_DESCRIPTION/` sections + links
+- [ ] Claude gate ran, PASSed, and shows `response_id` (link to comment)
+- [ ] Bugbot ✅ (or findings triaged with links)
+- [ ] Codecov ✅ (project + patch links)
+
 ---
 
 ## R0 compact template (docs-only)
@@ -155,32 +152,3 @@ Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`,
   - doc correctness and links
 - Ignore:
   - generated registries unless CI fails
-# Summary
-
-- RUN_ID: `RUN_<YYYYMMDD>_<HHMMZ>`
-- Task IDs: `TASK-###, ...`
-
-## What changed
-- <FILL_ME>
-
-## Why it changed
-- <FILL_ME>
-
-## Files/areas touched
-- <FILL_ME>
-
-## Tests and evidence
-- Tests run:
-  - <FILL_ME>
-- Evidence location:
-  - `qa/test_evidence/<RUN_ID>/...` (or CI link)
-
-## Docs updated
-- `CHANGELOG.md`: yes/no
-- Living docs updated (list):
-  - <FILL_ME>
-
-## Risks / rollback
-- Risk level: low/med/high
-- Rollback plan:
-  - <FILL_ME>

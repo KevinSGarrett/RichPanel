@@ -20,6 +20,7 @@ jobs:
 
             const labels = (pr.labels || []).map((label) => label.name);
             const riskPattern = /^risk:(R[0-4])(?:$|[-_].+)/;
+            const gateLabel = "gate:claude";
             const present = labels.filter((label) => riskPattern.test(label));
             const normalized = Array.from(
               new Set(
@@ -32,7 +33,7 @@ jobs:
 
             if (normalized.length === 0) {
               core.setFailed(
-                "PR must have exactly one risk label (risk:R0, risk:R1, risk:R2, risk:R3, risk:R4)"
+                "PR must have exactly one risk label (risk:R0, risk:R1, risk:R2, risk:R3, risk:R4) so CI can select the correct Claude model."
               );
               return;
             }
@@ -42,5 +43,13 @@ jobs:
               );
               return;
             }
+            const hasGateLabel = labels.includes(gateLabel);
+            if (!hasGateLabel) {
+              core.setFailed(
+                'PR must include the "gate:claude" label so the Claude gate runs and returns a response_id.'
+              );
+              return;
+            }
 
             core.info(`Risk label valid: ${normalized[0]}`);
+            core.info(`Claude gate label present: ${gateLabel}`);
