@@ -10,7 +10,7 @@
 - **PR merge strategy:** merge commit
 - **Risk label:** risk:R2
 - **gate:claude label:** yes
-- **Claude PASS comment:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
+- **Claude PASS comment:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776100412
 
 ## Objective + stop conditions
 - **Objective:** Harden the Claude gate to require real Anthropic responses, update 4.5 model mapping, and enforce PR metadata requirements with self-scores and audit fields.
@@ -99,7 +99,7 @@ Ran 32 tests in 0.011s â€” OK.
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no (manual polling)
 - **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/133/checks
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21196888850 (Claude gate)
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21197389382 (Claude gate)
 - **Codecov status:** green â€” https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/133
 - **Bugbot status:** green â€” https://github.com/KevinSGarrett/RichPanel/pull/133/checks
 
@@ -121,8 +121,8 @@ Ran 32 tests in 0.011s â€” OK.
 - **Claude PASS comment link:** https://github.com/KevinSGarrett/RichPanel/pull/133#issuecomment-3776046866
 - **Gate status:** pass
 - **Model used:** claude-opus-4-5-20251101
-- **Response id:** msg_01X4dfjq617kLrpjL7HZ9KVY
-- **Gate run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21196888850
+- **Response id:** msg_01CNGFQAYwnJFRMfJGtTwhx9
+- **Gate run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21197389382
 
 ### E2E Proof (if applicable)
 - **E2E required:** no
@@ -146,3 +146,4 @@ Ran 32 tests in 0.011s â€” OK.
 
 ## Follow-ups (actionable)
 - None.
+
