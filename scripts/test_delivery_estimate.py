@@ -152,6 +152,30 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(window["min_days"], 1)
         self.assertEqual(window["max_days"], 1)
 
+    def test_mapping_prefers_digit_key_when_method_has_digit(self) -> None:
+        custom_map = {"2-day": [2, 2], "economy": [5, 7]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("2-day economy shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 2)
+        self.assertEqual(window["max_days"], 2)
+
+    def test_mapping_tie_prefers_faster_window(self) -> None:
+        custom_map = {"free": [5, 7], "rush": [1, 2]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Free Rush Shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 1)
+        self.assertEqual(window["max_days"], 2)
+
     def test_same_day_order_remaining_window(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-02",

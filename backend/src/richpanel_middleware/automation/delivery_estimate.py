@@ -207,18 +207,28 @@ def _load_shipping_method_transit_map() -> Dict[str, tuple[int, int]]:
 def _match_transit_window(
     lowered_method: str, transit_map: Dict[str, tuple[int, int]]
 ) -> Optional[tuple[int, int]]:
-    best_key: Optional[str] = None
-    for key in transit_map:
+    matches: list[tuple[str, tuple[int, int]]] = []
+    for key, window in transit_map.items():
         if key and key in lowered_method:
-            if best_key is None:
-                best_key = key
-            elif len(key) > len(best_key):
-                best_key = key
-            elif len(key) == len(best_key) and key < best_key:
-                best_key = key
-    if best_key is None:
+            matches.append((key, window))
+
+    if not matches:
         return None
-    return transit_map[best_key]
+
+    if any(char.isdigit() for char in lowered_method):
+        digit_matches = [
+            match
+            for match in matches
+            if any(char.isdigit() for char in match[0])
+        ]
+        if digit_matches:
+            matches = digit_matches
+
+    best_key, best_window = sorted(
+        matches,
+        key=lambda item: (-len(item[0]), item[1][1], item[1][0], item[0]),
+    )[0]
+    return best_window
 
 
 def normalize_shipping_method(raw: Optional[str]) -> Optional[Dict[str, Any]]:

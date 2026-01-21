@@ -84,7 +84,8 @@ Format (JSON object):
 
 Matching rules:
 - Case-insensitive, substring-based.
-- If multiple keys match, the longest key wins (deterministic).
+- If the shipping title contains digits and any matching key contains digits, prefer digit keys.
+- Otherwise the longest key wins; ties choose the fastest window (lowest max days), then lexicographic.
 - Invalid JSON falls back to defaults.
 
 Defaults when the env var is unset or invalid:
