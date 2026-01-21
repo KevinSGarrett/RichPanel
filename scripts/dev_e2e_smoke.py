@@ -476,7 +476,7 @@ def _order_status_no_tracking_payload(
     eta_end = (now + timedelta(days=5)).isoformat()
     order_seed = run_id or "order-status-smoke"
     seeded_order_id = _seed_order_id(order_seed, conversation_id)
-    shipping_method = "Standard (3-5 Business Days)"
+    shipping_method = "Standard Shipping"
 
     base_order = {
         "id": seeded_order_id,

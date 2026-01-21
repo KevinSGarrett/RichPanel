@@ -174,6 +174,9 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertIsNone(payload.get("tracking_number"))
         self.assertIsNone(payload.get("tracking_url"))
         self.assertEqual(payload["tracking"]["status"], "label_pending")
+        shipping_method = payload["shipping_method"].lower()
+        self.assertIn("standard shipping", shipping_method)
+        self.assertFalse(any(char.isdigit() for char in shipping_method))
 
     def test_order_status_no_tracking_short_window_shape(self) -> None:
         payload = _order_status_no_tracking_short_window_payload(

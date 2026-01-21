@@ -36,6 +36,10 @@ class DeliveryEstimateTests(unittest.TestCase):
         single = parse_transit_days("Ships in 4 business days")
         self.assertEqual(single, (4, 4))
 
+    def test_parse_transit_days_empty_returns_none(self) -> None:
+        self.assertIsNone(parse_transit_days(None))
+        self.assertIsNone(parse_transit_days("   "))
+
     def test_mapping_fallback_standard_shipping(self) -> None:
         window = normalize_shipping_method("Standard Shipping")
         self.assertIsNotNone(window)
@@ -64,6 +68,77 @@ class DeliveryEstimateTests(unittest.TestCase):
         assert window is not None
         self.assertEqual(window["min_days"], 3)
         self.assertEqual(window["max_days"], 5)
+
+    def test_mapping_invalid_json_type_falls_back(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(["standard", [3, 5]])},
+        ):
+            window = normalize_shipping_method("Standard Shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 3)
+        self.assertEqual(window["max_days"], 5)
+
+    def test_mapping_invalid_entries_fall_back_when_empty(self) -> None:
+        custom_map = {"standard": {"min": 3}, "ground": -1}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Standard Shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 3)
+        self.assertEqual(window["max_days"], 5)
+
+    def test_mapping_bool_value_skipped_prefers_specific(self) -> None:
+        custom_map = {"standard": True, "standard shipping": [4, 6]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Standard Shipping")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 4)
+        self.assertEqual(window["max_days"], 6)
+
+    def test_mapping_string_values_coerce(self) -> None:
+        custom_map = {"express": ["1", "2"]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Express Delivery")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 1)
+        self.assertEqual(window["max_days"], 2)
+
+    def test_mapping_single_value_list(self) -> None:
+        custom_map = {"expedited": [2]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Expedited")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 2)
+        self.assertEqual(window["max_days"], 2)
+
+    def test_mapping_tie_breaker_equal_length(self) -> None:
+        custom_map = {"ship": [5, 6], "mail": [1, 1]}
+        with mock.patch.dict(
+            os.environ,
+            {"SHIPPING_METHOD_TRANSIT_MAP_JSON": json.dumps(custom_map)},
+        ):
+            window = normalize_shipping_method("Ship Mail")
+        self.assertIsNotNone(window)
+        assert window is not None
+        self.assertEqual(window["min_days"], 1)
+        self.assertEqual(window["max_days"], 1)
 
     def test_same_day_order_remaining_window(self) -> None:
         estimate = compute_delivery_estimate(
