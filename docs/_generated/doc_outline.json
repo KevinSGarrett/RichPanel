@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-21 - RUN_20260121_0354Z (B49: Claude Gate Hardening + PR Metadata Audit)",
+        "anchor": "2026-01-21-run202601210354z-b49-claude-gate-hardening-pr-metadata-audit"
+      },
+      {
+        "level": 3,
         "text": "2026-01-20 - RUN_20260120_2350Z (B48: OpenAI Evidence in Order Status Proof)",
         "anchor": "2026-01-20-run202601202350z-b48-openai-evidence-in-order-status-proof"
       },

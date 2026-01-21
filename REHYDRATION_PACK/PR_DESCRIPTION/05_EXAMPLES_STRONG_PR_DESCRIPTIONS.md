@@ -21,8 +21,10 @@ Use these as “known-good patterns” for Cursor agents.
 
 **Run ID:** `RUN_20260120_2350Z`  
 **Agents:** B  
+**Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate:** Opus 4.5 (`claude-opus-4-5-20251101`)  
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01EXAMPLEOPUS4P5`  
 
 ### 1) Summary
 - Make GPT-5 request payloads model-compatible so OpenAI routing/rewrite calls succeed in order-status flow.
@@ -118,7 +120,10 @@ openai.rewrite.rewrite_attempted=true, fallback_used=true, error_class=OpenAILow
 <!-- PR_QUALITY: title_score=97/100; body_score=95/100; rubric_title=07; rubric_body=03; risk=risk:R0; p0_ok=true; timestamp=2026-01-20 -->
 ```
 
+**Labels:** `risk:R0`, `gate:claude`
 **Risk:** `risk:R0` (docs-only)
+**Claude gate model (used):** `claude-haiku-4-5-20251015`  
+**Anthropic response id:** `msg_01EXAMPLEHAIKU4P5`  
 
 ### Summary
 - Create `docs/08_Engineering/Secrets_and_Environments.md` as the canonical secrets mapping.

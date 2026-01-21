@@ -41,6 +41,11 @@ secrets/
 /trust-ci-*.json
 /PR_117_FINAL_GATE_STATUS.md
 /final_pr_comment.md
+# Local PR drafting artifacts
+/pr_body.txt
+/pr_body_b49.md
+/b48_commit_history.txt
+/b48_rehydration_files.txt
 
 # Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
 artifacts/*

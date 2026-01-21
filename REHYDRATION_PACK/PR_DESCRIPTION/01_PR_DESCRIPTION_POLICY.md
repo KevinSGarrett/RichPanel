@@ -109,6 +109,18 @@ Add the hidden `PR_QUALITY` block described in **08**.
 
 ---
 
+### P0‑7 — Gate label + Claude response evidence required
+- PR must include the `gate:claude` label (in addition to `risk:R#`).
+- PR body must list both labels (e.g., `Labels: risk:R2, gate:claude`).
+- PR body must include:
+  - the **Claude gate model string used**, and
+  - the **Anthropic response id**.
+- If the gate run is pending, use `pending — <link>` and replace with the actual response id after the gate completes.
+
+Rationale: the Claude gate must be auditable and unskippable.
+
+---
+
 ## Strong requirements (P1)
 
 ### P1‑1 — “Invariants” must be explicit and auditable

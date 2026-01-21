@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for claude_gate_review.py"""
+import contextlib
+import io
 import json
 import os
 import sys
@@ -380,6 +382,8 @@ FINDINGS:
                 content = f.read()
             self.assertIn("skip=false", content)
             self.assertIn("verdict=PASS", content)
+            self.assertIn("model_used=claude-sonnet-4-5-20250929", content)
+            self.assertIn("response_id=msg_test123", content)
             
             # Verify Anthropic was called despite missing label
             mock_anthropic.assert_called_once()
@@ -388,6 +392,108 @@ FINDINGS:
             os.environ.pop("GITHUB_TOKEN", None)
             os.environ.pop("ANTHROPIC_API_KEY", None)
             os.environ.pop("CLAUDE_GATE_FORCE", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_raises_when_response_id_missing(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that missing Anthropic response id raises an error."""
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R2"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = {
+            "model": "claude-opus-4-5-20251101",
+            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+
+            with self.assertRaises(RuntimeError) as ctx:
+                claude_gate_review.main()
+            self.assertIn("missing id", str(ctx.exception).lower())
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_warns_on_response_model_mismatch(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that model mismatch logs a warning and still completes."""
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R1"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = {
+            "id": "msg_test123",
+            "model": "claude-opus-4-5-20251101",
+            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+
+            captured = io.StringIO()
+            with contextlib.redirect_stdout(captured):
+                result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            self.assertIn("model mismatch", captured.getvalue().lower())
+
+            with open(output_path, "r") as f:
+                content = f.read()
+            self.assertIn("model_used=claude-sonnet-4-5-20250929", content)
+            self.assertIn("response_model=claude-opus-4-5-20251101", content)
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
             if os.path.exists(output_path):
                 os.unlink(output_path)
 

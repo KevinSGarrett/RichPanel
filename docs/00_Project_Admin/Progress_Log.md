@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-20 - RUN_20260120_0221Z.
+Last verified: 2026-01-21 - RUN_20260121_0354Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-21 - RUN_20260121_0354Z (B49: Claude Gate Hardening + PR Metadata Audit)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260121_0354Z
+- PR #133: https://github.com/KevinSGarrett/RichPanel/pull/133
+- Required Anthropic response ID + `model_used` outputs in Claude gate; fail-closed on skip/missing response id.
+- Updated PR templates + PR_DESCRIPTION docs to require labels, self-scores, and Claude model/response id fields.
+- Added run artifacts for A/B/C folders to satisfy build-mode verification.
+
 ### 2026-01-20 - RUN_20260120_2350Z (B48: OpenAI Evidence in Order Status Proof)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260120_2350Z
 - Added OpenAI routing + rewrite evidence to dev_e2e_smoke proof JSON and require-openai flags

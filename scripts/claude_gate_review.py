@@ -223,7 +223,14 @@ def _build_prompt(title: str, body: str, risk: str, files_summary: str, diff_tex
     )
 
 
-def _format_comment(verdict: str, risk: str, model: str, findings, response_id: str = "", usage: dict = None) -> str:
+def _format_comment(
+    verdict: str,
+    risk: str,
+    model: str,
+    findings,
+    response_id: str = "",
+    usage: dict | None = None,
+) -> str:
     findings_block = "\n".join(f"- {item}" for item in findings)
     comment = (
         "Claude Review (gate:claude)\n"
@@ -296,7 +303,8 @@ def main() -> int:
         print("Proceeding with gate review (workflow guarantees label was applied).")
 
     risk = _normalize_risk(labels)
-    model = MODEL_BY_RISK[risk]
+    model_used = MODEL_BY_RISK[risk]
+    print(f"Claude gate enforced: skip=false, Risk={risk}, Model={model_used}")
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -347,7 +355,7 @@ def main() -> int:
     user_prompt = _build_prompt(title, body, risk, files_summary, diff_text)
 
     payload = {
-        "model": model,
+        "model": model_used,
         "max_tokens": 600,
         "temperature": 0.2,
         "system": system_prompt,
@@ -359,7 +367,18 @@ def main() -> int:
     
     # Extract Anthropic response ID and usage for audit trail
     response_id = response_json.get("id", "")
+    response_model = response_json.get("model", "")
     usage = response_json.get("usage", {})
+    if not response_id:
+        raise RuntimeError("Anthropic response missing id; gate requires a real API response.")
+    if not response_model:
+        print("WARNING: Anthropic response missing model; using requested model for logging.")
+        response_model = model_used
+    if response_model != model_used:
+        print(
+            "WARNING: Anthropic response model mismatch. "
+            f"requested={model_used}, response={response_model}"
+        )
 
     verdict = _parse_verdict(response_text)
     findings = _extract_findings(response_text, args.max_findings)
@@ -369,18 +388,24 @@ def main() -> int:
         verdict = "PASS"
         findings = ["No issues found."]
 
-    comment_body = _format_comment(verdict, risk, model, findings, response_id, usage)
+    comment_body = _format_comment(verdict, risk, model_used, findings, response_id, usage)
     with open(args.comment_path, "w", encoding="utf-8") as handle:
         handle.write(comment_body)
 
     _write_output("skip", "false")
     _write_output("verdict", verdict)
-    _write_output("model", model)
+    _write_output("model_used", model_used)
+    _write_output("model", model_used)
     _write_output("risk", risk)
     _write_output("response_id", response_id)
+    _write_output("response_model", response_model)
     _write_output("comment_path", args.comment_path)
 
-    print(f"Claude gate completed. Verdict={verdict}, Risk={risk}, Model={model}, ResponseID={response_id}")
+    print(
+        "Claude gate completed. "
+        f"Verdict={verdict}, Risk={risk}, ModelUsed={model_used}, "
+        f"ResponseModel={response_model}, ResponseID={response_id}"
+    )
     return 0
 
 

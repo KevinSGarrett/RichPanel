@@ -51,6 +51,7 @@ Before requesting Bugbot / Codecov / Claude review:
 - PR **Title** must score at or above the minimum in **07**
 - PR **Description** must score at or above the minimum in **03**
 - **All P0 checks** must pass (no placeholders, no PII leaks, no broken links, no escape-sequence corruption)
+- PR body must list `risk:R#` + `gate:claude`, plus the Claude model and Anthropic response id (or pending link)
 
 Details in **08_PR_TITLE_AND_DESCRIPTION_SCORE_GATE.md**.
 
