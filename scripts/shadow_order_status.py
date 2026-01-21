@@ -388,7 +388,7 @@ def _extract_latest_customer_message(
             sender = str(
                 message.get("sender_type") or message.get("author_type") or ""
             ).strip().lower()
-            if sender and sender not in {"customer", "user", "end_user", "shopper"}:
+            if sender not in {"customer", "user", "end_user", "shopper"}:
                 continue
             candidate = extract_customer_message(message, default="")
             if candidate:
