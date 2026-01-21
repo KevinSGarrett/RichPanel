@@ -8513,6 +8513,12 @@
       "anchor": "mapping-rule-v1"
     }
   ],
+  "shipping method transit map (configurable)": [
+    {
+      "path": "05_FAQ_Automation/No_Tracking_Delivery_Estimate_Automation.md",
+      "anchor": "shipping-method-transit-map-configurable"
+    }
+  ],
   "business day calculation (v1)": [
     {
       "path": "05_FAQ_Automation/No_Tracking_Delivery_Estimate_Automation.md",

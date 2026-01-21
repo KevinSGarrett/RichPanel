@@ -174,6 +174,9 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertIsNone(payload.get("tracking_number"))
         self.assertIsNone(payload.get("tracking_url"))
         self.assertEqual(payload["tracking"]["status"], "label_pending")
+        shipping_method = payload["shipping_method"].lower()
+        self.assertIn("standard shipping", shipping_method)
+        self.assertFalse(any(char.isdigit() for char in shipping_method))
 
     def test_order_status_no_tracking_short_window_shape(self) -> None:
         payload = _order_status_no_tracking_short_window_payload(
@@ -187,7 +190,9 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertIn("shipping_method", payload)
         self.assertIsNone(payload.get("tracking_number"))
         self.assertIsNone(payload.get("tracking_url"))
-        self.assertIn("standard (3-5 business days)", payload["shipping_method"].lower())
+        shipping_method = payload["shipping_method"].lower()
+        self.assertIn("standard shipping", shipping_method)
+        self.assertFalse(any(char.isdigit() for char in shipping_method))
 
         order_date = datetime.fromisoformat(payload["order_created_at"])
         ticket_date = datetime.fromisoformat(payload["ticket_created_at"])

@@ -1,8 +1,35 @@
 from __future__ import annotations
 
+import json
+import logging
+import os
 import re
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
+
+LOGGER = logging.getLogger(__name__)
+
+DEFAULT_SHIPPING_METHOD_TRANSIT_MAP: Dict[str, tuple[int, int]] = {
+    "priority": (1, 1),
+    "overnight": (1, 1),
+    "next day": (1, 1),
+    "next-day": (1, 1),
+    "1-day": (1, 1),
+    "1 day": (1, 1),
+    "express": (1, 2),
+    "expedited": (2, 3),
+    "rush": (1, 2),
+    "rushed": (1, 2),
+    "2-day": (2, 2),
+    "2 day": (2, 2),
+    "two day": (2, 2),
+    "standard": (3, 5),
+    "ground": (3, 7),
+    "economy": (5, 7),
+    "free": (5, 7),
+    "postal": (5, 7),
+    "mail": (5, 7),
+}
 
 
 def _coerce_date(value: Any) -> date:
@@ -80,6 +107,130 @@ def _parse_numeric_window(text: str) -> Optional[tuple[int, int]]:
     return None
 
 
+def parse_transit_days(raw: Optional[str]) -> Optional[tuple[int, int]]:
+    if raw is None:
+        return None
+    text = str(raw).strip().lower()
+    if not text:
+        return None
+    return _parse_numeric_window(text)
+
+
+def _coerce_transit_int(value: Any) -> Optional[int]:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value.is_integer() else None
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if text.isdecimal() and text.isascii():
+            try:
+                return int(text)
+            except ValueError:
+                return None
+        return None
+    return None
+
+
+def _normalize_transit_window(value: Any) -> Optional[tuple[int, int]]:
+    if isinstance(value, (list, tuple)):
+        if len(value) not in (1, 2):
+            return None
+        numbers = []
+        for item in value:
+            parsed = _coerce_transit_int(item)
+            if parsed is None:
+                return None
+            numbers.append(parsed)
+        if len(numbers) == 1:
+            low = high = numbers[0]
+        else:
+            low, high = numbers
+    else:
+        parsed = _coerce_transit_int(value)
+        if parsed is None:
+            return None
+        low = high = parsed
+
+    if low < 0 or high < 0:
+        return None
+    return (low, high) if low <= high else (high, low)
+
+
+def _load_shipping_method_transit_map() -> Dict[str, tuple[int, int]]:
+    raw = os.getenv("SHIPPING_METHOD_TRANSIT_MAP_JSON")
+    if not raw:
+        return DEFAULT_SHIPPING_METHOD_TRANSIT_MAP
+
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        LOGGER.error(
+            "Invalid SHIPPING_METHOD_TRANSIT_MAP_JSON; using defaults. error=%s",
+            exc,
+        )
+        return DEFAULT_SHIPPING_METHOD_TRANSIT_MAP
+
+    if not isinstance(parsed, dict):
+        LOGGER.error(
+            "Invalid SHIPPING_METHOD_TRANSIT_MAP_JSON; expected object. Using defaults."
+        )
+        return DEFAULT_SHIPPING_METHOD_TRANSIT_MAP
+
+    normalized: Dict[str, tuple[int, int]] = {}
+    for key, value in parsed.items():
+        key_text = str(key).strip().lower()
+        if not key_text:
+            continue
+        window = _normalize_transit_window(value)
+        if window is None:
+            LOGGER.warning(
+                "Invalid transit window for key '%s' in SHIPPING_METHOD_TRANSIT_MAP_JSON; skipping.",
+                key_text,
+            )
+            continue
+        normalized[key_text] = window
+
+    if not normalized:
+        LOGGER.error(
+            "SHIPPING_METHOD_TRANSIT_MAP_JSON contained no valid entries; using defaults."
+        )
+        return DEFAULT_SHIPPING_METHOD_TRANSIT_MAP
+
+    return normalized
+
+
+def _match_transit_window(
+    lowered_method: str, transit_map: Dict[str, tuple[int, int]]
+) -> Optional[tuple[int, int]]:
+    matches: list[tuple[str, tuple[int, int]]] = []
+    for key, window in transit_map.items():
+        if key and key in lowered_method:
+            matches.append((key, window))
+
+    if not matches:
+        return None
+
+    if any(char.isdigit() for char in lowered_method):
+        digit_matches = [
+            match
+            for match in matches
+            if any(char.isdigit() for char in match[0])
+        ]
+        if digit_matches:
+            matches = digit_matches
+
+    best_key, best_window = sorted(
+        matches,
+        key=lambda item: (-len(item[0]), item[1][1], item[1][0], item[0]),
+    )[0]
+    return best_window
+
+
 def normalize_shipping_method(raw: Optional[str]) -> Optional[Dict[str, Any]]:
     """
     Normalize a shipping method string into a bucket + SLA window.
@@ -95,15 +246,11 @@ def normalize_shipping_method(raw: Optional[str]) -> Optional[Dict[str, Any]]:
         return None
 
     lowered = method.lower()
-    numeric_window = _parse_numeric_window(lowered)
+    numeric_window = parse_transit_days(lowered)
     if numeric_window:
         min_days, max_days = numeric_window
         bucket = "Priority" if max_days <= 2 else "Standard"
-        normalized_method = (
-            f"{min_days}-{max_days} business days"
-            if min_days != max_days
-            else f"{min_days} business day" + ("" if min_days == 1 else "s")
-        )
+        normalized_method = format_eta_window(min_days, max_days)
         return {
             "bucket": bucket,
             "min_days": min_days,
@@ -112,37 +259,19 @@ def normalize_shipping_method(raw: Optional[str]) -> Optional[Dict[str, Any]]:
             "normalized_method": normalized_method,
         }
 
-    keyword_windows = [
-        (
-            (
-                "priority",
-                "overnight",
-                "next day",
-                "next-day",
-                "express",
-                "rush",
-                "rushed",
-                "1-day",
-                "1 day",
-            ),
-            (1, 1),
-            "Priority",
-        ),
-        (("2-day", "2 day", "two day"), (2, 2), "Priority"),
-        (("standard", "ground"), (3, 5), "Standard"),
-        (("economy", "free", "postal", "mail"), (5, 7), "Standard"),
-    ]
-    for keywords, window, bucket in keyword_windows:
-        if any(keyword in lowered for keyword in keywords):
-            min_days, max_days = window
-            normalized_method = f"{bucket} ({min_days}-{max_days} business days)"
-            return {
-                "bucket": bucket,
-                "min_days": min_days,
-                "max_days": max_days,
-                "raw_method": method,
-                "normalized_method": normalized_method,
-            }
+    transit_map = _load_shipping_method_transit_map()
+    mapped_window = _match_transit_window(lowered, transit_map)
+    if mapped_window:
+        min_days, max_days = mapped_window
+        bucket = "Priority" if max_days <= 2 else "Standard"
+        normalized_method = f"{bucket} ({format_eta_window(min_days, max_days)})"
+        return {
+            "bucket": bucket,
+            "min_days": min_days,
+            "max_days": max_days,
+            "raw_method": method,
+            "normalized_method": normalized_method,
+        }
 
     return None
 
@@ -316,6 +445,7 @@ __all__ = [
     "build_no_tracking_reply",
     "business_days_between",
     "compute_delivery_estimate",
+    "parse_transit_days",
     "format_eta_window",
     "normalize_shipping_method",
 ]

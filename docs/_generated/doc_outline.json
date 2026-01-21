@@ -7538,6 +7538,11 @@
         "anchor": "mapping-rule-v1"
       },
       {
+        "level": 3,
+        "text": "Shipping method transit map (configurable)",
+        "anchor": "shipping-method-transit-map-configurable"
+      },
+      {
         "level": 2,
         "text": "Business day calculation (v1)",
         "anchor": "business-day-calculation-v1"
