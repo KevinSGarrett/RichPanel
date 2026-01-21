@@ -107,8 +107,12 @@ def _last4(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     if len(text) <= 4:
-        return text
+        return "redacted"
     return text[-4:]
+
+
+def _safe_error(exc: Exception) -> Dict[str, str]:
+    return {"type": exc.__class__.__name__}
 
 
 def _require_env_flag(key: str, expected: str, *, context: str) -> None:
@@ -764,7 +768,7 @@ def main() -> int:
                 had_errors = True
                 result = {
                     "ticket_id": ticket_id,
-                    "error": f"{exc.__class__.__name__}: {str(exc)[:200]}",
+                    "error": _safe_error(exc),
                 }
             results.append(result)
     finally:

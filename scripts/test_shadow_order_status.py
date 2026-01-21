@@ -64,6 +64,13 @@ class _StubShopifyResponse:
 
 
 class ShadowOrderStatusGuardTests(unittest.TestCase):
+    def test_require_env_flag_missing_and_mismatch(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(SystemExit):
+                shadow._require_env_flag("RICHPANEL_READ_ONLY", "true", context="test")
+        with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "false"}, clear=True):
+            with self.assertRaises(SystemExit):
+                shadow._require_env_flag("RICHPANEL_READ_ONLY", "true", context="test")
     def test_requires_readonly_flags(self) -> None:
         env = {
             "RICHPANEL_ENV": "staging",
@@ -160,6 +167,8 @@ class ShadowOrderStatusRedactionTests(unittest.TestCase):
         self.assertTrue(hashed.startswith("hash:"))
         self.assertNotIn("User@example.com", hashed)
         self.assertEqual(shadow._last4("TN123456"), "3456")
+        self.assertEqual(shadow._last4("ABC"), "redacted")
+        self.assertEqual(shadow._last4("1234"), "redacted")
 
     def test_customer_redaction(self) -> None:
         ticket = {"customer": {"email": "a@example.com", "name": "Alice"}}
@@ -179,6 +188,11 @@ class ShadowOrderStatusRedactionTests(unittest.TestCase):
         self.assertIn("/ABC", redacted)
         self.assertNotIn("redacted:", redacted)
 
+    def test_tracking_present(self) -> None:
+        self.assertFalse(shadow._tracking_present("not a dict"))
+        self.assertTrue(shadow._tracking_present({"tracking_number": "TN"}))
+        self.assertTrue(shadow._tracking_present({"carrier_name": "UPS"}))
+
 
 class ShadowOrderStatusTraceTests(unittest.TestCase):
     def test_http_trace_blocks_non_get(self) -> None:
@@ -194,6 +208,12 @@ class ShadowOrderStatusTraceTests(unittest.TestCase):
         trace = shadow._HttpTrace()
         trace.record("POST", "https://api.openai.com/v1/chat/completions")
         trace.assert_read_only(allow_openai=True, trace_path=Path("trace.json"))
+
+    def test_http_trace_unknown_service(self) -> None:
+        trace = shadow._HttpTrace()
+        trace.record("GET", "https://example.com/anything")
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
     def test_http_trace_capture_restores_urlopen(self) -> None:
         calls = []
@@ -334,6 +354,54 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertTrue(evidence["rewrite_attempted"])
         self.assertEqual(evidence["response_id"], "resp-1")
 
+    def test_build_openai_evidence(self) -> None:
+        rewrite_result = shadow.ReplyRewriteResult(
+            body="x",
+            rewritten=False,
+            reason="dry_run",
+            model="gpt-test",
+            confidence=0.0,
+            dry_run=True,
+            fingerprint="fp",
+            llm_called=False,
+            response_id=None,
+        )
+        evidence = shadow._build_openai_evidence(rewrite_result)
+        self.assertFalse(evidence["rewrite_attempted"])
+        self.assertEqual(evidence["model"], "gpt-test")
+
+    def test_build_route_info(self) -> None:
+        routing = SimpleNamespace(
+            intent="order_status_tracking",
+            department="Email Support Team",
+            reason="stubbed",
+        )
+        artifact = SimpleNamespace(
+            primary_source="deterministic",
+            llm_suggestion={"confidence": 0.9, "model": "gpt-test"},
+        )
+        info = shadow._build_route_info(routing, artifact)
+        self.assertEqual(info["intent"], "order_status_tracking")
+        self.assertEqual(info["primary_source"], "deterministic")
+
+    def test_extract_latest_customer_message(self) -> None:
+        convo = {
+            "messages": [
+                {"sender_type": "agent", "body": "ignore"},
+                {"sender_type": "customer", "body": "need tracking"},
+            ]
+        }
+        message = shadow._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "need tracking")
+
+    def test_extract_order_payload(self) -> None:
+        ticket = {"order": {"order_id": "o-1"}, "__source_path": "/v1/tickets/1"}
+        convo = {"orders": [{"tracking_number": "TN123"}]}
+        merged = shadow._extract_order_payload(ticket, convo)
+        self.assertEqual(merged.get("order_id"), "o-1")
+        self.assertEqual(merged.get("tracking_number"), "TN123")
+        self.assertNotIn("__source_path", merged)
+
     def test_lookup_order_summary_payload_first_shopify(self) -> None:
         class _ShopifyClient:
             def get_order(self, *args, **kwargs):
@@ -366,6 +434,14 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         )
         self.assertEqual(source, "payload")
         self.assertEqual(summary.get("tracking_number"), "TN999")
+
+    def test_lookup_order_summary_baseline(self) -> None:
+        envelope = shadow._build_event_envelope({}, ticket_id="t-1")
+        summary, source = shadow._lookup_order_summary_payload_first(
+            envelope, allow_network=False, shopify_client=_GuardedShopifyClient()
+        )
+        self.assertEqual(source, "baseline")
+        self.assertIn("order_id", summary)
 
     def test_fetch_ticket_fallbacks(self) -> None:
         class _SequenceClient:
@@ -480,6 +556,43 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             self.assertEqual(
                 ticket_entry["order_status"]["tracking_number_last4"], "3456"
             )
+
+    def test_main_error_is_redacted(self) -> None:
+        env = {
+            "RICHPANEL_ENV": "staging",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            out_path = Path(tmpdir) / "out.json"
+            trace_path = Path(tmpdir) / "trace.json"
+            argv = [
+                "shadow_order_status.py",
+                "--ticket-id",
+                "t-1",
+                "--out",
+                str(out_path),
+                "--max-tickets",
+                "1",
+                "--confirm-live-readonly",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow, "run_ticket", side_effect=RuntimeError("email=x@y.com")
+            ), mock.patch.object(
+                shadow, "_build_shopify_client", return_value=_GuardedShopifyClient()
+            ), mock.patch.object(
+                shadow, "_build_trace_path", return_value=trace_path
+            ):
+                result = shadow.main()
+            self.assertEqual(result, 1)
+            raw = out_path.read_text(encoding="utf-8")
+            self.assertNotIn("x@y.com", raw)
+            payload = json.loads(raw)
+            err = payload["tickets"][0]["error"]
+            self.assertEqual(err["type"], "RuntimeError")
 
 
 def main() -> int:  # pragma: no cover
