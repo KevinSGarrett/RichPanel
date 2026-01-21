@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-21 - RUN_20260121_1440Z (B50: gate:claude enforcement + PR description template lock-in)",
+        "anchor": "2026-01-21-run202601211440z-b50-gateclaude-enforcement-pr-description-template-lock-in"
+      },
+      {
+        "level": 3,
         "text": "2026-01-21 - RUN_20260121_0354Z (B49: Claude Gate Hardening + PR Metadata Audit)",
         "anchor": "2026-01-21-run202601210354z-b49-claude-gate-hardening-pr-metadata-audit"
       },

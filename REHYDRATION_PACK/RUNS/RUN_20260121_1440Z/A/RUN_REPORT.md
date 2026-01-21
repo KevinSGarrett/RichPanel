@@ -1,21 +1,35 @@
 # RUN REPORT
 
+## Metadata
+- Run ID: RUN_20260121_1440Z (Agent A)
 - Branch: b50/required-gate-claude-and-pr-desc-template
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/136
 - Labels: risk:R1, gate:claude
 - CI command: `python scripts/run_ci_checks.py --ci`
-- CI output (highlights):
-  - OK: regenerated doc/reference registries and plan checklist
-  - WARN (pre-existing): legacy run folders with non-matching names (B42_AGENT_C, B46_AGENT_C, RUN_20260119_B42)
-  - All validation suites passed; `[OK] CI-equivalent checks passed.`
-- Claude gate: PASS (no skip)
-  - Model: claude-sonnet-4-5-20250929
-  - Response ID: msg_013JdPWAb8ZrVPzkK6NTkDWi
-  - Comment: https://github.com/KevinSGarrett/RichPanel/pull/136#issuecomment-3781073138
-  - Workflow wrote comment body to `.claude_gate_comment.txt` on runner; enforcement step now fails if skip!=false or response_id/model is empty.
-- Workflow/process notes:
-  - `pr_risk_label_required.yml` now fails when `gate:claude` is missing (while keeping exactly-one risk label rule).
-  - `pr_claude_gate_required.yml` drops continue-on-error and enforces skip=false + response_id/model output to prevent silent passes.
-  - PR template and Cursor agent prompts now require `REHYDRATION_PACK/PR_DESCRIPTION/` compliance, risk+gate labels, and self-score gates; added short agent prompt template.
-- Bugbot: check run completed (neutral) with summary "1 potential issue" — see Cursor check run https://github.com/KevinSGarrett/RichPanel/runs/61069847337
-- Codecov: pass (patch) for PR #136.
+- CI result: [OK]; note pre-existing WARN about legacy run folders (B42_AGENT_C, B46_AGENT_C, RUN_20260119_B42)
+- Bugbot: neutral — 1 potential issue (check run: https://github.com/KevinSGarrett/RichPanel/runs/61069847337)
+- Claude gate: PASS; model=claude-sonnet-4-5-20250929; response_id=msg_013JdPWAb8ZrVPzkK6NTkDWi; comment https://github.com/KevinSGarrett/RichPanel/pull/136#issuecomment-3781073138
+- Codecov: pass (patch) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/136
+- Notes: risk workflow now enforces gate:claude; Claude gate enforcement fails on skip/empty outputs; PR/agent templates require PR_DESCRIPTION self-scores and gate checklist; added short agent prompt template.
+
+## Diffstat
+- Workflows updated: `.github/workflows/pr_risk_label_required.yml`, `.github/workflows/pr_claude_gate_required.yml`
+- Templates updated: `.github/pull_request_template.md`, `REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md`, added `Cursor_Agent_Prompt_TEMPLATE_Short.md`
+- New artifacts: `REHYDRATION_PACK/RUNS/RUN_20260121_1440Z/A/*`
+
+## Commands Run
+- `python scripts/run_ci_checks.py --ci`
+
+## Tests / Proof
+- CI checks: https://github.com/KevinSGarrett/RichPanel/actions?query=branch%3Ab50%2Frequired-gate-claude-and-pr-desc-template
+- Claude gate comment: https://github.com/KevinSGarrett/RichPanel/pull/136#issuecomment-3781073138
+- Bugbot check run: https://github.com/KevinSGarrett/RichPanel/runs/61069847337
+- Codecov report: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/136
+
+## Files Changed
+- .github/workflows/pr_risk_label_required.yml
+- .github/workflows/pr_claude_gate_required.yml
+- .github/pull_request_template.md
+- REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE.md
+- REHYDRATION_PACK/_TEMPLATES/Cursor_Agent_Prompt_TEMPLATE_Short.md
+- REHYDRATION_PACK/RUNS/RUN_20260121_1440Z/A/*
