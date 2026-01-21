@@ -538,18 +538,16 @@ def _build_route_info(
     llm = getattr(routing_artifact, "llm_suggestion", None) if routing_artifact else None
     if not isinstance(llm, dict):
         llm = {}
-    confidence = None
-    if isinstance(llm, dict):
-        confidence = llm.get("confidence")
+    confidence = llm.get("confidence")
     return {
         "intent": getattr(routing, "intent", None),
         "department": getattr(routing, "department", None),
         "reason": getattr(routing, "reason", None),
         "primary_source": getattr(routing_artifact, "primary_source", None),
         "confidence": confidence,
-        "llm_model": llm.get("model") if isinstance(llm, dict) else None,
-        "llm_response_id": llm.get("response_id") if isinstance(llm, dict) else None,
-        "llm_gated_reason": llm.get("gated_reason") if isinstance(llm, dict) else None,
+        "llm_model": llm.get("model"),
+        "llm_response_id": llm.get("response_id"),
+        "llm_gated_reason": llm.get("gated_reason"),
     }
 
 
@@ -726,8 +724,8 @@ def main() -> int:
         confirm_live_readonly=args.confirm_live_readonly
     )
 
-    ticket_ids = [str(value).strip() for value in args.ticket_id or [] if value]
-    deduped: List[str] = list(dict.fromkeys(ticket_ids))
+    ticket_ids = [str(value).strip() for value in args.ticket_id or []]
+    deduped: List[str] = [value for value in dict.fromkeys(ticket_ids) if value]
     if not deduped:
         raise SystemExit("At least one --ticket-id is required")
     if args.max_tickets < 1:

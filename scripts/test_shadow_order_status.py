@@ -94,6 +94,30 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
                 shadow._require_readonly_guards(confirm_live_readonly=False)
         self.assertIn("confirm-live-readonly", str(ctx.exception))
 
+    def test_whitespace_ticket_id_rejected(self) -> None:
+        env = {
+            "RICHPANEL_ENV": "staging",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            out_path = Path(tmpdir) / "out.json"
+            argv = [
+                "shadow_order_status.py",
+                "--ticket-id",
+                "   ",
+                "--out",
+                str(out_path),
+                "--confirm-live-readonly",
+            ]
+            with mock.patch.object(sys, "argv", argv):
+                with self.assertRaises(SystemExit) as ctx:
+                    shadow.main()
+        self.assertIn("ticket-id", str(ctx.exception))
+
     def test_env_must_be_staging_or_prod(self) -> None:
         env = {
             "RICHPANEL_ENV": "dev",

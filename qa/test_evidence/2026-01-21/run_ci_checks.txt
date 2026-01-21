@@ -45,7 +45,7 @@ test_standard_shipping_canonical_remaining_window (__main__.DeliveryEstimateTest
 test_weekend_crossing_remaining_window (__main__.DeliveryEstimateTests.test_weekend_crossing_remaining_window) ... ok
 
 ----------------------------------------------------------------------
-Ran 22 tests in 0.008s
+Ran 22 tests in 0.011s
 
 OK
 [OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
@@ -112,7 +112,7 @@ test_none_order_summary_no_reply (backend.tests.test_order_status_context.OrderS
 test_tracking_signal_with_empty_strings (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_tracking_signal_with_empty_strings) ... ok
 
 ----------------------------------------------------------------------
-Ran 45 tests in 0.012s
+Ran 45 tests in 0.010s
 
 OK
 test_dry_run_default_skips_transport (__main__.RichpanelClientTests.test_dry_run_default_skips_transport) ... ok
@@ -138,7 +138,7 @@ richpanel.write_blocked
 ok
 
 ----------------------------------------------------------------------
-Ran 13 tests in 0.002s
+Ran 13 tests in 0.001s
 
 OK
 test_coerce_ticket_list (__main__.OrderStatusIntentEvalTests.test_coerce_ticket_list) ... ok
@@ -154,18 +154,18 @@ test_fetch_recent_ticket_ids_success (__main__.OrderStatusIntentEvalTests.test_f
 test_is_prod_target_variants (__main__.OrderStatusIntentEvalTests.test_is_prod_target_variants) ... ok
 test_label_and_redaction_helpers (__main__.OrderStatusIntentEvalTests.test_label_and_redaction_helpers) ... ok
 test_load_jsonl_dataset_errors (__main__.OrderStatusIntentEvalTests.test_load_jsonl_dataset_errors) ... ok
-test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-21 13:52:24,240 WARNING Skipping ticket with no message
-2026-01-21 13:52:24,241 WARNING Skipping ticket with no message
+test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-21 14:09:48,663 WARNING Skipping ticket with no message
+2026-01-21 14:09:48,664 WARNING Skipping ticket with no message
 ok
-test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-21 13:52:24,243 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpp6y825aw\out.json
-2026-01-21 13:52:24,243 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
-2026-01-21 13:52:24,243 INFO LLM metrics: unavailable (llm_not_called)
-2026-01-21 13:52:24,244 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpp6y825aw\richpanel.json
-2026-01-21 13:52:24,244 INFO Deterministic metrics: unavailable (None)
-2026-01-21 13:52:24,244 INFO LLM metrics: unavailable (None)
+test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-21 14:09:48,665 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmp_eit_9rv\out.json
+2026-01-21 14:09:48,665 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+2026-01-21 14:09:48,665 INFO LLM metrics: unavailable (llm_not_called)
+2026-01-21 14:09:48,667 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmp_eit_9rv\richpanel.json
+2026-01-21 14:09:48,667 INFO Deterministic metrics: unavailable (None)
+2026-01-21 14:09:48,667 INFO LLM metrics: unavailable (None)
 ok
 test_main_requires_write_disabled_for_prod (__main__.OrderStatusIntentEvalTests.test_main_requires_write_disabled_for_prod) ... ok
-test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-21 13:52:24,246 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-21 14:09:48,667 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
 ok
 test_require_env_flag (__main__.OrderStatusIntentEvalTests.test_require_env_flag) ... ok
 test_resolve_env_name_priority (__main__.OrderStatusIntentEvalTests.test_resolve_env_name_priority) ... ok
@@ -173,7 +173,7 @@ test_run_richpanel_eval_source_metadata (__main__.OrderStatusIntentEvalTests.tes
 test_write_summary (__main__.OrderStatusIntentEvalTests.test_write_summary) ... ok
 
 ----------------------------------------------------------------------
-Ran 21 tests in 0.022s
+Ran 21 tests in 0.017s
 
 OK
 test_automation_disabled_short_circuits_transport (__main__.OpenAIClientTests.test_automation_disabled_short_circuits_transport) ... ok
@@ -192,7 +192,7 @@ test_safe_mode_short_circuits_transport (__main__.OpenAIClientTests.test_safe_mo
 test_secret_path_uses_lowercased_env (__main__.OpenAIClientTests.test_secret_path_uses_lowercased_env) ... ok
 
 ----------------------------------------------------------------------
-Ran 13 tests in 0.001s
+Ran 13 tests in 0.002s
 
 OK
 test_dry_run_default_skips_transport (__main__.ShopifyClientTests.test_dry_run_default_skips_transport) ... ok
@@ -222,7 +222,7 @@ test_retry_honors_retry_after_header (__main__.ShipStationClientTests.test_retry
 ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 6.226s
+Ran 8 tests in 6.201s
 
 OK
 test_nested_order_tracking_numeric_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_numeric_is_extracted) ... ok
@@ -241,7 +241,7 @@ test_shopify_enrichment_merges_fields_when_network_enabled (__main__.OrderLookup
 test_shopify_fallback_used_when_payload_has_no_shipping_fields (__main__.OrderLookupTests.test_shopify_fallback_used_when_payload_has_no_shipping_fields) ... ok
 
 ----------------------------------------------------------------------
-Ran 14 tests in 2.218s
+Ran 14 tests in 2.169s
 
 OK
 test_fallback_on_low_confidence_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_low_confidence_preserves_original) ... ok
@@ -310,7 +310,7 @@ test_outbound_disabled_skips_writes_while_allowing_shadow_reads (__main__.ReadOn
 test_plan_actions_propagates_allow_network_for_shadow_reads (__main__.ReadOnlyShadowModeTests.test_plan_actions_propagates_allow_network_for_shadow_reads) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.002s
+Ran 2 tests in 0.001s
 
 OK
 test_business_day_anchor_skips_weekend (__main__.ScenarioPayloadTests.test_business_day_anchor_skips_weekend) ... ok
@@ -343,7 +343,7 @@ test_openai_routing_evidence_maps_response_id (__main__.OpenAIEvidenceTests.test
 test_openai_routing_evidence_missing_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_missing_response_id) ... ok
 
 ----------------------------------------------------------------------
-Ran 23 tests in 0.009s
+Ran 23 tests in 0.008s
 
 OK
 [OK] No unapproved protected deletes/renames detected (local diff).

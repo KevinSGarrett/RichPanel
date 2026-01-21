@@ -8,6 +8,7 @@ test_resolve_env_name_fallback (__main__.ShadowOrderStatusGuardTests.test_resolv
 test_resolve_env_name_prefers_richpanel_env (__main__.ShadowOrderStatusGuardTests.test_resolve_env_name_prefers_richpanel_env) ... ok
 test_shopify_secret_id_validation (__main__.ShadowOrderStatusGuardTests.test_shopify_secret_id_validation) ... ok
 test_shopify_secret_override_guard (__main__.ShadowOrderStatusGuardTests.test_shopify_secret_override_guard) ... ok
+test_whitespace_ticket_id_rejected (__main__.ShadowOrderStatusGuardTests.test_whitespace_ticket_id_rejected) ... ok
 test_customer_redaction (__main__.ShadowOrderStatusRedactionTests.test_customer_redaction) ... ok
 test_email_hash_and_last4 (__main__.ShadowOrderStatusRedactionTests.test_email_hash_and_last4) ... ok
 test_redact_path_variants (__main__.ShadowOrderStatusRedactionTests.test_redact_path_variants) ... ok
@@ -28,24 +29,24 @@ test_fetch_ticket_raises (__main__.ShadowOrderStatusNoWriteTests.test_fetch_tick
 test_lookup_order_summary_baseline (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_baseline) ... ok
 test_lookup_order_summary_payload_first_payload (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_payload_first_payload) ... ok
 test_lookup_order_summary_payload_first_shopify (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_payload_first_shopify) ... ok
-test_main_continues_after_failure (__main__.ShadowOrderStatusNoWriteTests.test_main_continues_after_failure) ... 2026-01-21 13:52:36,287 INFO Processing ticket redacted:46e9bc3476c9
-2026-01-21 13:52:36,287 INFO Processing ticket redacted:b1ad9ff6eb8d
-2026-01-21 13:52:36,289 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpgnt85bu8\out.json
-2026-01-21 13:52:36,289 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpgnt85bu8\trace.json
+test_main_continues_after_failure (__main__.ShadowOrderStatusNoWriteTests.test_main_continues_after_failure) ... 2026-01-21 14:10:00,114 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,114 INFO Processing ticket redacted:b1ad9ff6eb8d
+2026-01-21 14:10:00,114 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpt_1zx8ws\out.json
+2026-01-21 14:10:00,114 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpt_1zx8ws\trace.json
 ok
-test_main_error_is_redacted (__main__.ShadowOrderStatusNoWriteTests.test_main_error_is_redacted) ... 2026-01-21 13:52:36,292 INFO Processing ticket redacted:46e9bc3476c9
-2026-01-21 13:52:36,293 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpgidd47e9\out.json
-2026-01-21 13:52:36,293 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpgidd47e9\trace.json
+test_main_error_is_redacted (__main__.ShadowOrderStatusNoWriteTests.test_main_error_is_redacted) ... 2026-01-21 14:10:00,117 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,118 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpcoe951fs\out.json
+2026-01-21 14:10:00,118 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpcoe951fs\trace.json
 ok
-test_main_output_redacts_pii (__main__.ShadowOrderStatusNoWriteTests.test_main_output_redacts_pii) ... 2026-01-21 13:52:36,294 INFO Processing ticket redacted:46e9bc3476c9
-2026-01-21 13:52:36,295 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpvtpy0dl0\out.json
-2026-01-21 13:52:36,295 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpvtpy0dl0\trace.json
+test_main_output_redacts_pii (__main__.ShadowOrderStatusNoWriteTests.test_main_output_redacts_pii) ... 2026-01-21 14:10:00,120 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,120 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmp29j4i8d1\out.json
+2026-01-21 14:10:00,120 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp29j4i8d1\trace.json
 ok
 test_run_ticket_is_read_only (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_is_read_only) ... ok
 test_run_ticket_non_order_status (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_non_order_status) ... ok
 test_run_ticket_openai_evidence (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_openai_evidence) ... ok
 
 ----------------------------------------------------------------------
-Ran 36 tests in 0.022s
+Ran 37 tests in 0.021s
 
 OK
