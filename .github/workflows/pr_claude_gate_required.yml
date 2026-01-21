@@ -2,7 +2,7 @@ name: PR Claude Gate Required
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
 
 concurrency:
   group: claude-gate-${{ github.event.pull_request.number }}
