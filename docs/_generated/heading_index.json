@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-21 - run_20260121_2228z (b50: richpanel read only safety tests + docs)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-21-run202601212228z-b50-richpanel-read-only-safety-tests-docs"
+    }
+  ],
   "2026-01-21 - run_20260121_1440z (b50: gate:claude enforcement + pr description template lock-in)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -13291,6 +13297,12 @@
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
       "anchor": "required-configuration"
+    }
+  ],
+  "environment contract (explicit)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "environment-contract-explicit"
     }
   ],
   "runtime kill switches (safe_mode + automation_enabled)": [

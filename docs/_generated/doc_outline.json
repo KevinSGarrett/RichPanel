@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-21 - RUN_20260121_2228Z (B50: Richpanel read only safety tests + docs)",
+        "anchor": "2026-01-21-run202601212228z-b50-richpanel-read-only-safety-tests-docs"
+      },
+      {
+        "level": 3,
         "text": "2026-01-21 - RUN_20260121_1440Z (B50: gate:claude enforcement + PR description template lock-in)",
         "anchor": "2026-01-21-run202601211440z-b50-gateclaude-enforcement-pr-description-template-lock-in"
       },
@@ -11956,6 +11961,11 @@
         "level": 2,
         "text": "Required configuration",
         "anchor": "required-configuration"
+      },
+      {
+        "level": 3,
+        "text": "Environment contract (explicit)",
+        "anchor": "environment-contract-explicit"
       },
       {
         "level": 3,
