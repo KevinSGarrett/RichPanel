@@ -476,7 +476,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             def request(self, method: str, path: str, **kwargs):
                 raise shadow.RichpanelRequestError("boom")
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(RuntimeError):
             shadow._fetch_ticket(_FailClient(), "ticket-xyz")
 
     def test_fetch_conversation_handles_error(self) -> None:
@@ -605,6 +605,50 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             payload = json.loads(raw)
             err = payload["tickets"][0]["error"]
             self.assertEqual(err["type"], "RuntimeError")
+
+    def test_main_continues_after_failure(self) -> None:
+        env = {
+            "RICHPANEL_ENV": "staging",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+        }
+        success_result = {
+            "ticket_id": "t-2",
+            "routing": {"intent": "unknown", "confidence": 0.0},
+            "customer": {"email": "hash:abc", "name": "REDACTED"},
+            "order_status": {"is_order_status": False},
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            out_path = Path(tmpdir) / "out.json"
+            trace_path = Path(tmpdir) / "trace.json"
+            argv = [
+                "shadow_order_status.py",
+                "--ticket-id",
+                "t-1",
+                "--ticket-id",
+                "t-2",
+                "--out",
+                str(out_path),
+                "--max-tickets",
+                "2",
+                "--confirm-live-readonly",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow, "run_ticket", side_effect=[RuntimeError("boom"), success_result]
+            ), mock.patch.object(
+                shadow, "_build_shopify_client", return_value=_GuardedShopifyClient()
+            ), mock.patch.object(
+                shadow, "_build_trace_path", return_value=trace_path
+            ):
+                result = shadow.main()
+            self.assertEqual(result, 1)
+            payload = json.loads(out_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["tickets"]), 2)
+            self.assertEqual(payload["tickets"][0]["error"]["type"], "RuntimeError")
+            self.assertEqual(payload["tickets"][1]["ticket_id"], "t-2")
 
 
 def main() -> int:  # pragma: no cover

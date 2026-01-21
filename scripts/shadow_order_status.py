@@ -349,7 +349,7 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
         payload["__source_path"] = path
         return payload
     redacted_ref = _redact_identifier(ticket_ref) or "redacted"
-    raise SystemExit(
+    raise RuntimeError(
         f"Ticket lookup failed for {redacted_ref}: {'; '.join(errors)}"
     )
 
