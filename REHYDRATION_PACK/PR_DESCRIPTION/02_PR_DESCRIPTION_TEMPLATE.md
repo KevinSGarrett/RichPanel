@@ -2,6 +2,11 @@
 
 Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`, or empty sections.
 
+Minimum score gate:
+- R0/R1: title ≥95, body ≥95
+- R2: title ≥95, body ≥97
+- R3/R4: title ≥95, body ≥98
+
 > Rule: the PR description must be **complete before requesting review**.  
 > If something is pending, include a **link to the pending run**.
 
@@ -15,8 +20,10 @@ Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`,
 
 **Run ID:** `RUN_YYYYMMDD_HHMMZ`  
 **Agents:** A / B / C (or single agent)  
+**Labels:** `risk:R#`, `gate:claude`  
 **Risk:** `risk:R#`  
-**Claude gate:** Haiku / Sonnet 4.5 / Opus 4.5  
+**Claude gate model (used):** `claude-...` (Haiku/Sonnet/Opus 4.5 by risk)  
+**Anthropic response id:** `msg_...` (or `pending — <link>` until gate runs)  
 
 ### 1) Summary
 - 
@@ -114,7 +121,10 @@ Use this template verbatim. Replace placeholders. Do **not** leave `???`, `TBD`,
 <!-- PR_QUALITY: title_score=__/100; body_score=__/100; rubric_title=07; rubric_body=03; risk=risk:R0; p0_ok=true; timestamp=YYYY-MM-DD -->
 ```
 
-**Risk:** `risk:R0` (docs-only)
+**Labels:** `risk:R0`, `gate:claude`  
+**Risk:** `risk:R0` (docs-only)  
+**Claude gate model (used):** `claude-...` (Haiku 4.5 for R0)  
+**Anthropic response id:** `msg_...` (or `pending — <link>` until gate runs)  
 
 ### Summary
 - 

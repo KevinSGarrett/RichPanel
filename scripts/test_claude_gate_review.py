@@ -380,6 +380,8 @@ FINDINGS:
                 content = f.read()
             self.assertIn("skip=false", content)
             self.assertIn("verdict=PASS", content)
+            self.assertIn("model_used=claude-sonnet-4-5-20250929", content)
+            self.assertIn("response_id=msg_test123", content)
             
             # Verify Anthropic was called despite missing label
             mock_anthropic.assert_called_once()

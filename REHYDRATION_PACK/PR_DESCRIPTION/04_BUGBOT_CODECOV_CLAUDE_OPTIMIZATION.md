@@ -111,6 +111,11 @@ Common gate failures caused by PR metadata:
 
 Use the minimum score gate (08) to prevent these.
 
+### D) Record the Claude gate audit trail
+Claude gate reliability requires the PR body to include:
+- the model string used (e.g., `claude-opus-4-5-20251101`)
+- the Anthropic response id (or `pending — <link>` until the run completes)
+
 ---
 
 ## 4) Universal PR-metadata “power moves”

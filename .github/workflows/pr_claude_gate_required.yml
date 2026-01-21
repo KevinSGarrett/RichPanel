@@ -71,11 +71,24 @@ jobs:
             -f body="$comment_body"
 
       - name: Enforce Claude gate verdict
-        if: steps.claude_gate.outputs.skip != 'true'
+        if: always()
         run: |
           set -euo pipefail
+          echo "Claude gate outputs: skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}"
           if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
             echo "::error::Claude gate failed to run. Check logs above for details."
+            exit 1
+          fi
+          if [ "${{ steps.claude_gate.outputs.skip }}" = "true" ]; then
+            echo "::error::Claude gate was skipped. This workflow requires a real Anthropic API call."
+            exit 1
+          fi
+          if [ -z "${{ steps.claude_gate.outputs.response_id }}" ]; then
+            echo "::error::Claude gate did not return an Anthropic response id."
+            exit 1
+          fi
+          if [ -z "${{ steps.claude_gate.outputs.model_used }}" ]; then
+            echo "::error::Claude gate did not report model_used."
             exit 1
           fi
           if [ "${{ steps.claude_gate.outputs.verdict }}" != "PASS" ]; then

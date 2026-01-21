@@ -100,6 +100,7 @@ Checklist:
 - [ ] CI: pending — link, or green — link
 - [ ] Codecov: direct PR link included (not only checks)
 - [ ] Bugbot: pending — PR link, and how to trigger
+- [ ] Claude gate model + Anthropic response id recorded (or pending — link)
 - [ ] Evidence files listed (REHYDRATION_PACK paths, proof JSONs, logs)
 - [ ] Proof snippets are PII-safe and minimal
 

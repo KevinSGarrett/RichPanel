@@ -16,7 +16,8 @@ You must have these before writing the PR title/body:
 3) The **diff summary** (files changed + key functions modified)  
 4) **Tests actually run** + results (logs or command output)  
 5) **Artifacts created** (REHYDRATION_PACK paths, proof JSONs, traces)  
-6) Links (or pending links) for **CI**, **Codecov**, and **Bugbot**
+6) Links (or pending links) for **CI**, **Codecov**, **Bugbot**, and the **Claude gate run**  
+7) **Claude gate model + Anthropic response id** (or pending — link to the gate run)
 
 If any item is missing, do not guess. Add a “pending — <link>” anchor or omit the claim.
 
@@ -87,6 +88,7 @@ Include:
 - CI: pending — link (or green — link)
 - Codecov: direct PR link
 - Bugbot: pending — PR link (and how to trigger)
+- Claude gate: model string + response id (or pending — link to gate run)
 
 Then list evidence paths:
 - `REHYDRATION_PACK/.../RUN_REPORT.md`
@@ -154,6 +156,8 @@ A PR is “metadata complete” when:
 - Body meets gate minimum (08)
 - All P0 policies (01) pass
 - Hidden PR_QUALITY block is present and accurate
+- Labels include `risk:R#` and `gate:claude` and are listed in the PR body
+- Claude gate model + Anthropic response id are recorded in the PR body
 - No placeholders remain
 
 Only then should you trigger Bugbot and run the Claude gate.

@@ -92,6 +92,12 @@ Body includes these sections (in this order):
 - [ ] Ticket numbers / event IDs should be redacted in the PR body when the PR claims “PII-safe”
 - [ ] Secrets are never pasted into PR body (keys/tokens)
 
+### P0-F — Claude gate audit trail
+- [ ] PR has `gate:claude` label applied
+- [ ] PR body lists `Labels: risk:R#, gate:claude`
+- [ ] PR body includes the Claude model string used
+- [ ] PR body includes the Anthropic response id (or `pending — <link>` until the gate runs)
+
 ---
 
 ## The self-score requirement (mandatory)
