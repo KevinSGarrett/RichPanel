@@ -20,6 +20,23 @@ Validate production data shapes and integration behavior **without any writes or
 
 To enable production read-only shadow mode, you must configure both **runtime kill switches (SSM)** and **Lambda environment variables**:
 
+### Environment contract (explicit)
+
+Use these exact env var settings depending on mode.
+
+#### Live read-only shadow runs (production data, no writes)
+- `RICHPANEL_ENV=prod`
+- `RICHPANEL_READ_ONLY=true`
+- `RICHPANEL_WRITE_DISABLED=true`
+- `RICHPANEL_OUTBOUND_ENABLED=false`
+- `MW_OUTBOUND_ENABLED=false`
+
+#### Go-live (intentional outbound)
+- `RICHPANEL_READ_ONLY=false`
+- `RICHPANEL_OUTBOUND_ENABLED=true`
+- `MW_OUTBOUND_ENABLED=true`
+- Checklist: [ ] Explicitly confirm "We are now live" (record in Progress Log)
+
 ### Runtime kill switches (safe_mode + automation_enabled)
 
 The worker reads `safe_mode` and `automation_enabled` from **SSM Parameter Store** (not direct Lambda env vars).

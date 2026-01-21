@@ -11959,6 +11959,11 @@
       },
       {
         "level": 3,
+        "text": "Environment contract (explicit)",
+        "anchor": "environment-contract-explicit"
+      },
+      {
+        "level": 3,
         "text": "Runtime kill switches (safe_mode + automation_enabled)",
         "anchor": "runtime-kill-switches-safemode-automationenabled"
       },

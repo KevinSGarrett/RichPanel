@@ -13293,6 +13293,12 @@
       "anchor": "required-configuration"
     }
   ],
+  "environment contract (explicit)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "environment-contract-explicit"
+    }
+  ],
   "runtime kill switches (safe_mode + automation_enabled)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",

@@ -49,6 +49,9 @@ def _resolve_env_name() -> str:
     return value
 
 
+READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
+
+
 @dataclass
 class TransportRequest:
     method: str
@@ -551,11 +554,12 @@ class RichpanelClient:
     def _resolve_read_only(self, override: Optional[bool]) -> bool:
         if override is not None:
             return bool(override)
-        return _to_bool(
-            os.environ.get("RICHPANEL_READ_ONLY")
-            or os.environ.get("RICH_PANEL_READ_ONLY"),
-            default=False,
+        env_override = os.environ.get("RICHPANEL_READ_ONLY") or os.environ.get(
+            "RICH_PANEL_READ_ONLY"
         )
+        if env_override is not None:
+            return _to_bool(env_override, default=False)
+        return self.environment in READ_ONLY_ENVIRONMENTS
 
     @staticmethod
     def _writes_disabled() -> bool:
