@@ -407,7 +407,7 @@ def _order_status_scenario_payload(
         f"TRACK-{_fingerprint(seeded_order_id + order_seed, length=10).upper()}"
     )
     tracking_url = f"https://tracking.example.com/track/{tracking_number}"
-    shipping_method = "Standard (3-5 business days)"
+    shipping_method = "Standard Shipping"
     carrier = "UPS"
 
     base_order = {
@@ -542,7 +542,8 @@ def _order_status_no_tracking_short_window_payload(
     run_id: str, *, conversation_id: Optional[str]
 ) -> Dict[str, Any]:
     """
-    Order-status payload tuned for a short remaining window (~2 business days elapsed).
+    Order-status payload tuned for a short remaining window (~2 business days elapsed)
+    with a non-numeric shipping title (e.g., "Standard Shipping").
     """
     now = datetime.now(timezone.utc)
     anchor = _business_day_anchor(now)
@@ -552,7 +553,7 @@ def _order_status_no_tracking_short_window_payload(
     eta_end = (anchor + timedelta(days=3)).isoformat()
     order_seed = run_id or "order-status-smoke"
     seeded_order_id = _seed_order_id(order_seed, conversation_id)
-    shipping_method = "Standard (3-5 business days)"
+    shipping_method = "Standard Shipping"
 
     base_order = {
         "id": seeded_order_id,

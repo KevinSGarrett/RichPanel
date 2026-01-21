@@ -69,6 +69,34 @@ If no mapping match:
 - do not estimate
 - fall back to Tier 1 intake or route-only
 
+### Shipping method transit map (configurable)
+Set `SHIPPING_METHOD_TRANSIT_MAP_JSON` to override method -> transit window (business days).
+
+Format (JSON object):
+```
+{
+  "standard": [3, 5],
+  "ground": [3, 7],
+  "express": [1, 2],
+  "expedited": [2, 3]
+}
+```
+
+Matching rules:
+- Case-insensitive, substring-based.
+- If multiple keys match, the longest key wins (deterministic).
+- Invalid JSON falls back to defaults.
+
+Defaults when the env var is unset or invalid:
+- standard: 3-5 business days
+- ground: 3-7 business days
+- express: 1-2 business days
+- expedited: 2-3 business days
+- priority/overnight/next-day/1-day: 1 business day
+- 2-day/two day: 2 business days
+- rush/rushed: 1-2 business days
+- economy/free/postal/mail: 5-7 business days
+
 ---
 
 ## Business day calculation (v1)
@@ -103,6 +131,9 @@ This is passed into the template as:
 If `elapsed_bd >= max_bd` (i.e., `remaining_max == 0`), then the order is outside its SLA window:
 - do not auto-close
 - send an escalation-safe template and route to a human
+
+Implementation note: the deterministic no-tracking reply clamps the remaining window
+to 0-0 business days and uses "should arrive any day now" wording.
 
 > Note: We are not promising compensation or refunds. We are only escalating.
 
