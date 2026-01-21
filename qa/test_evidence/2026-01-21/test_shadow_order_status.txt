@@ -1,0 +1,52 @@
+test_env_must_be_staging_or_prod (__main__.ShadowOrderStatusGuardTests.test_env_must_be_staging_or_prod) ... ok
+test_require_env_flag_missing_and_mismatch (__main__.ShadowOrderStatusGuardTests.test_require_env_flag_missing_and_mismatch) ... ok
+test_requires_confirm_flag (__main__.ShadowOrderStatusGuardTests.test_requires_confirm_flag) ... ok
+test_requires_network_read_flag (__main__.ShadowOrderStatusGuardTests.test_requires_network_read_flag) ... ok
+test_requires_readonly_flags (__main__.ShadowOrderStatusGuardTests.test_requires_readonly_flags) ... ok
+test_requires_richpanel_env (__main__.ShadowOrderStatusGuardTests.test_requires_richpanel_env) ... ok
+test_resolve_env_name_fallback (__main__.ShadowOrderStatusGuardTests.test_resolve_env_name_fallback) ... ok
+test_resolve_env_name_prefers_richpanel_env (__main__.ShadowOrderStatusGuardTests.test_resolve_env_name_prefers_richpanel_env) ... ok
+test_shopify_secret_id_validation (__main__.ShadowOrderStatusGuardTests.test_shopify_secret_id_validation) ... ok
+test_shopify_secret_override_guard (__main__.ShadowOrderStatusGuardTests.test_shopify_secret_override_guard) ... ok
+test_whitespace_ticket_id_rejected (__main__.ShadowOrderStatusGuardTests.test_whitespace_ticket_id_rejected) ... ok
+test_customer_redaction (__main__.ShadowOrderStatusRedactionTests.test_customer_redaction) ... ok
+test_email_hash_and_last4 (__main__.ShadowOrderStatusRedactionTests.test_email_hash_and_last4) ... ok
+test_redact_path_variants (__main__.ShadowOrderStatusRedactionTests.test_redact_path_variants) ... ok
+test_tracking_present (__main__.ShadowOrderStatusRedactionTests.test_tracking_present) ... ok
+test_http_trace_allows_openai_when_enabled (__main__.ShadowOrderStatusTraceTests.test_http_trace_allows_openai_when_enabled) ... ok
+test_http_trace_blocks_non_get (__main__.ShadowOrderStatusTraceTests.test_http_trace_blocks_non_get) ... ok
+test_http_trace_capture_restores_urlopen (__main__.ShadowOrderStatusTraceTests.test_http_trace_capture_restores_urlopen) ... ok
+test_http_trace_unknown_service (__main__.ShadowOrderStatusTraceTests.test_http_trace_unknown_service) ... ok
+test_build_openai_evidence (__main__.ShadowOrderStatusNoWriteTests.test_build_openai_evidence) ... ok
+test_build_route_info (__main__.ShadowOrderStatusNoWriteTests.test_build_route_info) ... ok
+test_draft_reply_type_no_tracking (__main__.ShadowOrderStatusNoWriteTests.test_draft_reply_type_no_tracking) ... ok
+test_extract_latest_customer_message (__main__.ShadowOrderStatusNoWriteTests.test_extract_latest_customer_message) ... ok
+test_extract_order_payload (__main__.ShadowOrderStatusNoWriteTests.test_extract_order_payload) ... ok
+test_fetch_conversation_handles_error (__main__.ShadowOrderStatusNoWriteTests.test_fetch_conversation_handles_error) ... ok
+test_fetch_conversation_handles_exception (__main__.ShadowOrderStatusNoWriteTests.test_fetch_conversation_handles_exception) ... ok
+test_fetch_ticket_fallbacks (__main__.ShadowOrderStatusNoWriteTests.test_fetch_ticket_fallbacks) ... ok
+test_fetch_ticket_raises (__main__.ShadowOrderStatusNoWriteTests.test_fetch_ticket_raises) ... ok
+test_lookup_order_summary_baseline (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_baseline) ... ok
+test_lookup_order_summary_payload_first_payload (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_payload_first_payload) ... ok
+test_lookup_order_summary_payload_first_shopify (__main__.ShadowOrderStatusNoWriteTests.test_lookup_order_summary_payload_first_shopify) ... ok
+test_main_continues_after_failure (__main__.ShadowOrderStatusNoWriteTests.test_main_continues_after_failure) ... 2026-01-21 14:10:00,114 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,114 INFO Processing ticket redacted:b1ad9ff6eb8d
+2026-01-21 14:10:00,114 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpt_1zx8ws\out.json
+2026-01-21 14:10:00,114 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpt_1zx8ws\trace.json
+ok
+test_main_error_is_redacted (__main__.ShadowOrderStatusNoWriteTests.test_main_error_is_redacted) ... 2026-01-21 14:10:00,117 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,118 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmpcoe951fs\out.json
+2026-01-21 14:10:00,118 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpcoe951fs\trace.json
+ok
+test_main_output_redacts_pii (__main__.ShadowOrderStatusNoWriteTests.test_main_output_redacts_pii) ... 2026-01-21 14:10:00,120 INFO Processing ticket redacted:46e9bc3476c9
+2026-01-21 14:10:00,120 INFO Wrote PII-safe output to C:\Users\kevin\AppData\Local\Temp\tmp29j4i8d1\out.json
+2026-01-21 14:10:00,120 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp29j4i8d1\trace.json
+ok
+test_run_ticket_is_read_only (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_is_read_only) ... ok
+test_run_ticket_non_order_status (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_non_order_status) ... ok
+test_run_ticket_openai_evidence (__main__.ShadowOrderStatusNoWriteTests.test_run_ticket_openai_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 37 tests in 0.021s
+
+OK
