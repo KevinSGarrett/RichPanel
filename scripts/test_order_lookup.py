@@ -487,7 +487,10 @@ class OrderLookupTests(unittest.TestCase):
 
 
 def main() -> int:
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(OrderLookupTests)
+    loader = unittest.defaultTestLoader
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(OrderIdResolutionCoverageTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderLookupTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
