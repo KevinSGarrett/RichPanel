@@ -528,6 +528,14 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertEqual(source, "baseline")
         self.assertIn("order_id", summary)
 
+    def test_lookup_order_summary_skips_missing_order_id(self) -> None:
+        envelope = shadow._build_event_envelope({}, ticket_id="t-2")
+        summary, source = shadow._lookup_order_summary_payload_first(
+            envelope, allow_network=True, shopify_client=_GuardedShopifyClient()
+        )
+        self.assertEqual(source, "skipped_missing_order_id")
+        self.assertEqual(summary.get("order_id"), "unknown")
+
     def test_fetch_ticket_fallbacks(self) -> None:
         class _SequenceClient:
             def __init__(self):

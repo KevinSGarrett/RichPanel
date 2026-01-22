@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     _extract_order_id,
@@ -20,27 +21,30 @@ def test_extract_order_id_missing_returns_unknown() -> None:
     payload = {"conversation_id": "conv-123", "id": "conv-123"}
     assert _extract_order_id(payload, "conv-123") == "unknown"
 
+def test_extract_order_id_reads_nested_order_fields() -> None:
+    payload = {"order": {"id": "order-1"}}
+    assert _extract_order_id(payload, "conv-1") == "order-1"
 
-def test_allow_network_does_not_call_shopify_when_order_id_unknown(
+    payload = {"order": {"number": "order-2"}}
+    assert _extract_order_id(payload, "conv-1") == "order-2"
+
+
+def test_unknown_order_id_skips_shopify_and_logs(
     monkeypatch,
+    caplog,
 ) -> None:
-    calls = {"count": 0}
-
-    def _spy_get_order(self, *args, **kwargs):
-        calls["count"] += 1
-        raise AssertionError(
-            "Shopify should not be called when order_id is unknown"
-        )
-
-    monkeypatch.setattr(ShopifyClient, "get_order", _spy_get_order)
+    spy = mock.Mock(side_effect=AssertionError("Shopify should not be called"))
+    monkeypatch.setattr(ShopifyClient, "get_order", spy)
     envelope = build_event_envelope({"conversation_id": "conv-555"})
 
-    summary = lookup_order_summary(
-        envelope,
-        safe_mode=False,
-        automation_enabled=True,
-        allow_network=True,
-    )
+    with caplog.at_level(logging.INFO):
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+        )
 
     assert summary["order_id"] == "unknown"
-    assert calls["count"] == 0
+    assert spy.call_count == 0
+    assert "Skipping Shopify enrichment (missing order_id)" in caplog.text
