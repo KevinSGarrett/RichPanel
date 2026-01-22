@@ -17,3 +17,9 @@ Command Log
 15) gh pr edit 148 --body-file "C:\RichPanel_GIT\pr_body_b51.txt"
 16) gh pr edit 148 --add-label "risk:R2" --add-label "gate:claude"
 17) delete_file pr_body_b51.txt
+18) gh pr view 148 --json labels,state,number,url
+19) gh run list --workflow pr_claude_gate_required.yml --branch b51-agent-b-remove-conversationid-orderid-fallback --limit 1
+20) gh run watch 21262238564
+21) gh api repos/KevinSGarrett/RichPanel/issues/148/comments --jq '.[-1].body'
+22) gh pr edit 148 --body-file "C:\RichPanel_GIT\pr_body_b51.txt"
+23) delete_file pr_body_b51.txt
