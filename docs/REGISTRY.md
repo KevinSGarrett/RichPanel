@@ -254,6 +254,7 @@ Legend:
 - ✅ [Branch Protection and Merge Settings](08_Engineering/Branch_Protection_and_Merge_Settings.md)  (`08_Engineering/Branch_Protection_and_Merge_Settings.md`)
 - ✅ [CI and GitHub Actions Runbook (for Cursor Agents)](08_Engineering/CI_and_Actions_Runbook.md)  (`08_Engineering/CI_and_Actions_Runbook.md`)
 - 📎 [Claude Gate Audit Proof](08_Engineering/Claude_Gate_Audit_Proof.md)  (`08_Engineering/Claude_Gate_Audit_Proof.md`)
+- 📎 [Claude Gate Negative Testing](08_Engineering/Claude_Gate_Negative_Testing.md)  (`08_Engineering/Claude_Gate_Negative_Testing.md`)
 - ✅ [Developer Guide](08_Engineering/Developer_Guide.md)  (`08_Engineering/Developer_Guide.md`)
 - ✅ [GitHub Workflow and Repo Standards](08_Engineering/GitHub_Workflow_and_Repo_Standards.md)  (`08_Engineering/GitHub_Workflow_and_Repo_Standards.md`)
 - ✅ [Multi‑Agent GitOps Playbook](08_Engineering/Multi_Agent_GitOps_Playbook.md)  (`08_Engineering/Multi_Agent_GitOps_Playbook.md`)
