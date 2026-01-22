@@ -29,7 +29,7 @@ Make OpenAI routing/rewrite explicit in order status docs and prove usage via de
 
 ## Tests and evidence
 - Tests run: dev E2E smoke (pass); run_ci_checks.py --ci (pass)
-- Evidence path/link: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json; c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\779928fa-6aea-41a8-ab5b-c5b6560e8c82.txt
+- Evidence path/link: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json; c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\a9c6be23-0133-45fa-9af0-c22579738345.txt
 
 ## Decisions made
 - Temporarily enabled OPENAI_ROUTING_PRIMARY and lowered rewrite confidence threshold in dev worker for proof; reverted to defaults.
