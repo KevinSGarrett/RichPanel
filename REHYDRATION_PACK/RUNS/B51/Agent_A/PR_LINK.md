@@ -1,3 +1,3 @@
 # PR Link
 
-Pending - follow-up PR for Codecov patch fix.
+https://github.com/KevinSGarrett/RichPanel/pull/142

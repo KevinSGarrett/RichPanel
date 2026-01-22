@@ -21,3 +21,10 @@
 - `python -m compileall scripts backend/src` (coverage fix)
 - `python -m pytest -q` (passed: 361 tests)
 - `python scripts/run_ci_checks.py --ci` (failed: generated files changed after regen)
+- `git checkout -b b51-agent-a-claude-gate-coverage-fix origin/main`
+- `git pull --rebase`
+- `git push -u origin b51-agent-a-claude-gate-coverage-fix`
+- `gh pr create --title "B51: Restore Codecov patch coverage for Claude gate tests (risk:R2)" --body-file _tmp_pr_body.md --base main --head b51-agent-a-claude-gate-coverage-fix`
+- `gh pr edit 142 --body-file _tmp_pr_body.md`
+- `gh pr edit 142 --add-label "risk:R2" --add-label "gate:claude"`
+- `gh pr merge 142 --auto --merge`
