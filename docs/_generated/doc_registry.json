@@ -1930,6 +1930,16 @@
     "last_updated": "2026-01-11"
   },
   {
+    "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+    "title": "Claude Gate Audit Proof",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 192,
+    "approx_tokens": 249,
+    "last_updated": "2026-01-22"
+  },
+  {
     "path": "08_Engineering/Developer_Guide.md",
     "title": "Developer Guide",
     "section": "08_Engineering",
@@ -3875,8 +3885,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10721,
-    "approx_tokens": 13937,
+    "word_count": 10731,
+    "approx_tokens": 13950,
     "last_updated": ""
   },
   {

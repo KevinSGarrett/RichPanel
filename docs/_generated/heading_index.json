@@ -12653,6 +12653,30 @@
       "anchor": "aws-secret-ids-written-when-the-matching-github-secret-is-present"
     }
   ],
+  "claude gate audit proof": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "claude-gate-audit-proof"
+    }
+  ],
+  "pr comment evidence (required)": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "pr-comment-evidence-required"
+    }
+  ],
+  "confirm the run used the intended model": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "confirm-the-run-used-the-intended-model"
+    }
+  ],
+  "audit artifact (why it exists)": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "audit-artifact-why-it-exists"
+    }
+  ],
   "developer guide": [
     {
       "path": "08_Engineering/Developer_Guide.md",

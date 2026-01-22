@@ -52,12 +52,12 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-          CLAUDE_GATE_FORCE: "true"
         run: |
           set -euo pipefail
           python scripts/claude_gate_review.py \
             --repo "${{ github.repository }}" \
-            --pr-number "${{ github.event.pull_request.number }}"
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --audit-path "claude_gate_audit.json"
 
       - name: Post Claude review comment
         if: steps.claude_gate.outcome == 'success' && steps.claude_gate.outputs.skip != 'true'
@@ -69,11 +69,18 @@ jobs:
           gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
             -f body="$comment_body"
 
+      - name: Upload Claude gate audit artifact
+        if: steps.claude_gate.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-gate-audit
+          path: ${{ steps.claude_gate.outputs.audit_path }}
+
       - name: Enforce Claude gate verdict
         if: always()
         run: |
           set -euo pipefail
-          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}"
+          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}, request_id=${{ steps.claude_gate.outputs.request_id }}, usage_input=${{ steps.claude_gate.outputs.usage_input_tokens }}, usage_output=${{ steps.claude_gate.outputs.usage_output_tokens }}"
           if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
             echo "::error::Claude gate failed to run. Check logs above for details."
             exit 1
@@ -86,8 +93,16 @@ jobs:
             echo "::error::Claude gate did not return an Anthropic response id."
             exit 1
           fi
+          if [ -z "${{ steps.claude_gate.outputs.request_id }}" ]; then
+            echo "::error::Claude gate did not return an Anthropic request id."
+            exit 1
+          fi
           if [ -z "${{ steps.claude_gate.outputs.model_used }}" ]; then
             echo "::error::Claude gate did not report model_used."
+            exit 1
+          fi
+          if [ -z "${{ steps.claude_gate.outputs.usage_input_tokens }}" ] || [ -z "${{ steps.claude_gate.outputs.usage_output_tokens }}" ]; then
+            echo "::error::Claude gate did not return token usage."
             exit 1
           fi
           if [ "${{ steps.claude_gate.outputs.verdict }}" != "PASS" ]; then
