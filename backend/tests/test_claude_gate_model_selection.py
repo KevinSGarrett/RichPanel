@@ -28,5 +28,5 @@ class TestClaudeGateModelSelection(unittest.TestCase):
                 self.assertEqual(claude_gate_review._select_model(risk), expected)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()

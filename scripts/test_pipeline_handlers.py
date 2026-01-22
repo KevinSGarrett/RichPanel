@@ -1074,7 +1074,8 @@ class OutboundRoutingTagsTests(unittest.TestCase):
 
 
 def _build_suite() -> unittest.TestSuite:
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests)
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(FingerprintReplyBodyTests)
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests))
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests)
     )

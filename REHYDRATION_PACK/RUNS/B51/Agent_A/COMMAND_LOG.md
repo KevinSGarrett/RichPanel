@@ -16,3 +16,8 @@
 - `gh api repos/KevinSGarrett/RichPanel/issues/141/comments --jq '.[-1].body'`
 - `gh pr edit 141 --body-file _tmp_pr_body.md` (update response id)
 - `python -m pytest -q` (rerun after unittest fix)
+- `python -m unittest discover -s scripts -p "test_pipeline_handlers.py" -v`
+- `python -m unittest discover -s scripts -p "test_llm_routing.py" -v`
+- `python -m compileall scripts backend/src` (coverage fix)
+- `python -m pytest -q` (passed: 361 tests)
+- `python scripts/run_ci_checks.py --ci` (failed: generated files changed after regen)
