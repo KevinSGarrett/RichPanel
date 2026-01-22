@@ -7,6 +7,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from typing import Mapping
 
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
@@ -45,7 +46,7 @@ def _require_env(name: str) -> str:
     return value
 
 
-def _fetch_json(url: str, token: str, accept: str = "application/vnd.github+json"):
+def _fetch_json(url: str, token: str, accept: str = "application/vnd.github+json") -> dict:
     data = _fetch_raw(url, token, accept=accept)
     try:
         return json.loads(data.decode("utf-8"))
@@ -68,7 +69,7 @@ def _fetch_raw(url: str, token: str, accept: str) -> bytes:
         raise RuntimeError(f"GitHub API request failed for {url}: {exc}") from exc
 
 
-def _fetch_all_files(repo: str, pr_number: int, token: str):
+def _fetch_all_files(repo: str, pr_number: int, token: str) -> list[dict]:
     files = []
     page = 1
     while True:
@@ -89,7 +90,7 @@ def _truncate(text: str, max_chars: int) -> str:
     return text[:max_chars] + "\n[TRUNCATED]\n"
 
 
-def _normalize_risk(labels):
+def _normalize_risk(labels: list[str]) -> str:
     matches = []
     for label in labels:
         match = RISK_LABEL_RE.match(label)
@@ -106,6 +107,7 @@ def _normalize_risk(labels):
 
 
 def _select_model(risk: str) -> str:
+    """Resolve the Claude model to use for the given risk label."""
     override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
     if override:
         return override
@@ -115,7 +117,8 @@ def _select_model(risk: str) -> str:
         raise RuntimeError(f"Unsupported risk label: {risk}") from exc
 
 
-def _extract_request_id(headers) -> str:
+def _extract_request_id(headers: Mapping[str, str] | None) -> str:
+    """Extract the Anthropic request id from response headers."""
     for header in _REQUEST_ID_HEADERS:
         value = headers.get(header) if headers else None
         if value:
@@ -123,7 +126,8 @@ def _extract_request_id(headers) -> str:
     return ""
 
 
-def _coerce_token_count(value) -> int:
+def _coerce_token_count(value: object) -> int:
+    """Coerce a token count to int, returning 0 on invalid input."""
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -131,6 +135,7 @@ def _coerce_token_count(value) -> int:
 
 
 def _anthropic_request(payload: dict, api_key: str) -> tuple[dict, str]:
+    """Call the Anthropic API and return (response_json, request_id)."""
     url = "https://api.anthropic.com/v1/messages"
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=data, method="POST")
@@ -189,7 +194,7 @@ def _parse_verdict(text: str) -> str:
     return "FAIL"
 
 
-def _extract_findings(text: str, max_findings: int):
+def _extract_findings(text: str, max_findings: int) -> list[str]:
     lines = text.splitlines()
     findings = []
     start_idx = None
@@ -329,6 +334,7 @@ def main() -> int:
     pr_data = _fetch_json(pr_url, github_token)
     labels = [label.get("name", "") for label in pr_data.get("labels", [])]
 
+    # Fail closed if the gating label is absent: skip is not allowed.
     if GATE_LABEL not in labels:
         raise RuntimeError("gate:claude label missing; gate requires the label to run.")
 
@@ -336,6 +342,7 @@ def main() -> int:
     model_used = _select_model(risk)
     print(f"Claude gate enforced: skip=false, Risk={risk}, Model={model_used}")
 
+    # Fail closed when the Anthropic credential is missing.
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         print("ERROR: ANTHROPIC_API_KEY is required but missing.", file=sys.stderr)
@@ -395,7 +402,7 @@ def main() -> int:
     response_json, request_id = _anthropic_request(payload, api_key)
     response_text = _extract_text(response_json)
 
-    # Extract Anthropic response IDs and usage for audit trail
+    # Fail closed if the response is missing audit identifiers or usage signals.
     response_id = response_json.get("id", "")
     response_model = response_json.get("model", "")
     usage = response_json.get("usage")

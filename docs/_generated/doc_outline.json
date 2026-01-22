@@ -11399,6 +11399,11 @@
       },
       {
         "level": 2,
+        "text": "How to verify audit proof (step-by-step)",
+        "anchor": "how-to-verify-audit-proof-step-by-step"
+      },
+      {
+        "level": 2,
         "text": "Confirm the run used the intended model",
         "anchor": "confirm-the-run-used-the-intended-model"
       },
@@ -11406,6 +11411,51 @@
         "level": 2,
         "text": "Audit artifact (why it exists)",
         "anchor": "audit-artifact-why-it-exists"
+      },
+      {
+        "level": 2,
+        "text": "Failure mode catalog (fail-closed)",
+        "anchor": "failure-mode-catalog-fail-closed"
+      },
+      {
+        "level": 2,
+        "text": "Troubleshooting",
+        "anchor": "troubleshooting"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Claude Gate Negative Testing",
+        "anchor": "claude-gate-negative-testing"
+      },
+      {
+        "level": 2,
+        "text": "Purpose",
+        "anchor": "purpose"
+      },
+      {
+        "level": 2,
+        "text": "Strategy",
+        "anchor": "strategy"
+      },
+      {
+        "level": 2,
+        "text": "Scenarios covered",
+        "anchor": "scenarios-covered"
+      },
+      {
+        "level": 2,
+        "text": "Where to find evidence",
+        "anchor": "where-to-find-evidence"
+      },
+      {
+        "level": 2,
+        "text": "How to run locally",
+        "anchor": "how-to-run-locally"
       }
     ]
   },
