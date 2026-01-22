@@ -12,3 +12,8 @@ Command Log
 10) python scripts/run_ci_checks.py --ci
 11) delete_file claude_gate_audit.json
 12) python scripts/run_ci_checks.py --ci
+13) git push -u origin b51-agent-b-remove-conversationid-orderid-fallback
+14) gh pr create --title "B51: Fail-closed Shopify lookup without explicit order id (risk:R2)" --body "temp" --base main --head b51-agent-b-remove-conversationid-orderid-fallback
+15) gh pr edit 148 --body-file "C:\RichPanel_GIT\pr_body_b51.txt"
+16) gh pr edit 148 --add-label "risk:R2" --add-label "gate:claude"
+17) delete_file pr_body_b51.txt
