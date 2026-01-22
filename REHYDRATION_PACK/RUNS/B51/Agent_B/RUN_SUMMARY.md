@@ -8,4 +8,4 @@ Changes:
 Checks:
 - python -m compileall backend/src scripts (pass)
 - python -m pytest -q (pass)
-- python scripts/run_ci_checks.py --ci (fail: dirty worktree detected)
+- python scripts/run_ci_checks.py --ci (pass)
