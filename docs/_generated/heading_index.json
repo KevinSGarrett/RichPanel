@@ -4003,6 +4003,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "08_Engineering/OpenAI_Model_Plan.md",
       "anchor": "purpose"
     },
@@ -7640,6 +7644,10 @@
   "how to run locally": [
     {
       "path": "04_LLM_Design_Evaluation/Prototype_Wave04_LLMEval_Report.md",
+      "anchor": "how-to-run-locally"
+    },
+    {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
       "anchor": "how-to-run-locally"
     }
   ],
@@ -12665,6 +12673,12 @@
       "anchor": "pr-comment-evidence-required"
     }
   ],
+  "how to verify audit proof (step-by-step)": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "how-to-verify-audit-proof-step-by-step"
+    }
+  ],
   "confirm the run used the intended model": [
     {
       "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
@@ -12675,6 +12689,50 @@
     {
       "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
       "anchor": "audit-artifact-why-it-exists"
+    }
+  ],
+  "failure mode catalog (fail-closed)": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "failure-mode-catalog-fail-closed"
+    }
+  ],
+  "troubleshooting": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "troubleshooting"
+    },
+    {
+      "path": "08_Engineering/Developer_Guide.md",
+      "anchor": "troubleshooting"
+    },
+    {
+      "path": "98_Agent_Ops/Validation_and_Automation.md",
+      "anchor": "troubleshooting"
+    }
+  ],
+  "claude gate negative testing": [
+    {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+      "anchor": "claude-gate-negative-testing"
+    }
+  ],
+  "strategy": [
+    {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+      "anchor": "strategy"
+    }
+  ],
+  "scenarios covered": [
+    {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+      "anchor": "scenarios-covered"
+    }
+  ],
+  "where to find evidence": [
+    {
+      "path": "08_Engineering/Claude_Gate_Negative_Testing.md",
+      "anchor": "where-to-find-evidence"
     }
   ],
   "developer guide": [
@@ -12717,16 +12775,6 @@
     {
       "path": "08_Engineering/Developer_Guide.md",
       "anchor": "testing-expectations"
-    }
-  ],
-  "troubleshooting": [
-    {
-      "path": "08_Engineering/Developer_Guide.md",
-      "anchor": "troubleshooting"
-    },
-    {
-      "path": "98_Agent_Ops/Validation_and_Automation.md",
-      "anchor": "troubleshooting"
     }
   ],
   "github workflow and repo standards": [

@@ -1,3 +1,3 @@
 # PR Link
 
-Pending
+https://github.com/KevinSGarrett/RichPanel/pull/145
