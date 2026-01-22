@@ -263,6 +263,32 @@ class OrderLookupTests(unittest.TestCase):
         self.assertFalse(shopify.called)
         self.assertFalse(shipstation.called)
 
+    def test_payload_tracking_url_is_extracted(self) -> None:
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
+        payload = {
+            "order_id": "T-URL",
+            "tracking_number": "1Z999AA10123456784",
+            "tracking_url": "https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784",
+        }
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
+        )
+
+        self.assertEqual(
+            summary["tracking_url"],
+            "https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784",
+        )
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
     def test_payload_shipment_dict_used_for_carrier_and_service(self) -> None:
         shopify = _failing_shopify_client()
         shipstation = _failing_shipstation_client()

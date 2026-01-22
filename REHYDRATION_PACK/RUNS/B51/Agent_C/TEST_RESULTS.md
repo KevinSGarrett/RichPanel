@@ -2,7 +2,7 @@
 
 ## Summary
 - `compileall`: pass
-- `pytest`: pass (380 passed, 9 subtests passed)
+- `pytest`: pass (385 passed, 9 subtests passed)
 - `dev_e2e_smoke`: pass (ticket 1087; proof artifact written)
 
 ## Details
@@ -15,7 +15,19 @@ Status: pass
 python -m pytest -q
 ```
 Status: pass  
-Output: `380 passed, 9 subtests passed in 20.48s`
+Output: `385 passed, 9 subtests passed in 20.98s`
+
+```
+python -m pytest -q
+```
+Status: failed  
+Output: `test_rewrite_rejects_missing_tracking_number` assertion failed
+
+```
+python -m pytest -q
+```
+Status: pass  
+Output: `385 passed, 9 subtests passed in 20.98s`
 
 ```
 python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --scenario order_status_tracking_standard_shipping --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json
