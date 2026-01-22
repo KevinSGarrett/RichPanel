@@ -7,8 +7,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     _extract_order_id,

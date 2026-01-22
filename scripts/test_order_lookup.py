@@ -10,10 +10,8 @@ from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(SRC))
 
 from backend.tests.test_order_lookup_order_id_resolution import (  # noqa: E402
     OrderIdResolutionTests as _OrderIdResolutionTests,
