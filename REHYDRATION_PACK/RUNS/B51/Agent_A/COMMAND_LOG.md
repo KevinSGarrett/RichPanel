@@ -31,3 +31,5 @@
 - `gh pr checks 142`
 - `gh api repos/KevinSGarrett/RichPanel/issues/142/comments | ConvertFrom-Json` (fetch Claude gate comment)
 - `gh pr edit 142 --body-file _tmp_pr_body.md` (update IDs + CI/Codecov status)
+- `gh pr comment 142 --body "@cursor review"`
+- `gh pr checks 142` (poll until green)
