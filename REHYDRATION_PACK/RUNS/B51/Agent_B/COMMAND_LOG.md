@@ -23,3 +23,10 @@ Command Log
 21) gh api repos/KevinSGarrett/RichPanel/issues/148/comments --jq '.[-1].body'
 22) gh pr edit 148 --body-file "C:\RichPanel_GIT\pr_body_b51.txt"
 23) delete_file pr_body_b51.txt
+24) python -m compileall backend/src scripts
+25) python -m pytest -q
+26) python scripts/run_ci_checks.py --ci
+27) delete_file claude_gate_audit.json
+28) git add backend/tests/test_order_lookup_order_id_resolution.py scripts/test_shadow_order_status.py
+29) git commit -m "B51: cover missing order-id paths"
+30) python scripts/run_ci_checks.py --ci
