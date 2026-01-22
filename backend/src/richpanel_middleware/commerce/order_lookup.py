@@ -94,6 +94,9 @@ def lookup_order_summary(
         return _merge_summary(summary, payload_summary)
 
     order_id = summary["order_id"]
+    if order_id == "unknown":
+        LOGGER.info("Skipping Shopify enrichment (missing order_id)")
+        return summary
 
     if not _should_enrich(order_id, allow_network, safe_mode, automation_enabled):
         if not allow_network:
@@ -429,11 +432,19 @@ def _has_payload_shipping_signal(summary: OrderSummary) -> bool:
 
 
 def _extract_order_id(payload: Dict[str, Any], conversation_id: str) -> str:
-    for key in ("order_id", "orderId", "order_number", "orderNumber", "id"):
+    for key in ("order_id", "order_number"):
         value = _coerce_str(payload.get(key))
         if value:
             return value
-    return conversation_id or "unknown"
+
+    order = payload.get("order")
+    if isinstance(order, dict):
+        for key in ("id", "number"):
+            value = _coerce_str(order.get(key))
+            if value:
+                return value
+
+    return "unknown"
 
 
 def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
