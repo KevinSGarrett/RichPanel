@@ -67,6 +67,21 @@ class TestClaudeGateReview(unittest.TestCase):
         model = claude_gate_review.MODEL_BY_RISK["risk:R4"]
         self.assertEqual(model, "claude-opus-4-5")
 
+    def test_select_model_override(self):
+        """Test that model override env var is honored."""
+        os.environ["CLAUDE_GATE_MODEL_OVERRIDE"] = "claude-custom"
+        try:
+            model = claude_gate_review._select_model("risk:R1")
+            self.assertEqual(model, "claude-custom")
+        finally:
+            os.environ.pop("CLAUDE_GATE_MODEL_OVERRIDE", None)
+
+    def test_select_model_invalid_risk(self):
+        """Test that unsupported risk label raises."""
+        with self.assertRaises(RuntimeError) as ctx:
+            claude_gate_review._select_model("risk:R9")
+        self.assertIn("Unsupported risk label", str(ctx.exception))
+
     def test_parse_verdict_pass(self):
         """Test verdict parsing for PASS."""
         text = "VERDICT: PASS\nFINDINGS:\n- No issues found."
@@ -128,6 +143,25 @@ FINDINGS:
         response = {"content": []}
         text = claude_gate_review._extract_text(response)
         self.assertEqual(text, "")
+
+    def test_extract_request_id_prefers_primary(self):
+        """Test request id extraction prefers the primary header."""
+        headers = {
+            "x-request-id": "req_secondary",
+            "request-id": "req_primary",
+        }
+        request_id = claude_gate_review._extract_request_id(headers)
+        self.assertEqual(request_id, "req_primary")
+
+    def test_extract_request_id_missing(self):
+        """Test request id extraction returns empty when missing."""
+        request_id = claude_gate_review._extract_request_id({})
+        self.assertEqual(request_id, "")
+
+    def test_coerce_token_count_invalid(self):
+        """Test token count coercion for invalid values."""
+        self.assertEqual(claude_gate_review._coerce_token_count("oops"), 0)
+        self.assertEqual(claude_gate_review._coerce_token_count(None), 0)
 
     def test_format_comment_with_response_id(self):
         """Test comment formatting includes response ID."""
@@ -438,6 +472,195 @@ FINDINGS:
             with self.assertRaises(RuntimeError) as ctx:
                 claude_gate_review.main()
             self.assertIn("missing id", str(ctx.exception).lower())
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("CLAUDE_GATE_COMMENT_PATH", None)
+            os.environ.pop("CLAUDE_GATE_AUDIT_PATH", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+            if os.path.exists(comment_path):
+                os.unlink(comment_path)
+            if os.path.exists(audit_path):
+                os.unlink(audit_path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_raises_when_request_id_missing(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that missing Anthropic request id raises an error."""
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R2"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = (
+            {
+                "id": "msg_test123",
+                "model": "claude-opus-4-5",
+                "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+                "usage": {"input_tokens": 100, "output_tokens": 20},
+            },
+            "",
+        )
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            comment_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+            audit_path = f.name
+
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["CLAUDE_GATE_COMMENT_PATH"] = comment_path
+            os.environ["CLAUDE_GATE_AUDIT_PATH"] = audit_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+
+            with self.assertRaises(RuntimeError) as ctx:
+                claude_gate_review.main()
+            self.assertIn("request id", str(ctx.exception).lower())
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("CLAUDE_GATE_COMMENT_PATH", None)
+            os.environ.pop("CLAUDE_GATE_AUDIT_PATH", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+            if os.path.exists(comment_path):
+                os.unlink(comment_path)
+            if os.path.exists(audit_path):
+                os.unlink(audit_path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_raises_when_usage_missing(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that missing usage raises an error."""
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R2"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = (
+            {
+                "id": "msg_test123",
+                "model": "claude-opus-4-5",
+                "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+                "usage": None,
+            },
+            "req_test123",
+        )
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            comment_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+            audit_path = f.name
+
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["CLAUDE_GATE_COMMENT_PATH"] = comment_path
+            os.environ["CLAUDE_GATE_AUDIT_PATH"] = audit_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+
+            with self.assertRaises(RuntimeError) as ctx:
+                claude_gate_review.main()
+            self.assertIn("token usage", str(ctx.exception).lower())
+        finally:
+            os.environ.pop("GITHUB_OUTPUT", None)
+            os.environ.pop("CLAUDE_GATE_COMMENT_PATH", None)
+            os.environ.pop("CLAUDE_GATE_AUDIT_PATH", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            os.environ.pop("ANTHROPIC_API_KEY", None)
+            if os.path.exists(output_path):
+                os.unlink(output_path)
+            if os.path.exists(comment_path):
+                os.unlink(comment_path)
+            if os.path.exists(audit_path):
+                os.unlink(audit_path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_raises_when_usage_zero(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        """Test that zero token usage raises an error."""
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Test body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R2"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = (
+            {
+                "id": "msg_test123",
+                "model": "claude-opus-4-5",
+                "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+                "usage": {"input_tokens": 0, "output_tokens": 0},
+            },
+            "req_test123",
+        )
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            output_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as f:
+            comment_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+            audit_path = f.name
+
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["CLAUDE_GATE_COMMENT_PATH"] = comment_path
+            os.environ["CLAUDE_GATE_AUDIT_PATH"] = audit_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+
+            with self.assertRaises(RuntimeError) as ctx:
+                claude_gate_review.main()
+            self.assertIn("token usage", str(ctx.exception).lower())
         finally:
             os.environ.pop("GITHUB_OUTPUT", None)
             os.environ.pop("CLAUDE_GATE_COMMENT_PATH", None)

@@ -19,3 +19,4 @@
 - `gh pr checks 141` (rerun after CI update)
 - `gh api repos/KevinSGarrett/RichPanel/issues/141/comments | ConvertFrom-Json` (fetch Claude gate comment)
 - `gh pr edit 141 --body-file _tmp_pr_body.md` (update IDs + CI/Codecov status)
+- `python -m pytest -q` (rerun after coverage additions)
