@@ -135,6 +135,7 @@ This automation can use OpenAI in two places when explicitly enabled:
   OpenAI’s intent classification is used as the **final** routing source (this determines whether a ticket
   is treated as order status or not).
 - **Confidence threshold:** `OPENAI_ROUTING_MIN_CONFIDENCE` (float). Alias: `OPENAI_ROUTING_CONFIDENCE_THRESHOLD`.
+  - Invalid or out-of-range values fall back to the default threshold.
 
 ### Reply rewrite (draft → friendly)
 - The deterministic draft reply is generated **first** (Tier 2 template).

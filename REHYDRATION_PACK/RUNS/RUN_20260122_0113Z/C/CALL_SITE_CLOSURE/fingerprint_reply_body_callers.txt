@@ -1,0 +1,34 @@
+﻿.\backend\src\richpanel_middleware\automation\pipeline.py:584:def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+.\backend\src\richpanel_middleware\automation\pipeline.py:804:        original_hash = _fingerprint_reply_body(reply_body)
+.\backend\src\richpanel_middleware\automation\pipeline.py:840:        rewritten_hash = _fingerprint_reply_body(reply_body)
+.\scripts\test_pipeline_handlers.py:34:    _fingerprint_reply_body,
+.\scripts\test_pipeline_handlers.py:60:    def test_fingerprint_reply_body_none(self) -> None:
+.\scripts\test_pipeline_handlers.py:61:        self.assertIsNone(_fingerprint_reply_body(None))
+.\scripts\test_pipeline_handlers.py:63:    def test_fingerprint_reply_body_empty_string(self) -> None:
+.\scripts\test_pipeline_handlers.py:64:        self.assertIsNone(_fingerprint_reply_body(""))
+.\scripts\test_pipeline_handlers.py:66:    def test_fingerprint_reply_body_unicode(self) -> None:
+.\scripts\test_pipeline_handlers.py:67:        result = _fingerprint_reply_body("Hello Σ╕ûτòî ≡ƒîì")
+.\scripts\test_pipeline_handlers.py:73:    def test_fingerprint_reply_body_deterministic(self) -> None:
+.\scripts\test_pipeline_handlers.py:75:        self.assertEqual(_fingerprint_reply_body(body), _fingerprint_reply_body(body))
+.\scripts\test_pipeline_handlers.py:77:    def test_fingerprint_reply_body_different_inputs(self) -> None:
+.\scripts\test_pipeline_handlers.py:79:            _fingerprint_reply_body("Body A"), _fingerprint_reply_body("Body B")
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:584:def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:804:        original_hash = _fingerprint_reply_body(reply_body)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:840:        rewritten_hash = _fingerprint_reply_body(reply_body)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:1:.\backend\src\richpanel_middleware\automation\pipeline.py:584:def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:2:.\backend\src\richpanel_middleware\automation\pipeline.py:804:        original_hash = _fingerprint_reply_body(reply_body)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:3:.\backend\src\richpanel_middleware\automation\pipeline.py:840:        rewritten_hash = _fingerprint_reply_body(reply_body)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:4:.\scripts\test_pipeline_handlers.py:34:    _fingerprint_reply_body,
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:5:.\scripts\test_pipeline_handlers.py:60:    def test_fingerprint_reply_body_none(self) -> None:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:6:.\scripts\test_pipeline_handlers.py:61:        self.assertIsNone(_fingerprint_reply_body(None))
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:7:.\scripts\test_pipeline_handlers.py:63:    def test_fingerprint_reply_body_empty_string(self) -> None:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:8:.\scripts\test_pipeline_handlers.py:64:        self.assertIsNone(_fingerprint_reply_body(""))
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:9:.\scripts\test_pipeline_handlers.py:66:    def test_fingerprint_reply_body_unicode(self) -> None:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:10:.\scripts\test_pipeline_handlers.py:67:        result = _fingerprint_reply_body("Hello ╬úΓòò├╗╧ä├▓├« Γëí╞Æ├«├¼")
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:11:.\scripts\test_pipeline_handlers.py:73:    def test_fingerprint_reply_body_deterministic(self) -> None:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:12:.\scripts\test_pipeline_handlers.py:75:        self.assertEqual(_fingerprint_reply_body(body), _fingerprint_reply_body(body))
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:13:.\scripts\test_pipeline_handlers.py:77:    def test_fingerprint_reply_body_different_inputs(self) -> None:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:14:.\scripts\test_pipeline_handlers.py:79:            _fingerprint_reply_body("Body A"), _fingerprint_reply_body("Body B")
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:15:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:584:def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:16:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:804:        original_hash = _fingerprint_reply_body(reply_body)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\fingerprint_reply_body_callers.txt:17:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\pipeline_FULL.py:840:        rewritten_hash = _fingerprint_reply_body(reply_body)

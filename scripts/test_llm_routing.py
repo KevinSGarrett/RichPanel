@@ -346,6 +346,18 @@ class ThresholdTests(unittest.TestCase):
         os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "0.6"
         self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
 
+    def test_min_confidence_negative_falls_back(self):
+        os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = "-0.5"
+        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+
+    def test_min_confidence_above_one_falls_back(self):
+        os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = "1.5"
+        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+
+    def test_min_confidence_empty_string_falls_back(self):
+        os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = ""
+        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+
 
 def main():
     loader = unittest.TestLoader()

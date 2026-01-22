@@ -18,7 +18,7 @@
 - Documented OpenAI routing vs rewrite roles and env flags for order status automation.
 - Added John scenario payload + proof metadata/hashes to dev_e2e_smoke.
 - Recorded OpenAI rewrite hash evidence in pipeline output and smoke proof.
-- Added unit coverage for routing threshold alias and rewrite hash evidence.
+- Added edge-case handling for routing confidence thresholds and hash evidence tests.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -42,7 +42,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260122_0113Z/C/DOCS_IMPACT_MAP.md   |  23 ++
  .../RUNS/RUN_20260122_0113Z/C/FIX_REPORT.md        |  21 ++
  .../RUNS/RUN_20260122_0113Z/C/GIT_RUN_PLAN.md      |  58 ++++
- .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        |  84 +++++
+ .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        | 116 +++++++
  .../RUNS/RUN_20260122_0113Z/C/RUN_SUMMARY.md       |  38 +++
  .../RUNS/RUN_20260122_0113Z/C/STRUCTURE_REPORT.md  |  32 ++
  .../RUNS/RUN_20260122_0113Z/C/TEST_MATRIX.md       |  15 +
@@ -60,7 +60,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  scripts/test_e2e_smoke_encoding.py                 | 144 ++++++++-
  scripts/test_llm_routing.py                        |  16 +
  scripts/test_pipeline_handlers.py                  |  38 +++
- 37 files changed, 1863 insertions(+), 27 deletions(-)
+ 37 files changed, 1895 insertions(+), 27 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -80,16 +80,21 @@ List key files changed (grouped by area) and why:
 List commands you ran (include key flags/env if relevant):
 - aws sso login --profile rp-admin-dev - refresh dev AWS credentials.
 - python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-dev --ticket-number <redacted> --run-id RUN_20260122_0113Z --scenario order_status_no_tracking_standard_shipping_3_5 --require-openai-routing --require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json - capture proof.
-- python scripts/run_ci_checks.py --ci - CI-equivalent validation.
+- python scripts/run_ci_checks.py --ci - CI-equivalent validation (captured in TEST_LOGS_FULL/ci_full_output.txt).
 - python - (boto3) update rp-mw-dev-worker env: OPENAI_ROUTING_PRIMARY=true; OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD=0.0; revert to defaults after proof.
 - python - (RichpanelClient) remove mw-auto-replied tag and reopen dev ticket 1052 for smoke runs.
 - gh pr create / gh pr edit / gh pr comment - publish PR and trigger Bugbot.
+- python -m pytest -v - captured in TEST_LOGS_FULL/pytest_verbose.txt.
+- git diff origin/main..HEAD > REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/PR_DIFF.patch
+- rg "get_confidence_threshold" -n . > REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/get_confidence_threshold_callers.txt
+- rg "_fingerprint_reply_body" -n . > REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/fingerprint_reply_body_callers.txt
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-dev --ticket-number <redacted> --run-id RUN_20260122_0113Z --scenario order_status_no_tracking_standard_shipping_3_5 --require-openai-routing --require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json
-- python scripts/run_ci_checks.py --ci - pass - evidence: c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\b3feff11-c6ee-463d-9180-eb1a06e03c1b.txt
+- python scripts/run_ci_checks.py --ci - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/TEST_LOGS_FULL/ci_full_output.txt
+- python -m pytest -v - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/TEST_LOGS_FULL/pytest_verbose.txt
 
 OpenAI proof (from proof JSON):
 - routing_metadata.final.source = "openai"
@@ -100,6 +105,77 @@ Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`
 
 [OK] CI-equivalent checks passed.
+
+## Evidence bundle (full)
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/PR_DIFF.patch (full PR diff)
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/PROOF_FULL/e2e_order_status_no_tracking_standard_shipping_3_5_proof.json (complete proof JSON)
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CHANGED_FILES_FULL/llm_routing_FULL.py (full source)
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CHANGED_FILES_FULL/pipeline_FULL.py (full source)
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/get_confidence_threshold_callers.txt
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/fingerprint_reply_body_callers.txt
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/TEST_LOGS_FULL/ci_full_output.txt
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/TEST_LOGS_FULL/pytest_verbose.txt
+- REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/EVIDENCE_MANIFEST.md
+
+## Critical Function Implementations (PII Safety Verification)
+
+### `_fingerprint_reply_body` (pipeline.py)
+
+**Location:** `backend/src/richpanel_middleware/automation/pipeline.py`
+
+**Full implementation:**
+```python
+def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+    if not body:
+        return None
+    try:
+        serialized = json.dumps(body, ensure_ascii=False, sort_keys=True)
+    except Exception:
+        serialized = str(body)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:12]
+```
+
+**PII Safety Analysis:**
+- One-way SHA256 hash; original body cannot be recovered.
+- Truncated to 12 chars to avoid full-hash exposure.
+- Returns None for empty/None input.
+- Used only for proof metadata; not customer-facing.
+
+**Test coverage:**
+- `test_pipeline_handlers.py::test_fingerprint_reply_body_none`
+- `test_pipeline_handlers.py::test_fingerprint_reply_body_empty_string`
+- `test_pipeline_handlers.py::test_fingerprint_reply_body_unicode`
+- `test_pipeline_handlers.py::test_fingerprint_reply_body_deterministic`
+- `test_pipeline_handlers.py::test_fingerprint_reply_body_different_inputs`
+
+## Call-Site Closure (Backward Compatibility Verification)
+
+### `get_confidence_threshold()` callers
+**Command:** `rg "get_confidence_threshold" -n .`
+**Output:** `REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/get_confidence_threshold_callers.txt`
+
+**Analysis:**
+- All call sites are internal to `llm_routing.py` plus unit tests.
+- No external callers or API changes required.
+- Alias behavior remains backward compatible; invalid values now fall back to defaults.
+
+### `_fingerprint_reply_body()` callers
+**Command:** `rg "_fingerprint_reply_body" -n .`
+**Output:** `REHYDRATION_PACK/RUNS/RUN_20260122_0113Z/C/CALL_SITE_CLOSURE/fingerprint_reply_body_callers.txt`
+
+**Analysis:**
+- Callers are limited to `pipeline.py` and the new unit tests.
+- Additive evidence fields only; no breaking changes for consumers.
+
+## Edge Case Tests Added
+- `scripts/test_llm_routing.py::test_min_confidence_negative_falls_back`
+- `scripts/test_llm_routing.py::test_min_confidence_above_one_falls_back`
+- `scripts/test_llm_routing.py::test_min_confidence_empty_string_falls_back`
+- `scripts/test_pipeline_handlers.py::test_fingerprint_reply_body_none`
+- `scripts/test_pipeline_handlers.py::test_fingerprint_reply_body_empty_string`
+- `scripts/test_pipeline_handlers.py::test_fingerprint_reply_body_unicode`
+- `scripts/test_pipeline_handlers.py::test_fingerprint_reply_body_deterministic`
+- `scripts/test_pipeline_handlers.py::test_fingerprint_reply_body_different_inputs`
 
 ## Docs impact (summary)
 - **Docs updated:** docs/05_FAQ_Automation/Order_Status_Automation.md, docs/00_Project_Admin/Progress_Log.md

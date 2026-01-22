@@ -1,0 +1,36 @@
+﻿.\backend\src\richpanel_middleware\automation\llm_routing.py:72:def get_confidence_threshold() -> float:
+.\backend\src\richpanel_middleware\automation\llm_routing.py:126:        threshold = threshold if threshold is not None else get_confidence_threshold()
+.\backend\src\richpanel_middleware\automation\llm_routing.py:548:        threshold = get_confidence_threshold()
+.\backend\src\richpanel_middleware\automation\llm_routing.py:594:        "confidence_threshold": get_confidence_threshold(),
+.\backend\src\richpanel_middleware\automation\llm_routing.py:629:    "get_confidence_threshold",
+.\scripts\test_llm_routing.py:24:    get_confidence_threshold,
+.\scripts\test_llm_routing.py:333:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\scripts\test_llm_routing.py:337:        self.assertEqual(get_confidence_threshold(), 0.7)
+.\scripts\test_llm_routing.py:342:        self.assertEqual(get_confidence_threshold(), 0.42)
+.\scripts\test_llm_routing.py:347:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\scripts\test_llm_routing.py:351:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\scripts\test_llm_routing.py:355:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\scripts\test_llm_routing.py:359:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:72:def get_confidence_threshold() -> float:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:126:        threshold = threshold if threshold is not None else get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:548:        threshold = get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:594:        "confidence_threshold": get_confidence_threshold(),
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:629:    "get_confidence_threshold",
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:1:.\backend\src\richpanel_middleware\automation\llm_routing.py:72:def get_confidence_threshold() -> float:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:2:.\backend\src\richpanel_middleware\automation\llm_routing.py:126:        threshold = threshold if threshold is not None else get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:3:.\backend\src\richpanel_middleware\automation\llm_routing.py:548:        threshold = get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:4:.\backend\src\richpanel_middleware\automation\llm_routing.py:594:        "confidence_threshold": get_confidence_threshold(),
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:5:.\backend\src\richpanel_middleware\automation\llm_routing.py:629:    "get_confidence_threshold",
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:6:.\scripts\test_llm_routing.py:24:    get_confidence_threshold,
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:7:.\scripts\test_llm_routing.py:333:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:8:.\scripts\test_llm_routing.py:337:        self.assertEqual(get_confidence_threshold(), 0.7)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:9:.\scripts\test_llm_routing.py:342:        self.assertEqual(get_confidence_threshold(), 0.42)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:10:.\scripts\test_llm_routing.py:347:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:11:.\scripts\test_llm_routing.py:351:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:12:.\scripts\test_llm_routing.py:355:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:13:.\scripts\test_llm_routing.py:359:        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:14:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:72:def get_confidence_threshold() -> float:
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:15:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:126:        threshold = threshold if threshold is not None else get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:16:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:548:        threshold = get_confidence_threshold()
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:17:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:594:        "confidence_threshold": get_confidence_threshold(),
+.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CALL_SITE_CLOSURE\get_confidence_threshold_callers.txt:18:.\REHYDRATION_PACK\RUNS\RUN_20260122_0113Z\C\CHANGED_FILES_FULL\llm_routing_FULL.py:629:    "get_confidence_threshold",
