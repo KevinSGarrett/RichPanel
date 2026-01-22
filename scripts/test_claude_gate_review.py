@@ -86,7 +86,7 @@ class TestClaudeGateReview(unittest.TestCase):
         self.assertEqual(verdict, "FAIL")
 
     def test_parse_verdict_missing(self):
-        """Test verdict parsing defaults to FAIL when missing."""
+        """Test verdict parsing returns empty when missing."""
         text = "No clear verdict here."
         verdict = claude_gate_review._parse_verdict(text)
         self.assertEqual(verdict, "")
