@@ -52,3 +52,10 @@ Command Log
 50) git add backend/tests/test_order_lookup_order_id_resolution.py scripts/test_order_lookup.py
 51) git commit -m "B51: simplify test sys.path setup"
 52) python scripts/run_ci_checks.py --ci
+53) python -m compileall backend/src scripts
+54) python -m pytest -q
+55) python scripts/run_ci_checks.py --ci
+56) delete_file claude_gate_audit.json
+57) git add scripts/test_order_lookup.py
+58) git commit -m "B51: include coverage tests in order lookup main"
+59) python scripts/run_ci_checks.py --ci

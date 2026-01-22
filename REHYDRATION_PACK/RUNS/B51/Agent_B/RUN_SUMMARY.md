@@ -7,6 +7,7 @@ Changes:
 - Added unit tests for unknown order_id handling, nested order fields, and Shopify call suppression.
 - Executed backend order-id tests under scripts coverage to satisfy Codecov.
 - Simplified test sys.path setup to keep coverage deterministic.
+- Ensured scripts test runner main executes the coverage test class.
 
 Checks:
 - python -m compileall backend/src scripts (pass)
