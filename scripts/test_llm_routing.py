@@ -315,20 +315,36 @@ class SuggestionTests(unittest.TestCase):
 class ThresholdTests(unittest.TestCase):
     def setUp(self):
         self._orig = os.environ.get("OPENAI_ROUTING_CONFIDENCE_THRESHOLD")
+        self._orig_min = os.environ.get("OPENAI_ROUTING_MIN_CONFIDENCE")
 
     def tearDown(self):
         if self._orig:
             os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = self._orig
         else:
             os.environ.pop("OPENAI_ROUTING_CONFIDENCE_THRESHOLD", None)
+        if self._orig_min:
+            os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = self._orig_min
+        else:
+            os.environ.pop("OPENAI_ROUTING_MIN_CONFIDENCE", None)
 
     def test_default_threshold(self):
         os.environ.pop("OPENAI_ROUTING_CONFIDENCE_THRESHOLD", None)
+        os.environ.pop("OPENAI_ROUTING_MIN_CONFIDENCE", None)
         self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
 
     def test_custom_threshold(self):
         os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "0.7"
         self.assertEqual(get_confidence_threshold(), 0.7)
+
+    def test_min_confidence_overrides_legacy(self):
+        os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = "0.42"
+        os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "0.9"
+        self.assertEqual(get_confidence_threshold(), 0.42)
+
+    def test_min_confidence_invalid_falls_back(self):
+        os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = "not-a-float"
+        os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "0.6"
+        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
 
 
 def main():
