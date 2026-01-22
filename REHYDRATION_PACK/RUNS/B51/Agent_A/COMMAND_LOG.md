@@ -12,3 +12,6 @@
 - `gh pr edit 141 --body-file _tmp_pr_body.md`
 - `gh pr edit 141 --add-label "risk:R2" --add-label "gate:claude"`
 - `gh pr merge 141 --auto --merge`
+- `gh pr checks 141`
+- `gh api repos/KevinSGarrett/RichPanel/issues/141/comments --jq '.[-1].body'`
+- `gh pr edit 141 --body-file _tmp_pr_body.md` (update response id)
