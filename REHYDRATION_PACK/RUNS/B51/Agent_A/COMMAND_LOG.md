@@ -33,3 +33,4 @@
 - `gh pr edit 142 --body-file _tmp_pr_body.md` (update IDs + CI/Codecov status)
 - `gh pr comment 142 --body "@cursor review"`
 - `gh pr checks 142` (poll until green)
+- `gh pr view 142 --json state,mergeable,mergedAt,mergeStateStatus --jq "{state: .state, mergeable: .mergeable, mergedAt: .mergedAt, mergeStateStatus: .mergeStateStatus}"`
