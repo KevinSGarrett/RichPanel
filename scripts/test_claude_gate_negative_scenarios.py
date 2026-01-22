@@ -57,6 +57,16 @@ def _stub_urlopen(request, timeout=60):
     accept = headers.get("accept", "")
     scenario = os.environ.get("CLAUDE_GATE_TEST_SCENARIO", "")
 
+    def _message_body(**overrides):
+        body = {
+            "id": "msg_test",
+            "model": "claude-opus-4-5",
+            "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+        body.update(overrides)
+        return body
+
     def _pr_payload():
         labels = [{"name": "risk:R2"}]
         if scenario != "missing_gate_label":
@@ -76,37 +86,21 @@ def _stub_urlopen(request, timeout=60):
         return _StubResponse(200, _as_bytes(json.dumps(_pr_payload())))
 
     if url == "https://api.anthropic.com/v1/messages":
-        if scenario in ("invalid_api_key", "http_500"):
+        if scenario == "invalid_api_key":
             return _StubResponse(401, b"unauthorized", headers={"request-id": "req_test"})
+        if scenario == "http_500":
+            return _StubResponse(500, b"server error", headers={"request-id": "req_test"})
         if scenario == "missing_response_id":
-            body = {
-                "model": "claude-opus-4-5",
-                "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
-                "usage": {"input_tokens": 100, "output_tokens": 20},
-            }
+            body = _message_body()
+            body.pop("id", None)
             return _StubResponse(200, _as_bytes(json.dumps(body)), headers={"request-id": "req_test"})
         if scenario == "missing_request_id":
-            body = {
-                "id": "msg_test",
-                "model": "claude-opus-4-5",
-                "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
-                "usage": {"input_tokens": 100, "output_tokens": 20},
-            }
+            body = _message_body()
             return _StubResponse(200, _as_bytes(json.dumps(body)), headers={})
         if scenario == "zero_usage":
-            body = {
-                "id": "msg_test",
-                "model": "claude-opus-4-5",
-                "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
-                "usage": {"input_tokens": 0, "output_tokens": 0},
-            }
+            body = _message_body(usage={"input_tokens": 0, "output_tokens": 0})
             return _StubResponse(200, _as_bytes(json.dumps(body)), headers={"request-id": "req_test"})
-        body = {
-            "id": "msg_test",
-            "model": "claude-opus-4-5",
-            "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
-            "usage": {"input_tokens": 100, "output_tokens": 20},
-        }
+        body = _message_body()
         return _StubResponse(200, _as_bytes(json.dumps(body)), headers={"request-id": "req_test"})
 
     raise RuntimeError(f"Unexpected URL in stub: {url}")
@@ -129,7 +123,8 @@ def _run_gate(scenario: str, *, api_key: str | None) -> subprocess.CompletedProc
             raise AssertionError(f"Missing claude_gate_review.py at {script_path}")
 
         env = os.environ.copy()
-        env["PYTHONPATH"] = f"{tmpdir}{os.pathsep}{env.get('PYTHONPATH', '')}"
+        # Restrict PYTHONPATH to the stub-only path to avoid leaking into other tests.
+        env["PYTHONPATH"] = tmpdir
         env["GITHUB_TOKEN"] = "test-token"
         env["CLAUDE_GATE_TEST_SCENARIO"] = scenario
         if api_key is None:
@@ -166,6 +161,7 @@ class ClaudeGateNegativeTests(TestCase):
         """Gate should fail with invalid API key."""
         result = _run_gate("invalid_api_key", api_key="invalid-key")
         self.assertEqual(result.returncode, 1)
+        self.assertIn("unexpected status 401", result.stderr.lower())
 
     def test_missing_gate_label_fails(self):
         """Workflow should fail when gate:claude label is missing."""
@@ -177,6 +173,7 @@ class ClaudeGateNegativeTests(TestCase):
         """Gate should fail on Anthropic HTTP 500 response."""
         result = _run_gate("http_500", api_key="valid-key")
         self.assertEqual(result.returncode, 1)
+        self.assertIn("unexpected status 500", result.stderr.lower())
 
     def test_missing_response_id_fails(self):
         """Gate should fail when response id is missing."""
