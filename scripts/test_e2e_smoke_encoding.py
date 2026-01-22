@@ -31,12 +31,15 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _compute_draft_reply_body,
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
+    _extract_latest_comment_body,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
     _evaluate_openai_requirements,
+    _fetch_latest_reply_hash,
     append_summary,
     _redact_command,
     _iso_business_days_before,
@@ -247,6 +250,107 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertTrue(before_two.startswith("2024-01-04"))
         with self.assertRaises(ValueError):
             _iso_business_days_before(anchor, -1)
+
+
+class DraftReplyHelperTests(unittest.TestCase):
+    def test_compute_draft_reply_body_with_tracking(self) -> None:
+        payload = {
+            "order": {
+                "order_id": "ORDER-1",
+                "created_at": "2026-01-05T10:00:00+00:00",
+                "shipping_method": "Standard Shipping",
+                "tracking_number": "TRACK-123",
+                "tracking_url": "https://tracking.example.com/track/TRACK-123",
+                "carrier": "UPS",
+            },
+            "ticket_created_at": "2026-01-07T10:00:00+00:00",
+        }
+        body = _compute_draft_reply_body(
+            payload,
+            delivery_estimate=None,
+            inquiry_date=payload["ticket_created_at"],
+        )
+        self.assertIsInstance(body, str)
+        self.assertIn("tracking information", body.lower())
+
+    def test_compute_draft_reply_body_no_tracking_uses_estimate(self) -> None:
+        from richpanel_middleware.automation.delivery_estimate import (
+            compute_delivery_estimate,
+        )
+
+        payload = {
+            "order": {
+                "order_id": "ORDER-2",
+                "created_at": "2026-01-05T10:00:00+00:00",
+                "shipping_method": "Standard Shipping",
+            },
+            "ticket_created_at": "2026-01-07T10:00:00+00:00",
+        }
+        estimate = compute_delivery_estimate(
+            payload["order"]["created_at"],
+            payload["order"]["shipping_method"],
+            payload["ticket_created_at"],
+        )
+        body = _compute_draft_reply_body(
+            payload,
+            delivery_estimate=estimate,
+            inquiry_date=payload["ticket_created_at"],
+        )
+        self.assertIsInstance(body, str)
+        self.assertIn("standard (3-5 business days)", body.lower())
+        self.assertIn("1-3 business days", body.lower())
+
+    def test_extract_latest_comment_body_prefers_operator(self) -> None:
+        comments = [
+            {"plain_body": "customer note", "is_operator": False},
+            {"plain_body": "agent reply", "is_operator": True},
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "agent reply")
+
+    def test_extract_latest_comment_body_fallback(self) -> None:
+        comments = [
+            {"plain_body": "first", "is_operator": False},
+            {"body": "second", "is_operator": False},
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "second")
+
+    def test_fetch_latest_reply_hash(self) -> None:
+        comments = [
+            {"plain_body": "customer note", "is_operator": False},
+            {"plain_body": "agent reply", "is_operator": True},
+        ]
+
+        class _Resp:
+            def json(self) -> dict:
+                return {"ticket": {"comments": comments}}
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        executor = _Exec()
+        expected = _fingerprint("agent reply")
+        result = _fetch_latest_reply_hash(
+            executor,
+            "ticket-123",
+            allow_network=True,
+        )
+        self.assertEqual(result, expected)
+
+    def test_fetch_latest_reply_hash_no_network(self) -> None:
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> None:
+                raise AssertionError("execute should not be called")
+
+        executor = _Exec()
+        result = _fetch_latest_reply_hash(
+            executor,
+            "ticket-123",
+            allow_network=False,
+        )
+        self.assertIsNone(result)
 
 
 class DiagnosticsTests(unittest.TestCase):
