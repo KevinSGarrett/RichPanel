@@ -358,6 +358,11 @@ class ThresholdTests(unittest.TestCase):
         os.environ["OPENAI_ROUTING_MIN_CONFIDENCE"] = ""
         self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
 
+    def test_legacy_confidence_whitespace_falls_back(self):
+        os.environ.pop("OPENAI_ROUTING_MIN_CONFIDENCE", None)
+        os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "   "
+        self.assertEqual(get_confidence_threshold(), DEFAULT_CONFIDENCE_THRESHOLD)
+
 
 def main():
     loader = unittest.TestLoader()
