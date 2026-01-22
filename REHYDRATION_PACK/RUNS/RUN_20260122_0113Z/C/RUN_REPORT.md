@@ -49,7 +49,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260122_0113Z/C/GIT_RUN_PLAN.md      |   58 +
  ...us_no_tracking_standard_shipping_3_5_proof.json |  338 ++++++
  .../RUNS/RUN_20260122_0113Z/C/PR_DIFF.patch        |  Bin 0 -> 776210 bytes
- .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        |  192 ++++
+ .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        |  202 ++++
  .../RUNS/RUN_20260122_0113Z/C/RUN_SUMMARY.md       |   42 +
  .../RUNS/RUN_20260122_0113Z/C/STRUCTURE_REPORT.md  |   32 +
  .../C/TEST_LOGS_FULL/ci_full_output.txt            |  417 +++++++
@@ -69,7 +69,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  scripts/test_e2e_smoke_encoding.py                 |  144 ++-
  scripts/test_llm_routing.py                        |   28 +
  scripts/test_pipeline_handlers.py                  |   63 ++
- 46 files changed, 5023 insertions(+), 33 deletions(-)
+ 46 files changed, 5033 insertions(+), 33 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -199,4 +199,5 @@ def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
 
 ## Follow-ups (actionable)
 - [ ] Enable auto-merge on PR https://github.com/KevinSGarrett/RichPanel/pull/139 once permitted.
+
 
