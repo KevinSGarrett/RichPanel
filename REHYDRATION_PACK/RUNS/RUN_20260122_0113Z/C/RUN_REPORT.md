@@ -1,4 +1,4 @@
-# Agent Run Report
+﻿# Agent Run Report
 
 ## Metadata (required)
 - **Run ID:** `RUN_20260122_0113Z`
@@ -23,44 +23,53 @@
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-.gitignore                                         |   4 +
- .../RUNS/RUN_20260122_0113Z/A/DOCS_IMPACT_MAP.md   |  22 ++
- .../RUNS/RUN_20260122_0113Z/A/FIX_REPORT.md        |  21 ++
- .../RUNS/RUN_20260122_0113Z/A/GIT_RUN_PLAN.md      |  58 ++++
- .../RUNS/RUN_20260122_0113Z/A/RUN_REPORT.md        |  46 +++
- .../RUNS/RUN_20260122_0113Z/A/RUN_SUMMARY.md       |  32 ++
- .../RUNS/RUN_20260122_0113Z/A/STRUCTURE_REPORT.md  |  25 ++
- .../RUNS/RUN_20260122_0113Z/A/TEST_MATRIX.md       |  14 +
- .../RUNS/RUN_20260122_0113Z/B/DOCS_IMPACT_MAP.md   |  22 ++
- .../RUNS/RUN_20260122_0113Z/B/FIX_REPORT.md        |  21 ++
- .../RUNS/RUN_20260122_0113Z/B/GIT_RUN_PLAN.md      |  58 ++++
- .../RUNS/RUN_20260122_0113Z/B/RUN_REPORT.md        |  46 +++
- .../RUNS/RUN_20260122_0113Z/B/RUN_SUMMARY.md       |  32 ++
- .../RUNS/RUN_20260122_0113Z/B/STRUCTURE_REPORT.md  |  25 ++
- .../RUNS/RUN_20260122_0113Z/B/TEST_MATRIX.md       |  14 +
- .../RUNS/RUN_20260122_0113Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 ++++++++++
- .../RUNS/RUN_20260122_0113Z/C/DOCS_IMPACT_MAP.md   |  23 ++
- .../RUNS/RUN_20260122_0113Z/C/FIX_REPORT.md        |  21 ++
- .../RUNS/RUN_20260122_0113Z/C/GIT_RUN_PLAN.md      |  58 ++++
- .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        | 116 +++++++
- .../RUNS/RUN_20260122_0113Z/C/RUN_SUMMARY.md       |  38 +++
- .../RUNS/RUN_20260122_0113Z/C/STRUCTURE_REPORT.md  |  32 ++
- .../RUNS/RUN_20260122_0113Z/C/TEST_MATRIX.md       |  15 +
- ...us_no_tracking_standard_shipping_3_5_proof.json | 338 +++++++++++++++++++++
- .../RUNS/RUN_20260122_0113Z/RUN_META.md            |  11 +
- .../richpanel_middleware/automation/llm_routing.py |   4 +-
- .../richpanel_middleware/automation/pipeline.py    |  20 ++
- docs/00_Project_Admin/Progress_Log.md              |   8 +-
- docs/05_FAQ_Automation/Order_Status_Automation.md  |  30 ++
- docs/_generated/doc_outline.json                   |  30 ++
- docs/_generated/doc_registry.compact.json          |   2 +-
- docs/_generated/doc_registry.json                  |   8 +-
- docs/_generated/heading_index.json                 |  36 +++
- scripts/dev_e2e_smoke.py                           | 338 +++++++++++++++++++--
- scripts/test_e2e_smoke_encoding.py                 | 144 ++++++++-
- scripts/test_llm_routing.py                        |  16 +
- scripts/test_pipeline_handlers.py                  |  38 +++
- 37 files changed, 1895 insertions(+), 27 deletions(-)
+.gitignore                                         |    4 +
+ .../RUNS/RUN_20260122_0113Z/A/DOCS_IMPACT_MAP.md   |   22 +
+ .../RUNS/RUN_20260122_0113Z/A/FIX_REPORT.md        |   21 +
+ .../RUNS/RUN_20260122_0113Z/A/GIT_RUN_PLAN.md      |   58 +
+ .../RUNS/RUN_20260122_0113Z/A/RUN_REPORT.md        |   46 +
+ .../RUNS/RUN_20260122_0113Z/A/RUN_SUMMARY.md       |   32 +
+ .../RUNS/RUN_20260122_0113Z/A/STRUCTURE_REPORT.md  |   25 +
+ .../RUNS/RUN_20260122_0113Z/A/TEST_MATRIX.md       |   14 +
+ .../RUNS/RUN_20260122_0113Z/B/DOCS_IMPACT_MAP.md   |   22 +
+ .../RUNS/RUN_20260122_0113Z/B/FIX_REPORT.md        |   21 +
+ .../RUNS/RUN_20260122_0113Z/B/GIT_RUN_PLAN.md      |   58 +
+ .../RUNS/RUN_20260122_0113Z/B/RUN_REPORT.md        |   46 +
+ .../RUNS/RUN_20260122_0113Z/B/RUN_SUMMARY.md       |   32 +
+ .../RUNS/RUN_20260122_0113Z/B/STRUCTURE_REPORT.md  |   25 +
+ .../RUNS/RUN_20260122_0113Z/B/TEST_MATRIX.md       |   14 +
+ .../RUN_20260122_0113Z/C/AGENT_PROMPTS_ARCHIVE.md  |  156 +++
+ .../fingerprint_reply_body_callers.txt             |   34 +
+ .../get_confidence_threshold_callers.txt           |   36 +
+ .../C/CHANGED_FILES_FULL/llm_routing_FULL.py       |  632 +++++++++++
+ .../C/CHANGED_FILES_FULL/pipeline_FULL.py          | 1143 ++++++++++++++++++++
+ .../RUNS/RUN_20260122_0113Z/C/DOCS_IMPACT_MAP.md   |   23 +
+ .../RUNS/RUN_20260122_0113Z/C/EVIDENCE_MANIFEST.md |   23 +
+ .../RUNS/RUN_20260122_0113Z/C/FIX_REPORT.md        |   21 +
+ .../RUNS/RUN_20260122_0113Z/C/GIT_RUN_PLAN.md      |   58 +
+ ...us_no_tracking_standard_shipping_3_5_proof.json |  338 ++++++
+ .../RUNS/RUN_20260122_0113Z/C/PR_DIFF.patch        |  Bin 0 -> 776210 bytes
+ .../RUNS/RUN_20260122_0113Z/C/RUN_REPORT.md        |  192 ++++
+ .../RUNS/RUN_20260122_0113Z/C/RUN_SUMMARY.md       |   42 +
+ .../RUNS/RUN_20260122_0113Z/C/STRUCTURE_REPORT.md  |   32 +
+ .../C/TEST_LOGS_FULL/ci_full_output.txt            |  417 +++++++
+ .../C/TEST_LOGS_FULL/pytest_verbose.txt            |  374 +++++++
+ .../RUNS/RUN_20260122_0113Z/C/TEST_MATRIX.md       |   16 +
+ ...us_no_tracking_standard_shipping_3_5_proof.json |  338 ++++++
+ .../RUNS/RUN_20260122_0113Z/RUN_META.md            |   11 +
+ .../richpanel_middleware/automation/llm_routing.py |   22 +-
+ .../richpanel_middleware/automation/pipeline.py    |   20 +
+ docs/00_Project_Admin/Progress_Log.md              |    8 +-
+ docs/05_FAQ_Automation/Order_Status_Automation.md  |   31 +
+ docs/_generated/doc_outline.json                   |   30 +
+ docs/_generated/doc_registry.compact.json          |    2 +-
+ docs/_generated/doc_registry.json                  |    8 +-
+ docs/_generated/heading_index.json                 |   36 +
+ scripts/dev_e2e_smoke.py                           |  338 +++++-
+ scripts/test_e2e_smoke_encoding.py                 |  144 ++-
+ scripts/test_llm_routing.py                        |   28 +
+ scripts/test_pipeline_handlers.py                  |   63 ++
+ 46 files changed, 5023 insertions(+), 33 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -190,3 +199,4 @@ def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
 
 ## Follow-ups (actionable)
 - [ ] Enable auto-merge on PR https://github.com/KevinSGarrett/RichPanel/pull/139 once permitted.
+
