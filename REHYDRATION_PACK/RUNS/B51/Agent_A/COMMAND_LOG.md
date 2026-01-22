@@ -15,3 +15,4 @@
 - `gh pr checks 141`
 - `gh api repos/KevinSGarrett/RichPanel/issues/141/comments --jq '.[-1].body'`
 - `gh pr edit 141 --body-file _tmp_pr_body.md` (update response id)
+- `python -m pytest -q` (rerun after unittest fix)
