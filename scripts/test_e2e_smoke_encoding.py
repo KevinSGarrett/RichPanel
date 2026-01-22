@@ -31,17 +31,21 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _classify_order_status_result,
     _compute_middleware_outcome,
     _compute_reply_evidence,
+    _compute_draft_reply_body,
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
+    _extract_latest_comment_body,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
     _evaluate_openai_requirements,
+    _fetch_latest_reply_hash,
     append_summary,
     _redact_command,
     _iso_business_days_before,
     _order_status_no_tracking_payload,
     _order_status_no_tracking_short_window_payload,
+    _order_status_no_tracking_standard_shipping_3_5_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -204,6 +208,34 @@ class ScenarioPayloadTests(unittest.TestCase):
                 business_days += 1
         self.assertEqual(business_days, 2)
 
+    def test_order_status_no_tracking_standard_shipping_3_5_shape(self) -> None:
+        payload = _order_status_no_tracking_standard_shipping_3_5_payload(
+            "RUN_JOHN", conversation_id="conv-no-track-john-1"
+        )
+
+        self.assertEqual(
+            payload["scenario"], "order_status_no_tracking_standard_shipping_3_5"
+        )
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIsNone(payload.get("tracking_number"))
+        self.assertIsNone(payload.get("tracking_url"))
+        shipping_method = payload["shipping_method"].lower()
+        self.assertIn("standard shipping", shipping_method)
+        self.assertFalse(any(char.isdigit() for char in shipping_method))
+
+        order_date = datetime.fromisoformat(payload["order_created_at"])
+        ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        self.assertEqual(order_date.weekday(), 0)
+        self.assertEqual(ticket_date.weekday(), 2)
+        self.assertLessEqual(order_date, ticket_date)
+        business_days = 0
+        cursor = order_date
+        while cursor < ticket_date:
+            cursor += timedelta(days=1)
+            if cursor.weekday() < 5:
+                business_days += 1
+        self.assertEqual(business_days, 2)
+
     def test_business_day_anchor_skips_weekend(self) -> None:
         saturday = datetime(2024, 1, 6, 12, tzinfo=timezone.utc)
         monday = _business_day_anchor(saturday)
@@ -218,6 +250,107 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertTrue(before_two.startswith("2024-01-04"))
         with self.assertRaises(ValueError):
             _iso_business_days_before(anchor, -1)
+
+
+class DraftReplyHelperTests(unittest.TestCase):
+    def test_compute_draft_reply_body_with_tracking(self) -> None:
+        payload = {
+            "order": {
+                "order_id": "ORDER-1",
+                "created_at": "2026-01-05T10:00:00+00:00",
+                "shipping_method": "Standard Shipping",
+                "tracking_number": "TRACK-123",
+                "tracking_url": "https://tracking.example.com/track/TRACK-123",
+                "carrier": "UPS",
+            },
+            "ticket_created_at": "2026-01-07T10:00:00+00:00",
+        }
+        body = _compute_draft_reply_body(
+            payload,
+            delivery_estimate=None,
+            inquiry_date=payload["ticket_created_at"],
+        )
+        self.assertIsInstance(body, str)
+        self.assertIn("tracking information", body.lower())
+
+    def test_compute_draft_reply_body_no_tracking_uses_estimate(self) -> None:
+        from richpanel_middleware.automation.delivery_estimate import (
+            compute_delivery_estimate,
+        )
+
+        payload = {
+            "order": {
+                "order_id": "ORDER-2",
+                "created_at": "2026-01-05T10:00:00+00:00",
+                "shipping_method": "Standard Shipping",
+            },
+            "ticket_created_at": "2026-01-07T10:00:00+00:00",
+        }
+        estimate = compute_delivery_estimate(
+            payload["order"]["created_at"],
+            payload["order"]["shipping_method"],
+            payload["ticket_created_at"],
+        )
+        body = _compute_draft_reply_body(
+            payload,
+            delivery_estimate=estimate,
+            inquiry_date=payload["ticket_created_at"],
+        )
+        self.assertIsInstance(body, str)
+        self.assertIn("standard (3-5 business days)", body.lower())
+        self.assertIn("1-3 business days", body.lower())
+
+    def test_extract_latest_comment_body_prefers_operator(self) -> None:
+        comments = [
+            {"plain_body": "customer note", "is_operator": False},
+            {"plain_body": "agent reply", "is_operator": True},
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "agent reply")
+
+    def test_extract_latest_comment_body_fallback(self) -> None:
+        comments = [
+            {"plain_body": "first", "is_operator": False},
+            {"body": "second", "is_operator": False},
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "second")
+
+    def test_fetch_latest_reply_hash(self) -> None:
+        comments = [
+            {"plain_body": "customer note", "is_operator": False},
+            {"plain_body": "agent reply", "is_operator": True},
+        ]
+
+        class _Resp:
+            def json(self) -> dict:
+                return {"ticket": {"comments": comments}}
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        executor = _Exec()
+        expected = _fingerprint("agent reply")
+        result = _fetch_latest_reply_hash(
+            executor,
+            "ticket-123",
+            allow_network=True,
+        )
+        self.assertEqual(result, expected)
+
+    def test_fetch_latest_reply_hash_no_network(self) -> None:
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> None:
+                raise AssertionError("execute should not be called")
+
+        executor = _Exec()
+        result = _fetch_latest_reply_hash(
+            executor,
+            "ticket-123",
+            allow_network=False,
+        )
+        self.assertIsNone(result)
 
 
 class DiagnosticsTests(unittest.TestCase):
@@ -629,6 +762,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
         self.assertEqual(evidence["model"], "gpt-5.2-chat-latest")
         self.assertEqual(evidence["response_id"], "resp_123")
         self.assertEqual(evidence["final_intent"], "order_status_tracking")
+        self.assertEqual(evidence["final_source"], "deterministic")
 
     def test_openai_routing_evidence_missing_response_id(self) -> None:
         state_item = {
@@ -662,6 +796,8 @@ class OpenAIEvidenceTests(unittest.TestCase):
         evidence = _extract_openai_rewrite_evidence(state_item, {})
         self.assertFalse(evidence["rewrite_attempted"])
         self.assertEqual(evidence["reason"], "disabled")
+        self.assertIsNone(evidence["original_hash"])
+        self.assertIsNone(evidence["rewritten_hash"])
 
     def test_openai_requirements_fail_when_missing(self) -> None:
         routing = {"llm_called": False}
@@ -673,11 +809,12 @@ class OpenAIEvidenceTests(unittest.TestCase):
             require_rewrite=True,
         )
         self.assertFalse(result["openai_routing_called"])
+        self.assertFalse(result["openai_routing_source_openai"])
         self.assertFalse(result["openai_rewrite_attempted"])
         self.assertFalse(result["openai_rewrite_applied"])
 
     def test_openai_requirements_accept_fallback(self) -> None:
-        routing = {"llm_called": True}
+        routing = {"llm_called": True, "final_source": "openai"}
         rewrite = {
             "rewrite_attempted": True,
             "rewrite_applied": False,
@@ -690,6 +827,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
             require_rewrite=True,
         )
         self.assertTrue(result["openai_routing_called"])
+        self.assertTrue(result["openai_routing_source_openai"])
         self.assertTrue(result["openai_rewrite_attempted"])
         self.assertTrue(result["openai_rewrite_applied"])
 
@@ -724,6 +862,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
             "confidence",
             "response_id",
             "final_intent",
+            "final_source",
         ):
             self.assertIn(key, routing)
         for key in (
@@ -732,6 +871,9 @@ class OpenAIEvidenceTests(unittest.TestCase):
             "model",
             "response_id",
             "fallback_used",
+            "original_hash",
+            "rewritten_hash",
+            "rewritten_changed",
         ):
             self.assertIn(key, rewrite)
 

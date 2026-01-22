@@ -563,6 +563,44 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
         self.assertFalse(tag_call["kwargs"]["dry_run"])
 
+    def test_outbound_rewrite_hashes_populated(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor()
+        rewrite_result = ReplyRewriteResult(
+            body="rewritten body",
+            rewritten=True,
+            reason="applied",
+            model="gpt-5.2-chat-latest",
+            confidence=0.91,
+            dry_run=False,
+            fingerprint="fp",
+            llm_called=True,
+            response_id="resp-1",
+        )
+
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.rewrite_reply",
+            return_value=rewrite_result,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        openai_rewrite = result.get("openai_rewrite", {})
+        self.assertTrue(openai_rewrite.get("rewritten_changed"))
+        self.assertIsNotNone(openai_rewrite.get("original_hash"))
+        self.assertIsNotNone(openai_rewrite.get("rewritten_hash"))
+        self.assertNotEqual(
+            openai_rewrite.get("original_hash"),
+            openai_rewrite.get("rewritten_hash"),
+        )
+
     def test_outbound_skips_when_ticket_already_resolved(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_status="resolved")

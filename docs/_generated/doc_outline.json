@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-01-22 - RUN_20260122_0113Z (B50: OpenAI order status proof + John scenario)",
+        "anchor": "2026-01-22-run202601220113z-b50-openai-order-status-proof-john-scenario"
+      },
+      {
+        "level": 3,
         "text": "2026-01-21 - RUN_20260121_2228Z (B50: Richpanel read only safety tests + docs)",
         "anchor": "2026-01-21-run202601212228z-b50-richpanel-read-only-safety-tests-docs"
       },
@@ -7671,6 +7676,31 @@
         "level": 2,
         "text": "High-level decision flow (v1)",
         "anchor": "high-level-decision-flow-v1"
+      },
+      {
+        "level": 2,
+        "text": "OpenAI routing + rewrite (optional, gated)",
+        "anchor": "openai-routing-rewrite-optional-gated"
+      },
+      {
+        "level": 3,
+        "text": "Routing classification (order-status vs not)",
+        "anchor": "routing-classification-order-status-vs-not"
+      },
+      {
+        "level": 3,
+        "text": "Reply rewrite (draft → friendly)",
+        "anchor": "reply-rewrite-draft-friendly"
+      },
+      {
+        "level": 3,
+        "text": "Env vars to enable behavior",
+        "anchor": "env-vars-to-enable-behavior"
+      },
+      {
+        "level": 3,
+        "text": "OpenAI key sourcing (seed-secrets → AWS secret → runtime)",
+        "anchor": "openai-key-sourcing-seed-secrets-aws-secret-runtime"
       },
       {
         "level": 2,

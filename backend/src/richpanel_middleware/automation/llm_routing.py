@@ -71,7 +71,9 @@ def get_openai_routing_primary() -> bool:
 
 def get_confidence_threshold() -> float:
     """Get the confidence threshold for using LLM routing as primary."""
-    raw = os.environ.get("OPENAI_ROUTING_CONFIDENCE_THRESHOLD")
+    raw = os.environ.get("OPENAI_ROUTING_MIN_CONFIDENCE") or os.environ.get(
+        "OPENAI_ROUTING_CONFIDENCE_THRESHOLD"
+    )
     if raw:
         try:
             return float(raw)

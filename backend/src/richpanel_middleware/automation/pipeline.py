@@ -581,6 +581,16 @@ def _rewrite_error_class(
     return _REWRITE_REASON_ERROR_CLASS.get(reason)
 
 
+def _fingerprint_reply_body(body: Optional[str]) -> Optional[str]:
+    if not body:
+        return None
+    try:
+        serialized = json.dumps(body, ensure_ascii=False, sort_keys=True)
+    except Exception:
+        serialized = str(body)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:12]
+
+
 def _build_openai_rewrite_evidence(
     rewrite_result: Optional[ReplyRewriteResult],
     *,
@@ -791,7 +801,9 @@ def execute_order_status_reply(
             )
             return {"sent": False, "reason": "missing_draft_reply"}
 
+        original_hash = _fingerprint_reply_body(reply_body)
         rewrite_result: ReplyRewriteResult | None = None
+        openai_rewrite: Dict[str, Any]
         try:
             rewrite_result = rewrite_reply(
                 reply_body,
@@ -824,6 +836,14 @@ def execute_order_status_reply(
                     "conversation_id": envelope.conversation_id,
                 },
             )
+
+        rewritten_hash = _fingerprint_reply_body(reply_body)
+        rewritten_changed = None
+        if original_hash and rewritten_hash:
+            rewritten_changed = original_hash != rewritten_hash
+        openai_rewrite["original_hash"] = original_hash
+        openai_rewrite["rewritten_hash"] = rewritten_hash
+        openai_rewrite["rewritten_changed"] = rewritten_changed
 
         if rewrite_result:
             responses.append(

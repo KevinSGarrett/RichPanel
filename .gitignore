@@ -44,8 +44,12 @@ secrets/
 # Local PR drafting artifacts
 /pr_body.txt
 /pr_body_b49.md
+/pr_body_b49_shadow_mode.md
 /b48_commit_history.txt
 /b48_rehydration_files.txt
+
+# PM scratch packs (local only)
+/PM_REHYDRATION_PACK/
 
 # Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
 artifacts/*
