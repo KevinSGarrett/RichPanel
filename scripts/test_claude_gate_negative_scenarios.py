@@ -117,9 +117,16 @@ urllib.request.urlopen = _stub_urlopen
 
 
 def _run_gate(scenario: str, *, api_key: str | None) -> subprocess.CompletedProcess[str]:
+    """Run claude_gate_review.py in a subprocess with a stubbed network layer."""
     with tempfile.TemporaryDirectory() as tmpdir:
         sitecustomize_path = Path(tmpdir) / "sitecustomize.py"
         sitecustomize_path.write_text(_STUB_SITECUSTOMIZE, encoding="utf-8")
+
+        script_path = (
+            Path(__file__).resolve().parents[1] / "scripts" / "claude_gate_review.py"
+        )
+        if not script_path.exists():
+            raise AssertionError(f"Missing claude_gate_review.py at {script_path}")
 
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{tmpdir}{os.pathsep}{env.get('PYTHONPATH', '')}"
@@ -133,7 +140,7 @@ def _run_gate(scenario: str, *, api_key: str | None) -> subprocess.CompletedProc
         return subprocess.run(
             [
                 sys.executable,
-                "scripts/claude_gate_review.py",
+                str(script_path),
                 "--repo",
                 "test/repo",
                 "--pr-number",
@@ -152,41 +159,41 @@ class ClaudeGateNegativeTests(TestCase):
     def test_missing_api_key_fails(self):
         """Gate should fail when ANTHROPIC_API_KEY is missing."""
         result = _run_gate("missing_api_key", api_key=None)
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 2)
         self.assertIn("ANTHROPIC_API_KEY", result.stderr)
 
     def test_invalid_api_key_fails(self):
         """Gate should fail with invalid API key."""
         result = _run_gate("invalid_api_key", api_key="invalid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
 
     def test_missing_gate_label_fails(self):
         """Workflow should fail when gate:claude label is missing."""
         result = _run_gate("missing_gate_label", api_key="valid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
         self.assertIn("gate:claude", result.stderr)
 
     def test_http_500_fails(self):
         """Gate should fail on Anthropic HTTP 500 response."""
         result = _run_gate("http_500", api_key="valid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
 
     def test_missing_response_id_fails(self):
         """Gate should fail when response id is missing."""
         result = _run_gate("missing_response_id", api_key="valid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
         self.assertIn("missing id", result.stderr.lower())
 
     def test_missing_request_id_fails(self):
         """Gate should fail when request id is missing."""
         result = _run_gate("missing_request_id", api_key="valid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
         self.assertIn("request id", result.stderr.lower())
 
     def test_zero_usage_fails(self):
         """Gate should fail when token usage is zero."""
         result = _run_gate("zero_usage", api_key="valid-key")
-        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.returncode, 1)
         self.assertIn("token usage", result.stderr.lower())
 
 
