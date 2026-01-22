@@ -22,7 +22,7 @@ Make OpenAI routing/rewrite explicit in order status docs and prove usage via de
 
 ## Git/GitHub status (required)
 - Working branch: b50/openai-order-status-e2e-proof
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/139
 - CI status at end of run: green (run_ci_checks.py --ci pass)
 - Main updated: no
 - Branch cleanup done: no
