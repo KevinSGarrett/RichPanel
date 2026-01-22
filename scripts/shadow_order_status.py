@@ -476,7 +476,7 @@ def _lookup_order_summary_payload_first(
         return baseline, "baseline"
     order_id = baseline.get("order_id") or baseline.get("id")
     if not order_id or str(order_id).strip().lower() in {"unknown"}:
-        return baseline, "baseline"
+        return baseline, "skipped_missing_order_id"
 
     try:
         response = shopify_client.get_order(
@@ -607,6 +607,7 @@ def run_ticket(
     order_summary, summary_source = _lookup_order_summary_payload_first(
         envelope, allow_network=allow_network, shopify_client=shopify_client
     )
+    skipped_missing_order_id = summary_source == "skipped_missing_order_id"
     tracking_present = _tracking_present(order_summary)
     order_summary_found = summary_source in {"payload", "shopify"}
 
@@ -662,6 +663,8 @@ def run_ticket(
         {
             "order_summary_found": order_summary_found,
             "order_summary_source": summary_source,
+            "lookup_status": "SKIPPED" if skipped_missing_order_id else "OK",
+            "skipped_reason": "missing_order_id" if skipped_missing_order_id else None,
             "tracking_present": tracking_present,
             "tracking_number_last4": _last4(
                 str(
