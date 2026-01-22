@@ -10,9 +10,14 @@ from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from backend.tests.test_order_lookup_order_id_resolution import (  # noqa: E402
+    OrderIdResolutionTests as _OrderIdResolutionTests,
+)
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     lookup_order_summary,
 )
@@ -90,6 +95,10 @@ def _envelope(payload: dict) -> EventEnvelope:
             payload.get("conversation_id") or payload.get("order_id") or "conv-1"
         ),
     )
+
+
+class OrderIdResolutionCoverageTests(_OrderIdResolutionTests):
+    """Run backend order-id resolution tests under scripts coverage."""
 
 
 class OrderLookupTests(unittest.TestCase):

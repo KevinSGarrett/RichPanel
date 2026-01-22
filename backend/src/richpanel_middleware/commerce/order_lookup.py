@@ -206,7 +206,7 @@ def _lookup_shipstation(
 
 def _baseline_summary(envelope: EventEnvelope) -> OrderSummary:
     payload = envelope.payload or {}
-    order_id = _extract_order_id(payload, envelope.conversation_id)
+    order_id = _extract_order_id(payload)
     status = (
         _coerce_str(
             payload.get("status")
@@ -431,7 +431,7 @@ def _has_payload_shipping_signal(summary: OrderSummary) -> bool:
     return False
 
 
-def _extract_order_id(payload: Dict[str, Any], conversation_id: str) -> str:
+def _extract_order_id(payload: Dict[str, Any]) -> str:
     for key in ("order_id", "order_number"):
         value = _coerce_str(payload.get(key))
         if value:
