@@ -16,3 +16,5 @@
 - `python -m compileall backend/src scripts` (pass; re-run after coverage tests)
 - `python -m pytest -q` (failed: missing tracking-number assertion coverage)
 - `python -m pytest -q` (pass; after fixing tracking-number test)
+- `python -m pytest -q` (pass; after adding script-level rewrite validation tests)
+- `python -m compileall backend/src scripts` (pass; re-run after script-level tests)

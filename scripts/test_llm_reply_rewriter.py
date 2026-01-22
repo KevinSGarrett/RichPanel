@@ -9,9 +9,15 @@ from typing import cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+import backend.tests.test_reply_rewrite_validation as backend_rewrite_tests  # noqa: E402
+from richpanel_middleware.automation import (  # noqa: E402
+    llm_reply_rewriter as rewriter,
+)
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     rewrite_reply,
 )
@@ -257,6 +263,160 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertTrue(result.rewritten)
         self.assertEqual(result.body, body_text)
         self.assertEqual(result.reason, "applied")
+
+    def test_rewrite_rejects_missing_tracking_url(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        draft = (
+            "Tracking details:\n"
+            "- Tracking number: 1Z999AA10123456784\n"
+            "- Tracking link: https://tracking.example.com/track/1Z999AA10123456784\n"
+        )
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps(
+                {
+                    "body": "Tracking number: 1Z999AA10123456784",
+                    "confidence": 0.95,
+                    "risk_flags": [],
+                }
+            ),
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            draft,
+            conversation_id="t-track-url",
+            event_id="evt-track-url",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, draft)
+        self.assertEqual(result.reason, "missing_required_urls")
+
+    def test_rewrite_rejects_missing_tracking_number(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        draft = (
+            "Tracking details:\n"
+            "- Tracking number: ZX98765\n"
+            "- Tracking link: https://tracking.example.com/track/OTHER123\n"
+        )
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps(
+                {
+                    "body": "Tracking link: https://tracking.example.com/track/OTHER123",
+                    "confidence": 0.95,
+                    "risk_flags": [],
+                }
+            ),
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            draft,
+            conversation_id="t-track-num",
+            event_id="evt-track-num",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, draft)
+        self.assertEqual(result.reason, "missing_required_tracking")
+
+    def test_rewrite_applies_when_tokens_preserved(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        draft = (
+            "Tracking details:\n"
+            "- Tracking number: 1Z999AA10123456784\n"
+            "- Tracking link: https://tracking.example.com/track/1Z999AA10123456784\n"
+        )
+        rewritten = (
+            "Here is your tracking info:\n"
+            "Tracking number: 1Z999AA10123456784\n"
+            "Tracking link: https://tracking.example.com/track/1Z999AA10123456784"
+        )
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps(
+                {"body": rewritten, "confidence": 0.95, "risk_flags": []}
+            ),
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            draft,
+            conversation_id="t-track-ok",
+            event_id="evt-track-ok",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.body, rewritten)
+
+
+class ReplyRewriteHelperTests(unittest.TestCase):
+    def test_extract_urls_and_tracking_tokens(self) -> None:
+        text = (
+            "Track it here: https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784, "
+            "or use tracking number: 1Z999AA10123456784."
+        )
+        urls = rewriter._extract_urls(text)
+        self.assertEqual(
+            urls,
+            ["https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784"],
+        )
+        tokens = rewriter._extract_tracking_tokens(text)
+        self.assertEqual(tokens, ["1Z999AA10123456784"])
+
+    def test_extract_tracking_from_url_path(self) -> None:
+        url = "https://tracking.example.com/track/ABC12345"
+        tokens = rewriter._extract_tracking_from_url(url)
+        self.assertEqual(tokens, ["ABC12345"])
+
+    def test_missing_required_tokens_detects_missing_values(self) -> None:
+        original = (
+            "Tracking link: https://tracking.example.com/track/ABC123 "
+            "Tracking number: ABC123"
+        )
+        missing_urls, missing_tracking = rewriter._missing_required_tokens(
+            original, "Thanks for reaching out."
+        )
+        self.assertEqual(
+            missing_urls, ["https://tracking.example.com/track/ABC123"]
+        )
+        self.assertEqual(missing_tracking, ["ABC123"])
+
+        missing_urls, missing_tracking = rewriter._missing_required_tokens(
+            "Tracking number: ZX98765", "Tracking number: ZX98765"
+        )
+        self.assertEqual(missing_urls, [])
+        self.assertEqual(missing_tracking, [])
+
+    def test_backend_rewrite_validation_functions(self) -> None:
+        backend_rewrite_tests.test_rewrite_rejects_missing_tracking_url()
+        backend_rewrite_tests.test_rewrite_rejects_missing_tracking_number()
+        backend_rewrite_tests.test_rewrite_applies_when_tokens_preserved()
+        backend_rewrite_tests.test_extract_urls_and_tracking_tokens()
+        backend_rewrite_tests.test_missing_required_tokens_detects_missing_values()
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
