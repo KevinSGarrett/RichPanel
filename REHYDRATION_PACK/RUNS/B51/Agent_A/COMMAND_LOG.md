@@ -28,3 +28,6 @@
 - `gh pr edit 142 --body-file _tmp_pr_body.md`
 - `gh pr edit 142 --add-label "risk:R2" --add-label "gate:claude"`
 - `gh pr merge 142 --auto --merge`
+- `gh pr checks 142`
+- `gh api repos/KevinSGarrett/RichPanel/issues/142/comments | ConvertFrom-Json` (fetch Claude gate comment)
+- `gh pr edit 142 --body-file _tmp_pr_body.md` (update IDs + CI/Codecov status)
