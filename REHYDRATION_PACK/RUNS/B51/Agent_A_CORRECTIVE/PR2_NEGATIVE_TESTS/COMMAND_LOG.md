@@ -7,3 +7,5 @@
 - `gh pr create --title "B51: Demonstrate Claude gate fail-closed scenarios (risk:R1)" --body-file _tmp_pr_body.md --base main --head b51-negative-test-demonstrations`
 - `python -m pytest scripts/test_claude_gate_negative_scenarios.py -v` (rerun after updates)
 - `python -m pytest scripts/test_claude_gate_negative_scenarios.py -v` (rerun after schema/exit checks)
+- `git rebase --onto main 1988b39`
+- `git push --force-with-lease`
