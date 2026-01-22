@@ -31,6 +31,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     normalize_event,
     plan_actions,
     build_no_tracking_reply,
+    _fingerprint_reply_body,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -53,6 +54,30 @@ def _contains_float(value: Any) -> bool:
     if isinstance(value, (list, tuple, set)):
         return any(_contains_float(v) for v in value)
     return False
+
+
+class FingerprintReplyBodyTests(unittest.TestCase):
+    def test_fingerprint_reply_body_none(self) -> None:
+        self.assertIsNone(_fingerprint_reply_body(None))
+
+    def test_fingerprint_reply_body_empty_string(self) -> None:
+        self.assertIsNone(_fingerprint_reply_body(""))
+
+    def test_fingerprint_reply_body_unicode(self) -> None:
+        result = _fingerprint_reply_body("Hello 世界 🌍")
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(len(result), 12)
+        self.assertTrue(all(c in "0123456789abcdef" for c in result))
+
+    def test_fingerprint_reply_body_deterministic(self) -> None:
+        body = "Test reply body"
+        self.assertEqual(_fingerprint_reply_body(body), _fingerprint_reply_body(body))
+
+    def test_fingerprint_reply_body_different_inputs(self) -> None:
+        self.assertNotEqual(
+            _fingerprint_reply_body("Body A"), _fingerprint_reply_body("Body B")
+        )
 
 
 class PipelineTests(unittest.TestCase):

@@ -12,13 +12,15 @@ GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
 # Claude 4.5 models ONLY - no fallbacks
-MODEL_BY_RISK = {
-    "risk:R0": "claude-haiku-4-5-20251015",
-    "risk:R1": "claude-sonnet-4-5-20250929",
-    "risk:R2": "claude-opus-4-5-20251101",
-    "risk:R3": "claude-opus-4-5-20251101",
-    "risk:R4": "claude-opus-4-5-20251101",
+_DEFAULT_MODELS = {
+    "risk:R0": "claude-haiku-4-5",
+    "risk:R1": "claude-sonnet-4-5",
+    "risk:R2": "claude-opus-4-5",
+    "risk:R3": "claude-opus-4-5",
+    "risk:R4": "claude-opus-4-5",
 }
+MODEL_BY_RISK = dict(_DEFAULT_MODELS)
+_REQUEST_ID_HEADERS = ("request-id", "x-request-id", "x-amzn-requestid")
 
 DEFAULT_MAX_DIFF_CHARS = 60000
 DEFAULT_MAX_BODY_CHARS = 8000
@@ -103,7 +105,32 @@ def _normalize_risk(labels):
     return unique[0]
 
 
-def _anthropic_request(payload: dict, api_key: str) -> dict:
+def _select_model(risk: str) -> str:
+    override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
+    if override:
+        return override
+    try:
+        return _DEFAULT_MODELS[risk]
+    except KeyError as exc:
+        raise RuntimeError(f"Unsupported risk label: {risk}") from exc
+
+
+def _extract_request_id(headers) -> str:
+    for header in _REQUEST_ID_HEADERS:
+        value = headers.get(header) if headers else None
+        if value:
+            return value
+    return ""
+
+
+def _coerce_token_count(value) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _anthropic_request(payload: dict, api_key: str) -> tuple[dict, str]:
     url = "https://api.anthropic.com/v1/messages"
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=data, method="POST")
@@ -115,7 +142,16 @@ def _anthropic_request(payload: dict, api_key: str) -> dict:
     for attempt in range(4):
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
-                return json.loads(response.read().decode("utf-8"))
+                status = response.getcode()
+                body = response.read().decode("utf-8", "replace")
+                if status != 200:
+                    raise RuntimeError(f"Anthropic API unexpected status {status}: {body[:300]}")
+                try:
+                    response_json = json.loads(body)
+                except json.JSONDecodeError as exc:
+                    raise RuntimeError("Anthropic API returned invalid JSON.") from exc
+                request_id = _extract_request_id(response.headers)
+                return response_json, request_id
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", "replace")
             if exc.code in (429, 500, 502, 503, 504) and attempt < 3:
@@ -134,8 +170,6 @@ def _anthropic_request(payload: dict, api_key: str) -> dict:
                 backoff *= 2
                 continue
             raise RuntimeError(f"Anthropic API request failed: {exc}") from exc
-        except json.JSONDecodeError as exc:
-            raise RuntimeError("Anthropic API returned invalid JSON.") from exc
     raise RuntimeError("Anthropic API request failed after retries.")
 
 
@@ -229,6 +263,7 @@ def _format_comment(
     model: str,
     findings,
     response_id: str = "",
+    request_id: str = "",
     usage: dict | None = None,
 ) -> str:
     findings_block = "\n".join(f"- {item}" for item in findings)
@@ -236,10 +271,13 @@ def _format_comment(
         "Claude Review (gate:claude)\n"
         f"CLAUDE_REVIEW: {verdict}\n"
         f"Risk: {risk}\n"
-        f"Model: {model}\n"
+        f"Model used: {model}\n"
+        "skip=false\n"
     )
     if response_id:
         comment += f"Anthropic Response ID: {response_id}\n"
+    if request_id:
+        comment += f"Anthropic Request ID: {request_id}\n"
     if usage:
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
@@ -273,6 +311,7 @@ def main() -> int:
     parser.add_argument("--max-files", type=int, default=DEFAULT_MAX_FILES)
     parser.add_argument("--max-findings", type=int, default=DEFAULT_MAX_FINDINGS)
     parser.add_argument("--comment-path", default=os.environ.get("CLAUDE_GATE_COMMENT_PATH", ".claude_gate_comment.txt"))
+    parser.add_argument("--audit-path", default=os.environ.get("CLAUDE_GATE_AUDIT_PATH", "claude_gate_audit.json"))
     args = parser.parse_args()
 
     repo = args.repo
@@ -290,20 +329,11 @@ def main() -> int:
     pr_data = _fetch_json(pr_url, github_token)
     labels = [label.get("name", "") for label in pr_data.get("labels", [])]
 
-    # Check if workflow is forcing the gate to run (prevents race condition)
-    force_gate = os.environ.get("CLAUDE_GATE_FORCE", "").lower() in ("true", "1", "yes")
-    
-    if not force_gate and GATE_LABEL not in labels:
-        print("gate:claude label not present; skipping Claude gate.")
-        _write_output("skip", "true")
-        return 0
-    
-    if force_gate and GATE_LABEL not in labels:
-        print("WARNING: gate:claude label not detected in API response, but CLAUDE_GATE_FORCE=true")
-        print("Proceeding with gate review (workflow guarantees label was applied).")
+    if GATE_LABEL not in labels:
+        raise RuntimeError("gate:claude label missing; gate requires the label to run.")
 
     risk = _normalize_risk(labels)
-    model_used = MODEL_BY_RISK[risk]
+    model_used = _select_model(risk)
     print(f"Claude gate enforced: skip=false, Risk={risk}, Model={model_used}")
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -362,15 +392,17 @@ def main() -> int:
         "messages": [{"role": "user", "content": user_prompt}],
     }
 
-    response_json = _anthropic_request(payload, api_key)
+    response_json, request_id = _anthropic_request(payload, api_key)
     response_text = _extract_text(response_json)
-    
-    # Extract Anthropic response ID and usage for audit trail
+
+    # Extract Anthropic response IDs and usage for audit trail
     response_id = response_json.get("id", "")
     response_model = response_json.get("model", "")
-    usage = response_json.get("usage", {})
+    usage = response_json.get("usage")
     if not response_id:
         raise RuntimeError("Anthropic response missing id; gate requires a real API response.")
+    if not request_id:
+        raise RuntimeError("Anthropic response missing request id; gate requires request id.")
     if not response_model:
         print("WARNING: Anthropic response missing model; using requested model for logging.")
         response_model = model_used
@@ -379,6 +411,17 @@ def main() -> int:
             "WARNING: Anthropic response model mismatch. "
             f"requested={model_used}, response={response_model}"
         )
+    if not isinstance(usage, dict):
+        print(f"ERROR: Anthropic response missing usage: {usage}", file=sys.stderr)
+        raise RuntimeError("Anthropic response missing token usage; gate requires usage.")
+    input_tokens = _coerce_token_count(usage.get("input_tokens"))
+    output_tokens = _coerce_token_count(usage.get("output_tokens"))
+    if input_tokens <= 0 or output_tokens <= 0:
+        print(f"ERROR: Anthropic token usage missing/zero: {usage}", file=sys.stderr)
+        raise RuntimeError("Anthropic response missing token usage; gate requires usage.")
+    usage = dict(usage)
+    usage["input_tokens"] = input_tokens
+    usage["output_tokens"] = output_tokens
 
     verdict = _parse_verdict(response_text)
     findings = _extract_findings(response_text, args.max_findings)
@@ -388,9 +431,26 @@ def main() -> int:
         verdict = "PASS"
         findings = ["No issues found."]
 
-    comment_body = _format_comment(verdict, risk, model_used, findings, response_id, usage)
+    comment_body = _format_comment(verdict, risk, model_used, findings, response_id, request_id, usage)
+    comment_dir = os.path.dirname(args.comment_path)
+    if comment_dir:
+        os.makedirs(comment_dir, exist_ok=True)
     with open(args.comment_path, "w", encoding="utf-8") as handle:
         handle.write(comment_body)
+
+    audit_payload = {
+        "pr": pr_number,
+        "risk_label": risk,
+        "model": model_used,
+        "response_id": response_id,
+        "request_id": request_id,
+        "usage": usage,
+    }
+    audit_dir = os.path.dirname(args.audit_path)
+    if audit_dir:
+        os.makedirs(audit_dir, exist_ok=True)
+    with open(args.audit_path, "w", encoding="utf-8") as handle:
+        json.dump(audit_payload, handle, indent=2)
 
     _write_output("skip", "false")
     _write_output("verdict", verdict)
@@ -398,13 +458,18 @@ def main() -> int:
     _write_output("model", model_used)
     _write_output("risk", risk)
     _write_output("response_id", response_id)
+    _write_output("request_id", request_id)
+    _write_output("usage_input_tokens", str(input_tokens))
+    _write_output("usage_output_tokens", str(output_tokens))
     _write_output("response_model", response_model)
     _write_output("comment_path", args.comment_path)
+    _write_output("audit_path", args.audit_path)
 
     print(
         "Claude gate completed. "
         f"Verdict={verdict}, Risk={risk}, ModelUsed={model_used}, "
-        f"ResponseModel={response_model}, ResponseID={response_id}"
+        f"ResponseModel={response_model}, ResponseID={response_id}, RequestID={request_id}, "
+        f"Usage=input={input_tokens}, output={output_tokens}"
     )
     return 0
 

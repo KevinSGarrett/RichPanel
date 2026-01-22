@@ -11385,6 +11385,31 @@
     ]
   },
   {
+    "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Claude Gate Audit Proof",
+        "anchor": "claude-gate-audit-proof"
+      },
+      {
+        "level": 2,
+        "text": "PR comment evidence (required)",
+        "anchor": "pr-comment-evidence-required"
+      },
+      {
+        "level": 2,
+        "text": "Confirm the run used the intended model",
+        "anchor": "confirm-the-run-used-the-intended-model"
+      },
+      {
+        "level": 2,
+        "text": "Audit artifact (why it exists)",
+        "anchor": "audit-artifact-why-it-exists"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Developer_Guide.md",
     "outline": [
       {
