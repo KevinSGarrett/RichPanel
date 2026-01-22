@@ -44,3 +44,11 @@ Command Log
 42) git commit -m "B51: update run artifacts for bugbot fix"
 43) git commit -m "B51: update command log (bugbot fix)"
 44) git push
+45) coverage run -m unittest discover -s scripts -p "test_*.py"; coverage report -m backend/src/richpanel_middleware/commerce/order_lookup.py backend/tests/test_order_lookup_order_id_resolution.py scripts/test_order_lookup.py
+46) python -m compileall backend/src scripts
+47) python -m pytest -q
+48) python scripts/run_ci_checks.py --ci
+49) delete_file claude_gate_audit.json
+50) git add backend/tests/test_order_lookup_order_id_resolution.py scripts/test_order_lookup.py
+51) git commit -m "B51: simplify test sys.path setup"
+52) python scripts/run_ci_checks.py --ci
