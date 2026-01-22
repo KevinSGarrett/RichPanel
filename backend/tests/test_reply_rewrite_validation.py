@@ -58,6 +58,32 @@ def test_rewrite_rejects_missing_tracking_url() -> None:
     assert result.reason == "missing_required_urls"
 
 
+def test_rewrite_rejects_modified_url() -> None:
+    draft = (
+        "Tracking link: https://example.com/track/ABC123\n"
+        "Let us know if you have any questions."
+    )
+    client = _StubClient(
+        _response("Tracking link: https://example.com/track/ABC123XYZ")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "missing_required_tokens"
+
+
 def test_rewrite_rejects_missing_tracking_number() -> None:
     draft = (
         "Tracking details:\n"
@@ -132,14 +158,57 @@ def test_missing_required_tokens_detects_missing_values() -> None:
         "Tracking link: https://tracking.example.com/track/ABC123 "
         "Tracking number: ABC123"
     )
-    missing_urls, missing_tracking = rewriter._missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
         original, "Thanks for reaching out."
     )
     assert missing_urls == ["https://tracking.example.com/track/ABC123"]
     assert missing_tracking == ["ABC123"]
+    assert missing_eta == []
 
-    missing_urls, missing_tracking = rewriter._missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
         "Tracking number: ZX98765", "Tracking number: ZX98765"
     )
     assert missing_urls == []
     assert missing_tracking == []
+    assert missing_eta == []
+
+
+def test_rewrite_rejects_modified_eta_window() -> None:
+    draft = "It should arrive in about 1-3 business days."
+    client = _StubClient(_response("It should arrive in about 2-4 business days."))
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "missing_required_eta"
+
+
+def test_rewrite_accepts_equivalent_eta_separator() -> None:
+    draft = "It should arrive in about 1–3 business days."
+    client = _StubClient(_response("It should arrive in about 1-3 business days."))
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is True
+    assert result.body == "It should arrive in about 1-3 business days."

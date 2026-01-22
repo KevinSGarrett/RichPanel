@@ -397,26 +397,46 @@ class ReplyRewriteHelperTests(unittest.TestCase):
             "Tracking link: https://tracking.example.com/track/ABC123 "
             "Tracking number: ABC123"
         )
-        missing_urls, missing_tracking = rewriter._missing_required_tokens(
+        missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
             original, "Thanks for reaching out."
         )
         self.assertEqual(
             missing_urls, ["https://tracking.example.com/track/ABC123"]
         )
         self.assertEqual(missing_tracking, ["ABC123"])
+        self.assertEqual(missing_eta, [])
 
-        missing_urls, missing_tracking = rewriter._missing_required_tokens(
+        missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
             "Tracking number: ZX98765", "Tracking number: ZX98765"
         )
         self.assertEqual(missing_urls, [])
         self.assertEqual(missing_tracking, [])
+        self.assertEqual(missing_eta, [])
+
+    def test_extract_eta_windows(self) -> None:
+        text = "Arrives in 1–3 business days (or 2 days for express)."
+        windows = rewriter._extract_eta_windows(text)
+        self.assertEqual(windows, ["1-3 business days", "2 days"])
+
+    def test_missing_required_eta_detects_changes(self) -> None:
+        original = "Arrives in 1-3 business days."
+        rewritten = "Arrives in 2-4 business days."
+        missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
+            original, rewritten
+        )
+        self.assertEqual(missing_urls, [])
+        self.assertEqual(missing_tracking, [])
+        self.assertEqual(missing_eta, ["1-3 business days"])
 
     def test_backend_rewrite_validation_functions(self) -> None:
         backend_rewrite_tests.test_rewrite_rejects_missing_tracking_url()
+        backend_rewrite_tests.test_rewrite_rejects_modified_url()
         backend_rewrite_tests.test_rewrite_rejects_missing_tracking_number()
         backend_rewrite_tests.test_rewrite_applies_when_tokens_preserved()
         backend_rewrite_tests.test_extract_urls_and_tracking_tokens()
         backend_rewrite_tests.test_missing_required_tokens_detects_missing_values()
+        backend_rewrite_tests.test_rewrite_rejects_modified_eta_window()
+        backend_rewrite_tests.test_rewrite_accepts_equivalent_eta_separator()
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"

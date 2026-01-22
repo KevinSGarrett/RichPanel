@@ -336,13 +336,25 @@ class DraftReplyHelperTests(unittest.TestCase):
         body = _extract_latest_comment_body(comments)
         self.assertEqual(body, "agent reply")
 
+    def test_extract_latest_comment_body_prefers_middleware_source(self) -> None:
+        comments = [
+            {"plain_body": "agent reply", "is_operator": True, "source": "agent"},
+            {
+                "plain_body": "middleware reply",
+                "is_operator": True,
+                "source": "middleware",
+            },
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "middleware reply")
+
     def test_extract_latest_comment_body_fallback(self) -> None:
         comments = [
             {"plain_body": "first", "is_operator": False},
             {"body": "second", "is_operator": False},
         ]
         body = _extract_latest_comment_body(comments)
-        self.assertEqual(body, "second")
+        self.assertIsNone(body)
 
     def test_fetch_latest_reply_hash(self) -> None:
         comments = [

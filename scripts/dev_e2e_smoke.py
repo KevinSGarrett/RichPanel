@@ -285,6 +285,15 @@ def _extract_latest_comment_body(comments: Any) -> Optional[str]:
     if not isinstance(comments, list):
         return None
 
+    def _source_from(comment: Any) -> Optional[str]:
+        if not isinstance(comment, dict):
+            return None
+        for key in ("source", "source_name", "sourceName"):
+            value = comment.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip().lower()
+        return None
+
     def _body_from(comment: Any) -> Optional[str]:
         if not isinstance(comment, dict):
             return None
@@ -295,14 +304,18 @@ def _extract_latest_comment_body(comments: Any) -> Optional[str]:
 
     for comment in reversed(comments):
         if isinstance(comment, dict) and comment.get("is_operator") is True:
+            source = _source_from(comment)
+            if source and "middleware" in source:
+                body = _body_from(comment)
+                if body:
+                    return body
+
+    for comment in reversed(comments):
+        if isinstance(comment, dict) and comment.get("is_operator") is True:
             body = _body_from(comment)
             if body:
                 return body
 
-    for comment in reversed(comments):
-        body = _body_from(comment)
-        if body:
-            return body
     return None
 
 
@@ -2715,6 +2728,17 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if draft_body:
             draft_reply_hash = _fingerprint(draft_body)
 
+    routing_intent = routing_state.get("intent") or routing_audit.get("intent")
+    intent_matches_order_status = routing_intent in {
+        "order_status_tracking",
+        "shipping_delay_not_shipped",
+        "order_status_no_tracking",
+    }
+    openai_routing = _extract_openai_routing_evidence(
+        state_item, audit_item, routing_intent=routing_intent
+    )
+    openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
+
     if scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
         order_dt = _parse_iso8601(payload.get("order_created_at"))
         ticket_dt = _parse_iso8601(payload.get("ticket_created_at"))
@@ -2749,6 +2773,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             raise SmokeFailure("Tracking scenario missing tracking fields.")
 
         reply_body_candidate = None
+        if ticket_executor and payload_conversation:
+            reply_body_candidate = _fetch_latest_reply_body(
+                ticket_executor,
+                payload_conversation,
+                allow_network=allow_network,
+            )
+            if reply_body_candidate:
+                tracking_reply_source = "ticket"
+        if (
+            not reply_body_candidate
+            and openai_rewrite.get("rewrite_applied")
+        ):
+            raise SmokeFailure(
+                "Tracking scenario could not verify final rewritten reply; "
+                "ticket reply body unavailable."
+            )
         if not reply_body_candidate and draft_replies:
             for reply in reversed(draft_replies):
                 body = reply.get("body") if isinstance(reply, dict) else None
@@ -2764,14 +2804,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             )
             if reply_body_candidate:
                 tracking_reply_source = "computed_draft"
-        if not reply_body_candidate and ticket_executor and payload_conversation:
-            reply_body_candidate = _fetch_latest_reply_body(
-                ticket_executor,
-                payload_conversation,
-                allow_network=allow_network,
-            )
-            if reply_body_candidate:
-                tracking_reply_source = "ticket"
         if not reply_body_candidate:
             raise SmokeFailure("Tracking scenario could not locate a reply body.")
 
@@ -2878,16 +2910,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     print(f"[INFO] CloudWatch logs group: {console_links['log_group']}")
     print(f"[INFO] Logs console: {console_links['logs']}")
 
-    routing_intent = routing_state.get("intent") or routing_audit.get("intent")
-    intent_matches_order_status = routing_intent in {
-        "order_status_tracking",
-        "shipping_delay_not_shipped",
-        "order_status_no_tracking",
-    }
-    openai_routing = _extract_openai_routing_evidence(
-        state_item, audit_item, routing_intent=routing_intent
-    )
-    openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
     routing_metadata = {
         "final": {
             "source": openai_routing.get("final_source"),

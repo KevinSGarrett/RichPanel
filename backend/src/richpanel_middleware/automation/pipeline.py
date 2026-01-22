@@ -571,6 +571,7 @@ _REWRITE_REASON_ERROR_CLASS = {
     "missing_required_tokens": "OpenAIInvariantViolation",
     "missing_required_urls": "OpenAIInvariantViolation",
     "missing_required_tracking": "OpenAIInvariantViolation",
+    "missing_required_eta": "OpenAIInvariantViolation",
 }
 
 

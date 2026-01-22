@@ -41,6 +41,13 @@ SUSPICIOUS_PATTERNS = [
 ]
 
 _URL_REGEX = re.compile(r"https?://[^\s<>()\"']+")
+_ETA_RANGE_REGEX = re.compile(
+    r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
+    flags=re.IGNORECASE,
+)
+_ETA_SINGLE_REGEX = re.compile(
+    r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
+)
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -200,16 +207,46 @@ def _extract_tracking_tokens(text: str) -> List[str]:
     return _dedupe(tokens)
 
 
+def _normalize_eta_unit(unit: str) -> str:
+    return re.sub(r"\s+", " ", unit.strip().lower())
+
+
+def _extract_eta_windows(text: str) -> List[str]:
+    if not text:
+        return []
+    windows: List[str] = []
+    spans: List[Tuple[int, int]] = []
+    for match in _ETA_RANGE_REGEX.finditer(text):
+        spans.append(match.span())
+        min_days = match.group(1)
+        max_days = match.group(2)
+        unit = _normalize_eta_unit(match.group(3))
+        windows.append(f"{min_days}-{max_days} {unit}")
+    for match in _ETA_SINGLE_REGEX.finditer(text):
+        start, end = match.span()
+        if any(start < span_end and end > span_start for span_start, span_end in spans):
+            continue
+        days = match.group(1)
+        unit = _normalize_eta_unit(match.group(2))
+        windows.append(f"{days} {unit}")
+    return _dedupe(windows)
+
+
 def _missing_required_tokens(
     original: str, rewritten: str
-) -> Tuple[List[str], List[str]]:
+) -> Tuple[List[str], List[str], List[str]]:
     required_urls = _extract_urls(original)
+    rewritten_urls = _extract_urls(rewritten)
     required_tracking = _extract_tracking_tokens(original)
-    missing_urls = [url for url in required_urls if url not in rewritten]
+    rewritten_tracking = _extract_tracking_tokens(rewritten)
+    required_eta = _extract_eta_windows(original)
+    rewritten_eta = _extract_eta_windows(rewritten)
+    missing_urls = [url for url in required_urls if url not in rewritten_urls]
     missing_tracking = [
-        token for token in required_tracking if token not in rewritten
+        token for token in required_tracking if token not in rewritten_tracking
     ]
-    return missing_urls, missing_tracking
+    missing_eta = [window for window in required_eta if window not in rewritten_eta]
+    return missing_urls, missing_tracking, missing_eta
 
 
 def _extract_json_object(content: str) -> Optional[str]:
@@ -474,15 +511,17 @@ def rewrite_reply(
             risk_flags=risk_flags,
         )
 
-    missing_urls, missing_tracking = _missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta = _missing_required_tokens(
         reply_body, rewritten_body
     )
-    if missing_urls or missing_tracking:
+    if missing_urls or missing_tracking or missing_eta:
         reason = "missing_required_tokens"
-        if missing_urls and not missing_tracking:
+        if missing_urls and not missing_tracking and not missing_eta:
             reason = "missing_required_urls"
-        elif missing_tracking and not missing_urls:
+        elif missing_tracking and not missing_urls and not missing_eta:
             reason = "missing_required_tracking"
+        elif missing_eta and not missing_urls and not missing_tracking:
+            reason = "missing_required_eta"
         LOGGER.info(
             "reply_rewrite.validation_failed",
             extra={
@@ -491,6 +530,7 @@ def rewrite_reply(
                 "fingerprint": fingerprint,
                 "missing_urls": len(missing_urls),
                 "missing_tracking": len(missing_tracking),
+                "missing_eta": len(missing_eta),
             },
         )
         return ReplyRewriteResult(
