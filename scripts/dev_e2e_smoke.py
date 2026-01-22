@@ -93,6 +93,7 @@ _LOOP_PREVENTION_TAG = "mw-auto-replied"
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
     "order_status_tracking",
+    "order_status_tracking_standard_shipping",
     "order_status_no_tracking",
     "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5",
@@ -101,6 +102,7 @@ _ORDER_STATUS_SCENARIOS = {
 _ORDER_STATUS_VARIANTS = {
     "order_status": "order_status_tracking",
     "order_status_tracking": "order_status_tracking",
+    "order_status_tracking_standard_shipping": "order_status_tracking_standard_shipping",
     "order_status_no_tracking": "order_status_no_tracking",
     "order_status_no_tracking_short_window": "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5": "order_status_no_tracking_standard_shipping_3_5",
@@ -304,7 +306,7 @@ def _extract_latest_comment_body(comments: Any) -> Optional[str]:
     return None
 
 
-def _fetch_latest_reply_hash(
+def _fetch_latest_reply_body(
     executor: RichpanelExecutor,
     ticket_id: str,
     *,
@@ -326,8 +328,20 @@ def _fetch_latest_reply_hash(
         ticket = payload
     else:
         return None
+    return _extract_latest_comment_body(
+        ticket.get("comments") if isinstance(ticket, dict) else None
+    )
 
-    body = _extract_latest_comment_body(ticket.get("comments") if isinstance(ticket, dict) else None)
+
+def _fetch_latest_reply_hash(
+    executor: RichpanelExecutor,
+    ticket_id: str,
+    *,
+    allow_network: bool,
+) -> Optional[str]:
+    body = _fetch_latest_reply_body(
+        executor, ticket_id, allow_network=allow_network
+    )
     return _fingerprint(body) if body else None
 
 
@@ -557,6 +571,85 @@ def _order_status_scenario_payload(
             "serviceCode": shipping_method,
             "orderNumber": seeded_order_id,
             "shipDate": ticket_created_at,
+        },
+    }
+
+
+def _order_status_tracking_standard_shipping_payload(
+    run_id: str, *, conversation_id: Optional[str]
+) -> Dict[str, Any]:
+    """
+    Tracking-present scenario: Monday order, Wednesday ticket, standard shipping.
+    """
+    order_created_at_dt = datetime(2026, 2, 2, 10, 0, tzinfo=timezone.utc)
+    ticket_created_at_dt = datetime(2026, 2, 4, 10, 0, tzinfo=timezone.utc)
+    shipped_at_dt = datetime(2026, 2, 3, 10, 0, tzinfo=timezone.utc)
+    order_created_at = order_created_at_dt.isoformat()
+    ticket_created_at = ticket_created_at_dt.isoformat()
+    shipped_at = shipped_at_dt.isoformat()
+    order_seed = run_id or "order-status-smoke"
+    seeded_order_id = _seed_order_id(order_seed, conversation_id)
+    tracking_number = "1Z999AA10123456784"
+    tracking_url = (
+        "https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784"
+    )
+    shipping_method = "Standard Shipping"
+    carrier = "UPS"
+
+    base_order = {
+        "id": seeded_order_id,
+        "order_id": seeded_order_id,
+        "status": "shipped",
+        "fulfillment_status": "shipped",
+        "tracking_number": tracking_number,
+        "tracking_url": tracking_url,
+        "carrier": carrier,
+        "shipping_carrier": carrier,
+        "shipping_method": shipping_method,
+        "shipping_method_name": shipping_method,
+        "order_created_at": order_created_at,
+        "created_at": order_created_at,
+        "updated_at": ticket_created_at,
+        "shipped_at": shipped_at,
+        "items": [
+            {
+                "sku": "SMOKE-OS-TRACK-UPS",
+                "name": "Smoke Test Tracking Hoodie",
+                "quantity": 1,
+            }
+        ],
+    }
+
+    return {
+        "scenario": "order_status_tracking_standard_shipping",
+        "intent": "order_status_tracking",
+        "customer_message": "Hi, can you share the tracking info for my order?",
+        "ticket_created_at": ticket_created_at,
+        "order_created_at": order_created_at,
+        "shipped_at": shipped_at,
+        "order_id": seeded_order_id,
+        "status": "shipped",
+        "fulfillment_status": "shipped",
+        "order_status": "shipped",
+        "carrier": carrier,
+        "shipping_carrier": carrier,
+        "tracking_number": tracking_number,
+        "tracking_url": tracking_url,
+        "shipping_method": shipping_method,
+        "orders": [base_order],
+        "order": base_order,
+        "tracking": {
+            "number": tracking_number,
+            "carrier": carrier,
+            "status": "in_transit",
+            "status_url": tracking_url,
+            "updated_at": shipped_at,
+        },
+        "shipment": {
+            "carrier": carrier,
+            "serviceCode": shipping_method,
+            "orderNumber": seeded_order_id,
+            "shipDate": shipped_at,
         },
     }
 
@@ -1318,6 +1411,7 @@ def parse_args() -> argparse.Namespace:
             "baseline",
             "order_status",
             "order_status_tracking",
+            "order_status_tracking_standard_shipping",
             "order_status_no_tracking",
             "order_status_no_tracking_short_window",
             "order_status_no_tracking_standard_shipping_3_5",
@@ -2120,6 +2214,10 @@ def build_payload(
             scenario_payload = _order_status_no_tracking_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
+        elif scenario_variant == "order_status_tracking_standard_shipping":
+            scenario_payload = _order_status_tracking_standard_shipping_payload(
+                run_id or "smoke", conversation_id=conversation_id
+            )
         elif scenario_variant == "order_status_no_tracking_short_window":
             scenario_payload = _order_status_no_tracking_short_window_payload(
                 run_id or "smoke", conversation_id=conversation_id
@@ -2574,6 +2672,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     found_method = None
     window_fallback_used = False
     expected_delivery_estimate = None
+    tracking_number_expected = None
+    tracking_url_expected = None
+    tracking_reply_source = None
+    tracking_number_present = None
+    tracking_url_present = None
+    tracking_reply_verified = None
     draft_reply_hash = None
     reply_body_hash = None
     try:
@@ -2622,6 +2726,73 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             raise SmokeFailure("John scenario ticket_created_at is not a Wednesday.")
         if payload.get("tracking_number") or payload.get("tracking_url"):
             raise SmokeFailure("John scenario should not include tracking fields.")
+
+    if scenario_variant == "order_status_tracking_standard_shipping":
+        order_dt = _parse_iso8601(payload.get("order_created_at"))
+        ticket_dt = _parse_iso8601(payload.get("ticket_created_at"))
+        if not order_dt or not ticket_dt:
+            raise SmokeFailure("Tracking scenario missing order/ticket dates.")
+        if order_dt.date() != datetime(2026, 2, 2, tzinfo=timezone.utc).date():
+            raise SmokeFailure(
+                "Tracking scenario order_created_at is not 2026-02-02."
+            )
+        if ticket_dt.date() != datetime(2026, 2, 4, tzinfo=timezone.utc).date():
+            raise SmokeFailure(
+                "Tracking scenario ticket_created_at is not 2026-02-04."
+            )
+        if payload.get("shipping_method") != "Standard Shipping":
+            raise SmokeFailure("Tracking scenario shipping_method is not Standard Shipping.")
+
+        tracking_number_expected = payload.get("tracking_number")
+        tracking_url_expected = payload.get("tracking_url")
+        if not tracking_number_expected or not tracking_url_expected:
+            raise SmokeFailure("Tracking scenario missing tracking fields.")
+
+        reply_body_candidate = None
+        if not reply_body_candidate and draft_replies:
+            for reply in reversed(draft_replies):
+                body = reply.get("body") if isinstance(reply, dict) else None
+                if isinstance(body, str) and body.strip():
+                    reply_body_candidate = body
+                    tracking_reply_source = "draft_reply"
+                    break
+        if not reply_body_candidate:
+            reply_body_candidate = _compute_draft_reply_body(
+                payload,
+                delivery_estimate=expected_estimate,
+                inquiry_date=payload.get("ticket_created_at"),
+            )
+            if reply_body_candidate:
+                tracking_reply_source = "computed_draft"
+        if not reply_body_candidate and ticket_executor and payload_conversation:
+            reply_body_candidate = _fetch_latest_reply_body(
+                ticket_executor,
+                payload_conversation,
+                allow_network=allow_network,
+            )
+            if reply_body_candidate:
+                tracking_reply_source = "ticket"
+        if not reply_body_candidate:
+            raise SmokeFailure("Tracking scenario could not locate a reply body.")
+
+        tracking_number_present = tracking_number_expected in reply_body_candidate
+        tracking_url_present = tracking_url_expected in reply_body_candidate
+        tracking_reply_verified = tracking_number_present and tracking_url_present
+        if not tracking_reply_verified:
+            missing = []
+            if not tracking_number_present:
+                missing.append("tracking number")
+            if not tracking_url_present:
+                missing.append("tracking URL")
+            raise SmokeFailure(
+                "Tracking scenario reply missing required "
+                + " and ".join(missing)
+                + "."
+            )
+        print(
+            "[OK] Reply contains tracking number + URL "
+            f"(source={tracking_reply_source})."
+        )
 
     if scenario_variant in {
         "order_status_no_tracking_short_window",
@@ -3420,6 +3591,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "followup_route_tag": followup_route_tag_present,
         "followup_skip_followup_tag": followup_skip_followup_tag_present,
     }
+    tracking_reply_required = (
+        scenario_variant == "order_status_tracking_standard_shipping"
+    )
+    if tracking_reply_required:
+        criteria["tracking_reply_contains_tracking"] = tracking_reply_verified
 
     required_checks: List[bool] = [
         criteria["webhook_accepted"],
@@ -3497,6 +3673,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 },
             ]
         )
+        if tracking_reply_required:
+            required_checks.append(bool(tracking_reply_verified))
+            criteria_details.append(
+                {
+                    "name": "tracking_reply_contains_tracking",
+                    "description": "Final reply included tracking number and tracking URL",
+                    "required": True,
+                    "value": tracking_reply_verified,
+                }
+            )
 
     if require_openai_routing:
         required_checks.append(bool(openai_requirements.get("openai_routing_called")))
@@ -3711,6 +3897,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "eta_window_verified": found_window,
             "eta_method_verified": found_method,
             "eta_window_fallback_used": window_fallback_used,
+            "tracking_reply_verified": tracking_reply_verified,
+            "tracking_reply_source": tracking_reply_source,
+            "tracking_number_present": tracking_number_present,
+            "tracking_url_present": tracking_url_present,
+            "tracking_number_fingerprint": (
+                _fingerprint(tracking_number_expected)
+                if tracking_number_expected
+                else None
+            ),
+            "tracking_url_fingerprint": (
+                _fingerprint(tracking_url_expected) if tracking_url_expected else None
+            ),
         },
         "richpanel": {
             "pre": safe_pre_ticket,

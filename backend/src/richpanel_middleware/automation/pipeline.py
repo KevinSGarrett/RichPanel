@@ -568,6 +568,9 @@ _REWRITE_REASON_ERROR_CLASS = {
     "low_confidence": "OpenAILowConfidence",
     "risk_flagged": "OpenAIRiskFlagged",
     "dry_run": "OpenAIDryRun",
+    "missing_required_tokens": "OpenAIInvariantViolation",
+    "missing_required_urls": "OpenAIInvariantViolation",
+    "missing_required_tracking": "OpenAIInvariantViolation",
 }
 
 

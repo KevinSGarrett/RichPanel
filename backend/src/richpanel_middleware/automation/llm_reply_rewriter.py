@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+from urllib.parse import parse_qs, urlparse
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
@@ -38,6 +39,8 @@ SUSPICIOUS_PATTERNS = [
     r"\b5\d{3}\s?\d{4}\s?\d{4}\s?\d{4}\b",
     r"social security",
 ]
+
+_URL_REGEX = re.compile(r"https?://[^\s<>()\"']+")
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -100,6 +103,11 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
     system = (
         "You rewrite Richpanel customer replies. Preserve facts and promises, "
         "avoid new commitments, keep it concise and professional. "
+        "Do not add new promises. Do not remove compliance or safety language. "
+        "If the input includes any URLs, they must appear verbatim in the output. "
+        "If the input includes tracking numbers, they must appear verbatim in the output. "
+        "If the input includes an ETA window (for example, '1-3 business days'), "
+        "preserve the numbers and units exactly. "
         "Return strict JSON ONLY (no commentary, no code fences) with keys "
         "body (string <= 1000 chars), confidence (0-1 float), "
         "risk_flags (list of strings). "
@@ -111,6 +119,97 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         ChatMessage(role="system", content=system),
         ChatMessage(role="user", content=user),
     ]
+
+
+def _dedupe(items: List[str]) -> List[str]:
+    seen = set()
+    unique: List[str] = []
+    for item in items:
+        if item and item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return unique
+
+
+def _strip_url_punctuation(url: str) -> str:
+    trimmed = url.strip()
+    while trimmed and trimmed[-1] in ".,;:!?)]}'\"":
+        trimmed = trimmed[:-1]
+    return trimmed
+
+
+def _extract_urls(text: str) -> List[str]:
+    if not text:
+        return []
+    matches = _URL_REGEX.findall(text)
+    normalized = [_strip_url_punctuation(match) for match in matches]
+    return _dedupe([url for url in normalized if url])
+
+
+def _is_tracking_token(token: str) -> bool:
+    if not token or len(token) < 6:
+        return False
+    if not any(char.isdigit() for char in token):
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9-]+", token))
+
+
+def _extract_tracking_from_url(url: str) -> List[str]:
+    tokens: List[str] = []
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return tokens
+    query = parse_qs(parsed.query)
+    for key in (
+        "tracknum",
+        "tracking",
+        "tracking_number",
+        "trackingnumber",
+        "trackingno",
+        "tracking_code",
+        "trackingcode",
+        "trackingid",
+    ):
+        for value in query.get(key, []):
+            candidate = value.strip()
+            if _is_tracking_token(candidate):
+                tokens.append(candidate)
+    if parsed.path:
+        segments = [segment for segment in parsed.path.split("/") if segment]
+        if segments:
+            candidate = segments[-1].strip()
+            if _is_tracking_token(candidate):
+                tokens.append(candidate)
+    return tokens
+
+
+def _extract_tracking_tokens(text: str) -> List[str]:
+    if not text:
+        return []
+    tokens: List[str] = []
+    label_pattern = re.compile(
+        r"(?i)\btracking(?:\s*(?:number|no\.?|#))?\s*[:\-]?\s*([A-Z0-9-]{6,})"
+    )
+    for token in label_pattern.findall(text):
+        candidate = token.strip()
+        if _is_tracking_token(candidate):
+            tokens.append(candidate)
+    for url in _extract_urls(text):
+        tokens.extend(_extract_tracking_from_url(url))
+    return _dedupe(tokens)
+
+
+def _missing_required_tokens(
+    original: str, rewritten: str
+) -> Tuple[List[str], List[str]]:
+    required_urls = _extract_urls(original)
+    required_tracking = _extract_tracking_tokens(original)
+    missing_urls = [url for url in required_urls if url not in rewritten]
+    missing_tracking = [
+        token for token in required_tracking if token not in rewritten
+    ]
+    return missing_urls, missing_tracking
 
 
 def _extract_json_object(content: str) -> Optional[str]:
@@ -365,6 +464,39 @@ def rewrite_reply(
             body=reply_body,
             rewritten=False,
             reason=parse_error,
+            model=response.model,
+            confidence=confidence,
+            dry_run=response.dry_run,
+            fingerprint=fingerprint,
+            llm_called=llm_called,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
+            risk_flags=risk_flags,
+        )
+
+    missing_urls, missing_tracking = _missing_required_tokens(
+        reply_body, rewritten_body
+    )
+    if missing_urls or missing_tracking:
+        reason = "missing_required_tokens"
+        if missing_urls and not missing_tracking:
+            reason = "missing_required_urls"
+        elif missing_tracking and not missing_urls:
+            reason = "missing_required_tracking"
+        LOGGER.info(
+            "reply_rewrite.validation_failed",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "missing_urls": len(missing_urls),
+                "missing_tracking": len(missing_tracking),
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason=reason,
             model=response.model,
             confidence=confidence,
             dry_run=response.dry_run,

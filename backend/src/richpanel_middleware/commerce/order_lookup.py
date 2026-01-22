@@ -366,6 +366,32 @@ def _extract_payload_fields(payload: Dict[str, Any]) -> OrderSummary:
         summary["shipping_method"] = shipping_method
         summary["shipping_method_name"] = shipping_method
 
+    tracking_url = summary.get("tracking_url") or _coerce_str(
+        payload.get("tracking_url")
+        or payload.get("trackingUrl")
+        or payload.get("tracking_link")
+        or payload.get("status_url")
+        or payload.get("statusUrl")
+    )
+    if isinstance(tracking_obj, dict):
+        tracking_url = tracking_url or _coerce_str(
+            tracking_obj.get("status_url")
+            or tracking_obj.get("statusUrl")
+            or tracking_obj.get("tracking_url")
+            or tracking_obj.get("trackingUrl")
+            or tracking_obj.get("tracking_link")
+        )
+    if isinstance(shipment_obj, dict):
+        tracking_url = tracking_url or _coerce_str(
+            shipment_obj.get("tracking_url")
+            or shipment_obj.get("trackingUrl")
+            or shipment_obj.get("status_url")
+            or shipment_obj.get("statusUrl")
+            or shipment_obj.get("tracking_link")
+        )
+    if tracking_url:
+        summary["tracking_url"] = tracking_url
+
     updated_at = summary.get("updated_at") or _coerce_str(
         payload.get("updated_at")
         or payload.get("fulfillment_updated_at")
