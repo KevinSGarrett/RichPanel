@@ -69,13 +69,19 @@ class TestClaudeGateReview(unittest.TestCase):
 
     def test_parse_verdict_pass(self):
         """Test verdict parsing for PASS."""
-        text = "VERDICT: PASS\nFINDINGS:\n- No issues found."
+        text = (
+            "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+            "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+        )
         verdict = claude_gate_review._parse_verdict(text)
         self.assertEqual(verdict, "PASS")
 
     def test_parse_verdict_fail(self):
         """Test verdict parsing for FAIL."""
-        text = "VERDICT: FAIL\nFINDINGS:\n- Critical security issue."
+        text = (
+            "VERDICT: FAIL\nBLOCKERS:\n- Critical security issue.\nWARNINGS:\n- None\n"
+            "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+        )
         verdict = claude_gate_review._parse_verdict(text)
         self.assertEqual(verdict, "FAIL")
 
@@ -83,34 +89,79 @@ class TestClaudeGateReview(unittest.TestCase):
         """Test verdict parsing defaults to FAIL when missing."""
         text = "No clear verdict here."
         verdict = claude_gate_review._parse_verdict(text)
-        self.assertEqual(verdict, "FAIL")
+        self.assertEqual(verdict, "")
 
-    def test_extract_findings(self):
-        """Test findings extraction."""
-        text = """VERDICT: FAIL
-FINDINGS:
-- Issue 1
-- Issue 2
-- Issue 3
+    def test_extract_section(self):
+        """Test section extraction stops at next header."""
+        text = """VERDICT: PASS
+BLOCKERS:
+- None
+WARNINGS:
+- backend/src/app.py: Missing test for new branch.
+SUGGESTIONS:
+- None
+CHECKS_PERFORMED:
+- GENERAL_SAFETY
 """
-        findings = claude_gate_review._extract_findings(text, max_findings=5)
-        self.assertEqual(len(findings), 3)
-        self.assertEqual(findings[0], "Issue 1")
-        self.assertEqual(findings[1], "Issue 2")
-        self.assertEqual(findings[2], "Issue 3")
+        warnings = claude_gate_review._extract_section(text, "WARNINGS", max_items=3)
+        self.assertEqual(warnings, ["backend/src/app.py: Missing test for new branch."])
 
-    def test_extract_findings_max_limit(self):
-        """Test findings extraction respects max limit."""
-        text = """FINDINGS:
-- Issue 1
-- Issue 2
-- Issue 3
-- Issue 4
-- Issue 5
-- Issue 6
+    def test_parse_review_success(self):
+        """Test parsing the full review contract."""
+        text = """VERDICT: PASS
+BLOCKERS:
+- None
+WARNINGS:
+- backend/src/app.py: Missing test for new branch.
+SUGGESTIONS:
+- None
+CHECKS_PERFORMED:
+- GENERAL_SAFETY
 """
-        findings = claude_gate_review._extract_findings(text, max_findings=3)
-        self.assertEqual(len(findings), 3)
+        budgets = {
+            "blockers": 2,
+            "warnings": 3,
+            "suggestions": 3,
+            "checks_performed": 5,
+        }
+        model_verdict, blockers, warnings, suggestions, checks = claude_gate_review._parse_review(
+            text, budgets
+        )
+        self.assertEqual(model_verdict, "PASS")
+        self.assertEqual(blockers, ["None"])
+        self.assertEqual(warnings, ["backend/src/app.py: Missing test for new branch."])
+        self.assertEqual(suggestions, ["None"])
+        self.assertEqual(checks, ["GENERAL_SAFETY"])
+
+    def test_parse_review_missing_section_fails(self):
+        """Test parsing failure falls back to default blocker."""
+        text = """VERDICT: PASS
+BLOCKERS:
+- None
+WARNINGS:
+- None
+"""
+        budgets = {
+            "blockers": 2,
+            "warnings": 3,
+            "suggestions": 3,
+            "checks_performed": 5,
+        }
+        model_verdict, blockers, warnings, suggestions, checks = claude_gate_review._parse_review(
+            text, budgets
+        )
+        self.assertEqual(model_verdict, "PASS")
+        self.assertIn("could not be parsed", blockers[0].lower())
+        self.assertEqual(warnings, ["None"])
+        self.assertEqual(suggestions, ["None"])
+        self.assertEqual(checks, ["None"])
+
+    def test_final_verdict_from_blockers(self):
+        """Test final verdict derives from blockers only."""
+        self.assertEqual(claude_gate_review._final_verdict(["None"]), "PASS")
+        self.assertEqual(
+            claude_gate_review._final_verdict(["backend/src/app.py: Real issue."]), "FAIL"
+        )
 
     def test_extract_text_from_response(self):
         """Test text extraction from Anthropic response."""
@@ -134,33 +185,54 @@ FINDINGS:
         comment = claude_gate_review._format_comment(
             verdict="PASS",
             risk="risk:R2",
-            model="claude-opus-4-5-20251101",
-            findings=["No issues found."],
+            model_requested="claude-opus-4-5-20251101",
+            response_model="claude-opus-4-5-20251101",
+            blockers=["None"],
+            warnings=["backend/src/app.py: Missing test for new branch."],
+            suggestions=["None"],
+            checks_performed=["GENERAL_SAFETY"],
+            lenses=["GENERAL_SAFETY"],
+            diff_stats={"raw_chars": 10, "sent_chars": 10, "truncated": False},
+            files_stats={"total": 2, "included": 1},
             response_id="msg_abc123xyz",
             usage={"input_tokens": 1000, "output_tokens": 200},
         )
         self.assertIn("CLAUDE_REVIEW: PASS", comment)
         self.assertIn("Risk: risk:R2", comment)
-        self.assertIn("Model: claude-opus-4-5-20251101", comment)
+        self.assertIn("Requested Model: claude-opus-4-5-20251101", comment)
+        self.assertIn("Response Model: claude-opus-4-5-20251101", comment)
         self.assertIn("Anthropic Response ID: msg_abc123xyz", comment)
         self.assertIn("Token Usage: input=1000, output=200", comment)
-        self.assertIn("- No issues found.", comment)
+        self.assertIn("Diff: raw_chars=10, sent_chars=10, truncated=false", comment)
+        self.assertIn("Files: total=2, included=1", comment)
+        self.assertIn("Lenses: GENERAL_SAFETY", comment)
+        self.assertIn("BLOCKERS:", comment)
+        self.assertIn("WARNINGS:", comment)
+        self.assertIn("SUGGESTIONS:", comment)
+        self.assertIn("CHECKS_PERFORMED:", comment)
+        self.assertIn("- backend/src/app.py: Missing test for new branch.", comment)
 
     def test_format_comment_without_response_id(self):
         """Test comment formatting without response ID (backward compat)."""
         comment = claude_gate_review._format_comment(
             verdict="FAIL",
             risk="risk:R1",
-            model="claude-sonnet-4-5-20250929",
-            findings=["Issue 1", "Issue 2"],
+            model_requested="claude-sonnet-4-5-20250929",
+            response_model="claude-sonnet-4-5-20250929",
+            blockers=["backend/src/app.py: Real issue."],
+            warnings=["None"],
+            suggestions=["None"],
+            checks_performed=["GENERAL_SAFETY"],
+            lenses=["GENERAL_SAFETY"],
+            diff_stats={"raw_chars": 5, "sent_chars": 5, "truncated": False},
+            files_stats={"total": 1, "included": 1},
         )
         self.assertIn("CLAUDE_REVIEW: FAIL", comment)
         self.assertIn("Risk: risk:R1", comment)
-        self.assertIn("Model: claude-sonnet-4-5-20250929", comment)
+        self.assertIn("Requested Model: claude-sonnet-4-5-20250929", comment)
         self.assertNotIn("Anthropic Response ID", comment)
         self.assertNotIn("Token Usage", comment)
-        self.assertIn("- Issue 1", comment)
-        self.assertIn("- Issue 2", comment)
+        self.assertIn("- backend/src/app.py: Real issue.", comment)
 
     def test_truncate_text(self):
         """Test text truncation."""
@@ -183,34 +255,45 @@ FINDINGS:
             risk="risk:R2",
             files_summary="- file1.py (modified, +10 -5)",
             diff_text="diff content here",
+            lenses=["GENERAL_SAFETY"],
         )
         self.assertIn("PR TITLE (untrusted input):", prompt)
         self.assertIn("Test PR", prompt)
         self.assertIn("PR BODY (untrusted input):", prompt)
         self.assertIn("This is a test", prompt)
         self.assertIn("RISK LABEL: risk:R2", prompt)
+        self.assertIn("LENSES_APPLIED:", prompt)
+        self.assertIn("- GENERAL_SAFETY", prompt)
         self.assertIn("CHANGED FILES:", prompt)
         self.assertIn("- file1.py (modified, +10 -5)", prompt)
         self.assertIn("UNIFIED DIFF (untrusted input):", prompt)
         self.assertIn("diff content here", prompt)
 
-    def test_is_approved_false_positive_all_approved(self):
-        """Test approved false positive detection."""
-        findings = [
-            "anthropic_api_key is required",
-            "rate limiting not configured",
-        ]
-        result = claude_gate_review._is_approved_false_positive(findings)
-        self.assertTrue(result)
-
-    def test_is_approved_false_positive_mixed(self):
-        """Test approved false positive with real issue."""
-        findings = [
-            "anthropic_api_key is required",
-            "SQL injection vulnerability detected",
-        ]
-        result = claude_gate_review._is_approved_false_positive(findings)
-        self.assertFalse(result)
+    def test_ranked_diff_prioritizes_important_paths(self):
+        """Test diff ranking prioritizes configured paths."""
+        diff_text = (
+            "diff --git a/docs/readme.md b/docs/readme.md\n"
+            "index 123..456 100644\n"
+            "--- a/docs/readme.md\n"
+            "+++ b/docs/readme.md\n"
+            "@@ -1 +1 @@\n"
+            "-old\n"
+            "+new\n"
+            "diff --git a/backend/src/integrations/foo.py b/backend/src/integrations/foo.py\n"
+            "index abc..def 100644\n"
+            "--- a/backend/src/integrations/foo.py\n"
+            "+++ b/backend/src/integrations/foo.py\n"
+            "@@ -1 +1 @@\n"
+            "-old\n"
+            "+new\n"
+        )
+        selected, blocks, truncated, eligible = claude_gate_review._select_ranked_diff(
+            diff_text, max_chars=10000
+        )
+        self.assertFalse(truncated)
+        self.assertEqual(eligible, 2)
+        self.assertTrue(selected.startswith("diff --git a/backend/src/integrations/foo.py"))
+        self.assertEqual(blocks[0]["path"], "backend/src/integrations/foo.py")
 
     def test_write_output(self):
         """Test GitHub Actions output writing."""
@@ -251,7 +334,13 @@ FINDINGS:
         mock_response = MagicMock()
         mock_response.read.return_value = json.dumps({
             "id": "msg_test123",
-            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "content": [{
+                "type": "text",
+                "text": (
+                    "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+                    "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+                ),
+            }],
             "usage": {"input_tokens": 500, "output_tokens": 100},
         }).encode("utf-8")
         mock_response.__enter__.return_value = mock_response
@@ -355,7 +444,13 @@ FINDINGS:
         mock_fetch_raw.return_value = b"diff content"
         mock_anthropic.return_value = {
             "id": "msg_test123",
-            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "content": [{
+                "type": "text",
+                "text": (
+                    "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+                    "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+                ),
+            }],
             "usage": {"input_tokens": 100, "output_tokens": 20},
         }
         
@@ -412,7 +507,13 @@ FINDINGS:
         mock_fetch_raw.return_value = b"diff content"
         mock_anthropic.return_value = {
             "model": "claude-opus-4-5-20251101",
-            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "content": [{
+                "type": "text",
+                "text": (
+                    "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+                    "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+                ),
+            }],
             "usage": {"input_tokens": 100, "output_tokens": 20},
         }
 
@@ -460,7 +561,25 @@ FINDINGS:
         mock_anthropic.return_value = {
             "id": "msg_test123",
             "model": "claude-opus-4-5-20251101",
-            "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
+            "content": [{
+                "type": "text",
+                "text": (
+                    "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+                    "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+                ),
+            }],
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+        }
+        mock_anthropic.return_value = {
+            "id": "msg_test123",
+            "model": "claude-opus-4-5-20251101",
+            "content": [{
+                "type": "text",
+                "text": (
+                    "VERDICT: PASS\nBLOCKERS:\n- None\nWARNINGS:\n- None\n"
+                    "SUGGESTIONS:\n- None\nCHECKS_PERFORMED:\n- GENERAL_SAFETY"
+                ),
+            }],
             "usage": {"input_tokens": 100, "output_tokens": 20},
         }
 
