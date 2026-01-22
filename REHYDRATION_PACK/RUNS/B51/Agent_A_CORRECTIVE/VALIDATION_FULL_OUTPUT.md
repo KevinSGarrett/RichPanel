@@ -1,0 +1,429 @@
+OK: regenerated registry for 408 docs.
+OK: reference registry regenerated (365 files)
+[OK] Extracted 663 checklist items.
+[OK] Prompt-Repeat-Override present; skipping repeat guard.
+[OK] REHYDRATION_PACK validated (mode=build).
+[OK] Doc hygiene check passed (no banned placeholders found in INDEX-linked docs).
+OK: docs + reference validation passed
+[OK] Secret inventory is in sync with code defaults.
+[verify_admin_logs_sync] Checking admin logs sync...
+  Latest run folder: RUN_20260122_0113Z
+[OK] RUN_20260122_0113Z is referenced in Progress_Log.md
+test_business_days_skip_weekend (__main__.DeliveryEstimateTests.test_business_days_skip_weekend) ... ok
+test_late_window_reports_any_day_now (__main__.DeliveryEstimateTests.test_late_window_reports_any_day_now) ... ok
+test_mapping_bool_value_skipped_prefers_specific (__main__.DeliveryEstimateTests.test_mapping_bool_value_skipped_prefers_specific) ... Invalid transit window for key 'standard' in SHIPPING_METHOD_TRANSIT_MAP_JSON; skipping.
+ok
+test_mapping_fallback_standard_shipping (__main__.DeliveryEstimateTests.test_mapping_fallback_standard_shipping) ... ok
+test_mapping_invalid_entries_fall_back_when_empty (__main__.DeliveryEstimateTests.test_mapping_invalid_entries_fall_back_when_empty) ... Invalid transit window for key 'standard' in SHIPPING_METHOD_TRANSIT_MAP_JSON; skipping.
+Invalid transit window for key 'ground' in SHIPPING_METHOD_TRANSIT_MAP_JSON; skipping.
+SHIPPING_METHOD_TRANSIT_MAP_JSON contained no valid entries; using defaults.
+ok
+test_mapping_invalid_json_falls_back_to_defaults (__main__.DeliveryEstimateTests.test_mapping_invalid_json_falls_back_to_defaults) ... Invalid SHIPPING_METHOD_TRANSIT_MAP_JSON; using defaults. error=Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+ok
+test_mapping_invalid_json_type_falls_back (__main__.DeliveryEstimateTests.test_mapping_invalid_json_type_falls_back) ... Invalid SHIPPING_METHOD_TRANSIT_MAP_JSON; expected object. Using defaults.
+ok
+test_mapping_precedence_longest_key (__main__.DeliveryEstimateTests.test_mapping_precedence_longest_key) ... ok
+test_mapping_prefers_digit_key_when_method_has_digit (__main__.DeliveryEstimateTests.test_mapping_prefers_digit_key_when_method_has_digit) ... ok
+test_mapping_single_value_list (__main__.DeliveryEstimateTests.test_mapping_single_value_list) ... ok
+test_mapping_string_values_coerce (__main__.DeliveryEstimateTests.test_mapping_string_values_coerce) ... ok
+test_mapping_tie_breaker_equal_length (__main__.DeliveryEstimateTests.test_mapping_tie_breaker_equal_length) ... ok
+test_mapping_tie_prefers_faster_window (__main__.DeliveryEstimateTests.test_mapping_tie_prefers_faster_window) ... ok
+test_mapping_unicode_digit_strings_ignored (__main__.DeliveryEstimateTests.test_mapping_unicode_digit_strings_ignored) ... Invalid transit window for key 'standard' in SHIPPING_METHOD_TRANSIT_MAP_JSON; skipping.
+SHIPPING_METHOD_TRANSIT_MAP_JSON contained no valid entries; using defaults.
+ok
+test_missing_or_invalid_dates_returns_none (__main__.DeliveryEstimateTests.test_missing_or_invalid_dates_returns_none) ... ok
+test_parse_transit_days_empty_returns_none (__main__.DeliveryEstimateTests.test_parse_transit_days_empty_returns_none) ... ok
+test_parse_transit_days_numeric_range (__main__.DeliveryEstimateTests.test_parse_transit_days_numeric_range) ... ok
+test_remaining_window_allows_zero_minimum (__main__.DeliveryEstimateTests.test_remaining_window_allows_zero_minimum) ... ok
+test_same_day_order_remaining_window (__main__.DeliveryEstimateTests.test_same_day_order_remaining_window) ... ok
+test_shipping_method_normalization_handles_ranges (__main__.DeliveryEstimateTests.test_shipping_method_normalization_handles_ranges) ... ok
+test_standard_shipping_canonical_remaining_window (__main__.DeliveryEstimateTests.test_standard_shipping_canonical_remaining_window) ... ok
+test_weekend_crossing_remaining_window (__main__.DeliveryEstimateTests.test_weekend_crossing_remaining_window) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.009s
+
+OK
+[OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
+test_fingerprint_reply_body_deterministic (__main__.FingerprintReplyBodyTests.test_fingerprint_reply_body_deterministic) ... ok
+test_fingerprint_reply_body_different_inputs (__main__.FingerprintReplyBodyTests.test_fingerprint_reply_body_different_inputs) ... ok
+test_fingerprint_reply_body_empty_string (__main__.FingerprintReplyBodyTests.test_fingerprint_reply_body_empty_string) ... ok
+test_fingerprint_reply_body_none (__main__.FingerprintReplyBodyTests.test_fingerprint_reply_body_none) ... ok
+test_fingerprint_reply_body_unicode (__main__.FingerprintReplyBodyTests.test_fingerprint_reply_body_unicode) ... ok
+test_build_event_envelope_truncates_and_sanitizes (__main__.PipelineTests.test_build_event_envelope_truncates_and_sanitizes) ... ok
+test_ddb_sanitize_converts_floats_to_decimals_and_strips_nan (__main__.PipelineTests.test_ddb_sanitize_converts_floats_to_decimals_and_strips_nan) ... ok
+test_execute_and_record_writes_state_and_audit_tables (__main__.PipelineTests.test_execute_and_record_writes_state_and_audit_tables) ... ok
+test_execute_plan_dry_run_records (__main__.PipelineTests.test_execute_plan_dry_run_records) ... ok
+test_idempotency_write_persists_expected_fields (__main__.PipelineTests.test_idempotency_write_persists_expected_fields) ... ok
+test_kill_switch_cache_is_respected (__main__.PipelineTests.test_kill_switch_cache_is_respected) ... ok
+test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error (__main__.PipelineTests.test_kill_switch_env_override_requires_both_vars_and_fails_closed_on_ssm_error) ... worker.flag_load_failed
+Traceback (most recent call last):
+  File "C:\RichPanel_GIT\backend\src\lambda_handlers\worker\handler.py", line 421, in _load_kill_switches
+    response = _ssm_client().get_parameters(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\RichPanel_GIT\scripts\test_pipeline_handlers.py", line 389, in get_parameters
+    raise RuntimeError("ssm read blocked")
+RuntimeError: ssm read blocked
+ok
+test_kill_switch_env_override_takes_precedence_and_skips_ssm (__main__.PipelineTests.test_kill_switch_env_override_takes_precedence_and_skips_ssm) ... ok
+test_no_tracking_reply_includes_remaining_window (__main__.PipelineTests.test_no_tracking_reply_includes_remaining_window) ... ok
+test_normalize_event_populates_defaults (__main__.PipelineTests.test_normalize_event_populates_defaults) ... ok
+test_plan_allows_automation_candidate (__main__.PipelineTests.test_plan_allows_automation_candidate) ... ok
+test_plan_generates_eta_reply_when_context_present (__main__.PipelineTests.test_plan_generates_eta_reply_when_context_present) ... ok
+test_plan_generates_tracking_present_draft_reply (__main__.PipelineTests.test_plan_generates_tracking_present_draft_reply) ... ok
+test_plan_respects_safe_mode (__main__.PipelineTests.test_plan_respects_safe_mode) ... ok
+test_plan_skips_order_status_when_safety_blocks (__main__.PipelineTests.test_plan_skips_order_status_when_safety_blocks) ... ok
+test_plan_suppresses_when_order_context_missing (__main__.PipelineTests.test_plan_suppresses_when_order_context_missing) ... ok
+test_routing_classifies_returns (__main__.PipelineTests.test_routing_classifies_returns) ... ok
+test_routing_fallback_when_message_missing (__main__.PipelineTests.test_routing_fallback_when_message_missing) ... ok
+test_state_and_audit_redact_customer_body (__main__.PipelineTests.test_state_and_audit_redact_customer_body) ... ok
+test_outbound_exception_includes_openai_rewrite (__main__.OutboundOrderStatusTests.test_outbound_exception_includes_openai_rewrite) ... automation.order_status_reply.failed
+Traceback (most recent call last):
+  File "C:\RichPanel_GIT\backend\src\richpanel_middleware\automation\pipeline.py", line 917, in execute_order_status_reply
+    reply_response = executor.execute(
+                     ^^^^^^^^^^^^^^^^^
+  File "C:\RichPanel_GIT\scripts\test_pipeline_handlers.py", line 683, in execute
+    raise TransportError("simulated write failure")
+richpanel_middleware.integrations.richpanel.client.TransportError: simulated write failure
+ok
+test_outbound_executes_when_enabled (__main__.OutboundOrderStatusTests.test_outbound_executes_when_enabled) ... ok
+test_outbound_followup_after_auto_reply_routes_to_email_support (__main__.OutboundOrderStatusTests.test_outbound_followup_after_auto_reply_routes_to_email_support) ... ok
+test_outbound_logging_does_not_emit_reply_body (__main__.OutboundOrderStatusTests.test_outbound_logging_does_not_emit_reply_body) ... ok
+test_outbound_reply_dry_run_does_not_send (__main__.OutboundOrderStatusTests.test_outbound_reply_dry_run_does_not_send) ... ok
+test_outbound_reply_update_failure (__main__.OutboundOrderStatusTests.test_outbound_reply_update_failure) ... ok
+test_outbound_retries_do_not_duplicate_comment (__main__.OutboundOrderStatusTests.test_outbound_retries_do_not_duplicate_comment) ... ok
+test_outbound_rewrite_hashes_populated (__main__.OutboundOrderStatusTests.test_outbound_rewrite_hashes_populated) ... ok
+test_outbound_skip_when_disabled (__main__.OutboundOrderStatusTests.test_outbound_skip_when_disabled) ... ok
+test_outbound_skips_when_ticket_already_resolved (__main__.OutboundOrderStatusTests.test_outbound_skips_when_ticket_already_resolved) ... ok
+test_outbound_status_read_failure_routes_to_email_support (__main__.OutboundOrderStatusTests.test_outbound_status_read_failure_routes_to_email_support) ... ok
+test_routing_tags_executes_when_enabled (__main__.OutboundRoutingTagsTests.test_routing_tags_executes_when_enabled) ... ok
+test_routing_tags_skip_when_outbound_disabled (__main__.OutboundRoutingTagsTests.test_routing_tags_skip_when_outbound_disabled) ... ok
+test_select_model_defaults (backend.tests.test_claude_gate_model_selection.TestClaudeGateModelSelection.test_select_model_defaults) ... ok
+test_build_no_tracking_reply_none_order_summary (backend.tests.test_delivery_estimate_fallback.DeliveryEstimateFallbackTests.test_build_no_tracking_reply_none_order_summary) ... ok
+test_build_no_tracking_reply_order_id_is_none (backend.tests.test_delivery_estimate_fallback.DeliveryEstimateFallbackTests.test_build_no_tracking_reply_order_id_is_none) ... ok
+test_no_tracking_reply_with_order_id (backend.tests.test_delivery_estimate_fallback.DeliveryEstimateFallbackTests.test_no_tracking_reply_with_order_id) ... ok
+test_no_tracking_reply_without_order_id (backend.tests.test_delivery_estimate_fallback.DeliveryEstimateFallbackTests.test_no_tracking_reply_without_order_id) ... ok
+test_empty_string_order_id_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_empty_string_order_id_no_reply) ... ok
+test_full_context_proceeds_normally (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_full_context_proceeds_normally) ... ok
+test_full_context_with_camelcase_tracking_url (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_full_context_with_camelcase_tracking_url) ... ok
+test_missing_created_at_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_missing_created_at_no_reply) ... ok
+test_missing_order_id_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_missing_order_id_no_reply) ... ok
+test_missing_shipping_method_bucket_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_missing_shipping_method_bucket_no_reply) ... ok
+test_missing_tracking_and_shipping_method_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_missing_tracking_and_shipping_method_no_reply) ... ok
+test_multiple_missing_fields_logs_all (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_multiple_missing_fields_logs_all) ... ok
+test_none_order_summary_no_reply (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_none_order_summary_no_reply) ... ok
+test_tracking_signal_with_empty_strings (backend.tests.test_order_status_context.OrderStatusContextGateTests.test_tracking_signal_with_empty_strings) ... ok
+test_dry_run_does_not_bypass_write_disabled (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_dry_run_does_not_bypass_write_disabled) ... richpanel.write_blocked
+ok
+test_prod_default_read_only_blocks_writes (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_prod_default_read_only_blocks_writes) ... richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+ok
+test_read_only_env_override_allows_false_but_write_disabled_blocks (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_read_only_env_override_allows_false_but_write_disabled_blocks) ... richpanel.write_blocked
+ok
+
+----------------------------------------------------------------------
+Ran 55 tests in 0.015s
+
+OK
+test_dry_run_default_skips_transport (__main__.RichpanelClientTests.test_dry_run_default_skips_transport) ... ok
+test_env_flag_allows_outbound_requests (__main__.RichpanelClientTests.test_env_flag_allows_outbound_requests) ... ok
+test_env_namespace_is_reflected_in_secret_path (__main__.RichpanelClientTests.test_env_namespace_is_reflected_in_secret_path) ... ok
+test_executor_defaults_to_dry_run (__main__.RichpanelClientTests.test_executor_defaults_to_dry_run) ... ok
+test_executor_respects_outbound_enabled_flag (__main__.RichpanelClientTests.test_executor_respects_outbound_enabled_flag) ... ok
+test_get_ticket_metadata_handles_non_dict_ticket_number (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_non_dict_ticket_number) ... ok
+test_get_ticket_metadata_handles_non_dict_ticket_string (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_non_dict_ticket_string) ... ok
+test_get_ticket_metadata_handles_ticket_dict (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_ticket_dict) ... ok
+test_read_only_blocks_non_get (__main__.RichpanelClientTests.test_read_only_blocks_non_get) ... richpanel.write_blocked
+ok
+test_redaction_masks_api_key (__main__.RichpanelClientTests.test_redaction_masks_api_key) ... ok
+test_retries_on_429_and_honors_retry_after (__main__.RichpanelClientTests.test_retries_on_429_and_honors_retry_after) ... richpanel.retry
+ok
+test_transport_errors_retry_and_raise (__main__.RichpanelClientTests.test_transport_errors_retry_and_raise) ... richpanel.transport_error
+richpanel.transport_error
+ok
+test_writes_blocked_when_write_disabled_env_set (__main__.RichpanelClientTests.test_writes_blocked_when_write_disabled_env_set) ... richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.002s
+
+OK
+test_coerce_ticket_list (__main__.OrderStatusIntentEvalTests.test_coerce_ticket_list) ... ok
+test_compute_metrics_empty (__main__.OrderStatusIntentEvalTests.test_compute_metrics_empty) ... ok
+test_compute_metrics_non_empty (__main__.OrderStatusIntentEvalTests.test_compute_metrics_non_empty) ... ok
+test_deterministic_baseline_min_score (__main__.OrderStatusIntentEvalTests.test_deterministic_baseline_min_score) ... ok
+test_eval_output_structure_and_no_raw_text (__main__.OrderStatusIntentEvalTests.test_eval_output_structure_and_no_raw_text) ... ok
+test_evaluate_examples_with_llm (__main__.OrderStatusIntentEvalTests.test_evaluate_examples_with_llm) ... ok
+test_extract_message (__main__.OrderStatusIntentEvalTests.test_extract_message) ... ok
+test_fetch_payload_helpers (__main__.OrderStatusIntentEvalTests.test_fetch_payload_helpers) ... ok
+test_fetch_recent_ticket_ids_errors (__main__.OrderStatusIntentEvalTests.test_fetch_recent_ticket_ids_errors) ... ok
+test_fetch_recent_ticket_ids_success (__main__.OrderStatusIntentEvalTests.test_fetch_recent_ticket_ids_success) ... ok
+test_is_prod_target_variants (__main__.OrderStatusIntentEvalTests.test_is_prod_target_variants) ... ok
+test_label_and_redaction_helpers (__main__.OrderStatusIntentEvalTests.test_label_and_redaction_helpers) ... ok
+test_load_jsonl_dataset_errors (__main__.OrderStatusIntentEvalTests.test_load_jsonl_dataset_errors) ... ok
+test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-22 09:59:34,502 WARNING Skipping ticket with no message
+2026-01-22 09:59:34,502 WARNING Skipping ticket with no message
+ok
+test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-22 09:59:34,503 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmptasif55s\out.json
+2026-01-22 09:59:34,504 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+2026-01-22 09:59:34,504 INFO LLM metrics: unavailable (llm_not_called)
+2026-01-22 09:59:34,506 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmptasif55s\richpanel.json
+2026-01-22 09:59:34,506 INFO Deterministic metrics: unavailable (None)
+2026-01-22 09:59:34,506 INFO LLM metrics: unavailable (None)
+ok
+test_main_requires_write_disabled_for_prod (__main__.OrderStatusIntentEvalTests.test_main_requires_write_disabled_for_prod) ... ok
+test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-22 09:59:34,507 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+ok
+test_require_env_flag (__main__.OrderStatusIntentEvalTests.test_require_env_flag) ... ok
+test_resolve_env_name_priority (__main__.OrderStatusIntentEvalTests.test_resolve_env_name_priority) ... ok
+test_run_richpanel_eval_source_metadata (__main__.OrderStatusIntentEvalTests.test_run_richpanel_eval_source_metadata) ... ok
+test_write_summary (__main__.OrderStatusIntentEvalTests.test_write_summary) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.020s
+
+OK
+test_automation_disabled_short_circuits_transport (__main__.OpenAIClientTests.test_automation_disabled_short_circuits_transport) ... ok
+test_gpt5_payload_allows_nonzero_temperature (__main__.OpenAIClientTests.test_gpt5_payload_allows_nonzero_temperature) ... ok
+test_gpt5_payload_uses_max_completion_tokens (__main__.OpenAIClientTests.test_gpt5_payload_uses_max_completion_tokens) ... ok
+test_header_redaction_masks_sensitive_keys (__main__.OpenAIClientTests.test_header_redaction_masks_sensitive_keys) ... ok
+test_integrations_namespace_alias (__main__.OpenAIClientTests.test_integrations_namespace_alias) ... ok
+test_max_tokens_must_be_positive (__main__.OpenAIClientTests.test_max_tokens_must_be_positive) ... ok
+test_missing_secret_short_circuits_to_dry_run (__main__.OpenAIClientTests.test_missing_secret_short_circuits_to_dry_run) ... openai.missing_api_key
+ok
+test_network_blocked_short_circuits (__main__.OpenAIClientTests.test_network_blocked_short_circuits) ... ok
+test_non_gpt5_payload_uses_max_tokens_and_metadata (__main__.OpenAIClientTests.test_non_gpt5_payload_uses_max_tokens_and_metadata) ... ok
+test_offline_eval_runs_without_network (__main__.OpenAIClientTests.test_offline_eval_runs_without_network) ... ok
+test_prompt_builder_is_deterministic (__main__.OpenAIClientTests.test_prompt_builder_is_deterministic) ... ok
+test_safe_mode_short_circuits_transport (__main__.OpenAIClientTests.test_safe_mode_short_circuits_transport) ... ok
+test_secret_path_uses_lowercased_env (__main__.OpenAIClientTests.test_secret_path_uses_lowercased_env) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.002s
+
+OK
+test_dry_run_default_skips_transport (__main__.ShopifyClientTests.test_dry_run_default_skips_transport) ... ok
+test_env_namespace_is_reflected_in_secret_path (__main__.ShopifyClientTests.test_env_namespace_is_reflected_in_secret_path) ... ok
+test_falls_back_to_legacy_secret_when_canonical_missing (__main__.ShopifyClientTests.test_falls_back_to_legacy_secret_when_canonical_missing) ... ok
+test_get_order_builds_expected_path_and_query (__main__.ShopifyClientTests.test_get_order_builds_expected_path_and_query) ... ok
+test_get_order_respects_network_blocked_gate (__main__.ShopifyClientTests.test_get_order_respects_network_blocked_gate) ... ok
+test_missing_secret_short_circuits (__main__.ShopifyClientTests.test_missing_secret_short_circuits) ... shopify.missing_token
+ok
+test_redaction_masks_tokens (__main__.ShopifyClientTests.test_redaction_masks_tokens) ... ok
+test_retries_on_429_and_honors_retry_after (__main__.ShopifyClientTests.test_retries_on_429_and_honors_retry_after) ... shopify.retry
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.002s
+
+OK
+test_dry_run_default_skips_transport (__main__.ShipStationClientTests.test_dry_run_default_skips_transport) ... ok
+test_executor_allows_outbound_when_enabled (__main__.ShipStationClientTests.test_executor_allows_outbound_when_enabled) ... ok
+test_executor_blocks_without_env_flag (__main__.ShipStationClientTests.test_executor_blocks_without_env_flag) ... ok
+test_list_shipments_builds_expected_path_and_sorted_query (__main__.ShipStationClientTests.test_list_shipments_builds_expected_path_and_sorted_query) ... ok
+test_list_shipments_respects_network_blocked_gate (__main__.ShipStationClientTests.test_list_shipments_respects_network_blocked_gate) ... ok
+test_missing_credentials_short_circuits (__main__.ShipStationClientTests.test_missing_credentials_short_circuits) ... shipstation.missing_credentials
+ok
+test_redaction_masks_sensitive_headers (__main__.ShipStationClientTests.test_redaction_masks_sensitive_headers) ... ok
+test_retry_honors_retry_after_header (__main__.ShipStationClientTests.test_retry_honors_retry_after_header) ... shipstation.retry
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 6.223s
+
+OK
+test_nested_order_tracking_numeric_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_numeric_is_extracted) ... ok
+test_nested_order_tracking_string_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_string_is_extracted) ... ok
+test_offline_lookup_does_not_call_transports (__main__.OrderLookupTests.test_offline_lookup_does_not_call_transports) ... ok
+test_payload_fulfillments_list_used_for_tracking_and_carrier (__main__.OrderLookupTests.test_payload_fulfillments_list_used_for_tracking_and_carrier) ... ok
+test_payload_missing_shipping_signals_offline_returns_baseline (__main__.OrderLookupTests.test_payload_missing_shipping_signals_offline_returns_baseline) ... ok
+test_payload_only_summary_skips_network_when_enabled (__main__.OrderLookupTests.test_payload_only_summary_skips_network_when_enabled) ... ok
+test_payload_only_summary_when_network_disabled (__main__.OrderLookupTests.test_payload_only_summary_when_network_disabled) ... ok
+test_payload_orders_list_candidate_is_used (__main__.OrderLookupTests.test_payload_orders_list_candidate_is_used) ... ok
+test_payload_shipment_dict_used_for_carrier_and_service (__main__.OrderLookupTests.test_payload_shipment_dict_used_for_carrier_and_service) ... ok
+test_payload_tracking_dict_id_fallback (__main__.OrderLookupTests.test_payload_tracking_dict_id_fallback) ... ok
+test_payload_tracking_dict_number_is_used_not_stringified (__main__.OrderLookupTests.test_payload_tracking_dict_number_is_used_not_stringified) ... ok
+test_shipstation_enrichment_fills_tracking_when_shopify_missing (__main__.OrderLookupTests.test_shipstation_enrichment_fills_tracking_when_shopify_missing) ... ok
+test_shopify_enrichment_merges_fields_when_network_enabled (__main__.OrderLookupTests.test_shopify_enrichment_merges_fields_when_network_enabled) ... ok
+test_shopify_fallback_used_when_payload_has_no_shipping_fields (__main__.OrderLookupTests.test_shopify_fallback_used_when_payload_has_no_shipping_fields) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 2.219s
+
+OK
+test_fallback_on_low_confidence_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_low_confidence_preserves_original) ... ok
+test_fallback_on_parse_failure_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_parse_failure_preserves_original) ... reply_rewrite.parse_failed
+ok
+test_gates_block_network (__main__.ReplyRewriteTests.test_gates_block_network) ... ok
+test_gates_block_outbound (__main__.ReplyRewriteTests.test_gates_block_outbound) ... ok
+test_gates_block_when_disabled (__main__.ReplyRewriteTests.test_gates_block_when_disabled) ... ok
+test_logs_do_not_include_body (__main__.ReplyRewriteTests.test_logs_do_not_include_body) ... ok
+test_no_response_returns_fallback (__main__.ReplyRewriteTests.test_no_response_returns_fallback) ... ok
+test_parse_response_brace_and_escape_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_and_escape_inside_string) ... ok
+test_parse_response_brace_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_inside_string) ... ok
+test_parse_response_extracts_embedded_json (__main__.ReplyRewriteTests.test_parse_response_extracts_embedded_json) ... ok
+test_response_id_reason_set_when_raw_empty (__main__.ReplyRewriteTests.test_response_id_reason_set_when_raw_empty) ... ok
+test_rewrite_applies_when_enabled_and_safe (__main__.ReplyRewriteTests.test_rewrite_applies_when_enabled_and_safe) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.002s
+
+OK
+test_gating_allows_all_enabled (__main__.GatingTests.test_gating_allows_all_enabled) ... ok
+test_gating_blocks_automation_disabled (__main__.GatingTests.test_gating_blocks_automation_disabled) ... ok
+test_gating_blocks_network_disabled (__main__.GatingTests.test_gating_blocks_network_disabled) ... ok
+test_gating_blocks_safe_mode (__main__.GatingTests.test_gating_blocks_safe_mode) ... ok
+test_artifact_contains_deterministic (__main__.ArtifactTests.test_artifact_contains_deterministic) ... ok
+test_artifact_serializable (__main__.ArtifactTests.test_artifact_serializable) ... ok
+test_default_is_false (__main__.PrimaryFlagTests.test_default_is_false) ... ok
+test_default_uses_deterministic (__main__.PrimaryFlagTests.test_default_uses_deterministic) ... ok
+test_high_confidence_uses_llm (__main__.PrimaryFlagOnTests.test_high_confidence_uses_llm) ... ok
+test_low_confidence_uses_deterministic (__main__.PrimaryFlagOnTests.test_low_confidence_uses_deterministic) ... ok
+test_response_id_reason_when_raw_empty (__main__.ResponseIdReasonTests.test_response_id_reason_when_raw_empty) ... ok
+test_is_valid_with_invalid_intent (__main__.SuggestionTests.test_is_valid_with_invalid_intent) ... ok
+test_is_valid_with_valid_data (__main__.SuggestionTests.test_is_valid_with_valid_data) ... ok
+test_passes_threshold (__main__.SuggestionTests.test_passes_threshold) ... ok
+test_custom_threshold (__main__.ThresholdTests.test_custom_threshold) ... ok
+test_default_threshold (__main__.ThresholdTests.test_default_threshold) ... ok
+test_legacy_confidence_whitespace_falls_back (__main__.ThresholdTests.test_legacy_confidence_whitespace_falls_back) ... ok
+test_min_confidence_above_one_falls_back (__main__.ThresholdTests.test_min_confidence_above_one_falls_back) ... ok
+test_min_confidence_empty_string_falls_back (__main__.ThresholdTests.test_min_confidence_empty_string_falls_back) ... ok
+test_min_confidence_invalid_falls_back (__main__.ThresholdTests.test_min_confidence_invalid_falls_back) ... ok
+test_min_confidence_negative_falls_back (__main__.ThresholdTests.test_min_confidence_negative_falls_back) ... ok
+test_min_confidence_overrides_legacy (__main__.ThresholdTests.test_min_confidence_overrides_legacy) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.001s
+
+OK
+test_fallback_on_low_confidence_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_low_confidence_preserves_original) ... ok
+test_fallback_on_parse_failure_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_parse_failure_preserves_original) ... reply_rewrite.parse_failed
+ok
+test_gates_block_network (__main__.ReplyRewriteTests.test_gates_block_network) ... ok
+test_gates_block_outbound (__main__.ReplyRewriteTests.test_gates_block_outbound) ... ok
+test_gates_block_when_disabled (__main__.ReplyRewriteTests.test_gates_block_when_disabled) ... ok
+test_logs_do_not_include_body (__main__.ReplyRewriteTests.test_logs_do_not_include_body) ... ok
+test_no_response_returns_fallback (__main__.ReplyRewriteTests.test_no_response_returns_fallback) ... ok
+test_parse_response_brace_and_escape_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_and_escape_inside_string) ... ok
+test_parse_response_brace_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_inside_string) ... ok
+test_parse_response_extracts_embedded_json (__main__.ReplyRewriteTests.test_parse_response_extracts_embedded_json) ... ok
+test_response_id_reason_set_when_raw_empty (__main__.ReplyRewriteTests.test_response_id_reason_set_when_raw_empty) ... ok
+test_rewrite_applies_when_enabled_and_safe (__main__.ReplyRewriteTests.test_rewrite_applies_when_enabled_and_safe) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.003s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.003s
+
+OK
+test_outbound_disabled_skips_writes_while_allowing_shadow_reads (__main__.ReadOnlyShadowModeTests.test_outbound_disabled_skips_writes_while_allowing_shadow_reads) ... ok
+test_plan_actions_propagates_allow_network_for_shadow_reads (__main__.ReadOnlyShadowModeTests.test_plan_actions_propagates_allow_network_for_shadow_reads) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+OK
+test_business_day_anchor_skips_weekend (__main__.ScenarioPayloadTests.test_business_day_anchor_skips_weekend) ... ok
+test_iso_business_days_before_validation (__main__.ScenarioPayloadTests.test_iso_business_days_before_validation) ... ok
+test_order_status_no_tracking_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_shape) ... ok
+test_order_status_no_tracking_short_window_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_short_window_shape) ... ok
+test_order_status_no_tracking_standard_shipping_3_5_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_standard_shipping_3_5_shape) ... ok
+test_order_status_scenario_includes_required_fields (__main__.ScenarioPayloadTests.test_order_status_scenario_includes_required_fields)
+Ensure order_status scenario payload includes all required fields. ... ok
+test_order_status_scenario_is_deterministic (__main__.ScenarioPayloadTests.test_order_status_scenario_is_deterministic)
+Scenario payload should be deterministic for same run_id. ... ok
+test_order_status_scenario_no_pii (__main__.ScenarioPayloadTests.test_order_status_scenario_no_pii)
+Scenario payload must not contain PII patterns. ... ok
+test_middleware_encodes_email_based_conversation_id (__main__.URLEncodingTests.test_middleware_encodes_email_based_conversation_id)
+Middleware must URL-encode email-based conversation IDs for write paths. ... ok
+test_middleware_encodes_plus_sign_in_conversation_id (__main__.URLEncodingTests.test_middleware_encodes_plus_sign_in_conversation_id)
+Middleware must URL-encode + signs in conversation IDs. ... ok
+test_middleware_outcome_accepts_resolved (__main__.CriteriaTests.test_middleware_outcome_accepts_resolved) ... ok
+test_middleware_outcome_counts_positive_tag_added (__main__.CriteriaTests.test_middleware_outcome_counts_positive_tag_added) ... ok
+test_middleware_outcome_ignores_historical_skip_tags (__main__.CriteriaTests.test_middleware_outcome_ignores_historical_skip_tags) ... ok
+test_middleware_outcome_rejects_route_to_support_tag_added (__main__.CriteriaTests.test_middleware_outcome_rejects_route_to_support_tag_added) ... ok
+test_middleware_outcome_rejects_skip_tags (__main__.CriteriaTests.test_middleware_outcome_rejects_skip_tags) ... ok
+test_middleware_outcome_requires_tag_added_not_only_present (__main__.CriteriaTests.test_middleware_outcome_requires_tag_added_not_only_present) ... ok
+test_pii_guard_detects_patterns (__main__.CriteriaTests.test_pii_guard_detects_patterns) ... ok
+test_sanitize_decimals_converts (__main__.CriteriaTests.test_sanitize_decimals_converts) ... ok
+test_openai_evidence_contains_required_fields (__main__.OpenAIEvidenceTests.test_openai_evidence_contains_required_fields) ... ok
+test_openai_requirements_accept_fallback (__main__.OpenAIEvidenceTests.test_openai_requirements_accept_fallback) ... ok
+test_openai_requirements_fail_when_missing (__main__.OpenAIEvidenceTests.test_openai_requirements_fail_when_missing) ... ok
+test_openai_rewrite_evidence_disabled (__main__.OpenAIEvidenceTests.test_openai_rewrite_evidence_disabled) ... ok
+test_openai_routing_evidence_maps_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_maps_response_id) ... ok
+test_openai_routing_evidence_missing_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_missing_response_id) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.010s
+
+OK
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+
+$ python scripts/regen_doc_registry.py
+
+$ python scripts/regen_reference_registry.py
+
+$ python scripts/regen_plan_checklist.py
+
+$ python scripts/verify_agent_prompts_fresh.py
+
+$ python scripts/verify_rehydration_pack.py
+
+$ python scripts/verify_doc_hygiene.py
+
+$ python scripts/verify_plan_sync.py
+
+$ python scripts/verify_secret_inventory_sync.py
+
+$ python scripts/verify_admin_logs_sync.py
+
+$ python scripts/test_delivery_estimate.py
+
+$ python scripts/verify_openai_model_defaults.py
+
+$ python scripts/test_pipeline_handlers.py
+
+$ python scripts/test_richpanel_client.py
+
+$ python scripts/test_eval_order_status_intent.py
+
+$ python scripts/test_openai_client.py
+
+$ python scripts/test_shopify_client.py
+
+$ python scripts/test_shipstation_client.py
+
+$ python scripts/test_order_lookup.py
+
+$ python scripts/test_llm_reply_rewriter.py
+
+$ python scripts/test_llm_routing.py
+
+$ python scripts/test_llm_reply_rewriter.py
+
+$ python scripts/test_worker_handler_flag_wiring.py
+
+$ python scripts/test_read_only_shadow_mode.py
+
+$ python scripts/test_e2e_smoke_encoding.py
+
+$ python scripts/check_protected_deletes.py --ci
+
+[FAIL] Generated files changed after regen. Commit the regenerated outputs.
+Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.
+
+Uncommitted changes:
+M REHYDRATION_PACK/MANIFEST.yaml
+ M scripts/verify_rehydration_pack.py
+?? REHYDRATION_PACK/RUNS/B51/Agent_A_CORRECTIVE/
+?? claude_gate_audit.json
+
+EXIT_CODE=2

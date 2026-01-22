@@ -74,6 +74,7 @@ class ManifestEntry:
 @dataclass
 class RunArtifactSpec:
     run_id_regex: str = r"^RUN_\d{8}_\d{4}Z$"
+    legacy_run_id_regex: Optional[str] = None
     agent_ids: List[str] = None  # type: ignore[assignment]
     required_files_per_agent: List[str] = None  # type: ignore[assignment]
     optional_files_per_agent: List[str] = None  # type: ignore[assignment]
@@ -118,6 +119,7 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
 
     run_spec = RunArtifactSpec(
         run_id_regex=r"^RUN_\d{8}_\d{4}Z$",
+        legacy_run_id_regex=None,
         agent_ids=["A", "B", "C"],
         required_files_per_agent=[
             "RUN_SUMMARY.md",
@@ -213,6 +215,12 @@ def parse_manifest(manifest_text: str) -> Tuple[List[ManifestEntry], RunArtifact
             if key == "run_id_regex":
                 if value:
                     run_spec.run_id_regex = value
+                list_target = None
+                continue
+
+            if key == "legacy_run_id_regex":
+                if value:
+                    run_spec.legacy_run_id_regex = value
                 list_target = None
                 continue
 
@@ -321,6 +329,11 @@ def check_runs(
         return errors, warnings
 
     run_id_re = re.compile(run_spec.run_id_regex)
+    legacy_run_id_re = (
+        re.compile(run_spec.legacy_run_id_regex)
+        if run_spec.legacy_run_id_regex
+        else None
+    )
 
     run_folders = [p for p in runs_dir.iterdir() if p.is_dir()]
     if not run_folders:
@@ -334,7 +347,12 @@ def check_runs(
         )
 
     for run in sorted(run_folders, key=lambda p: p.name):
-        if not run_id_re.match(run.name):
+        if run_id_re.match(run.name):
+            pass
+        elif legacy_run_id_re and legacy_run_id_re.match(run.name):
+            # Legacy run folders are accepted without structural enforcement.
+            continue
+        else:
             msg = f"Run folder name does not match run_id_regex ({run_spec.run_id_regex}): {run.name}"
             warnings.append(msg)
             # Skip structural checks for non-conforming folders; treat as advisory.
