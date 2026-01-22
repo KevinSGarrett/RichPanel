@@ -28,7 +28,7 @@ class Violation:
     file: str
     pattern: str
     line: int
-    match_preview: str
+    match_length: int
 
 
 def scan_file(filepath: Path) -> list[Violation]:
@@ -43,7 +43,7 @@ def scan_file(filepath: Path) -> list[Violation]:
                         file=str(filepath),
                         pattern=pattern,
                         line=content[: match.start()].count("\n") + 1,
-                        match_preview=f"{match.group()[:20]}...",
+                        match_length=(match.end() - match.start()),
                     )
                 )
     except Exception as exc:
@@ -76,7 +76,7 @@ def main() -> int:
     if all_violations:
         print("SECRETS AUDIT FAILED - Potential secrets found:")
         for v in all_violations:
-            print(f"  {v.file}:{v.line} - {v.pattern} ({v.match_preview})")
+            print(f"  {v.file}:{v.line} - {v.pattern} (len={v.match_length})")
         return 1
 
     print("SECRETS AUDIT PASSED - No secrets detected in scanned files")
