@@ -124,7 +124,7 @@ test_read_only_env_override_allows_false_but_write_disabled_blocks (backend.test
 ok
 
 ----------------------------------------------------------------------
-Ran 55 tests in 0.015s
+Ran 55 tests in 0.017s
 
 OK
 test_dry_run_default_skips_transport (__main__.RichpanelClientTests.test_dry_run_default_skips_transport) ... ok
@@ -166,18 +166,18 @@ test_fetch_recent_ticket_ids_success (__main__.OrderStatusIntentEvalTests.test_f
 test_is_prod_target_variants (__main__.OrderStatusIntentEvalTests.test_is_prod_target_variants) ... ok
 test_label_and_redaction_helpers (__main__.OrderStatusIntentEvalTests.test_label_and_redaction_helpers) ... ok
 test_load_jsonl_dataset_errors (__main__.OrderStatusIntentEvalTests.test_load_jsonl_dataset_errors) ... ok
-test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-22 09:59:34,502 WARNING Skipping ticket with no message
-2026-01-22 09:59:34,502 WARNING Skipping ticket with no message
+test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-22 10:02:32,578 WARNING Skipping ticket with no message
+2026-01-22 10:02:32,580 WARNING Skipping ticket with no message
 ok
-test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-22 09:59:34,503 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmptasif55s\out.json
-2026-01-22 09:59:34,504 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
-2026-01-22 09:59:34,504 INFO LLM metrics: unavailable (llm_not_called)
-2026-01-22 09:59:34,506 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmptasif55s\richpanel.json
-2026-01-22 09:59:34,506 INFO Deterministic metrics: unavailable (None)
-2026-01-22 09:59:34,506 INFO LLM metrics: unavailable (None)
+test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-22 10:02:32,581 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpg3jfnze6\out.json
+2026-01-22 10:02:32,581 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+2026-01-22 10:02:32,581 INFO LLM metrics: unavailable (llm_not_called)
+2026-01-22 10:02:32,582 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpg3jfnze6\richpanel.json
+2026-01-22 10:02:32,582 INFO Deterministic metrics: unavailable (None)
+2026-01-22 10:02:32,582 INFO LLM metrics: unavailable (None)
 ok
 test_main_requires_write_disabled_for_prod (__main__.OrderStatusIntentEvalTests.test_main_requires_write_disabled_for_prod) ... ok
-test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-22 09:59:34,507 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-22 10:02:32,583 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
 ok
 test_require_env_flag (__main__.OrderStatusIntentEvalTests.test_require_env_flag) ... ok
 test_resolve_env_name_priority (__main__.OrderStatusIntentEvalTests.test_resolve_env_name_priority) ... ok
@@ -185,7 +185,7 @@ test_run_richpanel_eval_source_metadata (__main__.OrderStatusIntentEvalTests.tes
 test_write_summary (__main__.OrderStatusIntentEvalTests.test_write_summary) ... ok
 
 ----------------------------------------------------------------------
-Ran 21 tests in 0.020s
+Ran 21 tests in 0.019s
 
 OK
 test_automation_disabled_short_circuits_transport (__main__.OpenAIClientTests.test_automation_disabled_short_circuits_transport) ... ok
@@ -234,7 +234,7 @@ test_retry_honors_retry_after_header (__main__.ShipStationClientTests.test_retry
 ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 6.223s
+Ran 8 tests in 6.237s
 
 OK
 test_nested_order_tracking_numeric_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_numeric_is_extracted) ... ok
@@ -253,7 +253,7 @@ test_shopify_enrichment_merges_fields_when_network_enabled (__main__.OrderLookup
 test_shopify_fallback_used_when_payload_has_no_shipping_fields (__main__.OrderLookupTests.test_shopify_fallback_used_when_payload_has_no_shipping_fields) ... ok
 
 ----------------------------------------------------------------------
-Ran 14 tests in 2.219s
+Ran 14 tests in 2.216s
 
 OK
 test_fallback_on_low_confidence_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_low_confidence_preserves_original) ... ok
@@ -298,7 +298,7 @@ test_min_confidence_negative_falls_back (__main__.ThresholdTests.test_min_confid
 test_min_confidence_overrides_legacy (__main__.ThresholdTests.test_min_confidence_overrides_legacy) ... ok
 
 ----------------------------------------------------------------------
-Ran 22 tests in 0.001s
+Ran 22 tests in 0.002s
 
 OK
 test_fallback_on_low_confidence_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_low_confidence_preserves_original) ... ok
@@ -316,19 +316,19 @@ test_response_id_reason_set_when_raw_empty (__main__.ReplyRewriteTests.test_resp
 test_rewrite_applies_when_enabled_and_safe (__main__.ReplyRewriteTests.test_rewrite_applies_when_enabled_and_safe) ... ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 0.003s
+Ran 12 tests in 0.002s
 
 OK
 .....
 ----------------------------------------------------------------------
-Ran 5 tests in 0.003s
+Ran 5 tests in 0.004s
 
 OK
 test_outbound_disabled_skips_writes_while_allowing_shadow_reads (__main__.ReadOnlyShadowModeTests.test_outbound_disabled_skips_writes_while_allowing_shadow_reads) ... ok
 test_plan_actions_propagates_allow_network_for_shadow_reads (__main__.ReadOnlyShadowModeTests.test_plan_actions_propagates_allow_network_for_shadow_reads) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.002s
+Ran 2 tests in 0.001s
 
 OK
 test_business_day_anchor_skips_weekend (__main__.ScenarioPayloadTests.test_business_day_anchor_skips_weekend) ... ok
@@ -362,7 +362,7 @@ test_openai_routing_evidence_maps_response_id (__main__.OpenAIEvidenceTests.test
 test_openai_routing_evidence_missing_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_missing_response_id) ... ok
 
 ----------------------------------------------------------------------
-Ran 24 tests in 0.010s
+Ran 24 tests in 0.011s
 
 OK
 [OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
@@ -417,13 +417,6 @@ $ python scripts/test_e2e_smoke_encoding.py
 
 $ python scripts/check_protected_deletes.py --ci
 
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.
+[OK] CI-equivalent checks passed.
 
-Uncommitted changes:
-M REHYDRATION_PACK/MANIFEST.yaml
- M scripts/verify_rehydration_pack.py
-?? REHYDRATION_PACK/RUNS/B51/Agent_A_CORRECTIVE/
-?? claude_gate_audit.json
-
-EXIT_CODE=2
+EXIT_CODE=0

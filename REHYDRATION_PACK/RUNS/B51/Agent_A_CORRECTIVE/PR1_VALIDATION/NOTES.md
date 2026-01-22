@@ -1,4 +1,4 @@
 # Notes
 
-- Updated run id validation to treat legacy B## folders as accepted without structural enforcement.
-- Validation rerun required after committing new artifacts (run_ci_checks fails with uncommitted changes).
+- Updated run id validation to accept legacy B## and RUN_YYYYMMDD_B## folders without structural enforcement.
+- run_ci_checks.py --ci passed on a clean working tree; output recorded in VALIDATION_FULL_OUTPUT.md.
