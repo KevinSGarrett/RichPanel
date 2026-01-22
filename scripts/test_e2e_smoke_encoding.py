@@ -42,6 +42,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _iso_business_days_before,
     _order_status_no_tracking_payload,
     _order_status_no_tracking_short_window_payload,
+    _order_status_no_tracking_standard_shipping_3_5_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -196,6 +197,34 @@ class ScenarioPayloadTests(unittest.TestCase):
 
         order_date = datetime.fromisoformat(payload["order_created_at"])
         ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        business_days = 0
+        cursor = order_date
+        while cursor < ticket_date:
+            cursor += timedelta(days=1)
+            if cursor.weekday() < 5:
+                business_days += 1
+        self.assertEqual(business_days, 2)
+
+    def test_order_status_no_tracking_standard_shipping_3_5_shape(self) -> None:
+        payload = _order_status_no_tracking_standard_shipping_3_5_payload(
+            "RUN_JOHN", conversation_id="conv-no-track-john-1"
+        )
+
+        self.assertEqual(
+            payload["scenario"], "order_status_no_tracking_standard_shipping_3_5"
+        )
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIsNone(payload.get("tracking_number"))
+        self.assertIsNone(payload.get("tracking_url"))
+        shipping_method = payload["shipping_method"].lower()
+        self.assertIn("standard shipping", shipping_method)
+        self.assertFalse(any(char.isdigit() for char in shipping_method))
+
+        order_date = datetime.fromisoformat(payload["order_created_at"])
+        ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        self.assertEqual(order_date.weekday(), 0)
+        self.assertEqual(ticket_date.weekday(), 2)
+        self.assertLessEqual(order_date, ticket_date)
         business_days = 0
         cursor = order_date
         while cursor < ticket_date:
@@ -629,6 +658,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
         self.assertEqual(evidence["model"], "gpt-5.2-chat-latest")
         self.assertEqual(evidence["response_id"], "resp_123")
         self.assertEqual(evidence["final_intent"], "order_status_tracking")
+        self.assertEqual(evidence["final_source"], "deterministic")
 
     def test_openai_routing_evidence_missing_response_id(self) -> None:
         state_item = {
@@ -662,6 +692,8 @@ class OpenAIEvidenceTests(unittest.TestCase):
         evidence = _extract_openai_rewrite_evidence(state_item, {})
         self.assertFalse(evidence["rewrite_attempted"])
         self.assertEqual(evidence["reason"], "disabled")
+        self.assertIsNone(evidence["original_hash"])
+        self.assertIsNone(evidence["rewritten_hash"])
 
     def test_openai_requirements_fail_when_missing(self) -> None:
         routing = {"llm_called": False}
@@ -673,11 +705,12 @@ class OpenAIEvidenceTests(unittest.TestCase):
             require_rewrite=True,
         )
         self.assertFalse(result["openai_routing_called"])
+        self.assertFalse(result["openai_routing_source_openai"])
         self.assertFalse(result["openai_rewrite_attempted"])
         self.assertFalse(result["openai_rewrite_applied"])
 
     def test_openai_requirements_accept_fallback(self) -> None:
-        routing = {"llm_called": True}
+        routing = {"llm_called": True, "final_source": "openai"}
         rewrite = {
             "rewrite_attempted": True,
             "rewrite_applied": False,
@@ -690,6 +723,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
             require_rewrite=True,
         )
         self.assertTrue(result["openai_routing_called"])
+        self.assertTrue(result["openai_routing_source_openai"])
         self.assertTrue(result["openai_rewrite_attempted"])
         self.assertTrue(result["openai_rewrite_applied"])
 
@@ -724,6 +758,7 @@ class OpenAIEvidenceTests(unittest.TestCase):
             "confidence",
             "response_id",
             "final_intent",
+            "final_source",
         ):
             self.assertIn(key, routing)
         for key in (
@@ -732,6 +767,9 @@ class OpenAIEvidenceTests(unittest.TestCase):
             "model",
             "response_id",
             "fallback_used",
+            "original_hash",
+            "rewritten_hash",
+            "rewritten_changed",
         ):
             self.assertIn(key, rewrite)
 

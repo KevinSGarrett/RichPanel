@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-01-22 - run_20260122_0113z (b50: openai order status proof + john scenario)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-01-22-run202601220113z-b50-openai-order-status-proof-john-scenario"
+    }
+  ],
   "2026-01-21 - run_20260121_2228z (b50: richpanel read only safety tests + docs)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -8631,6 +8637,36 @@
     {
       "path": "05_FAQ_Automation/Order_Status_Automation.md",
       "anchor": "high-level-decision-flow-v1"
+    }
+  ],
+  "openai routing + rewrite (optional, gated)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "openai-routing-rewrite-optional-gated"
+    }
+  ],
+  "routing classification (order-status vs not)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "routing-classification-order-status-vs-not"
+    }
+  ],
+  "reply rewrite (draft → friendly)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "reply-rewrite-draft-friendly"
+    }
+  ],
+  "env vars to enable behavior": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "env-vars-to-enable-behavior"
+    }
+  ],
+  "openai key sourcing (seed-secrets → aws secret → runtime)": [
+    {
+      "path": "05_FAQ_Automation/Order_Status_Automation.md",
+      "anchor": "openai-key-sourcing-seed-secrets-aws-secret-runtime"
     }
   ],
   "response selection matrix (v1)": [

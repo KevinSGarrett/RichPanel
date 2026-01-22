@@ -126,6 +126,36 @@ Secondary (future):
 
 ---
 
+## OpenAI routing + rewrite (optional, gated)
+This automation can use OpenAI in two places when explicitly enabled:
+
+### Routing classification (order-status vs not)
+- **Advisory mode (default):** OpenAI is called only if gates pass, but deterministic routing remains the source of truth.
+- **Primary mode (configured):** when `OPENAI_ROUTING_PRIMARY=true` and confidence meets the threshold,
+  OpenAI’s intent classification is used as the **final** routing source (this determines whether a ticket
+  is treated as order status or not).
+- **Confidence threshold:** `OPENAI_ROUTING_MIN_CONFIDENCE` (float). Alias: `OPENAI_ROUTING_CONFIDENCE_THRESHOLD`.
+
+### Reply rewrite (draft → friendly)
+- The deterministic draft reply is generated **first** (Tier 2 template).
+- OpenAI **only** sees that draft reply body (not the raw customer message).
+- When `OPENAI_REPLY_REWRITE_ENABLED=true` and gates pass, the rewritten body replaces the draft if it is safe;
+  otherwise we fall back to the deterministic draft.
+
+### Env vars to enable behavior
+- `OPENAI_ROUTING_PRIMARY` (bool)
+- `OPENAI_ROUTING_MIN_CONFIDENCE` (float; alias: `OPENAI_ROUTING_CONFIDENCE_THRESHOLD`)
+- `OPENAI_REPLY_REWRITE_ENABLED` (bool)
+
+### OpenAI key sourcing (seed-secrets → AWS secret → runtime)
+- Seed via `.github/workflows/seed-secrets.yml` into AWS Secrets Manager:
+  `rp-mw/<env>/openai/api_key`
+- Runtime lookup order:
+  1) `OPENAI_API_KEY` (explicit override)
+  2) `OPENAI_API_KEY_SECRET_ID` (defaults to `rp-mw/<env>/openai/api_key`)
+
+---
+
 ## Response selection matrix (v1)
 
 | Order signals (from linked order) | Template | Why |

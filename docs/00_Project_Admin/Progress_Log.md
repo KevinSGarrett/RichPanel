@@ -1,6 +1,6 @@
 # Progress Log
 
-Last verified: 2026-01-21 - RUN_20260121_1440Z.
+Last verified: 2026-01-22 - RUN_20260122_0113Z.
 
 This is the canonical **long-lived** progress record for the project.
 
@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-01-22 - RUN_20260122_0113Z (B50: OpenAI order status proof + John scenario)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z
+- Documented OpenAI routing vs rewrite roles and env flags in order status docs.
+- Added John scenario + proof metadata (routing_metadata/rewriter_metadata hashes) in dev_e2e_smoke.
+- Dev E2E smoke PASS_STRONG with OpenAI routing primary and rewrite applied; proof JSON captured.
+
 ### 2026-01-21 - RUN_20260121_2228Z (B50: Richpanel read only safety tests + docs)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260121_2228Z
 - PR #137: https://github.com/KevinSGarrett/RichPanel/pull/137

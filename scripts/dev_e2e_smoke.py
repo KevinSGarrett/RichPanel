@@ -56,6 +56,8 @@ if str(BACKEND_SRC) not in sys.path:
     sys.path.insert(0, str(BACKEND_SRC))
 
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore  # noqa: E402
+    build_no_tracking_reply,
+    build_tracking_reply,
     compute_delivery_estimate,
 )
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
@@ -93,6 +95,7 @@ _ORDER_STATUS_SCENARIOS = {
     "order_status_tracking",
     "order_status_no_tracking",
     "order_status_no_tracking_short_window",
+    "order_status_no_tracking_standard_shipping_3_5",
 }
 
 _ORDER_STATUS_VARIANTS = {
@@ -100,6 +103,7 @@ _ORDER_STATUS_VARIANTS = {
     "order_status_tracking": "order_status_tracking",
     "order_status_no_tracking": "order_status_no_tracking",
     "order_status_no_tracking_short_window": "order_status_no_tracking_short_window",
+    "order_status_no_tracking_standard_shipping_3_5": "order_status_no_tracking_standard_shipping_3_5",
 }
 
 
@@ -244,6 +248,89 @@ def _fingerprint(value: str, length: int = 12) -> str:
     return digest[:length]
 
 
+def _compute_draft_reply_body(
+    payload: Dict[str, Any],
+    *,
+    delivery_estimate: Optional[Dict[str, Any]],
+    inquiry_date: Optional[str],
+) -> Optional[str]:
+    order_summary = None
+    if isinstance(payload.get("order"), dict):
+        order_summary = payload.get("order")
+    else:
+        orders = payload.get("orders")
+        if isinstance(orders, list) and orders:
+            candidate = orders[0]
+            if isinstance(candidate, dict):
+                order_summary = candidate
+    if not isinstance(order_summary, dict):
+        return None
+
+    draft_reply = build_tracking_reply(order_summary)
+    if not draft_reply:
+        draft_reply = build_no_tracking_reply(
+            order_summary,
+            inquiry_date=inquiry_date,
+            delivery_estimate=delivery_estimate,
+        )
+    if isinstance(draft_reply, dict):
+        body = draft_reply.get("body")
+        return body if isinstance(body, str) else None
+    return None
+
+
+def _extract_latest_comment_body(comments: Any) -> Optional[str]:
+    if not isinstance(comments, list):
+        return None
+
+    def _body_from(comment: Any) -> Optional[str]:
+        if not isinstance(comment, dict):
+            return None
+        body = comment.get("plain_body") or comment.get("body") or comment.get("html_body")
+        if isinstance(body, str) and body.strip():
+            return body
+        return None
+
+    for comment in reversed(comments):
+        if isinstance(comment, dict) and comment.get("is_operator") is True:
+            body = _body_from(comment)
+            if body:
+                return body
+
+    for comment in reversed(comments):
+        body = _body_from(comment)
+        if body:
+            return body
+    return None
+
+
+def _fetch_latest_reply_hash(
+    executor: RichpanelExecutor,
+    ticket_id: str,
+    *,
+    allow_network: bool,
+) -> Optional[str]:
+    if not allow_network or not ticket_id:
+        return None
+    encoded_id = urllib.parse.quote(str(ticket_id), safe="")
+    response = executor.execute(
+        "GET",
+        f"/v1/tickets/{encoded_id}",
+        dry_run=not allow_network,
+        log_body_excerpt=False,
+    )
+    payload = response.json() if response else None
+    if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
+        ticket = payload.get("ticket")
+    elif isinstance(payload, dict):
+        ticket = payload
+    else:
+        return None
+
+    body = _extract_latest_comment_body(ticket.get("comments") if isinstance(ticket, dict) else None)
+    return _fingerprint(body) if body else None
+
+
 def _fingerprint_event_id(event_id: Optional[str]) -> Optional[str]:
     if not event_id:
         return None
@@ -364,6 +451,18 @@ def _business_day_anchor(now: datetime) -> datetime:
     while anchor.weekday() >= 5:
         anchor += timedelta(days=1)
     return anchor
+
+
+def _most_recent_weekday(anchor: datetime, weekday: int) -> datetime:
+    """
+    Return the most recent occurrence of weekday (0=Mon..6=Sun) at 10:00 UTC.
+    """
+    if weekday < 0 or weekday > 6:
+        raise ValueError("weekday must be between 0 and 6")
+    days_since = (anchor.weekday() - weekday) % 7
+    target = (anchor - timedelta(days=days_since)).date()
+    tzinfo = anchor.tzinfo or timezone.utc
+    return datetime(target.year, target.month, target.day, 10, 0, tzinfo=tzinfo)
 
 
 def _iso_business_days_before(anchor: datetime, days: int) -> str:
@@ -534,6 +633,76 @@ def _order_status_no_tracking_payload(
             "start": eta_start,
             "end": eta_end,
             "shipping_method": shipping_method,
+        },
+    }
+
+
+def _order_status_no_tracking_standard_shipping_3_5_payload(
+    run_id: str, *, conversation_id: Optional[str]
+) -> Dict[str, Any]:
+    """
+    John scenario: Monday order, Wednesday ticket, standard shipping (3-5 days),
+    no tracking yet, remaining ETA should be 1-3 business days.
+    """
+    now = datetime.now(timezone.utc)
+    ticket_created_at_dt = _most_recent_weekday(now, 2)  # Wednesday
+    order_created_at_dt = ticket_created_at_dt - timedelta(days=2)  # Monday
+    order_created_at = order_created_at_dt.isoformat()
+    ticket_created_at = ticket_created_at_dt.isoformat()
+    order_seed = run_id or "order-status-smoke"
+    seeded_order_id = _seed_order_id(order_seed, conversation_id)
+    shipping_method = "Standard Shipping"
+
+    base_order = {
+        "id": seeded_order_id,
+        "order_id": seeded_order_id,
+        "status": "processing",
+        "fulfillment_status": "unfulfilled",
+        "carrier": "TBD",
+        "shipping_carrier": "TBD",
+        "shipping_method": shipping_method,
+        "shipping_method_name": shipping_method,
+        "order_created_at": order_created_at,
+        "created_at": order_created_at,
+        "updated_at": ticket_created_at,
+        "items": [
+            {
+                "sku": "SMOKE-OS-JOHN",
+                "name": "Smoke Test No-Tracking Tee",
+                "quantity": 1,
+            }
+        ],
+    }
+
+    return {
+        "scenario": "order_status_no_tracking_standard_shipping_3_5",
+        "intent": "order_status_tracking",
+        "customer_message": "Hi, can you share an update on my order status?",
+        "ticket_created_at": ticket_created_at,
+        "order_created_at": order_created_at,
+        "order_id": seeded_order_id,
+        "status": "processing",
+        "fulfillment_status": "unfulfilled",
+        "order_status": "processing",
+        "carrier": "TBD",
+        "shipping_carrier": "TBD",
+        "tracking_number": None,
+        "tracking_url": None,
+        "shipping_method": shipping_method,
+        "orders": [base_order],
+        "order": base_order,
+        "tracking": {
+            "number": None,
+            "carrier": "TBD",
+            "status": "label_pending",
+            "status_url": None,
+            "updated_at": ticket_created_at,
+        },
+        "shipment": {
+            "carrier": "TBD",
+            "serviceCode": shipping_method,
+            "orderNumber": seeded_order_id,
+            "shipDate": ticket_created_at,
         },
     }
 
@@ -1151,6 +1320,7 @@ def parse_args() -> argparse.Namespace:
             "order_status_tracking",
             "order_status_no_tracking",
             "order_status_no_tracking_short_window",
+            "order_status_no_tracking_standard_shipping_3_5",
         ],
         default="baseline",
         help="Scenario to run (default: baseline).",
@@ -1660,6 +1830,8 @@ def _extract_openai_routing_evidence(
             "response_id": None,
             "response_id_unavailable_reason": "routing_artifact_missing",
             "final_intent": routing_intent,
+            "primary_source": None,
+            "final_source": None,
         }
 
     llm = artifact.get("llm_suggestion")
@@ -1686,6 +1858,13 @@ def _extract_openai_routing_evidence(
     else:
         confidence = None
 
+    primary_source = artifact.get("primary_source")
+    final_source = None
+    if primary_source:
+        final_source = (
+            "openai" if primary_source in {"llm", "openai"} else "deterministic"
+        )
+
     return {
         "llm_called": llm_called,
         "model": model,
@@ -1693,7 +1872,8 @@ def _extract_openai_routing_evidence(
         "response_id": response_id,
         "response_id_unavailable_reason": response_id_reason,
         "final_intent": routing_intent,
-        "primary_source": artifact.get("primary_source"),
+        "primary_source": primary_source,
+        "final_source": final_source,
         "gated_reason": llm_suggestion.get("gated_reason"),
     }
 
@@ -1717,6 +1897,9 @@ def _extract_openai_rewrite_evidence(
             "fallback_used": False,
             "reason": "openai_rewrite_missing",
             "error_class": None,
+            "original_hash": None,
+            "rewritten_hash": None,
+            "rewritten_changed": None,
         }
 
     rewrite_attempted = bool(record.get("rewrite_attempted"))
@@ -1750,6 +1933,9 @@ def _extract_openai_rewrite_evidence(
         "fallback_used": fallback_used,
         "reason": reason,
         "error_class": error_class,
+        "original_hash": record.get("original_hash"),
+        "rewritten_hash": record.get("rewritten_hash"),
+        "rewritten_changed": record.get("rewritten_changed"),
     }
 
 
@@ -1761,6 +1947,8 @@ def _evaluate_openai_requirements(
     require_rewrite: bool,
 ) -> Dict[str, Optional[bool]]:
     routing_called = bool(openai_routing.get("llm_called"))
+    routing_source = openai_routing.get("final_source")
+    routing_source_openai = routing_source == "openai" if routing_source else False
     rewrite_attempted = bool(openai_rewrite.get("rewrite_attempted"))
     rewrite_applied = bool(openai_rewrite.get("rewrite_applied"))
     rewrite_satisfied = rewrite_applied or (
@@ -1768,6 +1956,9 @@ def _evaluate_openai_requirements(
     )
     return {
         "openai_routing_called": routing_called if require_routing else None,
+        "openai_routing_source_openai": (
+            routing_source_openai if require_routing else None
+        ),
         "openai_rewrite_attempted": rewrite_attempted if require_rewrite else None,
         "openai_rewrite_applied": rewrite_satisfied if require_rewrite else None,
     }
@@ -1925,19 +2116,22 @@ def build_payload(
 
     if _is_order_status_scenario(scenario):
         scenario_variant = _ORDER_STATUS_VARIANTS.get(scenario, "order_status_tracking")
-        scenario_payload = (
-            _order_status_no_tracking_payload(
+        if scenario_variant == "order_status_no_tracking":
+            scenario_payload = _order_status_no_tracking_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
-            if scenario_variant == "order_status_no_tracking"
-            else _order_status_no_tracking_short_window_payload(
+        elif scenario_variant == "order_status_no_tracking_short_window":
+            scenario_payload = _order_status_no_tracking_short_window_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
-            if scenario_variant == "order_status_no_tracking_short_window"
-            else _order_status_scenario_payload(
+        elif scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
+            scenario_payload = _order_status_no_tracking_standard_shipping_3_5_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
-        )
+        else:
+            scenario_payload = _order_status_scenario_payload(
+                run_id or "smoke", conversation_id=conversation_id
+            )
         payload["scenario_name"] = scenario
         # Merge scenario fields at top level for middleware visibility
         for key, value in scenario_payload.items():
@@ -2375,6 +2569,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     expected_estimate = None
     expected_window = None
+    expected_method = None
+    found_window = None
+    found_method = None
+    window_fallback_used = False
+    expected_delivery_estimate = None
+    draft_reply_hash = None
+    reply_body_hash = None
     try:
         expected_estimate = compute_delivery_estimate(
             payload.get("order_created_at"),
@@ -2383,21 +2584,53 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         )
         if expected_estimate:
             expected_window = expected_estimate.get("eta_human")
-    except Exception:
-        expected_estimate = None
-        expected_window = None
-
-    if scenario_variant == "order_status_no_tracking_short_window":
-        window_phrase = "1-3 business days"
-        method_phrase = "standard (3-5 business days)"
-        candidate_windows = []
-        candidate_methods = []
-        expected_method = None
-        if expected_estimate:
             expected_method = (
                 expected_estimate.get("normalized_method")
                 or expected_estimate.get("raw_method")
             )
+            expected_delivery_estimate = {
+                "eta_human": expected_estimate.get("eta_human"),
+                "normalized_method": expected_estimate.get("normalized_method"),
+                "elapsed_business_days": expected_estimate.get("elapsed_business_days"),
+                "remaining_min_days": expected_estimate.get("remaining_min_days"),
+                "remaining_max_days": expected_estimate.get("remaining_max_days"),
+            }
+    except Exception:
+        expected_estimate = None
+        expected_window = None
+        expected_method = None
+        expected_delivery_estimate = None
+        draft_reply_hash = None
+
+    if draft_reply_hash is None:
+        draft_body = _compute_draft_reply_body(
+            payload,
+            delivery_estimate=expected_estimate,
+            inquiry_date=payload.get("ticket_created_at"),
+        )
+        if draft_body:
+            draft_reply_hash = _fingerprint(draft_body)
+
+    if scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
+        order_dt = _parse_iso8601(payload.get("order_created_at"))
+        ticket_dt = _parse_iso8601(payload.get("ticket_created_at"))
+        if not order_dt or not ticket_dt:
+            raise SmokeFailure("John scenario missing order/ticket dates.")
+        if order_dt.weekday() != 0:
+            raise SmokeFailure("John scenario order_created_at is not a Monday.")
+        if ticket_dt.weekday() != 2:
+            raise SmokeFailure("John scenario ticket_created_at is not a Wednesday.")
+        if payload.get("tracking_number") or payload.get("tracking_url"):
+            raise SmokeFailure("John scenario should not include tracking fields.")
+
+    if scenario_variant in {
+        "order_status_no_tracking_short_window",
+        "order_status_no_tracking_standard_shipping_3_5",
+    }:
+        window_phrase = "1-3 business days"
+        method_phrase = "standard (3-5 business days)"
+        candidate_windows = []
+        candidate_methods = []
         for action in combined_actions:
             params = action.get("parameters") if isinstance(action, dict) else None
             if isinstance(params, dict):
@@ -2413,7 +2646,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     )
         if not draft_replies:
             raise SmokeFailure(
-                "Short-window scenario did not persist a draft reply to validate remaining window."
+                "No-tracking ETA scenario did not persist a draft reply to validate remaining window."
             )
         bodies_combined = " ".join(
             reply.get("body", "")
@@ -2444,11 +2677,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             )
         if not found_window:
             raise SmokeFailure(
-                "Short-window scenario draft reply did not include the remaining 1-3 business days window."
+                "No-tracking ETA scenario draft reply did not include the remaining 1-3 business days window."
             )
         if not found_method:
             raise SmokeFailure(
-                "Short-window scenario draft reply did not include the normalized shipping method label."
+                "No-tracking ETA scenario draft reply did not include the normalized shipping method label."
             )
         print(
             f"[OK] Draft reply includes remaining window '{window_phrase}' "
@@ -2484,6 +2717,29 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         state_item, audit_item, routing_intent=routing_intent
     )
     openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
+    routing_metadata = {
+        "final": {
+            "source": openai_routing.get("final_source"),
+            "intent": routing_intent,
+        },
+        "openai": {
+            "called": openai_routing.get("llm_called"),
+            "model": openai_routing.get("model"),
+            "request_id": openai_routing.get("response_id"),
+            "response_id_unavailable_reason": openai_routing.get(
+                "response_id_unavailable_reason"
+            ),
+            "confidence": openai_routing.get("confidence"),
+        },
+    }
+    rewriter_metadata = {
+        "used": bool(openai_rewrite.get("rewrite_applied")),
+        "model": openai_rewrite.get("model"),
+        "request_id": openai_rewrite.get("response_id"),
+        "original_hash": openai_rewrite.get("original_hash"),
+        "rewritten_hash": openai_rewrite.get("rewritten_hash"),
+        "changed": openai_rewrite.get("rewritten_changed"),
+    }
 
     dashboard_name = f"rp-mw-{env_name}-ops"
     alarm_names = [
@@ -2879,6 +3135,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             f"updated_at_delta={updated_at_delta}s."
         )
 
+        if reply_body_hash is None and payload_conversation:
+            reply_body_hash = _fetch_latest_reply_hash(
+                ticket_executor,
+                payload_conversation,
+                allow_network=allow_network,
+            )
+
         if args.simulate_followup and order_status_mode and status_resolved:
             required_tags = [_LOOP_PREVENTION_TAG]
             post_tags = post_ticket_data.get("tags") or []
@@ -3100,6 +3363,21 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             reply_update_candidate=reply_update_candidate,
         )
 
+    if draft_reply_hash and not openai_rewrite.get("original_hash"):
+        openai_rewrite["original_hash"] = draft_reply_hash
+    if reply_body_hash and not openai_rewrite.get("rewritten_hash"):
+        openai_rewrite["rewritten_hash"] = reply_body_hash
+    if (
+        openai_rewrite.get("rewritten_changed") is None
+        and draft_reply_hash
+        and reply_body_hash
+    ):
+        openai_rewrite["rewritten_changed"] = draft_reply_hash != reply_body_hash
+
+    rewriter_metadata["original_hash"] = openai_rewrite.get("original_hash")
+    rewriter_metadata["rewritten_hash"] = openai_rewrite.get("rewritten_hash")
+    rewriter_metadata["changed"] = openai_rewrite.get("rewritten_changed")
+
     openai_requirements = _evaluate_openai_requirements(
         openai_routing,
         openai_rewrite,
@@ -3129,6 +3407,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "test_tag_verified": test_tag_verified,
         "reply_evidence": reply_evidence,
         "openai_routing_called": openai_requirements.get("openai_routing_called"),
+        "openai_routing_source_openai": openai_requirements.get(
+            "openai_routing_source_openai"
+        ),
         "openai_rewrite_attempted": openai_requirements.get(
             "openai_rewrite_attempted"
         ),
@@ -3219,12 +3500,23 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     if require_openai_routing:
         required_checks.append(bool(openai_requirements.get("openai_routing_called")))
+        required_checks.append(
+            bool(openai_requirements.get("openai_routing_source_openai"))
+        )
         criteria_details.append(
             {
                 "name": "openai_routing_called",
                 "description": "OpenAI routing was invoked for intent detection",
                 "required": True,
                 "value": openai_requirements.get("openai_routing_called"),
+            }
+        )
+        criteria_details.append(
+            {
+                "name": "openai_routing_source_openai",
+                "description": "OpenAI routing selected as the final routing source",
+                "required": True,
+                "value": openai_requirements.get("openai_routing_source_openai"),
             }
         )
 
@@ -3411,6 +3703,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "openai": {
             "routing": openai_routing,
             "rewrite": openai_rewrite,
+        },
+        "routing_metadata": routing_metadata,
+        "rewriter_metadata": rewriter_metadata,
+        "order_status": {
+            "expected_delivery_estimate": expected_delivery_estimate,
+            "eta_window_verified": found_window,
+            "eta_method_verified": found_method,
+            "eta_window_fallback_used": window_fallback_used,
         },
         "richpanel": {
             "pre": safe_pre_ticket,
