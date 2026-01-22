@@ -33,3 +33,10 @@ Command Log
 31) git add REHYDRATION_PACK/RUNS/B51/Agent_B
 32) git commit -m "B51: update run artifacts for coverage fixes"
 33) git push
+34) python -m compileall backend/src scripts
+35) python -m pytest -q
+36) python scripts/run_ci_checks.py --ci
+37) delete_file claude_gate_audit.json
+38) git add backend/src/richpanel_middleware/commerce/order_lookup.py backend/tests/test_order_lookup_order_id_resolution.py scripts/test_order_lookup.py
+39) git commit -m "B51: tighten order_id tests and signature"
+40) python scripts/run_ci_checks.py --ci
