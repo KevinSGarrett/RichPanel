@@ -30,3 +30,6 @@ Command Log
 28) git add backend/tests/test_order_lookup_order_id_resolution.py scripts/test_shadow_order_status.py
 29) git commit -m "B51: cover missing order-id paths"
 30) python scripts/run_ci_checks.py --ci
+31) git add REHYDRATION_PACK/RUNS/B51/Agent_B
+32) git commit -m "B51: update run artifacts for coverage fixes"
+33) git push
