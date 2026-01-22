@@ -137,6 +137,7 @@ paths:
 
 run_artifacts:
   run_id_regex: ^RUN_\d{8}_\d{4}Z$
+  legacy_run_id_regex: ^(?:RUN_\d{8}_B\d{2}|B\d{2}(?:_AGENT_[A-Z])?)$
   agent_ids:
   - A
   - B
