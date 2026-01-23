@@ -16,6 +16,7 @@ try:
     import yaml  # type: ignore[import]
 except ModuleNotFoundError:  # pragma: no cover - PyYAML is expected in CI
     yaml = None
+_YAML_ERROR = yaml.YAMLError if yaml is not None else Exception
 
 from claude_gate_constants import CANONICAL_MARKER
 
@@ -182,7 +183,7 @@ def _load_review_config(path: Path = DEFAULT_CONFIG_PATH) -> dict:
     try:
         with open(path, "r", encoding="utf-8") as handle:
             data = yaml.safe_load(handle) or {}
-    except (OSError, yaml.YAMLError):
+    except (OSError, _YAML_ERROR):
         return {}
     return data if isinstance(data, dict) else {}
 
