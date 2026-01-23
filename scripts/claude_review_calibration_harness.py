@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import statistics
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,6 +46,27 @@ def _parse_previous_state(raw: str) -> dict | None:
     return parsed if isinstance(parsed, dict) else None
 
 
+def _load_fixture_bundle_at(fixtures_dir: Path, name: str) -> dict:
+    fixture_dir = fixtures_dir / name
+    if not fixture_dir.is_dir():
+        raise RuntimeError(f"Fixture '{name}' not found under {fixtures_dir}")
+    metadata_path = fixture_dir / "fixture_pr_metadata.json"
+    diff_path = fixture_dir / "fixture_diff.txt"
+    legacy_path = fixture_dir / "fixture_anthropic_response_legacy.txt"
+    structured_path = fixture_dir / "fixture_anthropic_response_structured.json"
+    previous_state_path = fixture_dir / "fixture_previous_state.json"
+    with open(metadata_path, "r", encoding="utf-8") as handle:
+        metadata = json.load(handle)
+    previous_state_text = previous_state_path.read_text(encoding="utf-8") if previous_state_path.exists() else ""
+    return {
+        "metadata": metadata,
+        "diff": diff_path.read_text(encoding="utf-8"),
+        "legacy_response": legacy_path.read_text(encoding="utf-8"),
+        "structured_response": structured_path.read_text(encoding="utf-8"),
+        "previous_state": previous_state_text,
+    }
+
+
 def _extract_false_positive_label(metadata: dict) -> bool | None:
     labels = metadata.get("kpi_labels")
     if not isinstance(labels, dict):
@@ -71,8 +91,9 @@ def _evaluate_fixture(
     *,
     mode: str,
     review_config: dict,
+    fixtures_dir: Path,
 ) -> dict:
-    bundle = gate._load_fixture_bundle(fixture_name)
+    bundle = _load_fixture_bundle_at(fixtures_dir, fixture_name)
     metadata = bundle.get("metadata", {})
     labels = metadata.get("labels", [])
     risk = metadata.get("risk_label") or gate._normalize_risk(labels or [])
@@ -179,11 +200,23 @@ def _format_int(value: int | None) -> str:
     return f"{int(value):,}"
 
 
+def _median(values: list[int]) -> float | None:
+    if not values:
+        return None
+    sorted_values = sorted(values)
+    midpoint = len(sorted_values) // 2
+    if len(sorted_values) % 2:
+        return float(sorted_values[midpoint])
+    return (sorted_values[midpoint - 1] + sorted_values[midpoint]) / 2
+
+
 def _compute_metrics(results: list[dict]) -> dict:
     total_runs = len(results)
-    action_required_counts = [int(item.get("action_required_count", 0)) for item in results]
+    action_required_counts: list[int] = [
+        int(item.get("action_required_count", 0) or 0) for item in results
+    ]
     action_required_runs = sum(1 for count in action_required_counts if count > 0)
-    action_required_median = statistics.median(action_required_counts) if action_required_counts else None
+    action_required_median = _median(action_required_counts)
     action_required_p90 = _percentile(action_required_counts, 0.9)
 
     parse_failures = sum(1 for item in results if item.get("parse_error"))
@@ -200,8 +233,12 @@ def _compute_metrics(results: list[dict]) -> dict:
             if label:
                 false_positive_runs += 1
 
-    token_totals = [item.get("token_total") for item in results if isinstance(item.get("token_total"), int)]
-    token_median = statistics.median(token_totals) if token_totals else None
+    token_totals: list[int] = []
+    for item in results:
+        token_total = item.get("token_total")
+        if isinstance(token_total, int):
+            token_totals.append(token_total)
+    token_median = _median(token_totals)
 
     finding_ids: list[str] = []
     for item in results:
@@ -234,7 +271,10 @@ def run_harness(
 ) -> dict:
     fixtures_dir = fixtures_dir or gate.DEFAULT_FIXTURES_DIR
     review_config = gate._load_review_config()
-    results = [_evaluate_fixture(name, mode=mode, review_config=review_config) for name in fixtures]
+    results = [
+        _evaluate_fixture(name, mode=mode, review_config=review_config, fixtures_dir=fixtures_dir)
+        for name in fixtures
+    ]
     overall = _compute_metrics(results)
     per_risk: dict[str, dict] = {}
     grouped: dict[str, list[dict]] = defaultdict(list)
