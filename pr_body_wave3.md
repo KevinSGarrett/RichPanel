@@ -5,7 +5,7 @@
 **Base:** `main`  
 **Branch:** `claude-review-gap-filler/wave3-calibration`  
 **PR type:** Draft until CI is green  
-**Merge:** Squash merge after approval + green CI  
+**Merge:** Merge commit after approval + green CI (repo does not allow squash merges)  
 
 ## 1) Summary
 - Add offline calibration harness with KPI scoreboard output.
