@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "verdict": "FAIL",
+  "risk": "risk:R3",
+  "reviewers": [
+    {
+      "name": "primary",
+      "model": "claude-opus-4-5",
+      "findings": [
+        {
+          "finding_id": "abcd1234",
+          "category": "reliability",
+          "severity": 4,
+          "confidence": 85,
+          "title": "Unbounded timeout on outbound request",
+          "summary": "Timeout is disabled for an outbound request.",
+          "file": "app.py",
+          "evidence": "send_request(data, timeout=None)",
+          "suggested_fix": "Set a bounded timeout and retries.",
+          "suggested_test": "Add a test that enforces timeout usage."
+        },
+        {
+          "finding_id": "efgh5678",
+          "category": "tests",
+          "severity": 2,
+          "confidence": 60,
+          "title": "Missing retry test",
+          "summary": "No tests cover retry behavior.",
+          "file": "app.py",
+          "evidence": "# TODO: add retries",
+          "suggested_fix": "Add retry coverage."
+        }
+      ]
+    }
+  ]
+}

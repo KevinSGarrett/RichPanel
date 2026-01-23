@@ -1,0 +1,19 @@
+{
+  "title": "Structured fixture",
+  "body": "Testing structured mode dry-run.",
+  "labels": ["gate:claude", "risk:R3"],
+  "files": [
+    {
+      "filename": "app.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1
+    }
+  ],
+  "response_id": "msg_fixture_structured",
+  "request_id": "req_fixture_structured",
+  "usage": {
+    "input_tokens": 2222,
+    "output_tokens": 111
+  }
+}
