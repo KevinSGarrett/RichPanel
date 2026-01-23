@@ -11,3 +11,4 @@ Summary: action_required=1, total_points=9, highest_severity_action_required=3
 Action Required:
 - [S3/C80, pts=9] Redacted finding (redacted.py) evidence="redacted"
 
+Smoke test update.
