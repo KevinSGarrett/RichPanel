@@ -1,0 +1,11 @@
+{
+  "title": "Add outbound retry",
+  "body": "Retries for outbound calls.",
+  "labels": ["gate:claude", "risk:R2"],
+  "risk_label": "risk:R2",
+  "files": ["backend/src/client.py"],
+  "response_id": "dry_run_response",
+  "request_id": "dry_run_request",
+  "response_model": "claude-opus-4-5",
+  "usage": {"input_tokens": 110, "output_tokens": 22}
+}

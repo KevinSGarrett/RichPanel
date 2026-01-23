@@ -171,12 +171,14 @@ FINDINGS:
             response_id="msg_abc123xyz",
             request_id="req_789xyz",
             usage={"input_tokens": 1000, "output_tokens": 200},
+            response_model="claude-opus-4-5",
         )
         self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
         self.assertIn("Mode: LEGACY", comment)
         self.assertIn("CLAUDE_REVIEW: PASS", comment)
         self.assertIn("Risk: risk:R2", comment)
         self.assertIn("Model used: claude-opus-4-5", comment)
+        self.assertIn("Response model: claude-opus-4-5", comment)
         self.assertIn("skip=false", comment)
         self.assertIn("Anthropic Response ID: msg_abc123xyz", comment)
         self.assertIn("Anthropic Request ID: req_789xyz", comment)
@@ -197,6 +199,7 @@ FINDINGS:
         self.assertIn("Risk: risk:R1", comment)
         self.assertIn("Model used: claude-sonnet-4-5", comment)
         self.assertIn("skip=false", comment)
+        self.assertNotIn("Response model", comment)
         self.assertNotIn("Anthropic Response ID", comment)
         self.assertNotIn("Token Usage", comment)
         self.assertIn("- Issue 1", comment)
@@ -223,16 +226,158 @@ FINDINGS:
             risk="risk:R2",
             files_summary="- file1.py (modified, +10 -5)",
             diff_text="diff content here",
+            lens_text="LENSES_APPLIED: [BASELINE_CODE_SAFETY]",
         )
         self.assertIn("PR TITLE (untrusted input):", prompt)
         self.assertIn("Test PR", prompt)
         self.assertIn("PR BODY (untrusted input):", prompt)
         self.assertIn("This is a test", prompt)
         self.assertIn("RISK LABEL: risk:R2", prompt)
+        self.assertIn("LENSES_APPLIED: [BASELINE_CODE_SAFETY]", prompt)
         self.assertIn("CHANGED FILES:", prompt)
         self.assertIn("- file1.py (modified, +10 -5)", prompt)
         self.assertIn("UNIFIED DIFF (untrusted input):", prompt)
         self.assertIn("diff content here", prompt)
+
+    def test_load_review_config_missing(self):
+        missing_path = Path(tempfile.gettempdir()) / "missing_claude_review.yml"
+        if missing_path.exists():
+            missing_path.unlink()
+        config = claude_gate_review._load_review_config(missing_path)
+        self.assertEqual(config, {})
+
+    def test_load_review_config_valid(self):
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yml") as handle:
+            handle.write("version: 1\nrisk_defaults:\n  R2:\n    max_findings: 4\n")
+            path = Path(handle.name)
+        try:
+            config = claude_gate_review._load_review_config(path)
+            self.assertIn("risk_defaults", config)
+            self.assertEqual(config["risk_defaults"]["R2"]["max_findings"], 4)
+        finally:
+            if path.exists():
+                path.unlink()
+
+    def test_get_risk_defaults_merge(self):
+        config = {
+            "risk_defaults": {
+                "R2": {
+                    "max_findings": 7,
+                    "action_required_min_confidence": 80,
+                }
+            }
+        }
+        defaults = claude_gate_review._get_risk_defaults(config, "risk:R2")
+        self.assertEqual(defaults["max_findings"], 7)
+        self.assertEqual(defaults["action_required_min_confidence"], 80)
+        self.assertEqual(defaults["action_required_min_severity"], 3)
+
+    def test_select_lenses_matches_paths(self):
+        config = {
+            "lenses": {
+                "A": {"paths": ["backend/src/**"], "invariants": ["A1"]},
+                "B": {"paths": ["infra/**"], "invariants": ["B1"]},
+            }
+        }
+        selected = claude_gate_review._select_lenses(["backend/src/orders.py"], config)
+        self.assertEqual(selected[0][0], "A")
+
+    def test_select_lenses_default_when_none(self):
+        config = {"lenses": {"A": {"paths": ["backend/src/**"], "invariants": ["A1"]}}}
+        selected = claude_gate_review._select_lenses(["docs/readme.md"], config)
+        self.assertEqual(selected[0][0], claude_gate_review.DEFAULT_LENS_NAME)
+
+    def test_apply_budgets_truncates(self):
+        findings = [
+            {
+                "finding_id": "c",
+                "severity": 5,
+                "confidence": 90,
+                "file": "c.py",
+                "evidence": "line",
+                "points": 5,
+            },
+            {
+                "finding_id": "a",
+                "severity": 3,
+                "confidence": 80,
+                "file": "a.py",
+                "evidence": "line",
+                "points": 3,
+            },
+            {
+                "finding_id": "b",
+                "severity": 2,
+                "confidence": 90,
+                "file": "",
+                "evidence": "",
+                "points": 2,
+            },
+        ]
+        action_required, fyi = claude_gate_review._apply_budgets(
+            findings,
+            {"max_findings": 2, "action_required_min_severity": 3, "action_required_min_confidence": 70},
+        )
+        self.assertEqual(len(action_required), 2)
+        self.assertEqual([item["finding_id"] for item in action_required], ["c", "a"])
+        self.assertEqual(fyi, [])
+
+    def test_build_state_payload_increments_occurrences(self):
+        prev_state = {
+            "version": 1,
+            "run_index": 1,
+            "findings": {
+                "abc": {"occurrences": 1, "last_seen": 1},
+                "old": {"occurrences": 1, "last_seen": 0},
+            },
+        }
+        findings = [{"finding_id": "abc", "severity": 2}]
+        state_payload, updated = claude_gate_review._build_state_payload(prev_state, findings)
+        self.assertEqual(state_payload["run_index"], 2)
+        self.assertIn("abc", state_payload["findings"])
+        self.assertNotIn("old", state_payload["findings"])
+        self.assertEqual(updated[0]["occurrences"], 2)
+        self.assertEqual(updated[0]["points"], 4)
+
+    def test_structured_verdict_uses_points_threshold(self):
+        payload = {
+            "version": "1.0",
+            "verdict": "PASS",
+            "risk": "risk:R2",
+            "reviewers": [
+                {
+                    "name": "primary",
+                    "model": "claude-opus-4-5",
+                    "findings": [
+                        {
+                            "finding_id": "abc123",
+                            "category": "reliability",
+                            "severity": 3,
+                            "confidence": 80,
+                            "title": "Timeout missing",
+                            "summary": "Timeout is None",
+                            "file": "app.py",
+                            "evidence": "timeout=None",
+                            "suggested_test": "Add timeout test",
+                        }
+                    ],
+                }
+            ],
+        }
+        warnings: list[str] = []
+        verdict, _, action_required, _, summary, _, parse_error = claude_gate_review._evaluate_structured_response(
+            json.dumps(payload),
+            diff_text="timeout=None",
+            mode=claude_gate_review.MODE_STRUCTURED,
+            bypass_enabled=False,
+            warnings=warnings,
+            risk_defaults={"fail_min_points": 2, "action_required_min_severity": 3, "action_required_min_confidence": 70},
+            previous_state=None,
+        )
+        self.assertEqual(verdict, "FAIL")
+        self.assertIsNone(parse_error)
+        self.assertEqual(summary["total_points"], 3)
+        self.assertEqual(len(action_required), 1)
 
     def test_is_approved_false_positive_all_approved(self):
         """Test approved false positive detection."""
@@ -1090,15 +1235,17 @@ FINDINGS:
             request_id="req_0123456789abcdef",
             usage={"input_tokens": 21814, "output_tokens": 18},
             mode_label="LEGACY",
+            response_model="claude-opus-4-5-20251101",
         )
         self.assertEqual(comment, expected)
 
+    @patch("claude_gate_review._fetch_issue_comments", return_value=[])
     @patch("claude_gate_review._fetch_json")
     @patch("claude_gate_review._fetch_all_files")
     @patch("claude_gate_review._fetch_raw")
     @patch("claude_gate_review._anthropic_request")
     def test_main_structured_mode_end_to_end(
-        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json, _mock_fetch_comments
     ):
         structured_payload = {
             "version": "1.0",
@@ -1129,7 +1276,9 @@ FINDINGS:
             "body": "Body",
             "labels": [{"name": "gate:claude"}, {"name": "risk:R3"}],
         }
-        mock_fetch_files.return_value = []
+        mock_fetch_files.return_value = [
+            {"filename": "backend/src/orders.py", "status": "modified", "additions": 1, "deletions": 0}
+        ]
         mock_fetch_raw.return_value = b"send_request(data, timeout=None)"
         mock_anthropic.return_value = (
             {
@@ -1168,8 +1317,12 @@ FINDINGS:
             with open(comment_path, "r", encoding="utf-8") as handle:
                 comment_body = handle.read()
             self.assertIn("Mode: STRUCTURED", comment_body)
+            self.assertIn("CLAUDE_REVIEW: PASS", comment_body)
             self.assertIn("Action Required", comment_body)
             self.assertIn("Structured JSON", comment_body)
+            self.assertIn("Lenses applied:", comment_body)
+            self.assertIn("ORDER_STATUS_SAFETY", comment_body)
+            self.assertIn(claude_gate_review.STATE_MARKER, comment_body)
         finally:
             for var in (
                 "GITHUB_OUTPUT",
@@ -1185,12 +1338,13 @@ FINDINGS:
                 if os.path.exists(path):
                     os.unlink(path)
 
+    @patch("claude_gate_review._fetch_issue_comments", return_value=[])
     @patch("claude_gate_review._fetch_json")
     @patch("claude_gate_review._fetch_all_files")
     @patch("claude_gate_review._fetch_raw")
     @patch("claude_gate_review._anthropic_request")
     def test_main_shadow_mode_non_blocking(
-        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json, _mock_fetch_comments
     ):
         structured_payload = {
             "version": "1.0",
@@ -1264,7 +1418,7 @@ FINDINGS:
             verdict="PASS",
             risk="risk:R1",
             model="claude-opus-4-5",
-            findings=[
+            action_required=[
                 {
                     "severity": 2,
                     "confidence": 60,
@@ -1274,15 +1428,25 @@ FINDINGS:
                     "file": "app.py",
                 }
             ],
+            fyi=[],
             payload={"version": "1.0", "reviewers": [], "verdict": "PASS"},
+            response_model="claude-opus-4-5",
             response_id="msg_test",
             request_id="req_test",
             usage={"input_tokens": 1, "output_tokens": 1},
             mode_label="STRUCTURED",
             bypass=False,
             warnings=None,
+            summary={
+                "action_required_count": 1,
+                "total_points": 2,
+                "highest_severity_action_required": 2,
+            },
+            state_payload={"version": 1, "run_index": 1, "findings": {}},
+            lens_names=[],
         )
-        self.assertIn("Finding (app.py): Timeout missing", comment)
+        self.assertIn("Timeout missing (app.py)", comment)
+        self.assertNotIn("Timeout missing: Timeout missing", comment)
 
 
 if __name__ == "__main__":

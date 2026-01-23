@@ -1,0 +1,3 @@
+VERDICT: FAIL
+FINDINGS:
+- Status transitions should be validated against allowed states.

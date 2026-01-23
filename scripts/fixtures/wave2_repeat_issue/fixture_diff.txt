@@ -1,0 +1,7 @@
+diff --git a/backend/src/client.py b/backend/src/client.py
+index 5555555..6666666 100644
+--- a/backend/src/client.py
++++ b/backend/src/client.py
+@@ -21,7 +21,7 @@ def send_request(payload):
+-    return http.post(url, json=payload)
++    return http.post(url, json=payload, timeout=None)

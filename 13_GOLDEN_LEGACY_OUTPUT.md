@@ -27,6 +27,7 @@ CLAUDE_REVIEW: <PASS|FAIL>
 Risk: <risk:R0..risk:R4>
 Model used: <anthropic model name>
 skip=false
+Response model: <anthropic model name>
 Anthropic Response ID: <msg_...>   # if present
 Anthropic Request ID: <req_...>    # if present
 Token Usage: input=<n>, output=<n> # if present
@@ -56,6 +57,7 @@ CLAUDE_REVIEW: PASS
 Risk: risk:R2
 Model used: claude-opus-4-5-20251101
 skip=false
+Response model: claude-opus-4-5-20251101
 Anthropic Response ID: msg_0123456789abcdef
 Anthropic Request ID: req_0123456789abcdef
 Token Usage: input=21814, output=18
@@ -85,6 +87,7 @@ CLAUDE_REVIEW: FAIL
 Risk: risk:R4
 Model used: claude-opus-4-5-20251101
 skip=false
+Response model: claude-opus-4-5-20251101
 Anthropic Response ID: msg_deadbeefcafefeed
 Anthropic Request ID: req_deadbeefcafefeed
 Token Usage: input=25000, output=240

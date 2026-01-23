@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "verdict": "FAIL",
+  "risk": "risk:R2",
+  "reviewers": [
+    {
+      "name": "primary",
+      "model": "claude-opus-4-5",
+      "findings": [
+        {
+          "finding_id": "repeat-timeout",
+          "category": "reliability",
+          "severity": 3,
+          "confidence": 85,
+          "title": "Timeout is disabled",
+          "summary": "Outbound call sets timeout=None.",
+          "file": "backend/src/client.py",
+          "evidence": "timeout=None",
+          "suggested_test": "Add a timeout regression test"
+        }
+      ]
+    }
+  ]
+}

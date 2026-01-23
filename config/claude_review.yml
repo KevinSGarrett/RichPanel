@@ -1,0 +1,62 @@
+version: 1
+
+risk_defaults:
+  R0:
+    max_findings: 2
+    action_required_min_severity: 3
+    action_required_min_confidence: 70
+    fail_min_points: 999
+  R1:
+    max_findings: 3
+    action_required_min_severity: 3
+    action_required_min_confidence: 70
+    fail_min_points: 999
+  R2:
+    max_findings: 4
+    action_required_min_severity: 3
+    action_required_min_confidence: 70
+    fail_min_points: 10
+  R3:
+    max_findings: 5
+    action_required_min_severity: 3
+    action_required_min_confidence: 75
+    fail_min_points: 12
+  R4:
+    max_findings: 6
+    action_required_min_severity: 3
+    action_required_min_confidence: 80
+    fail_min_points: 12
+
+lenses:
+  ORDER_STATUS_SAFETY:
+    paths:
+      - "backend/src/**"
+      - "integrations/**"
+    invariants:
+      - "No double-ship/double-refund from retries or replays; idempotency is enforced."
+      - "Order status transitions are valid and safe."
+      - "Outbound actions are guarded; fail-closed on uncertainty."
+
+  SHADOW_MODE_WRITE_GUARANTEE:
+    paths:
+      - "backend/src/**"
+      - "docs/**shadow**"
+    invariants:
+      - "Shadow mode performs no external mutations and no persistence writes."
+      - "Outbound flags are respected and default to safe."
+
+  PII_REDACTION_AND_LOGGING:
+    paths:
+      - "backend/src/**"
+      - "scripts/**"
+    invariants:
+      - "No logging of customer PII or secrets."
+      - "Payload dumps are redacted."
+
+  IAM_AND_INFRA_SAFETY:
+    paths:
+      - "infra/cdk/**"
+      - ".github/workflows/**"
+    invariants:
+      - "Least privilege IAM; no wildcards without justification."
+      - "Production infra changes include rollback notes."

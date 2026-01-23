@@ -1,0 +1,9 @@
+diff --git a/infra/cdk/stack.ts b/infra/cdk/stack.ts
+index 3333333..4444444 100644
+--- a/infra/cdk/stack.ts
++++ b/infra/cdk/stack.ts
+@@ -10,6 +10,7 @@ const policy = new PolicyStatement({
+   actions: ["s3:GetObject"],
+   resources: ["arn:aws:s3:::bucket/*"],
++  sid: "AllowReadOnly",
+ });
