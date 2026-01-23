@@ -1,0 +1,35 @@
+# Command Log
+
+## Executed
+- `python -m compileall backend/src scripts` (pass)
+- `python -m pytest -q` (pass)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --scenario order_status_tracking_standard_shipping --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (`--scenario order_status* requires --ticket-id or --ticket-number`)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --ticket-number 1084 --scenario order_status_tracking_standard_shipping --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (NoCredentialsError: unable to locate AWS credentials)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --ticket-number 1086 --scenario order_status_tracking_standard_shipping --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (tracking URL missing in reply evidence)
+- `python -m compileall backend/src scripts` (pass; re-run after smoke assertion update)
+- `python -m pytest -q` (pass; re-run after smoke assertion update)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1087 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: pass (proof artifact written)
+- `python -m compileall backend/src scripts` (pass; re-run after coverage tests)
+- `python -m pytest -q` (failed: missing tracking-number assertion coverage)
+- `python -m pytest -q` (pass; after fixing tracking-number test)
+- `python -m pytest -q` (pass; after adding script-level rewrite validation tests)
+- `python -m compileall backend/src scripts` (pass; re-run after script-level tests)
+- `python -m compileall backend/src scripts` (pass; after Bugbot fixes)
+- `python -m pytest -q` (pass; after Bugbot fixes)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1088 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (skip_or_escalation_tags_present)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1084 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (skip_or_escalation_tags_present)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1085 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: failed (skip_or_escalation_tags_present)
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1089 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
+  - Result: pass (classification=PASS_STRONG; status=PASS)
+- `python -m compileall backend/src scripts` (pass; after Bugbot follow-up in smoke validation)
+- `python -m compileall backend/src scripts` (pass; after tracking regex fix)
+- `python -m pytest -q` (pass; after tracking regex test)
+- `python -m compileall backend/src scripts` (pass; after URL parentheses fix)
+- `python -m pytest -q` (pass; after URL parentheses test)

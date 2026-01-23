@@ -46,6 +46,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_status_no_tracking_payload,
     _order_status_no_tracking_short_window_payload,
     _order_status_no_tracking_standard_shipping_3_5_payload,
+    _order_status_tracking_standard_shipping_payload,
     _apply_fallback_close,
     _diagnose_ticket_update,
     _sanitize_decimals,
@@ -236,6 +237,33 @@ class ScenarioPayloadTests(unittest.TestCase):
                 business_days += 1
         self.assertEqual(business_days, 2)
 
+    def test_order_status_tracking_standard_shipping_shape(self) -> None:
+        payload = _order_status_tracking_standard_shipping_payload(
+            "RUN_TRACK", conversation_id="conv-track-1"
+        )
+
+        self.assertEqual(
+            payload["scenario"], "order_status_tracking_standard_shipping"
+        )
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertEqual(payload["tracking_number"], "1Z999AA10123456784")
+        self.assertEqual(
+            payload["tracking_url"],
+            "https://www.ups.com/track?loc=en_US&tracknum=1Z999AA10123456784",
+        )
+        self.assertEqual(payload["shipping_method"], "Standard Shipping")
+        order_date = datetime.fromisoformat(payload["order_created_at"])
+        ticket_date = datetime.fromisoformat(payload["ticket_created_at"])
+        self.assertEqual(
+            order_date.date(),
+            datetime(2026, 2, 2, tzinfo=timezone.utc).date(),
+        )
+        self.assertEqual(
+            ticket_date.date(),
+            datetime(2026, 2, 4, tzinfo=timezone.utc).date(),
+        )
+        self.assertEqual(payload["tracking"]["status_url"], payload["tracking_url"])
+
     def test_business_day_anchor_skips_weekend(self) -> None:
         saturday = datetime(2024, 1, 6, 12, tzinfo=timezone.utc)
         monday = _business_day_anchor(saturday)
@@ -308,13 +336,25 @@ class DraftReplyHelperTests(unittest.TestCase):
         body = _extract_latest_comment_body(comments)
         self.assertEqual(body, "agent reply")
 
+    def test_extract_latest_comment_body_prefers_middleware_source(self) -> None:
+        comments = [
+            {"plain_body": "agent reply", "is_operator": True, "source": "agent"},
+            {
+                "plain_body": "middleware reply",
+                "is_operator": True,
+                "source": "middleware",
+            },
+        ]
+        body = _extract_latest_comment_body(comments)
+        self.assertEqual(body, "middleware reply")
+
     def test_extract_latest_comment_body_fallback(self) -> None:
         comments = [
             {"plain_body": "first", "is_operator": False},
             {"body": "second", "is_operator": False},
         ]
         body = _extract_latest_comment_body(comments)
-        self.assertEqual(body, "second")
+        self.assertIsNone(body)
 
     def test_fetch_latest_reply_hash(self) -> None:
         comments = [
