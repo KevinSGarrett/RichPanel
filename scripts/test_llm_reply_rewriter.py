@@ -387,6 +387,11 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         tokens = rewriter._extract_tracking_tokens(text)
         self.assertEqual(tokens, ["1Z999AA10123456784"])
 
+    def test_extract_tracking_tokens_accepts_lowercase_label(self) -> None:
+        text = "Tracking number: abc123-def456."
+        tokens = rewriter._extract_tracking_tokens(text)
+        self.assertEqual(tokens, ["abc123-def456"])
+
     def test_extract_tracking_from_url_path(self) -> None:
         url = "https://tracking.example.com/track/ABC12345"
         tokens = rewriter._extract_tracking_from_url(url)

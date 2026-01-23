@@ -196,7 +196,7 @@ def _extract_tracking_tokens(text: str) -> List[str]:
         return []
     tokens: List[str] = []
     label_pattern = re.compile(
-        r"(?i)\btracking(?:\s*(?:number|no\.?|#))?\s*[:\-]?\s*([A-Z0-9-]{6,})"
+        r"(?i)\btracking(?:\s*(?:number|no\.?|#))?\s*[:\-]?\s*([A-Za-z0-9-]{6,})"
     )
     for token in label_pattern.findall(text):
         candidate = token.strip()
