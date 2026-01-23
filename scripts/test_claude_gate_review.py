@@ -318,6 +318,23 @@ FINDINGS:
         summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=5)
         self.assertEqual(summaries, [])
 
+    def test_coerce_json_text(self):
+        fenced = """```json
+{"version":"1.0"}
+```"""
+        self.assertEqual(claude_gate_review._coerce_json_text(fenced), '{"version":"1.0"}')
+        wrapped = "prefix {\"version\":\"1.0\"} suffix"
+        self.assertEqual(claude_gate_review._coerce_json_text(wrapped), '{"version":"1.0"}')
+
+    def test_parse_structured_output_with_fence(self):
+        raw = """```json
+{"version":"1.0","verdict":"PASS","risk":"risk:R2","reviewers":[]}
+```"""
+        payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertEqual(payload.get("version"), "1.0")
+        self.assertEqual(findings, [])
+        self.assertEqual(errors, [])
+
     def test_build_prompt(self):
         """Test prompt building includes all required sections."""
         prompt = claude_gate_review._build_prompt(

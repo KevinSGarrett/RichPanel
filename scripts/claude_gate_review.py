@@ -752,12 +752,33 @@ def _is_action_required(finding: dict) -> bool:
     )
 
 
+def _coerce_json_text(raw_text: str) -> str:
+    text = (raw_text or "").strip()
+    if not text:
+        return text
+    fence_match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
+    if fence_match:
+        return fence_match.group(1).strip()
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start : end + 1].strip()
+    return text
+
+
 def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[dict], list[str]]:
     errors: list[str] = []
     try:
         payload = json.loads(raw_text)
     except json.JSONDecodeError as exc:
-        return {}, [], [f"Invalid JSON: {exc.msg}"]
+        coerced = _coerce_json_text(raw_text)
+        if coerced and coerced != raw_text:
+            try:
+                payload = json.loads(coerced)
+            except json.JSONDecodeError as exc2:
+                return {}, [], [f"Invalid JSON: {exc2.msg}"]
+        else:
+            return {}, [], [f"Invalid JSON: {exc.msg}"]
     if not isinstance(payload, dict):
         return payload, [], ["Structured output must be a JSON object."]
     if payload.get("version") != "1.0":
