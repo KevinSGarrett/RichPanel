@@ -13,8 +13,8 @@
 - Inject failed check summary into the Claude prompt to avoid duplicate bot findings.
 
 ## 2) Preconditions
-- Waves 0-2 merged and stable: **Not verified here** (please confirm on main).
-- CI green on main: **Not verified here** (please confirm on main).
+- Waves 0-2 merged and stable: **Confirmed on main** (wave changelog artifacts present: `WAVE01_CHANGELOG.md`, `WAVE_F02_CHANGELOG.md`, `WAVE_F03_CHANGELOG.md`).
+- CI green on main: **Confirmed** — https://github.com/KevinSGarrett/RichPanel/actions/runs/21277465360
 - Shadow PR samples >= 10: **Pending** (plan below).
 
 ## 3) Step 0 plan (recommended items)
@@ -39,25 +39,25 @@ Token/PR median (input+output): 144
 Duplicate rate (finding_id): 0% (0/3)
 ```
 
-**Sample KPI snapshot output (redacted, offline fixture):**
+**KPI snapshot output (real PR sample, last 14 days):**
 ```
 ## Claude Review KPI Snapshot
-- Repo: `sample/repo`
-- PRs sampled: `101`
-- Sample size (canonical comments parsed): `1`
-- Missing canonical comments: `0`
+- Repo: `KevinSGarrett/RichPanel`
+- PRs sampled: `153, 141, 143, 142, 152, 151, 146, 144, 148, 147, 149, 150, 145, 140, 139, 138, 137, 136, 135, 134, 133, 132, 131, 130, 129, 128, 127, 126, 125, 124, 123, 122, 120, 121, 119, 118, 117, 77, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 101, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 83, 84, 82, 81, 79, 80, 78, 75, 72, 74, 76, 73, 71, 70, 69, 68, 67, 66, 65, 64`
+- Sample size (canonical comments parsed): `3`
+- Missing canonical comments: `87`
 
 | Metric | Value |
 |---|---|
-| Action Required rate | 100% (1/1) |
+| Action Required rate | 67% (2/3) |
 | Action Required per run (median / p90) | 1 / 1 |
-| Token/PR median (input+output) | 19,120 (n=1) |
-| Structured parse failure rate | 0% (0/1) |
-| Mode breakdown | STRUCTURED=1 |
+| Token/PR median (input+output) | 20,883 (n=3) |
+| Structured parse failure rate | 67% (2/3) |
+| Mode breakdown | SHADOW=2, UNKNOWN=1 |
 ```
 
 **CI link:**
-- N/A (no GitHub access in this environment; run CI after push)
+- https://github.com/KevinSGarrett/RichPanel/actions/runs/21290446257 (in progress)
 
 ## 5) KPI impact statement (expected)
 - Token/PR: +0 to +50 tokens expected due to short failed-check summary injection.
@@ -73,5 +73,4 @@ Duplicate rate (finding_id): 0% (0/3)
 - Not implemented (no cache hit/miss signals available).
 
 ## 8) Blocked / N-A
-- CI run link: blocked pending GitHub access.
-- Real PR KPI snapshot: blocked pending GitHub token + PR numbers.
+- None
