@@ -99,6 +99,40 @@ class TestClaudeGateComments(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             claude_gate_comments.resolve_canonical_comment_action(comments)
 
+    def test_resolve_action_skips_invalid_id(self):
+        comments = [
+            {
+                "id": "oops",
+                "body": claude_gate_comments.CANONICAL_MARKER,
+                "created_at": "2025-01-01T00:00:00Z",
+            },
+            {
+                "id": 42,
+                "body": claude_gate_comments.CANONICAL_MARKER,
+                "created_at": "2025-01-02T00:00:00Z",
+            },
+        ]
+        action, comment_id, count = claude_gate_comments.resolve_canonical_comment_action(comments)
+        self.assertEqual(action, "update")
+        self.assertEqual(comment_id, 42)
+        self.assertEqual(count, 2)
+
+    def test_resolve_action_all_invalid_ids(self):
+        comments = [
+            {
+                "id": "oops",
+                "body": claude_gate_comments.CANONICAL_MARKER,
+                "created_at": "2025-01-01T00:00:00Z",
+            },
+            {
+                "id": None,
+                "body": claude_gate_comments.CANONICAL_MARKER,
+                "created_at": "2025-01-02T00:00:00Z",
+            },
+        ]
+        with self.assertRaises(RuntimeError):
+            claude_gate_comments.resolve_canonical_comment_action(comments)
+
     @patch("claude_gate_comments.urllib.request.urlopen")
     def test_github_request_success(self, mock_urlopen):
         mock_urlopen.return_value = _StubResponse(b'{"ok": true}', status=200)

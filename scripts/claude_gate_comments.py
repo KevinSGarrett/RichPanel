@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-CANONICAL_MARKER = "<!-- CLAUDE_REVIEW_CANONICAL -->"
+from claude_gate_constants import CANONICAL_MARKER
 _DEFAULT_ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
 
@@ -43,10 +43,14 @@ def resolve_canonical_comment_action(comments: list[dict]) -> tuple[str, int | N
     if not canonical:
         return ("create", None, 0)
     canonical.sort(key=_canonical_sort_key)
-    comment_id = canonical[0].get("id")
-    if comment_id is None:
-        raise RuntimeError("Canonical comment missing id.")
-    return ("update", int(comment_id), len(canonical))
+    for comment in canonical:
+        comment_id = comment.get("id")
+        try:
+            comment_id_int = int(comment_id)
+        except (TypeError, ValueError):
+            continue
+        return ("update", comment_id_int, len(canonical))
+    raise RuntimeError("Canonical comment missing a valid id.")
 
 
 def _github_request(

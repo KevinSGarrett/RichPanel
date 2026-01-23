@@ -9,6 +9,8 @@ import urllib.error
 import urllib.request
 from typing import Mapping
 
+from claude_gate_constants import CANONICAL_MARKER
+
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
@@ -27,7 +29,6 @@ DEFAULT_MAX_DIFF_CHARS = 60000
 DEFAULT_MAX_BODY_CHARS = 8000
 DEFAULT_MAX_FILES = 200
 DEFAULT_MAX_FINDINGS = 5
-CANONICAL_MARKER = "<!-- CLAUDE_REVIEW_CANONICAL -->"
 
 
 def _write_output(name: str, value: str) -> None:
