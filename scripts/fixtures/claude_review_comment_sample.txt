@@ -3,7 +3,7 @@ Claude Review (gate:claude)
 Mode: STRUCTURED
 CLAUDE_REVIEW: FAIL
 Risk: risk:R2
-Model used: claude-opus-4-5
+Model used: claude-opus-4-5-20251101
 Token Usage: input=19000, output=120
 
 Summary: action_required=1, total_points=9, highest_severity_action_required=3

@@ -46,34 +46,43 @@ class TestClaudeGateReview(unittest.TestCase):
     def test_model_selection_r0(self):
         """Test that R0 selects Haiku."""
         model = claude_gate_review.MODEL_BY_RISK["risk:R0"]
-        self.assertEqual(model, "claude-haiku-4-5")
+        self.assertEqual(model, "claude-haiku-4-5-20251001")
 
     def test_model_selection_r1(self):
         """Test that R1 selects Sonnet."""
         model = claude_gate_review.MODEL_BY_RISK["risk:R1"]
-        self.assertEqual(model, "claude-sonnet-4-5")
+        self.assertEqual(model, "claude-sonnet-4-5-20250929")
 
     def test_model_selection_r2(self):
         """Test that R2 selects Opus."""
         model = claude_gate_review.MODEL_BY_RISK["risk:R2"]
-        self.assertEqual(model, "claude-opus-4-5")
+        self.assertEqual(model, "claude-opus-4-5-20251101")
 
     def test_model_selection_r3(self):
         """Test that R3 selects Opus."""
         model = claude_gate_review.MODEL_BY_RISK["risk:R3"]
-        self.assertEqual(model, "claude-opus-4-5")
+        self.assertEqual(model, "claude-opus-4-5-20251101")
 
     def test_model_selection_r4(self):
         """Test that R4 selects Opus."""
         model = claude_gate_review.MODEL_BY_RISK["risk:R4"]
-        self.assertEqual(model, "claude-opus-4-5")
+        self.assertEqual(model, "claude-opus-4-5-20251101")
 
     def test_select_model_override(self):
         """Test that model override env var is honored."""
-        os.environ["CLAUDE_GATE_MODEL_OVERRIDE"] = "claude-custom"
+        os.environ["CLAUDE_GATE_MODEL_OVERRIDE"] = "claude-opus-4-5-20251101"
         try:
             model = claude_gate_review._select_model("risk:R1")
-            self.assertEqual(model, "claude-custom")
+            self.assertEqual(model, "claude-opus-4-5-20251101")
+        finally:
+            os.environ.pop("CLAUDE_GATE_MODEL_OVERRIDE", None)
+
+    def test_select_model_override_rejects_unlisted(self):
+        os.environ["CLAUDE_GATE_MODEL_OVERRIDE"] = "claude-custom"
+        try:
+            with self.assertRaises(RuntimeError) as ctx:
+                claude_gate_review._select_model("risk:R1")
+            self.assertIn("not allowlisted", str(ctx.exception))
         finally:
             os.environ.pop("CLAUDE_GATE_MODEL_OVERRIDE", None)
 
@@ -166,19 +175,19 @@ FINDINGS:
         comment = claude_gate_review._format_comment(
             verdict="PASS",
             risk="risk:R2",
-            model="claude-opus-4-5",
+            model="claude-opus-4-5-20251101",
             findings=["No issues found."],
             response_id="msg_abc123xyz",
             request_id="req_789xyz",
             usage={"input_tokens": 1000, "output_tokens": 200},
-            response_model="claude-opus-4-5",
+            response_model="claude-opus-4-5-20251101",
         )
         self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
         self.assertIn("Mode: LEGACY", comment)
         self.assertIn("CLAUDE_REVIEW: PASS", comment)
         self.assertIn("Risk: risk:R2", comment)
-        self.assertIn("Model used: claude-opus-4-5", comment)
-        self.assertIn("Response model: claude-opus-4-5", comment)
+        self.assertIn("Model used: claude-opus-4-5-20251101", comment)
+        self.assertIn("Response model: claude-opus-4-5-20251101", comment)
         self.assertIn("skip=false", comment)
         self.assertIn("Anthropic Response ID: msg_abc123xyz", comment)
         self.assertIn("Anthropic Request ID: req_789xyz", comment)
@@ -190,14 +199,14 @@ FINDINGS:
         comment = claude_gate_review._format_comment(
             verdict="FAIL",
             risk="risk:R1",
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-4-5-20250929",
             findings=["Issue 1", "Issue 2"],
         )
         self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
         self.assertIn("Mode: LEGACY", comment)
         self.assertIn("CLAUDE_REVIEW: FAIL", comment)
         self.assertIn("Risk: risk:R1", comment)
-        self.assertIn("Model used: claude-sonnet-4-5", comment)
+        self.assertIn("Model used: claude-sonnet-4-5-20250929", comment)
         self.assertIn("skip=false", comment)
         self.assertNotIn("Response model", comment)
         self.assertNotIn("Anthropic Response ID", comment)
@@ -608,7 +617,7 @@ FINDINGS:
             "reviewers": [
                 {
                     "name": "primary",
-                    "model": "claude-opus-4-5",
+                    "model": "claude-opus-4-5-20251101",
                     "findings": [
                         {
                             "finding_id": "blocker",
@@ -645,7 +654,7 @@ FINDINGS:
             "reviewers": [
                 {
                     "name": "primary",
-                    "model": "claude-opus-4-5",
+                    "model": "claude-opus-4-5-20251101",
                     "findings": [
                         {
                             "finding_id": "abc123",
@@ -743,7 +752,7 @@ FINDINGS:
         mock_urlopen.return_value = mock_response
 
         result, request_id = claude_gate_review._anthropic_request(
-            {"model": "claude-haiku-4-5", "messages": []},
+            {"model": "claude-haiku-4-5-20251001", "messages": []},
             "test-api-key"
         )
         
@@ -764,7 +773,7 @@ FINDINGS:
 
         with self.assertRaises(RuntimeError) as ctx:
             claude_gate_review._anthropic_request(
-                {"model": "claude-haiku-4-5", "messages": []},
+                {"model": "claude-haiku-4-5-20251001", "messages": []},
                 "test-api-key",
             )
         self.assertIn("unexpected status", str(ctx.exception).lower())
@@ -781,7 +790,7 @@ FINDINGS:
 
         with self.assertRaises(RuntimeError) as ctx:
             claude_gate_review._anthropic_request(
-                {"model": "claude-haiku-4-5", "messages": []},
+                {"model": "claude-haiku-4-5-20251001", "messages": []},
                 "test-api-key",
             )
         self.assertIn("invalid json", str(ctx.exception).lower())
@@ -919,7 +928,7 @@ FINDINGS:
         mock_fetch_raw.return_value = b"diff content"
         mock_anthropic.return_value = (
             {
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
                 "usage": {"input_tokens": 100, "output_tokens": 20},
             },
@@ -982,7 +991,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_test123",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
                 "usage": {"input_tokens": 100, "output_tokens": 20},
             },
@@ -1045,7 +1054,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_test123",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
                 "usage": None,
             },
@@ -1108,7 +1117,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_test123",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
                 "usage": {"input_tokens": 0, "output_tokens": 0},
             },
@@ -1171,7 +1180,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_test123",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": "VERDICT: PASS\nFINDINGS:\n- No issues."}],
                 "usage": {"input_tokens": 100, "output_tokens": 20},
             },
@@ -1202,8 +1211,10 @@ FINDINGS:
 
             with open(output_path, "r") as f:
                 content = f.read()
-            self.assertIn("model_used=claude-sonnet-4-5", content)
-            self.assertIn("response_model=claude-opus-4-5", content)
+            self.assertIn("model_used=claude-sonnet-4-5-20250929", content)
+            self.assertIn("response_model=claude-opus-4-5-20251101", content)
+            self.assertIn("request_id=req_test123", content)
+            self.assertIn("response_id=msg_test123", content)
         finally:
             os.environ.pop("GITHUB_OUTPUT", None)
             os.environ.pop("GITHUB_TOKEN", None)
@@ -1261,7 +1272,7 @@ FINDINGS:
             "reviewers": [
                 {
                     "name": "primary",
-                    "model": "claude-opus-4-5",
+                    "model": "claude-opus-4-5-20251101",
                     "findings": [
                         {
                             "category": "security",
@@ -1292,11 +1303,11 @@ FINDINGS:
 
     def test_default_model_mapping_locked(self):
         expected = {
-            "risk:R0": "claude-haiku-4-5",
-            "risk:R1": "claude-sonnet-4-5",
-            "risk:R2": "claude-opus-4-5",
-            "risk:R3": "claude-opus-4-5",
-            "risk:R4": "claude-opus-4-5",
+            "risk:R0": "claude-haiku-4-5-20251001",
+            "risk:R1": "claude-sonnet-4-5-20250929",
+            "risk:R2": "claude-opus-4-5-20251101",
+            "risk:R3": "claude-opus-4-5-20251101",
+            "risk:R4": "claude-opus-4-5-20251101",
         }
         self.assertEqual(claude_gate_review._DEFAULT_MODELS, expected)
 
@@ -1351,7 +1362,7 @@ FINDINGS:
                 "reviewers": [
                     {
                         "name": "primary",
-                        "model": "claude-opus-4-5",
+                        "model": "claude-opus-4-5-20251101",
                         "findings": [
                             {
                                 "finding_id": "abc123",
@@ -1401,7 +1412,7 @@ FINDINGS:
                 "version": "1.0",
                 "verdict": "PASS",
                 "risk": "risk:R1",
-                "reviewers": [{"name": "primary", "model": "claude-opus-4-5", "findings": 42}],
+                "reviewers": [{"name": "primary", "model": "claude-opus-4-5-20251101", "findings": 42}],
             }
         )
         _, _, errors = claude_gate_review._parse_structured_output(raw, "")
@@ -1416,7 +1427,7 @@ FINDINGS:
                 "reviewers": [
                     {
                         "name": "primary",
-                        "model": "claude-opus-4-5",
+                        "model": "claude-opus-4-5-20251101",
                         "findings": [
                             {
                                 "finding_id": "abc",
@@ -1447,7 +1458,7 @@ FINDINGS:
                 "reviewers": [
                     {
                         "name": "primary",
-                        "model": "claude-opus-4-5",
+                        "model": "claude-opus-4-5-20251101",
                         "findings": [
                             {
                                 "finding_id": "abc123",
@@ -1552,7 +1563,7 @@ FINDINGS:
             "reviewers": [
                 {
                     "name": "primary",
-                    "model": "claude-opus-4-5",
+                    "model": "claude-opus-4-5-20251101",
                     "findings": [
                         {
                             "finding_id": "abc123",
@@ -1581,7 +1592,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_structured",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": json.dumps(structured_payload)}],
                 "usage": {"input_tokens": 100, "output_tokens": 20},
             },
@@ -1651,7 +1662,7 @@ FINDINGS:
             "reviewers": [
                 {
                     "name": "primary",
-                    "model": "claude-opus-4-5",
+                    "model": "claude-opus-4-5-20251101",
                     "findings": [],
                 }
             ],
@@ -1666,7 +1677,7 @@ FINDINGS:
         mock_anthropic.return_value = (
             {
                 "id": "msg_shadow",
-                "model": "claude-opus-4-5",
+                "model": "claude-opus-4-5-20251101",
                 "content": [{"type": "text", "text": json.dumps(structured_payload)}],
                 "usage": {"input_tokens": 50, "output_tokens": 10},
             },
@@ -1715,7 +1726,7 @@ FINDINGS:
         comment = claude_gate_review._format_structured_comment(
             verdict="PASS",
             risk="risk:R1",
-            model="claude-opus-4-5",
+            model="claude-opus-4-5-20251101",
             action_required=[
                 {
                     "severity": 2,
@@ -1728,7 +1739,7 @@ FINDINGS:
             ],
             fyi=[],
             payload={"version": "1.0", "reviewers": [], "verdict": "PASS"},
-            response_model="claude-opus-4-5",
+            response_model="claude-opus-4-5-20251101",
             response_id="msg_test",
             request_id="req_test",
             usage={"input_tokens": 1, "output_tokens": 1},

@@ -49,7 +49,7 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
                 "version": "1.0",
                 "verdict": "PASS",
                 "risk": "risk:R2",
-                "reviewers": [{"name": "primary", "model": "claude-opus-4-5", "findings": []}],
+                "reviewers": [{"name": "primary", "model": "claude-opus-4-5-20251101", "findings": []}],
             }
             (fixture_dir / "fixture_pr_metadata.json").write_text(
                 json.dumps(metadata), encoding="utf-8"
@@ -200,7 +200,7 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
                 "reviewers": [
                     {
                         "name": "primary",
-                        "model": "claude-opus-4-5",
+                        "model": "claude-opus-4-5-20251101",
                         "findings": [
                             {
                                 "finding_id": "fixture-finding",

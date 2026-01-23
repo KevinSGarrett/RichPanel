@@ -122,7 +122,7 @@ openai.rewrite.rewrite_attempted=true, fallback_used=true, error_class=OpenAILow
 
 **Labels:** `risk:R0`, `gate:claude`
 **Risk:** `risk:R0` (docs-only)
-**Claude gate model (used):** `claude-haiku-4-5-20251015`  
+**Claude gate model (used):** `claude-haiku-4-5-20251001`  
 **Anthropic response id:** `msg_01EXAMPLEHAIKU4P5`  
 
 ### Summary

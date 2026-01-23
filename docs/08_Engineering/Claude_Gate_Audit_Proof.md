@@ -1,6 +1,6 @@
 # Claude Gate Audit Proof
 
-Last updated: 2026-01-22  
+Last updated: 2026-01-23  
 Status: Canonical
 
 ## PR comment evidence (required)
@@ -33,7 +33,7 @@ Example PR comment (redacted):
 
 ```
 Claude Review (risk=R2)
-Model used: claude-opus-4-5
+Model used: claude-opus-4-5-20251101
 Anthropic Response ID: msg_xxx
 Anthropic Request ID: req_xxx
 Token Usage: input=1234, output=56
@@ -44,11 +44,11 @@ skip=false
 
 1. Check the PR risk label (`risk:R0`-`risk:R4`).
 2. Validate the model in the PR comment matches the mapping:
-   - `risk:R0` → `claude-haiku-4-5`
-   - `risk:R1` → `claude-sonnet-4-5`
-   - `risk:R2` → `claude-opus-4-5`
-   - `risk:R3` → `claude-opus-4-5`
-   - `risk:R4` → `claude-opus-4-5`
+   - `risk:R0` → `claude-haiku-4-5-20251001`
+   - `risk:R1` → `claude-sonnet-4-5-20250929`
+   - `risk:R2` → `claude-opus-4-5-20251101`
+   - `risk:R3` → `claude-opus-4-5-20251101`
+   - `risk:R4` → `claude-opus-4-5-20251101`
 3. If the model does not match, the gate run is invalid and must fail.
 
 ## Audit artifact (why it exists)

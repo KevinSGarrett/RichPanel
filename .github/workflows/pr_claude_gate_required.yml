@@ -2,7 +2,7 @@ name: PR Claude Gate Required
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, edited, labeled]
 
 concurrency:
   group: claude-gate-${{ github.event.pull_request.number }}
@@ -73,6 +73,20 @@ jobs:
             --repo "${{ github.repository }}" \
             --pr-number "${{ github.event.pull_request.number }}" \
             --audit-path "claude_gate_audit.json"
+
+      - name: Write Claude gate proof summary
+        if: steps.claude_gate.outcome == 'success'
+        run: |
+          set -euo pipefail
+          {
+            echo "## Claude Gate Proof"
+            echo ""
+            echo "- Risk label: ${{ steps.claude_gate.outputs.risk }}"
+            echo "- Model used: ${{ steps.claude_gate.outputs.model_used }}"
+            echo "- Request ID: ${{ steps.claude_gate.outputs.request_id }}"
+            echo "- Response ID: ${{ steps.claude_gate.outputs.response_id }}"
+            echo "- Timestamp (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Post Claude review comment
         if: steps.claude_gate.outcome == 'success' && steps.claude_gate.outputs.skip != 'true'

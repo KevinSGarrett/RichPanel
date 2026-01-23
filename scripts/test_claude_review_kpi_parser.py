@@ -18,7 +18,7 @@ Claude Review (gate:claude)
 Mode: LEGACY
 CLAUDE_REVIEW: PASS
 Risk: risk:R2
-Model used: claude-opus-4-5
+Model used: claude-opus-4-5-20251101
 skip=false
 Token Usage: input=21814, output=18
 
@@ -40,7 +40,7 @@ Claude Review (gate:claude)
 Mode: STRUCTURED
 CLAUDE_REVIEW: FAIL
 Risk: risk:R3
-Model used: claude-opus-4-5
+Model used: claude-opus-4-5-20251101
 Token Usage: input=2222, output=111
 
 Summary: action_required=2, total_points=6, highest_severity_action_required=4
