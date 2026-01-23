@@ -20640,6 +20640,36 @@
     ]
   },
   {
+    "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Claude Review Noise KPI Scoreboard",
+        "anchor": "claude-review-noise-kpi-scoreboard"
+      },
+      {
+        "level": 2,
+        "text": "Targets (what \"good\" looks like)",
+        "anchor": "targets-what-good-looks-like"
+      },
+      {
+        "level": 2,
+        "text": "Current measurement (shadow mode)",
+        "anchor": "current-measurement-shadow-mode"
+      },
+      {
+        "level": 2,
+        "text": "Latest snapshot (paste output below)",
+        "anchor": "latest-snapshot-paste-output-below"
+      },
+      {
+        "level": 2,
+        "text": "Calibration harness snapshots",
+        "anchor": "calibration-harness-snapshots"
+      }
+    ]
+  },
+  {
     "path": "98_Agent_Ops/Chunking_and_Indexing_Standard.md",
     "outline": [
       {

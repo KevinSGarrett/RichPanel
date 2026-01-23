@@ -447,6 +447,7 @@ Legend:
 
 - ✅ [AI Worker Retrieval Workflow](98_Agent_Ops/AI_Worker_Retrieval_Workflow.md)  (`98_Agent_Ops/AI_Worker_Retrieval_Workflow.md`)
 - 📎 [Agent Roles and Concurrency (A/B/C)](98_Agent_Ops/Agent_Roles_and_Concurrency.md)  (`98_Agent_Ops/Agent_Roles_and_Concurrency.md`)
+- 📎 [Claude Review Noise KPI Scoreboard](98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md)  (`98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md`)
 - ✅ [Chunking and Indexing Standard (AI-first)](98_Agent_Ops/Chunking_and_Indexing_Standard.md)  (`98_Agent_Ops/Chunking_and_Indexing_Standard.md`)
 - ✅ [Living Documentation Set (Always-Update Docs)](98_Agent_Ops/Living_Documentation_Set.md)  (`98_Agent_Ops/Living_Documentation_Set.md`)
 - 📎 [Placeholder and Draft Standards](98_Agent_Ops/Placeholder_and_Draft_Standards.md)  (`98_Agent_Ops/Placeholder_and_Draft_Standards.md`)
