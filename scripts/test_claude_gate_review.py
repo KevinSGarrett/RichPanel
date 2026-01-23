@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
+from pathlib import Path
 
 # Import the module under test
 import claude_gate_review
@@ -172,6 +173,7 @@ FINDINGS:
             usage={"input_tokens": 1000, "output_tokens": 200},
         )
         self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
+        self.assertIn("Mode: LEGACY", comment)
         self.assertIn("CLAUDE_REVIEW: PASS", comment)
         self.assertIn("Risk: risk:R2", comment)
         self.assertIn("Model used: claude-opus-4-5", comment)
@@ -190,6 +192,7 @@ FINDINGS:
             findings=["Issue 1", "Issue 2"],
         )
         self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
+        self.assertIn("Mode: LEGACY", comment)
         self.assertIn("CLAUDE_REVIEW: FAIL", comment)
         self.assertIn("Risk: risk:R1", comment)
         self.assertIn("Model used: claude-sonnet-4-5", comment)
@@ -764,6 +767,522 @@ FINDINGS:
             os.environ.pop("ANTHROPIC_API_KEY", None)
             if os.path.exists(output_path):
                 os.unlink(output_path)
+
+
+    def test_mode_normalization(self):
+        self.assertEqual(claude_gate_review._normalize_mode("legacy"), "legacy")
+        self.assertEqual(claude_gate_review._normalize_mode("SHADOW"), "shadow")
+        self.assertEqual(claude_gate_review._normalize_mode("Structured"), "structured")
+        self.assertEqual(claude_gate_review._normalize_mode("unknown"), "legacy")
+
+    def test_break_glass_forces_pass(self):
+        warnings = []
+        verdict = claude_gate_review._apply_break_glass("FAIL", True, warnings)
+        self.assertEqual(verdict, "PASS")
+        self.assertTrue(any("bypass" in warning.lower() for warning in warnings))
+
+    def test_break_glass_noop_when_pass(self):
+        warnings = []
+        verdict = claude_gate_review._apply_break_glass("PASS", True, warnings)
+        self.assertEqual(verdict, "PASS")
+        self.assertTrue(any("already pass" in warning.lower() for warning in warnings))
+
+    def test_redact_evidence_secret(self):
+        self.assertEqual(claude_gate_review._redact_evidence("api_key=123"), "[REDACTED]")
+
+    def test_redact_evidence_truncates(self):
+        long_text = "a" * 250
+        redacted = claude_gate_review._redact_evidence(long_text)
+        self.assertTrue(redacted.endswith("[TRUNCATED]"))
+
+    def test_redact_evidence_no_false_positive(self):
+        self.assertEqual(claude_gate_review._redact_evidence("timeout=None"), "timeout=None")
+
+    def test_stable_finding_id_uses_raw_evidence(self):
+        finding = {
+            "category": "security",
+            "title": "Leaked secret",
+            "summary": "Secret in diff",
+            "file": "app.py",
+            "evidence": "[REDACTED]",
+        }
+        id_one = claude_gate_review._stable_finding_id(finding, "api_key=123")
+        id_two = claude_gate_review._stable_finding_id(finding, "password=456")
+        self.assertNotEqual(id_one, id_two)
+
+    def test_parse_structured_output_finding_id_uses_raw_evidence(self):
+        payload_one = {
+            "version": "1.0",
+            "verdict": "FAIL",
+            "risk": "risk:R3",
+            "reviewers": [
+                {
+                    "name": "primary",
+                    "model": "claude-opus-4-5",
+                    "findings": [
+                        {
+                            "category": "security",
+                            "severity": 3,
+                            "confidence": 80,
+                            "title": "Secret",
+                            "summary": "Secret in diff",
+                            "file": "app.py",
+                            "evidence": "api_key=123",
+                            "suggested_test": "Add secret scan",
+                        }
+                    ],
+                }
+            ],
+        }
+        payload_two = json.loads(json.dumps(payload_one))
+        payload_two["reviewers"][0]["findings"][0]["evidence"] = "password=456"
+        diff_text = "api_key=123\npassword=456"
+        _, findings_one, _ = claude_gate_review._parse_structured_output(
+            json.dumps(payload_one), diff_text
+        )
+        _, findings_two, _ = claude_gate_review._parse_structured_output(
+            json.dumps(payload_two), diff_text
+        )
+        self.assertEqual(findings_one[0]["evidence"], "[REDACTED]")
+        self.assertEqual(findings_two[0]["evidence"], "[REDACTED]")
+        self.assertNotEqual(findings_one[0]["finding_id"], findings_two[0]["finding_id"])
+
+    def test_default_model_mapping_locked(self):
+        expected = {
+            "risk:R0": "claude-haiku-4-5",
+            "risk:R1": "claude-sonnet-4-5",
+            "risk:R2": "claude-opus-4-5",
+            "risk:R3": "claude-opus-4-5",
+            "risk:R4": "claude-opus-4-5",
+        }
+        self.assertEqual(claude_gate_review._DEFAULT_MODELS, expected)
+
+    def test_action_required_classification(self):
+        finding = {"severity": 3, "confidence": 70, "file": "a.py", "evidence": "line"}
+        self.assertTrue(claude_gate_review._is_action_required(finding))
+        finding["confidence"] = 60
+        self.assertFalse(claude_gate_review._is_action_required(finding))
+
+    def test_normalize_verdict(self):
+        self.assertEqual(claude_gate_review._normalize_verdict("PASS"), "PASS")
+        self.assertEqual(claude_gate_review._normalize_verdict("fail"), "FAIL")
+        self.assertEqual(claude_gate_review._normalize_verdict("unknown"), "FAIL")
+
+    def test_format_mode_label(self):
+        self.assertEqual(claude_gate_review._format_mode_label("shadow"), "SHADOW")
+        self.assertEqual(claude_gate_review._format_mode_label("invalid"), "LEGACY")
+
+    def test_structured_parse_failure_payload(self):
+        payload = claude_gate_review._structured_parse_failure_payload(["oops"], "raw")
+        self.assertEqual(payload["errors"], ["oops"])
+        self.assertEqual(payload["verdict"], "FAIL")
+
+    def test_step_summary_written(self):
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as summary_file:
+            summary_path = summary_file.name
+        os.environ["GITHUB_STEP_SUMMARY"] = summary_path
+        try:
+            summary = claude_gate_review._build_step_summary(
+                mode_label="LEGACY",
+                verdict="PASS",
+                bypass=False,
+                action_required_count=0,
+                warnings=["note"],
+            )
+            claude_gate_review._write_step_summary(summary)
+            with open(summary_path, "r", encoding="utf-8") as handle:
+                content = handle.read()
+            self.assertIn("Mode: LEGACY", content)
+            self.assertIn("Warning: note", content)
+        finally:
+            os.environ.pop("GITHUB_STEP_SUMMARY", None)
+            if os.path.exists(summary_path):
+                os.unlink(summary_path)
+
+    def test_parse_structured_output_valid(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "FAIL",
+                "risk": "risk:R3",
+                "reviewers": [
+                    {
+                        "name": "primary",
+                        "model": "claude-opus-4-5",
+                        "findings": [
+                            {
+                                "finding_id": "abc123",
+                                "category": "reliability",
+                                "severity": 4,
+                                "confidence": 85,
+                                "title": "Timeout disabled",
+                                "summary": "Outbound timeout is None",
+                                "file": "app.py",
+                                "evidence": "send_request(data, timeout=None)",
+                                "suggested_test": "Add a timeout test",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        payload, findings, errors = claude_gate_review._parse_structured_output(
+            raw, "send_request(data, timeout=None)"
+        )
+        self.assertFalse(errors)
+        self.assertEqual(payload["verdict"], "FAIL")
+        self.assertEqual(len(findings), 1)
+
+    def test_parse_structured_output_invalid_json(self):
+        payload, findings, errors = claude_gate_review._parse_structured_output("{", "")
+        self.assertTrue(errors)
+        self.assertEqual(findings, [])
+        self.assertEqual(payload, {})
+
+    def test_parse_structured_output_non_dict_payload(self):
+        payload, findings, errors = claude_gate_review._parse_structured_output("42", "")
+        self.assertEqual(payload, 42)
+        self.assertEqual(findings, [])
+        self.assertTrue(any("JSON object" in error for error in errors))
+
+    def test_parse_structured_output_missing_reviewers_reports_all(self):
+        raw = json.dumps({"version": "0.9", "verdict": "MAYBE"})
+        _, _, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("version" in error.lower() for error in errors))
+        self.assertTrue(any("verdict" in error.lower() for error in errors))
+        self.assertTrue(any("reviewers" in error.lower() for error in errors))
+
+    def test_parse_structured_output_findings_not_list(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "PASS",
+                "risk": "risk:R1",
+                "reviewers": [{"name": "primary", "model": "claude-opus-4-5", "findings": 42}],
+            }
+        )
+        _, _, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("Findings must be a list" in error for error in errors))
+
+    def test_parse_structured_output_summary_none(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "PASS",
+                "risk": "risk:R1",
+                "reviewers": [
+                    {
+                        "name": "primary",
+                        "model": "claude-opus-4-5",
+                        "findings": [
+                            {
+                                "finding_id": "abc",
+                                "category": "tests",
+                                "severity": 1,
+                                "confidence": 50,
+                                "title": None,
+                                "summary": None,
+                                "file": "",
+                                "evidence": "",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        _, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("title must be a string" in error.lower() for error in errors))
+        self.assertTrue(any("summary must be a string" in error.lower() for error in errors))
+        self.assertEqual(findings[0]["title"], "")
+        self.assertEqual(findings[0]["summary"], "")
+    def test_parse_structured_output_missing_evidence(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "FAIL",
+                "risk": "risk:R3",
+                "reviewers": [
+                    {
+                        "name": "primary",
+                        "model": "claude-opus-4-5",
+                        "findings": [
+                            {
+                                "finding_id": "abc123",
+                                "category": "reliability",
+                                "severity": 3,
+                                "confidence": 80,
+                                "title": "Missing evidence",
+                                "summary": "No evidence",
+                                "file": "app.py",
+                                "evidence": "",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        _, _, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("Severity >= 3 requires file and evidence" in error for error in errors))
+
+    def test_invalid_structured_json_blocks_in_structured_mode(self):
+        bundle = claude_gate_review._load_fixture_bundle("legacy_small")
+        bundle["structured_response"] = "{"
+        os.environ["CLAUDE_REVIEW_MODE"] = "structured"
+        try:
+            argv = ["claude_gate_review.py", "--dry-run", "--fixture", "legacy_small"]
+            with patch("claude_gate_review._load_fixture_bundle", return_value=bundle):
+                captured = io.StringIO()
+                with contextlib.redirect_stdout(captured):
+                    with patch.object(sys, "argv", argv):
+                        result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            self.assertIn("CLAUDE_REVIEW: FAIL", captured.getvalue())
+        finally:
+            os.environ.pop("CLAUDE_REVIEW_MODE", None)
+
+    def test_invalid_structured_json_does_not_block_shadow_mode(self):
+        bundle = claude_gate_review._load_fixture_bundle("legacy_small")
+        bundle["structured_response"] = "{"
+        os.environ["CLAUDE_REVIEW_MODE"] = "shadow"
+        try:
+            argv = ["claude_gate_review.py", "--dry-run", "--fixture", "legacy_small"]
+            with patch("claude_gate_review._load_fixture_bundle", return_value=bundle):
+                captured = io.StringIO()
+                with contextlib.redirect_stdout(captured):
+                    with patch.object(sys, "argv", argv):
+                        result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            self.assertIn("CLAUDE_REVIEW: PASS", captured.getvalue())
+            self.assertIn("Structured output parse failure", captured.getvalue())
+        finally:
+            os.environ.pop("CLAUDE_REVIEW_MODE", None)
+
+    def test_dry_run_does_not_call_network(self):
+        with patch("claude_gate_review._fetch_json") as mock_fetch, patch(
+            "claude_gate_review._anthropic_request"
+        ) as mock_anthropic:
+            argv = [
+                "claude_gate_review.py",
+                "--dry-run",
+                "--fixture",
+                "legacy_small",
+            ]
+            with patch.object(sys, "argv", argv):
+                result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            mock_fetch.assert_not_called()
+            mock_anthropic.assert_not_called()
+
+    def test_golden_legacy_output_matches(self):
+        golden_path = Path(__file__).resolve().parents[1] / "13_GOLDEN_LEGACY_OUTPUT.md"
+        text = golden_path.read_text(encoding="utf-8")
+        marker = "### A2) Example *PR comment body* (what the script posts)"
+        block_start = text.index(marker)
+        block_start = text.index("```text", block_start) + len("```text")
+        block_end = text.index("```", block_start)
+        expected = text[block_start:block_end].strip("\n") + "\n"
+        comment = claude_gate_review._format_comment(
+            verdict="PASS",
+            risk="risk:R2",
+            model="claude-opus-4-5-20251101",
+            findings=["No issues found."],
+            response_id="msg_0123456789abcdef",
+            request_id="req_0123456789abcdef",
+            usage={"input_tokens": 21814, "output_tokens": 18},
+            mode_label="LEGACY",
+        )
+        self.assertEqual(comment, expected)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_structured_mode_end_to_end(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        structured_payload = {
+            "version": "1.0",
+            "verdict": "FAIL",
+            "risk": "risk:R3",
+            "reviewers": [
+                {
+                    "name": "primary",
+                    "model": "claude-opus-4-5",
+                    "findings": [
+                        {
+                            "finding_id": "abc123",
+                            "category": "reliability",
+                            "severity": 3,
+                            "confidence": 80,
+                            "title": "Timeout missing",
+                            "summary": "Outbound timeout is None",
+                            "file": "app.py",
+                            "evidence": "send_request(data, timeout=None)",
+                            "suggested_test": "Add timeout test",
+                        }
+                    ],
+                }
+            ],
+        }
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R3"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"send_request(data, timeout=None)"
+        mock_anthropic.return_value = (
+            {
+                "id": "msg_structured",
+                "model": "claude-opus-4-5",
+                "content": [{"type": "text", "text": json.dumps(structured_payload)}],
+                "usage": {"input_tokens": 100, "output_tokens": 20},
+            },
+            "req_structured",
+        )
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as output_file:
+            output_path = output_file.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as comment_file:
+            comment_path = comment_file.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as audit_file:
+            audit_path = audit_file.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as summary_file:
+            summary_path = summary_file.name
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["CLAUDE_GATE_COMMENT_PATH"] = comment_path
+            os.environ["CLAUDE_GATE_AUDIT_PATH"] = audit_path
+            os.environ["GITHUB_STEP_SUMMARY"] = summary_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+            os.environ["CLAUDE_REVIEW_MODE"] = "structured"
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+            result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            with open(comment_path, "r", encoding="utf-8") as handle:
+                comment_body = handle.read()
+            self.assertIn("Mode: STRUCTURED", comment_body)
+            self.assertIn("Action Required", comment_body)
+            self.assertIn("Structured JSON", comment_body)
+        finally:
+            for var in (
+                "GITHUB_OUTPUT",
+                "CLAUDE_GATE_COMMENT_PATH",
+                "CLAUDE_GATE_AUDIT_PATH",
+                "GITHUB_STEP_SUMMARY",
+                "GITHUB_TOKEN",
+                "ANTHROPIC_API_KEY",
+                "CLAUDE_REVIEW_MODE",
+            ):
+                os.environ.pop(var, None)
+            for path in (output_path, comment_path, audit_path, summary_path):
+                if os.path.exists(path):
+                    os.unlink(path)
+
+    @patch("claude_gate_review._fetch_json")
+    @patch("claude_gate_review._fetch_all_files")
+    @patch("claude_gate_review._fetch_raw")
+    @patch("claude_gate_review._anthropic_request")
+    def test_main_shadow_mode_non_blocking(
+        self, mock_anthropic, mock_fetch_raw, mock_fetch_files, mock_fetch_json
+    ):
+        structured_payload = {
+            "version": "1.0",
+            "verdict": "FAIL",
+            "risk": "risk:R2",
+            "reviewers": [
+                {
+                    "name": "primary",
+                    "model": "claude-opus-4-5",
+                    "findings": [],
+                }
+            ],
+        }
+        mock_fetch_json.return_value = {
+            "title": "Test PR",
+            "body": "Body",
+            "labels": [{"name": "gate:claude"}, {"name": "risk:R2"}],
+        }
+        mock_fetch_files.return_value = []
+        mock_fetch_raw.return_value = b"diff content"
+        mock_anthropic.return_value = (
+            {
+                "id": "msg_shadow",
+                "model": "claude-opus-4-5",
+                "content": [{"type": "text", "text": json.dumps(structured_payload)}],
+                "usage": {"input_tokens": 50, "output_tokens": 10},
+            },
+            "req_shadow",
+        )
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as output_file:
+            output_path = output_file.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as comment_file:
+            comment_path = comment_file.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as audit_file:
+            audit_path = audit_file.name
+        try:
+            os.environ["GITHUB_OUTPUT"] = output_path
+            os.environ["CLAUDE_GATE_COMMENT_PATH"] = comment_path
+            os.environ["CLAUDE_GATE_AUDIT_PATH"] = audit_path
+            os.environ["GITHUB_TOKEN"] = "fake-token"
+            os.environ["ANTHROPIC_API_KEY"] = "fake-key"
+            os.environ["CLAUDE_REVIEW_MODE"] = "shadow"
+            sys.argv = [
+                "claude_gate_review.py",
+                "--repo",
+                "test/repo",
+                "--pr-number",
+                "123",
+            ]
+            result = claude_gate_review.main()
+            self.assertEqual(result, 0)
+            with open(output_path, "r", encoding="utf-8") as handle:
+                output = handle.read()
+            self.assertIn("verdict=PASS", output)
+        finally:
+            for var in (
+                "GITHUB_OUTPUT",
+                "CLAUDE_GATE_COMMENT_PATH",
+                "CLAUDE_GATE_AUDIT_PATH",
+                "GITHUB_TOKEN",
+                "ANTHROPIC_API_KEY",
+                "CLAUDE_REVIEW_MODE",
+            ):
+                os.environ.pop(var, None)
+            for path in (output_path, comment_path, audit_path):
+                if os.path.exists(path):
+                    os.unlink(path)
+
+    def test_format_structured_comment_no_duplicate_summary(self):
+        comment = claude_gate_review._format_structured_comment(
+            verdict="PASS",
+            risk="risk:R1",
+            model="claude-opus-4-5",
+            findings=[
+                {
+                    "severity": 2,
+                    "confidence": 60,
+                    "points": 2,
+                    "title": "",
+                    "summary": "Timeout missing",
+                    "file": "app.py",
+                }
+            ],
+            payload={"version": "1.0", "reviewers": [], "verdict": "PASS"},
+            response_id="msg_test",
+            request_id="req_test",
+            usage={"input_tokens": 1, "output_tokens": 1},
+            mode_label="STRUCTURED",
+            bypass=False,
+            warnings=None,
+        )
+        self.assertIn("Finding (app.py): Timeout missing", comment)
 
 
 if __name__ == "__main__":

@@ -47,6 +47,9 @@ class _StubFP:
     def read(self) -> bytes:
         return self._body
 
+    def close(self) -> None:
+        return None
+
 
 class TestClaudeGateComments(unittest.TestCase):
     """Test canonical comment selection for Claude gate."""

@@ -1,0 +1,19 @@
+{
+  "title": "Legacy fixture",
+  "body": "Testing legacy mode dry-run.",
+  "labels": ["gate:claude", "risk:R2"],
+  "files": [
+    {
+      "filename": "scripts/claude_gate_review.py",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 1
+    }
+  ],
+  "response_id": "msg_fixture_legacy",
+  "request_id": "req_fixture_legacy",
+  "usage": {
+    "input_tokens": 1234,
+    "output_tokens": 56
+  }
+}

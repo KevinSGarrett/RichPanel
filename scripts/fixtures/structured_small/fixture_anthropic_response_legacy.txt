@@ -1,0 +1,3 @@
+VERDICT: FAIL
+FINDINGS:
+- Timeout disabled for outbound request.
