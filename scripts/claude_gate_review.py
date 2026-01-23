@@ -138,6 +138,53 @@ def _apply_break_glass(verdict: str, bypass: bool, warnings: list[str]) -> str:
     return "PASS"
 
 
+def _evaluate_legacy_response(
+    response_text: str,
+    *,
+    max_findings: int,
+    bypass_enabled: bool,
+    warnings: list[str],
+) -> tuple[str, list[str]]:
+    verdict = _parse_verdict(response_text)
+    findings = _extract_findings(response_text, max_findings)
+    if verdict == "FAIL" and "No issues found." in findings:
+        findings = ["Claude output missing a clear failure reason or verdict."]
+    if verdict == "FAIL" and _is_approved_false_positive(findings):
+        verdict = "PASS"
+        findings = ["No issues found."]
+    verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
+    return verdict, findings
+
+
+def _evaluate_structured_response(
+    response_text: str,
+    *,
+    diff_text: str,
+    mode: str,
+    bypass_enabled: bool,
+    warnings: list[str],
+) -> tuple[str, dict, list[dict], int | None, str | None]:
+    payload, findings, errors = _parse_structured_output(response_text, diff_text)
+    verdict_value = payload.get("verdict") if isinstance(payload, dict) else None
+    structured_verdict = _normalize_verdict(verdict_value if isinstance(verdict_value, str) else None)
+    parse_error_message = None
+    if errors:
+        warnings.append("Structured output parse failure.")
+        warnings.append(errors[0])
+        parse_error_message = errors[0]
+        payload = _structured_parse_failure_payload(errors, response_text)
+        findings = []
+        structured_verdict = "FAIL"
+    verdict = structured_verdict if mode == MODE_STRUCTURED else "PASS"
+    if mode == MODE_SHADOW and structured_verdict != "PASS":
+        warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
+    verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
+    action_required_count = 1 if parse_error_message else len(
+        [finding for finding in findings if _is_action_required(finding)]
+    )
+    return verdict, payload, findings, action_required_count, parse_error_message
+
+
 def _fetch_json(url: str, token: str, accept: str = "application/vnd.github+json") -> dict:
     data = _fetch_raw(url, token, accept=accept)
     try:
@@ -653,14 +700,12 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
 
     if mode == MODE_LEGACY:
         response_text = bundle["legacy_response"]
-        verdict = _parse_verdict(response_text)
-        legacy_findings = _extract_findings(response_text, args.max_findings)
-        if verdict == "FAIL" and "No issues found." in legacy_findings:
-            legacy_findings = ["Claude output missing a clear failure reason or verdict."]
-        if verdict == "FAIL" and _is_approved_false_positive(legacy_findings):
-            verdict = "PASS"
-            legacy_findings = ["No issues found."]
-        verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
+        verdict, legacy_findings = _evaluate_legacy_response(
+            response_text,
+            max_findings=args.max_findings,
+            bypass_enabled=bypass_enabled,
+            warnings=warnings,
+        )
         comment_body = _format_comment(
             verdict,
             risk,
@@ -681,23 +726,14 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
         )
     else:
         structured_text = bundle["structured_response"]
-        payload, structured_findings, errors = _parse_structured_output(structured_text, diff_text)
-        verdict_value = payload.get("verdict") if isinstance(payload, dict) else None
-        structured_verdict = _normalize_verdict(verdict_value if isinstance(verdict_value, str) else None)
-        parse_error_message = None
-        if errors:
-            warnings.append("Structured output parse failure.")
-            warnings.append(errors[0])
-            payload = _structured_parse_failure_payload(errors, structured_text)
-            structured_findings = []
-            structured_verdict = "FAIL"
-            parse_error_message = errors[0]
-        effective_verdict = structured_verdict if mode == MODE_STRUCTURED else "PASS"
-        if mode == MODE_SHADOW and structured_verdict != "PASS":
-            warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
-        effective_verdict = _apply_break_glass(effective_verdict, bypass_enabled, warnings)
-        action_required_count = 1 if parse_error_message else len(
-            [f for f in structured_findings if _is_action_required(f)]
+        effective_verdict, payload, structured_findings, action_required_count, parse_error_message = (
+            _evaluate_structured_response(
+                structured_text,
+                diff_text=diff_text,
+                mode=mode,
+                bypass_enabled=bypass_enabled,
+                warnings=warnings,
+            )
         )
         comment_body = _format_structured_comment(
             verdict=effective_verdict,
@@ -901,14 +937,12 @@ def main() -> int:
     action_required_count: int | None = None
 
     if mode == MODE_LEGACY:
-        verdict = _parse_verdict(response_text)
-        legacy_findings = _extract_findings(response_text, args.max_findings)
-        if verdict == "FAIL" and "No issues found." in legacy_findings:
-            legacy_findings = ["Claude output missing a clear failure reason or verdict."]
-        if verdict == "FAIL" and _is_approved_false_positive(legacy_findings):
-            verdict = "PASS"
-            legacy_findings = ["No issues found."]
-        verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
+        verdict, legacy_findings = _evaluate_legacy_response(
+            response_text,
+            max_findings=args.max_findings,
+            bypass_enabled=bypass_enabled,
+            warnings=warnings,
+        )
         comment_body = _format_comment(
             verdict,
             risk,
@@ -922,23 +956,14 @@ def main() -> int:
             warnings=warnings,
         )
     else:
-        payload, structured_findings, errors = _parse_structured_output(response_text, diff_text)
-        verdict_value = payload.get("verdict") if isinstance(payload, dict) else None
-        structured_verdict = _normalize_verdict(verdict_value if isinstance(verdict_value, str) else None)
-        parse_error_message = None
-        if errors:
-            warnings.append("Structured output parse failure.")
-            warnings.append(errors[0])
-            parse_error_message = errors[0]
-            payload = _structured_parse_failure_payload(errors, response_text)
-            structured_findings = []
-            structured_verdict = "FAIL"
-        verdict = structured_verdict if mode == MODE_STRUCTURED else "PASS"
-        if mode == MODE_SHADOW and structured_verdict != "PASS":
-            warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
-        verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
-        action_required_count = 1 if parse_error_message else len(
-            [finding for finding in structured_findings if _is_action_required(finding)]
+        verdict, payload, structured_findings, action_required_count, parse_error_message = (
+            _evaluate_structured_response(
+                response_text,
+                diff_text=diff_text,
+                mode=mode,
+                bypass_enabled=bypass_enabled,
+                warnings=warnings,
+            )
         )
         comment_body = _format_structured_comment(
             verdict=verdict,
