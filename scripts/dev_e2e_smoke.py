@@ -2771,8 +2771,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         tracking_url_expected = payload.get("tracking_url")
         if not tracking_number_expected or not tracking_url_expected:
             raise SmokeFailure("Tracking scenario missing tracking fields.")
+        if not isinstance(tracking_number_expected, str):
+            raise SmokeFailure("Tracking scenario tracking_number is not a string.")
+        if not isinstance(tracking_url_expected, str):
+            raise SmokeFailure("Tracking scenario tracking_url is not a string.")
 
-        reply_body_candidate = None
+        reply_body_candidate: Optional[str] = None
         if ticket_executor and payload_conversation:
             reply_body_candidate = _fetch_latest_reply_body(
                 ticket_executor,
@@ -2804,8 +2808,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             )
             if reply_body_candidate:
                 tracking_reply_source = "computed_draft"
-        if not reply_body_candidate:
+        if not reply_body_candidate or not isinstance(reply_body_candidate, str):
             raise SmokeFailure("Tracking scenario could not locate a reply body.")
+        if not reply_body_candidate.strip():
+            raise SmokeFailure("Tracking scenario reply body is empty.")
 
         tracking_number_present = tracking_number_expected in reply_body_candidate
         tracking_url_present = tracking_url_expected in reply_body_candidate

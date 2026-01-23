@@ -28,3 +28,4 @@
   - Result: failed (skip_or_escalation_tags_present)
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --ticket-number 1089 --scenario order_status_tracking_standard_shipping --no-require-openai-routing --no-require-openai-rewrite --proof-path REHYDRATION_PACK/RUNS/B51/Agent_C/e2e_order_status_tracking_standard_shipping_proof.json`
   - Result: pass (classification=PASS_STRONG; status=PASS)
+- `python -m compileall backend/src scripts` (pass; after Bugbot follow-up in smoke validation)

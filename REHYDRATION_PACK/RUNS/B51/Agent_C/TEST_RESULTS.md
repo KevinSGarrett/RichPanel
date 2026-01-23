@@ -88,3 +88,8 @@ python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name Richpa
 ```
 Status: pass  
 Output: `classification=PASS_STRONG; status=PASS`
+
+```
+python -m compileall backend/src scripts
+```
+Status: pass
