@@ -1259,6 +1259,31 @@ FINDINGS:
                 if os.path.exists(path):
                     os.unlink(path)
 
+    def test_format_structured_comment_no_duplicate_summary(self):
+        comment = claude_gate_review._format_structured_comment(
+            verdict="PASS",
+            risk="risk:R1",
+            model="claude-opus-4-5",
+            findings=[
+                {
+                    "severity": 2,
+                    "confidence": 60,
+                    "points": 2,
+                    "title": "",
+                    "summary": "Timeout missing",
+                    "file": "app.py",
+                }
+            ],
+            payload={"version": "1.0", "reviewers": [], "verdict": "PASS"},
+            response_id="msg_test",
+            request_id="req_test",
+            usage={"input_tokens": 1, "output_tokens": 1},
+            mode_label="STRUCTURED",
+            bypass=False,
+            warnings=None,
+        )
+        self.assertIn("Finding (app.py): Timeout missing", comment)
+
 
 if __name__ == "__main__":
     unittest.main()

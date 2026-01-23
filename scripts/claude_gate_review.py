@@ -638,11 +638,13 @@ def _format_structured_comment(
     fyi = [f for f in findings if f not in action_required]
 
     def _format_item(item: dict) -> str:
-        title = item.get("title") or item.get("summary") or "Finding"
+        title_value = (item.get("title") or "").strip()
+        summary_value = (item.get("summary") or "").strip()
+        title = title_value or "Finding"
         file_part = f" ({item.get('file')})" if item.get("file") else ""
         return (
             f"- [S{item.get('severity')}/C{item.get('confidence')}, pts={item.get('points')}] "
-            f"{title}{file_part}: {item.get('summary', '').strip()}"
+            f"{title}{file_part}: {summary_value}"
         ).strip()
 
     comment = f"{header}\nAction Required:\n"
