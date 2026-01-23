@@ -425,21 +425,6 @@ def _structured_parse_failure_payload(errors: list[str], raw_text: str) -> dict:
     }
 
 
-def _synthetic_parse_failure_finding(message: str) -> dict:
-    return {
-        "finding_id": "parse_failure",
-        "category": "reliability",
-        "severity": 5,
-        "confidence": 100,
-        "title": "Structured output parse failure",
-        "summary": message,
-        "file": "",
-        "evidence": "",
-        "suggested_test": "",
-        "points": 5,
-    }
-
-
 def _is_approved_false_positive(findings) -> bool:
     approved_patterns = [
         r"anthropic_api_key",

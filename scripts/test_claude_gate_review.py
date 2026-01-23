@@ -868,12 +868,6 @@ FINDINGS:
         self.assertEqual(payload["errors"], ["oops"])
         self.assertEqual(payload["verdict"], "FAIL")
 
-    def test_synthetic_parse_failure_finding(self):
-        finding = claude_gate_review._synthetic_parse_failure_finding("bad json")
-        self.assertEqual(finding["severity"], 5)
-        self.assertEqual(finding["confidence"], 100)
-        self.assertIn("parse failure", finding["title"].lower())
-
     def test_step_summary_written(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as summary_file:
             summary_path = summary_file.name
