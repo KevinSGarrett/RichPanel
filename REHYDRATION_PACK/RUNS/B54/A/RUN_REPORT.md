@@ -30,4 +30,4 @@
 
 ## Evidence Links
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/155
-- Claude gate workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21296930863
+- Claude gate workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21297106610
