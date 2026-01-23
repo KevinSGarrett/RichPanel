@@ -304,6 +304,20 @@ FINDINGS:
                 [],
             )
 
+        with patch("claude_gate_review._fetch_json", return_value=["unexpected"]):
+            self.assertEqual(
+                claude_gate_review._fetch_failed_check_summaries("owner/repo", "deadbeef", "token"),
+                [],
+            )
+
+    def test_extract_failed_check_summaries_skips_empty(self):
+        runs = [
+            {"status": "completed", "conclusion": "failure"},
+            {"status": "completed", "conclusion": "timed_out"},
+        ]
+        summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=5)
+        self.assertEqual(summaries, [])
+
     def test_build_prompt(self):
         """Test prompt building includes all required sections."""
         prompt = claude_gate_review._build_prompt(

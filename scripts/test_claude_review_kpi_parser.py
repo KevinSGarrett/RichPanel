@@ -68,7 +68,8 @@ Action Required:
             )
             self.assertIsInstance(raw_loaded, list)
             assert isinstance(raw_loaded, list)
-            self.assertEqual(raw_loaded[0].get("body"), "raw comment")  # type: ignore[index]
+            first = next(iter(raw_loaded), {})
+            self.assertEqual(first.get("body"), "raw comment")
 
             list_path = temp_path / "list.json"
             list_path.write_text(
@@ -182,6 +183,9 @@ Top findings:
         self.assertIsNone(parsed["token_input"])
         self.assertIsNone(parsed["token_output"])
 
+    def test_parse_comment_empty_body(self) -> None:
+        self.assertIsNone(snapshot.parse_claude_review_comment(""))
+
     @patch("claude_review_kpi_snapshot.gate_comments._github_request_json")
     @patch("claude_review_kpi_snapshot.gate_comments._parse_github_datetime")
     def test_fetch_pr_numbers_since(self, mock_parse, mock_request) -> None:
@@ -220,6 +224,32 @@ Top findings:
             json_string.write_text(json.dumps("hello"), encoding="utf-8")
             loaded_string = snapshot._load_comments_from_path(str(json_string))
             self.assertIsInstance(loaded_string, list)
+
+    def test_select_canonical_comment_none(self) -> None:
+        self.assertIsNone(snapshot._select_canonical_comment([{"body": "no marker"}]))
+
+    def test_select_canonical_comment_latest(self) -> None:
+        comments = [
+            {
+                "id": 1,
+                "body": "<!-- CLAUDE_REVIEW_CANONICAL -->\nClaude Review (gate:claude)",
+                "created_at": "2025-01-01T00:00:00Z",
+            },
+            {
+                "id": 2,
+                "body": "<!-- CLAUDE_REVIEW_CANONICAL -->\nClaude Review (gate:claude)",
+                "updated_at": "2025-01-02T00:00:00Z",
+            },
+        ]
+        canonical = snapshot._select_canonical_comment(comments)
+        self.assertIsNotNone(canonical)
+        assert canonical is not None
+        self.assertEqual(canonical["id"], 2)
+
+    def test_format_helpers(self) -> None:
+        self.assertEqual(snapshot._format_rate(1, 4), "25% (1/4)")
+        self.assertIsNone(snapshot._percentile([], 0.9))
+        self.assertEqual(snapshot._format_count(1.25), "1.2")
 
     def test_main_requires_prs_or_since(self) -> None:
         with patch.object(sys, "argv", ["prog", "--repo", "owner/repo"]):
