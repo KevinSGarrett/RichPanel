@@ -5,7 +5,7 @@
 - Branch: b54/claude-gate-model-ids
 - Risk label: risk:R2
 - Required labels: risk:R2, gate:claude
-- PR: <PR_LINK_PENDING>
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/155
 
 ## Objective
 - Enforce a hard Claude gate that cannot pass without a real Anthropic API call, with correct Claude 4.5 model IDs and proof in Actions logs/summary.
@@ -29,5 +29,5 @@
   - Result: PASS (151 tests)
 
 ## Evidence Links
-- PR: <PR_LINK_PENDING>
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/155
 - Claude gate workflow run: <CLAUDE_GATE_RUN_LINK_PENDING>
