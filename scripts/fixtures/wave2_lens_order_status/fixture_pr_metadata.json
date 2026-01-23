@@ -7,5 +7,8 @@
   "response_id": "dry_run_response",
   "request_id": "dry_run_request",
   "response_model": "claude-opus-4-5",
-  "usage": {"input_tokens": 120, "output_tokens": 24}
+  "usage": {"input_tokens": 120, "output_tokens": 24},
+  "kpi_labels": {
+    "action_required_real": true
+  }
 }

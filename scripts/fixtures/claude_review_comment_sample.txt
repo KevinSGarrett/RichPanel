@@ -1,0 +1,12 @@
+<!-- CLAUDE_REVIEW_CANONICAL -->
+Claude Review (gate:claude)
+Mode: STRUCTURED
+CLAUDE_REVIEW: FAIL
+Risk: risk:R2
+Model used: claude-opus-4-5
+Token Usage: input=19000, output=120
+
+Summary: action_required=1, total_points=9, highest_severity_action_required=3
+
+Action Required:
+- [S3/C80, pts=9] Redacted finding (redacted.py) evidence="redacted"
