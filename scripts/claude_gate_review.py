@@ -324,7 +324,7 @@ def _build_state_payload(previous_state: dict | None, findings: list[dict]) -> t
     active_prev = {
         fid: data
         for fid, data in prev_findings.items()
-        if isinstance(data, dict) and int(data.get("last_seen", 0)) >= run_index - STATE_RETAIN_RUNS + 1
+        if isinstance(data, dict) and int(data.get("last_seen", 0)) >= run_index - STATE_RETAIN_RUNS
     }
 
     state_findings: dict[str, dict] = dict(active_prev)

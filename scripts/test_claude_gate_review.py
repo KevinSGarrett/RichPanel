@@ -440,7 +440,7 @@ FINDINGS:
             "run_index": 1,
             "findings": {
                 "abc": {"occurrences": 1, "last_seen": 1},
-                "old": {"occurrences": 1, "last_seen": 0},
+                "old": {"occurrences": 1, "last_seen": -1},
             },
         }
         findings = [{"finding_id": "abc", "severity": 2}]
@@ -450,6 +450,21 @@ FINDINGS:
         self.assertNotIn("old", state_payload["findings"])
         self.assertEqual(updated[0]["occurrences"], 2)
         self.assertEqual(updated[0]["points"], 4)
+
+    def test_build_state_payload_retains_two_runs(self):
+        prev_state = {
+            "version": 1,
+            "run_index": 2,
+            "findings": {
+                "recent": {"occurrences": 1, "last_seen": 2},
+                "older": {"occurrences": 1, "last_seen": 1},
+                "stale": {"occurrences": 1, "last_seen": 0},
+            },
+        }
+        state_payload, _ = claude_gate_review._build_state_payload(prev_state, [])
+        self.assertIn("recent", state_payload["findings"])
+        self.assertIn("older", state_payload["findings"])
+        self.assertNotIn("stale", state_payload["findings"])
 
     def test_evaluate_structured_response_parse_error_keeps_state(self):
         previous_state = {"version": 1, "run_index": 1, "findings": {"abc": {"occurrences": 1, "last_seen": 1}}}
