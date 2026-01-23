@@ -11,6 +11,8 @@
 - `docs/08_Engineering/CI_and_Actions_Runbook.md`: update model mapping + proof requirements and add local debug steps.
 - `docs/08_Engineering/Claude_Gate_Audit_Proof.md`: update model mapping and example IDs.
 - `REHYDRATION_PACK/PR_DESCRIPTION/05_EXAMPLES_STRONG_PR_DESCRIPTIONS.md`: update Haiku 4.5 example ID.
+- `docs/_generated/doc_registry.json` + `docs/_generated/doc_registry.compact.json`: regenerated doc registry.
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md` + `docs/00_Project_Admin/To_Do/_generated/plan_checklist.json`: regenerated plan checklist outputs.
 
 ## Run Artifacts
 - `REHYDRATION_PACK/RUNS/B54/A/RUN_REPORT.md`

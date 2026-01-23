@@ -2483,7 +2483,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-115DD100F4",
-    "line": 598,
+    "line": 616,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "DynamoDB evidence (idempotency/state/audit record links)"
   },
@@ -2491,7 +2491,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-38B7D770B9",
-    "line": 600,
+    "line": 618,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)"
   },
@@ -2499,7 +2499,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-5C795D71FE",
-    "line": 599,
+    "line": 617,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "CloudWatch Logs links (worker execution, routing decision, reply sent)"
   },
@@ -2507,7 +2507,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-6664EFC4CE",
-    "line": 603,
+    "line": 621,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Follow-up behavior (if tested): confirm no duplicate reply, routing tags applied"
   },
@@ -2515,7 +2515,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-9F3622A347",
-    "line": 601,
+    "line": 619,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Message count delta or `last_message_source` evidence"
   },
@@ -2523,7 +2523,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-B3684CA430",
-    "line": 602,
+    "line": 620,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "PII scan result (confirm proof JSON is safe)"
   },
@@ -2531,7 +2531,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-B8C9C5E794",
-    "line": 595,
+    "line": 613,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Exact commands used (with redacted ticket numbers for public artifacts)"
   },
@@ -2539,7 +2539,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-D470EB41BB",
-    "line": 596,
+    "line": 614,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "PASS classification (PASS_STRONG or PASS_WEAK) for each scenario"
   },
@@ -2547,7 +2547,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-D8E8C345C2",
-    "line": 597,
+    "line": 615,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "OpenAI evidence: `openai.routing.llm_called=true` and `openai.rewrite.rewrite_applied=true` (or recorded fallback with `fallback_used=true` + `error_class`)"
   },
@@ -2555,7 +2555,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-F363631DD5",
-    "line": 594,
+    "line": 612,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Proof JSON paths for both scenarios (tracking + no-tracking)"
   },
