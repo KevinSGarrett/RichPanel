@@ -1,6 +1,6 @@
 # Claude Gate Audit Proof
 
-Last updated: 2026-01-22  
+Last updated: 2026-01-23  
 Status: Canonical
 
 ## PR comment evidence (required)
