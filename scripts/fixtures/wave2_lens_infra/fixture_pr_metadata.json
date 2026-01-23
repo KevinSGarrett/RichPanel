@@ -6,6 +6,6 @@
   "files": ["infra/cdk/stack.ts"],
   "response_id": "dry_run_response",
   "request_id": "dry_run_request",
-  "response_model": "claude-opus-4-5",
+  "response_model": "claude-opus-4-5-20251101",
   "usage": {"input_tokens": 90, "output_tokens": 18}
 }

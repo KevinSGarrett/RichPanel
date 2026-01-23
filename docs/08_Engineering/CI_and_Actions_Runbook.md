@@ -157,7 +157,7 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 - When the gate runs, the workflow:
   - fetches PR title/body, changed files, and unified diff
   - selects the model by risk:
-    * `R0` → Haiku 3.5 (`claude-haiku-4-5-20251015`)
+    * `R0` → Haiku 4.5 (`claude-haiku-4-5-20251001`)
     * `R1` → Sonnet 4.5 (`claude-sonnet-4-5-20250929`)
     * `R2/R3/R4` → Opus 4.5 (`claude-opus-4-5-20251101`)
   - calls the Anthropic Messages API using `ANTHROPIC_API_KEY`
@@ -165,14 +165,20 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
     * `CLAUDE_REVIEW: PASS|FAIL`
     * Risk label and model used
     * **Anthropic Response ID** (e.g., `msg_abc123xyz`) for audit trail
+    * **Anthropic Request ID** (e.g., `req_abc123xyz`) from response headers
     * **Token usage** (input/output tokens) for cost tracking
     * Top findings from the review
-  - fails the check if verdict is FAIL or the API key is missing
+  - emits a single-line log proof: `Claude Gate PASS | model=... | request_id=... | response_id=... | risk=R# | pr=...`
+  - writes a Step Summary with risk label, model, request_id, response_id, and timestamp
+  - fails the check if verdict is FAIL, `ANTHROPIC_API_KEY` is missing, or request/response IDs are missing
   - required secret: `ANTHROPIC_API_KEY` (Actions repo secret)
 
 **Claude gate proof requirements:**
 - Every PR comment MUST include the Anthropic response/message ID (format: `msg_` prefix)
+- Every PR comment MUST include the Anthropic request ID (format: `req_` prefix)
 - Token usage (input/output) MUST be displayed for cost transparency
+- The Actions log must include the single-line `Claude Gate PASS | model=... | request_id=... | response_id=... | risk=R# | pr=...` proof
+- The Step Summary must show risk label, model, request_id, response_id, and timestamp
 - This creates concrete, audit-friendly evidence that a real Anthropic API call happened
 - Cross-check response IDs in the Anthropic dashboard for verification
 
@@ -186,7 +192,19 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 **Claude gate cannot be bypassed:**
 - The workflow automatically creates and applies the `gate:claude` label if missing
 - The gate will fail closed if `ANTHROPIC_API_KEY` is not configured
-- Every run must produce an Anthropic response ID for audit purposes
+- Every run must produce Anthropic request/response IDs for audit purposes
+
+**Local re-run / debug:**
+- Real run (requires network + credentials):
+  ```powershell
+  $env:GITHUB_TOKEN = "..."
+  $env:ANTHROPIC_API_KEY = "..."
+  python scripts/claude_gate_review.py --repo <owner/repo> --pr-number <PR#>
+  ```
+- Offline formatting/debug (no API call, not valid for CI proof):
+  ```powershell
+  python scripts/claude_gate_review.py --dry-run --fixture legacy_small
+  ```
 
 ---
 

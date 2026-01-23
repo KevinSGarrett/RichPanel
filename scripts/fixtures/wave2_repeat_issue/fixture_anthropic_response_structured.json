@@ -5,7 +5,7 @@
   "reviewers": [
     {
       "name": "primary",
-      "model": "claude-opus-4-5",
+      "model": "claude-opus-4-5-20251101",
       "findings": [
         {
           "finding_id": "repeat-timeout",

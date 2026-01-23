@@ -23,13 +23,18 @@ from claude_gate_constants import CANONICAL_MARKER
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
-# Claude 4.5 models ONLY - no fallbacks
+# Claude 4.5 models ONLY - allowlist enforced
+_ALLOWED_MODELS = {
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-4-5-20250929",
+    "claude-opus-4-5-20251101",
+}
 _DEFAULT_MODELS = {
-    "risk:R0": "claude-haiku-4-5",
-    "risk:R1": "claude-sonnet-4-5",
-    "risk:R2": "claude-opus-4-5",
-    "risk:R3": "claude-opus-4-5",
-    "risk:R4": "claude-opus-4-5",
+    "risk:R0": "claude-haiku-4-5-20251001",
+    "risk:R1": "claude-sonnet-4-5-20250929",
+    "risk:R2": "claude-opus-4-5-20251101",
+    "risk:R3": "claude-opus-4-5-20251101",
+    "risk:R4": "claude-opus-4-5-20251101",
 }
 MODEL_BY_RISK = dict(_DEFAULT_MODELS)
 _REQUEST_ID_HEADERS = ("request-id", "x-request-id", "x-amzn-requestid")
@@ -583,15 +588,27 @@ def _normalize_risk(labels: list[str]) -> str:
     return unique[0]
 
 
-def _select_model(risk: str) -> str:
+def _require_allowed_model(model: str, source: str) -> str:
+    if model not in _ALLOWED_MODELS:
+        allowed = ", ".join(sorted(_ALLOWED_MODELS))
+        raise RuntimeError(
+            f"Model '{model}' from {source} is not allowlisted. Allowed models: {allowed}."
+        )
+    return model
+
+
+def _select_model(risk: str, model_override: str | None = None) -> str:
     """Resolve the Claude model to use for the given risk label."""
-    override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
+    override = (model_override or "").strip()
+    if not override:
+        override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
     if override:
-        return override
+        return _require_allowed_model(override, "model override")
     try:
-        return _DEFAULT_MODELS[risk]
+        model = _DEFAULT_MODELS[risk]
     except KeyError as exc:
         raise RuntimeError(f"Unsupported risk label: {risk}") from exc
+    return _require_allowed_model(model, f"risk mapping {risk}")
 
 
 def _extract_request_id(headers: Mapping[str, str] | None) -> str:
@@ -1103,7 +1120,7 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
     metadata = bundle["metadata"]
     labels = metadata.get("labels", [])
     risk = metadata.get("risk_label") or _normalize_risk(labels)
-    model_used = _select_model(risk)
+    model_used = _select_model(risk, args.model_override)
     response_id = metadata.get("response_id", "dry_run_response")
     request_id = metadata.get("request_id", "dry_run_request")
     response_model = metadata.get("response_model", model_used)
@@ -1218,8 +1235,17 @@ def main() -> int:
     parser.add_argument("--max-body-chars", type=int, default=DEFAULT_MAX_BODY_CHARS)
     parser.add_argument("--max-files", type=int, default=DEFAULT_MAX_FILES)
     parser.add_argument("--max-findings", type=int, default=DEFAULT_MAX_FINDINGS)
-    parser.add_argument("--comment-path", default=os.environ.get("CLAUDE_GATE_COMMENT_PATH", ".claude_gate_comment.txt"))
-    parser.add_argument("--audit-path", default=os.environ.get("CLAUDE_GATE_AUDIT_PATH", "claude_gate_audit.json"))
+    parser.add_argument(
+        "--comment-path", default=os.environ.get("CLAUDE_GATE_COMMENT_PATH", ".claude_gate_comment.txt")
+    )
+    parser.add_argument(
+        "--audit-path", default=os.environ.get("CLAUDE_GATE_AUDIT_PATH", "claude_gate_audit.json")
+    )
+    parser.add_argument(
+        "--model-override",
+        default=os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", ""),
+        help="Override the model id (must be in allowlist).",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--fixture")
     args = parser.parse_args()
@@ -1251,7 +1277,7 @@ def main() -> int:
         raise RuntimeError("gate:claude label missing; gate requires the label to run.")
 
     risk = _normalize_risk(labels)
-    model_used = _select_model(risk)
+    model_used = _select_model(risk, args.model_override)
     print(f"Claude gate enforced: skip=false, Risk={risk}, Model={model_used}")
     review_config = _load_review_config()
     risk_defaults = _get_risk_defaults(review_config, risk)
@@ -1521,6 +1547,12 @@ def main() -> int:
         f"Verdict={verdict}, Risk={risk}, ModelUsed={model_used}, "
         f"ResponseModel={response_model}, ResponseID={response_id}, RequestID={request_id}, "
         f"Usage=input={input_tokens}, output={output_tokens}"
+    )
+    pr_link = f"https://github.com/{repo}/pull/{pr_number}"
+    print(
+        "Claude Gate "
+        f"{verdict} | model={model_used} | request_id={request_id} | response_id={response_id} "
+        f"| risk={_risk_key(risk)} | pr={pr_link}"
     )
     return 0
 

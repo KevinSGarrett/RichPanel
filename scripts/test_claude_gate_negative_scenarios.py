@@ -60,7 +60,7 @@ def _stub_urlopen(request, timeout=60):
     def _message_body(**overrides):
         body = {
             "id": "msg_test",
-            "model": "claude-opus-4-5",
+            "model": "claude-opus-4-5-20251101",
             "content": [{"type": "text", "text": "VERDICT: PASS\\nFINDINGS:\\n- No issues."}],
             "usage": {"input_tokens": 100, "output_tokens": 20},
         }
