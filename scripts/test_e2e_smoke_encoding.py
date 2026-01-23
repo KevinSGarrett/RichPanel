@@ -16,7 +16,7 @@ from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
-from typing import Any
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -38,6 +38,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_latest_comment_body,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
+    _evaluate_outbound_evidence,
     _evaluate_openai_requirements,
     _fetch_latest_reply_hash,
     append_summary,
@@ -282,7 +283,7 @@ class ScenarioPayloadTests(unittest.TestCase):
 
 class DraftReplyHelperTests(unittest.TestCase):
     def test_compute_draft_reply_body_with_tracking(self) -> None:
-        payload = {
+        payload: dict[str, Any] = {
             "order": {
                 "order_id": "ORDER-1",
                 "created_at": "2026-01-05T10:00:00+00:00",
@@ -293,12 +294,14 @@ class DraftReplyHelperTests(unittest.TestCase):
             },
             "ticket_created_at": "2026-01-07T10:00:00+00:00",
         }
+        inquiry_date = cast(str, payload["ticket_created_at"])
         body = _compute_draft_reply_body(
             payload,
             delivery_estimate=None,
-            inquiry_date=payload["ticket_created_at"],
+            inquiry_date=inquiry_date,
         )
         self.assertIsInstance(body, str)
+        body = cast(str, body)
         self.assertIn("tracking information", body.lower())
 
     def test_compute_draft_reply_body_no_tracking_uses_estimate(self) -> None:
@@ -306,7 +309,7 @@ class DraftReplyHelperTests(unittest.TestCase):
             compute_delivery_estimate,
         )
 
-        payload = {
+        payload: dict[str, Any] = {
             "order": {
                 "order_id": "ORDER-2",
                 "created_at": "2026-01-05T10:00:00+00:00",
@@ -314,17 +317,20 @@ class DraftReplyHelperTests(unittest.TestCase):
             },
             "ticket_created_at": "2026-01-07T10:00:00+00:00",
         }
+        order = cast(dict[str, Any], payload["order"])
+        inquiry_date = cast(str, payload["ticket_created_at"])
         estimate = compute_delivery_estimate(
-            payload["order"]["created_at"],
-            payload["order"]["shipping_method"],
-            payload["ticket_created_at"],
+            cast(str, order["created_at"]),
+            cast(str, order["shipping_method"]),
+            inquiry_date,
         )
         body = _compute_draft_reply_body(
             payload,
             delivery_estimate=estimate,
-            inquiry_date=payload["ticket_created_at"],
+            inquiry_date=inquiry_date,
         )
         self.assertIsInstance(body, str)
+        body = cast(str, body)
         self.assertIn("standard (3-5 business days)", body.lower())
         self.assertIn("1-3 business days", body.lower())
 
@@ -373,7 +379,7 @@ class DraftReplyHelperTests(unittest.TestCase):
         executor = _Exec()
         expected = _fingerprint("agent reply")
         result = _fetch_latest_reply_hash(
-            executor,
+            cast(Any, executor),
             "ticket-123",
             allow_network=True,
         )
@@ -386,7 +392,7 @@ class DraftReplyHelperTests(unittest.TestCase):
 
         executor = _Exec()
         result = _fetch_latest_reply_hash(
-            executor,
+            cast(Any, executor),
             "ticket-123",
             allow_network=False,
         )
@@ -507,6 +513,29 @@ class ReplyEvidenceTests(unittest.TestCase):
         self.assertTrue(evidence)
         self.assertIn("positive_middleware_tag_added", reason)
         self.assertIn("reply_update_success:ticket_state_closed", reason)
+
+
+class OutboundEvidenceTests(unittest.TestCase):
+    def test_outbound_evidence_positive(self) -> None:
+        evidence = _evaluate_outbound_evidence(
+            message_count_delta=2, last_message_source_after="Middleware"
+        )
+        self.assertTrue(evidence["outbound_message_count_delta_ge_1"])
+        self.assertTrue(evidence["outbound_last_message_source_middleware"])
+
+    def test_outbound_evidence_negative(self) -> None:
+        evidence = _evaluate_outbound_evidence(
+            message_count_delta=0, last_message_source_after="agent"
+        )
+        self.assertFalse(evidence["outbound_message_count_delta_ge_1"])
+        self.assertFalse(evidence["outbound_last_message_source_middleware"])
+
+    def test_outbound_evidence_missing(self) -> None:
+        evidence = _evaluate_outbound_evidence(
+            message_count_delta=None, last_message_source_after=None
+        )
+        self.assertFalse(evidence["outbound_message_count_delta_ge_1"])
+        self.assertFalse(evidence["outbound_last_message_source_middleware"])
 
 
 class ClassificationTests(unittest.TestCase):
