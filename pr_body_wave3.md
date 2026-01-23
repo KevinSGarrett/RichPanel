@@ -5,6 +5,7 @@
 **Base:** `main`  
 **Branch:** `claude-review-gap-filler/wave3-calibration`  
 **PR type:** Draft until CI is green  
+**Merge:** Squash merge after approval + green CI  
 
 ## 1) Summary
 - Add offline calibration harness with KPI scoreboard output.
@@ -62,9 +63,11 @@ Duplicate rate (finding_id): 0% (0/3)
 - Token/PR: +0 to +50 tokens expected due to short failed-check summary injection.
 - Duplicate rate: expected to decrease (prompt explicitly asks for novel insights only).
 - AR-rate: expected neutral or slightly lower; harness baseline is 60% (3/5 fixtures).
+- False positive proxy: expected neutral; harness labeled FP proxy is 0% (0/3).
 
 ## 6) Risk & rollback
 - Backout plan: set `CLAUDE_REVIEW_MODE=legacy` or revert this PR (single revert).
+- Stop condition: if calibration shows no clear benefit, do not merge.
 
 ## 7) Optional prompt caching
 - Not implemented (no cache hit/miss signals available).
