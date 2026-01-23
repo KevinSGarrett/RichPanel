@@ -82,6 +82,24 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
         self.assertIn("Noise KPI Scoreboard", rendered)
         self.assertIn("Action Required rate", rendered)
 
+    def test_helper_metrics(self) -> None:
+        self.assertEqual(harness._format_rate(0, 0), "N/A")
+        self.assertEqual(harness._format_int(None), "N/A")
+        self.assertEqual(harness._format_count(None), "N/A")
+        self.assertEqual(harness._percentile([1, 2, 3], 0.9), 3.0)
+        self.assertEqual(harness._median([1, 2, 3, 4]), 2.5)
+        self.assertEqual(harness._median([1, 2, 3]), 2.0)
+
+    def test_false_positive_label_and_truncation(self) -> None:
+        self.assertTrue(harness._detect_truncation({"diff_truncated": True}, ""))
+        self.assertTrue(harness._detect_truncation({}, "abc\n[TRUNCATED]\n"))
+        self.assertFalse(harness._detect_truncation({}, "no truncation"))
+        self.assertEqual(harness._extract_false_positive_label({"kpi_labels": {"false_positive": True}}), True)
+        self.assertEqual(
+            harness._extract_false_positive_label({"kpi_labels": {"action_required_real": True}}),
+            False,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()  # pragma: no cover

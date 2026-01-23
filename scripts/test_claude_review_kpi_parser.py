@@ -3,6 +3,8 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from typing import Any
 
 import claude_review_kpi_snapshot as snapshot
 
@@ -59,21 +61,32 @@ Action Required:
             temp_path = Path(temp_dir)
             raw_path = temp_path / "raw.txt"
             raw_path.write_text("raw comment", encoding="utf-8")
-            self.assertEqual(snapshot._load_comments_from_path(str(raw_path))[0]["body"], "raw comment")
+            raw_loaded: list[dict[str, Any]] = snapshot._load_comments_from_path(  # type: ignore[assignment]
+                str(raw_path)
+            )
+            self.assertIsInstance(raw_loaded, list)
+            assert isinstance(raw_loaded, list)
+            self.assertEqual(raw_loaded[0].get("body"), "raw comment")  # type: ignore[index]
 
             list_path = temp_path / "list.json"
             list_path.write_text(
                 json.dumps([{"body": "one"}, {"body": "two"}]), encoding="utf-8"
             )
-            list_loaded = snapshot._load_comments_from_path(str(list_path))
+            list_loaded: list[dict[str, Any]] = snapshot._load_comments_from_path(  # type: ignore[assignment]
+                str(list_path)
+            )
+            self.assertIsInstance(list_loaded, list)
+            assert isinstance(list_loaded, list)
             self.assertEqual(len(list_loaded), 2)
 
             mapping_path = temp_path / "map.json"
             mapping_path.write_text(json.dumps({"153": [{"body": "mapped"}]}), encoding="utf-8")
-            mapping_loaded = snapshot._load_comments_from_path(str(mapping_path))
+            mapping_loaded: dict[int, list[dict[str, Any]]] = snapshot._load_comments_from_path(  # type: ignore[assignment]
+                str(mapping_path)
+            )
             self.assertIsInstance(mapping_loaded, dict)
             assert isinstance(mapping_loaded, dict)
-            self.assertEqual(mapping_loaded[153][0]["body"], "mapped")
+            self.assertEqual(mapping_loaded[153][0].get("body"), "mapped")  # type: ignore[index]
 
     def test_select_canonical_comment(self) -> None:
         comments = [
@@ -113,6 +126,39 @@ Action Required:
         )
         self.assertIn("Claude Review KPI Snapshot", block)
         self.assertIn("Action Required rate", block)
+
+    def test_parse_comment_structured_parse_failure(self) -> None:
+        body = """<!-- CLAUDE_REVIEW_CANONICAL -->
+Claude Review (gate:claude)
+Mode: STRUCTURED
+CLAUDE_REVIEW: PASS
+WARNING: Structured output parse failure.
+"""
+        parsed = snapshot.parse_claude_review_comment(body)
+        self.assertIsNotNone(parsed)
+        assert parsed is not None
+        self.assertTrue(parsed["parse_error"])
+
+    def test_count_bullets_after_stops_on_details(self) -> None:
+        body = """Action Required:
+- Item 1
+- Item 2
+<details>
+<summary>FYI</summary>
+"""
+        count = snapshot._count_bullets_after("Action Required:", body)
+        self.assertEqual(count, 2)
+
+    @patch("claude_review_kpi_snapshot.gate_comments._github_request_json")
+    @patch("claude_review_kpi_snapshot.gate_comments._parse_github_datetime")
+    def test_fetch_pr_numbers_since(self, mock_parse, mock_request) -> None:
+        mock_parse.return_value = snapshot.datetime.max.replace(tzinfo=snapshot.timezone.utc)
+        mock_request.side_effect = [
+            [{"number": 11, "updated_at": "now"}, {"number": 12, "updated_at": "now"}],
+            [],
+        ]
+        numbers = snapshot._fetch_pr_numbers_since("owner/repo", 7, "token")
+        self.assertEqual(numbers, [11, 12])
 
 
 if __name__ == "__main__":
