@@ -57,7 +57,7 @@ Duplicate rate (finding_id): 0% (0/3)
 ```
 
 **CI link:**
-- https://github.com/KevinSGarrett/RichPanel/actions/runs/21292354353 (success)
+- https://github.com/KevinSGarrett/RichPanel/actions/runs/21292777414 (success)
 
 ## 5) KPI impact statement (expected)
 - Token/PR: +0 to +50 tokens expected due to short failed-check summary injection.
