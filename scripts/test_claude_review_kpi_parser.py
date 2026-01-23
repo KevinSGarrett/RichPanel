@@ -149,6 +149,37 @@ WARNING: Structured output parse failure.
         count = snapshot._count_bullets_after("Action Required:", body)
         self.assertEqual(count, 2)
 
+    def test_extract_header_value_missing(self) -> None:
+        self.assertIsNone(snapshot._extract_header_value(snapshot._MODE_RE, "no mode here"))
+
+    def test_count_bullets_after_missing_header(self) -> None:
+        self.assertIsNone(snapshot._count_bullets_after("Action Required:", "no header"))
+
+    def test_extract_action_required_count_summary(self) -> None:
+        body = "Summary: action_required=3, total_points=5"
+        self.assertEqual(snapshot._extract_action_required_count(body, None), 3)
+
+    def test_extract_action_required_count_legacy(self) -> None:
+        body = """Top findings:
+- Issue 1
+- Issue 2
+"""
+        self.assertEqual(snapshot._extract_action_required_count(body, "LEGACY"), 2)
+
+    def test_parse_comment_without_tokens(self) -> None:
+        body = """<!-- CLAUDE_REVIEW_CANONICAL -->
+Claude Review (gate:claude)
+Mode: LEGACY
+CLAUDE_REVIEW: PASS
+Top findings:
+- No issues found.
+"""
+        parsed = snapshot.parse_claude_review_comment(body)
+        self.assertIsNotNone(parsed)
+        assert parsed is not None
+        self.assertIsNone(parsed["token_input"])
+        self.assertIsNone(parsed["token_output"])
+
     @patch("claude_review_kpi_snapshot.gate_comments._github_request_json")
     @patch("claude_review_kpi_snapshot.gate_comments._parse_github_datetime")
     def test_fetch_pr_numbers_since(self, mock_parse, mock_request) -> None:
@@ -159,6 +190,34 @@ WARNING: Structured output parse failure.
         ]
         numbers = snapshot._fetch_pr_numbers_since("owner/repo", 7, "token")
         self.assertEqual(numbers, [11, 12])
+
+    @patch("claude_review_kpi_snapshot.gate_comments._github_request_json")
+    def test_fetch_pr_numbers_since_empty_payload(self, mock_request) -> None:
+        mock_request.return_value = []
+        self.assertEqual(snapshot._fetch_pr_numbers_since("owner/repo", 7, "token"), [])
+
+    def test_load_comments_from_path_dict_variants(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            comments_path = temp_path / "comments.json"
+            comments_path.write_text(json.dumps({"comments": [{"body": "c1"}]}), encoding="utf-8")
+            loaded = snapshot._load_comments_from_path(str(comments_path))
+            self.assertIsInstance(loaded, list)
+
+            body_path = temp_path / "body.json"
+            body_path.write_text(json.dumps({"body": "b1"}), encoding="utf-8")
+            loaded_body = snapshot._load_comments_from_path(str(body_path))
+            self.assertIsInstance(loaded_body, list)
+
+            empty_map = temp_path / "empty.json"
+            empty_map.write_text(json.dumps({"nope": []}), encoding="utf-8")
+            loaded_empty = snapshot._load_comments_from_path(str(empty_map))
+            self.assertEqual(loaded_empty, [])
+
+            json_string = temp_path / "string.json"
+            json_string.write_text(json.dumps("hello"), encoding="utf-8")
+            loaded_string = snapshot._load_comments_from_path(str(json_string))
+            self.assertIsInstance(loaded_string, list)
 
 
 if __name__ == "__main__":

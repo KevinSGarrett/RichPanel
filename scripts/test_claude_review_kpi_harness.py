@@ -100,6 +100,95 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
             False,
         )
 
+    def test_load_fixture_bundle_at_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(RuntimeError):
+                harness._load_fixture_bundle_at(Path(temp_dir), "missing")
+
+    def test_evaluate_fixture_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fixtures_dir = Path(temp_dir)
+            fixture_dir = fixtures_dir / "legacy_fixture"
+            fixture_dir.mkdir()
+            metadata = {
+                "title": "Legacy fixture",
+                "body": "Body",
+                "labels": ["gate:claude", "risk:R2"],
+                "files": [],
+                "usage": {"input_tokens": 5, "output_tokens": 5},
+            }
+            (fixture_dir / "fixture_pr_metadata.json").write_text(
+                json.dumps(metadata), encoding="utf-8"
+            )
+            (fixture_dir / "fixture_diff.txt").write_text("diff", encoding="utf-8")
+            (fixture_dir / "fixture_anthropic_response_legacy.txt").write_text(
+                "VERDICT: PASS\nFINDINGS:\n- No issues found.\n",
+                encoding="utf-8",
+            )
+            (fixture_dir / "fixture_anthropic_response_structured.json").write_text(
+                json.dumps({"version": "1.0", "verdict": "PASS", "risk": "risk:R2", "reviewers": []}),
+                encoding="utf-8",
+            )
+            result = harness._evaluate_fixture(
+                "legacy_fixture",
+                mode="legacy",
+                review_config={},
+                fixtures_dir=fixtures_dir,
+            )
+            self.assertEqual(result["action_required_count"], 0)
+
+    def test_evaluate_fixture_parse_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fixtures_dir = Path(temp_dir)
+            fixture_dir = fixtures_dir / "bad_structured"
+            fixture_dir.mkdir()
+            metadata = {
+                "title": "Structured fixture",
+                "body": "Body",
+                "labels": ["gate:claude", "risk:R2"],
+                "files": [],
+                "usage": {"input_tokens": 5, "output_tokens": 5},
+            }
+            (fixture_dir / "fixture_pr_metadata.json").write_text(
+                json.dumps(metadata), encoding="utf-8"
+            )
+            (fixture_dir / "fixture_diff.txt").write_text("diff", encoding="utf-8")
+            (fixture_dir / "fixture_anthropic_response_legacy.txt").write_text(
+                "VERDICT: PASS\nFINDINGS:\n- No issues found.\n",
+                encoding="utf-8",
+            )
+            (fixture_dir / "fixture_anthropic_response_structured.json").write_text(
+                "not-json", encoding="utf-8"
+            )
+            result = harness._evaluate_fixture(
+                "bad_structured",
+                mode="structured",
+                review_config={},
+                fixtures_dir=fixtures_dir,
+            )
+            self.assertTrue(result["parse_error"])
+
+    def test_compute_metrics_duplicates(self) -> None:
+        results = [
+            {
+                "action_required_count": 1,
+                "action_required_ids": ["dup"],
+                "token_total": 10,
+                "diff_truncated": True,
+                "parse_error": False,
+            },
+            {
+                "action_required_count": 1,
+                "action_required_ids": ["dup"],
+                "token_total": 20,
+                "diff_truncated": False,
+                "parse_error": True,
+            },
+        ]
+        metrics = harness._compute_metrics(results)
+        self.assertEqual(metrics["duplicate_finding_total"], 1)
+        self.assertEqual(metrics["parse_failures"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()  # pragma: no cover
