@@ -1,0 +1,9 @@
+diff --git a/backend/src/orders.py b/backend/src/orders.py
+index 1111111..2222222 100644
+--- a/backend/src/orders.py
++++ b/backend/src/orders.py
+@@ -40,7 +40,9 @@ def update_order(order):
+-    status = None
++    status = transition_order_status(order)
++    if not status:
++        raise ValueError("Invalid transition")

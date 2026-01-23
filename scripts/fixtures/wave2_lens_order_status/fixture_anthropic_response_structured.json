@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "verdict": "FAIL",
+  "risk": "risk:R3",
+  "reviewers": [
+    {
+      "name": "primary",
+      "model": "claude-opus-4-5",
+      "findings": [
+        {
+          "finding_id": "order-status-guard",
+          "category": "correctness",
+          "severity": 3,
+          "confidence": 80,
+          "title": "Missing transition validation",
+          "summary": "Status transitions should be validated against allowed states.",
+          "file": "backend/src/orders.py",
+          "evidence": "transition_order_status(order)",
+          "suggested_test": "Add a test for invalid status transitions"
+        }
+      ]
+    }
+  ]
+}

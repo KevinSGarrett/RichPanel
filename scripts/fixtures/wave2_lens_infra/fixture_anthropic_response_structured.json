@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "verdict": "PASS",
+  "risk": "risk:R2",
+  "reviewers": [
+    {
+      "name": "primary",
+      "model": "claude-opus-4-5",
+      "findings": []
+    }
+  ]
+}

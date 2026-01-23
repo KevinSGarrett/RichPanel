@@ -80,6 +80,9 @@ def _stub_urlopen(request, timeout=60):
     if url.startswith("https://api.github.com/repos/test/repo/pulls/1/files"):
         return _StubResponse(200, b"[]")
 
+    if url.startswith("https://api.github.com/repos/test/repo/issues/1/comments"):
+        return _StubResponse(200, b"[]")
+
     if url.startswith("https://api.github.com/repos/test/repo/pulls/1"):
         if "application/vnd.github.v3.diff" in accept:
             return _StubResponse(200, b"diff --git a/a b/a\\n")

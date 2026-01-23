@@ -1,0 +1,11 @@
+{
+  "title": "Order status transition guard",
+  "body": "Ensure status transitions stay safe.",
+  "labels": ["gate:claude", "risk:R3"],
+  "risk_label": "risk:R3",
+  "files": ["backend/src/orders.py"],
+  "response_id": "dry_run_response",
+  "request_id": "dry_run_request",
+  "response_model": "claude-opus-4-5",
+  "usage": {"input_tokens": 120, "output_tokens": 24}
+}

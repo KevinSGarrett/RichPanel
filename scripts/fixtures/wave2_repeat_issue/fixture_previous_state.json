@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "run_index": 1,
+  "findings": {
+    "repeat-timeout": {
+      "occurrences": 1,
+      "last_seen": 1
+    }
+  }
+}

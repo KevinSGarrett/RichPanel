@@ -1,0 +1,3 @@
+VERDICT: FAIL
+FINDINGS:
+- Outbound call sets timeout=None.
