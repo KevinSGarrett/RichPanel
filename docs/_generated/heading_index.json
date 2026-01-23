@@ -21025,6 +21025,36 @@
       "anchor": "5-stop-and-ask-pm-triggers-hard"
     }
   ],
+  "claude review noise kpi scoreboard": [
+    {
+      "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+      "anchor": "claude-review-noise-kpi-scoreboard"
+    }
+  ],
+  "targets (what \"good\" looks like)": [
+    {
+      "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+      "anchor": "targets-what-good-looks-like"
+    }
+  ],
+  "current measurement (shadow mode)": [
+    {
+      "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+      "anchor": "current-measurement-shadow-mode"
+    }
+  ],
+  "latest snapshot (paste output below)": [
+    {
+      "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+      "anchor": "latest-snapshot-paste-output-below"
+    }
+  ],
+  "calibration harness snapshots": [
+    {
+      "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+      "anchor": "calibration-harness-snapshots"
+    }
+  ],
   "chunking and indexing standard (ai-first)": [
     {
       "path": "98_Agent_Ops/Chunking_and_Indexing_Standard.md",

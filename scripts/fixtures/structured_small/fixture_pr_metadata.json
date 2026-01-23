@@ -15,5 +15,8 @@
   "usage": {
     "input_tokens": 2222,
     "output_tokens": 111
+  },
+  "kpi_labels": {
+    "action_required_real": true
   }
 }

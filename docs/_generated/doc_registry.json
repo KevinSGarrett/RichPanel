@@ -3570,6 +3570,16 @@
     "last_updated": "2025-12-23"
   },
   {
+    "path": "98_Agent_Ops/CLAUDE_REVIEW_NOISE_KPI_SCOREBOARD.md",
+    "title": "Claude Review Noise KPI Scoreboard",
+    "section": "98_Agent_Ops",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 296,
+    "approx_tokens": 384,
+    "last_updated": ""
+  },
+  {
     "path": "98_Agent_Ops/Chunking_and_Indexing_Standard.md",
     "title": "Chunking and Indexing Standard (AI-first)",
     "section": "98_Agent_Ops",
@@ -3895,8 +3905,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10741,
-    "approx_tokens": 13963,
+    "word_count": 10752,
+    "approx_tokens": 13977,
     "last_updated": ""
   },
   {

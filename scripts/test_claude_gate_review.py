@@ -218,6 +218,123 @@ FINDINGS:
         truncated = claude_gate_review._truncate(text, 100)
         self.assertEqual(text, truncated)
 
+    def test_build_prompt_includes_failed_checks(self):
+        """Ensure failed checks are injected into the prompt."""
+        prompt = claude_gate_review._build_prompt(
+            "Title",
+            "Body",
+            "risk:R2",
+            "- file.py (modified, +1 -0)",
+            "diff",
+            failed_checks=["Bugbot: issue", "Codecov"],
+        )
+        self.assertIn("FAILED CHECKS", prompt)
+        self.assertIn("Bugbot: issue", prompt)
+        self.assertIn("do not repeat them", prompt)
+
+    def test_build_prompt_without_failed_checks(self):
+        prompt = claude_gate_review._build_prompt(
+            "Title",
+            "Body",
+            "risk:R2",
+            "- file.py (modified, +1 -0)",
+            "diff",
+        )
+        self.assertNotIn("FAILED CHECKS", prompt)
+
+    def test_fetch_failed_check_summaries(self):
+        """Fetch failed check summaries from mocked API payload."""
+        payload = {
+            "check_runs": [
+                {"name": "Lint", "status": "completed", "conclusion": "success"},
+                {"name": "Bugbot", "status": "completed", "conclusion": "failure"},
+                {
+                    "name": "Codecov",
+                    "status": "completed",
+                    "conclusion": "action_required",
+                    "output": {"title": "Coverage drop"},
+                },
+            ]
+        }
+        with patch("claude_gate_review._fetch_json", return_value=payload):
+            summaries = claude_gate_review._fetch_failed_check_summaries(
+                "owner/repo", "deadbeef", "token"
+            )
+        self.assertEqual(summaries, ["Bugbot", "Codecov: Coverage drop"])
+
+    def test_extract_failed_check_summaries_filters(self):
+        runs = [
+            {"name": "Build", "status": "in_progress", "conclusion": "failure"},
+            {"name": "Docs", "status": "completed", "conclusion": "success"},
+            {"name": "CI", "status": "completed", "conclusion": "cancelled"},
+            {"name": "", "status": "completed", "conclusion": "failure", "output": {"title": "Only title"}},
+            {"name": "CI", "status": "completed", "conclusion": "cancelled"},
+        ]
+        summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=3)
+        self.assertEqual(summaries, ["CI", "Only title"])
+
+    def test_extract_failed_check_summaries_title_equals_name(self):
+        runs = [
+            {
+                "name": "Codecov",
+                "status": "",
+                "conclusion": "failure",
+                "output": {"title": "Codecov"},
+            },
+            {
+                "name": "Docs",
+                "status": "completed",
+                "conclusion": "failure",
+                "output": [],
+            },
+        ]
+        summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=2)
+        self.assertEqual(summaries, ["Codecov", "Docs"])
+
+    def test_fetch_failed_check_summaries_empty(self):
+        self.assertEqual(claude_gate_review._fetch_failed_check_summaries("owner/repo", "", "token"), [])
+        with patch("claude_gate_review._fetch_json", return_value=[]):
+            self.assertEqual(
+                claude_gate_review._fetch_failed_check_summaries("owner/repo", "deadbeef", "token"),
+                [],
+            )
+        with patch("claude_gate_review._fetch_json", return_value={"check_runs": "nope"}):
+            self.assertEqual(
+                claude_gate_review._fetch_failed_check_summaries("owner/repo", "deadbeef", "token"),
+                [],
+            )
+
+        with patch("claude_gate_review._fetch_json", return_value=["unexpected"]):
+            self.assertEqual(
+                claude_gate_review._fetch_failed_check_summaries("owner/repo", "deadbeef", "token"),
+                [],
+            )
+
+    def test_extract_failed_check_summaries_skips_empty(self):
+        runs = [
+            {"status": "completed", "conclusion": "failure"},
+            {"status": "completed", "conclusion": "timed_out"},
+        ]
+        summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=5)
+        self.assertEqual(summaries, [])
+
+    def test_coerce_json_text(self):
+        fenced = """```json
+{"version":"1.0"}
+```"""
+        self.assertEqual(claude_gate_review._coerce_json_text(fenced), '{"version":"1.0"}')
+        wrapped = "prefix {\"version\":\"1.0\"} suffix"
+        self.assertEqual(claude_gate_review._coerce_json_text(wrapped), '{"version":"1.0"}')
+
+    def test_parse_structured_output_with_fence(self):
+        raw = """```json
+{"version":"1.0","verdict":"PASS","risk":"risk:R2","reviewers":[]}
+```"""
+        payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertEqual(payload.get("version"), "1.0")
+        self.assertEqual(findings, [])
+        self.assertEqual(errors, [])
+
     def test_build_prompt(self):
         """Test prompt building includes all required sections."""
         prompt = claude_gate_review._build_prompt(

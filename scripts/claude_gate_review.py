@@ -10,7 +10,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path, PurePosixPath
-from typing import Mapping
+from typing import Mapping, Sequence
 
 try:
     import yaml  # type: ignore[import]
@@ -496,6 +496,57 @@ def _fetch_issue_comments(repo: str, pr_number: int, token: str) -> list[dict]:
     return comments
 
 
+def _extract_failed_check_summaries(check_runs: Sequence[object], limit: int = 6) -> list[str]:
+    failure_conclusions = {
+        "failure",
+        "cancelled",
+        "timed_out",
+        "action_required",
+        "startup_failure",
+    }
+    summaries: list[str] = []
+    seen: set[str] = set()
+    for run in check_runs:
+        if not isinstance(run, dict):
+            continue
+        status = str(run.get("status") or "").lower()
+        if status and status != "completed":
+            continue
+        conclusion = str(run.get("conclusion") or "").lower()
+        if conclusion not in failure_conclusions:
+            continue
+        name = str(run.get("name") or "").strip()
+        output = run.get("output", {}) if isinstance(run.get("output", {}), dict) else {}
+        title = str(output.get("title") or "").strip()
+        summary = ""
+        if name and title and title != name:
+            summary = f"{name}: {title}"
+        elif name:
+            summary = name
+        elif title:
+            summary = title
+        if not summary or summary in seen:
+            continue
+        seen.add(summary)
+        summaries.append(summary)
+        if len(summaries) >= limit:
+            break
+    return summaries
+
+
+def _fetch_failed_check_summaries(repo: str, sha: str, token: str) -> list[str]:
+    if not sha:
+        return []
+    url = f"https://api.github.com/repos/{repo}/commits/{sha}/check-runs?per_page=100"
+    payload = _fetch_json(url, token, accept="application/vnd.github+json")
+    if not isinstance(payload, dict):
+        return []
+    check_runs = payload.get("check_runs", [])
+    if not isinstance(check_runs, list):
+        return []
+    return _extract_failed_check_summaries(check_runs)
+
+
 def _find_canonical_comment(comments: list[dict]) -> dict | None:
     canonical = [comment for comment in comments if CANONICAL_MARKER in (comment.get("body") or "")]
     if not canonical:
@@ -701,12 +752,33 @@ def _is_action_required(finding: dict) -> bool:
     )
 
 
+def _coerce_json_text(raw_text: str) -> str:
+    text = (raw_text or "").strip()
+    if not text:
+        return text
+    fence_match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
+    if fence_match:
+        return fence_match.group(1).strip()
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start : end + 1].strip()
+    return text
+
+
 def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[dict], list[str]]:
     errors: list[str] = []
     try:
         payload = json.loads(raw_text)
     except json.JSONDecodeError as exc:
-        return {}, [], [f"Invalid JSON: {exc.msg}"]
+        coerced = _coerce_json_text(raw_text)
+        if coerced and coerced != raw_text:
+            try:
+                payload = json.loads(coerced)
+            except json.JSONDecodeError as exc2:
+                return {}, [], [f"Invalid JSON: {exc2.msg}"]
+        else:
+            return {}, [], [f"Invalid JSON: {exc.msg}"]
     if not isinstance(payload, dict):
         return payload, [], ["Structured output must be a JSON object."]
     if payload.get("version") != "1.0":
@@ -816,6 +888,7 @@ def _build_prompt(
     files_summary: str,
     diff_text: str,
     lens_text: str = "",
+    failed_checks: list[str] | None = None,
 ) -> str:
     prompt = (
         "PR TITLE (untrusted input):\n"
@@ -828,6 +901,14 @@ def _build_prompt(
         "<<<END_BODY>>>\n\n"
         f"RISK LABEL: {risk}\n\n"
     )
+    if failed_checks:
+        prompt += "FAILED CHECKS (already reported by other tools):\n"
+        for item in failed_checks[:6]:
+            prompt += f"- {item}\n"
+        prompt += (
+            "\nIMPORTANT: These checks already failed; do not repeat them. "
+            "Provide only novel insights beyond them.\n\n"
+        )
     if lens_text:
         prompt += f"{lens_text}\n\n"
     prompt += (
@@ -1272,7 +1353,25 @@ def main() -> int:
     )
     system_prompt = legacy_system_prompt if mode == MODE_LEGACY else structured_system_prompt
 
-    user_prompt = _build_prompt(title, body, risk, files_summary, diff_text, lens_text=lens_text)
+    failed_checks: list[str] = []
+    head_sha = ""
+    if isinstance(pr_data.get("head", {}), dict):
+        head_sha = str(pr_data.get("head", {}).get("sha") or "").strip()
+    if head_sha:
+        try:
+            failed_checks = _fetch_failed_check_summaries(repo, head_sha, github_token)
+        except RuntimeError as exc:
+            print(f"NOTE: Unable to fetch failed checks: {exc}", file=sys.stderr)
+
+    user_prompt = _build_prompt(
+        title,
+        body,
+        risk,
+        files_summary,
+        diff_text,
+        lens_text=lens_text,
+        failed_checks=failed_checks,
+    )
 
     payload = {
         "model": model_used,
