@@ -27,6 +27,7 @@ DEFAULT_MAX_DIFF_CHARS = 60000
 DEFAULT_MAX_BODY_CHARS = 8000
 DEFAULT_MAX_FILES = 200
 DEFAULT_MAX_FINDINGS = 5
+CANONICAL_MARKER = "<!-- CLAUDE_REVIEW_CANONICAL -->"
 
 
 def _write_output(name: str, value: str) -> None:
@@ -273,6 +274,7 @@ def _format_comment(
 ) -> str:
     findings_block = "\n".join(f"- {item}" for item in findings)
     comment = (
+        f"{CANONICAL_MARKER}\n"
         "Claude Review (gate:claude)\n"
         f"CLAUDE_REVIEW: {verdict}\n"
         f"Risk: {risk}\n"
