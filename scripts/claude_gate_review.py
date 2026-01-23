@@ -9,7 +9,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Mapping
 
 try:
@@ -209,6 +209,15 @@ def _normalize_path(path: str) -> str:
     return path.replace("\\", "/")
 
 
+def _path_matches(pattern: str, file_path: str) -> bool:
+    normalized = _normalize_path(file_path)
+    normalized_pattern = _normalize_path(pattern)
+    path_obj = PurePosixPath(normalized)
+    if path_obj.match(normalized_pattern):
+        return True
+    return fnmatch.fnmatchcase(normalized, normalized_pattern)
+
+
 def _select_lenses(changed_files: list[str], config: dict) -> list[tuple[str, dict]]:
     lenses_config = config.get("lenses", {}) if isinstance(config, dict) else {}
     selected: list[tuple[str, dict]] = []
@@ -219,8 +228,7 @@ def _select_lenses(changed_files: list[str], config: dict) -> list[tuple[str, di
         if not isinstance(paths, list):
             continue
         for file_path in changed_files:
-            normalized = _normalize_path(file_path)
-            if any(fnmatch.fnmatchcase(normalized, pattern) for pattern in paths):
+            if any(_path_matches(pattern, file_path) for pattern in paths):
                 selected.append((lens_name, lens_data))
                 break
     if not selected:
@@ -491,7 +499,13 @@ def _find_canonical_comment(comments: list[dict]) -> dict | None:
     canonical = [comment for comment in comments if CANONICAL_MARKER in (comment.get("body") or "")]
     if not canonical:
         return None
-    canonical.sort(key=lambda c: (c.get("created_at", ""), int(c.get("id", 0) or 0)))
+    canonical.sort(
+        key=lambda c: (
+            c.get("updated_at") or c.get("created_at") or "",
+            int(c.get("id", 0) or 0),
+        ),
+        reverse=True,
+    )
     return canonical[0]
 
 

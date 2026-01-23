@@ -293,6 +293,8 @@ FINDINGS:
         }
         selected = claude_gate_review._select_lenses(["backend/src/orders.py"], config)
         self.assertEqual(selected[0][0], "A")
+        selected_nested = claude_gate_review._select_lenses(["backend/src/models/order.py"], config)
+        self.assertEqual(selected_nested[0][0], "A")
 
     def test_select_lenses_default_when_none(self):
         config = {"lenses": {"A": {"paths": ["backend/src/**"], "invariants": ["A1"]}}}
@@ -405,10 +407,20 @@ FINDINGS:
         payload = claude_gate_review._extract_state_from_comment(comment)
         self.assertIsNone(payload)
 
-    def test_find_canonical_comment_oldest(self):
+    def test_find_canonical_comment_latest(self):
         comments = [
-            {"id": 2, "created_at": "2024-01-02T00:00:00Z", "body": claude_gate_review.CANONICAL_MARKER},
-            {"id": 1, "created_at": "2024-01-01T00:00:00Z", "body": claude_gate_review.CANONICAL_MARKER},
+            {
+                "id": 2,
+                "created_at": "2024-01-02T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+                "body": claude_gate_review.CANONICAL_MARKER,
+            },
+            {
+                "id": 1,
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-03T00:00:00Z",
+                "body": claude_gate_review.CANONICAL_MARKER,
+            },
         ]
         selected = claude_gate_review._find_canonical_comment(comments)
         self.assertEqual(selected["id"], 1)
