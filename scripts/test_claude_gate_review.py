@@ -241,8 +241,9 @@ FINDINGS:
 
     def test_load_review_config_missing(self):
         missing_path = Path(tempfile.gettempdir()) / "missing_claude_review.yml"
-        if missing_path.exists():
-            missing_path.unlink()
+        missing_path.write_text("version: 1\n", encoding="utf-8")
+        self.assertTrue(missing_path.exists())
+        missing_path.unlink()
         config = claude_gate_review._load_review_config(missing_path)
         self.assertEqual(config, {})
 
@@ -254,6 +255,17 @@ FINDINGS:
             config = claude_gate_review._load_review_config(path)
             self.assertIn("risk_defaults", config)
             self.assertEqual(config["risk_defaults"]["R2"]["max_findings"], 4)
+        finally:
+            if path.exists():
+                path.unlink()
+
+    def test_load_review_config_invalid_yaml(self):
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".yml") as handle:
+            handle.write("risk_defaults: [")
+            path = Path(handle.name)
+        try:
+            config = claude_gate_review._load_review_config(path)
+            self.assertEqual(config, {})
         finally:
             if path.exists():
                 path.unlink()
@@ -286,6 +298,32 @@ FINDINGS:
         config = {"lenses": {"A": {"paths": ["backend/src/**"], "invariants": ["A1"]}}}
         selected = claude_gate_review._select_lenses(["docs/readme.md"], config)
         self.assertEqual(selected[0][0], claude_gate_review.DEFAULT_LENS_NAME)
+
+    def test_select_lenses_caps_max(self):
+        config = {
+            "lenses": {
+                "L1": {"paths": ["backend/**"], "invariants": []},
+                "L2": {"paths": ["backend/**"], "invariants": []},
+                "L3": {"paths": ["backend/**"], "invariants": []},
+                "L4": {"paths": ["backend/**"], "invariants": []},
+                "L5": {"paths": ["backend/**"], "invariants": []},
+            }
+        }
+        selected = claude_gate_review._select_lenses(["backend/src/orders.py"], config)
+        self.assertEqual(len(selected), claude_gate_review.MAX_LENSES)
+
+    def test_build_lens_prompt_caps_invariants(self):
+        lenses = [
+            (
+                "LENS_A",
+                {"invariants": [f"inv-{idx}" for idx in range(6)]},
+            )
+        ]
+        prompt = claude_gate_review._build_lens_prompt(lenses)
+        self.assertIn("LENSES_APPLIED: [LENS_A]", prompt)
+        self.assertIn("- inv-0", prompt)
+        self.assertIn("- inv-4", prompt)
+        self.assertNotIn("- inv-5", prompt)
 
     def test_apply_budgets_truncates(self):
         findings = [
@@ -322,6 +360,68 @@ FINDINGS:
         self.assertEqual([item["finding_id"] for item in action_required], ["c", "a"])
         self.assertEqual(fyi, [])
 
+    def test_apply_budgets_keeps_fyi(self):
+        findings = [
+            {
+                "finding_id": "a",
+                "severity": 3,
+                "confidence": 80,
+                "file": "a.py",
+                "evidence": "line",
+                "points": 3,
+            },
+            {
+                "finding_id": "b",
+                "severity": 2,
+                "confidence": 90,
+                "file": "",
+                "evidence": "",
+                "points": 2,
+            },
+        ]
+        action_required, fyi = claude_gate_review._apply_budgets(
+            findings,
+            {"max_findings": 2, "action_required_min_severity": 3, "action_required_min_confidence": 70},
+        )
+        self.assertEqual(len(action_required), 1)
+        self.assertEqual(len(fyi), 1)
+
+    def test_apply_budgets_zero_max(self):
+        action_required, fyi = claude_gate_review._apply_budgets(
+            [],
+            {"max_findings": 0, "action_required_min_severity": 3, "action_required_min_confidence": 70},
+        )
+        self.assertEqual(action_required, [])
+        self.assertEqual(fyi, [])
+
+    def test_extract_state_from_comment(self):
+        payload = {"version": 1, "run_index": 2, "findings": {"a": {"occurrences": 1}}}
+        comment = f"{claude_gate_review.STATE_MARKER}\n```json\n{json.dumps(payload)}\n```\n"
+        payload = claude_gate_review._extract_state_from_comment(comment)
+        self.assertEqual(payload["run_index"], 2)
+
+    def test_extract_state_from_comment_invalid(self):
+        comment = f"{claude_gate_review.STATE_MARKER}\n```json\nnot-json\n```\n"
+        payload = claude_gate_review._extract_state_from_comment(comment)
+        self.assertIsNone(payload)
+
+    def test_find_canonical_comment_oldest(self):
+        comments = [
+            {"id": 2, "created_at": "2024-01-02T00:00:00Z", "body": claude_gate_review.CANONICAL_MARKER},
+            {"id": 1, "created_at": "2024-01-01T00:00:00Z", "body": claude_gate_review.CANONICAL_MARKER},
+        ]
+        selected = claude_gate_review._find_canonical_comment(comments)
+        self.assertEqual(selected["id"], 1)
+
+    @patch("claude_gate_review._fetch_json")
+    def test_fetch_issue_comments_paginates(self, mock_fetch_json):
+        mock_fetch_json.side_effect = [
+            [{"id": 1}],
+            [],
+        ]
+        comments = claude_gate_review._fetch_issue_comments("owner/repo", 1, "token")
+        self.assertEqual(len(comments), 1)
+
     def test_build_state_payload_increments_occurrences(self):
         prev_state = {
             "version": 1,
@@ -338,6 +438,60 @@ FINDINGS:
         self.assertNotIn("old", state_payload["findings"])
         self.assertEqual(updated[0]["occurrences"], 2)
         self.assertEqual(updated[0]["points"], 4)
+
+    def test_evaluate_structured_response_parse_error_keeps_state(self):
+        previous_state = {"version": 1, "run_index": 1, "findings": {"abc": {"occurrences": 1, "last_seen": 1}}}
+        warnings: list[str] = []
+        verdict, _, _, _, summary, state_payload, parse_error = claude_gate_review._evaluate_structured_response(
+            "{",
+            diff_text="",
+            mode=claude_gate_review.MODE_SHADOW,
+            bypass_enabled=False,
+            warnings=warnings,
+            risk_defaults=claude_gate_review.DEFAULT_RISK_DEFAULTS["R2"],
+            previous_state=previous_state,
+        )
+        self.assertEqual(verdict, "PASS")
+        self.assertIsNotNone(parse_error)
+        self.assertEqual(summary["action_required_count"], 1)
+        self.assertEqual(state_payload["findings"]["abc"]["occurrences"], 1)
+
+    def test_evaluate_structured_response_explicit_blocker(self):
+        payload = {
+            "version": "1.0",
+            "verdict": "PASS",
+            "risk": "risk:R2",
+            "reviewers": [
+                {
+                    "name": "primary",
+                    "model": "claude-opus-4-5",
+                    "findings": [
+                        {
+                            "finding_id": "blocker",
+                            "category": "security",
+                            "severity": 5,
+                            "confidence": 90,
+                            "title": "Critical",
+                            "summary": "Critical issue",
+                            "file": "app.py",
+                            "evidence": "bad()",
+                            "suggested_test": "Add test",
+                        }
+                    ],
+                }
+            ],
+        }
+        warnings: list[str] = []
+        verdict, _, _, _, _, _, _ = claude_gate_review._evaluate_structured_response(
+            json.dumps(payload),
+            diff_text="bad()",
+            mode=claude_gate_review.MODE_STRUCTURED,
+            bypass_enabled=False,
+            warnings=warnings,
+            risk_defaults={"fail_min_points": 999, "action_required_min_severity": 3, "action_required_min_confidence": 70},
+            previous_state=None,
+        )
+        self.assertEqual(verdict, "FAIL")
 
     def test_structured_verdict_uses_points_threshold(self):
         payload = {
@@ -1447,7 +1601,3 @@ FINDINGS:
         )
         self.assertIn("Timeout missing (app.py)", comment)
         self.assertNotIn("Timeout missing: Timeout missing", comment)
-
-
-if __name__ == "__main__":
-    unittest.main()

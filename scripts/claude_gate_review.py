@@ -297,7 +297,7 @@ def _apply_budgets(findings: list[dict], risk_defaults: dict) -> tuple[list[dict
 def _extract_state_from_comment(body: str) -> dict | None:
     if not body:
         return None
-    pattern = re.compile(rf"{re.escape(STATE_MARKER)}\\s*```json\\s*(.*?)```", re.DOTALL)
+    pattern = re.compile(rf"{re.escape(STATE_MARKER)}\s*```json\s*(.*?)```", re.DOTALL)
     match = pattern.search(body)
     if not match:
         return None
