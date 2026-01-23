@@ -40,6 +40,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_openai_rewrite_evidence,
     _evaluate_outbound_evidence,
     _evaluate_openai_requirements,
+    _fetch_ticket_snapshot,
     _fetch_latest_reply_hash,
     append_summary,
     _redact_command,
@@ -514,6 +515,18 @@ class ReplyEvidenceTests(unittest.TestCase):
         self.assertIn("positive_middleware_tag_added", reason)
         self.assertIn("reply_update_success:ticket_state_closed", reason)
 
+    def test_reply_evidence_middleware_source_requires_delta(self) -> None:
+        evidence, reason = _compute_reply_evidence(
+            status_changed=False,
+            updated_at_delta=None,
+            message_count_delta=0,
+            last_message_source_after="middleware",
+            tags_added=[],
+        )
+        self.assertFalse(evidence)
+        self.assertIn("message_count_delta=0", reason)
+        self.assertNotIn("last_message_source=middleware", reason)
+
 
 class OutboundEvidenceTests(unittest.TestCase):
     def test_outbound_evidence_positive(self) -> None:
@@ -536,6 +549,52 @@ class OutboundEvidenceTests(unittest.TestCase):
         )
         self.assertFalse(evidence["outbound_message_count_delta_ge_1"])
         self.assertFalse(evidence["outbound_last_message_source_middleware"])
+
+
+class TicketSnapshotTests(unittest.TestCase):
+    def test_fetch_ticket_snapshot_comment_fallback(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-1",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [
+                    {"type": "Comment", "is_operator": False},
+                    {"type": "text", "is_operator": False},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-1",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("message_count"), 2)
+        self.assertEqual(result.get("last_message_source"), "middleware")
+
+    def test_build_followup_payload_strips_force_primary(self) -> None:
+        base = {
+            "event_id": "evt:123",
+            "scenario_name": "order_status",
+            "intent": "order_status_tracking",
+            "force_openai_routing_primary": True,
+        }
+        followup = _build_followup_payload(
+            base, followup_message="ok", scenario_variant="order_status"
+        )
+        self.assertNotIn("force_openai_routing_primary", followup)
 
 
 class ClassificationTests(unittest.TestCase):

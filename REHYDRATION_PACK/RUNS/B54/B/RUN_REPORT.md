@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-23
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b54/sandbox-outbound-proof-suite`
-- **PR:** none (pending)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/160
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -21,6 +21,7 @@
 - Strengthened `dev_e2e_smoke.py` proof flags, outbound evidence extraction, and follow-up reply detection.
 - Added a dev-only OpenAI routing primary override (payload gated to `dev_e2e_smoke`).
 - Added a PII-safe helper to list recent sandbox ticket IDs.
+- Added unit tests for ticket snapshot comment-count fallback behavior.
 
 ## Diffstat
 ```
@@ -29,13 +30,13 @@ REHYDRATION_PACK/RUNS/B54/B/EVIDENCE.md            |  24 ++
 .../order_status_outbound_followup_proof.json      | 413 +++++++++++++++++++++
 ...tatus_outbound_followup_proof_attempt_1087.json | 407 ++++++++++++++++++++
 ...tatus_outbound_followup_proof_attempt_1089.json | 407 ++++++++++++++++++++
-REHYDRATION_PACK/RUNS/B54/B/RUN_REPORT.md          |  65 ++++
+REHYDRATION_PACK/RUNS/B54/B/RUN_REPORT.md          |  69 ++++
 .../richpanel_middleware/automation/llm_routing.py |   7 +-
 .../richpanel_middleware/automation/pipeline.py    |  10 +-
 scripts/dev_e2e_smoke.py                           | 147 +++++++-
 scripts/find_recent_sandbox_ticket.py              | 230 ++++++++++++
 scripts/test_e2e_smoke_encoding.py                 |  49 ++-
-11 files changed, 1752 insertions(+), 19 deletions(-)
+11 files changed, 1756 insertions(+), 19 deletions(-)
 ```
 
 ## Files Changed (key)
@@ -43,7 +44,7 @@ scripts/test_e2e_smoke_encoding.py                 |  49 ++-
 - `backend/src/richpanel_middleware/automation/llm_routing.py` - optional dev-only OpenAI primary override.
 - `backend/src/richpanel_middleware/automation/pipeline.py` - pass dev-only routing override.
 - `scripts/find_recent_sandbox_ticket.py` - PII-safe helper to list recent sandbox tickets.
-- `scripts/test_e2e_smoke_encoding.py` - tests for outbound evidence helper and typing cleanups.
+- `scripts/test_e2e_smoke_encoding.py` - tests for outbound evidence + ticket snapshot fallback behavior.
 
 ## Commands Run
 - `aws sso login --profile rp-admin-kevin` - refresh AWS creds
