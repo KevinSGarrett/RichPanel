@@ -20649,6 +20649,16 @@
       },
       {
         "level": 2,
+        "text": "Latest KPI Snapshot (last 14 days) — 2026-01-23",
+        "anchor": "latest-kpi-snapshot-last-14-days-2026-01-23"
+      },
+      {
+        "level": 2,
+        "text": "Claude Review KPI Snapshot",
+        "anchor": "claude-review-kpi-snapshot"
+      },
+      {
+        "level": 2,
         "text": "Targets (what \"good\" looks like)",
         "anchor": "targets-what-good-looks-like"
       },
