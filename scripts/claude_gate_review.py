@@ -330,13 +330,16 @@ def _redact_evidence(text: str) -> str:
     return snippet
 
 
-def _stable_finding_id(finding: dict) -> str:
+def _stable_finding_id(finding: dict, evidence_override: str | None = None) -> str:
+    evidence_value = evidence_override
+    if evidence_value is None:
+        evidence_value = finding.get("evidence", "")
     parts = [
         str(finding.get("category", "")).strip(),
         str(finding.get("title", "")).strip(),
         str(finding.get("summary", "")).strip(),
         str(finding.get("file", "")).strip(),
-        str(finding.get("evidence", "")).strip(),
+        str(evidence_value).strip(),
     ]
     seed = "|".join(parts)
     return hashlib.sha1(seed.encode("utf-8")).hexdigest()[:12]
@@ -397,6 +400,7 @@ def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[
             normalized.setdefault("file", "")
             normalized.setdefault("evidence", "")
             normalized.setdefault("suggested_test", "")
+            raw_evidence = normalized.get("evidence", "")
             if severity >= 3:
                 if not normalized.get("file") or not normalized.get("evidence"):
                     errors.append("Severity >= 3 requires file and evidence.")
@@ -404,9 +408,9 @@ def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[
                     errors.append("Evidence for severity >= 3 must appear in diff.")
             if severity >= 4 and not normalized.get("suggested_test"):
                 errors.append("Severity >= 4 requires suggested_test.")
-            normalized["evidence"] = _redact_evidence(normalized.get("evidence", ""))
             if not normalized.get("finding_id"):
-                normalized["finding_id"] = _stable_finding_id(normalized)
+                normalized["finding_id"] = _stable_finding_id(normalized, raw_evidence)
+            normalized["evidence"] = _redact_evidence(raw_evidence)
             normalized["points"] = severity
             findings.append(normalized)
     return payload, findings, errors
@@ -665,16 +669,18 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
         parse_error_message = None
         if errors:
             warnings.append("Structured output parse failure.")
-            if errors:
-                warnings.append(errors[0])
+            warnings.append(errors[0])
             payload = _structured_parse_failure_payload(errors, structured_text)
-            findings = [_synthetic_parse_failure_finding(errors[0] if errors else "Invalid JSON")]
+            findings = []
             structured_verdict = "FAIL"
-            parse_error_message = errors[0] if errors else "Invalid JSON"
+            parse_error_message = errors[0]
         effective_verdict = structured_verdict if mode == MODE_STRUCTURED else "PASS"
         if mode == MODE_SHADOW and structured_verdict != "PASS":
             warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
         effective_verdict = _apply_break_glass(effective_verdict, bypass_enabled, warnings)
+        action_required_count = 1 if parse_error_message else len(
+            [f for f in findings if _is_action_required(f)]
+        )
         comment_body = _format_structured_comment(
             verdict=effective_verdict,
             risk=risk,
@@ -693,7 +699,7 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
             mode_label=mode_label,
             verdict=effective_verdict,
             bypass=bypass_enabled,
-            action_required_count=len([f for f in findings if _is_action_required(f)]),
+            action_required_count=action_required_count,
             warnings=warnings,
         )
 
@@ -906,13 +912,15 @@ def main() -> int:
             warnings.append(errors[0])
             parse_error_message = errors[0]
             payload = _structured_parse_failure_payload(errors, response_text)
-            findings = [_synthetic_parse_failure_finding(errors[0])]
+            findings = []
             structured_verdict = "FAIL"
         verdict = structured_verdict if mode == MODE_STRUCTURED else "PASS"
         if mode == MODE_SHADOW and structured_verdict != "PASS":
             warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
         verdict = _apply_break_glass(verdict, bypass_enabled, warnings)
-        action_required_count = len([finding for finding in findings if _is_action_required(finding)])
+        action_required_count = 1 if parse_error_message else len(
+            [finding for finding in findings if _is_action_required(finding)]
+        )
         comment_body = _format_structured_comment(
             verdict=verdict,
             risk=risk,
