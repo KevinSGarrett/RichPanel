@@ -189,6 +189,38 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
         self.assertEqual(metrics["duplicate_finding_total"], 1)
         self.assertEqual(metrics["parse_failures"], 1)
 
+    def test_parse_fixture_names(self) -> None:
+        fixtures = harness._parse_fixture_names("a,b a", Path("."))
+        self.assertEqual(fixtures, ["a", "b"])
+
+    def test_render_scoreboard_empty_metrics(self) -> None:
+        metrics = {"overall": harness._compute_metrics([]), "per_risk": {}, "results": []}
+        rendered = harness._render_scoreboard(
+            metrics,
+            fixtures=[],
+            mode="structured",
+            start_date="2026-01-01",
+            end_date="2026-01-02",
+        )
+        self.assertIn("Top recurring Action Required findings", rendered)
+
+    def test_main_writes_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "scoreboard.md"
+            with patch(
+                "sys.argv",
+                [
+                    "prog",
+                    "--fixtures",
+                    "legacy_small",
+                    "--output",
+                    str(output_path),
+                ],
+            ):
+                result = harness.main()
+            self.assertEqual(result, 0)
+            self.assertTrue(output_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()  # pragma: no cover

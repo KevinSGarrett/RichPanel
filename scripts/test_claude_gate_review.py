@@ -232,6 +232,16 @@ FINDINGS:
         self.assertIn("Bugbot: issue", prompt)
         self.assertIn("do not repeat them", prompt)
 
+    def test_build_prompt_without_failed_checks(self):
+        prompt = claude_gate_review._build_prompt(
+            "Title",
+            "Body",
+            "risk:R2",
+            "- file.py (modified, +1 -0)",
+            "diff",
+        )
+        self.assertNotIn("FAILED CHECKS", prompt)
+
     def test_fetch_failed_check_summaries(self):
         """Fetch failed check summaries from mocked API payload."""
         payload = {
@@ -262,6 +272,24 @@ FINDINGS:
         ]
         summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=3)
         self.assertEqual(summaries, ["CI", "Only title"])
+
+    def test_extract_failed_check_summaries_title_equals_name(self):
+        runs = [
+            {
+                "name": "Codecov",
+                "status": "",
+                "conclusion": "failure",
+                "output": {"title": "Codecov"},
+            },
+            {
+                "name": "Docs",
+                "status": "completed",
+                "conclusion": "failure",
+                "output": [],
+            },
+        ]
+        summaries = claude_gate_review._extract_failed_check_summaries(runs, limit=2)
+        self.assertEqual(summaries, ["Codecov", "Docs"])
 
     def test_fetch_failed_check_summaries_empty(self):
         self.assertEqual(claude_gate_review._fetch_failed_check_summaries("owner/repo", "", "token"), [])

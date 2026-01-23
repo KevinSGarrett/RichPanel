@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import json
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -218,6 +220,70 @@ Top findings:
             json_string.write_text(json.dumps("hello"), encoding="utf-8")
             loaded_string = snapshot._load_comments_from_path(str(json_string))
             self.assertIsInstance(loaded_string, list)
+
+    def test_main_requires_prs_or_since(self) -> None:
+        with patch.object(sys, "argv", ["prog", "--repo", "owner/repo"]):
+            with self.assertRaises(SystemExit):
+                snapshot.main()
+
+    def test_main_rejects_prs_and_since(self) -> None:
+        with patch.object(sys, "argv", ["prog", "--repo", "owner/repo", "--prs", "1", "--since-days", "7"]):
+            with self.assertRaises(SystemExit):
+                snapshot.main()
+
+    def test_main_missing_token(self) -> None:
+        with patch.object(sys, "argv", ["prog", "--repo", "owner/repo", "--prs", "1"]):
+            with patch.dict(os.environ, {}, clear=True):
+                self.assertEqual(snapshot.main(), 2)
+
+    def test_main_offline_comment_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            comment_path = Path(temp_dir) / "comments.json"
+            comment_path.write_text(
+                json.dumps(
+                    {
+                        "1": [
+                            {
+                                "body": "<!-- CLAUDE_REVIEW_CANONICAL -->\n"
+                                "Claude Review (gate:claude)\n"
+                                "Mode: LEGACY\n"
+                                "CLAUDE_REVIEW: PASS\n"
+                                "Top findings:\n"
+                                "- No issues found."
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "prog",
+                    "--repo",
+                    "owner/repo",
+                    "--prs",
+                    "1",
+                    "--comment-path",
+                    str(comment_path),
+                ],
+            ):
+                self.assertEqual(snapshot.main(), 0)
+
+    def test_main_since_days_uses_fetch(self) -> None:
+        comment = {
+            "body": "<!-- CLAUDE_REVIEW_CANONICAL -->\nClaude Review (gate:claude)\nMode: LEGACY\nCLAUDE_REVIEW: PASS"
+        }
+        with patch.object(sys, "argv", ["prog", "--repo", "owner/repo", "--since-days", "7"]):
+            with patch.dict(os.environ, {"GITHUB_TOKEN": "token"}):
+                with patch(
+                    "claude_review_kpi_snapshot._fetch_pr_numbers_since", return_value=[1]
+                ), patch(
+                    "claude_review_kpi_snapshot.gate_comments._list_issue_comments",
+                    return_value=[comment],
+                ):
+                    self.assertEqual(snapshot.main(), 0)
 
 
 if __name__ == "__main__":
