@@ -218,6 +218,40 @@ FINDINGS:
         truncated = claude_gate_review._truncate(text, 100)
         self.assertEqual(text, truncated)
 
+    def test_build_prompt_includes_failed_checks(self):
+        """Ensure failed checks are injected into the prompt."""
+        prompt = claude_gate_review._build_prompt(
+            "Title",
+            "Body",
+            "risk:R2",
+            "- file.py (modified, +1 -0)",
+            "diff",
+            failed_checks=["Bugbot: issue", "Codecov"],
+        )
+        self.assertIn("FAILED CHECKS", prompt)
+        self.assertIn("Bugbot: issue", prompt)
+        self.assertIn("do not repeat them", prompt)
+
+    def test_fetch_failed_check_summaries(self):
+        """Fetch failed check summaries from mocked API payload."""
+        payload = {
+            "check_runs": [
+                {"name": "Lint", "status": "completed", "conclusion": "success"},
+                {"name": "Bugbot", "status": "completed", "conclusion": "failure"},
+                {
+                    "name": "Codecov",
+                    "status": "completed",
+                    "conclusion": "action_required",
+                    "output": {"title": "Coverage drop"},
+                },
+            ]
+        }
+        with patch("claude_gate_review._fetch_json", return_value=payload):
+            summaries = claude_gate_review._fetch_failed_check_summaries(
+                "owner/repo", "deadbeef", "token"
+            )
+        self.assertEqual(summaries, ["Bugbot", "Codecov: Coverage drop"])
+
     def test_build_prompt(self):
         """Test prompt building includes all required sections."""
         prompt = claude_gate_review._build_prompt(

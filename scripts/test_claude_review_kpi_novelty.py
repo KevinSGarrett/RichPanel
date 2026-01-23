@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import unittest
-
+from typing import Any
 import claude_gate_review as gate
 
 
 class TestClaudeReviewNoveltyExtraction(unittest.TestCase):
     def test_extract_failed_check_summaries(self) -> None:
-        check_runs = [
+        check_runs: list[dict[Any, Any]] = [
             {"name": "Lint", "status": "completed", "conclusion": "success"},
             {
                 "name": "Bugbot",
@@ -28,4 +28,4 @@ class TestClaudeReviewNoveltyExtraction(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main()  # pragma: no cover

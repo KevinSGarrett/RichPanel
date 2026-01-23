@@ -10,7 +10,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path, PurePosixPath
-from typing import Mapping
+from typing import Mapping, Sequence
 
 try:
     import yaml  # type: ignore[import]
@@ -496,7 +496,7 @@ def _fetch_issue_comments(repo: str, pr_number: int, token: str) -> list[dict]:
     return comments
 
 
-def _extract_failed_check_summaries(check_runs: list[dict], limit: int = 6) -> list[str]:
+def _extract_failed_check_summaries(check_runs: Sequence[object], limit: int = 6) -> list[str]:
     failure_conclusions = {
         "failure",
         "cancelled",

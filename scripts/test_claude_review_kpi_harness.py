@@ -69,6 +69,19 @@ class TestClaudeReviewCalibrationHarness(unittest.TestCase):
             self.assertEqual(results["overall"]["total_runs"], 1)
             self.assertEqual(results["results"][0]["risk"], "risk:R2")
 
+    def test_render_scoreboard_output(self) -> None:
+        fixtures = ["legacy_small", "structured_small"]
+        results = harness.run_harness(fixtures, mode="structured")
+        rendered = harness._render_scoreboard(
+            results,
+            fixtures=fixtures,
+            mode="structured",
+            start_date="2026-01-01",
+            end_date="2026-01-02",
+        )
+        self.assertIn("Noise KPI Scoreboard", rendered)
+        self.assertIn("Action Required rate", rendered)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main()  # pragma: no cover
