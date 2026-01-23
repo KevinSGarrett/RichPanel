@@ -781,6 +781,12 @@ FINDINGS:
         self.assertEqual(verdict, "PASS")
         self.assertTrue(any("bypass" in warning.lower() for warning in warnings))
 
+    def test_break_glass_noop_when_pass(self):
+        warnings = []
+        verdict = claude_gate_review._apply_break_glass("PASS", True, warnings)
+        self.assertEqual(verdict, "PASS")
+        self.assertTrue(any("already pass" in warning.lower() for warning in warnings))
+
     def test_redact_evidence_secret(self):
         self.assertEqual(claude_gate_review._redact_evidence("api_key=123"), "[REDACTED]")
 
@@ -788,6 +794,9 @@ FINDINGS:
         long_text = "a" * 250
         redacted = claude_gate_review._redact_evidence(long_text)
         self.assertTrue(redacted.endswith("[TRUNCATED]"))
+
+    def test_redact_evidence_no_false_positive(self):
+        self.assertEqual(claude_gate_review._redact_evidence("timeout=None"), "timeout=None")
 
     def test_stable_finding_id_uses_raw_evidence(self):
         finding = {
@@ -930,6 +939,62 @@ FINDINGS:
         self.assertEqual(findings, [])
         self.assertEqual(payload, {})
 
+    def test_parse_structured_output_non_dict_payload(self):
+        payload, findings, errors = claude_gate_review._parse_structured_output("42", "")
+        self.assertEqual(payload, 42)
+        self.assertEqual(findings, [])
+        self.assertTrue(any("JSON object" in error for error in errors))
+
+    def test_parse_structured_output_missing_reviewers_reports_all(self):
+        raw = json.dumps({"version": "0.9", "verdict": "MAYBE"})
+        _, _, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("version" in error.lower() for error in errors))
+        self.assertTrue(any("verdict" in error.lower() for error in errors))
+        self.assertTrue(any("reviewers" in error.lower() for error in errors))
+
+    def test_parse_structured_output_findings_not_list(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "PASS",
+                "risk": "risk:R1",
+                "reviewers": [{"name": "primary", "model": "claude-opus-4-5", "findings": 42}],
+            }
+        )
+        _, _, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("Findings must be a list" in error for error in errors))
+
+    def test_parse_structured_output_summary_none(self):
+        raw = json.dumps(
+            {
+                "version": "1.0",
+                "verdict": "PASS",
+                "risk": "risk:R1",
+                "reviewers": [
+                    {
+                        "name": "primary",
+                        "model": "claude-opus-4-5",
+                        "findings": [
+                            {
+                                "finding_id": "abc",
+                                "category": "tests",
+                                "severity": 1,
+                                "confidence": 50,
+                                "title": None,
+                                "summary": None,
+                                "file": "",
+                                "evidence": "",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        _, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertTrue(any("title must be a string" in error.lower() for error in errors))
+        self.assertTrue(any("summary must be a string" in error.lower() for error in errors))
+        self.assertEqual(findings[0]["title"], "")
+        self.assertEqual(findings[0]["summary"], "")
     def test_parse_structured_output_missing_evidence(self):
         raw = json.dumps(
             {
