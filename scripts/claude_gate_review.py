@@ -9,6 +9,8 @@ import urllib.error
 import urllib.request
 from typing import Mapping
 
+from claude_gate_constants import CANONICAL_MARKER
+
 GATE_LABEL = "gate:claude"
 RISK_LABEL_RE = re.compile(r"^risk:(R[0-4])(?:$|[-_].+)?$")
 
@@ -273,6 +275,7 @@ def _format_comment(
 ) -> str:
     findings_block = "\n".join(f"- {item}" for item in findings)
     comment = (
+        f"{CANONICAL_MARKER}\n"
         "Claude Review (gate:claude)\n"
         f"CLAUDE_REVIEW: {verdict}\n"
         f"Risk: {risk}\n"

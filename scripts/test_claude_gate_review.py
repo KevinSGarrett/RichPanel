@@ -171,6 +171,7 @@ FINDINGS:
             request_id="req_789xyz",
             usage={"input_tokens": 1000, "output_tokens": 200},
         )
+        self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
         self.assertIn("CLAUDE_REVIEW: PASS", comment)
         self.assertIn("Risk: risk:R2", comment)
         self.assertIn("Model used: claude-opus-4-5", comment)
@@ -188,6 +189,7 @@ FINDINGS:
             model="claude-sonnet-4-5",
             findings=["Issue 1", "Issue 2"],
         )
+        self.assertTrue(comment.startswith(claude_gate_review.CANONICAL_MARKER))
         self.assertIn("CLAUDE_REVIEW: FAIL", comment)
         self.assertIn("Risk: risk:R1", comment)
         self.assertIn("Model used: claude-sonnet-4-5", comment)

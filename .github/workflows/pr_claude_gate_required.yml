@@ -2,11 +2,11 @@ name: PR Claude Gate Required
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled]
+    types: [opened, reopened, synchronize]
 
 concurrency:
   group: claude-gate-${{ github.event.pull_request.number }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -15,6 +15,13 @@ permissions:
 
 jobs:
   claude-gate-check:
+    if: >-
+      !(
+        github.event_name == 'pull_request' &&
+        github.event.action == 'labeled' &&
+        github.event.label.name == 'gate:claude' &&
+        github.actor == 'github-actions[bot]'
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -62,12 +69,13 @@ jobs:
       - name: Post Claude review comment
         if: steps.claude_gate.outcome == 'success' && steps.claude_gate.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          comment_body="$(cat "${{ steps.claude_gate.outputs.comment_path }}")"
-          gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            -f body="$comment_body"
+          python scripts/claude_gate_comments.py \
+            --repo "${{ github.repository }}" \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --comment-path "${{ steps.claude_gate.outputs.comment_path }}"
 
       - name: Upload Claude gate audit artifact
         if: steps.claude_gate.outcome == 'success'
