@@ -31,3 +31,5 @@
 - `python -m compileall backend/src scripts` (pass; after Bugbot follow-up in smoke validation)
 - `python -m compileall backend/src scripts` (pass; after tracking regex fix)
 - `python -m pytest -q` (pass; after tracking regex test)
+- `python -m compileall backend/src scripts` (pass; after URL parentheses fix)
+- `python -m pytest -q` (pass; after URL parentheses test)

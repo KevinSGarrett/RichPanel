@@ -2,7 +2,7 @@
 
 ## Summary
 - `compileall`: pass
-- `pytest`: pass (399 passed, 9 subtests passed)
+- `pytest`: pass (400 passed, 9 subtests passed)
 - `dev_e2e_smoke`: pass (ticket 1089; proof artifact written)
 
 ## Details
@@ -21,6 +21,17 @@ python -m pytest -q
 ```
 Status: pass  
 Output: `399 passed, 9 subtests passed in 20.46s`
+
+```
+python -m compileall backend/src scripts
+```
+Status: pass
+
+```
+python -m pytest -q
+```
+Status: pass  
+Output: `400 passed, 9 subtests passed in 20.32s`
 
 ```
 python -m pytest -q

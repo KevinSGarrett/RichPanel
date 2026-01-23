@@ -392,6 +392,16 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         tokens = rewriter._extract_tracking_tokens(text)
         self.assertEqual(tokens, ["abc123-def456"])
 
+    def test_extract_urls_preserves_parentheses(self) -> None:
+        text = (
+            "Reference: https://en.wikipedia.org/wiki/Function_(mathematics) "
+            "for details."
+        )
+        urls = rewriter._extract_urls(text)
+        self.assertEqual(
+            urls, ["https://en.wikipedia.org/wiki/Function_(mathematics)"]
+        )
+
     def test_extract_tracking_from_url_path(self) -> None:
         url = "https://tracking.example.com/track/ABC12345"
         tokens = rewriter._extract_tracking_from_url(url)

@@ -40,7 +40,7 @@ SUSPICIOUS_PATTERNS = [
     r"social security",
 ]
 
-_URL_REGEX = re.compile(r"https?://[^\s<>()\"']+")
+_URL_REGEX = re.compile(r"https?://[^\s<>\"']+")
 _ETA_RANGE_REGEX = re.compile(
     r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
     flags=re.IGNORECASE,
@@ -140,7 +140,12 @@ def _dedupe(items: List[str]) -> List[str]:
 
 def _strip_url_punctuation(url: str) -> str:
     trimmed = url.strip()
-    while trimmed and trimmed[-1] in ".,;:!?)]}'\"":
+    while trimmed and trimmed.endswith(")"):
+        if trimmed.count("(") < trimmed.count(")"):
+            trimmed = trimmed[:-1]
+        else:
+            break
+    while trimmed and trimmed[-1] in ".,;:!?]}'\"":
         trimmed = trimmed[:-1]
     return trimmed
 
