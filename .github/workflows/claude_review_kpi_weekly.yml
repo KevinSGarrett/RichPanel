@@ -1,0 +1,32 @@
+name: Claude Review KPI Weekly Snapshot
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+
+jobs:
+  kpi_snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Generate KPI snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/claude_review_kpi_snapshot.py --repo "${{ github.repository }}" --since-days 14 > kpi.md
+      - name: Post snapshot to KPI log issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment 157 --body-file kpi.md
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-review-kpi-snapshot
+          path: kpi.md
