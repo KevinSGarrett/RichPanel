@@ -234,6 +234,32 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
         )
 
+    def test_probe_shopify_ok(self) -> None:
+        stub_client = SimpleNamespace(
+            request=lambda *args, **kwargs: SimpleNamespace(
+                status_code=200, dry_run=False
+            )
+        )
+        with mock.patch.object(
+            shadow_eval, "_build_shopify_client", return_value=stub_client
+        ):
+            result = shadow_eval._probe_shopify(shop_domain="example.myshopify.com")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status_code"], 200)
+        self.assertFalse(result["dry_run"])
+
+    def test_probe_shopify_dry_run(self) -> None:
+        stub_client = SimpleNamespace(
+            request=lambda *args, **kwargs: SimpleNamespace(
+                status_code=0, dry_run=True
+            )
+        )
+        with mock.patch.object(
+            shadow_eval, "_build_shopify_client", return_value=stub_client
+        ):
+            result = shadow_eval._probe_shopify(shop_domain="example.myshopify.com")
+        self.assertFalse(result["ok"])
+
     def test_http_trace_records_and_asserts(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
@@ -450,6 +476,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         plan = SimpleNamespace(
             actions=[
@@ -487,6 +514,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 "--allow-non-prod",
                 "--shop-domain",
                 "example.myshopify.com",
+                "--shopify-probe",
             ]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
@@ -498,12 +526,123 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                return_value={"status_code": 200, "dry_run": False, "ok": True},
             ):
                 result = shadow_eval.main()
                 self.assertEqual(result, 0)
                 self.assertTrue(trace_path.exists())
                 self.assertTrue(artifact_path.exists())
                 self.assertTrue(report_md_path.exists())
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+                self.assertTrue(payload["shopify_probe"]["enabled"])
+                self.assertTrue(payload["shopify_probe"]["ok"])
+
+    def test_main_records_probe_error(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+                "--shop-domain",
+                "example.myshopify.com",
+                "--shopify-probe",
+            ]
+            plan = SimpleNamespace(
+                actions=[],
+                routing=SimpleNamespace(
+                    intent="unknown", department="Email Support Team", reason="stubbed"
+                ),
+                mode="automation_candidate",
+                reasons=["stubbed"],
+            )
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                return_value={"status_code": 403, "dry_run": False, "ok": False},
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 1)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
+
+    def test_main_records_probe_exception(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+                "--shop-domain",
+                "example.myshopify.com",
+                "--shopify-probe",
+            ]
+            plan = SimpleNamespace(
+                actions=[],
+                routing=SimpleNamespace(
+                    intent="unknown", department="Email Support Team", reason="stubbed"
+                ),
+                mode="automation_candidate",
+                reasons=["stubbed"],
+            )
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                side_effect=shadow_eval.ShopifyRequestError("boom"),
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 1)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
 
 
 def main() -> int:  # pragma: no cover

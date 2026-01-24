@@ -34,6 +34,10 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     SecretLoadError,
     TransportError,
 )
+from richpanel_middleware.integrations.shopify import (  # type: ignore
+    ShopifyClient,
+    ShopifyRequestError,
+)
 from readonly_shadow_utils import (
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
@@ -125,6 +129,26 @@ def _build_richpanel_client(
         dry_run=False,  # allow GETs; writes are still blocked by read-only + env guard
         read_only=True,
     )
+
+
+def _build_shopify_client(
+    *, allow_network: Optional[bool], shop_domain: Optional[str]
+) -> ShopifyClient:
+    return ShopifyClient(shop_domain=shop_domain, allow_network=allow_network)
+
+
+def _probe_shopify(*, shop_domain: Optional[str]) -> Dict[str, Any]:
+    client = _build_shopify_client(allow_network=None, shop_domain=shop_domain)
+    response = client.request(
+        "GET",
+        "shop.json",
+        params={"fields": "id"},
+        dry_run=False,
+        safe_mode=False,
+        automation_enabled=True,
+    )
+    ok = response.status_code < 400 and not response.dry_run
+    return {"status_code": response.status_code, "dry_run": response.dry_run, "ok": ok}
 
 
 def _is_prod_target(*, richpanel_base_url: str, richpanel_secret_id: Optional[str]) -> bool:
@@ -411,6 +435,11 @@ def main() -> int:
         "--shop-domain",
         help="Optional Shopify shop domain override (defaults to env)",
     )
+    parser.add_argument(
+        "--shopify-probe",
+        action="store_true",
+        help="Probe Shopify with a read-only GET to verify access",
+    )
     args = parser.parse_args()
 
     env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
@@ -441,11 +470,23 @@ def main() -> int:
     ticket_refs: List[str] = []
     sample_mode = "explicit"
     tickets_requested = 0
+    shopify_probe: Dict[str, Any] = {"enabled": bool(args.shopify_probe)}
     try:
         rp_client = _build_richpanel_client(
             richpanel_secret=args.richpanel_secret_id,
             base_url=richpanel_base_url,
         )
+
+        if args.shopify_probe:
+            try:
+                probe = _probe_shopify(shop_domain=args.shop_domain)
+                shopify_probe.update(probe)
+                if not probe.get("ok", False):
+                    had_errors = True
+                    shopify_probe["error"] = {"type": "shopify_error"}
+            except (ShopifyRequestError, Exception) as exc:
+                had_errors = True
+                shopify_probe["error"] = _safe_error(exc)
 
         explicit_refs = [str(value).strip() for value in (args.ticket_id or [])]
         explicit_refs = [value for value in dict.fromkeys(explicit_refs) if value]
@@ -569,6 +610,7 @@ def main() -> int:
         "prod_target": is_prod_target,
         "sample_mode": sample_mode,
         "counts": counts,
+        "shopify_probe": shopify_probe,
         "tickets": ticket_results,
         "http_trace_path": str(trace_path),
         "http_trace_summary": trace_summary,
@@ -596,6 +638,9 @@ def main() -> int:
         f"- Tracking found: {counts['tracking_found']}",
         f"- ETA available: {counts['eta_available']}",
         f"- Errors: {counts['errors']}",
+        f"- Shopify probe enabled: {shopify_probe['enabled']}",
+        f"- Shopify probe ok: {shopify_probe.get('ok')}",
+        f"- Shopify probe status: {shopify_probe.get('status_code')}",
         "",
         "## HTTP Trace Summary",
         f"- Total requests: {trace_summary['total_requests']}",

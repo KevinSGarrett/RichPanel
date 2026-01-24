@@ -22,6 +22,12 @@ on:
         default: "false"
         type: choice
         options: ["true", "false"]
+      shopify-probe:
+        description: "Probe Shopify with a read-only GET (true|false)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
 
 permissions:
   id-token: write
@@ -120,6 +126,7 @@ jobs:
         env:
           INPUT_SAMPLE_SIZE: ${{ inputs.sample-size }}
           INPUT_TICKET_IDS: ${{ inputs.ticket-ids }}
+          INPUT_SHOPIFY_PROBE: ${{ inputs.shopify-probe }}
         run: |
           set -euo pipefail
           TICKET_ARGS=()
@@ -142,9 +149,15 @@ jobs:
             SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
           fi
 
+          SHOPIFY_PROBE_ARGS=()
+          if [ "${INPUT_SHOPIFY_PROBE:-false}" = "true" ]; then
+            SHOPIFY_PROBE_ARGS=(--shopify-probe)
+          fi
+
           python scripts/live_readonly_shadow_eval.py \
             "${SAMPLE_ARGS[@]}" \
-            "${TICKET_ARGS[@]}"
+            "${TICKET_ARGS[@]}" \
+            "${SHOPIFY_PROBE_ARGS[@]}"
 
       - name: Upload shadow eval artifacts
         uses: actions/upload-artifact@v4
