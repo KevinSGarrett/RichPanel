@@ -16,6 +16,7 @@
 - Added `shopify-probe` workflow input and CLI flag for read-only Shopify verification (orders count, best-effort).
 - Added GH secret fallback to accept `PROD_SHOPIFY_API_TOKEN` when the admin token secret is unset.
 - Shadow eval now extracts the latest customer message from conversation messages for routing.
+- Added Shopify order-number fallback using `orders.json?name=` when `GET /orders/{id}` returns 404.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`

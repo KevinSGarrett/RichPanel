@@ -148,6 +148,55 @@ def _should_enrich(
     return allow_network and not safe_mode and automation_enabled
 
 
+def _extract_shopify_order_payload(data: Any) -> Dict[str, Any]:
+    payload: Dict[str, Any] = {}
+    if isinstance(data, dict):
+        if isinstance(data.get("order"), dict):
+            payload = data["order"]
+        elif isinstance(data.get("orders"), list) and data["orders"]:
+            first = data["orders"][0]
+            if isinstance(first, dict):
+                payload = first
+        else:
+            payload = data
+    return payload
+
+
+def _lookup_shopify_by_name(
+    *,
+    order_name: str,
+    allow_network: bool,
+    safe_mode: bool,
+    automation_enabled: bool,
+    client: ShopifyClient,
+) -> Dict[str, Any]:
+    if not order_name:
+        return {}
+
+    candidates = [order_name]
+    if not order_name.startswith("#"):
+        candidates.insert(0, f"#{order_name}")
+
+    for candidate in candidates:
+        response = client.find_order_by_name(
+            candidate,
+            fields=SHOPIFY_ORDER_FIELDS,
+            status="any",
+            limit=1,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            dry_run=not allow_network,
+        )
+        if response.dry_run:
+            continue
+        if response.status_code >= 400:
+            continue
+        payload = _extract_shopify_order_payload(response.json() or {})
+        if payload:
+            return payload
+    return {}
+
+
 def _lookup_shopify(
     order_id: str,
     *,
@@ -167,17 +216,17 @@ def _lookup_shopify(
         automation_enabled=automation_enabled,
         dry_run=not allow_network,
     )
-    data = response.json() or {}
     payload: Dict[str, Any] = {}
-    if isinstance(data, dict):
-        if isinstance(data.get("order"), dict):
-            payload = data["order"]
-        elif isinstance(data.get("orders"), list) and data["orders"]:
-            first = data["orders"][0]
-            if isinstance(first, dict):
-                payload = first
-        else:
-            payload = data
+    if response.status_code == 404:
+        payload = _lookup_shopify_by_name(
+            order_name=str(order_id).strip(),
+            allow_network=allow_network,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            client=client,
+        )
+    else:
+        payload = _extract_shopify_order_payload(response.json() or {})
     return _extract_shopify_fields(payload)
 
 
