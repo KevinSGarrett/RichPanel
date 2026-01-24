@@ -34,6 +34,11 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     SecretLoadError,
     TransportError,
 )
+from readonly_shadow_utils import (
+    extract_ticket_fields as _extract_ticket_fields,
+    extract_ticket_list as _extract_ticket_list,
+    fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
+)
 LOGGER = logging.getLogger("readonly_shadow_eval")
 logging.basicConfig(
     level=logging.INFO,
@@ -116,61 +121,6 @@ def _require_env_flags(context: str) -> Dict[str, str]:
         _require_env_flag(key, expected, context=context)
         applied[key] = expected
     return applied
-
-
-def _extract_ticket_list(payload: Any) -> List[Dict[str, Any]]:
-    if isinstance(payload, list):
-        return [item for item in payload if isinstance(item, dict)]
-    if isinstance(payload, dict):
-        for key in ("tickets", "data", "items", "results"):
-            items = payload.get(key)
-            if isinstance(items, list):
-                return [item for item in items if isinstance(item, dict)]
-    return []
-
-
-def _extract_ticket_fields(ticket: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
-    ticket_number = (
-        ticket.get("conversation_no")
-        or ticket.get("ticket_number")
-        or ticket.get("number")
-        or ticket.get("conversation_number")
-    )
-    ticket_id = ticket.get("id") or ticket.get("ticket_id") or ticket.get("_id")
-    number_str = str(ticket_number).strip() if ticket_number is not None else None
-    id_str = str(ticket_id).strip() if ticket_id is not None else None
-    return number_str or None, id_str or None
-
-
-def _fetch_recent_ticket_refs(
-    client: RichpanelClient, *, sample_size: int, list_path: str
-) -> List[str]:
-    if sample_size < 1:
-        raise SystemExit("--sample-size must be >= 1")
-    response = client.request(
-        "GET",
-        list_path,
-        params={"limit": str(sample_size), "page": "1"},
-        dry_run=False,
-        log_body_excerpt=False,
-    )
-    if response.dry_run or response.status_code >= 400:
-        raise SystemExit(
-            f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
-        )
-    tickets = _extract_ticket_list(response.json())
-    results: List[str] = []
-    seen: set[str] = set()
-    for ticket in tickets:
-        number, ticket_id = _extract_ticket_fields(ticket)
-        candidate = ticket_id or number
-        if not candidate or candidate in seen:
-            continue
-        seen.add(candidate)
-        results.append(candidate)
-        if len(results) >= sample_size:
-            break
-    return results
 
 
 def _build_richpanel_client(

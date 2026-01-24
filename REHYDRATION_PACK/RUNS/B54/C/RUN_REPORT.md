@@ -22,6 +22,7 @@
 - Added latest-ticket sampling + sanitized output fields in `scripts/shadow_order_status.py`.
 - Added workflow dispatch `shadow_live_readonly_eval.yml` that runs the evaluation with GH secrets and uploads artifacts.
 - Adjusted Claude gate shadow-mode parsing to avoid action-required noise on structured JSON parse failures.
+- Extracted shared ticket sampling helpers into `scripts/readonly_shadow_utils.py` and hardened workflow inputs + `boto3` install.
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run

@@ -45,13 +45,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
       - name: Run live read-only shadow evaluation
         shell: bash
+        env:
+          INPUT_SAMPLE_SIZE: ${{ inputs.sample-size }}
+          INPUT_TICKET_IDS: ${{ inputs.ticket-ids }}
         run: |
           set -euo pipefail
           TICKET_ARGS=()
-          if [ -n "${{ inputs.ticket-ids }}" ]; then
-            IFS=',' read -ra IDS <<< "${{ inputs.ticket-ids }}"
+          if [ -n "${INPUT_TICKET_IDS:-}" ]; then
+            IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"
             for id in "${IDS[@]}"; do
               trimmed="$(echo "$id" | xargs)"
               if [ -n "$trimmed" ]; then
@@ -62,7 +70,11 @@ jobs:
 
           SAMPLE_ARGS=()
           if [ ${#TICKET_ARGS[@]} -eq 0 ]; then
-            SAMPLE_ARGS=(--sample-size "${{ inputs.sample-size }}")
+            if [[ ! "${INPUT_SAMPLE_SIZE:-}" =~ ^[0-9]+$ ]]; then
+              echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"
+              exit 2
+            fi
+            SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
           fi
 
           python scripts/live_readonly_shadow_eval.py \

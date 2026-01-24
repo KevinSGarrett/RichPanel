@@ -6,7 +6,9 @@
 - Redacted error type fields to safe categories in shadow eval outputs.
 - Updated shadow eval tests for new CLI flags and redaction behavior.
 - Suppressed Claude gate structured parse failures from showing as action required in shadow mode.
+- Extracted shared ticket sampling helpers into `scripts/readonly_shadow_utils.py`.
 - Added workflow dispatch for live read-only shadow validation: `.github/workflows/shadow_live_readonly_eval.yml`.
+- Hardened workflow inputs (env-bound values + validation) and installed `boto3`.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
