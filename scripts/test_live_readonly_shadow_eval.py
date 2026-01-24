@@ -450,6 +450,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         plan = SimpleNamespace(
             actions=[
@@ -487,6 +488,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 "--allow-non-prod",
                 "--shop-domain",
                 "example.myshopify.com",
+                "--shopify-probe",
             ]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
@@ -498,12 +500,19 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                return_value={"status_code": 200, "dry_run": False, "ok": True},
             ):
                 result = shadow_eval.main()
                 self.assertEqual(result, 0)
                 self.assertTrue(trace_path.exists())
                 self.assertTrue(artifact_path.exists())
                 self.assertTrue(report_md_path.exists())
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+                self.assertTrue(payload["shopify_probe"]["enabled"])
+                self.assertTrue(payload["shopify_probe"]["ok"])
 
 
 def main() -> int:  # pragma: no cover
