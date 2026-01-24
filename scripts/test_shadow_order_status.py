@@ -703,6 +703,8 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertTrue(shadow._comment_is_operator({"is_operator": True}))
         self.assertFalse(shadow._comment_is_operator({"isOperator": False}))
         self.assertTrue(shadow._comment_is_operator({"via": {"isOperator": True}}))
+        self.assertTrue(shadow._comment_is_operator({"via": {"is_operator": True}}))
+        self.assertIsNone(shadow._comment_is_operator({"via": "not-a-dict"}))
         self.assertFalse(shadow._comment_is_operator({"sender_type": "customer"}))
         self.assertTrue(shadow._comment_is_operator({"author_type": "Agent"}))
         self.assertIsNone(shadow._comment_is_operator({}))
@@ -713,6 +715,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
 
         payload = {
             "comments": [
+                "not-a-dict",
                 {"plain_body": "agent note", "via": {"isOperator": True}},
                 {"body": "customer body", "via": {"isOperator": False}},
             ]
@@ -726,6 +729,13 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             ]
         }
         self.assertEqual(shadow._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer message")
 
     def test_fetch_conversation_handles_bad_json(self) -> None:
         class _BadJsonResponse(_StubResponse):

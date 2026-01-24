@@ -301,6 +301,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(
             shadow_eval._comment_is_operator({"via": {"isOperator": True}})
         )
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"via": {"is_operator": True}})
+        )
+        self.assertIsNone(shadow_eval._comment_is_operator({"via": "not-a-dict"}))
         self.assertFalse(
             shadow_eval._comment_is_operator({"sender_type": "customer"})
         )
@@ -315,6 +319,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
         payload = {
             "comments": [
+                "not-a-dict",
                 {"plain_body": "agent note", "via": {"isOperator": True}},
                 {"body": "customer body", "via": {"isOperator": False}},
             ]
@@ -328,6 +333,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ]
         }
         self.assertEqual(shadow_eval._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(
+            shadow_eval._extract_comment_message(payload), "customer message"
+        )
 
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
