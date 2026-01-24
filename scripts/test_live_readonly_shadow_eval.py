@@ -37,6 +37,7 @@ class _StubClient:
             payload = {
                 "ticket": {
                     "id": "t-123",
+                    "conversation_id": "conv-123",
                     "order": {"order_id": "order-123", "tracking_number": "TN123"},
                     "customer": {"email": "customer@example.com", "name": "Test User"},
                 }
@@ -429,6 +430,18 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         result = shadow_eval._fetch_conversation(_BoomClient(), "t-123")
         self.assertEqual(result, {})
 
+    def test_fetch_conversation_handles_bad_json(self) -> None:
+        class _BadJsonResponse(_StubResponse):
+            def json(self) -> dict:
+                raise ValueError("bad json")
+
+        class _BadJsonClient:
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                return _BadJsonResponse({}, status_code=200)
+
+        result = shadow_eval._fetch_conversation(_BadJsonClient(), "t-123")
+        self.assertEqual(result, {})
+
     def test_fetch_conversation_falls_back_to_messages(self) -> None:
         class _SequenceClient:
             def __init__(self) -> None:
@@ -578,6 +591,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
             stub_client = _StubClient()
+            captured: dict[str, dict] = {}
+            def _capture_event(payload: dict) -> SimpleNamespace:
+                captured["payload"] = payload["payload"]
+                return SimpleNamespace()
             argv = [
                 "live_readonly_shadow_eval.py",
                 "--ticket-id",
@@ -594,7 +611,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 "_build_report_paths",
                 return_value=(artifact_path, report_md_path, trace_path),
             ), mock.patch.object(
-                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+                shadow_eval, "normalize_event", side_effect=_capture_event
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
             ), mock.patch.object(
@@ -610,6 +627,9 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 payload = json.loads(artifact_path.read_text(encoding="utf-8"))
                 self.assertTrue(payload["shopify_probe"]["enabled"])
                 self.assertTrue(payload["shopify_probe"]["ok"])
+                self.assertEqual(
+                    captured["payload"]["conversation_id"], "conv-123"
+                )
 
     def test_main_records_probe_error(self) -> None:
         env = {

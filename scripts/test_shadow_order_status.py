@@ -642,6 +642,18 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         result = shadow._fetch_conversation(_BoomClient(), "t-1")
         self.assertEqual(result, {})
 
+    def test_fetch_conversation_handles_bad_json(self) -> None:
+        class _BadJsonResponse(_StubResponse):
+            def json(self) -> dict:
+                raise ValueError("bad json")
+
+        class _BadJsonClient:
+            def request(self, method: str, path: str, **kwargs):
+                return _BadJsonResponse({}, status_code=200)
+
+        result = shadow._fetch_conversation(_BadJsonClient(), "t-1")
+        self.assertEqual(result, {})
+
     def test_fetch_conversation_falls_back_to_messages(self) -> None:
         class _SequenceClient:
             def __init__(self) -> None:

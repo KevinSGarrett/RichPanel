@@ -351,7 +351,13 @@ def _fetch_conversation(
                     resp.dry_run,
                 )
                 continue
-            payload = resp.json()
+            try:
+                payload = resp.json()
+            except Exception:
+                LOGGER.warning(
+                    "Conversation parse failed for %s", _redact_path(path)
+                )
+                continue
             if isinstance(payload, list):
                 payload = {"messages": payload}
             if isinstance(payload, dict) and isinstance(payload.get("conversation"), dict):
@@ -607,7 +613,8 @@ def main() -> int:
                 event_payload.update(
                     {
                         "ticket_id": ticket_ref,
-                        "conversation_id": ticket_ref,
+                        "conversation_id": ticket_payload.get("conversation_id")
+                        or ticket_id,
                         "customer_message": customer_message,
                     }
                 )

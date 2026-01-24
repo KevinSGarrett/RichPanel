@@ -378,7 +378,13 @@ def _fetch_conversation(
                     resp.dry_run,
                 )
                 continue
-            payload = resp.json()
+            try:
+                payload = resp.json()
+            except Exception:
+                LOGGER.warning(
+                    "Conversation parse failed for %s", _redact_path(path)
+                )
+                continue
             if isinstance(payload, list):
                 payload = {"messages": payload}
             if isinstance(payload, dict) and isinstance(payload.get("conversation"), dict):
