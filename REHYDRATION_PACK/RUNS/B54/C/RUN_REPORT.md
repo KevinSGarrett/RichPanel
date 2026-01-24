@@ -25,6 +25,7 @@
 - Extracted shared ticket sampling helpers into `scripts/readonly_shadow_utils.py` and hardened workflow inputs + `boto3` install.
 - Centralized `_safe_error` handling in the shared utility to avoid duplication.
 - Enabled optional AWS secret resolution in the workflow when GH secrets are secret IDs.
+- Added fallback to list tickets via `/api/v1/conversations` when `/v1/tickets` is forbidden or missing.
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run
