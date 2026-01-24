@@ -606,7 +606,7 @@ FINDINGS:
         )
         self.assertEqual(verdict, "PASS")
         self.assertIsNotNone(parse_error)
-        self.assertEqual(summary["action_required_count"], 1)
+        self.assertEqual(summary["action_required_count"], 0)
         self.assertEqual(state_payload["findings"]["abc"]["occurrences"], 1)
 
     def test_evaluate_structured_response_explicit_blocker(self):

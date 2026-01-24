@@ -61,12 +61,18 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyClient,
     ShopifyRequestError,
 )
+from readonly_shadow_utils import (
+    fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
+    safe_error as _safe_error,
+)
 
 LOGGER = logging.getLogger("shadow_order_status")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
+logging.getLogger("richpanel_middleware").setLevel(logging.WARNING)
+logging.getLogger("integrations").setLevel(logging.WARNING)
 
 ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
 ALLOWED_ENVS = {"staging", "prod"}
@@ -77,15 +83,6 @@ def _fingerprint(text: str, *, length: int = 12) -> str:
     return digest[:length]
 
 
-def _hash_email(value: Optional[str]) -> Optional[str]:
-    if value is None:
-        return None
-    text = str(value).strip()
-    if not text:
-        return None
-    return f"hash:{_fingerprint(text.lower())}"
-
-
 def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if value is None:
         return None
@@ -93,21 +90,6 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     return f"redacted:{_fingerprint(text)}"
-
-
-def _last4(value: Optional[str]) -> Optional[str]:
-    if value is None:
-        return None
-    text = str(value).strip()
-    if not text:
-        return None
-    if len(text) <= 4:
-        return "redacted"
-    return text[-4:]
-
-
-def _safe_error(exc: Exception) -> Dict[str, str]:
-    return {"type": exc.__class__.__name__}
 
 
 def _require_env_flag(key: str, expected: str, *, context: str) -> None:
@@ -331,16 +313,18 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
         try:
             resp = client.request("GET", path, dry_run=False, log_body_excerpt=False)
         except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-            errors.append(f"{path}: {exc}")
+            errors.append(f"{_redact_path(path)}: {exc.__class__.__name__}")
             continue
         if resp.dry_run or resp.status_code >= 400:
-            errors.append(f"{path}: status {resp.status_code} dry_run={resp.dry_run}")
+            errors.append(
+                f"{_redact_path(path)}: status {resp.status_code} dry_run={resp.dry_run}"
+            )
             continue
         payload = resp.json() or {}
         if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
             payload = payload["ticket"]
         payload = payload if isinstance(payload, dict) else {}
-        payload["__source_path"] = path
+        payload["__source_path"] = _redact_path(path)
         return payload
     redacted_ref = _redact_identifier(ticket_ref) or "redacted"
     raise RuntimeError(
@@ -410,9 +394,9 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
     return merged
 
 
-def _extract_customer_redaction(
+def _extract_customer_presence(
     ticket: Dict[str, Any], convo: Dict[str, Any]
-) -> Dict[str, Optional[str]]:
+) -> Dict[str, bool]:
     sources: list[Dict[str, Any]] = []
     for candidate in (ticket, convo):
         if isinstance(candidate, dict):
@@ -432,10 +416,10 @@ def _extract_customer_redaction(
         address = address or source.get("billing_address")
 
     return {
-        "email": _hash_email(email),
-        "phone": "REDACTED" if phone else None,
-        "name": "REDACTED" if name else None,
-        "address": "REDACTED" if address else None,
+        "email_present": bool(email),
+        "phone_present": bool(phone),
+        "name_present": bool(name),
+        "address_present": bool(address),
     }
 
 
@@ -560,6 +544,7 @@ def run_ticket(
     outbound_enabled: bool,
     rewrite_enabled: bool,
 ) -> Dict[str, Any]:
+    ticket_redacted = _redact_identifier(ticket_id) or "redacted"
     ticket = _fetch_ticket(richpanel_client, ticket_id)
     convo = _fetch_conversation(richpanel_client, ticket_id)
     customer_message = _extract_latest_customer_message(ticket, convo) or "(not provided)"
@@ -584,9 +569,9 @@ def run_ticket(
     is_order_status = intent in ORDER_STATUS_INTENTS
 
     result: Dict[str, Any] = {
-        "ticket_id": ticket_id,
+        "ticket_id_redacted": ticket_redacted,
         "routing": route_info,
-        "customer": _extract_customer_redaction(ticket, convo),
+        "customer_presence": _extract_customer_presence(ticket, convo),
         "order_status": {
             "is_order_status": is_order_status,
         },
@@ -598,7 +583,6 @@ def run_ticket(
                 "skipped_reason": "route_not_order_status",
                 "order_summary_found": False,
                 "tracking_present": False,
-                "tracking_number_last4": None,
                 "eta_window": None,
             }
         )
@@ -666,15 +650,6 @@ def run_ticket(
             "lookup_status": "SKIPPED" if skipped_missing_order_id else "OK",
             "skipped_reason": "missing_order_id" if skipped_missing_order_id else None,
             "tracking_present": tracking_present,
-            "tracking_number_last4": _last4(
-                str(
-                    order_summary.get("tracking_number")
-                    or order_summary.get("tracking")
-                    or order_summary.get("tracking_no")
-                    or order_summary.get("trackingCode")
-                    or ""
-                )
-            ),
             "eta_window": {
                 "window_min_days": delivery_estimate.get("window_min_days"),
                 "window_max_days": delivery_estimate.get("window_max_days"),
@@ -702,8 +677,18 @@ def main() -> int:
     parser.add_argument(
         "--ticket-id",
         action="append",
-        required=True,
         help="Richpanel ticket or conversation id (repeatable)",
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=0,
+        help="Number of recent tickets to sample when --ticket-id is not provided",
+    )
+    parser.add_argument(
+        "--ticket-list-path",
+        default="/v1/tickets",
+        help="Richpanel API path for ticket listing (default: /v1/tickets)",
     )
     parser.add_argument(
         "--out",
@@ -726,17 +711,8 @@ def main() -> int:
     env_name = _require_readonly_guards(
         confirm_live_readonly=args.confirm_live_readonly
     )
-
-    ticket_ids = [str(value).strip() for value in args.ticket_id or []]
-    deduped: List[str] = [value for value in dict.fromkeys(ticket_ids) if value]
-    if not deduped:
-        raise SystemExit("At least one --ticket-id is required")
     if args.max_tickets < 1:
         raise SystemExit("--max-tickets must be >= 1")
-    if len(deduped) > args.max_tickets:
-        raise SystemExit(
-            f"Refusing to process {len(deduped)} tickets (max {args.max_tickets})"
-        )
 
     allow_network, outbound_enabled = _resolve_network_flags()
     rewrite_enabled = _to_bool(os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), False)
@@ -747,12 +723,49 @@ def main() -> int:
     shopify_client = _build_shopify_client(
         allow_network=allow_network, env_name=env_name
     )
+    deduped: List[str] = []
+    sample_mode = "explicit"
+    tickets_requested = 0
 
     trace_path = _build_trace_path()
     trace = _HttpTrace().capture()
     try:
         results: List[Dict[str, Any]] = []
         had_errors = False
+        ticket_ids = [str(value).strip() for value in args.ticket_id or []]
+        deduped = [value for value in dict.fromkeys(ticket_ids) if value]
+        if not deduped:
+            if args.sample_size < 1:
+                raise SystemExit(
+                    "At least one --ticket-id or a positive --sample-size is required"
+                )
+            if args.sample_size > args.max_tickets:
+                raise SystemExit(
+                    f"--sample-size must be <= --max-tickets ({args.max_tickets})"
+                )
+            tickets_requested = args.sample_size
+            sample_mode = "recent"
+            deduped = _fetch_recent_ticket_refs(
+                richpanel_client,
+                sample_size=args.sample_size,
+                list_path=args.ticket_list_path,
+            )
+        else:
+            tickets_requested = len(deduped)
+            sample_mode = "explicit"
+        if not deduped:
+            raise SystemExit("No tickets available for evaluation")
+        if len(deduped) > args.max_tickets:
+            raise SystemExit(
+                f"Refusing to process {len(deduped)} tickets (max {args.max_tickets})"
+            )
+        if len(deduped) < tickets_requested:
+            LOGGER.warning(
+                "Sample size reduced: requested %d got %d",
+                tickets_requested,
+                len(deduped),
+            )
+
         for ticket_id in deduped:
             redacted = _redact_identifier(ticket_id) or "redacted"
             LOGGER.info("Processing ticket %s", redacted)
@@ -770,7 +783,7 @@ def main() -> int:
             except Exception as exc:
                 had_errors = True
                 result = {
-                    "ticket_id": ticket_id,
+                    "ticket_id_redacted": _redact_identifier(ticket_id) or "redacted",
                     "error": _safe_error(exc),
                 }
             results.append(result)
@@ -782,9 +795,37 @@ def main() -> int:
 
     out_path = Path(args.out).expanduser().resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    counts = {
+        "tickets_requested": tickets_requested,
+        "tickets_selected": len(deduped),
+        "tickets_scanned": len(results),
+        "order_status_candidates": sum(
+            1
+            for item in results
+            if item.get("order_status", {}).get("is_order_status")
+        ),
+        "orders_matched": sum(
+            1
+            for item in results
+            if item.get("order_status", {}).get("order_summary_found")
+        ),
+        "tracking_found": sum(
+            1
+            for item in results
+            if item.get("order_status", {}).get("tracking_present")
+        ),
+        "eta_available": sum(
+            1
+            for item in results
+            if item.get("order_status", {}).get("eta_window")
+        ),
+        "errors": sum(1 for item in results if item.get("error")),
+    }
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "environment": env_name,
+        "sample_mode": sample_mode,
+        "counts": counts,
         "http_trace_path": str(trace_path),
         "tickets": results,
     }

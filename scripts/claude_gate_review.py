@@ -423,7 +423,10 @@ def _evaluate_structured_response(
     highest_severity_action_required = max(
         (int(item.get("severity", 0)) for item in action_required), default=0
     )
-    action_required_count = 1 if parse_error_message else len(action_required)
+    if parse_error_message and mode == MODE_SHADOW:
+        action_required_count = 0
+    else:
+        action_required_count = 1 if parse_error_message else len(action_required)
     summary = {
         "action_required_count": action_required_count,
         "total_points": total_points,
@@ -1070,12 +1073,13 @@ def _format_structured_comment(
         f"total_points={summary.get('total_points', 0)}, "
         f"highest_severity_action_required={summary.get('highest_severity_action_required', 0)}\n"
     )
+    show_parse_error = bool(parse_error_message) and mode_label != "SHADOW"
     comment += "\nAction Required:\n"
-    if parse_error_message:
+    if show_parse_error:
         comment += f"- Structured output parse failure: {parse_error_message}\n"
     if action_required:
         comment += "\n".join(_format_item(item) for item in action_required) + "\n"
-    if not action_required and not parse_error_message:
+    if not action_required and not show_parse_error:
         comment += "- None\n"
 
     if fyi:

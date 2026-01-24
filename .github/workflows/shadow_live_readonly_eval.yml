@@ -1,0 +1,91 @@
+name: Shadow Live Read-Only Eval
+
+on:
+  workflow_dispatch:
+    inputs:
+      sample-size:
+        description: "Number of recent tickets to sample (ignored if ticket-ids provided)"
+        required: false
+        default: "10"
+        type: string
+      ticket-ids:
+        description: "Optional comma-separated Richpanel ticket or conversation IDs"
+        required: false
+        type: string
+      shop-domain:
+        description: "Shopify shop domain (e.g. shop.myshopify.com)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  live-readonly-shadow-eval:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: prod
+      RICHPANEL_ENV: prod
+      MW_ALLOW_NETWORK_READS: "true"
+      RICHPANEL_OUTBOUND_ENABLED: "true"
+      RICHPANEL_WRITE_DISABLED: "true"
+      RICHPANEL_READ_ONLY: "true"
+      SHOPIFY_OUTBOUND_ENABLED: "true"
+      OPENAI_ALLOW_NETWORK: "false"
+      OPENAI_REPLY_REWRITE_ENABLED: "false"
+      RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
+      SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Run live read-only shadow evaluation
+        shell: bash
+        env:
+          INPUT_SAMPLE_SIZE: ${{ inputs.sample-size }}
+          INPUT_TICKET_IDS: ${{ inputs.ticket-ids }}
+        run: |
+          set -euo pipefail
+          TICKET_ARGS=()
+          if [ -n "${INPUT_TICKET_IDS:-}" ]; then
+            IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"
+            for id in "${IDS[@]}"; do
+              trimmed="$(echo "$id" | xargs)"
+              if [ -n "$trimmed" ]; then
+                TICKET_ARGS+=(--ticket-id "$trimmed")
+              fi
+            done
+          fi
+
+          SAMPLE_ARGS=()
+          if [ ${#TICKET_ARGS[@]} -eq 0 ]; then
+            if [[ ! "${INPUT_SAMPLE_SIZE:-}" =~ ^[0-9]+$ ]]; then
+              echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"
+              exit 2
+            fi
+            SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
+          fi
+
+          python scripts/live_readonly_shadow_eval.py \
+            "${SAMPLE_ARGS[@]}" \
+            "${TICKET_ARGS[@]}"
+
+      - name: Upload shadow eval artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-readonly-shadow-eval
+          path: |
+            artifacts/readonly_shadow/*.json
+            artifacts/readonly_shadow/*.md
+          if-no-files-found: error
