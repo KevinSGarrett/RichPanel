@@ -13,9 +13,30 @@ from richpanel_middleware.commerce import order_lookup  # noqa: E402
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     _extract_customer_identity,
     _extract_order_id,
+    _baseline_summary,
+    _coerce_int,
+    _coerce_price,
+    _coerce_str,
+    _extract_order_number_from_payload,
+    _extract_order_number_from_text,
+    _extract_payload_fields,
+    _extract_shopify_fields,
     _extract_shopify_order_identifier,
+    _extract_shopify_order_payload,
+    _extract_shipstation_fields,
+    _iter_comment_texts,
+    _list_shopify_orders_by_email,
+    _lookup_shopify,
+    _lookup_shopify_by_email,
+    _lookup_shopify_by_email_name,
+    _lookup_shopify_by_name,
+    _lookup_shipstation,
+    _match_order_number_from_text,
     _order_matches_name,
+    _resolve_orders_by_identity,
+    _select_order_from_name_search,
     _select_most_recent_order,
+    _should_enrich,
     lookup_order_summary,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
@@ -115,6 +136,363 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual(
             _extract_shopify_order_identifier({"id": "ABC123"}), "ABC123"
         )
+
+    def test_should_enrich_rejects_missing_order_id(self) -> None:
+        self.assertFalse(_should_enrich("", True, False, True))
+        self.assertFalse(_should_enrich("unknown", True, False, True))
+
+    def test_extract_shopify_order_payload_variants(self) -> None:
+        self.assertEqual(
+            _extract_shopify_order_payload({"order": {"id": "o-1"}})["id"],
+            "o-1",
+        )
+        self.assertEqual(
+            _extract_shopify_order_payload({"orders": [{"id": "o-2"}]})["id"],
+            "o-2",
+        )
+        self.assertEqual(
+            _extract_shopify_order_payload({"id": "o-3"}).get("id"), "o-3"
+        )
+
+    def test_select_order_from_name_search_handles_non_dict(self) -> None:
+        data = {"orders": ["bad", {"name": "#5555", "order_number": 5555}]}
+        selected = _select_order_from_name_search("#5555", data)
+        self.assertEqual(selected.get("order_number"), 5555)
+
+    def test_select_order_from_name_search_matches_name_only(self) -> None:
+        data = {"orders": [{"name": "#777"}]}
+        selected = _select_order_from_name_search("#777", data)
+        self.assertEqual(selected.get("name"), "#777")
+
+    def test_select_order_from_name_search_falls_back_to_payload(self) -> None:
+        data = {"order": {"id": "o-9"}}
+        selected = _select_order_from_name_search("#999", data)
+        self.assertEqual(selected.get("id"), "o-9")
+
+    def test_lookup_shopify_by_name_empty_returns_empty(self) -> None:
+        class _StubClient:
+            def find_orders_by_name(self, *args, **kwargs):
+                raise AssertionError("should not be called")
+
+        payload = _lookup_shopify_by_name(
+            order_name="",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(),
+        )
+        self.assertEqual(payload, {})
+
+    def test_resolve_orders_by_identity_no_orders(self) -> None:
+        payload, resolution = _resolve_orders_by_identity([], email="x", name="y")
+        self.assertEqual(payload, {})
+        self.assertEqual(resolution.get("resolvedBy"), "no_match")
+
+    def test_list_shopify_orders_by_email_handles_failures(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, dry_run: bool, payload: dict):
+                self.status_code = status_code
+                self.dry_run = dry_run
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, response):
+                self.response = response
+
+            def list_orders_by_email(self, *args, **kwargs):
+                return self.response
+
+        self.assertEqual(
+            _list_shopify_orders_by_email(
+                email="x",
+                allow_network=False,
+                safe_mode=False,
+                automation_enabled=True,
+                client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={})),
+            ),
+            [],
+        )
+        self.assertEqual(
+            _list_shopify_orders_by_email(
+                email="x",
+                allow_network=True,
+                safe_mode=False,
+                automation_enabled=True,
+                client=_StubClient(_StubResponse(status_code=500, dry_run=False, payload={})),
+            ),
+            [],
+        )
+        self.assertEqual(
+            _list_shopify_orders_by_email(
+                email="x",
+                allow_network=True,
+                safe_mode=False,
+                automation_enabled=True,
+                client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={"orders": "nope"})),
+            ),
+            [],
+        )
+
+    def test_lookup_shopify_handles_404_fallback(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, payload: dict):
+                self.status_code = status_code
+                self._payload = payload
+                self.dry_run = False
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self):
+                self.calls = []
+
+            def get_order(self, *args, **kwargs):
+                self.calls.append("get_order")
+                return _StubResponse(status_code=404, payload={})
+
+            def find_orders_by_name(self, *args, **kwargs):
+                self.calls.append("find_orders_by_name")
+                return _StubResponse(
+                    status_code=200, payload={"orders": [{"order_number": 111}]}
+                )
+
+        payload = _lookup_shopify(
+            "111",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            client=_StubClient(),
+        )
+        self.assertEqual(payload.get("order_number"), "111")
+
+    def test_lookup_shopify_skips_when_network_disabled(self) -> None:
+        payload = _lookup_shopify(
+            "111",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            client=None,
+        )
+        self.assertEqual(payload, {})
+
+    def test_lookup_shipstation_skips_when_network_disabled(self) -> None:
+        summary = _lookup_shipstation(
+            "A-1",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            client=None,
+        )
+        self.assertEqual(summary, {})
+
+    def test_lookup_shopify_by_email_helpers(self) -> None:
+        class _StubResponse:
+            def __init__(self, payload: dict):
+                self.status_code = 200
+                self.dry_run = False
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, payload: dict):
+                self.payload = payload
+
+            def list_orders_by_email(self, *args, **kwargs):
+                return _StubResponse(self.payload)
+
+        client = _StubClient(
+            {"orders": [{"order_number": 1, "created_at": "2026-01-01T00:00:00Z"}]}
+        )
+        payload = _lookup_shopify_by_email_name(
+            email="a@example.com",
+            name="",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=client,
+        )
+        self.assertEqual(payload.get("order_number"), 1)
+        payload = _lookup_shopify_by_email(
+            email="a@example.com",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=client,
+        )
+        self.assertEqual(payload.get("order_number"), 1)
+
+    def test_lookup_order_summary_identity_resolution_no_orders(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+
+            def json(self):
+                return {"orders": []}
+
+        class _StubClient:
+            def list_orders_by_email(self, *args, **kwargs):
+                return _StubResponse()
+
+        summary = lookup_order_summary(
+            build_event_envelope({"email": "nobody@example.com"}),
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=_StubClient(),
+        )
+        resolution = summary.get("order_resolution") or {}
+        self.assertEqual(resolution.get("resolvedBy"), "no_match")
+
+    def test_lookup_order_summary_handles_shopify_and_shipstation_errors(self) -> None:
+        class _ShopifyClient:
+            def __init__(self):
+                self.called = False
+
+            def get_order(self, *args, **kwargs):
+                self.called = True
+                raise RuntimeError("boom")
+
+        class _ShipStationClient:
+            def __init__(self):
+                self.called = False
+
+            def list_shipments(self, *args, **kwargs):
+                self.called = True
+                raise RuntimeError("shipstation boom")
+
+        summary = lookup_order_summary(
+            build_event_envelope({"order_id": "ERR-1"}),
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=_ShopifyClient(),
+            shipstation_client=_ShipStationClient(),
+        )
+        self.assertEqual(summary["order_id"], "ERR-1")
+
+    def test_extract_order_number_from_payload_paths(self) -> None:
+        number, label = _extract_order_number_from_payload(None)
+        self.assertEqual((number, label), ("", ""))
+        number, label = _extract_order_number_from_payload({"order_number": "123"})
+        self.assertEqual((number, label), ("123", "order_number_field"))
+        number, label = _extract_order_number_from_payload({"order": {"name": "#456"}})
+        self.assertEqual((number, label), ("456", "hash_number"))
+        number, label = _extract_order_number_from_payload(
+            {"custom_fields": {"order_ref": "789"}}
+        )
+        self.assertEqual((number, label), ("789", "order_number_field"))
+        number, label = _extract_order_number_from_payload({"subject": "order #654"})
+        self.assertEqual((number, label), ("654", "order_number"))
+        number, label = _extract_order_number_from_payload(
+            {"comments": [{"plain_body": "order no. 111"}]}
+        )
+        self.assertEqual((number, label), ("111", "order_no_text"))
+        number, label = _extract_order_number_from_payload(
+            {"messages": ["bad", {"text": "order #222"}]}
+        )
+        self.assertEqual((number, label), ("222", "order_number"))
+
+        number, label = _extract_order_number_from_payload(
+            {"order": {"order_number": "333"}}
+        )
+        self.assertEqual((number, label), ("333", "order_number_field"))
+        class _FlakyStr:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def __str__(self) -> str:
+                self.calls += 1
+                return "" if self.calls == 1 else "orderNumber: 444"
+
+        number, label = _extract_order_number_from_payload(
+            {"custom_fields": {"order_ref": _FlakyStr()}}
+        )
+        self.assertEqual((number, label), ("444", "orderNumber_field"))
+
+    def test_extract_comment_text_helpers(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        self.assertEqual(_iter_comment_texts({"comments": "nope"}), [])
+        self.assertEqual(
+            _iter_comment_texts({"comments": ["bad", {"plain_body": _BadStr()}]}),
+            [],
+        )
+
+    def test_match_order_number_from_text_empty(self) -> None:
+        self.assertEqual(_match_order_number_from_text(""), ("", ""))
+
+    def test_extract_shopify_fields_and_shipstation_fields(self) -> None:
+        self.assertEqual(_extract_shopify_fields("bad"), {})
+        payload = {
+            "order_number": "777",
+            "shipping_lines": [{"title": "Ground"}],
+            "line_items": [{"id": 1}],
+        }
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("order_number"), "777")
+        self.assertEqual(summary.get("shipping_method"), "Ground")
+        self.assertEqual(summary.get("items_count"), 1)
+
+        self.assertEqual(_extract_shipstation_fields("bad"), {})
+        summary = _extract_shipstation_fields(
+            {
+                "shipments": ["bad", {"trackingNumber": "TN1"}],
+                "createDate": "2026-01-01T00:00:00Z",
+                "orderTotal": "10.50",
+            }
+        )
+        self.assertEqual(summary.get("tracking_number"), "TN1")
+        self.assertEqual(summary.get("created_at"), "2026-01-01T00:00:00Z")
+        self.assertEqual(summary.get("total_price"), "10.50")
+
+    def test_coerce_helpers_handle_exceptions(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        self.assertIsNone(_coerce_str(_BadStr()))
+        self.assertIsNone(_coerce_int("not-int"))
+        self.assertEqual(_coerce_price("bad"), "bad")
+
+    def test_extract_customer_identity_non_dict_and_messages(self) -> None:
+        self.assertEqual(_extract_customer_identity("nope"), ("", ""))
+        payload = {
+            "messages": ["bad", {"text": "email: jane@example.com"}],
+        }
+        email, name = _extract_customer_identity(payload)
+        self.assertEqual(email, "jane@example.com")
+        self.assertEqual(name, "")
+
+    def test_order_matches_name_with_single_word_and_address(self) -> None:
+        order = {"shipping_address": {"name": "Prince"}}
+        self.assertTrue(_order_matches_name(order, name="Prince", email=""))
+
+    def test_extract_shopify_order_identifier_extra_cases(self) -> None:
+        self.assertEqual(_extract_shopify_order_identifier("bad"), "")
+        self.assertEqual(
+            _extract_shopify_order_identifier({"order_number": " 999 "}), "999"
+        )
+        self.assertEqual(
+            _extract_shopify_order_identifier({"id": " 123 "}), "123"
+        )
+
+    def test_baseline_and_payload_field_counts(self) -> None:
+        envelope = build_event_envelope({"items": [{"id": 1}, {"id": 2}]})
+        summary = _baseline_summary(envelope)
+        self.assertEqual(summary["items_count"], 2)
+
+        payload_summary = _extract_payload_fields(
+            {"items": [{"id": 1}], "line_items": [{"id": 2}, {"id": 3}]}
+        )
+        self.assertEqual(payload_summary.get("items_count"), 2)
 
     def test_unknown_order_id_skips_shopify_and_logs(self) -> None:
         with mock.patch.object(
