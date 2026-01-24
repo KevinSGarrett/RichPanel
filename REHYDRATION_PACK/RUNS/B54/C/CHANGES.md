@@ -10,6 +10,7 @@
 - Centralized `_safe_error` in `scripts/readonly_shadow_utils.py` for reuse.
 - Added workflow dispatch for live read-only shadow validation: `.github/workflows/shadow_live_readonly_eval.yml`.
 - Hardened workflow inputs (env-bound values + validation) and installed `boto3`.
+- Added OIDC-based AWS secret resolution when GH secrets point to secret IDs.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
