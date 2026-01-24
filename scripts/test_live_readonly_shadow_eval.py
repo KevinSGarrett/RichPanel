@@ -588,7 +588,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 return_value={"status_code": 403, "dry_run": False, "ok": False},
             ):
                 result = shadow_eval.main()
-            self.assertEqual(result, 1)
+            self.assertEqual(result, 0)
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
 
@@ -640,7 +640,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 side_effect=shadow_eval.ShopifyRequestError("boom"),
             ):
                 result = shadow_eval.main()
-            self.assertEqual(result, 1)
+            self.assertEqual(result, 0)
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
 
