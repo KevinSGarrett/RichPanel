@@ -485,6 +485,46 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             )
         self.assertEqual(result["order_status"]["draft_reply_type"], "no_tracking")
 
+    def test_run_ticket_uses_ticket_id_value_for_payload_conversation_id(self) -> None:
+        ticket = {
+            "id": "real-1",
+            "customer_message": "where is my order",
+            "order": {"order_id": "o-1"},
+        }
+        rp_client = _GuardedRichpanelClient(ticket, {})
+        shopify_client = _GuardedShopifyClient()
+        captured: dict[str, dict] = {}
+
+        def _capture(payload, **kwargs):
+            captured["payload"] = payload
+            routing = SimpleNamespace(
+                intent="order_status_tracking",
+                department="Email Support Team",
+                reason="stubbed",
+            )
+            routing_artifact = SimpleNamespace(primary_source="deterministic")
+            return routing, routing_artifact
+
+        with mock.patch.object(
+            shadow, "compute_dual_routing", side_effect=_capture
+        ), mock.patch.object(
+            shadow,
+            "_lookup_order_summary_payload_first",
+            return_value=({"order_id": "o-1", "tracking_number": "TN1"}, "payload"),
+        ), mock.patch.object(
+            shadow, "build_tracking_reply", return_value={"body": "stubbed"}
+        ):
+            result = shadow.run_ticket(
+                "ref-123",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=False,
+                outbound_enabled=False,
+                rewrite_enabled=False,
+            )
+        self.assertEqual(result["order_status"]["draft_reply_type"], "tracking")
+        self.assertEqual(captured["payload"]["conversation_id"], "real-1")
+
     def test_build_openai_evidence(self) -> None:
         rewrite_result = shadow.ReplyRewriteResult(
             body="x",

@@ -606,7 +606,7 @@ def run_ticket(
     customer_message = _extract_latest_customer_message(ticket, convo) or "(not provided)"
     payload = _extract_order_payload(ticket, convo)
     payload["ticket_id"] = ticket_id
-    payload["conversation_id"] = ticket.get("conversation_id") or ticket_id
+    payload["conversation_id"] = ticket.get("conversation_id") or ticket_id_value
     payload["customer_message"] = customer_message
 
     envelope = _build_event_envelope(payload, ticket_id=ticket_id)
