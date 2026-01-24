@@ -183,6 +183,20 @@ class OrderIdResolutionTests(unittest.TestCase):
         )
         self.assertEqual(payload, {})
 
+    def test_lookup_shopify_by_name_handles_exception(self) -> None:
+        class _BoomClient:
+            def find_orders_by_name(self, *args, **kwargs):
+                raise RuntimeError("boom")
+
+        payload = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_BoomClient(),
+        )
+        self.assertEqual(payload, {})
+
     def test_resolve_orders_by_identity_no_orders(self) -> None:
         payload, resolution = _resolve_orders_by_identity([], email="x", name="y")
         self.assertEqual(payload, {})
@@ -232,6 +246,21 @@ class OrderIdResolutionTests(unittest.TestCase):
                 safe_mode=False,
                 automation_enabled=True,
                 client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={"orders": "nope"})),
+            ),
+            [],
+        )
+
+        class _BoomClient:
+            def list_orders_by_email(self, *args, **kwargs):
+                raise RuntimeError("boom")
+
+        self.assertEqual(
+            _list_shopify_orders_by_email(
+                email="x",
+                allow_network=True,
+                safe_mode=False,
+                automation_enabled=True,
+                client=_BoomClient(),
             ),
             [],
         )

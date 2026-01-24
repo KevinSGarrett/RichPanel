@@ -310,15 +310,22 @@ def _lookup_shopify_by_name(
     candidates = [normalized]
 
     for candidate in candidates:
-        response = client.find_orders_by_name(
-            candidate,
-            fields=SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER,
-            status="any",
-            limit=5,
-            safe_mode=safe_mode,
-            automation_enabled=automation_enabled,
-            dry_run=not allow_network,
-        )
+        try:
+            response = client.find_orders_by_name(
+                candidate,
+                fields=SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER,
+                status="any",
+                limit=5,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                dry_run=not allow_network,
+            )
+        except Exception:
+            LOGGER.warning(
+                "Shopify name lookup failed",
+                extra={"order_name": candidate},
+            )
+            continue
         if response.dry_run:
             continue
         if response.status_code >= 400:
@@ -414,15 +421,19 @@ def _list_shopify_orders_by_email(
 ) -> List[Dict[str, Any]]:
     if not allow_network:
         return []
-    response = client.list_orders_by_email(
-        email,
-        fields=SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER,
-        status="any",
-        limit=MAX_EMAIL_ORDER_RESULTS,
-        safe_mode=safe_mode,
-        automation_enabled=automation_enabled,
-        dry_run=not allow_network,
-    )
+    try:
+        response = client.list_orders_by_email(
+            email,
+            fields=SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER,
+            status="any",
+            limit=MAX_EMAIL_ORDER_RESULTS,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            dry_run=not allow_network,
+        )
+    except Exception:
+        LOGGER.warning("Shopify email lookup failed")
+        return []
     if response.dry_run or response.status_code >= 400:
         return []
     payload = response.json() or {}
