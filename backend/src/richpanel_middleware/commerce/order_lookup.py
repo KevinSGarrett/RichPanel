@@ -116,6 +116,13 @@ def lookup_order_summary(
     payload_summary = _order_summary_from_payload(envelope.payload)
     if payload_summary:
         summary = _merge_summary(summary, payload_summary)
+        order_id = summary.get("order_id")
+        if _has_payload_shipping_signal(summary) and order_id not in (
+            None,
+            "",
+            "unknown",
+        ):
+            return summary
 
     payload_dict = envelope.payload if isinstance(envelope.payload, dict) else {}
     order_id = summary["order_id"]
