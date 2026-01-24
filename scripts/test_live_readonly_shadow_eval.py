@@ -188,6 +188,33 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertIn("/ABC", redacted)
         self.assertNotIn("redacted:", redacted)
 
+    def test_extract_latest_customer_message(self) -> None:
+        convo = {
+            "messages": [
+                {"sender_type": "agent", "body": "ignore"},
+                {"sender_type": "customer", "body": "need tracking"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "need tracking")
+
+        convo = {
+            "messages": [
+                {"sender_type": " customer ", "body": "trimmed sender"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "trimmed sender")
+
+        convo = {
+            "messages": [
+                {"body": "system message"},
+                {"sender_type": "customer", "body": "real customer"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "real customer")
+
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit) as ctx:

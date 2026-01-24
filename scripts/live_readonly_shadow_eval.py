@@ -327,6 +327,31 @@ def _fetch_conversation(client: RichpanelClient, ticket_id: str) -> Dict[str, An
         return {}
 
 
+def _extract_latest_customer_message(
+    ticket: Dict[str, Any], convo: Dict[str, Any]
+) -> str:
+    text = extract_customer_message(ticket, default="")
+    if text:
+        return text
+    text = extract_customer_message(convo, default="")
+    if text:
+        return text
+    messages = convo.get("messages") or convo.get("conversation_messages") or []
+    if isinstance(messages, list):
+        for message in reversed(messages):
+            if not isinstance(message, dict):
+                continue
+            sender = str(
+                message.get("sender_type") or message.get("author_type") or ""
+            ).strip().lower()
+            if sender not in {"customer", "user", "end_user", "shopper"}:
+                continue
+            candidate = extract_customer_message(message, default="")
+            if candidate:
+                return candidate
+    return ""
+
+
 def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dict[str, Any]:
     """Blend known order fields to feed the pipeline order lookup."""
     candidates: list[Dict[str, Any]] = []
@@ -529,8 +554,9 @@ def main() -> int:
                 convo_payload = _fetch_conversation(rp_client, ticket_ref)
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
 
-                customer_message = extract_customer_message(
-                    order_payload, default="(not provided)"
+                customer_message = (
+                    _extract_latest_customer_message(ticket_payload, convo_payload)
+                    or "(not provided)"
                 )
                 event_payload = dict(order_payload)
                 event_payload.update(
