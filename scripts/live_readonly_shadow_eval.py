@@ -39,6 +39,7 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyRequestError,
 )
 from readonly_shadow_utils import (
+    build_route_info as _build_route_info,
     comment_is_operator as _comment_is_operator,
     extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
@@ -638,6 +639,11 @@ def main() -> int:
                     automation_enabled=True,
                     allow_network=True,
                     outbound_enabled=False,
+                )
+
+                result["routing"] = _build_route_info(
+                    getattr(plan, "routing", None),
+                    getattr(plan, "routing_artifact", None),
                 )
 
                 order_action = next(
