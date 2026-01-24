@@ -84,6 +84,8 @@ class _FallbackListingClient:
         if path == "/v1/tickets":
             return _StubResponse({}, status_code=403)
         if path == "/api/v1/conversations":
+            return _StubResponse({}, status_code=404)
+        if path == "/v1/conversations":
             return _StubResponse(self.list_payload, status_code=200)
         return _StubResponse({}, status_code=404)
 
@@ -244,7 +246,10 @@ class ShadowOrderStatusHelperTests(unittest.TestCase):
             client, sample_size=2, list_path="/v1/tickets"
         )
         self.assertEqual(results, ["c-1", "1002"])
-        self.assertEqual(client.paths, ["/v1/tickets", "/api/v1/conversations"])
+        self.assertEqual(
+            client.paths,
+            ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
+        )
 
     def test_safe_error_redacts_exception_type(self) -> None:
         self.assertEqual(shadow._safe_error(RuntimeError("boom"))["type"], "error")

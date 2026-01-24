@@ -35,6 +35,7 @@ def fetch_recent_ticket_refs(
     list_paths = [list_path]
     if list_path == "/v1/tickets":
         list_paths.append("/api/v1/conversations")
+        list_paths.append("/v1/conversations")
 
     for path in list_paths:
         response = client.request(
