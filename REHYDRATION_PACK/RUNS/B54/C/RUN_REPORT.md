@@ -3,10 +3,10 @@
 ## Metadata
 - **Run ID:** `b54-20260123-live-readonly-shadow`
 - **Agent:** C
-- **Date (UTC):** 2026-01-23
+- **Date (UTC):** 2026-01-24
 - **Worktree path:** `C:\RichPanel_GIT`
-- **Branch:** `b54/live-readonly-shadow-validation`
-- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/161
+- **Branch:** `main`
+- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -14,7 +14,7 @@
 - **Stop conditions:** workflow dispatch exists; scripts enforce read-only guards; PII-safe report template stored in `REHYDRATION_PACK/RUNS/B54/C/PROOF/`.
 
 ## Ticket sourcing (required)
-- **How obtained:** workflow dispatch uses `/v1/tickets` listing to sample recent tickets.
+- **How obtained:** workflow dispatch used explicit ticket IDs (provided out-of-band) to bypass list endpoints.
 - **Ticket reference:** stored as hashed ticket IDs in the JSON report (no raw IDs).
 
 ## What changed (high-level)
@@ -34,8 +34,8 @@
 - `python scripts/test_claude_gate_review.py`
 
 ## Tests / Proof
-- Workflow dispatch: `.github/workflows/shadow_live_readonly_eval.yml` (not executed in this workspace).
-- Proof template: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`.
+- Workflow dispatch run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21308270109
+- Proof: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
 
 ## Docs impact
 - Added run artifacts: `REHYDRATION_PACK/RUNS/B54/C/RUN_REPORT.md`, `EVIDENCE.md`, `CHANGES.md`.
@@ -47,7 +47,7 @@
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
-- Pending: workflow run link and artifact evidence once the workflow is executed.
+- None.
 
 ## Follow-ups
-- [ ] Run the workflow dispatch and update this report with the run link + artifact paths.
+- [x] Recorded workflow run link + artifact paths.
