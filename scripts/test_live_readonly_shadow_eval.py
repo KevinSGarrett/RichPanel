@@ -15,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import live_readonly_shadow_eval as shadow_eval  # noqa: E402
+import readonly_shadow_utils as shadow_utils  # noqa: E402
 
 
 class _StubResponse:
@@ -403,6 +404,36 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ]
         }
         self.assertEqual(shadow_eval._extract_comment_message(payload), "short")
+
+        payload = {
+            "comments": [
+                {"body": "operator note", "via": {"isOperator": True}},
+                {"body": "unknown note", "via": {}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "unknown note")
+
+        def _simple_extractor(comment):
+            return comment.get("text", "")
+
+        payload = {"comments": [{"text": "fallback text", "via": {"channel": "email"}}]}
+        self.assertEqual(
+            shadow_utils.extract_comment_message(payload, extractor=_simple_extractor),
+            "fallback text",
+        )
+
+    def test_parse_timestamp_variants(self) -> None:
+        self.assertIsNone(shadow_utils._parse_timestamp(None))
+        self.assertIsNone(shadow_utils._parse_timestamp("not-a-time"))
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00Z")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00+00:00")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00")
+        )
 
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
