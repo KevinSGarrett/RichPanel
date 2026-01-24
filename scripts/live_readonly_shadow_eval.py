@@ -483,10 +483,19 @@ def main() -> int:
                 shopify_probe.update(probe)
                 if not probe.get("ok", False):
                     shopify_probe["error"] = {"type": "shopify_error"}
-            except ShopifyRequestError as exc:
-                shopify_probe["error"] = _safe_error(exc)
+                    LOGGER.warning(
+                        "Shopify probe failed",
+                        extra={
+                            "status": probe.get("status_code"),
+                            "dry_run": probe.get("dry_run"),
+                        },
+                    )
             except Exception as exc:
                 shopify_probe["error"] = _safe_error(exc)
+                LOGGER.warning(
+                    "Shopify probe exception",
+                    extra={"error_type": shopify_probe["error"]["type"]},
+                )
 
         explicit_refs = [str(value).strip() for value in (args.ticket_id or [])]
         explicit_refs = [value for value in dict.fromkeys(explicit_refs) if value]
