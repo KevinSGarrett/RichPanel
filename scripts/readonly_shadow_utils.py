@@ -56,3 +56,12 @@ def fetch_recent_ticket_refs(
         if len(results) >= sample_size:
             break
     return results
+
+
+def safe_error(exc: Exception) -> Dict[str, str]:
+    name = exc.__class__.__name__
+    if name in {"RichpanelRequestError", "SecretLoadError", "TransportError"}:
+        return {"type": "richpanel_error"}
+    if name in {"ShopifyRequestError"}:
+        return {"type": "shopify_error"}
+    return {"type": "error"}

@@ -35,9 +35,8 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     TransportError,
 )
 from readonly_shadow_utils import (
-    extract_ticket_fields as _extract_ticket_fields,
-    extract_ticket_list as _extract_ticket_list,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
+    safe_error as _safe_error,
 )
 LOGGER = logging.getLogger("readonly_shadow_eval")
 logging.basicConfig(
@@ -71,12 +70,6 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     return f"redacted:{_fingerprint(text)}"
-
-
-def _safe_error(exc: Exception) -> Dict[str, str]:
-    if isinstance(exc, (RichpanelRequestError, SecretLoadError, TransportError)):
-        return {"type": "richpanel_error"}
-    return {"type": "error"}
 
 
 def _resolve_env_name() -> str:

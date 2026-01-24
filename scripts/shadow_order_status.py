@@ -62,9 +62,8 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyRequestError,
 )
 from readonly_shadow_utils import (
-    extract_ticket_fields as _extract_ticket_fields,
-    extract_ticket_list as _extract_ticket_list,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
+    safe_error as _safe_error,
 )
 
 LOGGER = logging.getLogger("shadow_order_status")
@@ -91,14 +90,6 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     return f"redacted:{_fingerprint(text)}"
-
-
-def _safe_error(exc: Exception) -> Dict[str, str]:
-    if isinstance(exc, (RichpanelRequestError, SecretLoadError, TransportError)):
-        return {"type": "richpanel_error"}
-    if isinstance(exc, ShopifyRequestError):
-        return {"type": "shopify_error"}
-    return {"type": "error"}
 
 
 def _require_env_flag(key: str, expected: str, *, context: str) -> None:
