@@ -122,6 +122,34 @@ class ShopifyClientTests(unittest.TestCase):
             "https://example.myshopify.com/admin/api/2024-01/orders/order%20123.json?fields=id%2Cname",
         )
 
+    def test_find_order_by_name_builds_expected_query(self) -> None:
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+        client = ShopifyClient(
+            access_token="test-token",
+            allow_network=True,
+            transport=transport,
+        )
+
+        response = client.find_order_by_name(
+            "#1158259",
+            fields=["id", "name"],
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(len(transport.requests), 1)
+        request = transport.requests[0]
+        self.assertEqual(request.method, "GET")
+        self.assertEqual(
+            request.url,
+            "https://example.myshopify.com/admin/api/2024-01/orders.json?fields=id%2Cname&limit=1&name=%231158259&status=any",
+        )
+
     def test_get_order_respects_network_blocked_gate(self) -> None:
         transport = _FailingTransport()
         client = ShopifyClient(
