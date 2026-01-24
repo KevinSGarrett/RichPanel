@@ -3,6 +3,7 @@
 ## Code
 - Hardened `scripts/live_readonly_shadow_eval.py` for prod-only runs, sample-size selection, and PII-safe summary outputs with HTTP trace verification.
 - Added latest-ticket sampling and sanitized outputs to `scripts/shadow_order_status.py`.
+- Redacted error type fields to safe categories in shadow eval outputs.
 - Updated shadow eval tests for new CLI flags and redaction behavior.
 - Added workflow dispatch for live read-only shadow validation: `.github/workflows/shadow_live_readonly_eval.yml`.
 

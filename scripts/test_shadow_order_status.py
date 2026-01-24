@@ -63,6 +63,17 @@ class _StubShopifyResponse:
         return self._payload
 
 
+class _ListingClient:
+    def __init__(self, list_payload: dict, *, status_code: int = 200):
+        self.list_payload = list_payload
+        self.status_code = status_code
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        if path == "/v1/tickets":
+            return _StubResponse(self.list_payload, status_code=self.status_code)
+        return _StubResponse({}, status_code=404)
+
+
 class ShadowOrderStatusGuardTests(unittest.TestCase):
     def test_require_env_flag_missing_and_mismatch(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
@@ -183,6 +194,36 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True):
             with self.assertRaises(SystemExit):
                 shadow._resolve_shopify_secret_id("staging")
+
+
+class ShadowOrderStatusHelperTests(unittest.TestCase):
+    def test_fetch_recent_ticket_refs_success(self) -> None:
+        payload = {
+            "tickets": [
+                {"id": "t-1"},
+                {"conversation_no": "1001"},
+                {"id": "t-1"},
+            ]
+        }
+        client = _ListingClient(payload)
+        results = shadow._fetch_recent_ticket_refs(
+            client, sample_size=2, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["t-1", "1001"])
+
+    def test_fetch_recent_ticket_refs_errors_on_status(self) -> None:
+        client = _ListingClient({}, status_code=500)
+        with self.assertRaises(SystemExit):
+            shadow._fetch_recent_ticket_refs(
+                client, sample_size=1, list_path="/v1/tickets"
+            )
+
+    def test_safe_error_redacts_exception_type(self) -> None:
+        self.assertEqual(shadow._safe_error(RuntimeError("boom"))["type"], "error")
+        self.assertEqual(
+            shadow._safe_error(shadow.TransportError("boom"))["type"],
+            "richpanel_error",
+        )
 
 
 class ShadowOrderStatusRedactionTests(unittest.TestCase):
@@ -568,6 +609,94 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         result = shadow._fetch_conversation(_BoomClient(), "t-1")
         self.assertEqual(result, {})
 
+    def test_main_uses_sample_size_when_no_ticket_id(self) -> None:
+        env = {
+            "RICHPANEL_ENV": "staging",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+        }
+        results = [
+            {
+                "ticket_id_redacted": "redacted:111",
+                "routing": {"intent": "order_status_tracking"},
+                "customer_presence": {"email_present": True},
+                "order_status": {
+                    "is_order_status": True,
+                    "order_summary_found": True,
+                    "tracking_present": True,
+                    "eta_window": {"bucket": "on_time"},
+                },
+            },
+            {
+                "ticket_id_redacted": "redacted:222",
+                "routing": {"intent": "refund_request"},
+                "customer_presence": {"email_present": False},
+                "order_status": {
+                    "is_order_status": False,
+                    "order_summary_found": False,
+                    "tracking_present": False,
+                    "eta_window": None,
+                },
+            },
+        ]
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            out_path = Path(tmpdir) / "out.json"
+            trace_path = Path(tmpdir) / "trace.json"
+            argv = [
+                "shadow_order_status.py",
+                "--sample-size",
+                "2",
+                "--out",
+                str(out_path),
+                "--max-tickets",
+                "5",
+                "--confirm-live-readonly",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow, "_fetch_recent_ticket_refs", return_value=["t-1", "t-2"]
+            ), mock.patch.object(
+                shadow, "run_ticket", side_effect=results
+            ), mock.patch.object(
+                shadow, "_build_shopify_client", return_value=_GuardedShopifyClient()
+            ), mock.patch.object(
+                shadow, "_build_trace_path", return_value=trace_path
+            ):
+                result = shadow.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(out_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["sample_mode"], "recent")
+            self.assertEqual(payload["counts"]["tickets_scanned"], 2)
+            self.assertEqual(payload["counts"]["orders_matched"], 1)
+            self.assertEqual(payload["counts"]["tracking_found"], 1)
+
+    def test_main_sample_size_over_max_tickets_rejected(self) -> None:
+        env = {
+            "RICHPANEL_ENV": "staging",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            out_path = Path(tmpdir) / "out.json"
+            argv = [
+                "shadow_order_status.py",
+                "--sample-size",
+                "3",
+                "--out",
+                str(out_path),
+                "--max-tickets",
+                "2",
+                "--confirm-live-readonly",
+            ]
+            with mock.patch.object(sys, "argv", argv):
+                with self.assertRaises(SystemExit):
+                    shadow.main()
+
     def test_main_output_redacts_pii(self) -> None:
         ticket_payload = {
             "id": "t-1",
@@ -676,7 +805,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             self.assertNotIn("x@y.com", raw)
             payload = json.loads(raw)
             err = payload["tickets"][0]["error"]
-            self.assertEqual(err["type"], "RuntimeError")
+            self.assertEqual(err["type"], "error")
 
     def test_main_continues_after_failure(self) -> None:
         env = {
@@ -719,7 +848,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             self.assertEqual(result, 1)
             payload = json.loads(out_path.read_text(encoding="utf-8"))
             self.assertEqual(len(payload["tickets"]), 2)
-            self.assertEqual(payload["tickets"][0]["error"]["type"], "RuntimeError")
+            self.assertEqual(payload["tickets"][0]["error"]["type"], "error")
             self.assertTrue(
                 payload["tickets"][1]["ticket_id_redacted"].startswith("redacted:")
             )
@@ -727,6 +856,11 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
 
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(
+            ShadowOrderStatusHelperTests
+        )
+    )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(
             ShadowOrderStatusRedactionTests

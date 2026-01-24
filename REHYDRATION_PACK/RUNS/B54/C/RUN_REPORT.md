@@ -24,7 +24,7 @@
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run
-- None locally (workflow dispatch is the preferred execution path).
+- `python -m unittest scripts.test_live_readonly_shadow_eval scripts.test_shadow_order_status`
 
 ## Tests / Proof
 - Workflow dispatch: `.github/workflows/shadow_live_readonly_eval.yml` (not executed in this workspace).

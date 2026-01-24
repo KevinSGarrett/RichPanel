@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import unittest
@@ -47,6 +48,17 @@ class _StubClient:
         return _StubResponse({}, status_code=404)
 
 
+class _ListingClient:
+    def __init__(self, list_payload: dict, *, status_code: int = 200):
+        self.list_payload = list_payload
+        self.status_code = status_code
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        if path == "/v1/tickets":
+            return _StubResponse(self.list_payload, status_code=self.status_code)
+        return _StubResponse({}, status_code=404)
+
+
 class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
     def test_prod_requires_write_disabled(self) -> None:
         env = {
@@ -64,6 +76,15 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
 
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
+    def test_require_prod_environment_blocks_non_prod(self) -> None:
+        env = {"MW_ENV": "dev"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            with self.assertRaises(SystemExit):
+                shadow_eval._require_prod_environment(allow_non_prod=False)
+            self.assertEqual(
+                shadow_eval._require_prod_environment(allow_non_prod=True), "dev"
+            )
+
     def test_resolve_env_name_defaults_to_local(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertEqual(shadow_eval._resolve_env_name(), "local")
@@ -159,6 +180,27 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 )
         self.assertIn("unset", str(ctx.exception))
 
+    def test_fetch_recent_ticket_refs_success(self) -> None:
+        payload = {
+            "tickets": [
+                {"id": "t-1"},
+                {"conversation_no": "1001"},
+                {"id": "t-1"},
+            ]
+        }
+        client = _ListingClient(payload)
+        results = shadow_eval._fetch_recent_ticket_refs(
+            client, sample_size=2, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["t-1", "1001"])
+
+    def test_fetch_recent_ticket_refs_errors_on_status(self) -> None:
+        client = _ListingClient({}, status_code=500)
+        with self.assertRaises(SystemExit):
+            shadow_eval._fetch_recent_ticket_refs(
+                client, sample_size=1, list_path="/v1/tickets"
+            )
+
     def test_http_trace_records_and_asserts(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
@@ -221,6 +263,30 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         payload = trace.to_dict()
         self.assertIn("generated_at", payload)
         self.assertEqual(len(payload["entries"]), 1)
+
+    def test_summarize_trace_counts(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
+        trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
+        summary = shadow_eval._summarize_trace(trace)
+        self.assertEqual(summary["total_requests"], 2)
+        self.assertTrue(summary["allowed_methods_only"])
+        self.assertEqual(summary["methods"].get("GET"), 1)
+
+    def test_delivery_estimate_present(self) -> None:
+        self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))
+        self.assertTrue(
+            shadow_eval._delivery_estimate_present({"eta_human": "2-4 days"})
+        )
+
+    def test_safe_error_redacts_exception_type(self) -> None:
+        self.assertEqual(
+            shadow_eval._safe_error(RuntimeError("boom"))["type"], "error"
+        )
+        self.assertEqual(
+            shadow_eval._safe_error(shadow_eval.TransportError("boom"))["type"],
+            "richpanel_error",
+        )
 
     def test_fetch_ticket_uses_number_path_on_failure(self) -> None:
         class _SequenceClient:
@@ -286,6 +352,64 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertTrue(report_path.parent.exists())
             self.assertTrue(report_md_path.parent.exists())
             self.assertTrue(trace_path.parent.exists())
+
+    def test_main_uses_recent_sample_when_no_ticket_id(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        plan = SimpleNamespace(
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "order_summary": {"order_id": "order-123"},
+                        "delivery_estimate": {"eta_human": "2-4 days"},
+                    },
+                }
+            ],
+            routing=SimpleNamespace(
+                intent="order_status_tracking",
+                department="Email Support Team",
+                reason="stubbed",
+            ),
+            mode="automation_candidate",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "2",
+                "--allow-non-prod",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1", "t-2"]
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["sample_mode"], "recent")
+            self.assertEqual(payload["counts"]["tickets_scanned"], 2)
+            self.assertTrue(payload["tickets"][0]["ticket_id_redacted"].startswith("redacted:"))
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {

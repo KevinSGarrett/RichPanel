@@ -69,7 +69,9 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
 
 
 def _safe_error(exc: Exception) -> Dict[str, str]:
-    return {"type": exc.__class__.__name__}
+    if isinstance(exc, (RichpanelRequestError, SecretLoadError, TransportError)):
+        return {"type": "richpanel_error"}
+    return {"type": "error"}
 
 
 def _resolve_env_name() -> str:

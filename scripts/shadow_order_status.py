@@ -89,7 +89,11 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
 
 
 def _safe_error(exc: Exception) -> Dict[str, str]:
-    return {"type": exc.__class__.__name__}
+    if isinstance(exc, (RichpanelRequestError, SecretLoadError, TransportError)):
+        return {"type": "richpanel_error"}
+    if isinstance(exc, ShopifyRequestError):
+        return {"type": "shopify_error"}
+    return {"type": "error"}
 
 
 def _require_env_flag(key: str, expected: str, *, context: str) -> None:
