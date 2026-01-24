@@ -15,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import live_readonly_shadow_eval as shadow_eval  # noqa: E402
+import readonly_shadow_utils as shadow_utils  # noqa: E402
 
 
 class _StubResponse:
@@ -37,12 +38,15 @@ class _StubClient:
             payload = {
                 "ticket": {
                     "id": "t-123",
+                    "conversation_id": "conv-123",
                     "order": {"order_id": "order-123", "tracking_number": "TN123"},
                     "customer": {"email": "customer@example.com", "name": "Test User"},
                 }
             }
             return _StubResponse(payload)
-        if path.startswith("/api/v1/conversations/"):
+        if path.startswith("/api/v1/conversations/") or path.startswith(
+            "/v1/conversations/"
+        ):
             payload = {"customer_profile": {"phone": "555-1212"}}
             return _StubResponse(payload)
         return _StubResponse({}, status_code=404)
@@ -56,6 +60,22 @@ class _ListingClient:
     def request(self, method: str, path: str, **kwargs) -> _StubResponse:
         if path == "/v1/tickets":
             return _StubResponse(self.list_payload, status_code=self.status_code)
+        return _StubResponse({}, status_code=404)
+
+
+class _FallbackListingClient:
+    def __init__(self, list_payload: dict):
+        self.list_payload = list_payload
+        self.paths: list[str] = []
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        self.paths.append(path)
+        if path == "/v1/tickets":
+            return _StubResponse({}, status_code=403)
+        if path == "/api/v1/conversations":
+            return _StubResponse({}, status_code=404)
+        if path == "/v1/conversations":
+            return _StubResponse(self.list_payload, status_code=200)
         return _StubResponse({}, status_code=404)
 
 
@@ -172,6 +192,64 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertIn("/ABC", redacted)
         self.assertNotIn("redacted:", redacted)
 
+    def test_extract_latest_customer_message(self) -> None:
+        ticket = {"customer_note": "ticket message"}
+        convo = {"messages": [{"sender_type": "customer", "body": "later message"}]}
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "ticket message")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
+
+        ticket = {}
+        convo = {"body": "conversation message"}
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "conversation message")
+
+        convo = {
+            "messages": [
+                {"sender_type": "agent", "body": "ignore"},
+                {"sender_type": "customer", "body": "need tracking"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "need tracking")
+
+        convo = {
+            "messages": [
+                {"sender_type": " customer ", "body": "trimmed sender"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "trimmed sender")
+
+        convo = {
+            "messages": [
+                {"body": "system message"},
+                {"sender_type": "customer", "body": "real customer"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "real customer")
+
+        convo = {"messages": ["not-a-dict", {"sender_type": "agent", "body": "ignore"}]}
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "")
+
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit) as ctx:
@@ -201,16 +279,252 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 client, sample_size=1, list_path="/v1/tickets"
             )
 
+    def test_fetch_recent_ticket_refs_fallbacks_on_forbidden(self) -> None:
+        payload = {
+            "data": [
+                {"id": "c-1"},
+                {"conversation_no": "1002"},
+            ]
+        }
+        client = _FallbackListingClient(payload)
+        results = shadow_eval._fetch_recent_ticket_refs(
+            client, sample_size=2, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["c-1", "1002"])
+        self.assertEqual(
+            client.paths,
+            ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
+        )
+
+    def test_comment_is_operator_detection(self) -> None:
+        self.assertTrue(shadow_eval._comment_is_operator({"is_operator": True}))
+        self.assertFalse(shadow_eval._comment_is_operator({"isOperator": False}))
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"via": {"isOperator": True}})
+        )
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"via": {"is_operator": True}})
+        )
+        self.assertIsNone(shadow_eval._comment_is_operator({"via": "not-a-dict"}))
+        self.assertIsNone(shadow_eval._comment_is_operator({}))
+
+    def test_extract_comment_message_variants(self) -> None:
+        payload = {"comments": "not-a-list"}
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "")
+
+        payload = {
+            "comments": [
+                "not-a-dict",
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer body", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer body")
+
+        payload = {
+            "comments": [
+                {"plain_body": "  ", "via": {"isOperator": False}},
+                {"body": "customer plain", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(
+            shadow_eval._extract_comment_message(
+                payload, extractor=shadow_eval.extract_customer_message
+            ),
+            "customer message",
+        )
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {
+                        "plain_body": "agent email",
+                        "via": {"isOperator": True, "channel": "email"},
+                        "created_at": "2026-01-24T06:00:00Z",
+                    },
+                    {
+                        "plain_body": "customer chat",
+                        "via": {"isOperator": False, "channel": "chat"},
+                        "created_at": "2026-01-24T05:00:00Z",
+                    },
+                ]
+            }
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer chat")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "newer chat",
+                    "via": {"channel": "chat"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "older email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+                {
+                    "plain_body": "newer email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "newer email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "longer message here",
+                    "via": {"channel": "email"},
+                },
+                {
+                    "plain_body": "short",
+                    "via": {"channel": "email"},
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "short")
+
+        payload = {
+            "comments": [
+                {"body": "operator note", "via": {"isOperator": True}},
+                {"body": "unknown note", "via": {}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "unknown note")
+
+        def _simple_extractor(comment):
+            return comment.get("text", "")
+
+        payload = {"comments": [{"text": "fallback text", "via": {"channel": "email"}}]}
+        self.assertEqual(
+            shadow_utils.extract_comment_message(payload, extractor=_simple_extractor),
+            "fallback text",
+        )
+
+    def test_parse_timestamp_variants(self) -> None:
+        self.assertIsNone(shadow_utils._parse_timestamp(None))
+        self.assertIsNone(shadow_utils._parse_timestamp("not-a-time"))
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00Z")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00+00:00")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00")
+        )
+
+    def test_summarize_comment_metadata(self) -> None:
+        payload = {"comments": "not-a-list"}
+        meta = shadow_utils.summarize_comment_metadata(payload)
+        self.assertEqual(meta["comment_count"], 0)
+        self.assertFalse(meta["comment_text_present"])
+        self.assertFalse(meta["comment_operator_flag_present"])
+        self.assertFalse(meta["customer_comment_present"])
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {"plain_body": "agent", "via": {"isOperator": True}},
+                    {"body": "customer", "via": {"isOperator": False}},
+                    {"body": "  ", "via": {"isOperator": False}},
+                ]
+            }
+        }
+        meta = shadow_utils.summarize_comment_metadata(payload)
+        self.assertEqual(meta["comment_count"], 3)
+        self.assertTrue(meta["comment_text_present"])
+        self.assertTrue(meta["comment_operator_flag_present"])
+        self.assertTrue(meta["customer_comment_present"])
+
+    def test_extract_order_number(self) -> None:
+        payload = {"subject": "Order #1057300 missing"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1057300")
+        payload = {"comments": [{"body": "order number: 1185086"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1185086")
+        payload = {"ticket": {"comments": [{"plain_body": "orderNumber: 1121654"}]}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1121654")
+        payload = {
+            "comments": [
+                {"plain_body": "#1234"},
+                {"plain_body": "orderNumber: 99999"},
+            ]
+        }
+        self.assertEqual(shadow_utils.extract_order_number(payload), "99999")
+        payload = {"custom_fields": {"order_number": "1234567"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"order": {"name": "#2223334"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "2223334")
+        payload = {"messages": [{"text": "Order no. 7654321"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "7654321")
+        payload = {"order_number": "#1,234,567"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"custom_fields": {"shipping_code": "9999999"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "")
+
+    def test_probe_shopify_ok(self) -> None:
+        stub_client = SimpleNamespace(
+            request=lambda *args, **kwargs: SimpleNamespace(
+                status_code=200, dry_run=False
+            )
+        )
+        with mock.patch.object(
+            shadow_eval, "_build_shopify_client", return_value=stub_client
+        ):
+            result = shadow_eval._probe_shopify(shop_domain="example.myshopify.com")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status_code"], 200)
+        self.assertFalse(result["dry_run"])
+
+    def test_probe_shopify_dry_run(self) -> None:
+        stub_client = SimpleNamespace(
+            request=lambda *args, **kwargs: SimpleNamespace(
+                status_code=0, dry_run=True
+            )
+        )
+        with mock.patch.object(
+            shadow_eval, "_build_shopify_client", return_value=stub_client
+        ):
+            result = shadow_eval._probe_shopify(shop_domain="example.myshopify.com")
+        self.assertFalse(result["ok"])
+
     def test_http_trace_records_and_asserts(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
         trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
-        trace.assert_get_only(context="test", trace_path=Path("trace.json"))
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
         self.assertEqual(trace.entries[0]["method"], "GET")
 
         trace.record("POST", "https://api.richpanel.com/v1/tickets/123")
         with self.assertRaises(SystemExit):
-            trace.assert_get_only(context="test", trace_path=Path("trace.json"))
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace = shadow_eval._HttpTrace()
+        trace.record("POST", "https://api.openai.com/v1/chat/completions")
+        trace.assert_read_only(allow_openai=True, trace_path=Path("trace.json"))
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
     def test_http_trace_service_mapping(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -327,6 +641,46 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         result = shadow_eval._fetch_conversation(_BoomClient(), "t-123")
         self.assertEqual(result, {})
 
+    def test_fetch_conversation_handles_bad_json(self) -> None:
+        class _BadJsonResponse(_StubResponse):
+            def json(self) -> dict:
+                raise ValueError("bad json")
+
+        class _BadJsonClient:
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                return _BadJsonResponse({}, status_code=200)
+
+        result = shadow_eval._fetch_conversation(_BadJsonClient(), "t-123")
+        self.assertEqual(result, {})
+
+    def test_fetch_conversation_falls_back_to_messages(self) -> None:
+        class _SequenceClient:
+            def __init__(self) -> None:
+                self.paths: list[str] = []
+
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                self.paths.append(path)
+                if path == "/api/v1/conversations/conv-1":
+                    return _StubResponse({}, status_code=403)
+                if path == "/v1/conversations/conv-1":
+                    return _StubResponse({}, status_code=404)
+                if path == "/api/v1/conversations/conv-1/messages":
+                    return _StubResponse(
+                        [{"sender_type": "customer", "body": "where is my order"}],
+                        status_code=200,
+                    )
+                return _StubResponse({}, status_code=404)
+
+        client = _SequenceClient()
+        result = shadow_eval._fetch_conversation(
+            client, "t-123", conversation_id="conv-1"
+        )
+        self.assertEqual(result.get("messages")[0]["body"], "where is my order")
+        self.assertTrue(any("/api/v1/conversations/" in path for path in client.paths))
+        source_path = result.get("__source_path", "")
+        self.assertIn("/api/v1/conversations/", source_path)
+        self.assertIn("/messages", source_path)
+
     def test_extract_order_payload_merges(self) -> None:
         ticket = {"order": {"order_id": "o-1"}, "__source_path": "/v1/tickets/1"}
         convo = {"orders": [{"tracking_number": "TN123"}]}
@@ -334,6 +688,12 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(merged.get("order_id"), "o-1")
         self.assertEqual(merged.get("tracking_number"), "TN123")
         self.assertNotIn("__source_path", merged)
+
+    def test_extract_order_payload_adds_order_number(self) -> None:
+        ticket = {"comments": [{"plain_body": "Order #1158259"}]}
+        convo: dict = {}
+        merged = shadow_eval._extract_order_payload(ticket, convo)
+        self.assertEqual(merged.get("order_number"), "1158259")
 
     def test_tracking_present_checks_fields(self) -> None:
         self.assertFalse(shadow_eval._tracking_present("not a dict"))
@@ -410,6 +770,11 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(payload["sample_mode"], "recent")
             self.assertEqual(payload["counts"]["tickets_scanned"], 2)
             self.assertTrue(payload["tickets"][0]["ticket_id_redacted"].startswith("redacted:"))
+            self.assertEqual(
+                payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
+            )
+            self.assertIn("order_id_present", payload["tickets"][0])
+            self.assertIn("order_context_missing", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
@@ -417,6 +782,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         plan = SimpleNamespace(
             actions=[
@@ -447,6 +813,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
             stub_client = _StubClient()
+            captured: dict[str, dict] = {}
+            def _capture_event(payload: dict) -> SimpleNamespace:
+                captured["payload"] = payload["payload"]
+                return SimpleNamespace()
             argv = [
                 "live_readonly_shadow_eval.py",
                 "--ticket-id",
@@ -454,7 +824,85 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 "--allow-non-prod",
                 "--shop-domain",
                 "example.myshopify.com",
+                "--shopify-probe",
             ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", side_effect=_capture_event
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "lookup_order_summary",
+                return_value={
+                    "order_resolution": {
+                        "resolvedBy": "probe",
+                        "confidence": "high",
+                        "reason": "test",
+                    }
+                },
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                return_value={"status_code": 200, "dry_run": False, "ok": True},
+            ):
+                result = shadow_eval.main()
+                self.assertEqual(result, 0)
+                self.assertTrue(trace_path.exists())
+                self.assertTrue(artifact_path.exists())
+                self.assertTrue(report_md_path.exists())
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+                self.assertTrue(payload["shopify_probe"]["enabled"])
+                self.assertTrue(payload["shopify_probe"]["ok"])
+                self.assertEqual(
+                    captured["payload"]["conversation_id"], "conv-123"
+                )
+                self.assertEqual(
+                    payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
+                )
+            self.assertEqual(
+                payload["tickets"][0]["order_resolution"]["resolvedBy"], "probe"
+            )
+                self.assertIn("order_created_at_present", payload["tickets"][0])
+                self.assertIn("tracking_or_shipping_method_present", payload["tickets"][0])
+
+    def test_main_records_probe_error(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+                "--shop-domain",
+                "example.myshopify.com",
+                "--shopify-probe",
+            ]
+            plan = SimpleNamespace(
+                actions=[],
+                routing=SimpleNamespace(
+                    intent="unknown", department="Email Support Team", reason="stubbed"
+                ),
+                mode="automation_candidate",
+                reasons=["stubbed"],
+            )
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
@@ -465,12 +913,71 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                return_value={"status_code": 403, "dry_run": False, "ok": False},
             ):
                 result = shadow_eval.main()
-                self.assertEqual(result, 0)
-                self.assertTrue(trace_path.exists())
-                self.assertTrue(artifact_path.exists())
-                self.assertTrue(report_md_path.exists())
+            self.assertEqual(result, 0)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
+
+    def test_main_records_probe_exception(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+                "--shop-domain",
+                "example.myshopify.com",
+                "--shopify-probe",
+            ]
+            plan = SimpleNamespace(
+                actions=[],
+                routing=SimpleNamespace(
+                    intent="unknown", department="Email Support Team", reason="stubbed"
+                ),
+                mode="automation_candidate",
+                reasons=["stubbed"],
+            )
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
+            ), mock.patch.object(
+                shadow_eval,
+                "_probe_shopify",
+                side_effect=shadow_eval.ShopifyRequestError("boom"),
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
 
 
 def main() -> int:  # pragma: no cover

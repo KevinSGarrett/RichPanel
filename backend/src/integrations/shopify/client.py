@@ -167,6 +167,7 @@ class ShopifyClient:
         self.shop_domain = (
             shop_domain
             or os.environ.get("SHOPIFY_SHOP_DOMAIN")
+            or os.environ.get("SHOPIFY_SHOP")
             or "example.myshopify.com"
         ).rstrip("/")
         version = (
@@ -208,8 +209,10 @@ class ShopifyClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
-        self._access_token = access_token or os.environ.get(
-            "SHOPIFY_ACCESS_TOKEN_OVERRIDE"
+        self._access_token = (
+            access_token
+            or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
+            or os.environ.get("SHOPIFY_TOKEN")
         )
         self._secrets_client_obj = secrets_client
         self._sleeper = sleeper or time.sleep
@@ -353,6 +356,96 @@ class ShopifyClient:
         return self.request(
             "GET",
             f"orders/{safe_order_id}.json",
+            params=params,
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
+    def find_orders_by_name(
+        self,
+        order_name: str,
+        *,
+        fields: Optional[List[str]] = None,
+        status: str = "any",
+        limit: int = 5,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShopifyResponse:
+        """
+        Search orders by Shopify order name (e.g. #1001).
+        Uses the primary request() entrypoint so all safety gates apply.
+        """
+        safe_name = str(order_name).strip()
+        params: Dict[str, str] = {
+            "status": status,
+            "limit": str(limit),
+            "name": safe_name,
+        }
+        if fields:
+            params["fields"] = ",".join(sorted(map(str, fields)))
+        query = urllib.parse.urlencode(sorted(params.items()))
+
+        return self.request(
+            "GET",
+            f"orders.json?{query}",
+            params=None,
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
+    def find_order_by_name(
+        self,
+        order_name: str,
+        *,
+        fields: Optional[List[str]] = None,
+        status: str = "any",
+        limit: int = 5,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShopifyResponse:
+        """
+        Back-compat wrapper for name-based order search.
+        """
+        return self.find_orders_by_name(
+            order_name,
+            fields=fields,
+            status=status,
+            limit=limit,
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
+    def list_orders_by_email(
+        self,
+        email: str,
+        *,
+        fields: Optional[List[str]] = None,
+        status: str = "any",
+        limit: int = 50,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShopifyResponse:
+        """
+        List orders by customer email.
+        Uses the primary request() entrypoint so all safety gates apply.
+        """
+        safe_email = str(email).strip()
+        params: Dict[str, str] = {
+            "status": status,
+            "limit": str(limit),
+            "email": safe_email,
+        }
+        if fields:
+            params["fields"] = ",".join(sorted(map(str, fields)))
+        return self.request(
+            "GET",
+            "orders.json",
             params=params,
             dry_run=dry_run,
             safe_mode=safe_mode,

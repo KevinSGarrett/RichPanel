@@ -3,7 +3,7 @@
 Live Read-Only Shadow Evaluation
 
 Reads real Richpanel + Shopify data for a small ticket sample without allowing any writes.
-Fails closed via environment guards + GET-only request tracing.
+Fails closed via environment guards + read-only request tracing.
 Produces PII-safe JSON + markdown artifacts under artifacts/.
 """
 from __future__ import annotations
@@ -19,6 +19,7 @@ import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,9 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
+from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
+from richpanel_middleware.ingest.envelope import build_event_envelope  # type: ignore
+from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
 from richpanel_middleware.automation.router import extract_customer_message  # type: ignore
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     RichpanelClient,
@@ -34,9 +38,18 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     SecretLoadError,
     TransportError,
 )
+from richpanel_middleware.integrations.shopify import (  # type: ignore
+    ShopifyClient,
+    ShopifyRequestError,
+)
 from readonly_shadow_utils import (
+    build_route_info as _build_route_info,
+    comment_is_operator as _comment_is_operator,
+    extract_comment_message as _extract_comment_message,
+    extract_order_number,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
+    summarize_comment_metadata,
 )
 LOGGER = logging.getLogger("readonly_shadow_eval")
 logging.basicConfig(
@@ -56,6 +69,17 @@ REQUIRED_FLAGS = {
 
 ALLOWED_PROD_ENVS = {"prod", "production"}
 DEFAULT_SAMPLE_SIZE = 10
+
+
+def _to_bool(value: Optional[str], default: bool = False) -> bool:
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
@@ -127,6 +151,26 @@ def _build_richpanel_client(
     )
 
 
+def _build_shopify_client(
+    *, allow_network: Optional[bool], shop_domain: Optional[str]
+) -> ShopifyClient:
+    return ShopifyClient(shop_domain=shop_domain, allow_network=allow_network)
+
+
+def _probe_shopify(*, shop_domain: Optional[str]) -> Dict[str, Any]:
+    client = _build_shopify_client(allow_network=None, shop_domain=shop_domain)
+    response = client.request(
+        "GET",
+        "orders/count.json",
+        params={"status": "any"},
+        dry_run=False,
+        safe_mode=False,
+        automation_enabled=True,
+    )
+    ok = response.status_code < 400 and not response.dry_run
+    return {"status_code": response.status_code, "dry_run": response.dry_run, "ok": ok}
+
+
 def _is_prod_target(*, richpanel_base_url: str, richpanel_secret_id: Optional[str]) -> bool:
     env_name = _resolve_env_name()
     if env_name in {"prod", "production"}:
@@ -191,6 +235,10 @@ class _HttpTrace:
             service = "shopify"
         elif hostname.endswith("shipstation.com"):
             service = "shipstation"
+        elif hostname.endswith("openai.com"):
+            service = "openai"
+        elif hostname.endswith("anthropic.com"):
+            service = "anthropic"
         self.entries.append(
             {"method": method.upper(), "path": path, "service": service}
         )
@@ -218,12 +266,30 @@ class _HttpTrace:
             urllib.request.urlopen = self._original_urlopen  # type: ignore
             self._original_urlopen = None
 
-    def assert_get_only(self, *, context: str, trace_path: Path) -> None:
-        allowed = {"GET", "HEAD"}
-        non_allowed = [entry for entry in self.entries if entry["method"] not in allowed]
-        if non_allowed:
+    def assert_read_only(self, *, allow_openai: bool, trace_path: Path) -> None:
+        allowed = {
+            "richpanel": {"GET", "HEAD"},
+            "shopify": {"GET", "HEAD"},
+            "shipstation": {"GET", "HEAD"},
+            "openai": {"POST"},
+            "anthropic": {"POST"},
+        }
+        violations = []
+        for entry in self.entries:
+            service = entry["service"]
+            method = entry["method"]
+            if service in {"openai", "anthropic"} and not allow_openai:
+                violations.append(entry)
+                continue
+            if service not in allowed:
+                violations.append(entry)
+                continue
+            if method not in allowed[service]:
+                violations.append(entry)
+
+        if violations:
             raise SystemExit(
-                f"Non-GET request detected during {context}. Trace: {trace_path}"
+                f"Non-read-only HTTP request detected. Trace: {trace_path}"
             )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -280,27 +346,103 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
     )
 
 
-def _fetch_conversation(client: RichpanelClient, ticket_id: str) -> Dict[str, Any]:
+def _fetch_conversation(
+    client: RichpanelClient,
+    ticket_id: str,
+    *,
+    conversation_id: Optional[str] = None,
+    conversation_no: Optional[object] = None,
+) -> Dict[str, Any]:
     """Best-effort conversation read; tolerates failures."""
-    encoded = urllib.parse.quote(ticket_id, safe="")
-    try:
-        resp = client.request(
-            "GET",
-            f"/api/v1/conversations/{encoded}",
-            dry_run=False,
-            log_body_excerpt=False,
-        )
-        if resp.dry_run or resp.status_code >= 400:
-            LOGGER.warning(
-                "Conversation fetch skipped",
-                extra={"status": resp.status_code, "dry_run": resp.dry_run},
-            )
-            return {}
-        payload = resp.json()
-        return payload if isinstance(payload, dict) else {}
-    except Exception:
-        LOGGER.warning("Conversation fetch failed")
-        return {}
+    candidates: list[str] = []
+    for value in (conversation_id, conversation_no, ticket_id):
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text and text not in candidates:
+            candidates.append(text)
+
+    attempts = (
+        "/api/v1/conversations/{encoded}",
+        "/v1/conversations/{encoded}",
+        "/api/v1/conversations/{encoded}/messages",
+        "/v1/conversations/{encoded}/messages",
+    )
+
+    for candidate in candidates:
+        encoded = urllib.parse.quote(candidate, safe="")
+        for template in attempts:
+            path = template.format(encoded=encoded)
+            try:
+                resp = client.request(
+                    "GET",
+                    path,
+                    dry_run=False,
+                    log_body_excerpt=False,
+                )
+            except Exception:
+                LOGGER.warning(
+                    "Conversation fetch failed for %s", _redact_path(path)
+                )
+                continue
+            if resp.dry_run or resp.status_code >= 400:
+                LOGGER.warning(
+                    "Conversation fetch skipped for %s status=%s dry_run=%s",
+                    _redact_path(path),
+                    resp.status_code,
+                    resp.dry_run,
+                )
+                continue
+            try:
+                payload = resp.json()
+            except Exception:
+                LOGGER.warning(
+                    "Conversation parse failed for %s", _redact_path(path)
+                )
+                continue
+            if isinstance(payload, list):
+                payload = {"messages": payload}
+            if isinstance(payload, dict) and isinstance(payload.get("conversation"), dict):
+                convo = dict(payload.get("conversation") or {})
+                if isinstance(payload.get("messages"), list) and "messages" not in convo:
+                    convo["messages"] = payload["messages"]
+                payload = convo
+            payload = payload if isinstance(payload, dict) else {}
+            if payload:
+                payload["__source_path"] = _redact_path(path)
+                return payload
+    return {}
+
+
+def _extract_latest_customer_message(
+    ticket: Dict[str, Any], convo: Dict[str, Any]
+) -> str:
+    text = extract_customer_message(ticket, default="")
+    if text:
+        return text
+    text = _extract_comment_message(ticket, extractor=extract_customer_message)
+    if text:
+        return text
+    text = extract_customer_message(convo, default="")
+    if text:
+        return text
+    text = _extract_comment_message(convo, extractor=extract_customer_message)
+    if text:
+        return text
+    messages = convo.get("messages") or convo.get("conversation_messages") or []
+    if isinstance(messages, list):
+        for message in reversed(messages):
+            if not isinstance(message, dict):
+                continue
+            sender = str(
+                message.get("sender_type") or message.get("author_type") or ""
+            ).strip().lower()
+            if sender not in {"customer", "user", "end_user", "shopper"}:
+                continue
+            candidate = extract_customer_message(message, default="")
+            if candidate:
+                return candidate
+    return ""
 
 
 def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dict[str, Any]:
@@ -322,6 +464,10 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
             if key in ("__source_path",):
                 continue
             merged.setdefault(key, val)
+    if not merged.get("order_number") and not merged.get("orderNumber"):
+        order_number = extract_order_number(ticket) or extract_order_number(convo)
+        if order_number:
+            merged["order_number"] = order_number
     return merged
 
 
@@ -356,6 +502,32 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
         if value not in (None, "", [], {}):
             return True
     return False
+
+
+def _order_context_summary(
+    order_payload: Dict[str, Any],
+    order_summary: Optional[Dict[str, Any]],
+    *,
+    conversation_id: str,
+) -> Dict[str, Any]:
+    envelope_stub = SimpleNamespace(conversation_id=conversation_id)
+    missing_fields = _missing_order_context(
+        order_summary or {}, envelope_stub, order_payload
+    )
+    order_number_present = bool(
+        order_payload.get("order_number") or order_payload.get("orderNumber")
+    )
+    tracking_or_shipping_method_present = not any(
+        field in missing_fields
+        for field in ("tracking_or_shipping_method", "shipping_method_bucket")
+    )
+    return {
+        "order_id_present": "order_id" not in missing_fields,
+        "order_number_present": order_number_present,
+        "order_created_at_present": "created_at" not in missing_fields,
+        "tracking_or_shipping_method_present": tracking_or_shipping_method_present,
+        "order_context_missing": missing_fields,
+    }
 
 
 def _build_run_id() -> str:
@@ -411,6 +583,11 @@ def main() -> int:
         "--shop-domain",
         help="Optional Shopify shop domain override (defaults to env)",
     )
+    parser.add_argument(
+        "--shopify-probe",
+        action="store_true",
+        help="Probe Shopify with a read-only GET to verify access",
+    )
     args = parser.parse_args()
 
     env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
@@ -441,11 +618,32 @@ def main() -> int:
     ticket_refs: List[str] = []
     sample_mode = "explicit"
     tickets_requested = 0
+    shopify_probe: Dict[str, Any] = {"enabled": bool(args.shopify_probe)}
     try:
         rp_client = _build_richpanel_client(
             richpanel_secret=args.richpanel_secret_id,
             base_url=richpanel_base_url,
         )
+
+        if args.shopify_probe:
+            try:
+                probe = _probe_shopify(shop_domain=args.shop_domain)
+                shopify_probe.update(probe)
+                if not probe.get("ok", False):
+                    shopify_probe["error"] = {"type": "shopify_error"}
+                    LOGGER.warning(
+                        "Shopify probe failed",
+                        extra={
+                            "status": probe.get("status_code"),
+                            "dry_run": probe.get("dry_run"),
+                        },
+                    )
+            except Exception as exc:
+                shopify_probe["error"] = _safe_error(exc)
+                LOGGER.warning(
+                    "Shopify probe exception",
+                    extra={"error_type": shopify_probe["error"]["type"]},
+                )
 
         explicit_refs = [str(value).strip() for value in (args.ticket_id or [])]
         explicit_refs = [value for value in dict.fromkeys(explicit_refs) if value]
@@ -476,17 +674,39 @@ def main() -> int:
             result: Dict[str, Any] = {"ticket_id_redacted": redacted}
             try:
                 ticket_payload = _fetch_ticket(rp_client, ticket_ref)
-                convo_payload = _fetch_conversation(rp_client, ticket_ref)
-                order_payload = _extract_order_payload(ticket_payload, convo_payload)
-
-                customer_message = extract_customer_message(
-                    order_payload, default="(not provided)"
+                ticket_id = str(ticket_payload.get("id") or ticket_ref).strip()
+                convo_payload = _fetch_conversation(
+                    rp_client,
+                    ticket_id,
+                    conversation_id=ticket_payload.get("conversation_id"),
+                    conversation_no=ticket_payload.get("conversation_no"),
                 )
+                order_payload = _extract_order_payload(ticket_payload, convo_payload)
+                if sample_mode == "explicit":
+                    probe_summary = lookup_order_summary(
+                        build_event_envelope(order_payload),
+                        safe_mode=False,
+                        automation_enabled=True,
+                        allow_network=True,
+                    )
+                    if isinstance(probe_summary, dict):
+                        result["order_resolution"] = probe_summary.get(
+                            "order_resolution"
+                        )
+
+                raw_customer_message = _extract_latest_customer_message(
+                    ticket_payload, convo_payload
+                )
+                customer_message = raw_customer_message or "(not provided)"
+                comment_metadata = summarize_comment_metadata(ticket_payload)
+                result.update(comment_metadata)
+                result["customer_message_present"] = bool(raw_customer_message)
                 event_payload = dict(order_payload)
                 event_payload.update(
                     {
                         "ticket_id": ticket_ref,
-                        "conversation_id": ticket_ref,
+                        "conversation_id": ticket_payload.get("conversation_id")
+                        or ticket_id,
                         "customer_message": customer_message,
                     }
                 )
@@ -498,6 +718,11 @@ def main() -> int:
                     automation_enabled=True,
                     allow_network=True,
                     outbound_enabled=False,
+                )
+
+                result["routing"] = _build_route_info(
+                    getattr(plan, "routing", None),
+                    getattr(plan, "routing_artifact", None),
                 )
 
                 order_action = next(
@@ -516,6 +741,15 @@ def main() -> int:
                 )
                 order_summary = (
                     parameters.get("order_summary") if isinstance(parameters, dict) else {}
+                )
+                result.update(
+                    _order_context_summary(
+                        order_payload,
+                        order_summary,
+                        conversation_id=str(
+                            ticket_payload.get("conversation_id") or ticket_id
+                        ),
+                    )
                 )
                 delivery_estimate = (
                     parameters.get("delivery_estimate")
@@ -539,13 +773,18 @@ def main() -> int:
                 had_errors = True
                 result["error"] = _safe_error(exc)
             ticket_results.append(result)
+
     finally:
         trace.stop()
         with trace_path.open("w", encoding="utf-8") as fh:
             json.dump(trace.to_dict(), fh, ensure_ascii=False, indent=2)
-        trace.assert_get_only(
-            context="read-only shadow evaluation", trace_path=trace_path
+        openai_allow_network = _to_bool(
+            os.environ.get("OPENAI_ALLOW_NETWORK"), False
         )
+        allow_openai = openai_allow_network and _to_bool(
+            os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False
+        )
+        trace.assert_read_only(allow_openai=allow_openai, trace_path=trace_path)
 
     trace_summary = _summarize_trace(trace)
     counts = {
@@ -569,6 +808,7 @@ def main() -> int:
         "prod_target": is_prod_target,
         "sample_mode": sample_mode,
         "counts": counts,
+        "shopify_probe": shopify_probe,
         "tickets": ticket_results,
         "http_trace_path": str(trace_path),
         "http_trace_summary": trace_summary,
@@ -596,6 +836,9 @@ def main() -> int:
         f"- Tracking found: {counts['tracking_found']}",
         f"- ETA available: {counts['eta_available']}",
         f"- Errors: {counts['errors']}",
+        f"- Shopify probe enabled: {shopify_probe['enabled']}",
+        f"- Shopify probe ok: {shopify_probe.get('ok')}",
+        f"- Shopify probe status: {shopify_probe.get('status_code')}",
         "",
         "## HTTP Trace Summary",
         f"- Total requests: {trace_summary['total_requests']}",

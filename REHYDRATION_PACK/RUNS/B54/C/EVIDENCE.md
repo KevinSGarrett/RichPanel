@@ -1,4 +1,4 @@
-# B54 C Evidence
+﻿# B54 C Evidence
 
 ## Workflow (recommended)
 - Workflow: `.github/workflows/shadow_live_readonly_eval.yml`
@@ -9,11 +9,17 @@ gh workflow run shadow_live_readonly_eval.yml \
   -f shop-domain=<your-shop.myshopify.com>
 ```
 - Optional: provide comma-separated ticket IDs via `-f ticket-ids="<id1>,<id2>"`
+- Latest workflow run: pending (not dispatched after latest code changes)
 
 ## Expected artifacts (from workflow run)
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
+
+## Latest local read-only run (sanitized, explicit IDs)
+- Run ID: `RUN_20260124_2116Z`
+- Report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2116Z.json`
+- Trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2116Z.json`
 
 ## Validation checks (PII-safe)
 - `counts.orders_matched` and `counts.tracking_found` populated in the JSON report.
