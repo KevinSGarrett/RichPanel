@@ -197,6 +197,23 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         message = shadow_eval._extract_latest_customer_message(ticket, convo)
         self.assertEqual(message, "ticket message")
 
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
+
         ticket = {}
         convo = {"body": "conversation message"}
         message = shadow_eval._extract_latest_customer_message(ticket, convo)

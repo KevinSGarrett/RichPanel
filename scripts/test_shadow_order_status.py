@@ -568,6 +568,23 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         message = shadow._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "need tracking")
 
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
+
         convo = {
             "messages": [
                 {"sender_type": " customer ", "body": "trimmed sender"},
