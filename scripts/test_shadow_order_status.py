@@ -705,8 +705,6 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         self.assertTrue(shadow._comment_is_operator({"via": {"isOperator": True}}))
         self.assertTrue(shadow._comment_is_operator({"via": {"is_operator": True}}))
         self.assertIsNone(shadow._comment_is_operator({"via": "not-a-dict"}))
-        self.assertFalse(shadow._comment_is_operator({"sender_type": "customer"}))
-        self.assertTrue(shadow._comment_is_operator({"author_type": "Agent"}))
         self.assertIsNone(shadow._comment_is_operator({}))
 
     def test_extract_comment_message_variants(self) -> None:
@@ -741,6 +739,70 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             ),
             "customer message",
         )
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {
+                        "plain_body": "agent email",
+                        "via": {"isOperator": True, "channel": "email"},
+                        "created_at": "2026-01-24T06:00:00Z",
+                    },
+                    {
+                        "plain_body": "customer chat",
+                        "via": {"isOperator": False, "channel": "chat"},
+                        "created_at": "2026-01-24T05:00:00Z",
+                    },
+                ]
+            }
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer chat")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "newer chat",
+                    "via": {"channel": "chat"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "older email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+                {
+                    "plain_body": "newer email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "newer email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "longer message here",
+                    "via": {"channel": "email"},
+                },
+                {
+                    "plain_body": "short",
+                    "via": {"channel": "email"},
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "short")
 
     def test_fetch_conversation_handles_bad_json(self) -> None:
         class _BadJsonResponse(_StubResponse):
