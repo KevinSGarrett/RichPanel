@@ -637,7 +637,6 @@ def run_ticket(
 
     result: Dict[str, Any] = {
         "ticket_id_redacted": ticket_redacted,
-        "comment_metadata": comment_metadata,
         "customer_message_present": bool(raw_customer_message),
         "routing": route_info,
         "customer_presence": _extract_customer_presence(ticket, convo),
@@ -645,6 +644,7 @@ def run_ticket(
             "is_order_status": is_order_status,
         },
     }
+    result.update(comment_metadata)
 
     if not is_order_status:
         result["order_status"].update(
