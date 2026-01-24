@@ -482,10 +482,10 @@ def main() -> int:
                 probe = _probe_shopify(shop_domain=args.shop_domain)
                 shopify_probe.update(probe)
                 if not probe.get("ok", False):
-                    had_errors = True
                     shopify_probe["error"] = {"type": "shopify_error"}
-            except (ShopifyRequestError, Exception) as exc:
-                had_errors = True
+            except ShopifyRequestError as exc:
+                shopify_probe["error"] = _safe_error(exc)
+            except Exception as exc:
                 shopify_probe["error"] = _safe_error(exc)
 
         explicit_refs = [str(value).strip() for value in (args.ticket_id or [])]
