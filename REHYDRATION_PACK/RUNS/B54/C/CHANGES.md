@@ -5,6 +5,7 @@
 - Added latest-ticket sampling and sanitized outputs to `scripts/shadow_order_status.py`.
 - Redacted error type fields to safe categories in shadow eval outputs.
 - Updated shadow eval tests for new CLI flags and redaction behavior.
+- Suppressed Claude gate structured parse failures from showing as action required in shadow mode.
 - Added workflow dispatch for live read-only shadow validation: `.github/workflows/shadow_live_readonly_eval.yml`.
 
 ## Artifacts

@@ -21,10 +21,12 @@
 - Extended `scripts/live_readonly_shadow_eval.py` to sample tickets, enforce prod-only runs, and emit sanitized JSON/MD reports with GET/HEAD-only traces.
 - Added latest-ticket sampling + sanitized output fields in `scripts/shadow_order_status.py`.
 - Added workflow dispatch `shadow_live_readonly_eval.yml` that runs the evaluation with GH secrets and uploads artifacts.
+- Adjusted Claude gate shadow-mode parsing to avoid action-required noise on structured JSON parse failures.
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run
 - `python -m unittest scripts.test_live_readonly_shadow_eval scripts.test_shadow_order_status`
+- `python scripts/test_claude_gate_review.py`
 
 ## Tests / Proof
 - Workflow dispatch: `.github/workflows/shadow_live_readonly_eval.yml` (not executed in this workspace).
