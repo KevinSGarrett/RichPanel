@@ -642,6 +642,34 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         result = shadow._fetch_conversation(_BoomClient(), "t-1")
         self.assertEqual(result, {})
 
+    def test_fetch_conversation_falls_back_to_messages(self) -> None:
+        class _SequenceClient:
+            def __init__(self) -> None:
+                self.paths: list[str] = []
+
+            def request(self, method: str, path: str, **kwargs):
+                self.paths.append(path)
+                if path == "/api/v1/conversations/conv-9":
+                    return _StubResponse({}, status_code=403)
+                if path == "/v1/conversations/conv-9":
+                    return _StubResponse({}, status_code=404)
+                if path == "/api/v1/conversations/conv-9/messages":
+                    return _StubResponse(
+                        [{"sender_type": "customer", "body": "status please"}],
+                        status_code=200,
+                    )
+                return _StubResponse({}, status_code=404)
+
+        client = _SequenceClient()
+        result = shadow._fetch_conversation(
+            client, "t-9", conversation_id="conv-9"
+        )
+        self.assertEqual(result.get("messages")[0]["body"], "status please")
+        self.assertTrue(any("/api/v1/conversations/" in path for path in client.paths))
+        source_path = result.get("__source_path", "")
+        self.assertIn("/api/v1/conversations/", source_path)
+        self.assertIn("/messages", source_path)
+
     def test_main_uses_sample_size_when_no_ticket_id(self) -> None:
         env = {
             "RICHPANEL_ENV": "staging",

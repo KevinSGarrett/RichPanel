@@ -332,21 +332,65 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
     )
 
 
-def _fetch_conversation(client: RichpanelClient, ticket_id: str) -> Dict[str, Any]:
-    encoded = urllib.parse.quote(ticket_id, safe="")
-    try:
-        resp = client.request(
-            "GET",
-            f"/api/v1/conversations/{encoded}",
-            dry_run=False,
-            log_body_excerpt=False,
-        )
-        if resp.dry_run or resp.status_code >= 400:
-            return {}
-        payload = resp.json()
-        return payload if isinstance(payload, dict) else {}
-    except Exception:
-        return {}
+def _fetch_conversation(
+    client: RichpanelClient,
+    ticket_id: str,
+    *,
+    conversation_id: Optional[str] = None,
+    conversation_no: Optional[object] = None,
+) -> Dict[str, Any]:
+    candidates: list[str] = []
+    for value in (conversation_id, conversation_no, ticket_id):
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text and text not in candidates:
+            candidates.append(text)
+
+    attempts = (
+        "/api/v1/conversations/{encoded}",
+        "/v1/conversations/{encoded}",
+        "/api/v1/conversations/{encoded}/messages",
+        "/v1/conversations/{encoded}/messages",
+    )
+
+    for candidate in candidates:
+        encoded = urllib.parse.quote(candidate, safe="")
+        for template in attempts:
+            path = template.format(encoded=encoded)
+            try:
+                resp = client.request(
+                    "GET",
+                    path,
+                    dry_run=False,
+                    log_body_excerpt=False,
+                )
+            except Exception:
+                LOGGER.warning(
+                    "Conversation fetch failed for %s", _redact_path(path)
+                )
+                continue
+            if resp.dry_run or resp.status_code >= 400:
+                LOGGER.warning(
+                    "Conversation fetch skipped for %s status=%s dry_run=%s",
+                    _redact_path(path),
+                    resp.status_code,
+                    resp.dry_run,
+                )
+                continue
+            payload = resp.json()
+            if isinstance(payload, list):
+                payload = {"messages": payload}
+            if isinstance(payload, dict) and isinstance(payload.get("conversation"), dict):
+                convo = dict(payload.get("conversation") or {})
+                if isinstance(payload.get("messages"), list) and "messages" not in convo:
+                    convo["messages"] = payload["messages"]
+                payload = convo
+            payload = payload if isinstance(payload, dict) else {}
+            if payload:
+                payload["__source_path"] = _redact_path(path)
+                return payload
+    return {}
 
 
 def _extract_latest_customer_message(
@@ -546,11 +590,17 @@ def run_ticket(
 ) -> Dict[str, Any]:
     ticket_redacted = _redact_identifier(ticket_id) or "redacted"
     ticket = _fetch_ticket(richpanel_client, ticket_id)
-    convo = _fetch_conversation(richpanel_client, ticket_id)
+    ticket_id_value = str(ticket.get("id") or ticket_id).strip()
+    convo = _fetch_conversation(
+        richpanel_client,
+        ticket_id_value,
+        conversation_id=ticket.get("conversation_id"),
+        conversation_no=ticket.get("conversation_no"),
+    )
     customer_message = _extract_latest_customer_message(ticket, convo) or "(not provided)"
     payload = _extract_order_payload(ticket, convo)
     payload["ticket_id"] = ticket_id
-    payload["conversation_id"] = ticket_id
+    payload["conversation_id"] = ticket.get("conversation_id") or ticket_id
     payload["customer_message"] = customer_message
 
     envelope = _build_event_envelope(payload, ticket_id=ticket_id)
