@@ -141,8 +141,8 @@ def _probe_shopify(*, shop_domain: Optional[str]) -> Dict[str, Any]:
     client = _build_shopify_client(allow_network=None, shop_domain=shop_domain)
     response = client.request(
         "GET",
-        "shop.json",
-        params={"fields": "id"},
+        "orders/count.json",
+        params={"status": "any"},
         dry_run=False,
         safe_mode=False,
         automation_enabled=True,
