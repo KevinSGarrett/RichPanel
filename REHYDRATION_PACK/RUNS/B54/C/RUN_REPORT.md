@@ -29,6 +29,7 @@
 - Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 - Added `shopify-probe` flag to issue a read-only Shopify orders count GET for validation (best-effort).
 - Added GH secret fallback for `PROD_SHOPIFY_API_TOKEN` when admin token secret is missing.
+- Added Shopify order-number lookup fallback via `orders.json?name=` to resolve non-ID order numbers.
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run

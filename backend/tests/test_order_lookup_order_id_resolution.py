@@ -14,7 +14,25 @@ from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     lookup_order_summary,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
-from richpanel_middleware.integrations.shopify import ShopifyClient  # noqa: E402
+from richpanel_middleware.integrations.shopify import (  # noqa: E402
+    ShopifyClient,
+    TransportResponse,
+)
+
+
+class _RecordingTransport:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.requests = []
+
+    def send(self, request):
+        self.requests.append(request)
+        if not self.responses:
+            raise AssertionError("no response stub provided")
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        return response
 
 
 class OrderIdResolutionTests(unittest.TestCase):
@@ -61,3 +79,41 @@ class OrderIdResolutionTests(unittest.TestCase):
             "Skipping Shopify enrichment (missing order_id)",
             "\n".join(logs.output),
         )
+
+    def test_order_number_falls_back_to_name_search(self) -> None:
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=404, headers={}, body=b'{"errors":"Not Found"}'
+                ),
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=(
+                        b'{"orders":[{"created_at":"2026-01-24T00:00:00Z",'
+                        b'"shipping_lines":[{"title":"USPS/UPS Ground"}],'
+                        b'"fulfillments":[{"tracking_number":"TN123","tracking_company":"UPS"}],'
+                        b'"total_price":"10.00"}]}'
+                    ),
+                ),
+            ]
+        )
+        client = ShopifyClient(
+            access_token="test-token", allow_network=True, transport=transport
+        )
+
+        summary = lookup_order_summary(
+            build_event_envelope({"order_number": "1057300"}),
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            shopify_client=client,
+        )
+
+        self.assertEqual(summary["order_id"], "1057300")
+        self.assertEqual(summary["shipping_method"], "USPS/UPS Ground")
+        self.assertEqual(summary["tracking_number"], "TN123")
+        self.assertEqual(len(transport.requests), 2)
+        self.assertIn("/orders/1057300.json", transport.requests[0].url)
+        self.assertIn("orders.json", transport.requests[1].url)
+        self.assertIn("name=%231057300", transport.requests[1].url)
