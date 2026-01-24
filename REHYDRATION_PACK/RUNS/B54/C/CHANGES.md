@@ -14,6 +14,7 @@
 - Added fallback to list recent tickets via `/api/v1/conversations` and `/v1/conversations` when `/v1/tickets` returns 401/403/404.
 - Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 - Added `shopify-probe` workflow input and CLI flag for read-only Shopify verification (orders count, best-effort).
+- Added GH secret fallback to accept `PROD_SHOPIFY_API_TOKEN` when the admin token secret is unset.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
