@@ -733,6 +733,9 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(payload["sample_mode"], "recent")
             self.assertEqual(payload["counts"]["tickets_scanned"], 2)
             self.assertTrue(payload["tickets"][0]["ticket_id_redacted"].startswith("redacted:"))
+            self.assertEqual(
+                payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
+            )
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
@@ -809,6 +812,9 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 self.assertTrue(payload["shopify_probe"]["ok"])
                 self.assertEqual(
                     captured["payload"]["conversation_id"], "conv-123"
+                )
+                self.assertEqual(
+                    payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
                 )
 
     def test_main_records_probe_error(self) -> None:
