@@ -568,6 +568,23 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         message = shadow._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "need tracking")
 
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
+
         convo = {
             "messages": [
                 {"sender_type": " customer ", "body": "trimmed sender"},
@@ -681,6 +698,49 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
 
         result = shadow._fetch_conversation(_BoomClient(), "t-1")
         self.assertEqual(result, {})
+
+    def test_comment_is_operator_detection(self) -> None:
+        self.assertTrue(shadow._comment_is_operator({"is_operator": True}))
+        self.assertFalse(shadow._comment_is_operator({"isOperator": False}))
+        self.assertTrue(shadow._comment_is_operator({"via": {"isOperator": True}}))
+        self.assertTrue(shadow._comment_is_operator({"via": {"is_operator": True}}))
+        self.assertIsNone(shadow._comment_is_operator({"via": "not-a-dict"}))
+        self.assertFalse(shadow._comment_is_operator({"sender_type": "customer"}))
+        self.assertTrue(shadow._comment_is_operator({"author_type": "Agent"}))
+        self.assertIsNone(shadow._comment_is_operator({}))
+
+    def test_extract_comment_message_variants(self) -> None:
+        payload = {"comments": "not-a-list"}
+        self.assertEqual(shadow._extract_comment_message(payload), "")
+
+        payload = {
+            "comments": [
+                "not-a-dict",
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer body", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer body")
+
+        payload = {
+            "comments": [
+                {"plain_body": "  ", "via": {"isOperator": False}},
+                {"body": "customer plain", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(
+            shadow._extract_comment_message(
+                payload, extractor=shadow.extract_customer_message
+            ),
+            "customer message",
+        )
 
     def test_fetch_conversation_handles_bad_json(self) -> None:
         class _BadJsonResponse(_StubResponse):

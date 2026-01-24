@@ -62,6 +62,8 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyRequestError,
 )
 from readonly_shadow_utils import (
+    comment_is_operator as _comment_is_operator,
+    extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
 )
@@ -405,7 +407,13 @@ def _extract_latest_customer_message(
     text = extract_customer_message(ticket, default="")
     if text:
         return text
+    text = _extract_comment_message(ticket, extractor=extract_customer_message)
+    if text:
+        return text
     text = extract_customer_message(convo, default="")
+    if text:
+        return text
+    text = _extract_comment_message(convo, extractor=extract_customer_message)
     if text:
         return text
     messages = convo.get("messages") or convo.get("conversation_messages") or []

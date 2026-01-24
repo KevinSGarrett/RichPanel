@@ -197,6 +197,23 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         message = shadow_eval._extract_latest_customer_message(ticket, convo)
         self.assertEqual(message, "ticket message")
 
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
+
         ticket = {}
         convo = {"body": "conversation message"}
         message = shadow_eval._extract_latest_customer_message(ticket, convo)
@@ -276,6 +293,57 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(
             client.paths,
             ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
+        )
+
+    def test_comment_is_operator_detection(self) -> None:
+        self.assertTrue(shadow_eval._comment_is_operator({"is_operator": True}))
+        self.assertFalse(shadow_eval._comment_is_operator({"isOperator": False}))
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"via": {"isOperator": True}})
+        )
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"via": {"is_operator": True}})
+        )
+        self.assertIsNone(shadow_eval._comment_is_operator({"via": "not-a-dict"}))
+        self.assertFalse(
+            shadow_eval._comment_is_operator({"sender_type": "customer"})
+        )
+        self.assertTrue(
+            shadow_eval._comment_is_operator({"author_type": "Agent"})
+        )
+        self.assertIsNone(shadow_eval._comment_is_operator({}))
+
+    def test_extract_comment_message_variants(self) -> None:
+        payload = {"comments": "not-a-list"}
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "")
+
+        payload = {
+            "comments": [
+                "not-a-dict",
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer body", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer body")
+
+        payload = {
+            "comments": [
+                {"plain_body": "  ", "via": {"isOperator": False}},
+                {"body": "customer plain", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(
+            shadow_eval._extract_comment_message(
+                payload, extractor=shadow_eval.extract_customer_message
+            ),
+            "customer message",
         )
 
     def test_probe_shopify_ok(self) -> None:
