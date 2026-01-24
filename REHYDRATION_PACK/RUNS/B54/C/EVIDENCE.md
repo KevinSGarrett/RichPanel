@@ -9,6 +9,7 @@ gh workflow run shadow_live_readonly_eval.yml \
   -f shop-domain=<your-shop.myshopify.com>
 ```
 - Optional: provide comma-separated ticket IDs via `-f ticket-ids="<id1>,<id2>"`
+- Latest run (explicit ticket IDs + AWS secrets): https://github.com/KevinSGarrett/RichPanel/actions/runs/21308270109
 
 ## Expected artifacts (from workflow run)
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
