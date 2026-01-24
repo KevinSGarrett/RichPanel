@@ -15,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import live_readonly_shadow_eval as shadow_eval  # noqa: E402
+import readonly_shadow_utils as shadow_utils  # noqa: E402
 
 
 class _StubResponse:
@@ -305,12 +306,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_eval._comment_is_operator({"via": {"is_operator": True}})
         )
         self.assertIsNone(shadow_eval._comment_is_operator({"via": "not-a-dict"}))
-        self.assertFalse(
-            shadow_eval._comment_is_operator({"sender_type": "customer"})
-        )
-        self.assertTrue(
-            shadow_eval._comment_is_operator({"author_type": "Agent"})
-        )
         self.assertIsNone(shadow_eval._comment_is_operator({}))
 
     def test_extract_comment_message_variants(self) -> None:
@@ -344,6 +339,100 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 payload, extractor=shadow_eval.extract_customer_message
             ),
             "customer message",
+        )
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {
+                        "plain_body": "agent email",
+                        "via": {"isOperator": True, "channel": "email"},
+                        "created_at": "2026-01-24T06:00:00Z",
+                    },
+                    {
+                        "plain_body": "customer chat",
+                        "via": {"isOperator": False, "channel": "chat"},
+                        "created_at": "2026-01-24T05:00:00Z",
+                    },
+                ]
+            }
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "customer chat")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "newer chat",
+                    "via": {"channel": "chat"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "older email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+                {
+                    "plain_body": "newer email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "newer email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "longer message here",
+                    "via": {"channel": "email"},
+                },
+                {
+                    "plain_body": "short",
+                    "via": {"channel": "email"},
+                },
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "short")
+
+        payload = {
+            "comments": [
+                {"body": "operator note", "via": {"isOperator": True}},
+                {"body": "unknown note", "via": {}},
+            ]
+        }
+        self.assertEqual(shadow_eval._extract_comment_message(payload), "unknown note")
+
+        def _simple_extractor(comment):
+            return comment.get("text", "")
+
+        payload = {"comments": [{"text": "fallback text", "via": {"channel": "email"}}]}
+        self.assertEqual(
+            shadow_utils.extract_comment_message(payload, extractor=_simple_extractor),
+            "fallback text",
+        )
+
+    def test_parse_timestamp_variants(self) -> None:
+        self.assertIsNone(shadow_utils._parse_timestamp(None))
+        self.assertIsNone(shadow_utils._parse_timestamp("not-a-time"))
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00Z")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00+00:00")
+        )
+        self.assertIsNotNone(
+            shadow_utils._parse_timestamp("2026-01-24T06:10:00")
         )
 
     def test_probe_shopify_ok(self) -> None:

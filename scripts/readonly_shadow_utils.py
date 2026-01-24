@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
@@ -88,14 +89,26 @@ def comment_is_operator(comment: Dict[str, Any]) -> Optional[bool]:
         for key in ("isOperator", "is_operator"):
             if key in via:
                 return bool(via.get(key))
-    sender = str(comment.get("author_type") or comment.get("sender_type") or "").strip()
-    if sender:
-        normalized = sender.lower()
-        if normalized in {"agent", "operator", "staff", "admin", "support"}:
-            return True
-        if normalized in {"customer", "user", "end_user", "shopper"}:
-            return False
     return None
+
+
+def _parse_timestamp(value: Any) -> Optional[float]:
+    if not value:
+        return None
+    try:
+        text = str(value).strip()
+    except Exception:
+        return None
+    if not text:
+        return None
+    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
 
 
 def extract_comment_message(
@@ -103,29 +116,72 @@ def extract_comment_message(
     *,
     extractor: Optional[Callable[..., str]] = None,
 ) -> str:
-    comments = payload.get("comments") or []
+    ticket_obj = payload.get("ticket") if isinstance(payload.get("ticket"), dict) else payload
+    comments = ticket_obj.get("comments") or []
     if not isinstance(comments, list):
         return ""
-    for comment in reversed(comments):
+
+    has_operator_flag = any(
+        comment_is_operator(comment) is not None
+        for comment in comments
+        if isinstance(comment, dict)
+    )
+
+    candidates: list[tuple[tuple[Any, ...], str]] = []
+    for index, comment in enumerate(comments):
         if not isinstance(comment, dict):
             continue
-        if comment_is_operator(comment) is True:
-            continue
+        text_value = ""
         for key in ("plain_body", "body"):
             value = comment.get(key)
             if value is None:
                 continue
             try:
-                text = str(value).strip()
+                text_value = str(value).strip()
             except Exception:
-                continue
-            if text:
-                return text
-        if extractor:
+                text_value = ""
+            if text_value:
+                break
+        if not text_value and extractor:
             try:
-                candidate = extractor(comment, default="")
+                text_value = extractor(comment, default="")  # type: ignore[arg-type]
             except TypeError:
-                candidate = extractor(comment)
-            if candidate:
-                return candidate
-    return ""
+                text_value = extractor(comment)  # type: ignore[call-arg]
+        if not text_value:
+            continue
+
+        via = comment.get("via") if isinstance(comment.get("via"), dict) else {}
+        channel = str(via.get("channel") or "").strip().lower()
+        email_rank = 0 if channel == "email" else 1
+
+        operator_flag = comment_is_operator(comment)
+        if has_operator_flag:
+            if operator_flag is False:
+                operator_rank = 0
+            elif operator_flag is True:
+                operator_rank = 2
+            else:
+                operator_rank = 1
+        else:
+            operator_rank = 0
+
+        created_at = comment.get("created_at") or comment.get("createdAt")
+        timestamp = _parse_timestamp(created_at)
+        created_rank = -timestamp if timestamp is not None else float("inf")
+
+        plain_len = 0
+        try:
+            if comment.get("plain_body"):
+                plain_len = len(str(comment.get("plain_body")).strip())
+        except Exception:
+            plain_len = 0
+        body_len = len(text_value) if text_value else 0
+        text_len = plain_len if plain_len > 0 else body_len
+
+        score = (operator_rank, email_rank, created_rank, text_len, index)
+        candidates.append((score, text_value))
+
+    if not candidates:
+        return ""
+    best = min(candidates, key=lambda item: item[0])
+    return best[1]
