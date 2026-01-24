@@ -340,7 +340,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ]
         }
         self.assertEqual(
-            shadow_eval._extract_comment_message(payload), "customer message"
+            shadow_eval._extract_comment_message(
+                payload, extractor=shadow_eval.extract_customer_message
+            ),
+            "customer message",
         )
 
     def test_probe_shopify_ok(self) -> None:

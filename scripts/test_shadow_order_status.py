@@ -735,7 +735,12 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
                 {"message": "customer message", "via": {"isOperator": False}},
             ]
         }
-        self.assertEqual(shadow._extract_comment_message(payload), "customer message")
+        self.assertEqual(
+            shadow._extract_comment_message(
+                payload, extractor=shadow.extract_customer_message
+            ),
+            "customer message",
+        )
 
     def test_fetch_conversation_handles_bad_json(self) -> None:
         class _BadJsonResponse(_StubResponse):

@@ -39,6 +39,8 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyRequestError,
 )
 from readonly_shadow_utils import (
+    comment_is_operator as _comment_is_operator,
+    extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
 )
@@ -372,63 +374,19 @@ def _fetch_conversation(
     return {}
 
 
-def _comment_is_operator(comment: Dict[str, Any]) -> Optional[bool]:
-    for key in ("is_operator", "isOperator"):
-        if key in comment:
-            return bool(comment.get(key))
-    via = comment.get("via")
-    if isinstance(via, dict):
-        for key in ("isOperator", "is_operator"):
-            if key in via:
-                return bool(via.get(key))
-    sender = str(comment.get("author_type") or comment.get("sender_type") or "").strip()
-    if sender:
-        normalized = sender.lower()
-        if normalized in {"agent", "operator", "staff", "admin", "support"}:
-            return True
-        if normalized in {"customer", "user", "end_user", "shopper"}:
-            return False
-    return None
-
-
-def _extract_comment_message(payload: Dict[str, Any]) -> str:
-    comments = payload.get("comments") or []
-    if not isinstance(comments, list):
-        return ""
-    for comment in reversed(comments):
-        if not isinstance(comment, dict):
-            continue
-        if _comment_is_operator(comment) is True:
-            continue
-        for key in ("plain_body", "body"):
-            value = comment.get(key)
-            if value is None:
-                continue
-            try:
-                text = str(value).strip()
-            except Exception:
-                continue
-            if text:
-                return text
-        candidate = extract_customer_message(comment, default="")
-        if candidate:
-            return candidate
-    return ""
-
-
 def _extract_latest_customer_message(
     ticket: Dict[str, Any], convo: Dict[str, Any]
 ) -> str:
     text = extract_customer_message(ticket, default="")
     if text:
         return text
-    text = _extract_comment_message(ticket)
+    text = _extract_comment_message(ticket, extractor=extract_customer_message)
     if text:
         return text
     text = extract_customer_message(convo, default="")
     if text:
         return text
-    text = _extract_comment_message(convo)
+    text = _extract_comment_message(convo, extractor=extract_customer_message)
     if text:
         return text
     messages = convo.get("messages") or convo.get("conversation_messages") or []
