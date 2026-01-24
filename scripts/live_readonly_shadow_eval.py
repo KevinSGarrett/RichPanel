@@ -19,6 +19,7 @@ import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
+from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
 from richpanel_middleware.automation.router import extract_customer_message  # type: ignore
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     RichpanelClient,
@@ -462,6 +464,32 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
     return False
 
 
+def _order_context_summary(
+    order_payload: Dict[str, Any],
+    order_summary: Optional[Dict[str, Any]],
+    *,
+    conversation_id: str,
+) -> Dict[str, Any]:
+    envelope_stub = SimpleNamespace(conversation_id=conversation_id)
+    missing_fields = _missing_order_context(
+        order_summary or {}, envelope_stub, order_payload
+    )
+    order_number_present = bool(
+        order_payload.get("order_number") or order_payload.get("orderNumber")
+    )
+    tracking_or_shipping_method_present = not any(
+        field in missing_fields
+        for field in ("tracking_or_shipping_method", "shipping_method_bucket")
+    )
+    return {
+        "order_id_present": "order_id" not in missing_fields,
+        "order_number_present": order_number_present,
+        "order_created_at_present": "created_at" not in missing_fields,
+        "tracking_or_shipping_method_present": tracking_or_shipping_method_present,
+        "order_context_missing": missing_fields,
+    }
+
+
 def _build_run_id() -> str:
     return datetime.now(timezone.utc).strftime("RUN_%Y%m%d_%H%MZ")
 
@@ -662,6 +690,15 @@ def main() -> int:
                 )
                 order_summary = (
                     parameters.get("order_summary") if isinstance(parameters, dict) else {}
+                )
+                result.update(
+                    _order_context_summary(
+                        order_payload,
+                        order_summary,
+                        conversation_id=str(
+                            ticket_payload.get("conversation_id") or ticket_id
+                        ),
+                    )
                 )
                 delivery_estimate = (
                     parameters.get("delivery_estimate")

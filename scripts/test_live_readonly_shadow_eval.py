@@ -736,6 +736,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(
                 payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
             )
+            self.assertIn("order_id_present", payload["tickets"][0])
+            self.assertIn("order_context_missing", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
@@ -816,6 +818,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 self.assertEqual(
                     payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
                 )
+                self.assertIn("order_created_at_present", payload["tickets"][0])
+                self.assertIn("tracking_or_shipping_method_present", payload["tickets"][0])
 
     def test_main_records_probe_error(self) -> None:
         env = {
