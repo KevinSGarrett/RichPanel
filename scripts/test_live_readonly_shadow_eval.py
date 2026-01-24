@@ -587,6 +587,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(summary["allowed_methods_only"])
         self.assertEqual(summary["methods"].get("GET"), 1)
 
+    def test_summarize_trace_allows_openai_when_enabled(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.record("POST", "https://api.openai.com/v1/chat/completions")
+        summary = shadow_eval._summarize_trace(trace, allow_openai=True)
+        self.assertTrue(summary["allowed_methods_only"])
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+
     def test_delivery_estimate_present(self) -> None:
         self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))
         self.assertTrue(

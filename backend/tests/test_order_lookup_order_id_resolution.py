@@ -11,7 +11,11 @@ sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.commerce import order_lookup  # noqa: E402
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
+    _extract_customer_identity,
     _extract_order_id,
+    _extract_shopify_order_identifier,
+    _order_matches_name,
+    _select_most_recent_order,
     lookup_order_summary,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
@@ -60,6 +64,57 @@ class OrderIdResolutionTests(unittest.TestCase):
 
         payload = {"customer_message": "orderNumber: 1121654"}
         self.assertEqual(_extract_order_id(payload), "1121654")
+
+    def test_extract_customer_identity_from_payload_text(self) -> None:
+        payload = {
+            "subject": "Order update for alice@example.com",
+            "customer_profile": {"first_name": "Alice", "last_name": "Smith"},
+        }
+        email, name = _extract_customer_identity(payload)
+        self.assertEqual(email, "alice@example.com")
+        self.assertEqual(name, "alice smith")
+
+        payload = {
+            "comments": [
+                {"plain_body": "contact bob@example.com for updates"}
+            ],
+            "messages": [{"text": "also cc carol@example.com"}],
+        }
+        email, name = _extract_customer_identity(payload)
+        self.assertEqual(email, "bob@example.com")
+        self.assertEqual(name, "")
+
+    def test_order_matches_name_and_email(self) -> None:
+        order = {
+            "email": "jane@example.com",
+            "customer": {"first_name": "Jane", "last_name": "Doe"},
+        }
+        self.assertTrue(
+            _order_matches_name(order, name="Jane Doe", email="jane@example.com")
+        )
+        self.assertFalse(
+            _order_matches_name(order, name="Jane Doe", email="nope@example.com")
+        )
+        self.assertFalse(_order_matches_name(order, name="", email="jane@example.com"))
+
+    def test_select_most_recent_order_handles_bad_dates(self) -> None:
+        recent = {"created_at": "2026-01-10T00:00:00Z", "order_number": 2}
+        invalid = {"created_at": "not-a-date", "order_number": 1}
+        self.assertEqual(_select_most_recent_order([invalid, recent]), recent)
+
+    def test_extract_shopify_order_identifier_variants(self) -> None:
+        self.assertEqual(
+            _extract_shopify_order_identifier({"order_number": 123456}), "123456"
+        )
+        self.assertEqual(
+            _extract_shopify_order_identifier({"name": "#112233"}), "112233"
+        )
+        self.assertEqual(
+            _extract_shopify_order_identifier({"id": 987654321}), "987654321"
+        )
+        self.assertEqual(
+            _extract_shopify_order_identifier({"id": "ABC123"}), "ABC123"
+        )
 
     def test_unknown_order_id_skips_shopify_and_logs(self) -> None:
         with mock.patch.object(

@@ -570,7 +570,7 @@ def _select_most_recent_order(orders: List[Dict[str, Any]]) -> Dict[str, Any]:
         try:
             return datetime.datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
         except Exception:
-            return datetime.datetime.min
+            return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
 
     return sorted(orders, key=_parse_created_at, reverse=True)[0]
 
