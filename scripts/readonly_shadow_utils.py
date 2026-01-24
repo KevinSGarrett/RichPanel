@@ -36,7 +36,6 @@ def fetch_recent_ticket_refs(
     if list_path == "/v1/tickets":
         list_paths.append("/api/v1/conversations")
 
-    last_response = None
     for path in list_paths:
         response = client.request(
             "GET",
@@ -45,7 +44,6 @@ def fetch_recent_ticket_refs(
             dry_run=False,
             log_body_excerpt=False,
         )
-        last_response = response
         if response.dry_run:
             raise SystemExit(
                 f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
@@ -69,12 +67,6 @@ def fetch_recent_ticket_refs(
             if len(results) >= sample_size:
                 break
         return results
-
-    if last_response is not None:
-        raise SystemExit(
-            f"Ticket listing failed: status {last_response.status_code} dry_run={last_response.dry_run}"
-        )
-    raise SystemExit("Ticket listing failed: no response received")
 
 
 def safe_error(exc: Exception) -> Dict[str, str]:
