@@ -3,9 +3,9 @@
 ## Status
 - Run status: completed (workflow_dispatch).
 - Target: production (read-only).
-- Run ID: `RUN_20260124_0317Z`
-- Generated (UTC): 2026-01-24T03:17:14.294267+00:00
-- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21308270109
+- Run ID: `RUN_20260124_0431Z`
+- Generated (UTC): 2026-01-24T04:31:28.258422+00:00
+- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21309232168
 
 ## Run parameters
 - Sample mode: explicit ticket IDs
@@ -15,9 +15,9 @@
 - Inputs: `ticket-ids` (provided out-of-band), `use-aws-secrets=true`, `shop-domain` set
 
 ## Sanitized outputs
-- JSON report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_0317Z.json`
-- Markdown report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_0317Z.md`
-- HTTP trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_0317Z.json`
+- JSON report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_0431Z.json`
+- Markdown report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_0431Z.md`
+- HTTP trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_0431Z.json`
 
 ## Results summary
 - Tickets scanned: 6
@@ -25,8 +25,10 @@
 - Tracking found: 0
 - ETA available: 0
 - Errors: 0
+- Shopify probe: enabled, `status_code=401`, `ok=false`
 
 ## Verification checklist
 - `counts.tickets_scanned` equals requested sample size.
-- `http_trace_summary.allowed_methods_only` is `true` (GET only; 18 requests).
+- `http_trace_summary.allowed_methods_only` is `true` (GET only; 19 requests).
+- `http_trace_summary.services.shopify` equals `1` (probe GET captured).
 - No customer identifiers or message bodies appear in artifacts.

@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-24
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `main`
-- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165
+- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165, https://github.com/KevinSGarrett/RichPanel/pull/167, https://github.com/KevinSGarrett/RichPanel/pull/168, https://github.com/KevinSGarrett/RichPanel/pull/169
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -35,7 +35,7 @@
 - `python scripts/test_claude_gate_review.py`
 
 ## Tests / Proof
-- Workflow dispatch run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21308270109
+- Workflow dispatch run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21309232168
 - Proof: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
 
 ## Docs impact
@@ -48,7 +48,7 @@
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
-- None.
+- Shopify probe returned 401 (unauthorized); confirm access token + shop domain alignment to prove successful Shopify read.
 
 ## Follow-ups
 - [x] Recorded workflow run link + artifact paths.
