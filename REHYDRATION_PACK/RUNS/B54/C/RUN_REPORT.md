@@ -32,7 +32,7 @@
 - Local run: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2116Z.json`
 - Trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2116Z.json`
 - Proof summary: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
-- Workflow dispatch run: pending (required for final go/no-go)
+- Workflow dispatch run: in progress â€” https://github.com/KevinSGarrett/RichPanel/actions/runs/21322096722
 
 ## Docs impact
 - Added run artifacts: `REHYDRATION_PACK/RUNS/B54/C/RUN_REPORT.md`, `EVIDENCE.md`, `CHANGES.md`.
@@ -43,9 +43,8 @@
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
-- Workflow dispatch run with GH secrets is still pending.
+- Workflow dispatch run with GH secrets is still in progress.
 - Required PR (`b54/live-readonly-shadow-validation`) is open but not yet merged.
 
 ## Follow-ups
-- [ ] Trigger workflow_dispatch run with GH secrets and attach link in `EVIDENCE.md`.
 - [ ] Wait for CI/Codecov/Bugbot/Claude gates, then merge and update this report with links.
