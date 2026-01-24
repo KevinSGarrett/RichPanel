@@ -92,6 +92,47 @@ def comment_is_operator(comment: Dict[str, Any]) -> Optional[bool]:
     return None
 
 
+def _comment_has_text(comment: Dict[str, Any]) -> bool:
+    for key in ("plain_body", "body"):
+        value = comment.get(key)
+        if value is None:
+            continue
+        try:
+            text = str(value).strip()
+        except Exception:
+            continue
+        if text:
+            return True
+    return False
+
+
+def summarize_comment_metadata(payload: Dict[str, Any]) -> Dict[str, Any]:
+    ticket_obj = payload.get("ticket") if isinstance(payload.get("ticket"), dict) else payload
+    comments = ticket_obj.get("comments") or []
+    if not isinstance(comments, list):
+        return {
+            "comment_count": 0,
+            "comment_text_present": False,
+            "comment_operator_flag_present": False,
+            "customer_comment_present": False,
+        }
+    comment_dicts = [comment for comment in comments if isinstance(comment, dict)]
+    comment_count = len(comment_dicts)
+    comment_text_present = any(_comment_has_text(comment) for comment in comment_dicts)
+    comment_operator_flag_present = any(
+        comment_is_operator(comment) is not None for comment in comment_dicts
+    )
+    customer_comment_present = any(
+        comment_is_operator(comment) is False for comment in comment_dicts
+    )
+    return {
+        "comment_count": comment_count,
+        "comment_text_present": comment_text_present,
+        "comment_operator_flag_present": comment_operator_flag_present,
+        "customer_comment_present": customer_comment_present,
+    }
+
+
 def _parse_timestamp(value: Any) -> Optional[float]:
     if not value:
         return None

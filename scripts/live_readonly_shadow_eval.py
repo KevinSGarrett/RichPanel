@@ -43,6 +43,7 @@ from readonly_shadow_utils import (
     extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
+    summarize_comment_metadata,
 )
 LOGGER = logging.getLogger("readonly_shadow_eval")
 logging.basicConfig(
@@ -613,10 +614,13 @@ def main() -> int:
                 )
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
 
-                customer_message = (
-                    _extract_latest_customer_message(ticket_payload, convo_payload)
-                    or "(not provided)"
+                raw_customer_message = _extract_latest_customer_message(
+                    ticket_payload, convo_payload
                 )
+                customer_message = raw_customer_message or "(not provided)"
+                comment_metadata = summarize_comment_metadata(ticket_payload)
+                result.update(comment_metadata)
+                result["customer_message_present"] = bool(raw_customer_message)
                 event_payload = dict(order_payload)
                 event_payload.update(
                     {

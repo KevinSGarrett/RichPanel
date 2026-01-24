@@ -66,6 +66,7 @@ from readonly_shadow_utils import (
     extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
+    summarize_comment_metadata,
 )
 
 LOGGER = logging.getLogger("shadow_order_status")
@@ -611,7 +612,9 @@ def run_ticket(
         conversation_id=ticket.get("conversation_id"),
         conversation_no=ticket.get("conversation_no"),
     )
-    customer_message = _extract_latest_customer_message(ticket, convo) or "(not provided)"
+    raw_customer_message = _extract_latest_customer_message(ticket, convo)
+    customer_message = raw_customer_message or "(not provided)"
+    comment_metadata = summarize_comment_metadata(ticket)
     payload = _extract_order_payload(ticket, convo)
     payload["ticket_id"] = ticket_id
     payload["conversation_id"] = ticket.get("conversation_id") or ticket_id_value
@@ -634,12 +637,14 @@ def run_ticket(
 
     result: Dict[str, Any] = {
         "ticket_id_redacted": ticket_redacted,
+        "customer_message_present": bool(raw_customer_message),
         "routing": route_info,
         "customer_presence": _extract_customer_presence(ticket, convo),
         "order_status": {
             "is_order_status": is_order_status,
         },
     }
+    result.update(comment_metadata)
 
     if not is_order_status:
         result["order_status"].update(
