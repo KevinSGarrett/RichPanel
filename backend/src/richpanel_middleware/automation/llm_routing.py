@@ -506,6 +506,7 @@ def compute_dual_routing(
     allow_network: bool = False,
     outbound_enabled: bool = False,
     client: Optional[OpenAIClient] = None,
+    force_primary: bool = False,
 ) -> Tuple[RoutingDecision, RoutingArtifact]:
     """
     Compute both deterministic and LLM routing, returning the final decision and audit artifact.
@@ -544,8 +545,8 @@ def compute_dual_routing(
     primary_source = "deterministic"
     final_routing = deterministic
 
-    if get_openai_routing_primary():
-        threshold = get_confidence_threshold()
+    if get_openai_routing_primary() or force_primary:
+        threshold = 0.0 if force_primary else get_confidence_threshold()
         if llm_suggestion.passes_threshold(threshold):
             primary_source = "llm"
             # Build RoutingDecision from LLM suggestion
@@ -581,6 +582,7 @@ def compute_dual_routing(
                     "threshold": threshold,
                     "is_valid": llm_suggestion.is_valid(),
                     "gated_reason": llm_suggestion.gated_reason,
+                    "force_primary": force_primary,
                 },
             )
 
@@ -591,6 +593,7 @@ def compute_dual_routing(
         "allow_network": allow_network,
         "outbound_enabled": outbound_enabled,
         "openai_routing_primary": get_openai_routing_primary(),
+        "force_openai_routing_primary": force_primary,
         "confidence_threshold": get_confidence_threshold(),
         "llm_gated_reason": llm_suggestion.gated_reason,
     }

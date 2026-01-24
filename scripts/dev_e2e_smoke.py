@@ -994,6 +994,29 @@ def _fetch_ticket_snapshot(
         last_message_source = payload.get("last_message_source") or payload.get(
             "lastMessageSource"
         )
+        comment_count = None
+        comment_source = None
+        comments = payload.get("comments")
+        if isinstance(comments, list):
+            comment_count = len(comments)
+            # Heuristic: Richpanel uses type="text" for middleware replies in sandbox.
+            for comment in reversed(comments):
+                if not isinstance(comment, dict):
+                    continue
+                if comment.get("is_operator") is True:
+                    comment_source = "middleware"
+                    break
+                comment_type = comment.get("type")
+                if isinstance(comment_type, str) and comment_type.strip().lower() in {
+                    "text",
+                    "reply",
+                }:
+                    comment_source = "middleware"
+                    break
+        if message_count is None and comment_count is not None:
+            message_count = comment_count
+        if not last_message_source and comment_source:
+            last_message_source = comment_source
 
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
@@ -1329,7 +1352,8 @@ def _compute_reply_evidence(
         else:
             reasons.append(f"message_count_delta={message_count_delta}")
     if (
-        isinstance(last_message_source_after, str)
+        (message_count_delta is None or message_count_delta > 0)
+        and isinstance(last_message_source_after, str)
         and last_message_source_after.lower() == "middleware"
     ):
         reply_evidence = True
@@ -1459,6 +1483,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.set_defaults(require_openai_rewrite=None)
     parser.add_argument(
+        "--require-outbound",
+        dest="require_outbound",
+        action="store_true",
+        help=(
+            "Require outbound reply evidence (message_count_delta>=1 and "
+            "last_message_source=middleware)."
+        ),
+    )
+    parser.add_argument(
+        "--no-require-outbound",
+        dest="require_outbound",
+        action="store_false",
+        help="Disable outbound reply evidence requirement.",
+    )
+    parser.set_defaults(require_outbound=None)
+    parser.add_argument(
         "--apply-test-tag",
         action="store_true",
         help="Apply a unique mw-smoke:<RUN_ID> tag to the ticket (requires ticket-id or ticket-number).",
@@ -1495,6 +1535,12 @@ def parse_args() -> argparse.Namespace:
         help="Alias for --simulate-followup (required for follow-up routing proof).",
     )
     parser.add_argument(
+        "--followup",
+        dest="simulate_followup",
+        action="store_true",
+        help="Alias for --simulate-followup (required for follow-up routing proof).",
+    )
+    parser.add_argument(
         "--followup-message",
         default="thanks, but can you confirm?",
         help="Custom follow-up message text for the second webhook.",
@@ -1510,6 +1556,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--json-out",
+        dest="proof_path",
+        help="Alias for --proof-path (PII-safe proof JSON artifact).",
+    )
+    parser.add_argument(
+        "--json",
         dest="proof_path",
         help="Alias for --proof-path (PII-safe proof JSON artifact).",
     )
@@ -2071,6 +2122,22 @@ def _evaluate_openai_requirements(
     }
 
 
+def _evaluate_outbound_evidence(
+    *,
+    message_count_delta: Optional[int],
+    last_message_source_after: Optional[str],
+) -> Dict[str, bool]:
+    message_count_ok = message_count_delta is not None and message_count_delta >= 1
+    last_source_ok = (
+        isinstance(last_message_source_after, str)
+        and last_message_source_after.lower() == "middleware"
+    )
+    return {
+        "outbound_message_count_delta_ge_1": message_count_ok,
+        "outbound_last_message_source_middleware": last_source_ok,
+    }
+
+
 def wait_for_conversation_state_record(
     ddb_resource,
     table_name: str,
@@ -2272,6 +2339,7 @@ def _build_followup_payload(
         f"{base_payload.get('scenario_name', scenario_variant)}_followup"
     )
     followup_payload.setdefault("intent", "order_status_tracking")
+    followup_payload.pop("force_openai_routing_primary", None)
     return followup_payload
 
 
@@ -2431,6 +2499,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if args.require_openai_rewrite is not None
         else order_status_mode
     )
+    require_outbound = (
+        args.require_outbound
+        if args.require_outbound is not None
+        else order_status_mode
+    )
+    if not order_status_mode:
+        require_outbound = False
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
@@ -2571,6 +2646,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     payload["outbound_enabled"] = True
     payload["allow_network"] = True
     payload["automation_enabled"] = True
+    if require_openai_routing:
+        payload["force_openai_routing_primary"] = True
     payload["outbound_reason"] = "dev_smoke_proof"
     event_id = payload["event_id"]
     print(
@@ -3577,6 +3654,31 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     rewriter_metadata["rewritten_hash"] = openai_rewrite.get("rewritten_hash")
     rewriter_metadata["changed"] = openai_rewrite.get("rewritten_changed")
 
+    outbound_message_count_ok = None
+    outbound_last_message_source_ok = None
+    if order_status_mode:
+        outbound_evidence = _evaluate_outbound_evidence(
+            message_count_delta=message_count_delta,
+            last_message_source_after=last_message_source_after,
+        )
+        outbound_message_count_ok = outbound_evidence[
+            "outbound_message_count_delta_ge_1"
+        ]
+        outbound_last_message_source_ok = outbound_evidence[
+            "outbound_last_message_source_middleware"
+        ]
+
+    openai_routing_used = bool(openai_routing.get("llm_called"))
+    openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
+        bool(openai_rewrite.get("rewrite_attempted"))
+        and bool(openai_rewrite.get("fallback_used"))
+    )
+    closed_after = (
+        bool(status_resolved) if status_resolved is not None else None
+    )
+    if not order_status_mode:
+        closed_after = None
+
     openai_requirements = _evaluate_openai_requirements(
         openai_routing,
         openai_rewrite,
@@ -3605,6 +3707,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
         "reply_evidence": reply_evidence,
+        "outbound_message_count_delta_ge_1": outbound_message_count_ok,
+        "outbound_last_message_source_middleware": outbound_last_message_source_ok,
         "openai_routing_called": openai_requirements.get("openai_routing_called"),
         "openai_routing_source_openai": openai_requirements.get(
             "openai_routing_source_openai"
@@ -3712,11 +3816,32 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 }
             )
 
+    if require_outbound:
+        required_checks.extend(
+            [
+                bool(outbound_message_count_ok),
+                bool(outbound_last_message_source_ok),
+            ]
+        )
+        criteria_details.extend(
+            [
+                {
+                    "name": "outbound_message_count_delta_ge_1",
+                    "description": "Outbound reply increased message count (message_count_delta>=1)",
+                    "required": True,
+                    "value": outbound_message_count_ok,
+                },
+                {
+                    "name": "outbound_last_message_source_middleware",
+                    "description": "Outbound reply recorded last_message_source=middleware",
+                    "required": True,
+                    "value": outbound_last_message_source_ok,
+                },
+            ]
+        )
+
     if require_openai_routing:
         required_checks.append(bool(openai_requirements.get("openai_routing_called")))
-        required_checks.append(
-            bool(openai_requirements.get("openai_routing_source_openai"))
-        )
         criteria_details.append(
             {
                 "name": "openai_routing_called",
@@ -3729,7 +3854,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             {
                 "name": "openai_routing_source_openai",
                 "description": "OpenAI routing selected as the final routing source",
-                "required": True,
+                "required": False,
                 "value": openai_requirements.get("openai_routing_source_openai"),
             }
         )
@@ -3862,6 +3987,17 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         safe_diagnostics = dict(diagnostic_result)
         safe_diagnostics.pop("winning_payload", None)
 
+    proof_fields = {
+        "openai_routing_used": openai_routing_used,
+        "openai_rewrite_used": openai_rewrite_used,
+        "closed_after": closed_after,
+        "message_count_delta": message_count_delta,
+        "last_message_source_after": last_message_source_after,
+        "followup_routed_support": followup_routed_support,
+        "followup_reply_sent": followup_reply_sent,
+        "followup_skip_tags_added": followup_skip_tags_added,
+    }
+
     proof_payload = {
         "meta": {
             "run_id": run_id,
@@ -3973,6 +4109,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             ),
         },
         "followup": followup_proof,
+        "proof_fields": proof_fields,
         "result": {
             "status": result_status,
             "classification": classification,

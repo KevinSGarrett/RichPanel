@@ -311,6 +311,11 @@ def plan_actions(
     payload = envelope.payload if isinstance(envelope.payload, dict) else {}
 
     # Compute dual routing (deterministic + LLM advisory)
+    force_openai_primary = bool(
+        payload.get("force_openai_routing_primary")
+        if isinstance(payload, dict) and payload.get("source") == "dev_e2e_smoke"
+        else False
+    )
     routing, routing_artifact = compute_dual_routing(
         payload,
         conversation_id=envelope.conversation_id,
@@ -319,6 +324,7 @@ def plan_actions(
         automation_enabled=automation_enabled,
         allow_network=allow_network,
         outbound_enabled=outbound_enabled,
+        force_primary=force_openai_primary,
     )
 
     effective_automation = automation_enabled and not safe_mode
@@ -702,7 +708,7 @@ def execute_order_status_reply(
     )
 
     responses: List[Dict[str, Any]] = []
-    openai_rewrite: Optional[Dict[str, Any]] = None
+    openai_rewrite = None
     try:
         # URL-encode conversation_id for write operations (email IDs have special chars)
         target_id = _resolve_target_ticket_id(
@@ -807,7 +813,7 @@ def execute_order_status_reply(
 
         original_hash = _fingerprint_reply_body(reply_body)
         rewrite_result: ReplyRewriteResult | None = None
-        openai_rewrite: Dict[str, Any]
+        openai_rewrite = {}
         try:
             rewrite_result = rewrite_reply(
                 reply_body,

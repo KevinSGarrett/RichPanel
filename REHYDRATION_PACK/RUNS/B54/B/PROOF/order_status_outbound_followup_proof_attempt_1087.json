@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "run_id": "b54-20260123144137",
+    "timestamp": "2026-01-23T20:41:55.214124+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "scenario_variant": "order_status_tracking"
+  },
+  "inputs": {
+    "ticket_ref": null,
+    "ticket_ref_fingerprint": "c6d537e11215",
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --require-outbound --require-openai-routing --require-openai-rewrite --followup --run-id b54-20260123144137 --proof-path REHYDRATION_PACK/RUNS/B54/B/PROOF/order_status_outbound_followup_proof_attempt_1087.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id_fingerprint": "210d7f3a5766",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "8345445a6dec",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 33
+    },
+    "state_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "action_count": 2,
+      "updated_at": "2026-01-23T20:41:45.894780+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking"
+        ],
+        "reason": "matched order status keyword",
+        "intent": "order_status_tracking"
+      },
+      "recorded_at": "2026-01-23T20:41:45.894780+00:00",
+      "ts_action_fingerprint": "2026-01-23T20:41:45.894780+00:00#fingerprint:210d7f3a5766"
+    }
+  },
+  "openai": {
+    "routing": {
+      "llm_called": true,
+      "model": "gpt-5.2-chat-latest",
+      "confidence": 0.94,
+      "response_id": "chatcmpl-D1IGOScjsHnDx3vQIfG4joaAls52y",
+      "response_id_unavailable_reason": null,
+      "final_intent": "order_status_tracking",
+      "primary_source": "deterministic",
+      "final_source": "deterministic",
+      "gated_reason": null
+    },
+    "rewrite": {
+      "rewrite_attempted": false,
+      "rewrite_applied": false,
+      "model": "gpt-5.2-chat-latest",
+      "response_id": null,
+      "response_id_unavailable_reason": "followup_after_auto_reply",
+      "fallback_used": false,
+      "reason": "followup_after_auto_reply",
+      "error_class": null,
+      "original_hash": "bf1766a6b06b",
+      "rewritten_hash": null,
+      "rewritten_changed": null
+    }
+  },
+  "routing_metadata": {
+    "final": {
+      "source": "deterministic",
+      "intent": "order_status_tracking"
+    },
+    "openai": {
+      "called": true,
+      "model": "gpt-5.2-chat-latest",
+      "request_id": "chatcmpl-D1IGOScjsHnDx3vQIfG4joaAls52y",
+      "response_id_unavailable_reason": null,
+      "confidence": 0.94
+    }
+  },
+  "rewriter_metadata": {
+    "used": false,
+    "model": "gpt-5.2-chat-latest",
+    "request_id": null,
+    "original_hash": "bf1766a6b06b",
+    "rewritten_hash": null,
+    "changed": null
+  },
+  "order_status": {
+    "expected_delivery_estimate": {
+      "eta_human": "0-1 business days",
+      "normalized_method": "Standard (3-5 business days)",
+      "elapsed_business_days": 4,
+      "remaining_min_days": 0,
+      "remaining_max_days": 1
+    },
+    "eta_window_verified": null,
+    "eta_method_verified": null,
+    "eta_window_fallback_used": false,
+    "tracking_reply_verified": null,
+    "tracking_reply_source": null,
+    "tracking_number_present": null,
+    "tracking_url_present": null,
+    "tracking_number_fingerprint": null,
+    "tracking_url_fingerprint": null
+  },
+  "richpanel": {
+    "pre": {
+      "status": "CLOSED",
+      "state": null,
+      "tags": [
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-auto-replied",
+        "mw-order-status-answered",
+        "mw-order-status-answered:20260122155040",
+        "mw-reply-sent"
+      ],
+      "updated_at": "2026-01-22T21:51:00.662Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "8345445a6dec",
+      "endpoint_variant": "number",
+      "path_redacted": "/v1/tickets/number/<redacted>"
+    },
+    "post": {
+      "status": "CLOSED",
+      "state": null,
+      "tags": [
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied",
+        "mw-auto-replied",
+        "mw-order-status-answered",
+        "mw-order-status-answered:20260122155040",
+        "mw-reply-sent",
+        "mw-skip-followup-after-auto-reply",
+        "route-email-support-team"
+      ],
+      "updated_at": "2026-01-23T20:41:47.635Z",
+      "message_count": null,
+      "last_message_source": null,
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "8345445a6dec",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [
+      "mw-skip-followup-after-auto-reply",
+      "route-email-support-team"
+    ],
+    "tags_removed": [],
+    "skip_tags_added": [
+      "mw-skip-followup-after-auto-reply",
+      "route-email-support-team"
+    ],
+    "updated_at_delta_seconds": 82246.973,
+    "status_before": "closed",
+    "status_after": "closed",
+    "status_changed": false,
+    "message_count_before": null,
+    "message_count_after": null,
+    "message_count_delta": null,
+    "last_message_source_before": null,
+    "last_message_source_after": null,
+    "middleware_tags_added": [
+      "mw-skip-followup-after-auto-reply",
+      "route-email-support-team"
+    ],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": null,
+    "auto_close_applied": false,
+    "auto_close_result": null,
+    "reply_update_success": true,
+    "reply_update_candidate": "mw-skip-followup-after-auto-reply",
+    "reply_fallback": null,
+    "success_tag_added_this_run": false,
+    "skip_or_escalation_tags_added_this_run": true
+  },
+  "followup": {
+    "performed": true,
+    "event_id_fingerprint": "b8bb0cca117d",
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate"
+    },
+    "tags_added": [
+      "mw-intent-unknown_other"
+    ],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "middleware_tags_added": [
+      "mw-intent-unknown_other"
+    ],
+    "status_after": "closed",
+    "message_count_delta": null,
+    "updated_at_delta_seconds": 6.921,
+    "reply_sent": false,
+    "reply_reason": "no_reply_evidence_fields",
+    "routed_to_support": false
+  },
+  "proof_fields": {
+    "openai_routing_used": false,
+    "openai_rewrite_used": false,
+    "closed_after": true,
+    "message_count_delta": null,
+    "last_message_source_after": null,
+    "followup_routed_support": false,
+    "followup_reply_sent": false,
+    "followup_skip_tags_added": []
+  },
+  "result": {
+    "status": "FAIL",
+    "classification": "FAIL",
+    "classification_reason": "skip_or_escalation_tags_present",
+    "reply_evidence": true,
+    "reply_evidence_reason": "reply_update_success:mw-skip-followup-after-auto-reply",
+    "fallback_close_used": false,
+    "followup_reply_sent": false,
+    "followup_reply_reason": "no_reply_evidence_fields",
+    "criteria": {
+      "scenario": "order_status",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": true,
+      "middleware_outcome": false,
+      "status_resolved_or_closed": true,
+      "middleware_tag_applied": false,
+      "no_skip_tags": false,
+      "test_tag_verified": null,
+      "reply_evidence": true,
+      "outbound_message_count_delta_ge_1": false,
+      "outbound_last_message_source_middleware": false,
+      "openai_routing_called": true,
+      "openai_routing_source_openai": false,
+      "openai_rewrite_attempted": false,
+      "openai_rewrite_applied": false,
+      "followup_performed": true,
+      "followup_no_reply": true,
+      "followup_routed_support": false,
+      "followup_route_tag": false,
+      "followup_skip_followup_tag": false,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_order_status",
+        "description": "Routing intent matched order-status keywords",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_outcome",
+        "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "status_resolved_or_closed",
+        "description": "Post status is resolved/closed",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_tag_applied",
+        "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "no_skip_tags",
+        "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "reply_evidence",
+        "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "outbound_message_count_delta_ge_1",
+        "description": "Outbound reply increased message count (message_count_delta>=1)",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "outbound_last_message_source_middleware",
+        "description": "Outbound reply recorded last_message_source=middleware",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "openai_routing_called",
+        "description": "OpenAI routing was invoked for intent detection",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "openai_routing_source_openai",
+        "description": "OpenAI routing selected as the final routing source",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "openai_rewrite_attempted",
+        "description": "OpenAI rewrite was attempted for the draft reply",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "openai_rewrite_applied",
+        "description": "OpenAI rewrite applied or fallback recorded",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "followup_performed",
+        "description": "Follow-up webhook was sent when requested",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "followup_no_reply",
+        "description": "Follow-up produced no additional middleware reply",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "followup_routed_support",
+        "description": "Follow-up resulted in route-to-support outcome",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "followup_route_tag",
+        "description": "Follow-up applied route-email-support-team tag",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "followup_skip_followup_tag",
+        "description": "Follow-up applied mw-skip-followup-after-auto-reply tag",
+        "required": true,
+        "value": false
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": "skip_or_escalation_tags_present"
+  }
+}
