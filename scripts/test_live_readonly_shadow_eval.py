@@ -582,7 +582,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
         trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
-        summary = shadow_eval._summarize_trace(trace)
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
         self.assertEqual(summary["total_requests"], 2)
         self.assertTrue(summary["allowed_methods_only"])
         self.assertEqual(summary["methods"].get("GET"), 1)

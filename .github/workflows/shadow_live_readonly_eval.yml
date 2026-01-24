@@ -91,7 +91,7 @@ jobs:
 
           if output_lines:
               with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
-                  env_file.write("\\n".join(output_lines) + "\\n")
+                  env_file.write("\n".join(output_lines) + "\n")
           PY
 
       - name: Run live read-only shadow evaluation

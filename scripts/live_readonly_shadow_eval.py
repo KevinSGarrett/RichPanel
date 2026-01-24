@@ -300,16 +300,34 @@ class _HttpTrace:
         }
 
 
-def _summarize_trace(trace: _HttpTrace) -> Dict[str, Any]:
+def _summarize_trace(trace: _HttpTrace, *, allow_openai: bool) -> Dict[str, Any]:
     methods = Counter(entry.get("method") for entry in trace.entries)
     services = Counter(entry.get("service") for entry in trace.entries)
+    allowed = {
+        "richpanel": {"GET", "HEAD"},
+        "shopify": {"GET", "HEAD"},
+        "shipstation": {"GET", "HEAD"},
+        "openai": {"POST"},
+        "anthropic": {"POST"},
+    }
+    allowed_methods_only = True
+    for entry in trace.entries:
+        service = entry.get("service")
+        method = entry.get("method")
+        if service in {"openai", "anthropic"} and not allow_openai:
+            allowed_methods_only = False
+            break
+        if service not in allowed:
+            allowed_methods_only = False
+            break
+        if method not in allowed[service]:
+            allowed_methods_only = False
+            break
     return {
         "total_requests": len(trace.entries),
         "methods": dict(methods),
         "services": dict(services),
-        "allowed_methods_only": all(
-            entry.get("method") in {"GET", "HEAD"} for entry in trace.entries
-        ),
+        "allowed_methods_only": allowed_methods_only,
     }
 
 
@@ -786,7 +804,7 @@ def main() -> int:
         )
         trace.assert_read_only(allow_openai=allow_openai, trace_path=trace_path)
 
-    trace_summary = _summarize_trace(trace)
+    trace_summary = _summarize_trace(trace, allow_openai=allow_openai)
     counts = {
         "tickets_requested": tickets_requested,
         "tickets_selected": len(ticket_refs),
