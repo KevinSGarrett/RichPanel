@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
 sys.path.insert(0, str(SRC))
 
+from richpanel_middleware.commerce import order_lookup  # noqa: E402
 from richpanel_middleware.commerce.order_lookup import (  # noqa: E402
     _extract_order_id,
     lookup_order_summary,
@@ -117,3 +118,81 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertIn("/orders/1057300.json", transport.requests[0].url)
         self.assertIn("orders.json", transport.requests[1].url)
         self.assertIn("name=%231057300", transport.requests[1].url)
+
+    def test_lookup_shopify_by_name_skips_dry_run_and_errors(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, dry_run: bool, payload: dict):
+                self.status_code = status_code
+                self.dry_run = dry_run
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, responses):
+                self.responses = list(responses)
+
+            def find_order_by_name(self, *args, **kwargs):
+                return self.responses.pop(0)
+
+        payload = order_lookup._lookup_shopify_by_name(
+            order_name="#1057300",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient([_StubResponse(status_code=0, dry_run=True, payload={})]),
+        )
+        self.assertEqual(payload, {})
+
+        payload = order_lookup._lookup_shopify_by_name(
+            order_name="#1057300",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient([_StubResponse(status_code=500, dry_run=False, payload={})]),
+        )
+        self.assertEqual(payload, {})
+
+        payload = order_lookup._lookup_shopify_by_name(
+            order_name="#1057300",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                [
+                    _StubResponse(
+                        status_code=200,
+                        dry_run=False,
+                        payload={"orders": [{"shipping_lines": [{"title": "Standard"}]}]},
+                    )
+                ]
+            ),
+        )
+        self.assertEqual(payload.get("shipping_lines")[0]["title"], "Standard")
+
+    def test_lookup_shopify_by_name_handles_hash_prefixed(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, dry_run: bool, payload: dict):
+                self.status_code = status_code
+                self.dry_run = dry_run
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, responses):
+                self.responses = list(responses)
+
+            def find_order_by_name(self, *args, **kwargs):
+                return self.responses.pop(0)
+
+        payload = order_lookup._lookup_shopify_by_name(
+            order_name="#1057300",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient([_StubResponse(status_code=404, dry_run=False, payload={})]),
+        )
+        self.assertEqual(payload, {})

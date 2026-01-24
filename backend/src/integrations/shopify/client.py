@@ -393,40 +393,6 @@ class ShopifyClient:
             automation_enabled=automation_enabled,
         )
 
-    def find_order_by_name(
-        self,
-        order_name: str,
-        *,
-        fields: Optional[List[str]] = None,
-        status: str = "any",
-        limit: int = 1,
-        dry_run: Optional[bool] = None,
-        safe_mode: bool = False,
-        automation_enabled: bool = True,
-    ) -> ShopifyResponse:
-        """
-        Search orders by Shopify order name (e.g. #1001).
-        Uses the primary request() entrypoint so all safety gates apply.
-        """
-        safe_name = str(order_name).strip()
-        params: Dict[str, str] = {
-            "status": status,
-            "limit": str(limit),
-            "name": urllib.parse.quote(safe_name, safe=""),
-        }
-        if fields:
-            params["fields"] = ",".join(sorted(map(str, fields)))
-        query = urllib.parse.urlencode(sorted(params.items()), safe="%")
-
-        return self.request(
-            "GET",
-            f"orders.json?{query}",
-            params=None,
-            dry_run=dry_run,
-            safe_mode=safe_mode,
-            automation_enabled=automation_enabled,
-        )
-
     def _to_response(
         self, transport_response: TransportResponse, url: str
     ) -> ShopifyResponse:
