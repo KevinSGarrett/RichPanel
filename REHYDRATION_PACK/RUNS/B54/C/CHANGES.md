@@ -10,7 +10,7 @@
 - Centralized `_safe_error` in `scripts/readonly_shadow_utils.py` for reuse.
 - Added workflow dispatch for live read-only shadow validation: `.github/workflows/shadow_live_readonly_eval.yml`.
 - Hardened workflow inputs (env-bound values + validation) and installed `boto3`.
-- Added OIDC-based AWS secret resolution when GH secrets point to secret IDs.
+- Added optional AWS Secrets Manager resolution when `use-aws-secrets` is enabled.
 - Added fallback to list recent tickets via `/api/v1/conversations` and `/v1/conversations` when `/v1/tickets` returns 401/403/404.
 - Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 - Added `shopify-probe` workflow input and CLI flag for read-only Shopify verification (orders count, best-effort).

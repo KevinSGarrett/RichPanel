@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-24
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b54/live-readonly-shadow-validation`
-- **PR:** pending (must open with labels `risk:R2`, `gate:claude`)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/181
 - **PR merge strategy:** merge commit (pending)
 
 ## Objective + stop conditions
@@ -18,10 +18,10 @@
 - **Ticket reference:** stored as hashed ticket IDs in the JSON report (no raw IDs).
 
 ## What changed (high-level)
-- Enforced Shopify name search with `#` prefix + single encoding and added identity fallback with `order_resolution` telemetry.
-- Expanded order-number extraction to scan all comments with prioritized patterns and wrapper handling.
-- Persisted `order_resolution` for explicit ticket runs in `scripts/live_readonly_shadow_eval.py`.
-- Added local env fallbacks for `RP_KEY` and `SHOPIFY_TOKEN` during read-only runs.
+- Enforced read-only HTTP tracing with per-service method rules and OpenAI/Anthropic gating in `scripts/live_readonly_shadow_eval.py`.
+- Preserved the B54 order-resolution flow (order-number extraction + Shopify name lookup + identity fallback) with PII-safe telemetry.
+- Added workflow inputs for `shopify-probe` and optional AWS Secrets Manager resolution, plus Shopify token fallback.
+- Refreshed B54/C proof artifacts to the latest local run output and PII-safe summary table.
 
 ## Commands run
 - `python -m unittest backend.tests.test_order_lookup_order_id_resolution`
@@ -39,13 +39,13 @@
 
 ## Risks / edge cases considered
 - Read-only guardrails fail closed if required flags are missing or incorrect.
-- HTTP trace asserts GET/HEAD-only methods and stores a redacted path summary.
+- HTTP trace asserts read-only methods and stores a redacted path summary.
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
 - Workflow dispatch run with GH secrets is still pending.
-- Required PR (`b54/live-readonly-shadow-validation`) not opened, labeled, or merged.
+- Required PR (`b54/live-readonly-shadow-validation`) is open but not yet merged.
 
 ## Follow-ups
-- [ ] Open PR with required labels and PR body score gate.
 - [ ] Trigger workflow_dispatch run with GH secrets and attach link in `EVIDENCE.md`.
+- [ ] Wait for CI/Codecov/Bugbot/Claude gates, then merge and update this report with links.
