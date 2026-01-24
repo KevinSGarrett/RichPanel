@@ -32,30 +32,41 @@ def fetch_recent_ticket_refs(
 ) -> List[str]:
     if sample_size < 1:
         raise SystemExit("--sample-size must be >= 1")
-    response = client.request(
-        "GET",
-        list_path,
-        params={"limit": str(sample_size), "page": "1"},
-        dry_run=False,
-        log_body_excerpt=False,
-    )
-    if response.dry_run or response.status_code >= 400:
-        raise SystemExit(
-            f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
+    list_paths = [list_path]
+    if list_path == "/v1/tickets":
+        list_paths.append("/api/v1/conversations")
+
+    for path in list_paths:
+        response = client.request(
+            "GET",
+            path,
+            params={"limit": str(sample_size), "page": "1"},
+            dry_run=False,
+            log_body_excerpt=False,
         )
-    tickets = extract_ticket_list(response.json())
-    results: List[str] = []
-    seen: set[str] = set()
-    for ticket in tickets:
-        number, ticket_id = extract_ticket_fields(ticket)
-        candidate = ticket_id or number
-        if not candidate or candidate in seen:
-            continue
-        seen.add(candidate)
-        results.append(candidate)
-        if len(results) >= sample_size:
-            break
-    return results
+        if response.dry_run:
+            raise SystemExit(
+                f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
+            )
+        if response.status_code >= 400:
+            if path != list_paths[-1] and response.status_code in {401, 403, 404}:
+                continue
+            raise SystemExit(
+                f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
+            )
+        tickets = extract_ticket_list(response.json())
+        results: List[str] = []
+        seen: set[str] = set()
+        for ticket in tickets:
+            number, ticket_id = extract_ticket_fields(ticket)
+            candidate = ticket_id or number
+            if not candidate or candidate in seen:
+                continue
+            seen.add(candidate)
+            results.append(candidate)
+            if len(results) >= sample_size:
+                break
+        return results
 
 
 def safe_error(exc: Exception) -> Dict[str, str]:

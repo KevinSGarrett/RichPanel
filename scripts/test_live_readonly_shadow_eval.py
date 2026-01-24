@@ -59,6 +59,20 @@ class _ListingClient:
         return _StubResponse({}, status_code=404)
 
 
+class _FallbackListingClient:
+    def __init__(self, list_payload: dict):
+        self.list_payload = list_payload
+        self.paths: list[str] = []
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        self.paths.append(path)
+        if path == "/v1/tickets":
+            return _StubResponse({}, status_code=403)
+        if path == "/api/v1/conversations":
+            return _StubResponse(self.list_payload, status_code=200)
+        return _StubResponse({}, status_code=404)
+
+
 class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
     def test_prod_requires_write_disabled(self) -> None:
         env = {
@@ -200,6 +214,20 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_eval._fetch_recent_ticket_refs(
                 client, sample_size=1, list_path="/v1/tickets"
             )
+
+    def test_fetch_recent_ticket_refs_fallbacks_on_forbidden(self) -> None:
+        payload = {
+            "data": [
+                {"id": "c-1"},
+                {"conversation_no": "1002"},
+            ]
+        }
+        client = _FallbackListingClient(payload)
+        results = shadow_eval._fetch_recent_ticket_refs(
+            client, sample_size=2, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["c-1", "1002"])
+        self.assertEqual(client.paths, ["/v1/tickets", "/api/v1/conversations"])
 
     def test_http_trace_records_and_asserts(self) -> None:
         trace = shadow_eval._HttpTrace()
