@@ -74,6 +74,22 @@ class _ListingClient:
         return _StubResponse({}, status_code=404)
 
 
+class _FallbackListingClient:
+    def __init__(self, list_payload: dict):
+        self.list_payload = list_payload
+        self.paths: list[str] = []
+
+    def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+        self.paths.append(path)
+        if path == "/v1/tickets":
+            return _StubResponse({}, status_code=403)
+        if path == "/api/v1/conversations":
+            return _StubResponse({}, status_code=404)
+        if path == "/v1/conversations":
+            return _StubResponse(self.list_payload, status_code=200)
+        return _StubResponse({}, status_code=404)
+
+
 class ShadowOrderStatusGuardTests(unittest.TestCase):
     def test_require_env_flag_missing_and_mismatch(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
@@ -217,6 +233,23 @@ class ShadowOrderStatusHelperTests(unittest.TestCase):
             shadow._fetch_recent_ticket_refs(
                 client, sample_size=1, list_path="/v1/tickets"
             )
+
+    def test_fetch_recent_ticket_refs_fallbacks_on_forbidden(self) -> None:
+        payload = {
+            "data": [
+                {"id": "c-1"},
+                {"conversation_no": "1002"},
+            ]
+        }
+        client = _FallbackListingClient(payload)
+        results = shadow._fetch_recent_ticket_refs(
+            client, sample_size=2, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["c-1", "1002"])
+        self.assertEqual(
+            client.paths,
+            ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
+        )
 
     def test_safe_error_redacts_exception_type(self) -> None:
         self.assertEqual(shadow._safe_error(RuntimeError("boom"))["type"], "error")
@@ -452,6 +485,46 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             )
         self.assertEqual(result["order_status"]["draft_reply_type"], "no_tracking")
 
+    def test_run_ticket_uses_ticket_id_value_for_payload_conversation_id(self) -> None:
+        ticket = {
+            "id": "real-1",
+            "customer_message": "where is my order",
+            "order": {"order_id": "o-1"},
+        }
+        rp_client = _GuardedRichpanelClient(ticket, {})
+        shopify_client = _GuardedShopifyClient()
+        captured: dict[str, dict] = {}
+
+        def _capture(payload, **kwargs):
+            captured["payload"] = payload
+            routing = SimpleNamespace(
+                intent="order_status_tracking",
+                department="Email Support Team",
+                reason="stubbed",
+            )
+            routing_artifact = SimpleNamespace(primary_source="deterministic")
+            return routing, routing_artifact
+
+        with mock.patch.object(
+            shadow, "compute_dual_routing", side_effect=_capture
+        ), mock.patch.object(
+            shadow,
+            "_lookup_order_summary_payload_first",
+            return_value=({"order_id": "o-1", "tracking_number": "TN1"}, "payload"),
+        ), mock.patch.object(
+            shadow, "build_tracking_reply", return_value={"body": "stubbed"}
+        ):
+            result = shadow.run_ticket(
+                "ref-123",
+                richpanel_client=rp_client,
+                shopify_client=shopify_client,
+                allow_network=False,
+                outbound_enabled=False,
+                rewrite_enabled=False,
+            )
+        self.assertEqual(result["order_status"]["draft_reply_type"], "tracking")
+        self.assertEqual(captured["payload"]["conversation_id"], "real-1")
+
     def test_build_openai_evidence(self) -> None:
         rewrite_result = shadow.ReplyRewriteResult(
             body="x",
@@ -494,6 +567,23 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         }
         message = shadow._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "need tracking")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "customer comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer comment")
+
+        ticket = {
+            "comments": [
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer followup", "via": {"isOperator": False}},
+            ]
+        }
+        message = shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "customer followup")
 
         convo = {
             "messages": [
@@ -608,6 +698,151 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
 
         result = shadow._fetch_conversation(_BoomClient(), "t-1")
         self.assertEqual(result, {})
+
+    def test_comment_is_operator_detection(self) -> None:
+        self.assertTrue(shadow._comment_is_operator({"is_operator": True}))
+        self.assertFalse(shadow._comment_is_operator({"isOperator": False}))
+        self.assertTrue(shadow._comment_is_operator({"via": {"isOperator": True}}))
+        self.assertTrue(shadow._comment_is_operator({"via": {"is_operator": True}}))
+        self.assertIsNone(shadow._comment_is_operator({"via": "not-a-dict"}))
+        self.assertIsNone(shadow._comment_is_operator({}))
+
+    def test_extract_comment_message_variants(self) -> None:
+        payload = {"comments": "not-a-list"}
+        self.assertEqual(shadow._extract_comment_message(payload), "")
+
+        payload = {
+            "comments": [
+                "not-a-dict",
+                {"plain_body": "agent note", "via": {"isOperator": True}},
+                {"body": "customer body", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer body")
+
+        payload = {
+            "comments": [
+                {"plain_body": "  ", "via": {"isOperator": False}},
+                {"body": "customer plain", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer plain")
+
+        payload = {
+            "comments": [
+                {"message": "customer message", "via": {"isOperator": False}},
+            ]
+        }
+        self.assertEqual(
+            shadow._extract_comment_message(
+                payload, extractor=shadow.extract_customer_message
+            ),
+            "customer message",
+        )
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {
+                        "plain_body": "agent email",
+                        "via": {"isOperator": True, "channel": "email"},
+                        "created_at": "2026-01-24T06:00:00Z",
+                    },
+                    {
+                        "plain_body": "customer chat",
+                        "via": {"isOperator": False, "channel": "chat"},
+                        "created_at": "2026-01-24T05:00:00Z",
+                    },
+                ]
+            }
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "customer chat")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "newer chat",
+                    "via": {"channel": "chat"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "older email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "older email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:00:00Z",
+                },
+                {
+                    "plain_body": "newer email",
+                    "via": {"channel": "email"},
+                    "created_at": "2026-01-24T06:10:00Z",
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "newer email")
+
+        payload = {
+            "comments": [
+                {
+                    "plain_body": "longer message here",
+                    "via": {"channel": "email"},
+                },
+                {
+                    "plain_body": "short",
+                    "via": {"channel": "email"},
+                },
+            ]
+        }
+        self.assertEqual(shadow._extract_comment_message(payload), "short")
+
+    def test_fetch_conversation_handles_bad_json(self) -> None:
+        class _BadJsonResponse(_StubResponse):
+            def json(self) -> dict:
+                raise ValueError("bad json")
+
+        class _BadJsonClient:
+            def request(self, method: str, path: str, **kwargs):
+                return _BadJsonResponse({}, status_code=200)
+
+        result = shadow._fetch_conversation(_BadJsonClient(), "t-1")
+        self.assertEqual(result, {})
+
+    def test_fetch_conversation_falls_back_to_messages(self) -> None:
+        class _SequenceClient:
+            def __init__(self) -> None:
+                self.paths: list[str] = []
+
+            def request(self, method: str, path: str, **kwargs):
+                self.paths.append(path)
+                if path == "/api/v1/conversations/conv-9":
+                    return _StubResponse({}, status_code=403)
+                if path == "/v1/conversations/conv-9":
+                    return _StubResponse({}, status_code=404)
+                if path == "/api/v1/conversations/conv-9/messages":
+                    return _StubResponse(
+                        [{"sender_type": "customer", "body": "status please"}],
+                        status_code=200,
+                    )
+                return _StubResponse({}, status_code=404)
+
+        client = _SequenceClient()
+        result = shadow._fetch_conversation(
+            client, "t-9", conversation_id="conv-9"
+        )
+        self.assertEqual(result.get("messages")[0]["body"], "status please")
+        self.assertTrue(any("/api/v1/conversations/" in path for path in client.paths))
+        source_path = result.get("__source_path", "")
+        self.assertIn("/api/v1/conversations/", source_path)
+        self.assertIn("/messages", source_path)
 
     def test_main_uses_sample_size_when_no_ticket_id(self) -> None:
         env = {
