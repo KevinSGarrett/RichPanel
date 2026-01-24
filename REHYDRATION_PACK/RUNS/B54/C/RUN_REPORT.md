@@ -32,6 +32,7 @@
 
 ## Docs impact
 - Added run artifacts: `REHYDRATION_PACK/RUNS/B54/C/RUN_REPORT.md`, `EVIDENCE.md`, `CHANGES.md`.
+- Updated runbook: `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`.
 
 ## Risks / edge cases considered
 - Read-only guardrails fail closed if required flags are missing or incorrect.

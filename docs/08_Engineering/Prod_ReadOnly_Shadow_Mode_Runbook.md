@@ -93,8 +93,10 @@ Before enabling shadow mode in production:
 ### Live read-only shadow eval script (local)
 
 - Script: `scripts/live_readonly_shadow_eval.py`
+- Preferred execution: workflow dispatch `shadow_live_readonly_eval.yml` (uses GH secrets; no local prod secrets)
 - Required secrets (AWS Secrets Manager): `rp-mw/prod/richpanel/api_key`, `rp-mw/prod/shopify/admin_api_token`
 - Required env vars (the script enforces/fails-closed):
+  - `RICHPANEL_ENV=prod` (or `ENVIRONMENT=prod`)
   - `MW_ALLOW_NETWORK_READS=true`
   - `RICHPANEL_OUTBOUND_ENABLED=true` (required for real GETs; still read-only)
   - `RICHPANEL_WRITE_DISABLED=true`
@@ -112,7 +114,7 @@ $env:RICHPANEL_OUTBOUND_ENABLED = "true"
 $env:RICHPANEL_WRITE_DISABLED = "true"
 
 python scripts/live_readonly_shadow_eval.py `
-  --ticket-id <ticket-or-conversation-id> `
+  --sample-size 10 `
   --richpanel-secret-id rp-mw/prod/richpanel/api_key `
   --shop-domain <myshop.myshopify.com>
 ```
@@ -120,14 +122,14 @@ python scripts/live_readonly_shadow_eval.py `
 What it does:
 - Requires the read-only env flags above (fails closed if missing or incorrect)
 - Reads ticket + conversation, performs order lookup (Shopify fallback) with `allow_network` gated to reads only
-- Builds a dry-run action plan and prints a PII-safe preview of the planned response (no posts/tags)
-- Writes a PII-safe artifact to `artifacts/readonly_shadow/<timestamp>_<ticket_hash>.json` containing: redacted ticket id, redacted customer identifiers, routing/intent, whether tracking was found, and ETA window (if no tracking)
-- Captures a redacted HTTP trace to `artifacts/prod_readonly_shadow_eval_http_trace.json` and fails if any non-GET calls are observed
+- Builds a dry-run action plan without sending messages, tagging, or closing tickets
+- Writes a PII-safe JSON report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
+- Writes a PII-safe markdown report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
+- Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json` and fails if any non-GET calls are observed
 
 Success evidence for PRs:
 - Command used (including flags)
-- Path to the generated artifact JSON
-- Path to the HTTP trace JSON (should contain only GET requests)
+- Paths to the report JSON/MD and HTTP trace JSON (GET/HEAD only)
 - Cross-reference Shopify data expectations in `docs/SHOPIFY_STRATEGY/` for store-specific nuances
 
 ---

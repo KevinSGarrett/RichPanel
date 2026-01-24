@@ -8,3 +8,6 @@
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
+
+## Docs
+- Updated `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md` for new report paths and workflow guidance.
