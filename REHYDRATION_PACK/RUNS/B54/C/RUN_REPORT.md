@@ -32,7 +32,11 @@
 - Local run: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2116Z.json`
 - Trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2116Z.json`
 - Proof summary: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
-- Workflow dispatch run: in progress â€” https://github.com/KevinSGarrett/RichPanel/actions/runs/21322096722
+- Workflow dispatch run: success â€” https://github.com/KevinSGarrett/RichPanel/actions/runs/21322157644
+- Workflow artifacts (RUN_20260124_2150Z):
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.json`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.md`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2150Z.json`
 
 ## Docs impact
 - Added run artifacts: `REHYDRATION_PACK/RUNS/B54/C/RUN_REPORT.md`, `EVIDENCE.md`, `CHANGES.md`.
@@ -43,8 +47,8 @@
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
-- Workflow dispatch run with GH secrets is still in progress.
 - Required PR (`b54/live-readonly-shadow-validation`) is open but not yet merged.
+- PR checks (CI/Codecov/Bugbot/Claude gates) are still pending.
 
 ## Follow-ups
 - [ ] Wait for CI/Codecov/Bugbot/Claude gates, then merge and update this report with links.
