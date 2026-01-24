@@ -12,6 +12,7 @@
 - Hardened workflow inputs (env-bound values + validation) and installed `boto3`.
 - Added OIDC-based AWS secret resolution when GH secrets point to secret IDs.
 - Added fallback to list recent tickets via `/api/v1/conversations` and `/v1/conversations` when `/v1/tickets` returns 401/403/404.
+- Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`

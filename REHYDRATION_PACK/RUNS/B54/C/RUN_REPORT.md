@@ -26,6 +26,7 @@
 - Centralized `_safe_error` handling in the shared utility to avoid duplication.
 - Enabled optional AWS secret resolution in the workflow when GH secrets are secret IDs.
 - Added fallback to list tickets via `/api/v1/conversations` and `/v1/conversations` when `/v1/tickets` is forbidden or missing.
+- Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 - Updated unit tests for new CLI flags and redaction rules.
 
 ## Commands run
