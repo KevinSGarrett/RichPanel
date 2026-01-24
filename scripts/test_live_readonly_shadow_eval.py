@@ -465,6 +465,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(shadow_utils.extract_order_number(payload), "1185086")
         payload = {"custom_fields": {"order_number": "1234567"}}
         self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"order": {"name": "#2223334"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "2223334")
+        payload = {"messages": [{"text": "Order no. 7654321"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "7654321")
+        payload = {"order_number": "#1,234,567"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"custom_fields": {"shipping_code": "9999999"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "")
 
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
