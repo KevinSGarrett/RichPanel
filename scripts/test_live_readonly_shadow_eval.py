@@ -188,6 +188,47 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertIn("/ABC", redacted)
         self.assertNotIn("redacted:", redacted)
 
+    def test_extract_latest_customer_message(self) -> None:
+        ticket = {"customer_note": "ticket message"}
+        convo = {"messages": [{"sender_type": "customer", "body": "later message"}]}
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "ticket message")
+
+        ticket = {}
+        convo = {"body": "conversation message"}
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "conversation message")
+
+        convo = {
+            "messages": [
+                {"sender_type": "agent", "body": "ignore"},
+                {"sender_type": "customer", "body": "need tracking"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "need tracking")
+
+        convo = {
+            "messages": [
+                {"sender_type": " customer ", "body": "trimmed sender"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "trimmed sender")
+
+        convo = {
+            "messages": [
+                {"body": "system message"},
+                {"sender_type": "customer", "body": "real customer"},
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "real customer")
+
+        convo = {"messages": ["not-a-dict", {"sender_type": "agent", "body": "ignore"}]}
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "")
+
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit) as ctx:

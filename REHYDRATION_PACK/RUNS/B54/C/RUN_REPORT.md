@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-24
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `main`
-- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165, https://github.com/KevinSGarrett/RichPanel/pull/167, https://github.com/KevinSGarrett/RichPanel/pull/168, https://github.com/KevinSGarrett/RichPanel/pull/169
+- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165, https://github.com/KevinSGarrett/RichPanel/pull/167, https://github.com/KevinSGarrett/RichPanel/pull/168, https://github.com/KevinSGarrett/RichPanel/pull/169, https://github.com/KevinSGarrett/RichPanel/pull/171, https://github.com/KevinSGarrett/RichPanel/pull/172, https://github.com/KevinSGarrett/RichPanel/pull/173
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
@@ -29,6 +29,7 @@
 - Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
 - Added `shopify-probe` flag to issue a read-only Shopify orders count GET for validation (best-effort).
 - Added GH secret fallback for `PROD_SHOPIFY_API_TOKEN` when admin token secret is missing.
+- Shadow eval now extracts the latest customer message from conversation messages before routing.
 - Added Shopify order-number lookup fallback via `orders.json?name=` to resolve non-ID order numbers.
 - Updated unit tests for new CLI flags and redaction rules.
 
