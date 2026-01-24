@@ -39,6 +39,7 @@ from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyRequestError,
 )
 from readonly_shadow_utils import (
+    build_route_info as _build_route_info,
     comment_is_operator as _comment_is_operator,
     extract_comment_message as _extract_comment_message,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
@@ -459,25 +460,6 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
         if value not in (None, "", [], {}):
             return True
     return False
-
-
-def _build_route_info(
-    routing: Any, routing_artifact: Any
-) -> Dict[str, Optional[Any]]:
-    llm = getattr(routing_artifact, "llm_suggestion", None) if routing_artifact else None
-    if not isinstance(llm, dict):
-        llm = {}
-    confidence = llm.get("confidence")
-    return {
-        "intent": getattr(routing, "intent", None),
-        "department": getattr(routing, "department", None),
-        "reason": getattr(routing, "reason", None),
-        "primary_source": getattr(routing_artifact, "primary_source", None),
-        "confidence": confidence,
-        "llm_model": llm.get("model"),
-        "llm_response_id": llm.get("response_id"),
-        "llm_gated_reason": llm.get("gated_reason"),
-    }
 
 
 def _build_run_id() -> str:
