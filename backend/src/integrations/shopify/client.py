@@ -378,15 +378,16 @@ class ShopifyClient:
         params: Dict[str, str] = {
             "status": status,
             "limit": str(limit),
-            "name": safe_name,
+            "name": urllib.parse.quote(safe_name, safe=""),
         }
         if fields:
             params["fields"] = ",".join(sorted(map(str, fields)))
+        query = urllib.parse.urlencode(sorted(params.items()), safe="%")
 
         return self.request(
             "GET",
-            "orders.json",
-            params=params,
+            f"orders.json?{query}",
+            params=None,
             dry_run=dry_run,
             safe_mode=safe_mode,
             automation_enabled=automation_enabled,

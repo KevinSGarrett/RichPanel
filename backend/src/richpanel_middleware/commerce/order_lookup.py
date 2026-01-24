@@ -187,7 +187,9 @@ def _lookup_shopify_by_name(
             automation_enabled=automation_enabled,
             dry_run=not allow_network,
         )
-        if response.dry_run or response.status_code >= 400:
+        if response.dry_run:
+            continue
+        if response.status_code >= 400:
             continue
         payload = _extract_shopify_order_payload(response.json() or {})
         if payload:
