@@ -2,9 +2,9 @@
 """
 Live Read-Only Shadow Evaluation
 
-Reads real Richpanel + Shopify data for a single ticket without allowing any writes.
+Reads real Richpanel + Shopify data for a small ticket sample without allowing any writes.
 Fails closed via environment guards + GET-only request tracing.
-Produces PII-safe JSON artifacts under artifacts/.
+Produces PII-safe JSON + markdown artifacts under artifacts/.
 """
 from __future__ import annotations
 
@@ -16,9 +16,10 @@ import os
 import sys
 import urllib.parse
 import urllib.request
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
@@ -38,6 +39,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
+logging.getLogger("richpanel_middleware").setLevel(logging.WARNING)
+logging.getLogger("integrations").setLevel(logging.WARNING)
 
 PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
 
@@ -46,6 +49,9 @@ REQUIRED_FLAGS = {
     "RICHPANEL_OUTBOUND_ENABLED": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
 }
+
+ALLOWED_PROD_ENVS = {"prod", "production"}
+DEFAULT_SAMPLE_SIZE = 10
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
@@ -62,6 +68,10 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     return f"redacted:{_fingerprint(text)}"
 
 
+def _safe_error(exc: Exception) -> Dict[str, str]:
+    return {"type": exc.__class__.__name__}
+
+
 def _resolve_env_name() -> str:
     raw = (
         os.environ.get("RICHPANEL_ENV")
@@ -71,6 +81,18 @@ def _resolve_env_name() -> str:
         or "local"
     )
     return str(raw).strip().lower() or "local"
+
+
+def _require_prod_environment(*, allow_non_prod: bool) -> str:
+    env_name = _resolve_env_name()
+    if env_name in ALLOWED_PROD_ENVS:
+        return env_name
+    if allow_non_prod:
+        return env_name
+    raise SystemExit(
+        "ENVIRONMENT must resolve to prod for live read-only eval "
+        "(use --allow-non-prod for local tests)"
+    )
 
 
 def _resolve_richpanel_base_url() -> str:
@@ -92,6 +114,61 @@ def _require_env_flags(context: str) -> Dict[str, str]:
         _require_env_flag(key, expected, context=context)
         applied[key] = expected
     return applied
+
+
+def _extract_ticket_list(payload: Any) -> List[Dict[str, Any]]:
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        for key in ("tickets", "data", "items", "results"):
+            items = payload.get(key)
+            if isinstance(items, list):
+                return [item for item in items if isinstance(item, dict)]
+    return []
+
+
+def _extract_ticket_fields(ticket: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
+    ticket_number = (
+        ticket.get("conversation_no")
+        or ticket.get("ticket_number")
+        or ticket.get("number")
+        or ticket.get("conversation_number")
+    )
+    ticket_id = ticket.get("id") or ticket.get("ticket_id") or ticket.get("_id")
+    number_str = str(ticket_number).strip() if ticket_number is not None else None
+    id_str = str(ticket_id).strip() if ticket_id is not None else None
+    return number_str or None, id_str or None
+
+
+def _fetch_recent_ticket_refs(
+    client: RichpanelClient, *, sample_size: int, list_path: str
+) -> List[str]:
+    if sample_size < 1:
+        raise SystemExit("--sample-size must be >= 1")
+    response = client.request(
+        "GET",
+        list_path,
+        params={"limit": str(sample_size), "page": "1"},
+        dry_run=False,
+        log_body_excerpt=False,
+    )
+    if response.dry_run or response.status_code >= 400:
+        raise SystemExit(
+            f"Ticket listing failed: status {response.status_code} dry_run={response.dry_run}"
+        )
+    tickets = _extract_ticket_list(response.json())
+    results: List[str] = []
+    seen: set[str] = set()
+    for ticket in tickets:
+        number, ticket_id = _extract_ticket_fields(ticket)
+        candidate = ticket_id or number
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        results.append(candidate)
+        if len(results) >= sample_size:
+            break
+    return results
 
 
 def _build_richpanel_client(
@@ -212,6 +289,19 @@ class _HttpTrace:
         }
 
 
+def _summarize_trace(trace: _HttpTrace) -> Dict[str, Any]:
+    methods = Counter(entry.get("method") for entry in trace.entries)
+    services = Counter(entry.get("service") for entry in trace.entries)
+    return {
+        "total_requests": len(trace.entries),
+        "methods": dict(methods),
+        "services": dict(services),
+        "allowed_methods_only": all(
+            entry.get("method") in {"GET", "HEAD"} for entry in trace.entries
+        ),
+    }
+
+
 
 def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
     """Fetch ticket by id or ticket number; return payload + metadata."""
@@ -225,17 +315,19 @@ def _fetch_ticket(client: RichpanelClient, ticket_ref: str) -> Dict[str, Any]:
         try:
             resp = client.request("GET", path, dry_run=False, log_body_excerpt=False)
         except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-            errors.append(f"{path}: {exc}")
+            errors.append(f"{_redact_path(path)}: {exc.__class__.__name__}")
             continue
         if resp.dry_run or resp.status_code >= 400:
-            errors.append(f"{path}: status {resp.status_code} dry_run={resp.dry_run}")
+            errors.append(
+                f"{_redact_path(path)}: status {resp.status_code} dry_run={resp.dry_run}"
+            )
             continue
 
         payload = resp.json() or {}
         if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
             payload = payload["ticket"]
         payload = payload if isinstance(payload, dict) else {}
-        payload["__source_path"] = path
+        payload["__source_path"] = _redact_path(path)
         return payload
     redacted_ref = _redact_identifier(ticket_ref) or "redacted"
     raise SystemExit(
@@ -261,34 +353,9 @@ def _fetch_conversation(client: RichpanelClient, ticket_id: str) -> Dict[str, An
             return {}
         payload = resp.json()
         return payload if isinstance(payload, dict) else {}
-    except Exception as exc:
-        LOGGER.warning("Conversation fetch failed", exc_info=exc)
+    except Exception:
+        LOGGER.warning("Conversation fetch failed")
         return {}
-
-
-def _extract_customer_identifiers(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dict[str, Optional[str]]:
-    """Extract and redact customer identifiers without leaking raw PII."""
-    sources: list[Dict[str, Any]] = []
-    for candidate in (ticket, convo):
-        if isinstance(candidate, dict):
-            sources.append(candidate)
-            profile = candidate.get("customer") or candidate.get("customer_profile")
-            if isinstance(profile, dict):
-                sources.append(profile)
-
-    email = None
-    phone = None
-    name = None
-    for source in sources:
-        email = email or source.get("email")
-        phone = phone or source.get("phone") or source.get("phone_number")
-        name = name or source.get("name") or source.get("customer_name")
-
-    return {
-        "email": _redact_identifier(email),
-        "phone": _redact_identifier(phone),
-        "name": _redact_identifier(name),
-    }
 
 
 def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dict[str, Any]:
@@ -336,26 +403,60 @@ def _tracking_present(order_summary: Dict[str, Any]) -> bool:
     return False
 
 
-def _build_artifact_path(ticket_id: str) -> Path:
-    safe_id = _fingerprint(ticket_id)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+def _delivery_estimate_present(delivery_estimate: Any) -> bool:
+    if not isinstance(delivery_estimate, dict):
+        return False
+    for key in ("eta_human", "window_min_days", "window_max_days", "bucket", "is_late"):
+        value = delivery_estimate.get(key)
+        if value not in (None, "", [], {}):
+            return True
+    return False
+
+
+def _build_run_id() -> str:
+    return datetime.now(timezone.utc).strftime("RUN_%Y%m%d_%H%MZ")
+
+
+def _build_artifact_dir() -> Path:
     out_dir = ROOT / "artifacts" / "readonly_shadow"
     out_dir.mkdir(parents=True, exist_ok=True)
-    return out_dir / f"{timestamp}_{safe_id}.json"
+    return out_dir
 
 
-def _build_trace_path() -> Path:
-    out_dir = ROOT / "artifacts"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    return out_dir / "prod_readonly_shadow_eval_http_trace.json"
+def _build_report_paths(run_id: str) -> Tuple[Path, Path, Path]:
+    out_dir = _build_artifact_dir()
+    json_path = out_dir / f"live_readonly_shadow_eval_report_{run_id}.json"
+    md_path = out_dir / f"live_readonly_shadow_eval_report_{run_id}.md"
+    trace_path = out_dir / f"live_readonly_shadow_eval_http_trace_{run_id}.json"
+    return json_path, md_path, trace_path
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run live read-only shadow evaluation.")
     parser.add_argument(
         "--ticket-id",
-        required=True,
-        help="Richpanel ticket/conversation id to evaluate",
+        action="append",
+        help="Richpanel ticket/conversation id to evaluate (repeatable)",
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=DEFAULT_SAMPLE_SIZE,
+        help="Number of recent tickets to sample when --ticket-id is not provided",
+    )
+    parser.add_argument(
+        "--ticket-list-path",
+        default="/v1/tickets",
+        help="Richpanel API path for ticket listing (default: /v1/tickets)",
+    )
+    parser.add_argument(
+        "--allow-non-prod",
+        action="store_true",
+        help="Allow non-prod runs for local tests",
+    )
+    parser.add_argument(
+        "--run-id",
+        help="Optional run id override for artifact filenames",
     )
     parser.add_argument(
         "--richpanel-secret-id",
@@ -366,6 +467,10 @@ def main() -> int:
         help="Optional Shopify shop domain override (defaults to env)",
     )
     args = parser.parse_args()
+
+    env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
+    if not os.environ.get("RICHPANEL_ENV"):
+        os.environ["RICHPANEL_ENV"] = env_name
 
     richpanel_base_url = _resolve_richpanel_base_url()
     is_prod_target = _is_prod_target(
@@ -381,107 +486,199 @@ def main() -> int:
     enforced_env = _require_env_flags("read-only shadow evaluation")
     if args.shop_domain:
         os.environ["SHOPIFY_SHOP_DOMAIN"] = args.shop_domain
+
+    run_id = args.run_id or _build_run_id()
+    report_path, report_md_path, trace_path = _build_report_paths(run_id)
+
     trace = _HttpTrace().capture()
+    had_errors = False
+    ticket_results: List[Dict[str, Any]] = []
+    ticket_refs: List[str] = []
+    sample_mode = "explicit"
+    tickets_requested = 0
     try:
         rp_client = _build_richpanel_client(
             richpanel_secret=args.richpanel_secret_id,
             base_url=richpanel_base_url,
         )
 
-        ticket_payload = _fetch_ticket(rp_client, args.ticket_id)
-        convo_payload = _fetch_conversation(rp_client, args.ticket_id)
-        order_payload = _extract_order_payload(ticket_payload, convo_payload)
-        customer_ids = _extract_customer_identifiers(ticket_payload, convo_payload)
+        explicit_refs = [str(value).strip() for value in (args.ticket_id or [])]
+        explicit_refs = [value for value in dict.fromkeys(explicit_refs) if value]
+        if explicit_refs:
+            ticket_refs = explicit_refs
+            tickets_requested = len(explicit_refs)
+            sample_mode = "explicit"
+        else:
+            ticket_refs = _fetch_recent_ticket_refs(
+                rp_client,
+                sample_size=args.sample_size,
+                list_path=args.ticket_list_path,
+            )
+            tickets_requested = args.sample_size
+            sample_mode = "recent"
 
-        customer_message = extract_customer_message(
-            order_payload, default="(not provided)"
-        )
-        event_payload = dict(order_payload)
-        event_payload.update(
-            {
-                "ticket_id": args.ticket_id,
-                "conversation_id": args.ticket_id,
-                "customer_message": customer_message,
-            }
-        )
+        if not ticket_refs:
+            raise SystemExit("No tickets available for evaluation")
+        if len(ticket_refs) < tickets_requested:
+            LOGGER.warning(
+                "Sample size reduced: requested %d got %d",
+                tickets_requested,
+                len(ticket_refs),
+            )
 
-        envelope = normalize_event({"payload": event_payload})
-        # Keep outbound disabled to avoid any outbound messaging/LLM calls.
-        plan = plan_actions(
-            envelope,
-            safe_mode=False,
-            automation_enabled=True,
-            allow_network=True,
-            outbound_enabled=False,
-        )
+        for ticket_ref in ticket_refs:
+            redacted = _redact_identifier(ticket_ref) or "redacted"
+            result: Dict[str, Any] = {"ticket_id_redacted": redacted}
+            try:
+                ticket_payload = _fetch_ticket(rp_client, ticket_ref)
+                convo_payload = _fetch_conversation(rp_client, ticket_ref)
+                order_payload = _extract_order_payload(ticket_payload, convo_payload)
 
-        order_action = next(
-            (a for a in plan.actions if a.get("type") == "order_status_draft_reply"),
-            None,
-        )
-        parameters = (
-            order_action.get("parameters", {}) if isinstance(order_action, dict) else {}
-        )
-        order_summary = (
-            parameters.get("order_summary") if isinstance(parameters, dict) else {}
-        )
-        delivery_estimate = (
-            parameters.get("delivery_estimate") if isinstance(parameters, dict) else None
-        )
-        tracking_found = _tracking_present(order_summary or {})
+                customer_message = extract_customer_message(
+                    order_payload, default="(not provided)"
+                )
+                event_payload = dict(order_payload)
+                event_payload.update(
+                    {
+                        "ticket_id": ticket_ref,
+                        "conversation_id": ticket_ref,
+                        "customer_message": customer_message,
+                    }
+                )
+
+                envelope = normalize_event({"payload": event_payload})
+                plan = plan_actions(
+                    envelope,
+                    safe_mode=False,
+                    automation_enabled=True,
+                    allow_network=True,
+                    outbound_enabled=False,
+                )
+
+                order_action = next(
+                    (
+                        a
+                        for a in plan.actions
+                        if isinstance(a, dict)
+                        and a.get("type") == "order_status_draft_reply"
+                    ),
+                    None,
+                )
+                parameters = (
+                    order_action.get("parameters", {})
+                    if isinstance(order_action, dict)
+                    else {}
+                )
+                order_summary = (
+                    parameters.get("order_summary") if isinstance(parameters, dict) else {}
+                )
+                delivery_estimate = (
+                    parameters.get("delivery_estimate")
+                    if isinstance(parameters, dict)
+                    else None
+                )
+                tracking_found = _tracking_present(order_summary or {})
+                eta_available = _delivery_estimate_present(delivery_estimate)
+
+                result.update(
+                    {
+                        "order_status_candidate": bool(order_action),
+                        "order_matched": bool(order_summary),
+                        "tracking_found": tracking_found,
+                        "eta_available": eta_available,
+                    }
+                )
+            except SystemExit:
+                raise
+            except Exception as exc:
+                had_errors = True
+                result["error"] = _safe_error(exc)
+            ticket_results.append(result)
     finally:
         trace.stop()
-        trace_path = _build_trace_path()
         with trace_path.open("w", encoding="utf-8") as fh:
             json.dump(trace.to_dict(), fh, ensure_ascii=False, indent=2)
         trace.assert_get_only(
             context="read-only shadow evaluation", trace_path=trace_path
         )
 
-    artifact = {
-        "ticket_id_redacted": _redact_identifier(args.ticket_id),
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "env_flags": enforced_env,
-        "prod_target": is_prod_target,
-        "http_trace_path": str(_build_trace_path()),
-        "customer": customer_ids,
-        "routing": {
-            "intent": getattr(plan.routing, "intent", None),
-            "department": getattr(plan.routing, "department", None),
-            "reason": getattr(plan.routing, "reason", None),
-            "mode": plan.mode,
-            "reasons": plan.reasons,
-        },
-        "order": {
-            "order_id_redacted": _redact_identifier(str(order_summary.get("order_id", "")))
-            if isinstance(order_summary, dict)
-            else None,
-            "tracking_found": tracking_found,
-            "eta_window": delivery_estimate.get("eta_human") if isinstance(delivery_estimate, dict) else None,
-            "delivery_estimate": {
-                "window_min_days": delivery_estimate.get("window_min_days"),
-                "window_max_days": delivery_estimate.get("window_max_days"),
-                "bucket": delivery_estimate.get("bucket"),
-                "is_late": delivery_estimate.get("is_late"),
-            }
-            if isinstance(delivery_estimate, dict)
-            else None,
-        },
-        "plan_preview": {
-            "actions": [a.get("type") for a in plan.actions],
-            "has_draft_reply": bool(parameters.get("draft_reply")) if isinstance(parameters, dict) else False,
-        },
+    trace_summary = _summarize_trace(trace)
+    counts = {
+        "tickets_requested": tickets_requested,
+        "tickets_selected": len(ticket_refs),
+        "tickets_scanned": len(ticket_results),
+        "order_status_candidates": sum(
+            1 for item in ticket_results if item.get("order_status_candidate")
+        ),
+        "orders_matched": sum(1 for item in ticket_results if item.get("order_matched")),
+        "tracking_found": sum(1 for item in ticket_results if item.get("tracking_found")),
+        "eta_available": sum(1 for item in ticket_results if item.get("eta_available")),
+        "errors": sum(1 for item in ticket_results if item.get("error")),
     }
 
-    out_path = _build_artifact_path(args.ticket_id)
-    with out_path.open("w", encoding="utf-8") as fh:
-        json.dump(artifact, fh, ensure_ascii=False, indent=2)
+    report = {
+        "run_id": run_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "environment": env_name,
+        "env_flags": enforced_env,
+        "prod_target": is_prod_target,
+        "sample_mode": sample_mode,
+        "counts": counts,
+        "tickets": ticket_results,
+        "http_trace_path": str(trace_path),
+        "http_trace_summary": trace_summary,
+        "notes": [
+            "Ticket identifiers are hashed.",
+            "No message bodies or customer identifiers are stored.",
+            "HTTP trace captures urllib.request calls; AWS SDK calls are not included.",
+        ],
+    }
 
-    LOGGER.info("Planned response (PII-safe preview):")
-    LOGGER.info(json.dumps(artifact["plan_preview"], indent=2))
-    LOGGER.info("Artifact written to %s", out_path)
-    LOGGER.info("HTTP trace written to %s", _build_trace_path())
-    return 0
+    report_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    md_lines = [
+        "# Live Read-Only Shadow Eval Report",
+        "",
+        f"- Run ID: `{run_id}`",
+        f"- Generated (UTC): {report['timestamp']}",
+        f"- Environment: `{env_name}`",
+        f"- Sample mode: `{sample_mode}`",
+        f"- Tickets requested: {counts['tickets_requested']}",
+        f"- Tickets scanned: {counts['tickets_scanned']}",
+        f"- Orders matched: {counts['orders_matched']}",
+        f"- Tracking found: {counts['tracking_found']}",
+        f"- ETA available: {counts['eta_available']}",
+        f"- Errors: {counts['errors']}",
+        "",
+        "## HTTP Trace Summary",
+        f"- Total requests: {trace_summary['total_requests']}",
+        f"- Methods: {json.dumps(trace_summary['methods'], sort_keys=True)}",
+        f"- Services: {json.dumps(trace_summary['services'], sort_keys=True)}",
+        f"- Allowed methods only: {trace_summary['allowed_methods_only']}",
+        f"- Trace path: `{trace_path}`",
+        "",
+        "## Notes",
+        "- Ticket identifiers are hashed in the JSON report.",
+        "- No message bodies or customer identifiers are stored.",
+        "- HTTP trace captures urllib.request calls; AWS SDK calls are not included.",
+    ]
+    report_md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+
+    LOGGER.info(
+        "Shadow eval summary: run_id=%s tickets_scanned=%d orders_matched=%d "
+        "tracking_found=%d eta_available=%d errors=%d",
+        run_id,
+        counts["tickets_scanned"],
+        counts["orders_matched"],
+        counts["tracking_found"],
+        counts["eta_available"],
+        counts["errors"],
+    )
+    LOGGER.info("Report written to %s", report_path)
+    LOGGER.info("HTTP trace written to %s", trace_path)
+    return 1 if had_errors else 0
 
 
 if __name__ == "__main__":

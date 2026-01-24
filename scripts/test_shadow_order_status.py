@@ -186,22 +186,14 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 
 
 class ShadowOrderStatusRedactionTests(unittest.TestCase):
-    def test_email_hash_and_last4(self) -> None:
-        hashed = shadow._hash_email("User@example.com")
-        self.assertTrue(hashed.startswith("hash:"))
-        self.assertNotIn("User@example.com", hashed)
-        self.assertEqual(shadow._last4("TN123456"), "3456")
-        self.assertEqual(shadow._last4("ABC"), "redacted")
-        self.assertEqual(shadow._last4("1234"), "redacted")
-
-    def test_customer_redaction(self) -> None:
+    def test_customer_presence(self) -> None:
         ticket = {"customer": {"email": "a@example.com", "name": "Alice"}}
         convo = {"customer_profile": {"phone": "555-1212", "address": "123 Main"}}
-        redacted = shadow._extract_customer_redaction(ticket, convo)
-        self.assertTrue(redacted["email"].startswith("hash:"))
-        self.assertEqual(redacted["name"], "REDACTED")
-        self.assertEqual(redacted["phone"], "REDACTED")
-        self.assertEqual(redacted["address"], "REDACTED")
+        presence = shadow._extract_customer_presence(ticket, convo)
+        self.assertTrue(presence["email_present"])
+        self.assertTrue(presence["name_present"])
+        self.assertTrue(presence["phone_present"])
+        self.assertTrue(presence["address_present"])
 
     def test_redact_path_variants(self) -> None:
         self.assertEqual(shadow._redact_path(""), "/")
@@ -316,8 +308,8 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             )
         self.assertTrue(all(method in {"GET", "HEAD"} for method in rp_client.methods))
         self.assertFalse(shopify_client.called)
-        self.assertEqual(result["order_status"]["tracking_number_last4"], "3456")
-        self.assertEqual(result["customer"]["name"], "REDACTED")
+        self.assertTrue(result["order_status"]["tracking_present"])
+        self.assertTrue(result["customer_presence"]["name_present"])
 
     def test_run_ticket_non_order_status(self) -> None:
         ticket = {"customer_message": "refund my order"}
@@ -645,10 +637,9 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             self.assertNotIn("TN123456", raw)
             payload = json.loads(raw)
             ticket_entry = payload["tickets"][0]
-            self.assertEqual(ticket_entry["customer"]["name"], "REDACTED")
-            self.assertEqual(
-                ticket_entry["order_status"]["tracking_number_last4"], "3456"
-            )
+            self.assertTrue(ticket_entry["ticket_id_redacted"].startswith("redacted:"))
+            self.assertTrue(ticket_entry["customer_presence"]["name_present"])
+            self.assertTrue(ticket_entry["order_status"]["tracking_present"])
 
     def test_main_error_is_redacted(self) -> None:
         env = {
@@ -695,9 +686,9 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         success_result = {
-            "ticket_id": "t-2",
+            "ticket_id_redacted": "redacted:abc123",
             "routing": {"intent": "unknown", "confidence": 0.0},
-            "customer": {"email": "hash:abc", "name": "REDACTED"},
+            "customer_presence": {"email_present": True, "name_present": True},
             "order_status": {"is_order_status": False},
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -729,7 +720,9 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             payload = json.loads(out_path.read_text(encoding="utf-8"))
             self.assertEqual(len(payload["tickets"]), 2)
             self.assertEqual(payload["tickets"][0]["error"]["type"], "RuntimeError")
-            self.assertEqual(payload["tickets"][1]["ticket_id"], "t-2")
+            self.assertTrue(
+                payload["tickets"][1]["ticket_id_redacted"].startswith("redacted:")
+            )
 
 
 def main() -> int:  # pragma: no cover

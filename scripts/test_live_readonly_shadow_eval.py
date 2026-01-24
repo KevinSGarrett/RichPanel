@@ -232,7 +232,9 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 return _StubResponse({}, status_code=404)
 
         result = shadow_eval._fetch_ticket(_SequenceClient(), "123")
-        self.assertEqual(result.get("__source_path"), "/v1/tickets/number/123")
+        source_path = result.get("__source_path")
+        self.assertTrue(source_path.startswith("/v1/tickets/number/"))
+        self.assertNotIn("123", source_path)
 
     def test_fetch_ticket_raises_when_all_fail(self) -> None:
         class _FailClient:
@@ -259,14 +261,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         result = shadow_eval._fetch_conversation(_BoomClient(), "t-123")
         self.assertEqual(result, {})
 
-    def test_extract_customer_identifiers(self) -> None:
-        ticket = {"customer": {"email": "a@example.com", "name": "Alice"}}
-        convo = {"customer_profile": {"phone": "555-1212"}}
-        result = shadow_eval._extract_customer_identifiers(ticket, convo)
-        self.assertTrue(result["email"].startswith("redacted:"))
-        self.assertTrue(result["name"].startswith("redacted:"))
-        self.assertTrue(result["phone"].startswith("redacted:"))
-
     def test_extract_order_payload_merges(self) -> None:
         ticket = {"order": {"order_id": "o-1"}, "__source_path": "/v1/tickets/1"}
         convo = {"orders": [{"tracking_number": "TN123"}]}
@@ -286,9 +280,11 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         with TemporaryDirectory() as tmpdir, mock.patch.object(
             shadow_eval, "ROOT", Path(tmpdir)
         ):
-            artifact_path = shadow_eval._build_artifact_path("ticket-1")
-            trace_path = shadow_eval._build_trace_path()
-            self.assertTrue(artifact_path.parent.exists())
+            report_path, report_md_path, trace_path = shadow_eval._build_report_paths(
+                "RUN_TEST"
+            )
+            self.assertTrue(report_path.parent.exists())
+            self.assertTrue(report_md_path.parent.exists())
             self.assertTrue(trace_path.parent.exists())
 
     def test_main_runs_with_stubbed_client(self) -> None:
@@ -325,20 +321,22 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
                 "--ticket-id",
                 "t-123",
+                "--allow-non-prod",
                 "--shop-domain",
                 "example.myshopify.com",
             ]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
-                shadow_eval, "_build_trace_path", return_value=trace_path
-            ), mock.patch.object(
-                shadow_eval, "_build_artifact_path", return_value=artifact_path
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -348,6 +346,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 self.assertEqual(result, 0)
                 self.assertTrue(trace_path.exists())
                 self.assertTrue(artifact_path.exists())
+                self.assertTrue(report_md_path.exists())
 
 
 def main() -> int:  # pragma: no cover
