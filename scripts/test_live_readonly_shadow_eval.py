@@ -868,8 +868,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(
                 payload["tickets"][0]["order_resolution"]["resolvedBy"], "probe"
             )
-                self.assertIn("order_created_at_present", payload["tickets"][0])
-                self.assertIn("tracking_or_shipping_method_present", payload["tickets"][0])
+            self.assertIn("order_created_at_present", payload["tickets"][0])
+            self.assertIn(
+                "tracking_or_shipping_method_present", payload["tickets"][0]
+            )
 
     def test_main_records_probe_error(self) -> None:
         env = {
