@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-23
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b54/live-readonly-shadow-validation`
-- **PR:** pending — <link>
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/161
 - **PR merge strategy:** merge commit
 
 ## Objective + stop conditions
