@@ -458,6 +458,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(meta["comment_operator_flag_present"])
         self.assertTrue(meta["customer_comment_present"])
 
+    def test_extract_order_number(self) -> None:
+        payload = {"subject": "Order #1057300 missing"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1057300")
+        payload = {"comments": [{"body": "order number: 1185086"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1185086")
+        payload = {"custom_fields": {"order_number": "1234567"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
             request=lambda *args, **kwargs: SimpleNamespace(
@@ -657,6 +665,12 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(merged.get("order_id"), "o-1")
         self.assertEqual(merged.get("tracking_number"), "TN123")
         self.assertNotIn("__source_path", merged)
+
+    def test_extract_order_payload_adds_order_number(self) -> None:
+        ticket = {"comments": [{"plain_body": "Order #1158259"}]}
+        convo: dict = {}
+        merged = shadow_eval._extract_order_payload(ticket, convo)
+        self.assertEqual(merged.get("order_number"), "1158259")
 
     def test_tracking_present_checks_fields(self) -> None:
         self.assertFalse(shadow_eval._tracking_present("not a dict"))

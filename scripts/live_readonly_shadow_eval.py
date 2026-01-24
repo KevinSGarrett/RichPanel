@@ -44,6 +44,7 @@ from readonly_shadow_utils import (
     build_route_info as _build_route_info,
     comment_is_operator as _comment_is_operator,
     extract_comment_message as _extract_comment_message,
+    extract_order_number,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
     summarize_comment_metadata,
@@ -428,6 +429,10 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
             if key in ("__source_path",):
                 continue
             merged.setdefault(key, val)
+    if not merged.get("order_number") and not merged.get("orderNumber"):
+        order_number = extract_order_number(ticket) or extract_order_number(convo)
+        if order_number:
+            merged["order_number"] = order_number
     return merged
 
 
