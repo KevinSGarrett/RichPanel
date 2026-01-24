@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
@@ -148,6 +149,117 @@ def build_route_info(routing: Any, routing_artifact: Any) -> Dict[str, Optional[
         "llm_response_id": llm.get("response_id"),
         "llm_gated_reason": llm.get("gated_reason"),
     }
+
+
+_ORDER_NUMBER_PATTERNS = (
+    re.compile(r"(?i)\border\s*(?:number|no\.|#)?\s*[:#]?\s*(\d{4,})\b"),
+    re.compile(r"(?<!\w)#(\d{4,})\b"),
+)
+
+
+def _coerce_order_number(value: Any) -> str:
+    if value is None:
+        return ""
+    try:
+        text = str(value).strip()
+    except Exception:
+        return ""
+    if not text:
+        return ""
+    normalized = text.replace(",", "")
+    if normalized.startswith("#"):
+        normalized = normalized[1:].strip()
+    return normalized if normalized.isdigit() and len(normalized) >= 4 else ""
+
+
+def _extract_order_number_from_text(text: str) -> str:
+    if not text:
+        return ""
+    normalized = text.replace(",", "")
+    for pattern in _ORDER_NUMBER_PATTERNS:
+        match = pattern.search(normalized)
+        if match:
+            return match.group(1)
+    return ""
+
+
+def _iter_comment_texts(payload: Dict[str, Any]) -> List[str]:
+    ticket_obj = payload.get("ticket") if isinstance(payload.get("ticket"), dict) else payload
+    comments = ticket_obj.get("comments") or []
+    if not isinstance(comments, list):
+        return []
+    texts: List[str] = []
+    for comment in comments:
+        if not isinstance(comment, dict):
+            continue
+        for key in ("plain_body", "body"):
+            value = comment.get(key)
+            if value is None:
+                continue
+            try:
+                text = str(value).strip()
+            except Exception:
+                continue
+            if text:
+                texts.append(text)
+    return texts
+
+
+def extract_order_number(payload: Dict[str, Any]) -> str:
+    for key in ("order_number", "orderNumber", "order_no", "orderNo"):
+        value = _coerce_order_number(payload.get(key))
+        if value:
+            return value
+
+    order = payload.get("order")
+    if isinstance(order, dict):
+        for key in ("number", "order_number", "orderNumber", "order_no", "orderNo"):
+            value = _coerce_order_number(order.get(key))
+            if value:
+                return value
+        name_value = order.get("name")
+        if name_value:
+            candidate = _extract_order_number_from_text(str(name_value))
+            if candidate:
+                return candidate
+
+    custom_fields = payload.get("custom_fields")
+    if isinstance(custom_fields, dict):
+        for key, value in custom_fields.items():
+            if "order" not in str(key).lower():
+                continue
+            candidate = _coerce_order_number(value)
+            if candidate:
+                return candidate
+            candidate = _extract_order_number_from_text(str(value))
+            if candidate:
+                return candidate
+
+    subject = payload.get("subject")
+    if subject:
+        candidate = _extract_order_number_from_text(str(subject))
+        if candidate:
+            return candidate
+
+    for text in _iter_comment_texts(payload):
+        candidate = _extract_order_number_from_text(text)
+        if candidate:
+            return candidate
+
+    messages = payload.get("messages") or payload.get("conversation_messages") or []
+    if isinstance(messages, list):
+        for message in messages:
+            if not isinstance(message, dict):
+                continue
+            for key in ("plain_body", "body", "text", "message"):
+                value = message.get(key)
+                if value is None:
+                    continue
+                candidate = _extract_order_number_from_text(str(value))
+                if candidate:
+                    return candidate
+
+    return ""
 
 
 def _parse_timestamp(value: Any) -> Optional[float]:

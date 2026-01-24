@@ -251,6 +251,11 @@ class ShadowOrderStatusHelperTests(unittest.TestCase):
             ["/v1/tickets", "/api/v1/conversations", "/v1/conversations"],
         )
 
+    def test_extract_order_payload_adds_order_number(self) -> None:
+        ticket = {"comments": [{"plain_body": "Order #1158259"}]}
+        merged = shadow._extract_order_payload(ticket, {})
+        self.assertEqual(merged.get("order_number"), "1158259")
+
     def test_safe_error_redacts_exception_type(self) -> None:
         self.assertEqual(shadow._safe_error(RuntimeError("boom"))["type"], "error")
         self.assertEqual(
