@@ -435,6 +435,29 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_utils._parse_timestamp("2026-01-24T06:10:00")
         )
 
+    def test_summarize_comment_metadata(self) -> None:
+        payload = {"comments": "not-a-list"}
+        meta = shadow_utils.summarize_comment_metadata(payload)
+        self.assertEqual(meta["comment_count"], 0)
+        self.assertFalse(meta["comment_text_present"])
+        self.assertFalse(meta["comment_operator_flag_present"])
+        self.assertFalse(meta["customer_comment_present"])
+
+        payload = {
+            "ticket": {
+                "comments": [
+                    {"plain_body": "agent", "via": {"isOperator": True}},
+                    {"body": "customer", "via": {"isOperator": False}},
+                    {"body": "  ", "via": {"isOperator": False}},
+                ]
+            }
+        }
+        meta = shadow_utils.summarize_comment_metadata(payload)
+        self.assertEqual(meta["comment_count"], 3)
+        self.assertTrue(meta["comment_text_present"])
+        self.assertTrue(meta["comment_operator_flag_present"])
+        self.assertTrue(meta["customer_comment_present"])
+
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
             request=lambda *args, **kwargs: SimpleNamespace(
