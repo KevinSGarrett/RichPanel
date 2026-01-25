@@ -546,7 +546,7 @@ def compute_dual_routing(
     final_routing = deterministic
 
     if get_openai_routing_primary() or force_primary:
-        threshold = 0.0 if force_primary else get_confidence_threshold()
+        threshold = get_confidence_threshold()
         if llm_suggestion.passes_threshold(threshold):
             primary_source = "llm"
             # Build RoutingDecision from LLM suggestion

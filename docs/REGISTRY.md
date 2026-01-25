@@ -131,6 +131,7 @@ Legend:
 - ✅ [Idempotency, Retries, and Deduplication](03_Richpanel_Integration/Idempotency_Retry_Dedup.md)  (`03_Richpanel_Integration/Idempotency_Retry_Dedup.md`)
 - 📎 [Richpanel Integration Test Plan (Wave 03)](03_Richpanel_Integration/Integration_Test_Plan.md)  (`03_Richpanel_Integration/Integration_Test_Plan.md`)
 - 📎 [Macros and Template Alignment (Richpanel ↔ Middleware)](03_Richpanel_Integration/Macros_and_Template_Alignment.md)  (`03_Richpanel_Integration/Macros_and_Template_Alignment.md`)
+- 📎 [Outbound Reply Paths](03_Richpanel_Integration/Outbound_Reply_Paths.md)  (`03_Richpanel_Integration/Outbound_Reply_Paths.md`)
 - 📎 [Queues and Routing Primitives (Richpanel)](03_Richpanel_Integration/Queues_and_Routing_Primitives.md)  (`03_Richpanel_Integration/Queues_and_Routing_Primitives.md`)
 - ✅ [Richpanel API Contracts and Error Handling](03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md)  (`03_Richpanel_Integration/Richpanel_API_Contracts_and_Error_Handling.md`)
 - 📎 [Richpanel UI Configuration Changes (v1) — Runbook (NO UI changes by automation)](03_Richpanel_Integration/Richpanel_Config_Changes_v1.md)  (`03_Richpanel_Integration/Richpanel_Config_Changes_v1.md`)

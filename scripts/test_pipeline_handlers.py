@@ -505,6 +505,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
         os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
+        os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
 
     def _build_order_status_plan(self) -> tuple[Any, Any]:
         envelope = build_event_envelope(
@@ -552,6 +553,9 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
         self.assertTrue(result["sent"])
         self.assertEqual(len(executor.calls), 4)
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
 
         get_call = executor.calls[0]
         self.assertEqual(get_call["method"], "GET")
@@ -584,9 +588,99 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertEqual(tags_payload, sorted(tags_payload))
         self.assertEqual(
             tags_payload,
-            ["mw-auto-replied", "mw-order-status-answered", "mw-reply-sent"],
+            [
+                "mw-auto-replied",
+                "mw-order-status-answered",
+                "mw-outbound-path-comment",
+                "mw-reply-sent",
+            ],
         )
         self.assertFalse(tag_call["kwargs"]["dry_run"])
+
+    def test_outbound_email_send_message_path(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email")
+
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        send_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ]
+        self.assertEqual(len(send_calls), 1)
+        send_call = send_calls[0]
+        self.assertEqual(
+            send_call["kwargs"]["json_body"].get("author_id"), "agent-123"
+        )
+        close_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/send-message" not in call["path"]
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertTrue(close_calls)
+        close_payload = close_calls[0]["kwargs"]["json_body"]
+        self.assertFalse(_payload_contains_comment(close_payload))
+        add_tag_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(add_tag_calls), 1)
+        tags_payload = add_tag_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-outbound-path-send-message", tags_payload)
+        self.assertLess(executor.calls.index(send_call), executor.calls.index(close_calls[0]))
+        self.assertLess(executor.calls.index(close_calls[0]), executor.calls.index(add_tag_calls[0]))
+
+    def test_outbound_email_missing_author_id_routes_to_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email", users=[])
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "author_id_missing")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        close_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/send-message" not in call["path"]
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertEqual(close_calls, [])
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("route-email-support-team", route_tags)
+        self.assertIn("mw-escalated-human", route_tags)
+        self.assertIn("mw-send-message-author-missing", route_tags)
 
     def test_outbound_rewrite_hashes_populated(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -876,22 +970,39 @@ class _RecordingExecutor:
         *,
         ticket_status: str = "open",
         ticket_tags: list[str] | None = None,
+        ticket_channel: str | None = None,
+        users: list[dict[str, Any]] | None = None,
         raise_on_get: bool = False,
         reply_status_codes: list[int] | None = None,
+        send_message_status_codes: list[int] | None = None,
         force_dry_run: bool = False,
     ) -> None:
         self.calls: list[dict[str, Any]] = []
         self.ticket_status = ticket_status
         self.ticket_tags = ticket_tags or []
+        self.ticket_channel = ticket_channel
+        self.users = users or []
         self.raise_on_get = raise_on_get
         self.reply_status_codes = reply_status_codes or [202]
         self._reply_index = 0
+        self.send_message_status_codes = send_message_status_codes or [200]
+        self._send_message_index = 0
         self.force_dry_run = force_dry_run
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         effective_dry_run = self.force_dry_run or kwargs.get("dry_run", False)
         kwargs["dry_run"] = effective_dry_run
         self.calls.append({"method": method, "path": path, "kwargs": kwargs})
+
+        if method.upper() == "GET" and path.startswith("/v1/users"):
+            body = json.dumps({"users": self.users}).encode("utf-8")
+            return RichpanelResponse(
+                status_code=200,
+                headers={"content-type": "application/json"},
+                body=body,
+                url=path,
+                dry_run=kwargs.get("dry_run", False),
+            )
 
         if (
             method.upper() == "GET"
@@ -900,9 +1011,10 @@ class _RecordingExecutor:
         ):
             if self.raise_on_get:
                 raise TransportError("simulated ticket read failure")
-            body = json.dumps(
-                {"status": self.ticket_status, "tags": self.ticket_tags}
-            ).encode("utf-8")
+            payload = {"status": self.ticket_status, "tags": self.ticket_tags}
+            if self.ticket_channel is not None:
+                payload["via"] = {"channel": self.ticket_channel}
+            body = json.dumps(payload).encode("utf-8")
             return RichpanelResponse(
                 status_code=200,
                 headers={"content-type": "application/json"},
@@ -914,6 +1026,21 @@ class _RecordingExecutor:
         if method.upper() == "PUT" and "/add-tags" in path:
             tags = kwargs.get("json_body", {}).get("tags") or []
             self.ticket_tags = sorted(set(self.ticket_tags + tags))
+
+        if method.upper() == "PUT" and path.endswith("/send-message"):
+            status_code = (
+                self.send_message_status_codes[self._send_message_index]
+                if self._send_message_index < len(self.send_message_status_codes)
+                else self.send_message_status_codes[-1]
+            )
+            self._send_message_index += 1
+            return RichpanelResponse(
+                status_code=status_code,
+                headers={},
+                body=b"",
+                url=path,
+                dry_run=effective_dry_run,
+            )
 
         if method.upper() == "PUT" and path.startswith("/v1/tickets/"):
             payload = kwargs.get("json_body") or {}
