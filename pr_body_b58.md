@@ -5,7 +5,7 @@
 **Labels:** `risk:R3`, `gate:claude`  
 **Risk:** `risk:R3`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
+**Anthropic response id:** `msg_016Whf9m9efmtNYJhE4xCuQe`  
 
 ### 1) Summary
 - Deliver email-channel outbound order-status replies through Richpanel `/send-message` with operator author resolution and failure routing tags.
@@ -35,6 +35,7 @@
 - `execute_order_status_reply()` now selects `/send-message` for email-channel tickets and closes via safe update candidates without a middleware comment.
 - Author resolution prefers `RICHPANEL_BOT_AUTHOR_ID`, then `GET /v1/users` with agent/operator role matching.
 - Added deterministic path tags (`mw-outbound-path-send-message` vs `mw-outbound-path-comment`) and explicit failure routing tags.
+- Apply loop-prevention tags even when send-message succeeds but ticket close fails, routing to support with explicit reason tags.
 - `compute_dual_routing()` always uses `get_confidence_threshold()` even with `force_primary`.
 
 **Design decisions (why this way):**
@@ -48,6 +49,7 @@
 
 **Tests:**
 - `scripts/test_pipeline_handlers.py`
+- `scripts/test_llm_routing.py`
 
 **CI / workflows:**
 - None
@@ -68,15 +70,16 @@
 **Local / CI-equivalent:**
 - `python scripts/run_ci_checks.py --ci`
 - `python scripts/test_pipeline_handlers.py`
+- `python scripts/test_llm_routing.py`
 
 **E2E / proof runs (redacted):**
 - N/A (unit + deterministic proof snippet in `REHYDRATION_PACK/RUNS/B58/A/EVIDENCE.md`)
 
 ### 7) Results & evidence
-**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
-**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/183`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/183` (trigger via `@cursor review`)  
-**Claude gate:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/183`  
+**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/183`  
+**Claude gate:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21329294651/job/61391660224`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B58/A/RUN_REPORT.md`
