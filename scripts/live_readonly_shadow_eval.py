@@ -3,7 +3,7 @@
 Live Read-Only Shadow Evaluation
 
 Reads real Richpanel + Shopify data for a small ticket sample without allowing any writes.
-Fails closed via environment guards + GET-only request tracing.
+Fails closed via environment guards + read-only request tracing.
 Produces PII-safe JSON + markdown artifacts under artifacts/.
 """
 from __future__ import annotations
@@ -28,6 +28,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
+from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
+from richpanel_middleware.ingest.envelope import build_event_envelope  # type: ignore
 from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
 from richpanel_middleware.automation.router import extract_customer_message  # type: ignore
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
@@ -44,6 +46,7 @@ from readonly_shadow_utils import (
     build_route_info as _build_route_info,
     comment_is_operator as _comment_is_operator,
     extract_comment_message as _extract_comment_message,
+    extract_order_number,
     fetch_recent_ticket_refs as _fetch_recent_ticket_refs,
     safe_error as _safe_error,
     summarize_comment_metadata,
@@ -66,6 +69,17 @@ REQUIRED_FLAGS = {
 
 ALLOWED_PROD_ENVS = {"prod", "production"}
 DEFAULT_SAMPLE_SIZE = 10
+
+
+def _to_bool(value: Optional[str], default: bool = False) -> bool:
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
@@ -221,6 +235,10 @@ class _HttpTrace:
             service = "shopify"
         elif hostname.endswith("shipstation.com"):
             service = "shipstation"
+        elif hostname.endswith("openai.com"):
+            service = "openai"
+        elif hostname.endswith("anthropic.com"):
+            service = "anthropic"
         self.entries.append(
             {"method": method.upper(), "path": path, "service": service}
         )
@@ -248,12 +266,30 @@ class _HttpTrace:
             urllib.request.urlopen = self._original_urlopen  # type: ignore
             self._original_urlopen = None
 
-    def assert_get_only(self, *, context: str, trace_path: Path) -> None:
-        allowed = {"GET", "HEAD"}
-        non_allowed = [entry for entry in self.entries if entry["method"] not in allowed]
-        if non_allowed:
+    def assert_read_only(self, *, allow_openai: bool, trace_path: Path) -> None:
+        allowed = {
+            "richpanel": {"GET", "HEAD"},
+            "shopify": {"GET", "HEAD"},
+            "shipstation": {"GET", "HEAD"},
+            "openai": {"POST"},
+            "anthropic": {"POST"},
+        }
+        violations = []
+        for entry in self.entries:
+            service = entry["service"]
+            method = entry["method"]
+            if service in {"openai", "anthropic"} and not allow_openai:
+                violations.append(entry)
+                continue
+            if service not in allowed:
+                violations.append(entry)
+                continue
+            if method not in allowed[service]:
+                violations.append(entry)
+
+        if violations:
             raise SystemExit(
-                f"Non-GET request detected during {context}. Trace: {trace_path}"
+                f"Non-read-only HTTP request detected. Trace: {trace_path}"
             )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -264,16 +300,34 @@ class _HttpTrace:
         }
 
 
-def _summarize_trace(trace: _HttpTrace) -> Dict[str, Any]:
+def _summarize_trace(trace: _HttpTrace, *, allow_openai: bool) -> Dict[str, Any]:
     methods = Counter(entry.get("method") for entry in trace.entries)
     services = Counter(entry.get("service") for entry in trace.entries)
+    allowed = {
+        "richpanel": {"GET", "HEAD"},
+        "shopify": {"GET", "HEAD"},
+        "shipstation": {"GET", "HEAD"},
+        "openai": {"POST"},
+        "anthropic": {"POST"},
+    }
+    allowed_methods_only = True
+    for entry in trace.entries:
+        service = entry.get("service")
+        method = entry.get("method")
+        if service in {"openai", "anthropic"} and not allow_openai:
+            allowed_methods_only = False
+            break
+        if service not in allowed:
+            allowed_methods_only = False
+            break
+        if method not in allowed[service]:
+            allowed_methods_only = False
+            break
     return {
         "total_requests": len(trace.entries),
         "methods": dict(methods),
         "services": dict(services),
-        "allowed_methods_only": all(
-            entry.get("method") in {"GET", "HEAD"} for entry in trace.entries
-        ),
+        "allowed_methods_only": allowed_methods_only,
     }
 
 
@@ -428,6 +482,10 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
             if key in ("__source_path",):
                 continue
             merged.setdefault(key, val)
+    if not merged.get("order_number") and not merged.get("orderNumber"):
+        order_number = extract_order_number(ticket) or extract_order_number(convo)
+        if order_number:
+            merged["order_number"] = order_number
     return merged
 
 
@@ -642,6 +700,17 @@ def main() -> int:
                     conversation_no=ticket_payload.get("conversation_no"),
                 )
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
+                if sample_mode == "explicit":
+                    probe_summary = lookup_order_summary(
+                        build_event_envelope(order_payload),
+                        safe_mode=False,
+                        automation_enabled=True,
+                        allow_network=True,
+                    )
+                    if isinstance(probe_summary, dict):
+                        result["order_resolution"] = probe_summary.get(
+                            "order_resolution"
+                        )
 
                 raw_customer_message = _extract_latest_customer_message(
                     ticket_payload, convo_payload
@@ -722,15 +791,20 @@ def main() -> int:
                 had_errors = True
                 result["error"] = _safe_error(exc)
             ticket_results.append(result)
+
     finally:
         trace.stop()
         with trace_path.open("w", encoding="utf-8") as fh:
             json.dump(trace.to_dict(), fh, ensure_ascii=False, indent=2)
-        trace.assert_get_only(
-            context="read-only shadow evaluation", trace_path=trace_path
+        openai_allow_network = _to_bool(
+            os.environ.get("OPENAI_ALLOW_NETWORK"), False
         )
+        allow_openai = openai_allow_network and _to_bool(
+            os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False
+        )
+        trace.assert_read_only(allow_openai=allow_openai, trace_path=trace_path)
 
-    trace_summary = _summarize_trace(trace)
+    trace_summary = _summarize_trace(trace, allow_openai=allow_openai)
     counts = {
         "tickets_requested": tickets_requested,
         "tickets_selected": len(ticket_refs),

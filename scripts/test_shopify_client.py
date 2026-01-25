@@ -147,7 +147,7 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(request.method, "GET")
         self.assertEqual(
             request.url,
-            "https://example.myshopify.com/admin/api/2024-01/orders.json?fields=id%2Cname&limit=1&name=%231158259&status=any",
+            "https://example.myshopify.com/admin/api/2024-01/orders.json?fields=id%2Cname&limit=5&name=%231158259&status=any",
         )
 
     def test_get_order_respects_network_blocked_gate(self) -> None:

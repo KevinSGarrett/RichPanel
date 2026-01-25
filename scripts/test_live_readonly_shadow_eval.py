@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import importlib
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -109,6 +110,18 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertEqual(shadow_eval._resolve_env_name(), "local")
 
+    def test_sys_path_inserts_backend_src(self) -> None:
+        original_path = list(sys.path)
+        try:
+            src_path = str(shadow_eval.SRC)
+            if src_path in sys.path:
+                sys.path.remove(src_path)
+            importlib.reload(shadow_eval)
+            self.assertIn(src_path, sys.path)
+        finally:
+            sys.path[:] = original_path
+            importlib.reload(shadow_eval)
+
     def test_resolve_env_name_prefers_richpanel_env(self) -> None:
         env = {"RICHPANEL_ENV": "Staging", "MW_ENV": "prod"}
         with mock.patch.dict(os.environ, env, clear=True):
@@ -151,6 +164,20 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertIsNone(shadow_eval._redact_identifier(""))
         self.assertIsNone(shadow_eval._redact_identifier("   "))
 
+    def test_to_bool_defaults(self) -> None:
+        self.assertTrue(shadow_eval._to_bool("maybe", default=True))
+        self.assertFalse(shadow_eval._to_bool("maybe", default=False))
+        self.assertTrue(shadow_eval._to_bool("YES", default=False))
+
+    def test_redact_identifier_none(self) -> None:
+        self.assertIsNone(shadow_eval._redact_identifier(None))
+
+    def test_build_shopify_client(self) -> None:
+        client = shadow_eval._build_shopify_client(
+            allow_network=False, shop_domain="example.myshopify.com"
+        )
+        self.assertEqual(client.shop_domain, "example.myshopify.com")
+
     def test_is_prod_target_detects_env(self) -> None:
         env = {"MW_ENV": "prod"}
         with mock.patch.dict(os.environ, env, clear=True):
@@ -166,6 +193,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url=shadow_eval.PROD_RICHPANEL_BASE_URL,
                 richpanel_secret_id=None,
+            )
+        self.assertTrue(result)
+
+    def test_is_prod_target_detects_secret_hint(self) -> None:
+        env = {"MW_ENV": "dev"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            result = shadow_eval._is_prod_target(
+                richpanel_base_url="https://sandbox.richpanel.com",
+                richpanel_secret_id="arn:aws:secretsmanager:us-east-2:123:secret/prod/rp",
             )
         self.assertTrue(result)
 
@@ -214,6 +250,17 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         }
         message = shadow_eval._extract_latest_customer_message(ticket, {})
         self.assertEqual(message, "customer followup")
+
+        message = shadow_eval._extract_latest_customer_message(
+            {},
+            {
+                "messages": [
+                    {"sender_type": "operator", "body": "ignore"},
+                    {"sender_type": "customer", "body": "from convo"},
+                ]
+            },
+        )
+        self.assertEqual(message, "from convo")
 
         ticket = {}
         convo = {"body": "conversation message"}
@@ -458,6 +505,90 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(meta["comment_operator_flag_present"])
         self.assertTrue(meta["customer_comment_present"])
 
+    def test_extract_order_number(self) -> None:
+        payload = {"subject": "Order #1057300 missing"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1057300")
+        payload = {"comments": [{"body": "order number: 1185086"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1185086")
+        payload = {"ticket": {"comments": [{"plain_body": "orderNumber: 1121654"}]}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1121654")
+        payload = {
+            "comments": [
+                {"plain_body": "#1234"},
+                {"plain_body": "orderNumber: 99999"},
+            ]
+        }
+        self.assertEqual(shadow_utils.extract_order_number(payload), "99999")
+        payload = {"custom_fields": {"order_number": "1234567"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"order": {"name": "#2223334"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "2223334")
+        payload = {"messages": [{"text": "Order no. 7654321"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "7654321")
+        payload = {"order_number": "#1,234,567"}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234567")
+        payload = {"custom_fields": {"shipping_code": "9999999"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "")
+
+    def test_shadow_utils_list_and_fetch_edge_cases(self) -> None:
+        self.assertEqual(
+            shadow_utils.extract_ticket_list([{"id": "t-1"}, "bad"]),
+            [{"id": "t-1"}],
+        )
+        self.assertEqual(shadow_utils.extract_ticket_list({"data": []}), [])
+        with self.assertRaises(SystemExit):
+            shadow_utils.fetch_recent_ticket_refs(
+                _ListingClient({}), sample_size=0, list_path="/v1/tickets"
+            )
+
+        class _DryRunClient(_ListingClient):
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                return _StubResponse({}, status_code=200, dry_run=True)
+
+        with self.assertRaises(SystemExit):
+            shadow_utils.fetch_recent_ticket_refs(
+                _DryRunClient({}), sample_size=1, list_path="/v1/tickets"
+            )
+
+    def test_shadow_utils_text_parsing_edges(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        payload = {"comments": [{"plain_body": _BadStr()}]}
+        meta = shadow_utils.summarize_comment_metadata(payload)
+        self.assertFalse(meta["comment_text_present"])
+
+        self.assertEqual(shadow_utils._coerce_order_number("   "), "")
+        self.assertEqual(shadow_utils._coerce_order_number(_BadStr()), "")
+        self.assertEqual(shadow_utils._extract_order_number_from_text(""), "")
+        self.assertEqual(
+            shadow_utils._extract_order_number_from_text("no order here"), ""
+        )
+
+        self.assertEqual(shadow_utils._iter_comment_texts({"comments": "nope"}), [])
+        self.assertEqual(
+            shadow_utils._iter_comment_texts({"comments": ["bad", {"plain_body": _BadStr()}]}),
+            [],
+        )
+
+        payload = {"order": {"number": "1234"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "1234")
+
+        payload = {"custom_fields": {"order_ref": "orderNumber: 555"}}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "555")
+
+        payload = {"messages": ["bad", {"text": "order #888"}]}
+        self.assertEqual(shadow_utils.extract_order_number(payload), "888")
+
+        self.assertIsNone(shadow_utils._parse_timestamp(_BadStr()))
+        self.assertIsNone(shadow_utils._parse_timestamp(" "))
+
+        message = shadow_utils.extract_comment_message(
+            {"comments": [{"plain_body": _BadStr(), "body": "hi"}]}
+        )
+        self.assertEqual(message, "hi")
+
     def test_probe_shopify_ok(self) -> None:
         stub_client = SimpleNamespace(
             request=lambda *args, **kwargs: SimpleNamespace(
@@ -488,12 +619,18 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
         trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
-        trace.assert_get_only(context="test", trace_path=Path("trace.json"))
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
         self.assertEqual(trace.entries[0]["method"], "GET")
 
         trace.record("POST", "https://api.richpanel.com/v1/tickets/123")
         with self.assertRaises(SystemExit):
-            trace.assert_get_only(context="test", trace_path=Path("trace.json"))
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace = shadow_eval._HttpTrace()
+        trace.record("POST", "https://api.openai.com/v1/chat/completions")
+        trace.assert_read_only(allow_openai=True, trace_path=Path("trace.json"))
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
     def test_http_trace_service_mapping(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -501,6 +638,34 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace.record("GET", "https://ssapi.shipstation.com/shipments")
         self.assertEqual(trace.entries[0]["service"], "shopify")
         self.assertEqual(trace.entries[1]["service"], "shipstation")
+
+    def test_http_trace_records_anthropic_and_unknown(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.record("POST", "https://api.anthropic.com/v1/messages")
+        trace.record("GET", "https://example.com/unknown")
+        self.assertEqual(trace.entries[0]["service"], "anthropic")
+        self.assertEqual(trace.entries[1]["service"], "unknown")
+
+    def test_http_trace_capture_handles_bad_request(self) -> None:
+        class _BadRequest:
+            def get_method(self):
+                raise ValueError("boom")
+
+        trace = shadow_eval._HttpTrace()
+        original_urlopen = shadow_eval.urllib.request.urlopen
+        shadow_eval.urllib.request.urlopen = lambda *args, **kwargs: SimpleNamespace()
+        try:
+            trace.capture()
+            shadow_eval.urllib.request.urlopen(_BadRequest())
+        finally:
+            trace.stop()
+            shadow_eval.urllib.request.urlopen = original_urlopen
+
+    def test_http_trace_assert_read_only_unknown_service(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append({"method": "GET", "path": "/x", "service": "unknown"})
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
     def test_http_trace_capture_wraps_urlopen(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -551,13 +716,32 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://api.richpanel.com/v1/tickets/123")
         trace.record("HEAD", "https://api.richpanel.com/v1/tickets/123")
-        summary = shadow_eval._summarize_trace(trace)
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
         self.assertEqual(summary["total_requests"], 2)
         self.assertTrue(summary["allowed_methods_only"])
         self.assertEqual(summary["methods"].get("GET"), 1)
 
+    def test_summarize_trace_allows_openai_when_enabled(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.record("POST", "https://api.openai.com/v1/chat/completions")
+        summary = shadow_eval._summarize_trace(trace, allow_openai=True)
+        self.assertTrue(summary["allowed_methods_only"])
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+
+    def test_summarize_trace_rejects_unknown_service_and_method(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append({"method": "PUT", "path": "/x", "service": "richpanel"})
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append({"method": "GET", "path": "/x", "service": "unknown"})
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+
     def test_delivery_estimate_present(self) -> None:
         self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))
+        self.assertFalse(shadow_eval._delivery_estimate_present({}))
         self.assertTrue(
             shadow_eval._delivery_estimate_present({"eta_human": "2-4 days"})
         )
@@ -610,6 +794,20 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         result = shadow_eval._fetch_conversation(_BoomClient(), "t-123")
         self.assertEqual(result, {})
 
+    def test_fetch_conversation_flattens_conversation_wrapper(self) -> None:
+        class _StubClient:
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                return _StubResponse(
+                    {
+                        "conversation": {"id": "c-1"},
+                        "messages": [{"text": "hello"}],
+                    }
+                )
+
+        result = shadow_eval._fetch_conversation(_StubClient(), "t-123")
+        self.assertEqual(result.get("id"), "c-1")
+        self.assertEqual(result.get("messages")[0]["text"], "hello")
+
     def test_fetch_conversation_handles_bad_json(self) -> None:
         class _BadJsonResponse(_StubResponse):
             def json(self) -> dict:
@@ -657,6 +855,12 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(merged.get("order_id"), "o-1")
         self.assertEqual(merged.get("tracking_number"), "TN123")
         self.assertNotIn("__source_path", merged)
+
+    def test_extract_order_payload_adds_order_number(self) -> None:
+        ticket = {"comments": [{"plain_body": "Order #1158259"}]}
+        convo: dict = {}
+        merged = shadow_eval._extract_order_payload(ticket, convo)
+        self.assertEqual(merged.get("order_number"), "1158259")
 
     def test_tracking_present_checks_fields(self) -> None:
         self.assertFalse(shadow_eval._tracking_present("not a dict"))
@@ -801,6 +1005,16 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "plan_actions", return_value=plan
             ), mock.patch.object(
                 shadow_eval,
+                "lookup_order_summary",
+                return_value={
+                    "order_resolution": {
+                        "resolvedBy": "probe",
+                        "confidence": "high",
+                        "reason": "test",
+                    }
+                },
+            ), mock.patch.object(
+                shadow_eval,
                 "_probe_shopify",
                 return_value={"status_code": 200, "dry_run": False, "ok": True},
             ):
@@ -818,8 +1032,110 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 self.assertEqual(
                     payload["tickets"][0]["routing"]["intent"], "order_status_tracking"
                 )
-                self.assertIn("order_created_at_present", payload["tickets"][0])
-                self.assertIn("tracking_or_shipping_method_present", payload["tickets"][0])
+            self.assertEqual(
+                payload["tickets"][0]["order_resolution"]["resolvedBy"], "probe"
+            )
+            self.assertIn("order_created_at_present", payload["tickets"][0])
+            self.assertIn(
+                "tracking_or_shipping_method_present", payload["tickets"][0]
+            )
+
+    def test_main_raises_when_no_ticket_refs(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--allow-non-prod"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=[]
+            ):
+                with self.assertRaises(SystemExit):
+                    shadow_eval.main()
+
+    def test_main_warns_when_sample_reduced(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        plan = SimpleNamespace(
+            actions=[],
+            routing=SimpleNamespace(intent="unknown", department="Email", reason="stubbed"),
+            mode="none",
+            reasons=[],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--sample-size", "2", "--allow-non-prod"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", return_value={"id": "t-1"}
+            ), mock.patch.object(
+                shadow_eval, "_fetch_conversation", return_value={}
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ):
+                with self.assertLogs("readonly_shadow_eval", level="WARNING") as logs:
+                    shadow_eval.main()
+                self.assertIn("Sample size reduced", "\n".join(logs.output))
+
+    def test_main_records_error_when_ticket_processing_fails(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--sample-size", "1", "--allow-non-prod"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", side_effect=RuntimeError("boom")
+            ):
+                result = shadow_eval.main()
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(result, 1)
+            self.assertEqual(payload["counts"]["errors"], 1)
 
     def test_main_records_probe_error(self) -> None:
         env = {
@@ -863,6 +1179,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
             ), mock.patch.object(
                 shadow_eval,
                 "_probe_shopify",
@@ -915,6 +1233,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
             ), mock.patch.object(
                 shadow_eval,
                 "_probe_shopify",

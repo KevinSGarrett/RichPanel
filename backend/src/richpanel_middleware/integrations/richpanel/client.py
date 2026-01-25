@@ -240,7 +240,11 @@ class RichpanelClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
-        self._api_key = api_key or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
+        self._api_key = (
+            api_key
+            or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
+            or os.environ.get("RP_KEY")
+        )
         self._secrets_client_obj = None
         self._sleeper = sleeper or time.sleep
         self._rng = rng or random.random

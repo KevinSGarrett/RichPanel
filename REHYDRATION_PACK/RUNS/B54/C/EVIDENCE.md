@@ -1,4 +1,4 @@
-# B54 C Evidence
+﻿# B54 C Evidence
 
 ## Workflow (recommended)
 - Workflow: `.github/workflows/shadow_live_readonly_eval.yml`
@@ -6,17 +6,21 @@
 ```
 gh workflow run shadow_live_readonly_eval.yml \
   -f sample-size=10 \
-  -f shop-domain=<your-shop.myshopify.com> \
-  -f use-aws-secrets=true \
-  -f shopify-probe=true
+  -f shop-domain=<your-shop.myshopify.com>
 ```
 - Optional: provide comma-separated ticket IDs via `-f ticket-ids="<id1>,<id2>"`
-- Latest run (explicit ticket IDs + AWS secrets): https://github.com/KevinSGarrett/RichPanel/actions/runs/21309232168
+- Latest workflow run: success â€” https://github.com/KevinSGarrett/RichPanel/actions/runs/21322157644
+- Workflow artifact: `live-readonly-shadow-eval` (ID 5245610442) â€” https://api.github.com/repos/KevinSGarrett/RichPanel/actions/artifacts/5245610442/zip
 
-## Expected artifacts (from workflow run)
-- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
-- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
-- `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
+## Workflow artifacts (RUN_20260124_2150Z)
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.json`
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.md`
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2150Z.json`
+
+## Latest local read-only run (sanitized, explicit IDs)
+- Run ID: `RUN_20260124_2116Z`
+- Report: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2116Z.json`
+- Trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2116Z.json`
 
 ## Validation checks (PII-safe)
 - `counts.orders_matched` and `counts.tracking_found` populated in the JSON report.

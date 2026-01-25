@@ -1,57 +1,54 @@
-# Agent Run Report
+﻿# Agent Run Report
 
 ## Metadata
-- **Run ID:** `b54-20260123-live-readonly-shadow`
+- **Run ID:** `RUN_20260124_2116Z`
 - **Agent:** C
 - **Date (UTC):** 2026-01-24
 - **Worktree path:** `C:\RichPanel_GIT`
-- **Branch:** `main`
-- **PRs:** https://github.com/KevinSGarrett/RichPanel/pull/161, https://github.com/KevinSGarrett/RichPanel/pull/162, https://github.com/KevinSGarrett/RichPanel/pull/163, https://github.com/KevinSGarrett/RichPanel/pull/164, https://github.com/KevinSGarrett/RichPanel/pull/165, https://github.com/KevinSGarrett/RichPanel/pull/167, https://github.com/KevinSGarrett/RichPanel/pull/168, https://github.com/KevinSGarrett/RichPanel/pull/169, https://github.com/KevinSGarrett/RichPanel/pull/171, https://github.com/KevinSGarrett/RichPanel/pull/172, https://github.com/KevinSGarrett/RichPanel/pull/173
-- **PR merge strategy:** merge commit
+- **Branch:** `b54/live-readonly-shadow-validation`
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/181
+- **PR merge strategy:** merge commit (pending)
 
 ## Objective + stop conditions
 - **Objective:** Build a safe, repeatable live read-only shadow validation run that reads PROD Richpanel + Shopify (GET/HEAD only), computes order-status logic without writes, and emits sanitized artifacts.
-- **Stop conditions:** workflow dispatch exists; scripts enforce read-only guards; PII-safe report template stored in `REHYDRATION_PACK/RUNS/B54/C/PROOF/`.
+- **Stop conditions:** workflow dispatch exists; scripts enforce read-only guards; PII-safe report stored in `REHYDRATION_PACK/RUNS/B54/C/PROOF/`.
 
 ## Ticket sourcing (required)
-- **How obtained:** workflow dispatch used explicit ticket IDs (provided out-of-band) to bypass list endpoints.
+- **How obtained:** local read-only run using explicit ticket IDs (provided out-of-band) to bypass list endpoints.
 - **Ticket reference:** stored as hashed ticket IDs in the JSON report (no raw IDs).
 
 ## What changed (high-level)
-- Extended `scripts/live_readonly_shadow_eval.py` to sample tickets, enforce prod-only runs, and emit sanitized JSON/MD reports with GET/HEAD-only traces.
-- Added latest-ticket sampling + sanitized output fields in `scripts/shadow_order_status.py`.
-- Added workflow dispatch `shadow_live_readonly_eval.yml` that runs the evaluation with GH secrets and uploads artifacts.
-- Adjusted Claude gate shadow-mode parsing to avoid action-required noise on structured JSON parse failures.
-- Extracted shared ticket sampling helpers into `scripts/readonly_shadow_utils.py` and hardened workflow inputs + `boto3` install.
-- Centralized `_safe_error` handling in the shared utility to avoid duplication.
-- Enabled optional AWS secret resolution in the workflow when GH secrets are secret IDs.
-- Added fallback to list tickets via `/api/v1/conversations` and `/v1/conversations` when `/v1/tickets` is forbidden or missing.
-- Added `use-aws-secrets` workflow input to force AWS Secrets Manager resolution.
-- Added `shopify-probe` flag to issue a read-only Shopify orders count GET for validation (best-effort).
-- Added GH secret fallback for `PROD_SHOPIFY_API_TOKEN` when admin token secret is missing.
-- Shadow eval now extracts the latest customer message from conversation messages before routing.
-- Added Shopify order-number lookup fallback via `orders.json?name=` to resolve non-ID order numbers.
-- Updated unit tests for new CLI flags and redaction rules.
+- Enforced read-only HTTP tracing with per-service method rules and OpenAI/Anthropic gating in `scripts/live_readonly_shadow_eval.py`.
+- Preserved the B54 order-resolution flow (order-number extraction + Shopify name lookup + identity fallback) with PII-safe telemetry.
+- Added workflow inputs for `shopify-probe` and optional AWS Secrets Manager resolution, plus Shopify token fallback.
+- Refreshed B54/C proof artifacts to the latest local run output and PII-safe summary table.
 
 ## Commands run
-- `python -m unittest scripts.test_live_readonly_shadow_eval scripts.test_shadow_order_status`
-- `python scripts/test_claude_gate_review.py`
+- `python -m unittest backend.tests.test_order_lookup_order_id_resolution`
+- `python -m unittest scripts.test_live_readonly_shadow_eval`
+- `python scripts/live_readonly_shadow_eval.py --ticket-id <redacted> --ticket-id <redacted> --ticket-id <redacted> --ticket-id <redacted> --shopify-probe`
 
 ## Tests / Proof
-- Workflow dispatch run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21309232168
-- Proof: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
+- Local run: `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2116Z.json`
+- Trace: `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2116Z.json`
+- Proof summary: `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
+- Workflow dispatch run: success â€” https://github.com/KevinSGarrett/RichPanel/actions/runs/21322157644
+- Workflow artifacts (RUN_20260124_2150Z):
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.json`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260124_2150Z.md`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260124_2150Z.json`
 
 ## Docs impact
 - Added run artifacts: `REHYDRATION_PACK/RUNS/B54/C/RUN_REPORT.md`, `EVIDENCE.md`, `CHANGES.md`.
-- Updated runbook: `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`.
 
 ## Risks / edge cases considered
 - Read-only guardrails fail closed if required flags are missing or incorrect.
-- HTTP trace asserts GET/HEAD-only methods and stores a redacted path summary.
+- HTTP trace asserts read-only methods and stores a redacted path summary.
 - No customer identifiers or message bodies are written to reports.
 
 ## Blockers / open questions
-- Shopify probe returned 401 (unauthorized); confirm access token + shop domain alignment to prove successful Shopify read.
+- Required PR (`b54/live-readonly-shadow-validation`) is open but not yet merged.
+- PR checks (CI/Codecov/Bugbot/Claude gates) are still pending.
 
 ## Follow-ups
-- [x] Recorded workflow run link + artifact paths.
+- [ ] Wait for CI/Codecov/Bugbot/Claude gates, then merge and update this report with links.
