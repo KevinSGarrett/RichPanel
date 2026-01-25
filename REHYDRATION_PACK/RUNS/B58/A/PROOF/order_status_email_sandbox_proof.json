@@ -1,7 +1,7 @@
 {
   "meta": {
-    "run_id": "B58-SANDBOX-20260125132530",
-    "timestamp": "2026-01-25T19:25:52.050988+00:00",
+    "run_id": "B58-SANDBOX-20260125150840",
+    "timestamp": "2026-01-25T21:09:07.879205+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status",
@@ -9,17 +9,17 @@
   },
   "inputs": {
     "ticket_ref": null,
-    "ticket_ref_fingerprint": "f0d588a225e6",
+    "ticket_ref_fingerprint": "47c5fbf51c63",
     "apply_test_tag": false,
     "test_tag_value": null,
-    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125132530 --proof-path REHYDRATION_PACK\\RUNS\\B58\\A\\PROOF\\order_status_email_sandbox_proof.json"
+    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125150840 --proof-path REHYDRATION_PACK\\RUNS\\B58\\A\\PROOF\\order_status_email_sandbox_proof.json"
   },
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id_fingerprint": "c607a71482e6",
+    "event_id_fingerprint": "94b571ddbc61",
     "conversation_id": null,
-    "conversation_id_fingerprint": "1d7097048ae4",
+    "conversation_id_fingerprint": "363e57ab2a91",
     "accepted": true
   },
   "dynamo": {
@@ -47,11 +47,11 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.93)",
+        "reason": "llm_routing (confidence=0.95)",
         "intent": "order_status_tracking"
       },
       "action_count": 2,
-      "updated_at": "2026-01-25T19:25:37.687014+00:00"
+      "updated_at": "2026-01-25T21:08:48.258952+00:00"
     },
     "audit_record": {
       "routing": {
@@ -61,19 +61,19 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.93)",
+        "reason": "llm_routing (confidence=0.95)",
         "intent": "order_status_tracking"
       },
-      "recorded_at": "2026-01-25T19:25:37.687014+00:00",
-      "ts_action_fingerprint": "2026-01-25T19:25:37.687014+00:00#fingerprint:c607a71482e6"
+      "recorded_at": "2026-01-25T21:08:48.258952+00:00",
+      "ts_action_fingerprint": "2026-01-25T21:08:48.258952+00:00#fingerprint:94b571ddbc61"
     }
   },
   "openai": {
     "routing": {
       "llm_called": true,
       "model": "gpt-5.2-chat-latest",
-      "confidence": 0.93,
-      "response_id": "chatcmpl-D201nT2k8eecib8IFL6MOCCEc4soL",
+      "confidence": 0.95,
+      "response_id": "chatcmpl-D21dfBHAK1QQIfO65MxxwXLCb1gqK",
       "response_id_unavailable_reason": null,
       "final_intent": "order_status_tracking",
       "primary_source": "llm",
@@ -84,13 +84,13 @@
       "rewrite_attempted": true,
       "rewrite_applied": true,
       "model": "gpt-5.2-chat-latest",
-      "response_id": "chatcmpl-D201rlg7yzjtlIaMitFZ7a9CA6V2k",
+      "response_id": "chatcmpl-D21di04O0JZ0VlCFjiFeZfEncqqGn",
       "response_id_unavailable_reason": null,
       "fallback_used": false,
       "reason": "applied",
       "error_class": null,
-      "original_hash": "098fa75a3175",
-      "rewritten_hash": "ca1d153c8f7d",
+      "original_hash": "adf6dc7e5624",
+      "rewritten_hash": "f6288e0e152b",
       "rewritten_changed": true
     }
   },
@@ -102,17 +102,17 @@
     "openai": {
       "called": true,
       "model": "gpt-5.2-chat-latest",
-      "request_id": "chatcmpl-D201nT2k8eecib8IFL6MOCCEc4soL",
+      "request_id": "chatcmpl-D21dfBHAK1QQIfO65MxxwXLCb1gqK",
       "response_id_unavailable_reason": null,
-      "confidence": 0.93
+      "confidence": 0.95
     }
   },
   "rewriter_metadata": {
     "used": true,
     "model": "gpt-5.2-chat-latest",
-    "request_id": "chatcmpl-D201rlg7yzjtlIaMitFZ7a9CA6V2k",
-    "original_hash": "098fa75a3175",
-    "rewritten_hash": "ca1d153c8f7d",
+    "request_id": "chatcmpl-D21di04O0JZ0VlCFjiFeZfEncqqGn",
+    "original_hash": "adf6dc7e5624",
+    "rewritten_hash": "f6288e0e152b",
     "changed": true
   },
   "order_status": {
@@ -138,14 +138,14 @@
       "status": "OPEN",
       "state": null,
       "tags": [],
-      "updated_at": "2026-01-25T19:25:22.556Z",
+      "updated_at": "2026-01-25T21:08:30.347Z",
       "message_count": 1,
       "last_message_source": null,
       "operator_reply_present": false,
       "operator_reply_count": 0,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "1d7097048ae4",
+      "ticket_id_fingerprint": "363e57ab2a91",
       "endpoint_variant": "number",
       "path_redacted": "/v1/tickets/number/<redacted>"
     },
@@ -158,18 +158,18 @@
         "mw-routing-applied",
         "mw-auto-replied",
         "mw-order-status-answered",
-        "mw-order-status-answered:B58-SANDBOX-20260125132530",
+        "mw-order-status-answered:B58-SANDBOX-20260125150840",
         "mw-outbound-path-send-message",
         "mw-reply-sent"
       ],
-      "updated_at": "2026-01-25T19:25:45.164Z",
+      "updated_at": "2026-01-25T21:08:56.712Z",
       "message_count": 2,
       "last_message_source": "operator",
       "operator_reply_present": true,
       "operator_reply_count": 1,
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "1d7097048ae4",
+      "ticket_id_fingerprint": "363e57ab2a91",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
@@ -178,14 +178,14 @@
       "mw-intent-order_status_tracking",
       "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:B58-SANDBOX-20260125132530",
+      "mw-order-status-answered:B58-SANDBOX-20260125150840",
       "mw-outbound-path-send-message",
       "mw-reply-sent",
       "mw-routing-applied"
     ],
     "tags_removed": [],
     "skip_tags_added": [],
-    "updated_at_delta_seconds": 22.608,
+    "updated_at_delta_seconds": 26.365,
     "status_before": "open",
     "status_after": "closed",
     "status_changed": true,
@@ -199,7 +199,7 @@
       "mw-intent-order_status_tracking",
       "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:B58-SANDBOX-20260125132530",
+      "mw-order-status-answered:B58-SANDBOX-20260125150840",
       "mw-outbound-path-send-message",
       "mw-reply-sent",
       "mw-routing-applied"
@@ -224,7 +224,7 @@
   },
   "followup": {
     "performed": true,
-    "event_id_fingerprint": "255876b0d125",
+    "event_id_fingerprint": "1fdb0a776c1d",
     "idempotency_record": {
       "status": "processed",
       "mode": "automation_candidate"
@@ -246,7 +246,7 @@
     ],
     "status_after": "closed",
     "message_count_delta": 0,
-    "updated_at_delta_seconds": 4.588,
+    "updated_at_delta_seconds": 8.975,
     "reply_sent": false,
     "reply_reason": "message_count_delta=0",
     "routed_to_support": true
