@@ -6,6 +6,22 @@ cd C:\RichPanel_GIT
 python scripts\test_pipeline_handlers.py
 ```
 
+## CI-equivalent checks
+```powershell
+cd C:\RichPanel_GIT
+python scripts\run_ci_checks.py --ci | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B58\A\CI_RUN_OUTPUT.txt
+```
+
+Output:
+```
+[OK] REHYDRATION_PACK validated (mode=build).
+[OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+```
+
+Full log:
+- `REHYDRATION_PACK/RUNS/B58/A/CI_RUN_OUTPUT.txt`
+
 ## Email outbound path snippet
 Command:
 ```powershell
