@@ -29,6 +29,9 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
+from richpanel_middleware.automation.delivery_estimate import (  # type: ignore
+    compute_delivery_estimate,
+)
 from richpanel_middleware.ingest.envelope import build_event_envelope  # type: ignore
 from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
 from richpanel_middleware.automation.router import extract_customer_message  # type: ignore
@@ -522,6 +525,76 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
     return False
 
 
+def _redact_tracking_number(tracking: Optional[str]) -> Optional[str]:
+    """Redact tracking number for PII safety.
+    
+    For security, always show minimal chars:
+    - Empty/whitespace-only: return None
+    - Length <= 6: show "***" only (too short to safely expose any chars)
+    - Length 7-10: show first 2 + last 2 chars
+    - Length > 10: show first 4 + last 3 chars
+    """
+    if not tracking or not isinstance(tracking, str):
+        return None
+    tracking = tracking.strip()
+    if not tracking:  # Handle whitespace-only strings consistently with empty strings
+        return None
+    if len(tracking) <= 6:
+        return "***"
+    if len(tracking) <= 10:
+        return f"{tracking[:2]}***{tracking[-2:]}"
+    return f"{tracking[:4]}***{tracking[-3:]}"
+
+
+def _redact_date(date_str: Optional[str]) -> Optional[str]:
+    """Redact date for PII safety: show year-month only."""
+    if not date_str or not isinstance(date_str, str):
+        return None
+    # Extract just YYYY-MM from ISO date
+    parts = date_str.split("T")[0].split("-")
+    if len(parts) >= 2:
+        return f"{parts[0]}-{parts[1]}-XX"
+    return "XXXX-XX-XX"
+
+
+def _compute_eta_for_ticket(
+    order_summary: Dict[str, Any],
+    ticket_created_at: Optional[str],
+) -> Optional[Dict[str, Any]]:
+    """
+    Compute ETA for a ticket using order date + shipping method + ticket date.
+    Returns a PII-safe summary of the ETA calculation.
+    """
+    order_created = (
+        order_summary.get("created_at")
+        or order_summary.get("order_created_at")
+    )
+    shipping_method = (
+        order_summary.get("shipping_method")
+        or order_summary.get("shipping_method_name")
+    )
+    inquiry_date = ticket_created_at or datetime.now(timezone.utc).isoformat()
+
+    if not order_created or not shipping_method:
+        return None
+
+    estimate = compute_delivery_estimate(order_created, shipping_method, inquiry_date)
+    if not estimate:
+        return None
+
+    return {
+        "order_date_redacted": _redact_date(estimate.get("order_created_date")),
+        "inquiry_date_redacted": _redact_date(estimate.get("inquiry_date")),
+        "shipping_method": estimate.get("normalized_method") or estimate.get("raw_method"),
+        "elapsed_business_days": estimate.get("elapsed_business_days"),
+        "remaining_min_days": estimate.get("remaining_min_days"),
+        "remaining_max_days": estimate.get("remaining_max_days"),
+        "eta_human": estimate.get("eta_human"),
+        "is_late": estimate.get("is_late"),
+        "bucket": estimate.get("bucket"),
+    }
+
+
 def _order_context_summary(
     order_payload: Dict[str, Any],
     order_summary: Optional[Dict[str, Any]],
@@ -700,6 +773,10 @@ def main() -> int:
                     conversation_no=ticket_payload.get("conversation_no"),
                 )
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
+                # probe_summary is intentionally empty for non-explicit modes (e.g., "recent")
+                # because we only perform full Shopify lookups when explicitly requested ticket IDs
+                # are provided to avoid excessive API calls during sampling operations.
+                probe_summary: Dict[str, Any] = {}
                 if sample_mode == "explicit":
                     probe_summary = lookup_order_summary(
                         build_event_envelope(order_payload),
@@ -711,6 +788,24 @@ def main() -> int:
                         result["order_resolution"] = probe_summary.get(
                             "order_resolution"
                         )
+                        # Store tracking/shipping data from Shopify lookup (redacted for PII)
+                        tracking_num = probe_summary.get("tracking_number")
+                        result["shopify_tracking_number"] = bool(tracking_num)
+                        result["shopify_tracking_redacted"] = _redact_tracking_number(tracking_num)
+                        result["shopify_carrier"] = probe_summary.get("carrier") or None
+                        result["shopify_order_created_at"] = bool(
+                            probe_summary.get("created_at")
+                            or probe_summary.get("order_created_at")
+                        )
+                        result["shopify_shipping_method"] = (
+                            probe_summary.get("shipping_method")
+                            or probe_summary.get("shipping_method_name")
+                        )
+                        # Compute ETA from order date + shipping method + ticket date
+                        ticket_created = ticket_payload.get("created_at")
+                        eta_result = _compute_eta_for_ticket(probe_summary, ticket_created)
+                        if eta_result:
+                            result["computed_eta"] = eta_result
 
                 raw_customer_message = _extract_latest_customer_message(
                     ticket_payload, convo_payload
@@ -760,10 +855,16 @@ def main() -> int:
                 order_summary = (
                     parameters.get("order_summary") if isinstance(parameters, dict) else {}
                 )
+                # Merge probe_summary into order_summary if we have it
+                # Use isinstance check for consistency with other defensive checks
+                effective_summary = dict(probe_summary) if isinstance(probe_summary, dict) else {}
+                if order_summary:
+                    effective_summary.update(order_summary)
+
                 result.update(
                     _order_context_summary(
                         order_payload,
-                        order_summary,
+                        effective_summary,
                         conversation_id=str(
                             ticket_payload.get("conversation_id") or ticket_id
                         ),
@@ -774,13 +875,41 @@ def main() -> int:
                     if isinstance(parameters, dict)
                     else None
                 )
-                tracking_found = _tracking_present(order_summary or {})
-                eta_available = _delivery_estimate_present(delivery_estimate)
+
+                # Use probe_summary (Shopify data) for tracking detection
+                tracking_found = _tracking_present(effective_summary)
+                # ETA is available if we have delivery_estimate OR order_created_at
+                has_order_date = bool(
+                    effective_summary.get("created_at")
+                    or effective_summary.get("order_created_at")
+                    or order_payload.get("created_at")
+                    or order_payload.get("order_created_at")
+                )
+                # Check both shipping_method and shipping_method_name for consistency
+                # with _compute_eta_for_ticket which uses either field
+                has_shipping_method = bool(
+                    effective_summary.get("shipping_method")
+                    or effective_summary.get("shipping_method_name")
+                )
+                eta_available = _delivery_estimate_present(delivery_estimate) or (
+                    has_order_date and has_shipping_method
+                )
+
+                # order_matched should be true if we resolved an order (not just draft reply)
+                # Safely handle order_resolution being None (not just absent)
+                order_resolution = (
+                    probe_summary.get("order_resolution")
+                    if isinstance(probe_summary, dict) else None
+                )
+                order_resolved = (
+                    isinstance(order_resolution, dict)
+                    and order_resolution.get("resolvedBy") not in (None, "no_match")
+                )
 
                 result.update(
                     {
                         "order_status_candidate": bool(order_action),
-                        "order_matched": bool(order_summary),
+                        "order_matched": bool(order_summary) or order_resolved,
                         "tracking_found": tracking_found,
                         "eta_available": eta_available,
                     }

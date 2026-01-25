@@ -746,6 +746,106 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_eval._delivery_estimate_present({"eta_human": "2-4 days"})
         )
 
+    def test_redact_tracking_number_various_lengths(self) -> None:
+        # None/empty cases
+        self.assertIsNone(shadow_eval._redact_tracking_number(None))
+        self.assertIsNone(shadow_eval._redact_tracking_number(""))
+        self.assertIsNone(shadow_eval._redact_tracking_number(123))  # type: ignore
+
+        # Short tracking numbers (<=6 chars) should show only ***
+        self.assertEqual(shadow_eval._redact_tracking_number("ABC"), "***")
+        self.assertEqual(shadow_eval._redact_tracking_number("ABCDEF"), "***")
+
+        # Medium tracking numbers (7-10 chars) show first 2 + last 2
+        self.assertEqual(shadow_eval._redact_tracking_number("1234567"), "12***67")
+        self.assertEqual(shadow_eval._redact_tracking_number("1234567890"), "12***90")
+
+        # Long tracking numbers (>10 chars) show first 4 + last 3
+        self.assertEqual(shadow_eval._redact_tracking_number("12345678901"), "1234***901")
+        self.assertEqual(shadow_eval._redact_tracking_number("1ZV52E420840067015"), "1ZV5***015")
+
+        # Whitespace handling - strips before redacting
+        self.assertEqual(shadow_eval._redact_tracking_number("  1234567  "), "12***67")
+
+        # Whitespace-only strings should return None (consistent with empty string)
+        self.assertIsNone(shadow_eval._redact_tracking_number("   "))
+        self.assertIsNone(shadow_eval._redact_tracking_number("  \t\n  "))
+
+    def test_redact_date_various_formats(self) -> None:
+        # None/empty cases
+        self.assertIsNone(shadow_eval._redact_date(None))
+        self.assertIsNone(shadow_eval._redact_date(""))
+        self.assertIsNone(shadow_eval._redact_date(123))  # type: ignore
+
+        # Full ISO date
+        self.assertEqual(shadow_eval._redact_date("2026-01-24T10:30:00Z"), "2026-01-XX")
+        self.assertEqual(shadow_eval._redact_date("2025-12-15T08:00:00+00:00"), "2025-12-XX")
+
+        # Date only
+        self.assertEqual(shadow_eval._redact_date("2026-01-24"), "2026-01-XX")
+
+        # Malformed date (single part)
+        self.assertEqual(shadow_eval._redact_date("2026"), "XXXX-XX-XX")
+
+    def test_compute_eta_for_ticket_returns_none_when_missing_data(self) -> None:
+        # Missing order_created
+        result = shadow_eval._compute_eta_for_ticket(
+            {"shipping_method": "Standard"},
+            "2026-01-24T10:00:00Z"
+        )
+        self.assertIsNone(result)
+
+        # Missing shipping_method
+        result = shadow_eval._compute_eta_for_ticket(
+            {"created_at": "2026-01-20T10:00:00Z"},
+            "2026-01-24T10:00:00Z"
+        )
+        self.assertIsNone(result)
+
+        # Empty dict
+        result = shadow_eval._compute_eta_for_ticket({}, None)
+        self.assertIsNone(result)
+
+    def test_compute_eta_for_ticket_uses_shipping_method_name(self) -> None:
+        # Should work with shipping_method_name field (alternative field name)
+        with mock.patch.object(
+            shadow_eval, "compute_delivery_estimate",
+            return_value={
+                "order_created_date": "2026-01-20",
+                "inquiry_date": "2026-01-24",
+                "normalized_method": "Standard",
+                "elapsed_business_days": 3,
+                "remaining_min_days": 0,
+                "remaining_max_days": 4,
+                "eta_human": "0-4 business days",
+                "is_late": False,
+                "bucket": "Standard",
+            }
+        ):
+            result = shadow_eval._compute_eta_for_ticket(
+                {
+                    "order_created_at": "2026-01-20T10:00:00Z",
+                    "shipping_method_name": "Standard Shipping",  # alternative field
+                },
+                "2026-01-24T10:00:00Z"
+            )
+            self.assertIsNotNone(result)
+            self.assertEqual(result["shipping_method"], "Standard")
+            self.assertEqual(result["order_date_redacted"], "2026-01-XX")
+
+    def test_compute_eta_for_ticket_handles_empty_estimate(self) -> None:
+        with mock.patch.object(
+            shadow_eval, "compute_delivery_estimate", return_value=None
+        ):
+            result = shadow_eval._compute_eta_for_ticket(
+                {
+                    "created_at": "2026-01-20T10:00:00Z",
+                    "shipping_method": "Standard",
+                },
+                "2026-01-24T10:00:00Z"
+            )
+            self.assertIsNone(result)
+
     def test_safe_error_redacts_exception_type(self) -> None:
         self.assertEqual(
             shadow_eval._safe_error(RuntimeError("boom"))["type"], "error"
@@ -942,6 +1042,79 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             )
             self.assertIn("order_id_present", payload["tickets"][0])
             self.assertIn("order_context_missing", payload["tickets"][0])
+            # In non-explicit mode (sample_mode="recent"), probe_summary stays empty
+            # so order_matched is based only on order_summary from plan_actions
+            # which contains {"order_id": "order-123"} - so order_matched should be True
+            self.assertTrue(payload["tickets"][0]["order_matched"])
+
+    def test_non_explicit_mode_skips_shopify_lookup(self) -> None:
+        """Test that sample_mode='recent' intentionally skips Shopify lookup.
+        
+        This verifies the documented behavior where probe_summary stays empty
+        for non-explicit modes to avoid excessive API calls during sampling.
+        """
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        # Plan with NO order_summary to verify order_matched=False in non-explicit mode
+        plan = SimpleNamespace(
+            actions=[],  # No order_status_draft_reply action
+            routing=SimpleNamespace(
+                intent="unknown_other",
+                department="Email Support Team",
+                reason="stubbed",
+            ),
+            mode="none",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            lookup_calls = []
+
+            def mock_lookup(*args, **kwargs):
+                lookup_calls.append(True)
+                return {"order_id": "should-not-be-called"}
+
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-non-prod",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", side_effect=mock_lookup
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            # Verify lookup_order_summary was NOT called in non-explicit mode
+            self.assertEqual(len(lookup_calls), 0, "lookup_order_summary should not be called in 'recent' mode")
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["sample_mode"], "recent")
+            # With no order_summary and no probe_summary, order_matched should be False
+            self.assertFalse(payload["tickets"][0]["order_matched"])
+            # Verify no Shopify-specific fields are populated
+            self.assertNotIn("shopify_tracking_number", payload["tickets"][0])
+            self.assertNotIn("order_resolution", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
@@ -1190,6 +1363,113 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(result, 0)
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["shopify_probe"]["error"]["type"], "shopify_error")
+
+    def test_order_resolution_none_handling(self) -> None:
+        """Test that order_resolution being None (not just absent) is handled safely."""
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        plan = SimpleNamespace(
+            actions=[],
+            routing=SimpleNamespace(
+                intent="unknown", department="Email Support Team", reason="stubbed"
+            ),
+            mode="automation_candidate",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+            ]
+            # Return order_resolution as None (not absent, but explicitly None)
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "lookup_order_summary",
+                return_value={"order_resolution": None, "order_id": "123"},  # None value
+            ):
+                result = shadow_eval.main()
+            # Should not crash and should return successfully
+            self.assertEqual(result, 0)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            # order_matched should be False when order_resolution is None
+            self.assertFalse(payload["tickets"][0]["order_matched"])
+
+    def test_eta_available_with_shipping_method_name(self) -> None:
+        """Test that eta_available checks shipping_method_name field too."""
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        plan = SimpleNamespace(
+            actions=[],
+            routing=SimpleNamespace(
+                intent="unknown", department="Email Support Team", reason="stubbed"
+            ),
+            mode="automation_candidate",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            artifact_path = Path(tmpdir) / "artifact.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+            ]
+            # Return shipping_method_name instead of shipping_method
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(artifact_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval,
+                "lookup_order_summary",
+                return_value={
+                    "order_id": "123",
+                    "created_at": "2026-01-20T10:00:00Z",  # has order date
+                    "shipping_method_name": "Standard Shipping",  # alternative field
+                },
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            # eta_available should be True because we have order date + shipping_method_name
+            self.assertTrue(payload["tickets"][0]["eta_available"])
 
     def test_main_records_probe_exception(self) -> None:
         env = {
