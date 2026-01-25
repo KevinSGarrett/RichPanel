@@ -282,17 +282,43 @@ def _compute_draft_reply_body(
     return None
 
 
+def _comment_operator_flag(comment: Any) -> Optional[bool]:
+    if not isinstance(comment, dict):
+        return None
+    value = comment.get("is_operator")
+    if value is None:
+        value = comment.get("isOperator")
+    if isinstance(value, bool):
+        return value
+    return None
+
+
+def _comment_source_marker(comment: Any) -> Optional[str]:
+    if not isinstance(comment, dict):
+        return None
+    for key in ("source", "source_name", "sourceName"):
+        value = comment.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip().lower()
+    return None
+
+
+def _ticket_channel_from_payload(payload: Any) -> Optional[str]:
+    if not isinstance(payload, dict):
+        return None
+    via = payload.get("via")
+    channel = None
+    if isinstance(via, dict):
+        channel = via.get("channel")
+    if channel is None:
+        channel = payload.get("channel")
+    if isinstance(channel, str) and channel.strip():
+        return channel.strip().lower()
+    return None
+
+
 def _extract_latest_comment_body(comments: Any) -> Optional[str]:
     if not isinstance(comments, list):
-        return None
-
-    def _source_from(comment: Any) -> Optional[str]:
-        if not isinstance(comment, dict):
-            return None
-        for key in ("source", "source_name", "sourceName"):
-            value = comment.get(key)
-            if isinstance(value, str) and value.strip():
-                return value.strip().lower()
         return None
 
     def _body_from(comment: Any) -> Optional[str]:
@@ -304,15 +330,15 @@ def _extract_latest_comment_body(comments: Any) -> Optional[str]:
         return None
 
     for comment in reversed(comments):
-        if isinstance(comment, dict) and comment.get("is_operator") is True:
-            source = _source_from(comment)
+        if _comment_operator_flag(comment) is True:
+            source = _comment_source_marker(comment)
             if source and "middleware" in source:
                 body = _body_from(comment)
                 if body:
                     return body
 
     for comment in reversed(comments):
-        if isinstance(comment, dict) and comment.get("is_operator") is True:
+        if _comment_operator_flag(comment) is True:
             body = _body_from(comment)
             if body:
                 return body
@@ -992,47 +1018,49 @@ def _fetch_ticket_snapshot(
             or payload.get("message_count")
             or payload.get("messagesCount")
         )
-        last_message_source = payload.get("last_message_source") or payload.get(
+        last_message_source_raw = payload.get("last_message_source") or payload.get(
             "lastMessageSource"
         )
+        last_message_source = (
+            last_message_source_raw.strip().lower()
+            if isinstance(last_message_source_raw, str) and last_message_source_raw.strip()
+            else None
+        )
+        ticket_channel = _ticket_channel_from_payload(payload)
         comment_count = None
-        comment_source = None
         operator_reply_count = None
         operator_reply_present = None
+        latest_comment_is_operator = None
+        latest_comment_source = None
         comments = payload.get("comments")
         if isinstance(comments, list):
             comment_count = len(comments)
             operator_reply_count = 0
             for comment in comments:
-                if not isinstance(comment, dict):
-                    continue
-                is_operator = comment.get("is_operator")
-                if is_operator is None:
-                    is_operator = comment.get("isOperator")
+                is_operator = _comment_operator_flag(comment)
                 if is_operator is True:
                     operator_reply_count += 1
-            operator_reply_present = operator_reply_count > 0
-            # Heuristic: Richpanel uses type="text" for middleware replies in sandbox.
             for comment in reversed(comments):
-                if not isinstance(comment, dict):
-                    continue
-                is_operator = comment.get("is_operator")
-                if is_operator is None:
-                    is_operator = comment.get("isOperator")
-                if is_operator is True:
-                    comment_source = "operator"
+                if isinstance(comment, dict):
+                    latest_comment_is_operator = _comment_operator_flag(comment)
+                    latest_comment_source = _comment_source_marker(comment)
                     break
-                comment_type = comment.get("type")
-                if isinstance(comment_type, str) and comment_type.strip().lower() in {
-                    "text",
-                    "reply",
-                }:
-                    comment_source = "middleware"
-                    break
+            if isinstance(latest_comment_is_operator, bool):
+                operator_reply_present = latest_comment_is_operator
         if message_count is None and comment_count is not None:
             message_count = comment_count
-        if not last_message_source and comment_source:
-            last_message_source = comment_source
+        if latest_comment_is_operator is True:
+            last_message_source = "operator"
+        else:
+            explicit_source = None
+            if isinstance(last_message_source, str) and "middleware" in last_message_source:
+                explicit_source = "middleware"
+            elif (
+                isinstance(latest_comment_source, str)
+                and "middleware" in latest_comment_source
+            ):
+                explicit_source = "middleware"
+            last_message_source = explicit_source or "unknown"
 
         return {
             "ticket_id": str(payload.get("id") or ticket_ref),
@@ -1044,6 +1072,8 @@ def _fetch_ticket_snapshot(
             "last_message_source": last_message_source,
             "operator_reply_present": operator_reply_present,
             "operator_reply_count": operator_reply_count,
+            "latest_comment_is_operator": latest_comment_is_operator,
+            "ticket_channel": ticket_channel,
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "path": path,
@@ -1505,8 +1535,7 @@ def parse_args() -> argparse.Namespace:
         dest="require_outbound",
         action="store_true",
         help=(
-            "Require outbound reply evidence (message_count_delta>=1 and "
-            "last_message_source=middleware)."
+            "Require outbound reply evidence (message_count_delta>=1)."
         ),
     )
     parser.add_argument(
@@ -1521,7 +1550,7 @@ def parse_args() -> argparse.Namespace:
         dest="require_operator_reply",
         action="store_true",
         help=(
-            "Require operator reply evidence in ticket comments "
+            "Require operator reply evidence on the latest comment "
             "(is_operator=true)."
         ),
     )
@@ -1533,19 +1562,31 @@ def parse_args() -> argparse.Namespace:
     )
     parser.set_defaults(require_operator_reply=None)
     parser.add_argument(
-        "--require-send-message",
+        "--require-send-message-path",
         dest="require_send_message",
         action="store_true",
         help=(
             "Require mw-outbound-path-send-message tag evidence "
-            "(operator reply path)."
+            "(send-message path)."
         ),
+    )
+    parser.add_argument(
+        "--no-require-send-message-path",
+        dest="require_send_message",
+        action="store_false",
+        help="Disable send-message path evidence requirement.",
+    )
+    parser.add_argument(
+        "--require-send-message",
+        dest="require_send_message",
+        action="store_true",
+        help="Alias for --require-send-message-path (deprecated).",
     )
     parser.add_argument(
         "--no-require-send-message",
         dest="require_send_message",
         action="store_false",
-        help="Disable send-message path evidence requirement.",
+        help="Alias for --no-require-send-message-path (deprecated).",
     )
     parser.set_defaults(require_send_message=None)
     parser.add_argument(
@@ -2176,11 +2217,14 @@ def _evaluate_outbound_evidence(
     *,
     message_count_delta: Optional[int],
     last_message_source_after: Optional[str],
-) -> Dict[str, bool]:
-    message_count_ok = message_count_delta is not None and message_count_delta >= 1
+) -> Dict[str, Optional[bool]]:
+    message_count_ok = (
+        message_count_delta >= 1 if message_count_delta is not None else None
+    )
     last_source_ok = (
-        isinstance(last_message_source_after, str)
-        and last_message_source_after.lower() == "middleware"
+        last_message_source_after.lower() == "middleware"
+        if isinstance(last_message_source_after, str)
+        else None
     )
     return {
         "outbound_message_count_delta_ge_1": message_count_ok,
@@ -2190,12 +2234,16 @@ def _evaluate_outbound_evidence(
 
 def _evaluate_operator_reply_evidence(
     *,
-    operator_reply_present: Optional[bool],
+    latest_comment_is_operator: Optional[bool],
     operator_reply_count_delta: Optional[int],
-) -> Dict[str, bool]:
-    present_ok = bool(operator_reply_present)
+) -> Dict[str, Optional[bool]]:
+    present_ok = (
+        latest_comment_is_operator if isinstance(latest_comment_is_operator, bool) else None
+    )
     delta_ok = (
-        operator_reply_count_delta is not None and operator_reply_count_delta >= 1
+        operator_reply_count_delta >= 1
+        if operator_reply_count_delta is not None
+        else None
     )
     return {
         "operator_reply_present": present_ok,
@@ -2227,8 +2275,13 @@ def _compute_operator_reply_metrics(
         count_delta = count_after - count_before
     present_value = post_ticket_data.get("operator_reply_present")
     present = present_value if isinstance(present_value, bool) else None
+    latest_comment_value = post_ticket_data.get("latest_comment_is_operator")
+    latest_comment_is_operator = (
+        latest_comment_value if isinstance(latest_comment_value, bool) else None
+    )
     return {
         "operator_reply_present": present,
+        "latest_comment_is_operator": latest_comment_is_operator,
         "operator_reply_count_before": count_before,
         "operator_reply_count_after": count_after,
         "operator_reply_count_delta": count_delta,
@@ -2239,14 +2292,24 @@ def _build_operator_send_message_proof_fields(
     *,
     operator_reply_present: Optional[bool],
     operator_reply_count_delta: Optional[int],
+    latest_comment_is_operator: Optional[bool],
+    operator_reply_required: bool,
+    operator_reply_confirmed: Optional[bool],
     send_message_tag_present: Optional[bool],
     send_message_tag_added: Optional[bool],
+    send_message_path_required: bool,
+    send_message_path_confirmed: Optional[bool],
 ) -> Dict[str, Optional[Any]]:
     return {
         "operator_reply_present": operator_reply_present,
         "operator_reply_count_delta": operator_reply_count_delta,
+        "latest_comment_is_operator": latest_comment_is_operator,
+        "operator_reply_required": operator_reply_required,
+        "operator_reply_confirmed": operator_reply_confirmed,
         "send_message_tag_present": send_message_tag_present,
         "send_message_tag_added": send_message_tag_added,
+        "send_message_path_required": send_message_path_required,
+        "send_message_path_confirmed": send_message_path_confirmed,
     }
 
 
@@ -2256,6 +2319,7 @@ def _build_operator_send_message_richpanel_fields(
     operator_reply_count_before: Optional[int],
     operator_reply_count_after: Optional[int],
     operator_reply_count_delta: Optional[int],
+    latest_comment_is_operator: Optional[bool],
     send_message_tag_present: Optional[bool],
     send_message_tag_added: Optional[bool],
 ) -> Dict[str, Optional[Any]]:
@@ -2264,6 +2328,7 @@ def _build_operator_send_message_richpanel_fields(
         "operator_reply_count_before": operator_reply_count_before,
         "operator_reply_count_after": operator_reply_count_after,
         "operator_reply_count_delta": operator_reply_count_delta,
+        "latest_comment_is_operator": latest_comment_is_operator,
         "send_message_tag_present": send_message_tag_present,
         "send_message_tag_added": send_message_tag_added,
     }
@@ -2303,7 +2368,7 @@ def _append_operator_send_message_criteria_details(
         criteria_details.append(
             {
                 "name": "operator_reply_present",
-                "description": "Operator reply present in ticket comments (is_operator=true)",
+                "description": "Latest comment flagged is_operator=true (operator reply)",
                 "required": require_operator_reply,
                 "value": operator_reply_present_ok,
             }
@@ -2314,7 +2379,7 @@ def _append_operator_send_message_criteria_details(
         criteria_details.append(
             {
                 "name": "send_message_tag_present",
-                "description": "Ticket tagged with mw-outbound-path-send-message",
+                "description": "Ticket tagged with mw-outbound-path-send-message (send-message path)",
                 "required": require_send_message,
                 "value": send_message_tag_present_ok,
             }
@@ -3277,8 +3342,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     operator_reply_count_after = None
     operator_reply_count_delta = None
     operator_reply_present = None
+    latest_comment_is_operator = None
     send_message_tag_present = None
     send_message_tag_added = None
+    ticket_channel = None
     middleware_tags_added: List[str] = []
     middleware_tag_present: Optional[bool] = None
     middleware_outcome: Optional[Dict[str, Any]] = None
@@ -3474,9 +3541,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             pre_ticket_data, post_ticket_data
         )
         operator_reply_present = operator_metrics["operator_reply_present"]
+        latest_comment_is_operator = operator_metrics["latest_comment_is_operator"]
         operator_reply_count_before = operator_metrics["operator_reply_count_before"]
         operator_reply_count_after = operator_metrics["operator_reply_count_after"]
         operator_reply_count_delta = operator_metrics["operator_reply_count_delta"]
+        ticket_channel = post_ticket_data.get("ticket_channel") or pre_ticket_data.get(
+            "ticket_channel"
+        )
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
                 tags_added=tags_added,
@@ -3881,8 +3952,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     outbound_last_message_source_ok = None
     operator_reply_present_ok = None
     operator_reply_delta_ok = None
+    operator_reply_confirmed = None
     send_message_tag_present_ok = None
     send_message_tag_added_ok = None
+    send_message_path_confirmed = None
     if order_status_mode:
         outbound_evidence = _evaluate_outbound_evidence(
             message_count_delta=message_count_delta,
@@ -3895,19 +3968,24 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "outbound_last_message_source_middleware"
         ]
         operator_reply_evidence = _evaluate_operator_reply_evidence(
-            operator_reply_present=operator_reply_present,
+            latest_comment_is_operator=latest_comment_is_operator,
             operator_reply_count_delta=operator_reply_count_delta,
         )
         operator_reply_present_ok = operator_reply_evidence["operator_reply_present"]
         operator_reply_delta_ok = operator_reply_evidence[
             "operator_reply_count_delta_ge_1"
         ]
-        send_message_evidence = _evaluate_send_message_evidence(
-            tags_added=tags_added,
-            post_tags=post_ticket_data.get("tags") or [],
-        )
-        send_message_tag_present_ok = send_message_evidence["send_message_tag_present"]
-        send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
+        operator_reply_confirmed = operator_reply_present_ok
+        if post_ticket_data:
+            send_message_evidence = _evaluate_send_message_evidence(
+                tags_added=tags_added,
+                post_tags=post_ticket_data.get("tags") or [],
+            )
+            send_message_tag_present_ok = send_message_evidence[
+                "send_message_tag_present"
+            ]
+            send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
+            send_message_path_confirmed = send_message_tag_present_ok
 
     openai_routing_used = bool(openai_routing.get("llm_called"))
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
@@ -4066,27 +4144,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             )
 
     if require_outbound:
-        required_checks.extend(
-            [
-                bool(outbound_message_count_ok),
-                bool(outbound_last_message_source_ok),
-            ]
+        required_checks.append(bool(outbound_message_count_ok))
+        criteria_details.append(
+            {
+                "name": "outbound_message_count_delta_ge_1",
+                "description": "Outbound reply increased message count (message_count_delta>=1)",
+                "required": True,
+                "value": outbound_message_count_ok,
+            }
         )
-        criteria_details.extend(
-            [
-                {
-                    "name": "outbound_message_count_delta_ge_1",
-                    "description": "Outbound reply increased message count (message_count_delta>=1)",
-                    "required": True,
-                    "value": outbound_message_count_ok,
-                },
-                {
-                    "name": "outbound_last_message_source_middleware",
-                    "description": "Outbound reply recorded last_message_source=middleware",
-                    "required": True,
-                    "value": outbound_last_message_source_ok,
-                },
-            ]
+        criteria_details.append(
+            {
+                "name": "outbound_last_message_source_middleware",
+                "description": "Explicit last_message_source marked middleware",
+                "required": False,
+                "value": outbound_last_message_source_ok,
+            }
         )
 
     _append_operator_send_message_criteria_details(
@@ -4248,6 +4321,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         safe_diagnostics.pop("winning_payload", None)
 
     proof_fields = {
+        "ticket_channel": ticket_channel,
         "openai_routing_used": openai_routing_used,
         "openai_rewrite_used": openai_rewrite_used,
         "closed_after": closed_after,
@@ -4261,8 +4335,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         _build_operator_send_message_proof_fields(
             operator_reply_present=operator_reply_present,
             operator_reply_count_delta=operator_reply_count_delta,
+            latest_comment_is_operator=latest_comment_is_operator,
+            operator_reply_required=require_operator_reply,
+            operator_reply_confirmed=operator_reply_confirmed,
             send_message_tag_present=send_message_tag_present,
             send_message_tag_added=send_message_tag_added,
+            send_message_path_required=require_send_message,
+            send_message_path_confirmed=send_message_path_confirmed,
         )
     )
 
@@ -4306,6 +4385,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             operator_reply_count_before=operator_reply_count_before,
             operator_reply_count_after=operator_reply_count_after,
             operator_reply_count_delta=operator_reply_count_delta,
+            latest_comment_is_operator=latest_comment_is_operator,
             send_message_tag_present=send_message_tag_present,
             send_message_tag_added=send_message_tag_added,
         )

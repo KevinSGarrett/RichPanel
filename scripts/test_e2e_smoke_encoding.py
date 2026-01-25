@@ -554,24 +554,31 @@ class OutboundEvidenceTests(unittest.TestCase):
         evidence = _evaluate_outbound_evidence(
             message_count_delta=None, last_message_source_after=None
         )
-        self.assertFalse(evidence["outbound_message_count_delta_ge_1"])
-        self.assertFalse(evidence["outbound_last_message_source_middleware"])
+        self.assertIsNone(evidence["outbound_message_count_delta_ge_1"])
+        self.assertIsNone(evidence["outbound_last_message_source_middleware"])
 
 
 class OperatorReplyEvidenceTests(unittest.TestCase):
     def test_operator_reply_evidence_present(self) -> None:
         evidence = _evaluate_operator_reply_evidence(
-            operator_reply_present=True, operator_reply_count_delta=1
+            latest_comment_is_operator=True, operator_reply_count_delta=1
         )
         self.assertTrue(evidence["operator_reply_present"])
         self.assertTrue(evidence["operator_reply_count_delta_ge_1"])
 
     def test_operator_reply_evidence_missing(self) -> None:
         evidence = _evaluate_operator_reply_evidence(
-            operator_reply_present=False, operator_reply_count_delta=None
+            latest_comment_is_operator=False, operator_reply_count_delta=None
         )
         self.assertFalse(evidence["operator_reply_present"])
-        self.assertFalse(evidence["operator_reply_count_delta_ge_1"])
+        self.assertIsNone(evidence["operator_reply_count_delta_ge_1"])
+
+    def test_operator_reply_evidence_unknown(self) -> None:
+        evidence = _evaluate_operator_reply_evidence(
+            latest_comment_is_operator=None, operator_reply_count_delta=None
+        )
+        self.assertIsNone(evidence["operator_reply_present"])
+        self.assertIsNone(evidence["operator_reply_count_delta_ge_1"])
 
 
 class SendMessageEvidenceTests(unittest.TestCase):
@@ -596,24 +603,39 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
     def test_compute_operator_reply_metrics(self) -> None:
         metrics = _compute_operator_reply_metrics(
             {"operator_reply_count": 1},
-            {"operator_reply_count": 3, "operator_reply_present": True},
+            {
+                "operator_reply_count": 3,
+                "operator_reply_present": True,
+                "latest_comment_is_operator": True,
+            },
         )
         self.assertEqual(metrics["operator_reply_count_before"], 1)
         self.assertEqual(metrics["operator_reply_count_after"], 3)
         self.assertEqual(metrics["operator_reply_count_delta"], 2)
         self.assertTrue(metrics["operator_reply_present"])
+        self.assertTrue(metrics["latest_comment_is_operator"])
 
     def test_build_operator_send_message_proof_fields(self) -> None:
         fields = _build_operator_send_message_proof_fields(
             operator_reply_present=True,
             operator_reply_count_delta=1,
+            latest_comment_is_operator=True,
+            operator_reply_required=True,
+            operator_reply_confirmed=True,
             send_message_tag_present=True,
             send_message_tag_added=False,
+            send_message_path_required=True,
+            send_message_path_confirmed=True,
         )
         self.assertEqual(fields["operator_reply_present"], True)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
+        self.assertEqual(fields["latest_comment_is_operator"], True)
+        self.assertEqual(fields["operator_reply_required"], True)
+        self.assertEqual(fields["operator_reply_confirmed"], True)
         self.assertEqual(fields["send_message_tag_present"], True)
         self.assertEqual(fields["send_message_tag_added"], False)
+        self.assertEqual(fields["send_message_path_required"], True)
+        self.assertEqual(fields["send_message_path_confirmed"], True)
 
     def test_build_operator_send_message_richpanel_fields(self) -> None:
         fields = _build_operator_send_message_richpanel_fields(
@@ -621,6 +643,7 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             operator_reply_count_before=0,
             operator_reply_count_after=1,
             operator_reply_count_delta=1,
+            latest_comment_is_operator=False,
             send_message_tag_present=True,
             send_message_tag_added=True,
         )
@@ -628,6 +651,7 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         self.assertEqual(fields["operator_reply_count_before"], 0)
         self.assertEqual(fields["operator_reply_count_after"], 1)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
+        self.assertFalse(fields["latest_comment_is_operator"])
         self.assertTrue(fields["send_message_tag_present"])
         self.assertTrue(fields["send_message_tag_added"])
 
@@ -662,6 +686,39 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         self.assertIn("send_message_tag_present", names)
         self.assertIn("send_message_tag_added", names)
 
+    def test_append_operator_reply_required_unknown_fails(self) -> None:
+        required_checks = []
+        criteria_details = []
+        _append_operator_send_message_criteria_details(
+            criteria_details=criteria_details,
+            required_checks=required_checks,
+            order_status_mode=True,
+            require_operator_reply=True,
+            require_send_message=False,
+            operator_reply_present_ok=None,
+            send_message_tag_present_ok=None,
+            send_message_tag_added_ok=None,
+        )
+        self.assertEqual(required_checks, [False])
+        self.assertIsNone(criteria_details[0]["value"])
+
+    def test_append_send_message_required_missing_fails(self) -> None:
+        required_checks = []
+        criteria_details = []
+        _append_operator_send_message_criteria_details(
+            criteria_details=criteria_details,
+            required_checks=required_checks,
+            order_status_mode=True,
+            require_operator_reply=False,
+            require_send_message=True,
+            operator_reply_present_ok=None,
+            send_message_tag_present_ok=False,
+            send_message_tag_added_ok=None,
+        )
+        self.assertEqual(required_checks, [False])
+        names = [entry["name"] for entry in criteria_details]
+        self.assertIn("send_message_tag_present", names)
+
 
 class TicketSnapshotTests(unittest.TestCase):
     def test_fetch_ticket_snapshot_comment_fallback(self) -> None:
@@ -694,9 +751,76 @@ class TicketSnapshotTests(unittest.TestCase):
             allow_network=True,
         )
         self.assertEqual(result.get("message_count"), 2)
-        self.assertEqual(result.get("last_message_source"), "middleware")
+        self.assertEqual(result.get("last_message_source"), "unknown")
         self.assertFalse(result.get("operator_reply_present"))
         self.assertEqual(result.get("operator_reply_count"), 0)
+        self.assertFalse(result.get("latest_comment_is_operator"))
+
+    def test_fetch_ticket_snapshot_operator_latest_comment(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-2",
+                "status": "OPEN",
+                "tags": ["mw-outbound-path-send-message"],
+                "comments": [
+                    {"type": "text", "is_operator": False},
+                    {"type": "text", "isOperator": True},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-2",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("last_message_source"), "operator")
+        self.assertTrue(result.get("operator_reply_present"))
+        self.assertTrue(result.get("latest_comment_is_operator"))
+        self.assertEqual(result.get("operator_reply_count"), 1)
+
+    def test_fetch_ticket_snapshot_missing_operator_flag(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-3",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [
+                    {"type": "text", "body": "hello"},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-3",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("last_message_source"), "unknown")
+        self.assertIsNone(result.get("operator_reply_present"))
+        self.assertIsNone(result.get("latest_comment_is_operator"))
 
     def test_fetch_ticket_snapshot_operator_reply(self) -> None:
         payload = {
@@ -827,6 +951,34 @@ class ClassificationTests(unittest.TestCase):
         )
         self.assertEqual(result, "FAIL")
         self.assertEqual(reason, "Failed criteria: middleware_outcome")
+
+    def test_fail_reason_includes_operator_reply(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            auto_close_applied=False,
+            fallback_used=False,
+            failed=["operator_reply_present"],
+        )
+        self.assertEqual(result, "FAIL")
+        self.assertEqual(reason, "Failed criteria: operator_reply_present")
+
+    def test_fail_reason_includes_send_message_tag(self) -> None:
+        result, reason = _classify_order_status_result(
+            base_pass=False,
+            status_resolved_ok=True,
+            middleware_tag_ok=True,
+            middleware_ok=True,
+            skip_tags_present_ok=True,
+            auto_close_applied=False,
+            fallback_used=False,
+            failed=["send_message_tag_present"],
+        )
+        self.assertEqual(result, "FAIL")
+        self.assertEqual(reason, "Failed criteria: send_message_tag_present")
 
     def test_auto_close_applied_degrades_to_pass_weak(self) -> None:
         result, reason = _classify_order_status_result(
