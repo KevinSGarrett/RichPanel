@@ -62,6 +62,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install boto3
 
+      - name: Select secret source (optional)
+        if: ${{ inputs.use-aws-secrets == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV_NAME="${ENVIRONMENT:-prod}"
+          SECRETS_NAMESPACE="rp-mw/${ENV_NAME}"
+          {
+            echo "SECRETS_NAMESPACE=${SECRETS_NAMESPACE}"
+            echo "RICHPANEL_API_KEY_OVERRIDE=${SECRETS_NAMESPACE}/richpanel/api_key"
+            echo "SHOPIFY_ACCESS_TOKEN_OVERRIDE=${SECRETS_NAMESPACE}/shopify/admin_api_token"
+          } >> "$GITHUB_ENV"
+
       - name: Configure AWS credentials (optional)
         if: ${{ inputs.use-aws-secrets == 'true' }}
         uses: aws-actions/configure-aws-credentials@v4
