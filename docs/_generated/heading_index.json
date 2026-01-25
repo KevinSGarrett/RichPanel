@@ -5399,6 +5399,42 @@
       "anchor": "4-template-governance-to-avoid-drift"
     }
   ],
+  "outbound reply paths": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "outbound-reply-paths"
+    }
+  ],
+  "why two paths exist": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "why-two-paths-exist"
+    }
+  ],
+  "path selection": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "path-selection"
+    }
+  ],
+  "author resolution (email channel)": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "author-resolution-email-channel"
+    }
+  ],
+  "tags applied": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "tags-applied"
+    }
+  ],
+  "safety gates": [
+    {
+      "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+      "anchor": "safety-gates"
+    }
+  ],
   "queues and routing primitives (richpanel)": [
     {
       "path": "03_Richpanel_Integration/Queues_and_Routing_Primitives.md",

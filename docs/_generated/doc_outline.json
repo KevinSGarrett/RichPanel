@@ -4905,6 +4905,41 @@
     ]
   },
   {
+    "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Outbound Reply Paths",
+        "anchor": "outbound-reply-paths"
+      },
+      {
+        "level": 2,
+        "text": "Why two paths exist",
+        "anchor": "why-two-paths-exist"
+      },
+      {
+        "level": 2,
+        "text": "Path selection",
+        "anchor": "path-selection"
+      },
+      {
+        "level": 2,
+        "text": "Author resolution (email channel)",
+        "anchor": "author-resolution-email-channel"
+      },
+      {
+        "level": 2,
+        "text": "Tags applied",
+        "anchor": "tags-applied"
+      },
+      {
+        "level": 2,
+        "text": "Safety gates",
+        "anchor": "safety-gates"
+      }
+    ]
+  },
+  {
     "path": "03_Richpanel_Integration/Queues_and_Routing_Primitives.md",
     "outline": [
       {

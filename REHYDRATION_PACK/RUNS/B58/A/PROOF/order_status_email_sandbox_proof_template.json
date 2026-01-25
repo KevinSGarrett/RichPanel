@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "run_id": "B58-A-SANDBOX-PENDING",
+    "timestamp": "PENDING",
+    "env": "<sandbox-env>",
+    "region": "<aws-region>",
+    "scenario": "order_status",
+    "scenario_variant": "order_status_tracking"
+  },
+  "inputs": {
+    "command": "python scripts/dev_e2e_smoke.py --env <sandbox-env> --region <aws-region> --stack-name <stack-name> --wait-seconds 120 --profile <aws-profile> --scenario order_status --ticket-number <redacted> --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-<timestamp> --proof-path REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json"
+  },
+  "result": {
+    "status": "PENDING",
+    "notes": [
+      "Replace this template with the actual proof JSON produced by dev_e2e_smoke.py.",
+      "The proof must show operator reply evidence (is_operator=true), send-message tag present, closed ticket, and follow-up routed to support without another auto-reply."
+    ],
+    "required_evidence": {
+      "send_message_tag_present": true,
+      "operator_reply_present": true,
+      "closed_after": true,
+      "followup_no_reply": true,
+      "followup_routed_support": true
+    }
+  }
+}

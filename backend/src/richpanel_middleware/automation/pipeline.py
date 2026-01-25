@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import urllib.parse
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -52,6 +53,11 @@ ROUTING_APPLIED_TAG = "mw-routing-applied"
 EMAIL_SUPPORT_ROUTE_TAG = "route-email-support-team"
 ESCALATION_TAG = "mw-escalated-human"
 REPLY_SENT_TAG = "mw-reply-sent"
+OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
+OUTBOUND_PATH_COMMENT_TAG = "mw-outbound-path-comment"
+SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
+SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
+SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
@@ -59,11 +65,14 @@ ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 # Follow-up after auto-reply should route to support without escalation.
-_ESCALATION_REASONS: set[str] = set()
+_ESCALATION_REASONS: set[str] = {"author_id_missing", "reply_close_failed"}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
     "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
+    "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
+    "send_message_failed": SEND_MESSAGE_FAILED_TAG,
+    "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
 }
 
 
@@ -86,6 +95,16 @@ def _is_valid_order_id(value: Any, *, conversation_id: str) -> bool:
     if conversation_id and normalized == str(conversation_id):
         return False
     return True
+
+
+def _normalize_optional_text(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    try:
+        normalized = str(value).strip()
+    except Exception:
+        return None
+    return normalized or None
 
 
 def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
@@ -207,6 +226,18 @@ def _fingerprint(obj: Any, *, length: int = 12) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:length]
 
 
+def _hash_identifier(value: Optional[str], *, length: int = 8) -> Optional[str]:
+    if not value:
+        return None
+    try:
+        normalized = str(value).strip()
+    except Exception:
+        return None
+    if not normalized:
+        return None
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:length]
+
+
 def _redact_actions_for_storage(actions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Strip reply bodies and payloads from actions before persisting to Dynamo.
@@ -256,6 +287,154 @@ def _safe_ticket_metadata_fetch(
         return get_ticket_metadata(ticket_id, executor, allow_network=allow_network)
     except (RichpanelRequestError, SecretLoadError, TransportError):
         return None
+
+
+def _safe_ticket_snapshot_fetch(
+    ticket_id: str,
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> Tuple[Optional[TicketMetadata], Optional[str]]:
+    """
+    Fetch PII-safe ticket metadata plus channel (via.channel) for outbound routing.
+    """
+    try:
+        encoded_id = urllib.parse.quote(str(ticket_id), safe="")
+        response = executor.execute(
+            "GET",
+            f"/v1/tickets/{encoded_id}",
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+    except (RichpanelRequestError, SecretLoadError, TransportError):
+        return None, None
+
+    if response.dry_run:
+        return (
+            TicketMetadata(status=None, tags=set(), status_code=response.status_code, dry_run=True),
+            None,
+        )
+
+    if response.status_code < 200 or response.status_code >= 300:
+        return None, None
+
+    payload = response.json() or {}
+    if not isinstance(payload, dict):
+        payload = {}
+
+    ticket_obj = payload.get("ticket")
+    ticket_payload = ticket_obj if isinstance(ticket_obj, dict) else payload
+
+    status = _normalize_optional_text(
+        ticket_payload.get("status") or ticket_payload.get("state")
+    )
+    tags = dedupe_tags(ticket_payload.get("tags"))
+
+    channel = None
+    via = ticket_payload.get("via")
+    if isinstance(via, dict):
+        channel = _normalize_optional_text(via.get("channel"))
+    if channel is None:
+        channel = _normalize_optional_text(ticket_payload.get("channel"))
+    if channel:
+        channel = channel.lower()
+
+    return (
+        TicketMetadata(
+            status=status,
+            tags=tags,
+            status_code=response.status_code,
+            dry_run=response.dry_run,
+        ),
+        channel,
+    )
+
+
+def _user_id_from_payload(user: Dict[str, Any]) -> Optional[str]:
+    return _normalize_optional_text(
+        user.get("id") or user.get("user_id") or user.get("userId")
+    )
+
+
+def _iter_role_values(user: Dict[str, Any]) -> List[Any]:
+    values: List[Any] = []
+    for key in ("role", "type", "user_type", "userType"):
+        raw = user.get(key)
+        if isinstance(raw, dict):
+            for subkey in ("name", "type", "role"):
+                if subkey in raw:
+                    values.append(raw.get(subkey))
+        elif isinstance(raw, list):
+            values.extend(raw)
+        else:
+            values.append(raw)
+    return values
+
+
+def _user_is_agent(user: Dict[str, Any]) -> bool:
+    for value in _iter_role_values(user):
+        text = _normalize_optional_text(value)
+        if not text:
+            continue
+        lowered = text.lower()
+        if "agent" in lowered or "operator" in lowered:
+            return True
+    return False
+
+
+def _extract_users(payload: Any) -> List[Dict[str, Any]]:
+    if isinstance(payload, dict):
+        for key in ("users", "data", "agents", "items"):
+            candidates = payload.get(key)
+            if isinstance(candidates, list):
+                return [user for user in candidates if isinstance(user, dict)]
+        return []
+    if isinstance(payload, list):
+        return [user for user in payload if isinstance(user, dict)]
+    return []
+
+
+def _resolve_author_id(
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> Tuple[Optional[str], str]:
+    env_author_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AUTHOR_ID"))
+    if env_author_id:
+        return env_author_id, "env"
+    if not allow_network:
+        return None, "network_disabled"
+    try:
+        response = executor.execute(
+            "GET",
+            "/v1/users",
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+    except (RichpanelRequestError, SecretLoadError, TransportError):
+        return None, "user_fetch_failed"
+    if response.dry_run:
+        return None, "dry_run"
+    if response.status_code < 200 or response.status_code >= 300:
+        return None, "user_fetch_failed"
+
+    users = _extract_users(response.json())
+    if not users:
+        return None, "user_list_empty"
+
+    for user in users:
+        user_id = _user_id_from_payload(user)
+        if not user_id:
+            continue
+        if _user_is_agent(user):
+            return user_id, "role_match"
+
+    for user in users:
+        user_id = _user_id_from_payload(user)
+        if user_id:
+            return user_id, "first_available"
+
+    return None, "user_id_missing"
 
 
 def _resolve_target_ticket_id(
@@ -722,19 +901,24 @@ def execute_order_status_reply(
             f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
         )
 
-        ticket_metadata = _safe_ticket_metadata_fetch(
+        ticket_metadata, ticket_channel = _safe_ticket_snapshot_fetch(
             target_id,
             executor=executor,
             allow_network=allow_network,
         )
 
         def _route_email_support(
-            reason: str, ticket_status: Optional[str] = None
+            reason: str,
+            ticket_status: Optional[str] = None,
+            *,
+            extra_tags: Optional[List[str]] = None,
         ) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
             skip_tag = _SKIP_REASON_TAGS.get(reason)
             if skip_tag:
                 route_tags.append(skip_tag)
+            if extra_tags:
+                route_tags.extend(extra_tags)
             if reason in _ESCALATION_REASONS:
                 route_tags.append(ESCALATION_TAG)
             route_tags = sorted(dedupe_tags(route_tags))
@@ -774,6 +958,7 @@ def execute_order_status_reply(
             return _route_email_support("status_read_failed")
 
         ticket_status = ticket_metadata.status
+        is_email_channel = ticket_channel == "email"
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
@@ -917,61 +1102,204 @@ def execute_order_status_reply(
             ticket_payload = payload.get("ticket")
             return isinstance(ticket_payload, dict) and bool(ticket_payload.get("comment"))
 
-        update_success = None
-        comment_sent = False
-        for candidate_name, payload in update_candidates:
-            payload_dict = cast(Dict[str, Any], payload)
-            payload_to_send: Dict[str, Any] = payload_dict
-            if comment_sent:
-                payload_to_send = _strip_comment(payload_dict)
-            reply_response = executor.execute(
+        close_candidates = [
+            (candidate_name, _strip_comment(payload))
+            for candidate_name, payload in update_candidates
+        ]
+
+        def _apply_update_candidates(
+            candidates: List[Tuple[str, Dict[str, Any]]],
+            *,
+            strip_comment_after_success: bool,
+        ) -> Optional[str]:
+            update_success = None
+            comment_sent = False
+            for candidate_name, payload in candidates:
+                payload_dict = cast(Dict[str, Any], payload)
+                payload_to_send: Dict[str, Any] = payload_dict
+                if strip_comment_after_success and comment_sent:
+                    payload_to_send = _strip_comment(payload_dict)
+                reply_response = executor.execute(
+                    "PUT",
+                    f"/v1/tickets/{encoded_id}",
+                    json_body=payload_to_send,
+                    dry_run=not allow_network,
+                )
+                candidate_success = (
+                    200 <= reply_response.status_code < 300
+                    and not reply_response.dry_run
+                )
+                if (
+                    candidate_success
+                    and strip_comment_after_success
+                    and _payload_has_comment(payload_to_send)
+                ):
+                    comment_sent = True
+                closed_after = None
+                if candidate_success:
+                    refreshed = _safe_ticket_metadata_fetch(
+                        target_id,
+                        executor=executor,
+                        allow_network=allow_network,
+                    )
+                    closed_after = (
+                        _is_closed_status(refreshed.status) if refreshed else None
+                    )
+                    if closed_after is not True:
+                        candidate_success = False
+                responses.append(
+                    {
+                        "action": "reply_and_resolve",
+                        "status": reply_response.status_code,
+                        "dry_run": reply_response.dry_run,
+                        "candidate": candidate_name,
+                        "update_success": candidate_success,
+                        "closed_after": closed_after,
+                    }
+                )
+                LOGGER.info(
+                    "automation.order_status_reply.update_candidate",
+                    extra={
+                        "event_id": envelope.event_id,
+                        "conversation_id": envelope.conversation_id,
+                        "candidate": candidate_name,
+                        "status": reply_response.status_code,
+                        "dry_run": reply_response.dry_run,
+                        "closed_after": closed_after,
+                    },
+                )
+                if candidate_success:
+                    update_success = candidate_name
+                    break
+            return update_success
+
+        if is_email_channel:
+            author_id, author_strategy = _resolve_author_id(
+                executor=executor, allow_network=allow_network
+            )
+            author_hash = _hash_identifier(author_id)
+            if author_id:
+                LOGGER.info(
+                    "automation.order_status_reply.author_resolved",
+                    extra={
+                        "event_id": envelope.event_id,
+                        "conversation_id": envelope.conversation_id,
+                        "strategy": author_strategy,
+                        "author_id_hash": author_hash,
+                    },
+                )
+            else:
+                LOGGER.info(
+                    "automation.order_status_reply.author_missing",
+                    extra={
+                        "event_id": envelope.event_id,
+                        "conversation_id": envelope.conversation_id,
+                        "strategy": author_strategy,
+                    },
+                )
+                result = _route_email_support(
+                    "author_id_missing", ticket_status=ticket_status
+                )
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
+
+            send_response = executor.execute(
                 "PUT",
-                f"/v1/tickets/{encoded_id}",
-                json_body=payload_to_send,
+                f"/v1/tickets/{encoded_id}/send-message",
+                json_body={"author_id": author_id, "body": reply_body},
                 dry_run=not allow_network,
             )
-            candidate_success = (
-                200 <= reply_response.status_code < 300 and not reply_response.dry_run
-            )
-            if candidate_success and _payload_has_comment(payload_to_send):
-                comment_sent = True
-            closed_after = None
-            if candidate_success:
-                refreshed = _safe_ticket_metadata_fetch(
-                    target_id,
-                    executor=executor,
-                    allow_network=allow_network,
-                )
-                closed_after = (
-                    _is_closed_status(refreshed.status) if refreshed else None
-                )
-                if closed_after is not True:
-                    candidate_success = False
             responses.append(
                 {
-                    "action": "reply_and_resolve",
-                    "status": reply_response.status_code,
-                    "dry_run": reply_response.dry_run,
-                    "candidate": candidate_name,
-                    "update_success": candidate_success,
-                    "closed_after": closed_after,
+                    "action": "send_message",
+                    "status": send_response.status_code,
+                    "dry_run": send_response.dry_run,
                 }
             )
+            if send_response.dry_run:
+                result = {
+                    "sent": False,
+                    "reason": "send_message_dry_run",
+                    "responses": responses,
+                }
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
+            if send_response.status_code < 200 or send_response.status_code >= 300:
+                result = _route_email_support(
+                    "send_message_failed", ticket_status=ticket_status
+                )
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
+
+            update_success = _apply_update_candidates(
+                close_candidates, strip_comment_after_success=False
+            )
+            if update_success is None:
+                result = _route_email_support(
+                    "reply_close_failed",
+                    ticket_status=ticket_status,
+                    extra_tags=[
+                        loop_prevention_tag,
+                        ORDER_STATUS_REPLY_TAG,
+                        REPLY_SENT_TAG,
+                        run_specific_reply_tag,
+                        OUTBOUND_PATH_SEND_MESSAGE_TAG,
+                    ],
+                )
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
+
+            tags_to_apply = sorted(
+                dedupe_tags(
+                    [
+                        loop_prevention_tag,
+                        ORDER_STATUS_REPLY_TAG,
+                        REPLY_SENT_TAG,
+                        run_specific_reply_tag,
+                        OUTBOUND_PATH_SEND_MESSAGE_TAG,
+                    ]
+                )
+            )
+            tag_response = executor.execute(
+                "PUT",
+                f"/v1/tickets/{encoded_id}/add-tags",
+                json_body={"tags": tags_to_apply},
+                dry_run=not allow_network,
+            )
+            responses.append(
+                {
+                    "action": "add_tag",
+                    "status": tag_response.status_code,
+                    "dry_run": tag_response.dry_run,
+                }
+            )
+
             LOGGER.info(
-                "automation.order_status_reply.update_candidate",
+                "automation.order_status_reply.sent",
                 extra={
                     "event_id": envelope.event_id,
                     "conversation_id": envelope.conversation_id,
-                    "candidate": candidate_name,
-                    "status": reply_response.status_code,
-                    "dry_run": reply_response.dry_run,
-                    "closed_after": closed_after,
+                    "statuses": [
+                        entry["status"] for entry in responses if "status" in entry
+                    ],
+                    "dry_run": any(entry.get("dry_run") for entry in responses),
+                    "loop_tag": loop_prevention_tag,
+                    "update_candidate": update_success,
+                    "outbound_path": "send_message",
                 },
             )
-            if candidate_success:
-                update_success = candidate_name
-                break
+            result = {"sent": True, "reason": "sent", "responses": responses}
+            if openai_rewrite is not None:
+                result["openai_rewrite"] = openai_rewrite
+            return result
 
+        update_success = _apply_update_candidates(
+            update_candidates, strip_comment_after_success=True
+        )
         if update_success is None:
             result = {
                 "sent": False,
@@ -989,6 +1317,7 @@ def execute_order_status_reply(
                     ORDER_STATUS_REPLY_TAG,
                     REPLY_SENT_TAG,
                     run_specific_reply_tag,
+                    OUTBOUND_PATH_COMMENT_TAG,
                 ]
             )
         )
@@ -1017,6 +1346,7 @@ def execute_order_status_reply(
                 "dry_run": any(entry.get("dry_run") for entry in responses),
                 "loop_tag": loop_prevention_tag,
                 "update_candidate": update_success,
+                "outbound_path": "comment",
             },
         )
         result = {"sent": True, "reason": "sent", "responses": responses}

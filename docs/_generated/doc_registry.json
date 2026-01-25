@@ -980,6 +980,16 @@
     "last_updated": "2025-12-21"
   },
   {
+    "path": "03_Richpanel_Integration/Outbound_Reply_Paths.md",
+    "title": "Outbound Reply Paths",
+    "section": "03_Richpanel_Integration",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 244,
+    "approx_tokens": 317,
+    "last_updated": ""
+  },
+  {
     "path": "03_Richpanel_Integration/Queues_and_Routing_Primitives.md",
     "title": "Queues and Routing Primitives (Richpanel)",
     "section": "03_Richpanel_Integration",
@@ -3905,8 +3915,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10752,
-    "approx_tokens": 13977,
+    "word_count": 10761,
+    "approx_tokens": 13989,
     "last_updated": ""
   },
   {
