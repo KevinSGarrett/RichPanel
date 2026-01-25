@@ -37,16 +37,21 @@ Output:
 paths: ['/v1/tickets/t-email', '/v1/tickets/t-email/send-message', '/v1/tickets/t-email', '/v1/tickets/t-email', '/v1/tickets/t-email/add-tags']
 ```
 
-## Sandbox proof (pending manual run)
-Prereqs (manual):
-- Create a Richpanel automation/bot agent and capture its `author_id`.
-- Store the bot id in AWS Secrets Manager for the sandbox environment.
+## Sandbox proof (PASS)
+Notes:
+- Dev stack deployed via `deploy-dev.yml` workflow.
+- `RICHPANEL_BOT_AUTHOR_ID` set on `rp-mw-dev-worker` (hash recorded in run notes; no PII logged).
 
 Command (PII-safe, redacted ticket number):
 ```powershell
 cd C:\RichPanel_GIT
-python scripts\dev_e2e_smoke.py --env <sandbox-env> --region <aws-region> --stack-name <stack-name> --wait-seconds 120 --profile <aws-profile> --scenario order_status --ticket-number <redacted> --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-<timestamp> --proof-path REHYDRATION_PACK\RUNS\B58\A\PROOF\order_status_email_sandbox_proof.json
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125132530 --proof-path REHYDRATION_PACK\RUNS\B58\A\PROOF\order_status_email_sandbox_proof.json
 ```
 
-Template (to be replaced by actual proof output):
-- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof_template.json`
+Output:
+```
+[RESULT] classification=PASS_STRONG; status=PASS; failure_reason=none
+```
+
+Proof artifact:
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`

@@ -13,3 +13,11 @@
   - Added force-primary threshold coverage tests.
 - `docs/03_Richpanel_Integration/Outbound_Reply_Paths.md`
   - Documented outbound reply paths and email-specific requirements.
+- `scripts/dev_e2e_smoke.py`
+  - Added `--require-operator-reply` and `--require-send-message` proof flags and operator reply/send-message evidence fields.
+- `scripts/test_e2e_smoke_encoding.py`
+  - Added unit coverage for operator reply/send-message evidence and ticket snapshot operator detection.
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof_template.json`
+  - Added sandbox proof template for manual run output.
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
+  - Recorded PASS_STRONG sandbox proof run for email send-message path.

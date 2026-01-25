@@ -78,7 +78,7 @@
 - `python scripts/test_e2e_smoke_encoding.py`
 
 **E2E / proof runs (redacted):**
-- N/A (unit + deterministic proof snippet in `REHYDRATION_PACK/RUNS/B58/A/EVIDENCE.md`)
+- `python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125132530 --proof-path REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
 
 ### 7) Results & evidence
 **CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
@@ -90,11 +90,13 @@
 - `REHYDRATION_PACK/RUNS/B58/A/RUN_REPORT.md`
 - `REHYDRATION_PACK/RUNS/B58/A/EVIDENCE.md`
 - `REHYDRATION_PACK/RUNS/B58/A/CI_RUN_OUTPUT.txt`
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
 
 **Proof snippet(s) (PII-safe):**
 ```text
 paths: ['/v1/tickets/t-email', '/v1/tickets/t-email/send-message', '/v1/tickets/t-email', '/v1/tickets/t-email', '/v1/tickets/t-email/add-tags']
 [OK] CI-equivalent checks passed.
+[RESULT] classification=PASS_STRONG; status=PASS; failure_reason=none
 ```
 
 ### 8) Risk & rollback
