@@ -31,8 +31,6 @@ from richpanel_middleware.automation.pipeline import plan_actions, normalize_eve
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore
     compute_delivery_estimate,
-    build_tracking_reply,
-    build_no_tracking_reply,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # type: ignore
 from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
@@ -528,12 +526,20 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
 
 
 def _redact_tracking_number(tracking: Optional[str]) -> Optional[str]:
-    """Redact tracking number for PII safety: show first 4 and last 3 chars only."""
+    """Redact tracking number for PII safety.
+    
+    For security, always show minimal chars:
+    - Length <= 6: show "***" only (too short to safely expose any chars)
+    - Length 7-10: show first 2 + last 2 chars
+    - Length > 10: show first 4 + last 3 chars
+    """
     if not tracking or not isinstance(tracking, str):
         return None
     tracking = tracking.strip()
-    if len(tracking) <= 7:
-        return f"{tracking[:2]}***{tracking[-2:]}" if len(tracking) > 4 else "***"
+    if len(tracking) <= 6:
+        return "***"
+    if len(tracking) <= 10:
+        return f"{tracking[:2]}***{tracking[-2:]}"
     return f"{tracking[:4]}***{tracking[-3:]}"
 
 
@@ -764,6 +770,9 @@ def main() -> int:
                     conversation_no=ticket_payload.get("conversation_no"),
                 )
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
+                # probe_summary is intentionally empty for non-explicit modes (e.g., "recent")
+                # because we only perform full Shopify lookups when explicitly requested ticket IDs
+                # are provided to avoid excessive API calls during sampling operations.
                 probe_summary: Dict[str, Any] = {}
                 if sample_mode == "explicit":
                     probe_summary = lookup_order_summary(
@@ -872,15 +881,25 @@ def main() -> int:
                     or order_payload.get("created_at")
                     or order_payload.get("order_created_at")
                 )
+                # Check both shipping_method and shipping_method_name for consistency
+                # with _compute_eta_for_ticket which uses either field
+                has_shipping_method = bool(
+                    effective_summary.get("shipping_method")
+                    or effective_summary.get("shipping_method_name")
+                )
                 eta_available = _delivery_estimate_present(delivery_estimate) or (
-                    has_order_date and bool(effective_summary.get("shipping_method"))
+                    has_order_date and has_shipping_method
                 )
 
                 # order_matched should be true if we resolved an order (not just draft reply)
+                # Safely handle order_resolution being None (not just absent)
+                order_resolution = (
+                    probe_summary.get("order_resolution")
+                    if isinstance(probe_summary, dict) else None
+                )
                 order_resolved = (
-                    isinstance(probe_summary, dict)
-                    and probe_summary.get("order_resolution", {}).get("resolvedBy")
-                    not in (None, "no_match")
+                    isinstance(order_resolution, dict)
+                    and order_resolution.get("resolvedBy") not in (None, "no_match")
                 )
 
                 result.update(
