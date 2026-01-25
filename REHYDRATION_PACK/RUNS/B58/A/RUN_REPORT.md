@@ -2,6 +2,7 @@
 
 ## Metadata
 - Date: 2026-01-25
+- Run ID: `RUN_20260125_0130Z`
 - Branch: `b58/operator-reply-send-message`
 - Workspace: `C:\RichPanel_GIT`
 
@@ -17,3 +18,4 @@ Implement customer-visible outbound replies for email tickets using `/send-messa
 ## Tests
 - `python scripts\test_pipeline_handlers.py` (PASS)
 - `python scripts\test_llm_routing.py` (PASS)
+- `python scripts\run_ci_checks.py --ci` (see `REHYDRATION_PACK/RUNS/B58/A/CI_RUN_OUTPUT.txt`)
