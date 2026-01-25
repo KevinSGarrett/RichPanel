@@ -700,6 +700,7 @@ def main() -> int:
                     conversation_no=ticket_payload.get("conversation_no"),
                 )
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
+                probe_summary: Dict[str, Any] = {}
                 if sample_mode == "explicit":
                     probe_summary = lookup_order_summary(
                         build_event_envelope(order_payload),
@@ -710,6 +711,15 @@ def main() -> int:
                     if isinstance(probe_summary, dict):
                         result["order_resolution"] = probe_summary.get(
                             "order_resolution"
+                        )
+                        # Store tracking/shipping data from Shopify lookup
+                        result["shopify_tracking_number"] = bool(
+                            probe_summary.get("tracking_number")
+                        )
+                        result["shopify_carrier"] = bool(probe_summary.get("carrier"))
+                        result["shopify_order_created_at"] = bool(
+                            probe_summary.get("created_at")
+                            or probe_summary.get("order_created_at")
                         )
 
                 raw_customer_message = _extract_latest_customer_message(
@@ -760,10 +770,15 @@ def main() -> int:
                 order_summary = (
                     parameters.get("order_summary") if isinstance(parameters, dict) else {}
                 )
+                # Merge probe_summary into order_summary if we have it
+                effective_summary = dict(probe_summary) if probe_summary else {}
+                if order_summary:
+                    effective_summary.update(order_summary)
+
                 result.update(
                     _order_context_summary(
                         order_payload,
-                        order_summary,
+                        effective_summary,
                         conversation_id=str(
                             ticket_payload.get("conversation_id") or ticket_id
                         ),
@@ -774,13 +789,31 @@ def main() -> int:
                     if isinstance(parameters, dict)
                     else None
                 )
-                tracking_found = _tracking_present(order_summary or {})
-                eta_available = _delivery_estimate_present(delivery_estimate)
+
+                # Use probe_summary (Shopify data) for tracking detection
+                tracking_found = _tracking_present(effective_summary)
+                # ETA is available if we have delivery_estimate OR order_created_at
+                has_order_date = bool(
+                    effective_summary.get("created_at")
+                    or effective_summary.get("order_created_at")
+                    or order_payload.get("created_at")
+                    or order_payload.get("order_created_at")
+                )
+                eta_available = _delivery_estimate_present(delivery_estimate) or (
+                    has_order_date and bool(effective_summary.get("shipping_method"))
+                )
+
+                # order_matched should be true if we resolved an order (not just draft reply)
+                order_resolved = (
+                    isinstance(probe_summary, dict)
+                    and probe_summary.get("order_resolution", {}).get("resolvedBy")
+                    not in (None, "no_match")
+                )
 
                 result.update(
                     {
                         "order_status_candidate": bool(order_action),
-                        "order_matched": bool(order_summary),
+                        "order_matched": bool(order_summary) or order_resolved,
                         "tracking_found": tracking_found,
                         "eta_available": eta_available,
                     }
