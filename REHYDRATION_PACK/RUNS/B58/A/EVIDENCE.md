@@ -17,6 +17,7 @@ Output:
 [OK] REHYDRATION_PACK validated (mode=build).
 [OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
 [OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+[OK] CI-equivalent checks passed.
 ```
 
 Full log:
