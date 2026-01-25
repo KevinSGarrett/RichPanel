@@ -55,3 +55,6 @@ Output:
 
 Proof artifact:
 - `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
+
+Email delivery confirmation (manual, PII-safe):
+- Received order-status reply in the test inbox for run `B58-SANDBOX-20260125160800` at 2026-01-25 16:08 local time.
