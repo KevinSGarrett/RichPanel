@@ -529,6 +529,7 @@ def _redact_tracking_number(tracking: Optional[str]) -> Optional[str]:
     """Redact tracking number for PII safety.
     
     For security, always show minimal chars:
+    - Empty/whitespace-only: return None
     - Length <= 6: show "***" only (too short to safely expose any chars)
     - Length 7-10: show first 2 + last 2 chars
     - Length > 10: show first 4 + last 3 chars
@@ -536,6 +537,8 @@ def _redact_tracking_number(tracking: Optional[str]) -> Optional[str]:
     if not tracking or not isinstance(tracking, str):
         return None
     tracking = tracking.strip()
+    if not tracking:  # Handle whitespace-only strings consistently with empty strings
+        return None
     if len(tracking) <= 6:
         return "***"
     if len(tracking) <= 10:

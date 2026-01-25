@@ -764,8 +764,12 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(shadow_eval._redact_tracking_number("12345678901"), "1234***901")
         self.assertEqual(shadow_eval._redact_tracking_number("1ZV52E420840067015"), "1ZV5***015")
 
-        # Whitespace handling
+        # Whitespace handling - strips before redacting
         self.assertEqual(shadow_eval._redact_tracking_number("  1234567  "), "12***67")
+
+        # Whitespace-only strings should return None (consistent with empty string)
+        self.assertIsNone(shadow_eval._redact_tracking_number("   "))
+        self.assertIsNone(shadow_eval._redact_tracking_number("  \t\n  "))
 
     def test_redact_date_various_formats(self) -> None:
         # None/empty cases
@@ -1038,6 +1042,79 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             )
             self.assertIn("order_id_present", payload["tickets"][0])
             self.assertIn("order_context_missing", payload["tickets"][0])
+            # In non-explicit mode (sample_mode="recent"), probe_summary stays empty
+            # so order_matched is based only on order_summary from plan_actions
+            # which contains {"order_id": "order-123"} - so order_matched should be True
+            self.assertTrue(payload["tickets"][0]["order_matched"])
+
+    def test_non_explicit_mode_skips_shopify_lookup(self) -> None:
+        """Test that sample_mode='recent' intentionally skips Shopify lookup.
+        
+        This verifies the documented behavior where probe_summary stays empty
+        for non-explicit modes to avoid excessive API calls during sampling.
+        """
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        # Plan with NO order_summary to verify order_matched=False in non-explicit mode
+        plan = SimpleNamespace(
+            actions=[],  # No order_status_draft_reply action
+            routing=SimpleNamespace(
+                intent="unknown_other",
+                department="Email Support Team",
+                reason="stubbed",
+            ),
+            mode="none",
+            reasons=["stubbed"],
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            stub_client = _StubClient()
+            lookup_calls = []
+
+            def mock_lookup(*args, **kwargs):
+                lookup_calls.append(True)
+                return {"order_id": "should-not-be-called"}
+
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-non-prod",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=stub_client
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", side_effect=mock_lookup
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            # Verify lookup_order_summary was NOT called in non-explicit mode
+            self.assertEqual(len(lookup_calls), 0, "lookup_order_summary should not be called in 'recent' mode")
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["sample_mode"], "recent")
+            # With no order_summary and no probe_summary, order_matched should be False
+            self.assertFalse(payload["tickets"][0]["order_matched"])
+            # Verify no Shopify-specific fields are populated
+            self.assertNotIn("shopify_tracking_number", payload["tickets"][0])
+            self.assertNotIn("order_resolution", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
