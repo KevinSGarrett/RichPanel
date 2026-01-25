@@ -5,6 +5,7 @@
 cd C:\RichPanel_GIT
 python scripts\test_pipeline_handlers.py
 python scripts\test_llm_routing.py
+python scripts\test_e2e_smoke_encoding.py
 ```
 
 ## CI-equivalent checks
@@ -35,3 +36,17 @@ Output:
 ```
 paths: ['/v1/tickets/t-email', '/v1/tickets/t-email/send-message', '/v1/tickets/t-email', '/v1/tickets/t-email', '/v1/tickets/t-email/add-tags']
 ```
+
+## Sandbox proof (pending manual run)
+Prereqs (manual):
+- Create a Richpanel automation/bot agent and capture its `author_id`.
+- Store the bot id in AWS Secrets Manager for the sandbox environment.
+
+Command (PII-safe, redacted ticket number):
+```powershell
+cd C:\RichPanel_GIT
+python scripts\dev_e2e_smoke.py --env <sandbox-env> --region <aws-region> --stack-name <stack-name> --wait-seconds 120 --profile <aws-profile> --scenario order_status --ticket-number <redacted> --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-<timestamp> --proof-path REHYDRATION_PACK\RUNS\B58\A\PROOF\order_status_email_sandbox_proof.json
+```
+
+Template (to be replaced by actual proof output):
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof_template.json`

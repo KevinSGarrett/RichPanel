@@ -37,6 +37,7 @@
 - Added deterministic path tags (`mw-outbound-path-send-message` vs `mw-outbound-path-comment`) and explicit failure routing tags.
 - Apply loop-prevention tags even when send-message succeeds but ticket close fails, routing to support with explicit reason tags.
 - `compute_dual_routing()` always uses `get_confidence_threshold()` even with `force_primary`.
+- Added sandbox proof flags in `dev_e2e_smoke.py` for operator replies and `/send-message` tags, plus a proof template artifact.
 
 **Design decisions (why this way):**
 - Use the existing executor and safe update-candidate strategy to avoid introducing new write semantics.
@@ -50,6 +51,7 @@
 **Tests:**
 - `scripts/test_pipeline_handlers.py`
 - `scripts/test_llm_routing.py`
+- `scripts/test_e2e_smoke_encoding.py`
 
 **CI / workflows:**
 - None
@@ -59,11 +61,13 @@
 - `REHYDRATION_PACK/RUNS/B58/A/RUN_REPORT.md`
 - `REHYDRATION_PACK/RUNS/B58/A/EVIDENCE.md`
 - `REHYDRATION_PACK/RUNS/B58/A/CI_RUN_OUTPUT.txt`
+- `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof_template.json`
 
 **Hotspots:**
 - `backend/src/richpanel_middleware/automation/pipeline.py`
 - `backend/src/richpanel_middleware/automation/llm_routing.py`
 - `scripts/test_pipeline_handlers.py`
+- `scripts/dev_e2e_smoke.py`
 - `docs/03_Richpanel_Integration/Outbound_Reply_Paths.md`
 
 ### 6) Test plan
@@ -71,6 +75,7 @@
 - `python scripts/run_ci_checks.py --ci`
 - `python scripts/test_pipeline_handlers.py`
 - `python scripts/test_llm_routing.py`
+- `python scripts/test_e2e_smoke_encoding.py`
 
 **E2E / proof runs (redacted):**
 - N/A (unit + deterministic proof snippet in `REHYDRATION_PACK/RUNS/B58/A/EVIDENCE.md`)

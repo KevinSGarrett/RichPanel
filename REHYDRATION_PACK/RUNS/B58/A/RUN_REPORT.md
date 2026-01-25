@@ -18,4 +18,9 @@ Implement customer-visible outbound replies for email tickets using `/send-messa
 ## Tests
 - `python scripts\test_pipeline_handlers.py` (PASS)
 - `python scripts\test_llm_routing.py` (PASS)
+- `python scripts\test_e2e_smoke_encoding.py` (PASS)
 - `python scripts\run_ci_checks.py --ci` (see `REHYDRATION_PACK/RUNS/B58/A/CI_RUN_OUTPUT.txt`)
+
+## Sandbox proof (pending manual run)
+- Create Richpanel bot agent + store `author_id` in Secrets Manager for sandbox.
+- Run `scripts/dev_e2e_smoke.py` with `--require-send-message` and `--require-operator-reply` to produce a PII-safe proof JSON under `REHYDRATION_PACK/RUNS/B58/A/PROOF/`.

@@ -39,6 +39,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
     _evaluate_outbound_evidence,
+    _evaluate_operator_reply_evidence,
+    _evaluate_send_message_evidence,
     _evaluate_openai_requirements,
     _fetch_ticket_snapshot,
     _fetch_latest_reply_hash,
@@ -551,6 +553,40 @@ class OutboundEvidenceTests(unittest.TestCase):
         self.assertFalse(evidence["outbound_last_message_source_middleware"])
 
 
+class OperatorReplyEvidenceTests(unittest.TestCase):
+    def test_operator_reply_evidence_present(self) -> None:
+        evidence = _evaluate_operator_reply_evidence(
+            operator_reply_present=True, operator_reply_count_delta=1
+        )
+        self.assertTrue(evidence["operator_reply_present"])
+        self.assertTrue(evidence["operator_reply_count_delta_ge_1"])
+
+    def test_operator_reply_evidence_missing(self) -> None:
+        evidence = _evaluate_operator_reply_evidence(
+            operator_reply_present=False, operator_reply_count_delta=None
+        )
+        self.assertFalse(evidence["operator_reply_present"])
+        self.assertFalse(evidence["operator_reply_count_delta_ge_1"])
+
+
+class SendMessageEvidenceTests(unittest.TestCase):
+    def test_send_message_tag_present_and_added(self) -> None:
+        evidence = _evaluate_send_message_evidence(
+            tags_added=["mw-outbound-path-send-message"],
+            post_tags=["mw-outbound-path-send-message"],
+        )
+        self.assertTrue(evidence["send_message_tag_present"])
+        self.assertTrue(evidence["send_message_tag_added"])
+
+    def test_send_message_tag_present_not_added(self) -> None:
+        evidence = _evaluate_send_message_evidence(
+            tags_added=[],
+            post_tags=["mw-outbound-path-send-message"],
+        )
+        self.assertTrue(evidence["send_message_tag_present"])
+        self.assertFalse(evidence["send_message_tag_added"])
+
+
 class TicketSnapshotTests(unittest.TestCase):
     def test_fetch_ticket_snapshot_comment_fallback(self) -> None:
         payload = {
@@ -583,6 +619,41 @@ class TicketSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(result.get("message_count"), 2)
         self.assertEqual(result.get("last_message_source"), "middleware")
+        self.assertFalse(result.get("operator_reply_present"))
+        self.assertEqual(result.get("operator_reply_count"), 0)
+
+    def test_fetch_ticket_snapshot_operator_reply(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-2",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [
+                    {"type": "text", "is_operator": False},
+                    {"type": "reply", "is_operator": True},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-2",
+            allow_network=True,
+        )
+        self.assertTrue(result.get("operator_reply_present"))
+        self.assertEqual(result.get("operator_reply_count"), 1)
+        self.assertEqual(result.get("last_message_source"), "operator")
 
     def test_build_followup_payload_strips_force_primary(self) -> None:
         base = {

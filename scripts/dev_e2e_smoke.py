@@ -89,6 +89,7 @@ _POSITIVE_MIDDLEWARE_TAGS = {
 }
 
 _LOOP_PREVENTION_TAG = "mw-auto-replied"
+_OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
 
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
@@ -996,15 +997,30 @@ def _fetch_ticket_snapshot(
         )
         comment_count = None
         comment_source = None
+        operator_reply_count = None
+        operator_reply_present = None
         comments = payload.get("comments")
         if isinstance(comments, list):
             comment_count = len(comments)
+            operator_reply_count = 0
+            for comment in comments:
+                if not isinstance(comment, dict):
+                    continue
+                is_operator = comment.get("is_operator")
+                if is_operator is None:
+                    is_operator = comment.get("isOperator")
+                if is_operator is True:
+                    operator_reply_count += 1
+            operator_reply_present = operator_reply_count > 0
             # Heuristic: Richpanel uses type="text" for middleware replies in sandbox.
             for comment in reversed(comments):
                 if not isinstance(comment, dict):
                     continue
-                if comment.get("is_operator") is True:
-                    comment_source = "middleware"
+                is_operator = comment.get("is_operator")
+                if is_operator is None:
+                    is_operator = comment.get("isOperator")
+                if is_operator is True:
+                    comment_source = "operator"
                     break
                 comment_type = comment.get("type")
                 if isinstance(comment_type, str) and comment_type.strip().lower() in {
@@ -1026,6 +1042,8 @@ def _fetch_ticket_snapshot(
             "updated_at": updated_at,
             "message_count": message_count,
             "last_message_source": last_message_source,
+            "operator_reply_present": operator_reply_present,
+            "operator_reply_count": operator_reply_count,
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "path": path,
@@ -1498,6 +1516,38 @@ def parse_args() -> argparse.Namespace:
         help="Disable outbound reply evidence requirement.",
     )
     parser.set_defaults(require_outbound=None)
+    parser.add_argument(
+        "--require-operator-reply",
+        dest="require_operator_reply",
+        action="store_true",
+        help=(
+            "Require operator reply evidence in ticket comments "
+            "(is_operator=true)."
+        ),
+    )
+    parser.add_argument(
+        "--no-require-operator-reply",
+        dest="require_operator_reply",
+        action="store_false",
+        help="Disable operator reply evidence requirement.",
+    )
+    parser.set_defaults(require_operator_reply=None)
+    parser.add_argument(
+        "--require-send-message",
+        dest="require_send_message",
+        action="store_true",
+        help=(
+            "Require mw-outbound-path-send-message tag evidence "
+            "(operator reply path)."
+        ),
+    )
+    parser.add_argument(
+        "--no-require-send-message",
+        dest="require_send_message",
+        action="store_false",
+        help="Disable send-message path evidence requirement.",
+    )
+    parser.set_defaults(require_send_message=None)
     parser.add_argument(
         "--apply-test-tag",
         action="store_true",
@@ -2138,6 +2188,34 @@ def _evaluate_outbound_evidence(
     }
 
 
+def _evaluate_operator_reply_evidence(
+    *,
+    operator_reply_present: Optional[bool],
+    operator_reply_count_delta: Optional[int],
+) -> Dict[str, bool]:
+    present_ok = bool(operator_reply_present)
+    delta_ok = (
+        operator_reply_count_delta is not None and operator_reply_count_delta >= 1
+    )
+    return {
+        "operator_reply_present": present_ok,
+        "operator_reply_count_delta_ge_1": delta_ok,
+    }
+
+
+def _evaluate_send_message_evidence(
+    *,
+    tags_added: List[str],
+    post_tags: List[str],
+) -> Dict[str, bool]:
+    tag_present = _OUTBOUND_PATH_SEND_MESSAGE_TAG in post_tags
+    tag_added = _OUTBOUND_PATH_SEND_MESSAGE_TAG in tags_added
+    return {
+        "send_message_tag_present": tag_present,
+        "send_message_tag_added": tag_added,
+    }
+
+
 def wait_for_conversation_state_record(
     ddb_resource,
     table_name: str,
@@ -2504,8 +2582,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if args.require_outbound is not None
         else order_status_mode
     )
+    require_operator_reply = (
+        args.require_operator_reply
+        if args.require_operator_reply is not None
+        else False
+    )
+    require_send_message = (
+        args.require_send_message if args.require_send_message is not None else False
+    )
     if not order_status_mode:
         require_outbound = False
+        require_operator_reply = False
+        require_send_message = False
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
@@ -3072,12 +3160,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     message_count_delta = None
     last_message_source_before = None
     last_message_source_after = None
+    operator_reply_count_before = None
+    operator_reply_count_after = None
+    operator_reply_count_delta = None
+    operator_reply_present = None
+    send_message_tag_present = None
+    send_message_tag_added = None
     middleware_tags_added: List[str] = []
     middleware_tag_present: Optional[bool] = None
     middleware_outcome: Optional[Dict[str, Any]] = None
     skip_tags_present: Optional[bool] = None
     skip_tags_present_ok: Optional[bool] = None
     skip_tags_added: List[str] = []
+    pre_ticket_data: Dict[str, Any] = {}
+    post_ticket_data: Dict[str, Any] = {}
 
     if ticket_executor and payload_conversation:
         if args.apply_test_tag:
@@ -3099,8 +3195,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         post_ticket = _fetch_ticket_snapshot(
             ticket_executor, payload_conversation, allow_network=allow_network
         )
-        pre_ticket_data: Dict[str, Any] = pre_ticket or {}
-        post_ticket_data: Dict[str, Any] = post_ticket or {}
+        pre_ticket_data = pre_ticket or {}
+        post_ticket_data = post_ticket or {}
         if order_status_mode:
             post_tags = post_ticket_data.get("tags") or []
             status_val = post_ticket_data.get("status") or post_ticket_data.get("state")
@@ -3261,6 +3357,32 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         skip_tags_present = (
             middleware_outcome.get("skip_tags_present") if middleware_outcome else None
         )
+        operator_reply_count_before = _safe_int(
+            pre_ticket_data.get("operator_reply_count")
+        )
+        operator_reply_count_after = _safe_int(
+            post_ticket_data.get("operator_reply_count")
+        )
+        if (
+            operator_reply_count_before is not None
+            and operator_reply_count_after is not None
+        ):
+            operator_reply_count_delta = (
+                operator_reply_count_after - operator_reply_count_before
+            )
+        operator_reply_present_value = post_ticket_data.get("operator_reply_present")
+        operator_reply_present = (
+            operator_reply_present_value
+            if isinstance(operator_reply_present_value, bool)
+            else None
+        )
+        if post_ticket_data:
+            send_message_evidence = _evaluate_send_message_evidence(
+                tags_added=tags_added,
+                post_tags=post_ticket_data.get("tags") or [],
+            )
+            send_message_tag_present = send_message_evidence["send_message_tag_present"]
+            send_message_tag_added = send_message_evidence["send_message_tag_added"]
 
         # If middleware replied but did not close the ticket, perform a deterministic close to satisfy PASS_STRONG.
         # This uses the same diagnostics helper used elsewhere, but applies the winning payload when found.
@@ -3656,6 +3778,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     outbound_message_count_ok = None
     outbound_last_message_source_ok = None
+    operator_reply_present_ok = None
+    operator_reply_delta_ok = None
+    send_message_tag_present_ok = None
+    send_message_tag_added_ok = None
     if order_status_mode:
         outbound_evidence = _evaluate_outbound_evidence(
             message_count_delta=message_count_delta,
@@ -3667,6 +3793,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         outbound_last_message_source_ok = outbound_evidence[
             "outbound_last_message_source_middleware"
         ]
+        operator_reply_evidence = _evaluate_operator_reply_evidence(
+            operator_reply_present=operator_reply_present,
+            operator_reply_count_delta=operator_reply_count_delta,
+        )
+        operator_reply_present_ok = operator_reply_evidence["operator_reply_present"]
+        operator_reply_delta_ok = operator_reply_evidence[
+            "operator_reply_count_delta_ge_1"
+        ]
+        send_message_evidence = _evaluate_send_message_evidence(
+            tags_added=tags_added,
+            post_tags=post_ticket_data.get("tags") or [],
+        )
+        send_message_tag_present_ok = send_message_evidence["send_message_tag_present"]
+        send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
 
     openai_routing_used = bool(openai_routing.get("llm_called"))
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
@@ -3709,6 +3849,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_evidence": reply_evidence,
         "outbound_message_count_delta_ge_1": outbound_message_count_ok,
         "outbound_last_message_source_middleware": outbound_last_message_source_ok,
+        "operator_reply_present": operator_reply_present_ok,
+        "operator_reply_count_delta_ge_1": operator_reply_delta_ok,
+        "send_message_tag_present": send_message_tag_present_ok,
+        "send_message_tag_added": send_message_tag_added_ok,
         "openai_routing_called": openai_requirements.get("openai_routing_called"),
         "openai_routing_source_openai": openai_requirements.get(
             "openai_routing_source_openai"
@@ -3838,6 +3982,38 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     "value": outbound_last_message_source_ok,
                 },
             ]
+        )
+
+    if order_status_mode and (operator_reply_present_ok is not None or require_operator_reply):
+        if require_operator_reply:
+            required_checks.append(bool(operator_reply_present_ok))
+        criteria_details.append(
+            {
+                "name": "operator_reply_present",
+                "description": "Operator reply present in ticket comments (is_operator=true)",
+                "required": require_operator_reply,
+                "value": operator_reply_present_ok,
+            }
+        )
+
+    if order_status_mode and (send_message_tag_present_ok is not None or require_send_message):
+        if require_send_message:
+            required_checks.append(bool(send_message_tag_present_ok))
+        criteria_details.append(
+            {
+                "name": "send_message_tag_present",
+                "description": "Ticket tagged with mw-outbound-path-send-message",
+                "required": require_send_message,
+                "value": send_message_tag_present_ok,
+            }
+        )
+        criteria_details.append(
+            {
+                "name": "send_message_tag_added",
+                "description": "mw-outbound-path-send-message tag added this run",
+                "required": False,
+                "value": send_message_tag_added_ok,
+            }
         )
 
     if require_openai_routing:
@@ -3993,6 +4169,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "closed_after": closed_after,
         "message_count_delta": message_count_delta,
         "last_message_source_after": last_message_source_after,
+        "operator_reply_present": operator_reply_present,
+        "operator_reply_count_delta": operator_reply_count_delta,
+        "send_message_tag_present": send_message_tag_present,
+        "send_message_tag_added": send_message_tag_added,
         "followup_routed_support": followup_routed_support,
         "followup_reply_sent": followup_reply_sent,
         "followup_skip_tags_added": followup_skip_tags_added,
@@ -4089,6 +4269,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "message_count_delta": message_count_delta,
             "last_message_source_before": last_message_source_before,
             "last_message_source_after": last_message_source_after,
+            "operator_reply_present": operator_reply_present,
+            "operator_reply_count_before": operator_reply_count_before,
+            "operator_reply_count_after": operator_reply_count_after,
+            "operator_reply_count_delta": operator_reply_count_delta,
+            "send_message_tag_present": send_message_tag_present,
+            "send_message_tag_added": send_message_tag_added,
             "middleware_tags_added": middleware_tags_added,
             "test_tag_verified": test_tag_verified,
             "tag_result": _sanitize_tag_result(tag_result),
