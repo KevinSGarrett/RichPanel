@@ -25,4 +25,4 @@ Implement customer-visible outbound replies for email tickets using `/send-messa
 - Deployed dev stack via GitHub Actions (`deploy-dev.yml`, run `21338123425`).
 - Set `RICHPANEL_BOT_AUTHOR_ID` on `rp-mw-dev-worker` to dedicated bot (id_hash=`847bae85`).
 - Created fresh email tickets and ran `dev_e2e_smoke.py` with `--require-send-message` and `--require-operator-reply` (and `--no-require-outbound`).
-- Proof artifact: `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json` (PASS_STRONG, run `B58-SANDBOX-20260125150840`).
+- Proof artifact: `REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json` (PASS_STRONG, run `B58-SANDBOX-20260125160800`).
