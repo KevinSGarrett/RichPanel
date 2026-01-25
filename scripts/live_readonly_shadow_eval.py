@@ -856,7 +856,8 @@ def main() -> int:
                     parameters.get("order_summary") if isinstance(parameters, dict) else {}
                 )
                 # Merge probe_summary into order_summary if we have it
-                effective_summary = dict(probe_summary) if probe_summary else {}
+                # Use isinstance check for consistency with other defensive checks
+                effective_summary = dict(probe_summary) if isinstance(probe_summary, dict) else {}
                 if order_summary:
                     effective_summary.update(order_summary)
 
