@@ -16,3 +16,4 @@ Implement customer-visible outbound replies for email tickets using `/send-messa
 
 ## Tests
 - `python scripts\test_pipeline_handlers.py` (PASS)
+- `python scripts\test_llm_routing.py` (PASS)

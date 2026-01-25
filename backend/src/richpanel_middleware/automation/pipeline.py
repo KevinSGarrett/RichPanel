@@ -57,6 +57,7 @@ OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
 OUTBOUND_PATH_COMMENT_TAG = "mw-outbound-path-comment"
 SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
 SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
+SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
@@ -64,13 +65,14 @@ ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 # Follow-up after auto-reply should route to support without escalation.
-_ESCALATION_REASONS: set[str] = {"author_id_missing"}
+_ESCALATION_REASONS: set[str] = {"author_id_missing", "reply_close_failed"}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
     "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
     "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
     "send_message_failed": SEND_MESSAGE_FAILED_TAG,
+    "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
 }
 
 
@@ -906,12 +908,17 @@ def execute_order_status_reply(
         )
 
         def _route_email_support(
-            reason: str, ticket_status: Optional[str] = None
+            reason: str,
+            ticket_status: Optional[str] = None,
+            *,
+            extra_tags: Optional[List[str]] = None,
         ) -> Dict[str, Any]:
             route_tags = [EMAIL_SUPPORT_ROUTE_TAG]
             skip_tag = _SKIP_REASON_TAGS.get(reason)
             if skip_tag:
                 route_tags.append(skip_tag)
+            if extra_tags:
+                route_tags.extend(extra_tags)
             if reason in _ESCALATION_REASONS:
                 route_tags.append(ESCALATION_TAG)
             route_tags = sorted(dedupe_tags(route_tags))
@@ -1231,11 +1238,17 @@ def execute_order_status_reply(
                 close_candidates, strip_comment_after_success=False
             )
             if update_success is None:
-                result = {
-                    "sent": False,
-                    "reason": "reply_update_failed",
-                    "responses": responses,
-                }
+                result = _route_email_support(
+                    "reply_close_failed",
+                    ticket_status=ticket_status,
+                    extra_tags=[
+                        loop_prevention_tag,
+                        ORDER_STATUS_REPLY_TAG,
+                        REPLY_SENT_TAG,
+                        run_specific_reply_tag,
+                        OUTBOUND_PATH_SEND_MESSAGE_TAG,
+                    ],
+                )
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result

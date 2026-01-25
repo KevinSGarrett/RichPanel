@@ -4,6 +4,7 @@
 ```powershell
 cd C:\RichPanel_GIT
 python scripts\test_pipeline_handlers.py
+python scripts\test_llm_routing.py
 ```
 
 ## CI-equivalent checks

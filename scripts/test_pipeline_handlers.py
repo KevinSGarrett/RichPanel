@@ -32,6 +32,9 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     plan_actions,
     build_no_tracking_reply,
     _fingerprint_reply_body,
+    _resolve_author_id,
+    _user_is_agent,
+    _safe_ticket_snapshot_fetch,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -645,6 +648,101 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertLess(executor.calls.index(send_call), executor.calls.index(close_calls[0]))
         self.assertLess(executor.calls.index(close_calls[0]), executor.calls.index(add_tag_calls[0]))
 
+    def test_outbound_email_author_resolution_role_match(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            users=[
+                {"id": "user-1", "role": "customer"},
+                {"id": "agent-1", "role": {"name": "Agent"}},
+            ],
+        )
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertTrue(result["sent"])
+        send_call = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ][0]
+        self.assertEqual(send_call["kwargs"]["json_body"].get("author_id"), "agent-1")
+        self.assertTrue(
+            any(
+                call["method"] == "GET" and call["path"].startswith("/v1/users")
+                for call in executor.calls
+            )
+        )
+
+    def test_outbound_email_author_resolution_falls_back_to_first(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            users=[
+                {"id": "user-1", "role": "customer"},
+                {"id": "user-2", "type": "buyer"},
+            ],
+        )
+
+        result = execute_order_status_reply(
+            envelope,
+            plan,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            richpanel_executor=cast(RichpanelExecutor, executor),
+        )
+
+        self.assertTrue(result["sent"])
+        send_call = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ][0]
+        self.assertEqual(send_call["kwargs"]["json_body"].get("author_id"), "user-1")
+
+    def test_outbound_email_close_failure_routes_with_loop_tag(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            reply_status_codes=[500, 500],
+            send_message_status_codes=[200],
+        )
+
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "reply_close_failed")
+        tag_calls = [call for call in executor.calls if "/add-tags" in call["path"]]
+        self.assertEqual(len(tag_calls), 1)
+        tags = tag_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-auto-replied", tags)
+        self.assertIn("mw-reply-sent", tags)
+        self.assertIn("mw-outbound-path-send-message", tags)
+        self.assertIn("mw-send-message-close-failed", tags)
+        self.assertIn("route-email-support-team", tags)
+        self.assertIn("mw-escalated-human", tags)
+
     def test_outbound_email_missing_author_id_routes_to_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_channel="email", users=[])
@@ -1139,6 +1237,43 @@ class _CommentRetryExecutor:
         )
 
 
+class AuthorResolutionTests(unittest.TestCase):
+    def test_resolve_author_id_network_disabled(self) -> None:
+        executor = _RecordingExecutor()
+        author_id, strategy = _resolve_author_id(
+            executor=cast(RichpanelExecutor, executor), allow_network=False
+        )
+        self.assertIsNone(author_id)
+        self.assertEqual(strategy, "network_disabled")
+
+    def test_user_is_agent_role_variants(self) -> None:
+        self.assertTrue(_user_is_agent({"role": ["support", "operator"]}))
+        self.assertTrue(_user_is_agent({"type": {"name": "AGENT"}}))
+        self.assertFalse(_user_is_agent({"role": "customer"}))
+
+    def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
+        class _ChannelExecutor:
+            def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+                body = json.dumps(
+                    {"channel": "Email", "status": "open", "tags": []}
+                ).encode("utf-8")
+                return RichpanelResponse(
+                    status_code=200,
+                    headers={"content-type": "application/json"},
+                    body=body,
+                    url=path,
+                    dry_run=kwargs.get("dry_run", False),
+                )
+
+        metadata, channel = _safe_ticket_snapshot_fetch(
+            "ticket-1",
+            executor=cast(RichpanelExecutor, _ChannelExecutor()),
+            allow_network=True,
+        )
+        self.assertIsNotNone(metadata)
+        self.assertEqual(channel, "email")
+
+
 class OutboundRoutingTagsTests(unittest.TestCase):
     def setUp(self) -> None:
         worker.boto3 = None  # type: ignore
@@ -1205,6 +1340,9 @@ def _build_suite() -> unittest.TestSuite:
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PipelineTests))
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(AuthorResolutionTests)
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests)

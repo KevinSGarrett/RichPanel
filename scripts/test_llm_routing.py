@@ -247,6 +247,68 @@ class PrimaryFlagOnTests(unittest.TestCase):
         self.assertEqual(artifact.primary_source, "deterministic")
 
 
+class ForcePrimaryTests(unittest.TestCase):
+    def setUp(self):
+        self._orig_primary = os.environ.get("OPENAI_ROUTING_PRIMARY")
+        self._orig_threshold = os.environ.get("OPENAI_ROUTING_CONFIDENCE_THRESHOLD")
+        os.environ["OPENAI_ROUTING_PRIMARY"] = "false"
+        os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = "0.9"
+
+    def tearDown(self):
+        if self._orig_primary is not None:
+            os.environ["OPENAI_ROUTING_PRIMARY"] = self._orig_primary
+        else:
+            os.environ.pop("OPENAI_ROUTING_PRIMARY", None)
+        if self._orig_threshold is not None:
+            os.environ["OPENAI_ROUTING_CONFIDENCE_THRESHOLD"] = self._orig_threshold
+        else:
+            os.environ.pop("OPENAI_ROUTING_CONFIDENCE_THRESHOLD", None)
+
+    def test_force_primary_respects_threshold(self):
+        client = MockOpenAIClient(
+            response_json={
+                "intent": "refund_request",
+                "department": "Returns Admin",
+                "confidence": 0.5,
+            }
+        )
+        routing, artifact = compute_dual_routing(
+            payload={"customer_message": "refund please"},
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+            force_primary=True,
+        )
+        self.assertEqual(artifact.primary_source, "deterministic")
+        self.assertNotIn("mw-llm-routed", routing.tags)
+
+    def test_force_primary_uses_llm_when_confident(self):
+        client = MockOpenAIClient(
+            response_json={
+                "intent": "refund_request",
+                "department": "Returns Admin",
+                "confidence": 0.95,
+            }
+        )
+        routing, artifact = compute_dual_routing(
+            payload={"customer_message": "refund please"},
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+            force_primary=True,
+        )
+        self.assertEqual(artifact.primary_source, "llm")
+        self.assertIn("mw-llm-routed", routing.tags)
+
+
 class ResponseIdReasonTests(unittest.TestCase):
     class _RawlessClient:
         def __init__(self):
@@ -371,6 +433,7 @@ def main():
     suite.addTests(loader.loadTestsFromTestCase(ArtifactTests))
     suite.addTests(loader.loadTestsFromTestCase(PrimaryFlagTests))
     suite.addTests(loader.loadTestsFromTestCase(PrimaryFlagOnTests))
+    suite.addTests(loader.loadTestsFromTestCase(ForcePrimaryTests))
     suite.addTests(loader.loadTestsFromTestCase(ResponseIdReasonTests))
     suite.addTests(loader.loadTestsFromTestCase(SuggestionTests))
     suite.addTests(loader.loadTestsFromTestCase(ThresholdTests))
