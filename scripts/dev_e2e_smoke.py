@@ -2216,6 +2216,119 @@ def _evaluate_send_message_evidence(
     }
 
 
+def _compute_operator_reply_metrics(
+    pre_ticket_data: Dict[str, Any],
+    post_ticket_data: Dict[str, Any],
+) -> Dict[str, Optional[Any]]:
+    count_before = _safe_int(pre_ticket_data.get("operator_reply_count"))
+    count_after = _safe_int(post_ticket_data.get("operator_reply_count"))
+    count_delta = None
+    if count_before is not None and count_after is not None:
+        count_delta = count_after - count_before
+    present_value = post_ticket_data.get("operator_reply_present")
+    present = present_value if isinstance(present_value, bool) else None
+    return {
+        "operator_reply_present": present,
+        "operator_reply_count_before": count_before,
+        "operator_reply_count_after": count_after,
+        "operator_reply_count_delta": count_delta,
+    }
+
+
+def _build_operator_send_message_proof_fields(
+    *,
+    operator_reply_present: Optional[bool],
+    operator_reply_count_delta: Optional[int],
+    send_message_tag_present: Optional[bool],
+    send_message_tag_added: Optional[bool],
+) -> Dict[str, Optional[Any]]:
+    return {
+        "operator_reply_present": operator_reply_present,
+        "operator_reply_count_delta": operator_reply_count_delta,
+        "send_message_tag_present": send_message_tag_present,
+        "send_message_tag_added": send_message_tag_added,
+    }
+
+
+def _build_operator_send_message_richpanel_fields(
+    *,
+    operator_reply_present: Optional[bool],
+    operator_reply_count_before: Optional[int],
+    operator_reply_count_after: Optional[int],
+    operator_reply_count_delta: Optional[int],
+    send_message_tag_present: Optional[bool],
+    send_message_tag_added: Optional[bool],
+) -> Dict[str, Optional[Any]]:
+    return {
+        "operator_reply_present": operator_reply_present,
+        "operator_reply_count_before": operator_reply_count_before,
+        "operator_reply_count_after": operator_reply_count_after,
+        "operator_reply_count_delta": operator_reply_count_delta,
+        "send_message_tag_present": send_message_tag_present,
+        "send_message_tag_added": send_message_tag_added,
+    }
+
+
+def _build_operator_send_message_criteria(
+    *,
+    operator_reply_present_ok: Optional[bool],
+    operator_reply_delta_ok: Optional[bool],
+    send_message_tag_present_ok: Optional[bool],
+    send_message_tag_added_ok: Optional[bool],
+) -> Dict[str, Optional[bool]]:
+    return {
+        "operator_reply_present": operator_reply_present_ok,
+        "operator_reply_count_delta_ge_1": operator_reply_delta_ok,
+        "send_message_tag_present": send_message_tag_present_ok,
+        "send_message_tag_added": send_message_tag_added_ok,
+    }
+
+
+def _append_operator_send_message_criteria_details(
+    *,
+    criteria_details: List[Dict[str, Any]],
+    required_checks: List[bool],
+    order_status_mode: bool,
+    require_operator_reply: bool,
+    require_send_message: bool,
+    operator_reply_present_ok: Optional[bool],
+    send_message_tag_present_ok: Optional[bool],
+    send_message_tag_added_ok: Optional[bool],
+) -> None:
+    if not order_status_mode:
+        return
+    if operator_reply_present_ok is not None or require_operator_reply:
+        if require_operator_reply:
+            required_checks.append(bool(operator_reply_present_ok))
+        criteria_details.append(
+            {
+                "name": "operator_reply_present",
+                "description": "Operator reply present in ticket comments (is_operator=true)",
+                "required": require_operator_reply,
+                "value": operator_reply_present_ok,
+            }
+        )
+    if send_message_tag_present_ok is not None or require_send_message:
+        if require_send_message:
+            required_checks.append(bool(send_message_tag_present_ok))
+        criteria_details.append(
+            {
+                "name": "send_message_tag_present",
+                "description": "Ticket tagged with mw-outbound-path-send-message",
+                "required": require_send_message,
+                "value": send_message_tag_present_ok,
+            }
+        )
+        criteria_details.append(
+            {
+                "name": "send_message_tag_added",
+                "description": "mw-outbound-path-send-message tag added this run",
+                "required": False,
+                "value": send_message_tag_added_ok,
+            }
+        )
+
+
 def wait_for_conversation_state_record(
     ddb_resource,
     table_name: str,
@@ -3357,25 +3470,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         skip_tags_present = (
             middleware_outcome.get("skip_tags_present") if middleware_outcome else None
         )
-        operator_reply_count_before = _safe_int(
-            pre_ticket_data.get("operator_reply_count")
+        operator_metrics = _compute_operator_reply_metrics(
+            pre_ticket_data, post_ticket_data
         )
-        operator_reply_count_after = _safe_int(
-            post_ticket_data.get("operator_reply_count")
-        )
-        if (
-            operator_reply_count_before is not None
-            and operator_reply_count_after is not None
-        ):
-            operator_reply_count_delta = (
-                operator_reply_count_after - operator_reply_count_before
-            )
-        operator_reply_present_value = post_ticket_data.get("operator_reply_present")
-        operator_reply_present = (
-            operator_reply_present_value
-            if isinstance(operator_reply_present_value, bool)
-            else None
-        )
+        operator_reply_present = operator_metrics["operator_reply_present"]
+        operator_reply_count_before = operator_metrics["operator_reply_count_before"]
+        operator_reply_count_after = operator_metrics["operator_reply_count_after"]
+        operator_reply_count_delta = operator_metrics["operator_reply_count_delta"]
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
                 tags_added=tags_added,
@@ -3849,10 +3950,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_evidence": reply_evidence,
         "outbound_message_count_delta_ge_1": outbound_message_count_ok,
         "outbound_last_message_source_middleware": outbound_last_message_source_ok,
-        "operator_reply_present": operator_reply_present_ok,
-        "operator_reply_count_delta_ge_1": operator_reply_delta_ok,
-        "send_message_tag_present": send_message_tag_present_ok,
-        "send_message_tag_added": send_message_tag_added_ok,
         "openai_routing_called": openai_requirements.get("openai_routing_called"),
         "openai_routing_source_openai": openai_requirements.get(
             "openai_routing_source_openai"
@@ -3867,6 +3964,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "followup_route_tag": followup_route_tag_present,
         "followup_skip_followup_tag": followup_skip_followup_tag_present,
     }
+    criteria.update(
+        _build_operator_send_message_criteria(
+            operator_reply_present_ok=operator_reply_present_ok,
+            operator_reply_delta_ok=operator_reply_delta_ok,
+            send_message_tag_present_ok=send_message_tag_present_ok,
+            send_message_tag_added_ok=send_message_tag_added_ok,
+        )
+    )
     tracking_reply_required = (
         scenario_variant == "order_status_tracking_standard_shipping"
     )
@@ -3984,37 +4089,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             ]
         )
 
-    if order_status_mode and (operator_reply_present_ok is not None or require_operator_reply):
-        if require_operator_reply:
-            required_checks.append(bool(operator_reply_present_ok))
-        criteria_details.append(
-            {
-                "name": "operator_reply_present",
-                "description": "Operator reply present in ticket comments (is_operator=true)",
-                "required": require_operator_reply,
-                "value": operator_reply_present_ok,
-            }
-        )
-
-    if order_status_mode and (send_message_tag_present_ok is not None or require_send_message):
-        if require_send_message:
-            required_checks.append(bool(send_message_tag_present_ok))
-        criteria_details.append(
-            {
-                "name": "send_message_tag_present",
-                "description": "Ticket tagged with mw-outbound-path-send-message",
-                "required": require_send_message,
-                "value": send_message_tag_present_ok,
-            }
-        )
-        criteria_details.append(
-            {
-                "name": "send_message_tag_added",
-                "description": "mw-outbound-path-send-message tag added this run",
-                "required": False,
-                "value": send_message_tag_added_ok,
-            }
-        )
+    _append_operator_send_message_criteria_details(
+        criteria_details=criteria_details,
+        required_checks=required_checks,
+        order_status_mode=order_status_mode,
+        require_operator_reply=require_operator_reply,
+        require_send_message=require_send_message,
+        operator_reply_present_ok=operator_reply_present_ok,
+        send_message_tag_present_ok=send_message_tag_present_ok,
+        send_message_tag_added_ok=send_message_tag_added_ok,
+    )
 
     if require_openai_routing:
         required_checks.append(bool(openai_requirements.get("openai_routing_called")))
@@ -4169,14 +4253,63 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "closed_after": closed_after,
         "message_count_delta": message_count_delta,
         "last_message_source_after": last_message_source_after,
-        "operator_reply_present": operator_reply_present,
-        "operator_reply_count_delta": operator_reply_count_delta,
-        "send_message_tag_present": send_message_tag_present,
-        "send_message_tag_added": send_message_tag_added,
         "followup_routed_support": followup_routed_support,
         "followup_reply_sent": followup_reply_sent,
         "followup_skip_tags_added": followup_skip_tags_added,
     }
+    proof_fields.update(
+        _build_operator_send_message_proof_fields(
+            operator_reply_present=operator_reply_present,
+            operator_reply_count_delta=operator_reply_count_delta,
+            send_message_tag_present=send_message_tag_present,
+            send_message_tag_added=send_message_tag_added,
+        )
+    )
+
+    richpanel_payload = {
+        "pre": safe_pre_ticket,
+        "post": safe_post_ticket,
+        "tags_added": tags_added,
+        "tags_removed": tags_removed,
+        "skip_tags_added": skip_tags_added,
+        "updated_at_delta_seconds": updated_at_delta,
+        "status_before": status_before,
+        "status_after": status_after,
+        "status_changed": status_changed,
+        "message_count_before": message_count_before,
+        "message_count_after": message_count_after,
+        "message_count_delta": message_count_delta,
+        "last_message_source_before": last_message_source_before,
+        "last_message_source_after": last_message_source_after,
+        "middleware_tags_added": middleware_tags_added,
+        "test_tag_verified": test_tag_verified,
+        "tag_result": _sanitize_tag_result(tag_result),
+        "tag_error": tag_error,
+        "diagnostics": safe_diagnostics,
+        "auto_close_applied": auto_close_applied,
+        "auto_close_result": auto_close_result,
+        "reply_update_success": reply_update_success if order_status_mode else None,
+        "reply_update_candidate": (
+            reply_update_candidate if order_status_mode else None
+        ),
+        "reply_fallback": reply_fallback_result if order_status_mode else None,
+        "success_tag_added_this_run": (
+            bool(middleware_tag_ok) if order_status_mode else None
+        ),
+        "skip_or_escalation_tags_added_this_run": (
+            bool(skip_tags_present) if order_status_mode else None
+        ),
+    }
+    richpanel_payload.update(
+        _build_operator_send_message_richpanel_fields(
+            operator_reply_present=operator_reply_present,
+            operator_reply_count_before=operator_reply_count_before,
+            operator_reply_count_after=operator_reply_count_after,
+            operator_reply_count_delta=operator_reply_count_delta,
+            send_message_tag_present=send_message_tag_present,
+            send_message_tag_added=send_message_tag_added,
+        )
+    )
 
     proof_payload = {
         "meta": {
@@ -4254,46 +4387,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 _fingerprint(tracking_url_expected) if tracking_url_expected else None
             ),
         },
-        "richpanel": {
-            "pre": safe_pre_ticket,
-            "post": safe_post_ticket,
-            "tags_added": tags_added,
-            "tags_removed": tags_removed,
-            "skip_tags_added": skip_tags_added,
-            "updated_at_delta_seconds": updated_at_delta,
-            "status_before": status_before,
-            "status_after": status_after,
-            "status_changed": status_changed,
-            "message_count_before": message_count_before,
-            "message_count_after": message_count_after,
-            "message_count_delta": message_count_delta,
-            "last_message_source_before": last_message_source_before,
-            "last_message_source_after": last_message_source_after,
-            "operator_reply_present": operator_reply_present,
-            "operator_reply_count_before": operator_reply_count_before,
-            "operator_reply_count_after": operator_reply_count_after,
-            "operator_reply_count_delta": operator_reply_count_delta,
-            "send_message_tag_present": send_message_tag_present,
-            "send_message_tag_added": send_message_tag_added,
-            "middleware_tags_added": middleware_tags_added,
-            "test_tag_verified": test_tag_verified,
-            "tag_result": _sanitize_tag_result(tag_result),
-            "tag_error": tag_error,
-            "diagnostics": safe_diagnostics,
-            "auto_close_applied": auto_close_applied,
-            "auto_close_result": auto_close_result,
-            "reply_update_success": reply_update_success if order_status_mode else None,
-            "reply_update_candidate": (
-                reply_update_candidate if order_status_mode else None
-            ),
-            "reply_fallback": reply_fallback_result if order_status_mode else None,
-            "success_tag_added_this_run": (
-                bool(middleware_tag_ok) if order_status_mode else None
-            ),
-            "skip_or_escalation_tags_added_this_run": (
-                bool(skip_tags_present) if order_status_mode else None
-            ),
-        },
+        "richpanel": richpanel_payload,
         "followup": followup_proof,
         "proof_fields": proof_fields,
         "result": {

@@ -32,6 +32,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _compute_middleware_outcome,
     _compute_reply_evidence,
     _compute_draft_reply_body,
+    _compute_operator_reply_metrics,
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
@@ -42,6 +43,10 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_operator_reply_evidence,
     _evaluate_send_message_evidence,
     _evaluate_openai_requirements,
+    _build_operator_send_message_proof_fields,
+    _build_operator_send_message_richpanel_fields,
+    _build_operator_send_message_criteria,
+    _append_operator_send_message_criteria_details,
     _fetch_ticket_snapshot,
     _fetch_latest_reply_hash,
     append_summary,
@@ -585,6 +590,77 @@ class SendMessageEvidenceTests(unittest.TestCase):
         )
         self.assertTrue(evidence["send_message_tag_present"])
         self.assertFalse(evidence["send_message_tag_added"])
+
+
+class OperatorSendMessageHelperTests(unittest.TestCase):
+    def test_compute_operator_reply_metrics(self) -> None:
+        metrics = _compute_operator_reply_metrics(
+            {"operator_reply_count": 1},
+            {"operator_reply_count": 3, "operator_reply_present": True},
+        )
+        self.assertEqual(metrics["operator_reply_count_before"], 1)
+        self.assertEqual(metrics["operator_reply_count_after"], 3)
+        self.assertEqual(metrics["operator_reply_count_delta"], 2)
+        self.assertTrue(metrics["operator_reply_present"])
+
+    def test_build_operator_send_message_proof_fields(self) -> None:
+        fields = _build_operator_send_message_proof_fields(
+            operator_reply_present=True,
+            operator_reply_count_delta=1,
+            send_message_tag_present=True,
+            send_message_tag_added=False,
+        )
+        self.assertEqual(fields["operator_reply_present"], True)
+        self.assertEqual(fields["operator_reply_count_delta"], 1)
+        self.assertEqual(fields["send_message_tag_present"], True)
+        self.assertEqual(fields["send_message_tag_added"], False)
+
+    def test_build_operator_send_message_richpanel_fields(self) -> None:
+        fields = _build_operator_send_message_richpanel_fields(
+            operator_reply_present=False,
+            operator_reply_count_before=0,
+            operator_reply_count_after=1,
+            operator_reply_count_delta=1,
+            send_message_tag_present=True,
+            send_message_tag_added=True,
+        )
+        self.assertFalse(fields["operator_reply_present"])
+        self.assertEqual(fields["operator_reply_count_before"], 0)
+        self.assertEqual(fields["operator_reply_count_after"], 1)
+        self.assertEqual(fields["operator_reply_count_delta"], 1)
+        self.assertTrue(fields["send_message_tag_present"])
+        self.assertTrue(fields["send_message_tag_added"])
+
+    def test_build_operator_send_message_criteria(self) -> None:
+        criteria = _build_operator_send_message_criteria(
+            operator_reply_present_ok=True,
+            operator_reply_delta_ok=False,
+            send_message_tag_present_ok=True,
+            send_message_tag_added_ok=False,
+        )
+        self.assertTrue(criteria["operator_reply_present"])
+        self.assertFalse(criteria["operator_reply_count_delta_ge_1"])
+        self.assertTrue(criteria["send_message_tag_present"])
+        self.assertFalse(criteria["send_message_tag_added"])
+
+    def test_append_operator_send_message_criteria_details(self) -> None:
+        required_checks = []
+        criteria_details = []
+        _append_operator_send_message_criteria_details(
+            criteria_details=criteria_details,
+            required_checks=required_checks,
+            order_status_mode=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            operator_reply_present_ok=True,
+            send_message_tag_present_ok=True,
+            send_message_tag_added_ok=False,
+        )
+        self.assertTrue(required_checks)
+        names = [entry["name"] for entry in criteria_details]
+        self.assertIn("operator_reply_present", names)
+        self.assertIn("send_message_tag_present", names)
+        self.assertIn("send_message_tag_added", names)
 
 
 class TicketSnapshotTests(unittest.TestCase):
@@ -1430,6 +1506,11 @@ def main() -> int:
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
     suite.addTests(loader.loadTestsFromTestCase(CriteriaTests))
+    suite.addTests(loader.loadTestsFromTestCase(OutboundEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(OperatorReplyEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(SendMessageEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
