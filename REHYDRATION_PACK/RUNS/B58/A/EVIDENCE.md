@@ -40,12 +40,12 @@ paths: ['/v1/tickets/t-email', '/v1/tickets/t-email/send-message', '/v1/tickets/
 ## Sandbox proof (PASS)
 Notes:
 - Dev stack deployed via `deploy-dev.yml` workflow.
-- `RICHPANEL_BOT_AUTHOR_ID` set on `rp-mw-dev-worker` (hash recorded in run notes; no PII logged).
+- `RICHPANEL_BOT_AUTHOR_ID` set on `rp-mw-dev-worker` to dedicated bot (id_hash=`847bae85`).
 
 Command (PII-safe, redacted ticket number):
 ```powershell
 cd C:\RichPanel_GIT
-python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125132530 --proof-path REHYDRATION_PACK\RUNS\B58\A\PROOF\order_status_email_sandbox_proof.json
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125150840 --proof-path REHYDRATION_PACK\RUNS\B58\A\PROOF\order_status_email_sandbox_proof.json
 ```
 
 Output:

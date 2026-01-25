@@ -78,7 +78,7 @@
 - `python scripts/test_e2e_smoke_encoding.py`
 
 **E2E / proof runs (redacted):**
-- `python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125132530 --proof-path REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
+- `python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 120 --profile rp-admin-kevin --scenario order_status --ticket-number <redacted> --no-require-outbound --require-openai-routing --require-openai-rewrite --require-send-message --require-operator-reply --followup --run-id B58-SANDBOX-20260125150840 --proof-path REHYDRATION_PACK/RUNS/B58/A/PROOF/order_status_email_sandbox_proof.json`
 
 ### 7) Results & evidence
 **CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/183/checks`  
