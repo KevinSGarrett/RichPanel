@@ -1,4 +1,4 @@
-﻿# B54 C Changes
+﻿# B54-C Changes — FINAL
 
 ## Code
 - Hardened `scripts/live_readonly_shadow_eval.py` for prod-only runs, sample-size selection, and PII-safe summary outputs with HTTP trace verification.
@@ -24,7 +24,15 @@
 - Persisted `order_resolution` for explicit ticket runs in `scripts/live_readonly_shadow_eval.py`.
 
 ## Artifacts
-- `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md`
+- `REHYDRATION_PACK/RUNS/B54/C/PROOF/live_readonly_shadow_eval_report.md` — comprehensive 17-ticket evidence
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260125_0033Z.json`
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260125_0033Z.json`
 
 ## Docs
 - Updated `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md` for new report paths and workflow guidance.
+
+## PR
+- **PR #181:** https://github.com/KevinSGarrett/RichPanel/pull/181
+- **Status:** MERGED (2026-01-25T00:09:07Z)
+- **Labels:** `risk:R2`, `gate:claude`
+- **Score:** 98/100 (body), 96/100 (title)
