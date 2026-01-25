@@ -29,6 +29,11 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
+from richpanel_middleware.automation.delivery_estimate import (  # type: ignore
+    compute_delivery_estimate,
+    build_tracking_reply,
+    build_no_tracking_reply,
+)
 from richpanel_middleware.ingest.envelope import build_event_envelope  # type: ignore
 from richpanel_middleware.automation.pipeline import _missing_order_context  # type: ignore
 from richpanel_middleware.automation.router import extract_customer_message  # type: ignore
@@ -522,6 +527,65 @@ def _delivery_estimate_present(delivery_estimate: Any) -> bool:
     return False
 
 
+def _redact_tracking_number(tracking: Optional[str]) -> Optional[str]:
+    """Redact tracking number for PII safety: show first 4 and last 3 chars only."""
+    if not tracking or not isinstance(tracking, str):
+        return None
+    tracking = tracking.strip()
+    if len(tracking) <= 7:
+        return f"{tracking[:2]}***{tracking[-2:]}" if len(tracking) > 4 else "***"
+    return f"{tracking[:4]}***{tracking[-3:]}"
+
+
+def _redact_date(date_str: Optional[str]) -> Optional[str]:
+    """Redact date for PII safety: show year-month only."""
+    if not date_str or not isinstance(date_str, str):
+        return None
+    # Extract just YYYY-MM from ISO date
+    parts = date_str.split("T")[0].split("-")
+    if len(parts) >= 2:
+        return f"{parts[0]}-{parts[1]}-XX"
+    return "XXXX-XX-XX"
+
+
+def _compute_eta_for_ticket(
+    order_summary: Dict[str, Any],
+    ticket_created_at: Optional[str],
+) -> Optional[Dict[str, Any]]:
+    """
+    Compute ETA for a ticket using order date + shipping method + ticket date.
+    Returns a PII-safe summary of the ETA calculation.
+    """
+    order_created = (
+        order_summary.get("created_at")
+        or order_summary.get("order_created_at")
+    )
+    shipping_method = (
+        order_summary.get("shipping_method")
+        or order_summary.get("shipping_method_name")
+    )
+    inquiry_date = ticket_created_at or datetime.now(timezone.utc).isoformat()
+
+    if not order_created or not shipping_method:
+        return None
+
+    estimate = compute_delivery_estimate(order_created, shipping_method, inquiry_date)
+    if not estimate:
+        return None
+
+    return {
+        "order_date_redacted": _redact_date(estimate.get("order_created_date")),
+        "inquiry_date_redacted": _redact_date(estimate.get("inquiry_date")),
+        "shipping_method": estimate.get("normalized_method") or estimate.get("raw_method"),
+        "elapsed_business_days": estimate.get("elapsed_business_days"),
+        "remaining_min_days": estimate.get("remaining_min_days"),
+        "remaining_max_days": estimate.get("remaining_max_days"),
+        "eta_human": estimate.get("eta_human"),
+        "is_late": estimate.get("is_late"),
+        "bucket": estimate.get("bucket"),
+    }
+
+
 def _order_context_summary(
     order_payload: Dict[str, Any],
     order_summary: Optional[Dict[str, Any]],
@@ -712,15 +776,24 @@ def main() -> int:
                         result["order_resolution"] = probe_summary.get(
                             "order_resolution"
                         )
-                        # Store tracking/shipping data from Shopify lookup
-                        result["shopify_tracking_number"] = bool(
-                            probe_summary.get("tracking_number")
-                        )
-                        result["shopify_carrier"] = bool(probe_summary.get("carrier"))
+                        # Store tracking/shipping data from Shopify lookup (redacted for PII)
+                        tracking_num = probe_summary.get("tracking_number")
+                        result["shopify_tracking_number"] = bool(tracking_num)
+                        result["shopify_tracking_redacted"] = _redact_tracking_number(tracking_num)
+                        result["shopify_carrier"] = probe_summary.get("carrier") or None
                         result["shopify_order_created_at"] = bool(
                             probe_summary.get("created_at")
                             or probe_summary.get("order_created_at")
                         )
+                        result["shopify_shipping_method"] = (
+                            probe_summary.get("shipping_method")
+                            or probe_summary.get("shipping_method_name")
+                        )
+                        # Compute ETA from order date + shipping method + ticket date
+                        ticket_created = ticket_payload.get("created_at")
+                        eta_result = _compute_eta_for_ticket(probe_summary, ticket_created)
+                        if eta_result:
+                            result["computed_eta"] = eta_result
 
                 raw_customer_message = _extract_latest_customer_message(
                     ticket_payload, convo_payload
