@@ -16,6 +16,17 @@ Ran 12 tests in 0.003s
 OK
 ```
 
+## Dev/sandbox E2E (attempted)
+```powershell
+cd C:\RichPanel_GIT
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario baseline --no-require-outbound --no-require-openai-routing --no-require-openai-rewrite --run-id B59-DEV-20260126-1609Z --proof-path REHYDRATION_PACK\RUNS\B59\A\PROOF\dev_e2e_smoke_proof.json
+```
+
+Result:
+```
+botocore.exceptions.TokenRetrievalError: Error when retrieving token from sso: Token has expired and refresh failed
+```
+
 ## Key diffs
 - PR files: https://github.com/KevinSGarrett/RichPanel/pull/186/files
 - Compare: https://github.com/KevinSGarrett/RichPanel/compare/main...run/B59-A

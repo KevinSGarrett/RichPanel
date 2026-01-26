@@ -26,3 +26,7 @@ require an explicit `MW_PROD_WRITES_ACK`.
 ## Tests
 - `python scripts\test_richpanel_client.py` (PASS)
 - `python scripts\test_shopify_client.py` (PASS)
+
+## Dev/sandbox E2E
+- Attempted: `python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario baseline --no-require-outbound --no-require-openai-routing --no-require-openai-rewrite --run-id B59-DEV-20260126-1609Z --proof-path REHYDRATION_PACK\RUNS\B59\A\PROOF\dev_e2e_smoke_proof.json`
+- Result: failed before stack lookup (SSO token expired). Rerun after `aws sso login --profile rp-admin-kevin`.
