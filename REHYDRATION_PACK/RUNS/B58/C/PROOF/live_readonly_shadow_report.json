@@ -1,0 +1,72 @@
+{
+  "run_id": "RUN_20260126_0319Z",
+  "timestamp": "2026-01-26T03:20:47.831935+00:00",
+  "environment": "prod",
+  "sample_mode": "explicit",
+  "source_report": "C:\\RichPanel_GIT\\artifacts\\readonly_shadow\\live_readonly_shadow_eval_report_RUN_20260126_0319Z.json",
+  "counts": {
+    "tickets_evaluated": 17,
+    "order_status_like": 0,
+    "orders_matched": 16,
+    "tracking_present": 11,
+    "eta_computed": 16
+  },
+  "rates": {
+    "match_rate": 0.9412,
+    "tracking_present_rate": 0.6471,
+    "eta_computed_rate": 0.9412
+  },
+  "ticket_hashes": [
+    "redacted:788b726ba2a1",
+    "redacted:87022f956b30",
+    "redacted:1dcfec81d9b0",
+    "redacted:85417ff765d1",
+    "redacted:6962c808b085",
+    "redacted:9c8e254ed441",
+    "redacted:d1c30e537502",
+    "redacted:b645a23fd354",
+    "redacted:871707348a53",
+    "redacted:e7cf89bcb59f",
+    "redacted:2a7ecc5e705d",
+    "redacted:2a88c7506c07",
+    "redacted:72e09b2d31f5",
+    "redacted:90064405d18e",
+    "redacted:4966ad2d08e3",
+    "redacted:34de44a65a2f",
+    "redacted:f9ead722d06e"
+  ],
+  "shopify_probe": {
+    "enabled": true,
+    "status_code": 200,
+    "dry_run": false,
+    "ok": true
+  },
+  "http_trace_summary": {
+    "total_requests": 218,
+    "methods": {
+      "GET": 198,
+      "POST": 20
+    },
+    "services": {
+      "aws_portal": 2,
+      "aws_secretsmanager": 20,
+      "shopify": 21,
+      "richpanel": 170,
+      "shipstation": 5
+    },
+    "sources": {
+      "aws_sdk": 22,
+      "urllib": 196
+    },
+    "aws_operations": {
+      "GetSecretValue": 20
+    },
+    "aws_missing_operations": 0,
+    "aws_sdk_trace_enabled": true,
+    "allowed_methods_only": true
+  },
+  "notes": [
+    "Ticket identifiers are hashed.",
+    "Metrics derived from live_readonly_shadow_eval_report RUN_20260126_0319Z."
+  ]
+}

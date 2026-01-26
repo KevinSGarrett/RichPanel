@@ -5,6 +5,7 @@ import os
 import sys
 import importlib
 import unittest
+import types
 from pathlib import Path
 from unittest import mock
 from types import SimpleNamespace
@@ -85,7 +86,6 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
         env = {
             "MW_ENV": "prod",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "false",
         }
         with mock.patch.dict(os.environ, env, clear=True):
@@ -138,7 +138,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_env_flags_success(self) -> None:
         env = {
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with mock.patch.dict(os.environ, env, clear=True):
@@ -168,6 +167,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(shadow_eval._to_bool("maybe", default=True))
         self.assertFalse(shadow_eval._to_bool("maybe", default=False))
         self.assertTrue(shadow_eval._to_bool("YES", default=False))
+        self.assertFalse(shadow_eval._to_bool("no", default=True))
 
     def test_redact_identifier_none(self) -> None:
         self.assertIsNone(shadow_eval._redact_identifier(None))
@@ -275,6 +275,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         }
         message = shadow_eval._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "need tracking")
+
+        convo = {
+            "comments": [
+                {"body": "from convo comment", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "from convo comment")
 
         convo = {
             "messages": [
@@ -632,12 +640,87 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
+    def test_http_trace_allows_aws_readonly_ops(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {
+                "method": "POST",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "GetSecretValue",
+            }
+        )
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace.entries.append(
+            {
+                "method": "POST",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "DeleteSecret",
+            }
+        )
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+    def test_http_trace_blocks_aws_non_post(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {
+                "method": "GET",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "GetSecretValue",
+            }
+        )
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+    def test_http_trace_allows_aws_portal_get(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {"method": "GET", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace.entries.append(
+            {"method": "PUT", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
     def test_http_trace_service_mapping(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://shop.myshopify.com/admin/api/2024-01/orders/1")
         trace.record("GET", "https://ssapi.shipstation.com/shipments")
         self.assertEqual(trace.entries[0]["service"], "shopify")
         self.assertEqual(trace.entries[1]["service"], "shipstation")
+
+    def test_service_from_hostname(self) -> None:
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.richpanel.com"), "richpanel"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("shop.myshopify.com"), "shopify"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("ssapi.shipstation.com"), "shipstation"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.openai.com"), "openai"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.anthropic.com"), "anthropic"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("secretsmanager.us-east-2.amazonaws.com"),
+            "aws_secretsmanager",
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("portal.sso.amazonaws.com"),
+            "aws_portal",
+        )
+        self.assertEqual(shadow_eval._service_from_hostname(""), "unknown")
 
     def test_http_trace_records_anthropic_and_unknown(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -711,6 +794,9 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         payload = trace.to_dict()
         self.assertIn("generated_at", payload)
         self.assertEqual(len(payload["entries"]), 1)
+        trace._aws_trace.error = "botocore_unavailable"
+        payload = trace.to_dict()
+        self.assertEqual(payload.get("aws_sdk_trace_error"), "botocore_unavailable")
 
     def test_summarize_trace_counts(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -738,6 +824,204 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace.entries.append({"method": "GET", "path": "/x", "service": "unknown"})
         summary = shadow_eval._summarize_trace(trace, allow_openai=False)
         self.assertFalse(summary["allowed_methods_only"])
+
+    def test_summarize_trace_aws_missing_operation(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {"method": "POST", "path": "/", "service": "aws_secretsmanager"}
+        )
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+        self.assertEqual(summary.get("aws_missing_operations"), 1)
+
+    def test_summarize_trace_aws_portal_bad_method(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {"method": "PUT", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+
+    def test_summarize_trace_aws_portal_ok(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {"method": "GET", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertTrue(summary["allowed_methods_only"])
+
+    def test_summarize_trace_aws_non_post(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {
+                "method": "GET",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "GetSecretValue",
+            }
+        )
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertFalse(summary["allowed_methods_only"])
+
+    def test_summarize_trace_aws_allowed_operation(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {
+                "method": "POST",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "GetSecretValue",
+            }
+        )
+        summary = shadow_eval._summarize_trace(trace, allow_openai=False)
+        self.assertTrue(summary["allowed_methods_only"])
+
+    def test_extract_aws_operation_sources(self) -> None:
+        class _Req:
+            def __init__(self, **kwargs) -> None:
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+
+        req = _Req(context={"operation_name": "GetSecretValue"})
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSecretValue")
+
+        req = _Req(headers={"X-Amz-Target": "secretsmanager.GetSecretValue"})
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSecretValue")
+
+        class _HeaderObj:
+            def get(self, key, default=None):
+                if key.lower() == "x-amz-target":
+                    return "secretsmanager.GetSecretValue"
+                return default
+
+        req = _Req(headers=_HeaderObj())
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSecretValue")
+
+        req = _Req(body=b"Action=GetCallerIdentity&Version=2011-06-15")
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetCallerIdentity")
+
+        req = _Req(data="Action=GetSessionToken&Version=2011-06-15")
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSessionToken")
+
+        req = _Req()
+        self.assertIsNone(shadow_eval._extract_aws_operation(req))
+
+    def test_resolve_shopify_secrets_client_no_profile(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(shadow_eval._resolve_shopify_secrets_client())
+
+    def test_resolve_shopify_secrets_client_with_profile(self) -> None:
+        class _StubSession:
+            def __init__(self, profile_name: str, region_name: str) -> None:
+                self.profile_name = profile_name
+                self.region_name = region_name
+
+            def client(self, service_name: str, region_name=None):
+                return {
+                    "service": service_name,
+                    "region": region_name,
+                    "profile": self.profile_name,
+                }
+
+        class _StubBoto3:
+            def Session(self, profile_name: str, region_name: str):
+                return _StubSession(profile_name, region_name)
+
+        env = {
+            "SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev",
+            "AWS_REGION": "us-east-2",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(shadow_eval, "boto3", _StubBoto3()):
+                client = shadow_eval._resolve_shopify_secrets_client()
+        assert client is not None
+        self.assertEqual(client["service"], "secretsmanager")
+        self.assertEqual(client["profile"], "rp-admin-dev")
+        self.assertEqual(client["region"], "us-east-2")
+
+    def test_resolve_shopify_secrets_client_requires_boto3(self) -> None:
+        env = {"SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(shadow_eval, "boto3", None):
+                with self.assertRaises(SystemExit):
+                    shadow_eval._resolve_shopify_secrets_client()
+
+    def test_aws_sdk_trace_capture_noop_when_wrapped(self) -> None:
+        trace = shadow_eval._AwsSdkTrace([])
+        trace._original_send = lambda *args, **kwargs: None
+        trace.capture()
+        self.assertIsNotNone(trace._original_send)
+
+    def test_aws_sdk_trace_capture_handles_missing_botocore(self) -> None:
+        trace = shadow_eval._AwsSdkTrace([])
+        with mock.patch("builtins.__import__", side_effect=ImportError):
+            trace.capture()
+        self.assertFalse(trace.enabled)
+        self.assertEqual(trace.error, "botocore_unavailable")
+
+    def test_aws_sdk_trace_capture_records(self) -> None:
+        entries: list[dict] = []
+        trace = shadow_eval._AwsSdkTrace(entries)
+
+        class _Req:
+            method = "POST"
+            url = "https://secretsmanager.us-east-2.amazonaws.com/"
+            headers = {"X-Amz-Target": "secretsmanager.GetSecretValue"}
+            body = b""
+            context = {"operation_name": "GetSecretValue"}
+
+        def _fake_send(self, request):
+            return {"ok": True}
+
+        endpoint_mod = types.ModuleType("botocore.endpoint")
+        endpoint_mod.Endpoint = type("Endpoint", (), {"_send": _fake_send})
+        botocore_mod = types.ModuleType("botocore")
+        botocore_mod.endpoint = endpoint_mod
+        fake_modules = {"botocore": botocore_mod, "botocore.endpoint": endpoint_mod}
+
+        with mock.patch.dict(sys.modules, fake_modules):
+            trace.capture()
+            endpoint_mod.Endpoint._send(None, _Req())
+            trace.stop()
+
+        self.assertTrue(entries)
+        self.assertEqual(entries[0]["service"], "aws_secretsmanager")
+        self.assertEqual(entries[0]["operation"], "GetSecretValue")
+        self.assertEqual(entries[0]["source"], "aws_sdk")
+
+    def test_aws_sdk_trace_wrap_exception_path(self) -> None:
+        trace = shadow_eval._AwsSdkTrace([])
+
+        class _BadReq:
+            method = "POST"
+            headers = {}
+            body = b""
+            context = {}
+
+            @property
+            def url(self):
+                raise ValueError("boom")
+
+        def _fake_send(self, request):
+            return {"ok": True}
+
+        endpoint_mod = types.ModuleType("botocore.endpoint")
+        endpoint_mod.Endpoint = type("Endpoint", (), {"_send": _fake_send})
+        botocore_mod = types.ModuleType("botocore")
+        botocore_mod.endpoint = endpoint_mod
+        fake_modules = {"botocore": botocore_mod, "botocore.endpoint": endpoint_mod}
+
+        with mock.patch.dict(sys.modules, fake_modules):
+            trace.capture()
+            endpoint_mod.Endpoint._send(None, _BadReq())
+            trace.stop()
+
+    def test_aws_sdk_trace_stop_handles_import_error(self) -> None:
+        trace = shadow_eval._AwsSdkTrace([])
+        trace._original_send = lambda *args, **kwargs: None
+        with mock.patch("builtins.__import__", side_effect=ImportError):
+            trace.stop()
+        self.assertIsNone(trace._original_send)
 
     def test_delivery_estimate_present(self) -> None:
         self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))
@@ -984,7 +1268,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1056,7 +1339,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         # Plan with NO order_summary to verify order_matched=False in non-explicit mode
@@ -1120,7 +1402,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
@@ -1217,7 +1498,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -1243,7 +1523,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1284,7 +1563,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -1310,11 +1588,35 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertEqual(payload["counts"]["errors"], 1)
 
+    def test_main_reraises_system_exit_in_ticket_loop(self) -> None:
+        env = {
+            "MW_ENV": "prod",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", side_effect=SystemExit("boom")
+            ):
+                with self.assertRaises(SystemExit):
+                    shadow_eval.main()
+
     def test_main_records_probe_error(self) -> None:
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
@@ -1369,7 +1671,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1421,7 +1722,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1475,7 +1775,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
