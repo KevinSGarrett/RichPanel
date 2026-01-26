@@ -206,6 +206,8 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(redacted["X-Shopify-Access-Token"], "***")
         self.assertEqual(redacted["Authorization"], "***")
         self.assertEqual(redacted["ok"], "1")
+        self.assertEqual(headers["X-Shopify-Access-Token"], "secret")
+        self.assertEqual(headers["Authorization"], "Bearer abc")
 
     def test_prod_write_requires_ack(self) -> None:
         os.environ["MW_ENV"] = "prod"

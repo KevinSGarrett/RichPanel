@@ -10,5 +10,13 @@
   - Added prod ack blocked/allowed tests plus non-prod regression coverage.
 - `scripts/test_shopify_client.py`
   - Added prod ack blocked/allowed tests plus non-prod regression coverage.
+  - Restored immutability assertion for `redact_headers()`.
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
   - Documented the two-man rule, required env var, and interlocks.
+- `docs/_generated/doc_registry.json`
+- `docs/_generated/doc_registry.compact.json`
+- `docs/_generated/doc_outline.json`
+- `docs/_generated/heading_index.json`
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md`
+- `docs/00_Project_Admin/To_Do/_generated/plan_checklist.json`
