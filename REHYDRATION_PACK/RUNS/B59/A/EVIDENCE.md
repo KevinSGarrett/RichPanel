@@ -22,6 +22,8 @@ OK
 - `backend/src/richpanel_middleware/integrations/richpanel/client.py`
 - `backend/src/integrations/shopify/client.py`
 - `backend/src/integrations/common.py`
+- `backend/src/richpanel_middleware/integrations/shopify/client.py`
+- `backend/src/richpanel_middleware/integrations/shopify/__init__.py`
 - `scripts/test_richpanel_client.py`
 - `scripts/test_shopify_client.py`
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`

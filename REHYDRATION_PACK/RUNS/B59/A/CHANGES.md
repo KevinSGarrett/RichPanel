@@ -10,9 +10,14 @@
   - Included `ENV` in environment resolution for prod detection.
   - Reused shared prod write acknowledgment helper from `integrations.common`.
   - Logged a warning when `ENV` drives prod resolution and flagged prod ack in dry-run logs.
+  - Raised `ShopifyWriteDisabledError` for prod writes without acknowledgment.
 - `backend/src/integrations/common.py`
   - Centralized prod write acknowledgment parsing to avoid drift.
   - Added shared environment resolution helper for consistent precedence.
+- `backend/src/richpanel_middleware/integrations/shopify/client.py`
+  - Re-exported `ShopifyWriteDisabledError` for middleware callers.
+- `backend/src/richpanel_middleware/integrations/shopify/__init__.py`
+  - Exposed `ShopifyWriteDisabledError` in module exports.
 - `scripts/test_richpanel_client.py`
   - Added prod ack blocked/allowed tests plus non-prod regression coverage.
 - `scripts/test_shopify_client.py`

@@ -100,6 +100,10 @@ class ShopifyRequestError(Exception):
         self.response = response
 
 
+class ShopifyWriteDisabledError(ShopifyRequestError):
+    """Raised when a Shopify write is attempted while writes are disabled."""
+
+
 class HttpTransport:
     """Minimal urllib-based transport to avoid external dependencies."""
 
@@ -235,7 +239,18 @@ class ShopifyClient:
 
         reason = self._short_circuit_reason(safe_mode, automation_enabled, use_dry_run)
         if reason is None and self._prod_write_ack_required(method_upper):
-            reason = "prod_write_ack_required"
+            self._logger.warning(
+                "shopify.write_blocked",
+                extra={
+                    "method": method_upper,
+                    "url": url,
+                    "reason": "prod_write_ack_required",
+                    "environment": self.environment,
+                },
+            )
+            raise ShopifyWriteDisabledError(
+                "Shopify writes are disabled; request blocked"
+            )
         if reason:
             self._logger.info(
                 "shopify.dry_run",
@@ -651,6 +666,7 @@ __all__ = [
     "ShopifyClient",
     "ShopifyRequestError",
     "ShopifyResponse",
+    "ShopifyWriteDisabledError",
     "Transport",
     "TransportRequest",
     "TransportResponse",

@@ -13,6 +13,7 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.integrations.shopify import (  # noqa: E402
     ShopifyClient,
+    ShopifyWriteDisabledError,
     TransportRequest,
     TransportResponse,
 )
@@ -216,17 +217,15 @@ class ShopifyClientTests(unittest.TestCase):
             access_token="test-token", allow_network=True, transport=transport
         )
 
-        response = client.request(
-            "POST",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-            dry_run=False,
-        )
+        with self.assertRaises(ShopifyWriteDisabledError):
+            client.request(
+                "POST",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+                dry_run=False,
+            )
 
-        self.assertTrue(response.dry_run)
-        self.assertEqual(response.reason, "prod_write_ack_required")
-        self.assertEqual(response.headers.get("x-dry-run"), "1")
         self.assertFalse(transport.called)
 
     def test_prod_write_ack_allows_network(self) -> None:
