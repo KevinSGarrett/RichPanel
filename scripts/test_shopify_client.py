@@ -228,6 +228,25 @@ class ShopifyClientTests(unittest.TestCase):
 
         self.assertFalse(transport.called)
 
+    def test_safe_mode_short_circuits_before_prod_ack(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        transport = _FailingTransport()
+        client = ShopifyClient(
+            access_token="test-token", allow_network=True, transport=transport
+        )
+
+        response = client.request(
+            "POST",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=True,
+            automation_enabled=True,
+            dry_run=False,
+        )
+
+        self.assertTrue(response.dry_run)
+        self.assertEqual(response.reason, "safe_mode")
+        self.assertFalse(transport.called)
+
     def test_prod_write_ack_allows_network(self) -> None:
         os.environ["MW_ENV"] = "prod"
         os.environ["MW_PROD_WRITES_ACK"] = "true"

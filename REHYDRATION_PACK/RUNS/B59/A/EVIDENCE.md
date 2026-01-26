@@ -12,7 +12,7 @@ Output:
 Ran 17 tests in 0.002s
 OK
 
-Ran 12 tests in 0.003s
+Ran 13 tests in 0.003s
 OK
 ```
 

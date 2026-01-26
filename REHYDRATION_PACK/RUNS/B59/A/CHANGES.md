@@ -5,12 +5,14 @@
   - Included `ENV` in environment resolution for prod detection.
   - Reused shared prod write acknowledgment helper from `integrations.common`.
   - Logged a warning when `ENV` drives prod resolution.
+  - Logged a warning when defaulting to `local` in AWS execution contexts.
 - `backend/src/integrations/shopify/client.py`
   - Added prod-only write acknowledgment gating for non-GET/HEAD calls.
   - Included `ENV` in environment resolution for prod detection.
   - Reused shared prod write acknowledgment helper from `integrations.common`.
   - Logged a warning when `ENV` drives prod resolution and flagged prod ack in dry-run logs.
   - Raised `ShopifyWriteDisabledError` for prod writes without acknowledgment.
+  - Logged a warning when defaulting to `local` in AWS execution contexts.
 - `backend/src/integrations/common.py`
   - Centralized prod write acknowledgment parsing to avoid drift.
   - Added shared environment resolution helper for consistent precedence.
@@ -23,6 +25,7 @@
 - `scripts/test_shopify_client.py`
   - Added prod ack blocked/allowed tests plus non-prod regression coverage.
   - Restored immutability assertion for `redact_headers()`.
+  - Added safe-mode short-circuit test for prod ack gating.
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
   - Documented the two-man rule, required env var, and interlocks.
 - `docs/08_Engineering/Secrets_and_Environments.md`

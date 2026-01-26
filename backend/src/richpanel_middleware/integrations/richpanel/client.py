@@ -566,6 +566,21 @@ class RichpanelClient:
 
     def _log_env_resolution_warning(self, env_source: Optional[str]) -> None:
         if env_source != "ENV":
+            if (
+                env_source is None
+                and self.environment == "local"
+                and (
+                    os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+                    or os.environ.get("AWS_EXECUTION_ENV")
+                )
+            ):
+                self._logger.warning(
+                    "richpanel.env_resolution_default_local",
+                    extra={
+                        "environment": self.environment,
+                        "env_source": env_source,
+                    },
+                )
             return
         if self.environment not in PRODUCTION_ENVIRONMENTS:
             return
