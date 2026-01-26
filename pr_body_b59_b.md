@@ -6,6 +6,7 @@
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
 **Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/187`  
+**Anthropic request id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/187`  
 
 ### 1) Summary
 - Add sandbox auto-ticket creation so E2E order-status proofs no longer depend on manually sourced ticket numbers.
