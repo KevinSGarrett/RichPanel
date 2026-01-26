@@ -12133,6 +12133,16 @@
         "anchor": "live-read-only-shadow-eval-script-local"
       },
       {
+        "level": 3,
+        "text": "Validate Shopify token (read-only)",
+        "anchor": "validate-shopify-token-read-only"
+      },
+      {
+        "level": 3,
+        "text": "Common failure modes (401 / 403)",
+        "anchor": "common-failure-modes-401-403"
+      },
+      {
         "level": 2,
         "text": "How to enable shadow mode",
         "anchor": "how-to-enable-shadow-mode"
