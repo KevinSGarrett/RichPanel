@@ -45,3 +45,7 @@
 - `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`
 - `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md`
 - `docs/00_Project_Admin/To_Do/_generated/plan_checklist.json`
+- `REHYDRATION_PACK/RUNS/B59/A/EVIDENCE.md`
+  - Added dev/sandbox E2E proof summary and artifact path.
+- `REHYDRATION_PACK/RUNS/B59/A/RUN_REPORT.md`
+  - Documented dev/sandbox E2E PASS_STRONG result.
