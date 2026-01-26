@@ -16,6 +16,7 @@ from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
     prod_write_acknowledged,
+    resolve_env_name,
 )
 
 try:
@@ -40,20 +41,6 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
-
-
-def _resolve_env_name() -> str:
-    """Choose an environment name for secret lookup; defaults to 'local'."""
-    raw = (
-        os.environ.get("RICHPANEL_ENV")
-        or os.environ.get("RICH_PANEL_ENV")
-        or os.environ.get("MW_ENV")
-        or os.environ.get("ENV")
-        or os.environ.get("ENVIRONMENT")
-        or "local"
-    )
-    value = str(raw).strip().lower() or "local"
-    return value
 
 
 READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
@@ -224,7 +211,7 @@ class RichpanelClient:
             or os.environ.get("RICHPANEL_API_BASE_URL")
             or "https://api.richpanel.com"
         ).rstrip("/")
-        self.environment = _resolve_env_name()
+        self.environment, env_source = resolve_env_name()
         self.api_key_secret_id = (
             api_key_secret_id
             or os.environ.get("RICHPANEL_API_KEY_SECRET_ARN")
@@ -247,6 +234,7 @@ class RichpanelClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
+        self._log_env_resolution_warning(env_source)
         self._api_key = (
             api_key
             or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
@@ -575,6 +563,16 @@ class RichpanelClient:
         if env_override is not None:
             return _to_bool(env_override, default=False)
         return self.environment in READ_ONLY_ENVIRONMENTS
+
+    def _log_env_resolution_warning(self, env_source: Optional[str]) -> None:
+        if env_source != "ENV":
+            return
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return
+        self._logger.warning(
+            "richpanel.env_resolution_from_env",
+            extra={"environment": self.environment, "env_source": env_source},
+        )
 
     def _prod_write_ack_required(self) -> bool:
         if self.environment not in PRODUCTION_ENVIRONMENTS:

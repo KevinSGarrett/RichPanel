@@ -16,6 +16,7 @@ from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
     prod_write_acknowledged,
+    resolve_env_name,
 )
 
 try:
@@ -40,20 +41,6 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
-
-
-def _resolve_env_name() -> str:
-    """Choose an environment name for secret lookup; defaults to 'local'."""
-    raw = (
-        os.environ.get("RICHPANEL_ENV")
-        or os.environ.get("RICH_PANEL_ENV")
-        or os.environ.get("MW_ENV")
-        or os.environ.get("ENV")
-        or os.environ.get("ENVIRONMENT")
-        or "local"
-    )
-    value = str(raw).strip().lower() or "local"
-    return value
 
 
 
@@ -172,7 +159,7 @@ class ShopifyClient:
         rng: Optional[Callable[[], float]] = None,
         secrets_client: Optional[Any] = None,
     ) -> None:
-        self.environment = _resolve_env_name()
+        self.environment, env_source = resolve_env_name()
         self.shop_domain = (
             shop_domain
             or os.environ.get("SHOPIFY_SHOP_DOMAIN")
@@ -218,6 +205,7 @@ class ShopifyClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
+        self._log_env_resolution_warning(env_source)
         self._access_token = (
             access_token
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
@@ -256,6 +244,7 @@ class ShopifyClient:
                     "url": url,
                     "reason": reason,
                     "dry_run": True,
+                    "prod_write_ack_required": reason == "prod_write_ack_required",
                 },
             )
             return ShopifyResponse(
@@ -622,6 +611,16 @@ class ShopifyClient:
         if dry_run:
             return "dry_run_forced"
         return None
+
+    def _log_env_resolution_warning(self, env_source: Optional[str]) -> None:
+        if env_source != "ENV":
+            return
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return
+        self._logger.warning(
+            "shopify.env_resolution_from_env",
+            extra={"environment": self.environment, "env_source": env_source},
+        )
 
     def _prod_write_ack_required(self, method: str) -> bool:
         if method.upper() in {"GET", "HEAD"}:
