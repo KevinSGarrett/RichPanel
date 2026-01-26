@@ -5,6 +5,7 @@ import os
 import sys
 import importlib
 import unittest
+import types
 from pathlib import Path
 from unittest import mock
 from types import SimpleNamespace
@@ -959,11 +960,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(trace.error, "botocore_unavailable")
 
     def test_aws_sdk_trace_capture_records(self) -> None:
-        try:
-            import botocore.endpoint  # type: ignore
-        except Exception:
-            self.skipTest("botocore not available")
-
         entries: list[dict] = []
         trace = shadow_eval._AwsSdkTrace(entries)
 
@@ -977,9 +973,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         def _fake_send(self, request):
             return {"ok": True}
 
-        with mock.patch("botocore.endpoint.Endpoint._send", new=_fake_send):
+        endpoint_mod = types.ModuleType("botocore.endpoint")
+        endpoint_mod.Endpoint = type("Endpoint", (), {"_send": _fake_send})
+        botocore_mod = types.ModuleType("botocore")
+        botocore_mod.endpoint = endpoint_mod
+        fake_modules = {"botocore": botocore_mod, "botocore.endpoint": endpoint_mod}
+
+        with mock.patch.dict(sys.modules, fake_modules):
             trace.capture()
-            botocore.endpoint.Endpoint._send(None, _Req())
+            endpoint_mod.Endpoint._send(None, _Req())
             trace.stop()
 
         self.assertTrue(entries)
@@ -988,11 +990,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(entries[0]["source"], "aws_sdk")
 
     def test_aws_sdk_trace_wrap_exception_path(self) -> None:
-        try:
-            import botocore.endpoint  # type: ignore
-        except Exception:
-            self.skipTest("botocore not available")
-
         trace = shadow_eval._AwsSdkTrace([])
 
         class _BadReq:
@@ -1008,9 +1005,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         def _fake_send(self, request):
             return {"ok": True}
 
-        with mock.patch("botocore.endpoint.Endpoint._send", new=_fake_send):
+        endpoint_mod = types.ModuleType("botocore.endpoint")
+        endpoint_mod.Endpoint = type("Endpoint", (), {"_send": _fake_send})
+        botocore_mod = types.ModuleType("botocore")
+        botocore_mod.endpoint = endpoint_mod
+        fake_modules = {"botocore": botocore_mod, "botocore.endpoint": endpoint_mod}
+
+        with mock.patch.dict(sys.modules, fake_modules):
             trace.capture()
-            botocore.endpoint.Endpoint._send(None, _BadReq())
+            endpoint_mod.Endpoint._send(None, _BadReq())
             trace.stop()
 
     def test_aws_sdk_trace_stop_handles_import_error(self) -> None:
