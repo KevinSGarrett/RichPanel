@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -27,6 +28,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
+    SmokeFailure,
     _check_pii_safe,
     _classify_order_status_result,
     _compute_middleware_outcome,
@@ -57,7 +59,13 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_status_no_tracking_standard_shipping_3_5_payload,
     _order_status_tracking_standard_shipping_payload,
     _apply_fallback_close,
+    _build_create_ticket_payload,
     _diagnose_ticket_update,
+    _extract_created_ticket_fields,
+    _create_sandbox_email_ticket,
+    _redact_identifier,
+    _resolve_smoke_ticket_text,
+    _SMOKE_TICKET_TAGS,
     _sanitize_decimals,
     _sanitize_response_metadata,
     _sanitize_ts_action_id,
@@ -1055,6 +1063,192 @@ class PIISafetyTests(unittest.TestCase):
         self.assertNotIn("Automated smoke body", cmd)
         self.assertTrue(cmd.startswith("python "))
 
+
+class AutoTicketHelpersTests(unittest.TestCase):
+    def test_resolve_smoke_ticket_text_defaults_and_env(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                _resolve_smoke_ticket_text(
+                    None, env_key="MW_SMOKE_TICKET_BODY", default="default"
+                ),
+                "default",
+            )
+            self.assertEqual(
+                _resolve_smoke_ticket_text(
+                    "  hello  ",
+                    env_key="MW_SMOKE_TICKET_BODY",
+                    default="default",
+                ),
+                "hello",
+            )
+        with patch.dict(
+            os.environ, {"MW_SMOKE_TICKET_BODY": "  env  "}, clear=True
+        ):
+            self.assertEqual(
+                _resolve_smoke_ticket_text(
+                    None, env_key="MW_SMOKE_TICKET_BODY", default="default"
+                ),
+                "env",
+            )
+
+    def test_redact_identifier(self) -> None:
+        self.assertIsNone(_redact_identifier(None))
+        redacted = _redact_identifier("ticket-123")
+        self.assertTrue(redacted.startswith("redacted:"))
+        self.assertNotIn("ticket-123", redacted)
+
+    def test_extract_created_ticket_fields(self) -> None:
+        number, ticket_id = _extract_created_ticket_fields(
+            {"ticket": {"conversation_no": 123, "id": "t-1"}}
+        )
+        self.assertEqual(number, "123")
+        self.assertEqual(ticket_id, "t-1")
+        number, ticket_id = _extract_created_ticket_fields(
+            {"conversation_number": "456", "ticket_id": "t-2"}
+        )
+        self.assertEqual(number, "456")
+        self.assertEqual(ticket_id, "t-2")
+
+    def test_build_create_ticket_payload_shape(self) -> None:
+        payload = _build_create_ticket_payload(
+            from_email="from@example.com",
+            to_email="support@example.com",
+            subject="Subject",
+            body="Body",
+            first_name="Sandbox",
+            last_name="Test",
+        )
+        ticket = payload["ticket"]
+        self.assertEqual(ticket["comment"]["public"], True)
+        self.assertEqual(
+            ticket["via"]["source"]["from"]["address"], "from@example.com"
+        )
+        self.assertEqual(
+            ticket["via"]["source"]["to"]["address"], "support@example.com"
+        )
+        self.assertEqual(ticket["customer_profile"]["firstName"], "Sandbox")
+        self.assertEqual(ticket["customer_profile"]["lastName"], "Test")
+        self.assertEqual(ticket["tags"], _SMOKE_TICKET_TAGS)
+
+    def test_create_sandbox_email_ticket_success(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"ticket": {"conversation_no": 321, "id": "t-1"}}
+
+        class _StubClient:
+            last_instance = None
+
+            def __init__(self, **_: Any) -> None:
+                _StubClient.last_instance = self
+                self.calls: list[tuple[str, str, dict]] = []
+
+            def request(self, method: str, path: str, **kwargs: Any) -> _StubResponse:
+                self.calls.append((method, path, kwargs))
+                return _StubResponse()
+
+        with TemporaryDirectory() as tmpdir, patch(
+            "dev_e2e_smoke.RichpanelClient", _StubClient
+        ):
+            proof_path = Path(tmpdir) / "created.json"
+            result = _create_sandbox_email_ticket(
+                env_name="dev",
+                region="us-east-2",
+                stack_name="RichpanelMiddleware-dev",
+                api_key_secret_id=None,
+                from_email="from@example.com",
+                to_email="support@example.com",
+                subject="Subject",
+                body="Body",
+                first_name="Sandbox",
+                last_name="Test",
+                proof_path=proof_path,
+            )
+            self.assertEqual(result["ticket_number"], "321")
+            self.assertEqual(result["ticket_id"], "t-1")
+            self.assertTrue(proof_path.exists())
+            artifact = json.loads(proof_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                artifact["response"]["ticket_number_fingerprint"],
+                result["ticket_number_fingerprint"],
+            )
+            self.assertEqual(
+                artifact["response"]["conversation_id_fingerprint"],
+                result["ticket_id_fingerprint"],
+            )
+            self.assertTrue(
+                artifact["response"]["ticket_number_redacted"].startswith("redacted:")
+            )
+            self.assertEqual(artifact["request"]["channel"], "email")
+            self.assertEqual(_StubClient.last_instance.calls[0][1], "/v1/tickets")
+
+    def test_create_sandbox_email_ticket_dry_run_fails(self) -> None:
+        class _DryRunResponse:
+            status_code = 200
+            dry_run = True
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {}
+
+        class _DryRunClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _DryRunResponse:
+                return _DryRunResponse()
+
+        with patch("dev_e2e_smoke.RichpanelClient", _DryRunClient):
+            with self.assertRaises(SmokeFailure):
+                _create_sandbox_email_ticket(
+                    env_name="dev",
+                    region="us-east-2",
+                    stack_name="RichpanelMiddleware-dev",
+                    api_key_secret_id=None,
+                    from_email="from@example.com",
+                    to_email="support@example.com",
+                    subject="Subject",
+                    body="Body",
+                    first_name="Sandbox",
+                    last_name="Test",
+                    proof_path=None,
+                )
+
+    def test_create_sandbox_email_ticket_http_error_fails(self) -> None:
+        class _ErrorResponse:
+            status_code = 500
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"error": "boom"}
+
+        class _ErrorClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _ErrorResponse:
+                return _ErrorResponse()
+
+        with patch("dev_e2e_smoke.RichpanelClient", _ErrorClient):
+            with self.assertRaises(SmokeFailure):
+                _create_sandbox_email_ticket(
+                    env_name="dev",
+                    region="us-east-2",
+                    stack_name="RichpanelMiddleware-dev",
+                    api_key_secret_id=None,
+                    from_email="from@example.com",
+                    to_email="support@example.com",
+                    subject="Subject",
+                    body="Body",
+                    first_name="Sandbox",
+                    last_name="Test",
+                    proof_path=None,
+                )
+
     def test_sanitize_ts_action_id_fingerprints_event(self) -> None:
         original = "2026-01-17T00:00:00Z#evt:abc12345"
         sanitized = _sanitize_ts_action_id(original)
@@ -1674,6 +1868,7 @@ def main() -> int:
     suite.addTests(loader.loadTestsFromTestCase(OperatorReplyEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(SendMessageEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
