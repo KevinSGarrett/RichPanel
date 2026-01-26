@@ -84,6 +84,27 @@ Ticket IDs are redacted; hashes correspond to `ticket_id_redacted` in
 
 Derived unmatched count: `orders_unmatched = tickets_scanned - orders_matched = 0`.
 
+## Shopify access scopes (prod, read-only GET)
+Command (local, token not logged; uses AWS profile + Secrets Manager):
+```powershell
+python _tmp\verify_shopify_scopes.py
+```
+
+Response (scopes only):
+```json
+{
+  "status": 200,
+  "scope_count": 5,
+  "scopes": [
+    "read_all_orders",
+    "read_customers",
+    "read_fulfillments",
+    "read_orders",
+    "read_shipping"
+  ]
+}
+```
+
 ## Shopify token diagnosis (prod)
 ### Metadata check (no secret values)
 ```powershell
@@ -96,6 +117,17 @@ aws secretsmanager describe-secret `
 Description (from Secrets Manager):
 ```
 Shopify Admin API token (prod) - placeholder; replace with real token from Shopify custom app
+```
+
+### Secret metadata (proof of update)
+```json
+{
+  "LastChangedDate": "2026-01-26T14:27:16.713000-06:00",
+  "VersionIdsToStages": {
+    "967016f8-5763-48aa-9611-d2936e2a1fd3": ["AWSPREVIOUS"],
+    "d27a6f1f-d9a3-4390-b488-78946100c140": ["AWSCURRENT"]
+  }
+}
 ```
 
 ### Fix applied
