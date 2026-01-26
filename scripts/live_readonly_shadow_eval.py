@@ -22,6 +22,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    import boto3  # type: ignore
+except ImportError:  # pragma: no cover
+    boto3 = None  # type: ignore
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
@@ -154,13 +159,41 @@ def _build_richpanel_client(
 
 
 def _build_shopify_client(
-    *, allow_network: Optional[bool], shop_domain: Optional[str]
+    *,
+    allow_network: Optional[bool],
+    shop_domain: Optional[str],
+    secrets_client: Optional[Any] = None,
 ) -> ShopifyClient:
-    return ShopifyClient(shop_domain=shop_domain, allow_network=allow_network)
+    return ShopifyClient(
+        shop_domain=shop_domain,
+        allow_network=allow_network,
+        secrets_client=secrets_client,
+    )
 
 
-def _probe_shopify(*, shop_domain: Optional[str]) -> Dict[str, Any]:
-    client = _build_shopify_client(allow_network=None, shop_domain=shop_domain)
+def _resolve_shopify_secrets_client() -> Optional[Any]:
+    profile = os.environ.get("SHOPIFY_ACCESS_TOKEN_PROFILE")
+    if not profile:
+        return None
+    if boto3 is None:
+        raise SystemExit("boto3 is required for SHOPIFY_ACCESS_TOKEN_PROFILE usage")
+    region = (
+        os.environ.get("AWS_REGION")
+        or os.environ.get("AWS_DEFAULT_REGION")
+        or "us-east-2"
+    )
+    session = boto3.Session(profile_name=profile, region_name=region)
+    return session.client("secretsmanager", region_name=region)
+
+
+def _probe_shopify(
+    *, shop_domain: Optional[str], secrets_client: Optional[Any] = None
+) -> Dict[str, Any]:
+    client = _build_shopify_client(
+        allow_network=None,
+        shop_domain=shop_domain,
+        secrets_client=secrets_client,
+    )
     response = client.request(
         "GET",
         "orders/count.json",
@@ -219,30 +252,143 @@ def _redact_path(path: str) -> str:
     return "/" + "/".join(redacted_segments)
 
 
+def _service_from_hostname(hostname: str) -> str:
+    if not hostname:
+        return "unknown"
+    if hostname.endswith("richpanel.com"):
+        return "richpanel"
+    if hostname.endswith("myshopify.com"):
+        return "shopify"
+    if hostname.endswith("shipstation.com"):
+        return "shipstation"
+    if hostname.endswith("openai.com"):
+        return "openai"
+    if hostname.endswith("anthropic.com"):
+        return "anthropic"
+    if hostname.endswith("amazonaws.com"):
+        prefix = hostname.split(".")[0].strip().lower()
+        return f"aws_{prefix}" if prefix else "aws"
+    return "unknown"
+
+
+AWS_ALLOWED_OPERATIONS = {
+    "AssumeRole",
+    "AssumeRoleWithSAML",
+    "AssumeRoleWithWebIdentity",
+    "GetAccessKeyInfo",
+    "GetCallerIdentity",
+    "GetRoleCredentials",
+    "GetSecretValue",
+    "GetSessionToken",
+}
+
+
+def _extract_aws_operation(request: Any) -> Optional[str]:
+    context = getattr(request, "context", None)
+    if isinstance(context, dict):
+        for key in ("operation_name", "operation"):
+            value = context.get(key)
+            if value:
+                return str(value)
+
+    headers = getattr(request, "headers", None) or {}
+    target = None
+    getter = getattr(headers, "get", None)
+    if callable(getter):
+        target = getter("X-Amz-Target") or getter("x-amz-target")
+    elif isinstance(headers, dict):
+        target = headers.get("X-Amz-Target") or headers.get("x-amz-target")
+    if target:
+        operation = str(target).split(".")[-1]
+        return operation.strip().strip("'\"")
+
+    body = getattr(request, "body", None)
+    if body is None:
+        body = getattr(request, "data", None)
+    if body:
+        if isinstance(body, (bytes, bytearray)):
+            text = body.decode("utf-8", errors="ignore")
+        else:
+            text = str(body)
+        parsed = urllib.parse.parse_qs(text, keep_blank_values=True)
+        for key in ("Action", "action"):
+            action = parsed.get(key)
+            if action:
+                return str(action[0]).strip().strip("'\"")
+    return None
+
+
+class _AwsSdkTrace:
+    def __init__(self, entries: List[Dict[str, str]]) -> None:
+        self.entries = entries
+        self._original_send = None
+        self.enabled = False
+        self.error: Optional[str] = None
+
+    def capture(self) -> None:
+        if self._original_send is not None:
+            return
+        try:
+            import botocore.endpoint  # type: ignore
+        except Exception:
+            self.enabled = False
+            self.error = "botocore_unavailable"
+            return
+
+        self._original_send = botocore.endpoint.Endpoint._send
+        self.enabled = True
+
+        def _wrapped_send(endpoint, request):
+            try:
+                method = getattr(request, "method", "GET")
+                url = getattr(request, "url", "")
+                operation = _extract_aws_operation(request)
+                parsed = urllib.parse.urlparse(url)
+                entry = {
+                    "method": str(method).upper(),
+                    "path": _redact_path(parsed.path),
+                    "service": _service_from_hostname(parsed.hostname or ""),
+                    "source": "aws_sdk",
+                }
+                if operation:
+                    entry["operation"] = operation
+                self.entries.append(entry)
+            except Exception:
+                LOGGER.warning("AWS SDK trace capture failed", exc_info=True)
+            return self._original_send(endpoint, request)
+
+        botocore.endpoint.Endpoint._send = _wrapped_send
+
+    def stop(self) -> None:
+        if self._original_send is not None:
+            try:
+                import botocore.endpoint  # type: ignore
+            except Exception:
+                pass
+            else:
+                botocore.endpoint.Endpoint._send = self._original_send
+            self._original_send = None
+
+
 class _HttpTrace:
     _original_urlopen: Any
 
     def __init__(self) -> None:
         self.entries: list[Dict[str, str]] = []
         self._original_urlopen = None
+        self._aws_trace = _AwsSdkTrace(self.entries)
 
-    def record(self, method: str, url: str) -> None:
+    def record(self, method: str, url: str, *, source: str = "urllib") -> None:
         parsed = urllib.parse.urlparse(url)
         path = _redact_path(parsed.path)
-        service = "unknown"
-        hostname = parsed.hostname or ""
-        if hostname.endswith("richpanel.com"):
-            service = "richpanel"
-        elif hostname.endswith("myshopify.com"):
-            service = "shopify"
-        elif hostname.endswith("shipstation.com"):
-            service = "shipstation"
-        elif hostname.endswith("openai.com"):
-            service = "openai"
-        elif hostname.endswith("anthropic.com"):
-            service = "anthropic"
+        service = _service_from_hostname(parsed.hostname or "")
         self.entries.append(
-            {"method": method.upper(), "path": path, "service": service}
+            {
+                "method": method.upper(),
+                "path": path,
+                "service": service,
+                "source": source,
+            }
         )
 
     def capture(self) -> "_HttpTrace":
@@ -261,12 +407,14 @@ class _HttpTrace:
             return original(req, *args, **kwargs)
 
         urllib.request.urlopen = _wrapped_urlopen  # type: ignore
+        self._aws_trace.capture()
         return self
 
     def stop(self) -> None:
         if self._original_urlopen is not None:
             urllib.request.urlopen = self._original_urlopen  # type: ignore
             self._original_urlopen = None
+        self._aws_trace.stop()
 
     def assert_read_only(self, *, allow_openai: bool, trace_path: Path) -> None:
         allowed = {
@@ -280,6 +428,19 @@ class _HttpTrace:
         for entry in self.entries:
             service = entry["service"]
             method = entry["method"]
+            if service.startswith("aws"):
+                normalized = service.lower()
+                if any(token in normalized for token in ("oidc", "sso", "portal")):
+                    if method not in {"GET", "POST"}:
+                        violations.append(entry)
+                    continue
+                operation = entry.get("operation")
+                if method != "POST":
+                    violations.append(entry)
+                    continue
+                if not operation or operation not in AWS_ALLOWED_OPERATIONS:
+                    violations.append(entry)
+                continue
             if service in {"openai", "anthropic"} and not allow_openai:
                 violations.append(entry)
                 continue
@@ -295,16 +456,29 @@ class _HttpTrace:
             )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        payload = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "entries": list(self.entries),
-            "note": "Captured via urllib.request.urlopen; AWS SDK calls are not included.",
+            "aws_sdk_trace_enabled": self._aws_trace.enabled,
         }
+        if self._aws_trace.error:
+            payload["aws_sdk_trace_error"] = self._aws_trace.error
+        payload["note"] = (
+            "Captured via urllib.request.urlopen and botocore Endpoint._send "
+            "(AWS SDK); entries include source and optional aws operation."
+        )
+        return payload
 
 
 def _summarize_trace(trace: _HttpTrace, *, allow_openai: bool) -> Dict[str, Any]:
     methods = Counter(entry.get("method") for entry in trace.entries)
     services = Counter(entry.get("service") for entry in trace.entries)
+    sources = Counter(entry.get("source") for entry in trace.entries)
+    aws_operations = Counter(
+        entry.get("operation")
+        for entry in trace.entries
+        if entry.get("service", "").startswith("aws") and entry.get("operation")
+    )
     allowed = {
         "richpanel": {"GET", "HEAD"},
         "shopify": {"GET", "HEAD"},
@@ -312,10 +486,27 @@ def _summarize_trace(trace: _HttpTrace, *, allow_openai: bool) -> Dict[str, Any]
         "openai": {"POST"},
         "anthropic": {"POST"},
     }
+    aws_missing_ops = 0
     allowed_methods_only = True
     for entry in trace.entries:
         service = entry.get("service")
         method = entry.get("method")
+        if service and str(service).startswith("aws"):
+            normalized = str(service).lower()
+            if any(token in normalized for token in ("oidc", "sso", "portal")):
+                if method not in {"GET", "POST"}:
+                    allowed_methods_only = False
+                    break
+                continue
+            if method != "POST":
+                allowed_methods_only = False
+                break
+            operation = entry.get("operation")
+            if not operation or operation not in AWS_ALLOWED_OPERATIONS:
+                aws_missing_ops += 1
+                allowed_methods_only = False
+                break
+            continue
         if service in {"openai", "anthropic"} and not allow_openai:
             allowed_methods_only = False
             break
@@ -329,6 +520,10 @@ def _summarize_trace(trace: _HttpTrace, *, allow_openai: bool) -> Dict[str, Any]
         "total_requests": len(trace.entries),
         "methods": dict(methods),
         "services": dict(services),
+        "sources": dict(sources),
+        "aws_operations": dict(aws_operations),
+        "aws_missing_operations": aws_missing_ops,
+        "aws_sdk_trace_enabled": trace._aws_trace.enabled,
         "allowed_methods_only": allowed_methods_only,
     }
 
@@ -699,6 +894,13 @@ def main() -> int:
     if args.shop_domain:
         os.environ["SHOPIFY_SHOP_DOMAIN"] = args.shop_domain
 
+    shopify_secrets_client = _resolve_shopify_secrets_client()
+    shopify_client = _build_shopify_client(
+        allow_network=None,
+        shop_domain=args.shop_domain,
+        secrets_client=shopify_secrets_client,
+    )
+
     run_id = args.run_id or _build_run_id()
     report_path, report_md_path, trace_path = _build_report_paths(run_id)
 
@@ -717,7 +919,10 @@ def main() -> int:
 
         if args.shopify_probe:
             try:
-                probe = _probe_shopify(shop_domain=args.shop_domain)
+                probe = _probe_shopify(
+                    shop_domain=args.shop_domain,
+                    secrets_client=shopify_secrets_client,
+                )
                 shopify_probe.update(probe)
                 if not probe.get("ok", False):
                     shopify_probe["error"] = {"type": "shopify_error"}
@@ -782,6 +987,7 @@ def main() -> int:
                         safe_mode=False,
                         automation_enabled=True,
                         allow_network=True,
+                        shopify_client=shopify_client,
                     )
                     if isinstance(probe_summary, dict):
                         result["order_resolution"] = probe_summary.get(
@@ -961,7 +1167,8 @@ def main() -> int:
         "notes": [
             "Ticket identifiers are hashed.",
             "No message bodies or customer identifiers are stored.",
-            "HTTP trace captures urllib.request calls; AWS SDK calls are not included.",
+            "HTTP trace captures urllib.request and AWS SDK (botocore) calls; "
+            "entries include source and AWS operation metadata.",
         ],
     }
 
@@ -990,13 +1197,16 @@ def main() -> int:
         f"- Total requests: {trace_summary['total_requests']}",
         f"- Methods: {json.dumps(trace_summary['methods'], sort_keys=True)}",
         f"- Services: {json.dumps(trace_summary['services'], sort_keys=True)}",
+        f"- Sources: {json.dumps(trace_summary.get('sources', {}), sort_keys=True)}",
+        f"- AWS operations: {json.dumps(trace_summary.get('aws_operations', {}), sort_keys=True)}",
+        f"- AWS missing operations: {trace_summary.get('aws_missing_operations', 0)}",
         f"- Allowed methods only: {trace_summary['allowed_methods_only']}",
         f"- Trace path: `{trace_path}`",
         "",
         "## Notes",
         "- Ticket identifiers are hashed in the JSON report.",
         "- No message bodies or customer identifiers are stored.",
-        "- HTTP trace captures urllib.request calls; AWS SDK calls are not included.",
+        "- HTTP trace captures urllib.request and AWS SDK (botocore) calls.",
     ]
     report_md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
 

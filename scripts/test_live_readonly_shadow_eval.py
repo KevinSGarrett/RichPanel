@@ -630,6 +630,29 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
+    def test_http_trace_allows_aws_readonly_ops(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {
+                "method": "POST",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "GetSecretValue",
+            }
+        )
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace.entries.append(
+            {
+                "method": "POST",
+                "path": "/",
+                "service": "aws_secretsmanager",
+                "operation": "DeleteSecret",
+            }
+        )
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
     def test_http_trace_service_mapping(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://shop.myshopify.com/admin/api/2024-01/orders/1")
@@ -736,6 +759,21 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         trace.entries.append({"method": "GET", "path": "/x", "service": "unknown"})
         summary = shadow_eval._summarize_trace(trace, allow_openai=False)
         self.assertFalse(summary["allowed_methods_only"])
+
+    def test_extract_aws_operation_sources(self) -> None:
+        class _Req:
+            def __init__(self, **kwargs) -> None:
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+
+        req = _Req(context={"operation_name": "GetSecretValue"})
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSecretValue")
+
+        req = _Req(headers={"X-Amz-Target": "secretsmanager.GetSecretValue"})
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetSecretValue")
+
+        req = _Req(body=b"Action=GetCallerIdentity&Version=2011-06-15")
+        self.assertEqual(shadow_eval._extract_aws_operation(req), "GetCallerIdentity")
 
     def test_delivery_estimate_present(self) -> None:
         self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))

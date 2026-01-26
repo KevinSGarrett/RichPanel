@@ -2,7 +2,7 @@
 
 ## Metadata
 - Date (UTC): 2026-01-26
-- Run ID: `RUN_20260126_0154Z`
+- Run ID: `RUN_20260126_0319Z`
 - Branch: `b58/live-readonly-shadow-report`
 - Workspace: `C:\RichPanel_GIT`
 - Environment: `prod` (read-only)
@@ -15,20 +15,21 @@ Produce the first live read-only shadow validation report proving the read path 
 - Read-only shadow eval completed with outbound disabled and write blocks enabled.
 - 17 tickets evaluated; 16 matched to Shopify orders.
 - Tracking present in 11, ETA computed in 16.
-- HTTP trace shows GET-only traffic; no non-GET methods attempted.
+- HTTP trace covers urllib + AWS SDK; Richpanel/Shopify/ShipStation are GET-only, AWS calls are POST GetSecretValue.
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B58/C/PROOF/live_readonly_shadow_report.json`
-- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260126_0154Z.json`
-- `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260126_0154Z.json`
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260126_0319Z.json`
+- `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260126_0319Z.json`
 
 ## PR Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/185
 - Labels: `risk:R2`, `gate:claude`
-- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344274528
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344412169
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
-- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344280148 (response id `msg_01YRaYJbJghtnuUk7GK6KiJG`)
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344417605 (response id `msg_01TaGW6zqkxasMwXm4RU8vfD`)
 
 ## Notes
-- Shopify token sourced from `rp-mw/dev/shopify/admin_api_token` via override for this run (token not logged).
+- Shopify token sourced from `rp-mw/dev/shopify/admin_api_token` via `SHOPIFY_ACCESS_TOKEN_PROFILE=rp-admin-dev` (token not logged).
+- Prod Shopify secret returned 401 in this environment; dev token used to restore read-path proof.
 - Conversation reads returned 403 for some endpoints; ticket + Shopify matching still succeeded.
