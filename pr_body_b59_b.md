@@ -5,8 +5,8 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/187`  
-**Anthropic request id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/187`  
+**Anthropic response id:** `msg_01B4LrGLzPceQhQLQcDhaGSL`  
+**Anthropic request id:** `req_011CXWWMGT5mPhnX9E4poA6y`  
 
 ### 1) Summary
 - Add sandbox auto-ticket creation so E2E order-status proofs no longer depend on manually sourced ticket numbers.
@@ -64,10 +64,10 @@
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile rp-admin-kevin --scenario order_status --create-ticket --ticket-from-email <redacted> --ticket-subject <redacted> --ticket-body <redacted> --require-openai-routing --require-openai-rewrite --require-outbound --require-operator-reply --require-send-message-path --followup --run-id B59-SANDBOX-AUTOTICKET-20260126-1254Z --proof-path REHYDRATION_PACK/RUNS/B59/B/PROOF/order_status_operator_reply_followup_proof_autoticket.json --create-ticket-proof-path REHYDRATION_PACK/RUNS/B59/B/PROOF/created_ticket.json`
 
 ### 7) Results & evidence
-**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/187`  
-**Codecov:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/187`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/187`  
-**Claude gate:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/187`  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21370196017/job/61512445227`  
+**Codecov:** fail — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/187`  
+**Bugbot:** pass — `https://cursor.com`  
+**Claude gate:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21370202358/job/61512482149`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B59/B/RUN_REPORT.md`
