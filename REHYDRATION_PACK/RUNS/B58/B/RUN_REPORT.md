@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-25
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b58/operator-reply-proof-upgrade`
-- **PR:** pending
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/184
 
 ## Objective + stop conditions
 - **Objective:** Upgrade the sandbox proof suite to require operator replies + send-message path evidence and produce a PII-safe proof showing order-status auto-reply, ticket closure, and follow-up routing to support without a second auto-reply.
