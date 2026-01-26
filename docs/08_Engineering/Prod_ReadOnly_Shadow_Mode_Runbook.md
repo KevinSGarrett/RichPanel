@@ -116,7 +116,11 @@ Before enabling shadow mode in production:
 
 - Script: `scripts/live_readonly_shadow_eval.py`
 - Preferred execution: workflow dispatch `shadow_live_readonly_eval.yml` (uses GH secrets; no local prod secrets)
-- Required secrets (AWS Secrets Manager): `rp-mw/prod/richpanel/api_key`, `rp-mw/prod/shopify/admin_api_token`
+- Required secrets (AWS Secrets Manager):
+  - `rp-mw/prod/richpanel/api_key`
+  - `rp-mw/prod/shopify/admin_api_token` (canonical; legacy fallback: `rp-mw/prod/shopify/access_token`)
+  - If prod uses the same Shopify store as dev (single-store setup), keep the prod secret
+    aligned to the dev token so `--env prod` reads succeed.
 - Required env vars (the script enforces/fails-closed):
   - `RICHPANEL_ENV=prod` (or `ENVIRONMENT=prod`)
   - `MW_ALLOW_NETWORK_READS=true`
@@ -141,6 +145,26 @@ python scripts/live_readonly_shadow_eval.py `
   --shop-domain <myshop.myshopify.com>
 ```
 
+### Validate Shopify token (read-only)
+Use the probe to confirm the token + shop domain combination works (GET-only):
+
+```powershell
+$env:RICHPANEL_ENV = "prod"
+$env:MW_ALLOW_NETWORK_READS = "true"
+$env:RICHPANEL_WRITE_DISABLED = "true"
+$env:RICHPANEL_OUTBOUND_ENABLED = "false"
+$env:SHOPIFY_OUTBOUND_ENABLED = "true"
+$env:SHOPIFY_WRITE_DISABLED = "true"
+$env:SHOPIFY_SHOP_DOMAIN = "<shop>.myshopify.com"
+
+python scripts/live_readonly_shadow_eval.py `
+  --ticket-id <ticket-or-conversation-id> `
+  --shop-domain <shop>.myshopify.com `
+  --shopify-probe
+```
+
+**Expected:** `shopify_probe.ok=true` and `status_code=200` in the JSON/MD report.
+
 What it does:
 - Requires the read-only env flags above (fails closed if missing or incorrect)
 - Reads ticket + conversation, performs order lookup (Shopify fallback) with `allow_network` gated to reads only
@@ -148,6 +172,15 @@ What it does:
 - Writes a PII-safe JSON report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
 - Writes a PII-safe markdown report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
 - Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json` and fails if any non-GET calls are observed
+
+### Common failure modes (401 / 403)
+- **401 Unauthorized (Shopify):** token invalid/expired, wrong `SHOPIFY_SHOP_DOMAIN`, or secret still
+  contains a placeholder value. Fix by updating `rp-mw/prod/shopify/admin_api_token` (and ensure the
+  shop domain matches the token's store). If there is a single store, align prod + dev secrets.
+- **403 Forbidden (Shopify):** token lacks required scopes (`read_orders`, `read_fulfillments`, etc.)
+  or the app is not installed on the target store. Reinstall the app and mint a read-only token.
+- **403 Forbidden (Richpanel conversations):** conversation endpoints may be restricted even when
+  ticket reads succeed. Use explicit ticket IDs for shadow runs if list endpoints are blocked.
 
 Success evidence for PRs:
 - Command used (including flags)
