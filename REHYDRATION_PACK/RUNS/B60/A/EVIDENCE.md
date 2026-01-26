@@ -21,17 +21,17 @@ Remove-Item Env:CLAUDE_REVIEW_MODE
 
 ## Claude gate run (CI)
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/189
-- Workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/21378294625
+- Workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/21378404990
 - Mode: shadow
 - Model used: claude-opus-4-5-20251101
-- Anthropic request id: req_011CXWsYgPFco7wA773Dz4W8
-- Anthropic response id: msg_01FCqDzkZTT6WSbG4bRmRVco
+- Anthropic request id: req_011CXWstCCuLkEGmuhHhJKJ9
+- Anthropic response id: msg_01HdSQeLSnbxrpZ8i1Umy9FS
 
 ## PII-safe output snippet
 ```
 Mode: SHADOW
 CLAUDE_REVIEW: PASS
 Model used: claude-opus-4-5-20251101
-Anthropic Request ID: req_011CXWsYgPFco7wA773Dz4W8
-Anthropic Response ID: msg_01FCqDzkZTT6WSbG4bRmRVco
+Anthropic Request ID: req_011CXWstCCuLkEGmuhHhJKJ9
+Anthropic Response ID: msg_01HdSQeLSnbxrpZ8i1Umy9FS
 ```
