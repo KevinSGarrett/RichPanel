@@ -65,6 +65,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     RichpanelExecutor,
     RichpanelRequestError,
     RichpanelResponse,
+    RichpanelWriteDisabledError,
     SecretLoadError,
     TransportError,
 )
@@ -1110,7 +1111,12 @@ def _create_sandbox_email_ticket(
             dry_run=False,
             log_body_excerpt=False,
         )
-    except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+    except (
+        RichpanelRequestError,
+        RichpanelWriteDisabledError,
+        SecretLoadError,
+        TransportError,
+    ) as exc:
         raise SmokeFailure(f"Ticket creation failed: {exc}") from exc
 
     if response.dry_run:

@@ -74,6 +74,10 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     wait_for_openai_rewrite_audit_record,
 )
 
+from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
+    RichpanelWriteDisabledError,
+)
+
 
 def _fingerprint(value: str, length: int = 12) -> str:
     """Local implementation to avoid importing dev_e2e_smoke (which requires boto3)."""
@@ -1234,6 +1238,30 @@ class AutoTicketHelpersTests(unittest.TestCase):
                 return _ErrorResponse()
 
         with patch("dev_e2e_smoke.RichpanelClient", _ErrorClient):
+            with self.assertRaises(SmokeFailure):
+                _create_sandbox_email_ticket(
+                    env_name="dev",
+                    region="us-east-2",
+                    stack_name="RichpanelMiddleware-dev",
+                    api_key_secret_id=None,
+                    from_email="from@example.com",
+                    to_email="support@example.com",
+                    subject="Subject",
+                    body="Body",
+                    first_name="Sandbox",
+                    last_name="Test",
+                    proof_path=None,
+                )
+
+    def test_create_sandbox_email_ticket_write_disabled(self) -> None:
+        class _WriteDisabledClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> None:
+                raise RichpanelWriteDisabledError("writes disabled")
+
+        with patch("dev_e2e_smoke.RichpanelClient", _WriteDisabledClient):
             with self.assertRaises(SmokeFailure):
                 _create_sandbox_email_ticket(
                     env_name="dev",
