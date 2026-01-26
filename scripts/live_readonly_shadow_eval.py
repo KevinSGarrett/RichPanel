@@ -293,11 +293,12 @@ def _extract_aws_operation(request: Any) -> Optional[str]:
 
     headers = getattr(request, "headers", None) or {}
     target = None
-    getter = getattr(headers, "get", None)
-    if callable(getter):
-        target = getter("X-Amz-Target") or getter("x-amz-target")
-    elif isinstance(headers, dict):
+    if isinstance(headers, dict):
         target = headers.get("X-Amz-Target") or headers.get("x-amz-target")
+    else:
+        getter = getattr(headers, "get", None)
+        if callable(getter):
+            target = getter("X-Amz-Target") or getter("x-amz-target")
     if target:
         operation = str(target).split(".")[-1]
         return operation.strip().strip("'\"")
