@@ -1,6 +1,6 @@
 # Evidence — B58/C
 
-## Command (exact)
+## Command (exact; ticket IDs redacted)
 ```powershell
 $env:AWS_PROFILE = "rp-admin-prod"
 $env:AWS_DEFAULT_REGION = "us-east-2"
@@ -19,8 +19,10 @@ $env:RICHPANEL_API_KEY_SECRET_ID = "rp-mw/prod/richpanel/api_key"
 $env:SHOPIFY_ACCESS_TOKEN_OVERRIDE = ""
 $env:RICHPANEL_API_KEY_OVERRIDE = ""
 
-python scripts\live_readonly_shadow_eval.py --ticket-id 94875 --ticket-id 98378 --ticket-id 94874 --ticket-id 95608 --ticket-id 98245 --ticket-id 94872 --ticket-id 84723 --ticket-id 95614 --ticket-id 97493 --ticket-id 97034 --ticket-id 95618 --ticket-id 95693 --ticket-id 95620 --ticket-id 95515 --ticket-id 98371 --ticket-id 95622 --ticket-id 95624 --shopify-probe
+python scripts\live_readonly_shadow_eval.py --ticket-id redacted:788b726ba2a1 --ticket-id redacted:87022f956b30 --ticket-id redacted:1dcfec81d9b0 --ticket-id redacted:85417ff765d1 --ticket-id redacted:6962c808b085 --ticket-id redacted:9c8e254ed441 --ticket-id redacted:d1c30e537502 --ticket-id redacted:b645a23fd354 --ticket-id redacted:871707348a53 --ticket-id redacted:e7cf89bcb59f --ticket-id redacted:2a7ecc5e705d --ticket-id redacted:2a88c7506c07 --ticket-id redacted:72e09b2d31f5 --ticket-id redacted:90064405d18e --ticket-id redacted:4966ad2d08e3 --ticket-id redacted:34de44a65a2f --ticket-id redacted:f9ead722d06e --shopify-probe
 ```
+
+Ticket IDs are redacted in this document; hashes correspond to `ticket_hashes` in `REHYDRATION_PACK/RUNS/B58/C/PROOF/live_readonly_shadow_report.json`.
 
 ## Read-only flags used
 - `RICHPANEL_ENV=prod`
