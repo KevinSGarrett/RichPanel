@@ -631,8 +631,14 @@ def _select_model(risk: str, model_override: str | None = None) -> str:
         override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
     if override:
         return _require_allowed_model(override, "model override")
+    unknown_risk = risk not in _DEFAULT_MODELS
     model = _DEFAULT_MODELS.get(risk, DEFAULT_FALLBACK_MODEL)
-    source = f"risk mapping {risk}" if risk in _DEFAULT_MODELS else "risk mapping default"
+    source = f"risk mapping {risk}" if not unknown_risk else "risk mapping default"
+    if unknown_risk:
+        print(
+            f"WARNING: Unknown risk label '{risk}'; defaulting to {DEFAULT_FALLBACK_MODEL}.",
+            file=sys.stderr,
+        )
     return _require_allowed_model(model, source)
 
 
@@ -773,6 +779,8 @@ _EVIDENCE_SECRET_RE = re.compile(
     r"|\bpassword\b"
     r"|\btoken\b"
     r"|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    r"|\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"
+    r"|\b\d{1,5}\s+[A-Za-z0-9.\-]+\s+(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|drive|dr)\b"
     r"|\b\d{9,}\b"
     r")",
     re.IGNORECASE,

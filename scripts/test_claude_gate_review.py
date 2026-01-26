@@ -346,6 +346,14 @@ FINDINGS:
             claude_gate_review._coerce_json_text(balanced),
             '{"version":"1.0","note":"brace } inside"}',
         )
+        escaped = (
+            'prefix {"version":"1.0","note":"escaped \\\\\"quote\\\\\" and brace } '
+            'inside","unicode":"\\u2603"} suffix'
+        )
+        self.assertEqual(
+            claude_gate_review._coerce_json_text(escaped),
+            '{"version":"1.0","note":"escaped \\\\\"quote\\\\\" and brace } inside","unicode":"\\u2603"}',
+        )
 
     def test_parse_structured_output_with_fence(self):
         raw = """```json
@@ -1276,6 +1284,18 @@ Let me know if you need more."""
     def test_redact_evidence_long_number(self):
         self.assertEqual(
             claude_gate_review._redact_evidence("order=1234567890"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_phone(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("call 415-555-1212"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_address(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("ship to 123 Main St"),
             "[REDACTED]",
         )
 
