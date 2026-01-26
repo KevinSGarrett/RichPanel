@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-01-26
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `b59/autoticket-sandbox-e2e`
-- **PR:** (pending)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/187
 
 ## Objective + stop conditions
 - **Objective:** Make sandbox E2E smoke runs fully self-contained by auto-creating a sandbox email ticket and running the order-status scenario against it, with PII-safe proof artifacts.
