@@ -18,9 +18,9 @@ require an explicit `MW_PROD_WRITES_ACK`.
 ## PR Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/186
 - Labels: `risk:R3`, `gate:claude`
-- CI (validate): pending — https://github.com/KevinSGarrett/RichPanel/pull/186/checks
+- CI (validate): pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21362938525
 - Codecov: pending — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/186
-- Claude gate: pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21362468117 (response id `msg_01CPbpZZErLZRLAttQC8CSRP`)
+- Claude gate: pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21362948600 (response id `msg_016BDubfjJ1xW6vszpD5UwAM`)
 - Compare: https://github.com/KevinSGarrett/RichPanel/compare/main...run/B59-A
 
 ## Tests
