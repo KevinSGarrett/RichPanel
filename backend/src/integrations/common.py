@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from typing import Optional, Tuple
 
@@ -44,11 +45,40 @@ def resolve_env_name() -> Tuple[str, Optional[str]]:
     return value, source
 
 
+def log_env_resolution_warning(
+    logger: logging.Logger,
+    *,
+    service: str,
+    env_source: Optional[str],
+    environment: str,
+) -> None:
+    if env_source == "ENV":
+        if environment in PRODUCTION_ENVIRONMENTS:
+            logger.warning(
+                f"{service}.env_resolution_from_env",
+                extra={"environment": environment, "env_source": env_source},
+            )
+        return
+    if (
+        env_source is None
+        and environment == "local"
+        and (
+            os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+            or os.environ.get("AWS_EXECUTION_ENV")
+        )
+    ):
+        logger.warning(
+            f"{service}.env_resolution_default_local",
+            extra={"environment": environment, "env_source": env_source},
+        )
+
+
 __all__ = [
     "ENV_RESOLUTION_ORDER",
     "PRODUCTION_ENVIRONMENTS",
     "PROD_WRITE_ACK_ENV",
     "PROD_WRITE_ACK_PHRASE",
+    "log_env_resolution_warning",
     "prod_write_acknowledged",
     "resolve_env_name",
 ]

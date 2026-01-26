@@ -6,6 +6,7 @@
   - Reused shared prod write acknowledgment helper from `integrations.common`.
   - Logged a warning when `ENV` drives prod resolution.
   - Logged a warning when defaulting to `local` in AWS execution contexts.
+  - Switched env resolution warnings to shared helper.
 - `backend/src/integrations/shopify/client.py`
   - Added prod-only write acknowledgment gating for non-GET/HEAD calls.
   - Included `ENV` in environment resolution for prod detection.
@@ -13,9 +14,11 @@
   - Logged a warning when `ENV` drives prod resolution and flagged prod ack in dry-run logs.
   - Raised `ShopifyWriteDisabledError` for prod writes without acknowledgment.
   - Logged a warning when defaulting to `local` in AWS execution contexts.
+  - Switched env resolution warnings to shared helper and removed dead prod-ack log field.
 - `backend/src/integrations/common.py`
   - Centralized prod write acknowledgment parsing to avoid drift.
   - Added shared environment resolution helper for consistent precedence.
+  - Added shared env resolution warning logger to avoid duplication.
 - `backend/src/integrations/openai/client.py`
   - Aligned environment resolution with shared helper (includes `ENV`).
 - `backend/src/richpanel_middleware/integrations/shopify/client.py`

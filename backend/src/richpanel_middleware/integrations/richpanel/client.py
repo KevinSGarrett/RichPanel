@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
 )
@@ -234,7 +235,12 @@ class RichpanelClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
-        self._log_env_resolution_warning(env_source)
+        log_env_resolution_warning(
+            self._logger,
+            service="richpanel",
+            env_source=env_source,
+            environment=self.environment,
+        )
         self._api_key = (
             api_key
             or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
@@ -563,31 +569,6 @@ class RichpanelClient:
         if env_override is not None:
             return _to_bool(env_override, default=False)
         return self.environment in READ_ONLY_ENVIRONMENTS
-
-    def _log_env_resolution_warning(self, env_source: Optional[str]) -> None:
-        if env_source != "ENV":
-            if (
-                env_source is None
-                and self.environment == "local"
-                and (
-                    os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
-                    or os.environ.get("AWS_EXECUTION_ENV")
-                )
-            ):
-                self._logger.warning(
-                    "richpanel.env_resolution_default_local",
-                    extra={
-                        "environment": self.environment,
-                        "env_source": env_source,
-                    },
-                )
-            return
-        if self.environment not in PRODUCTION_ENVIRONMENTS:
-            return
-        self._logger.warning(
-            "richpanel.env_resolution_from_env",
-            extra={"environment": self.environment, "env_source": env_source},
-        )
 
     def _prod_write_ack_required(self) -> bool:
         if self.environment not in PRODUCTION_ENVIRONMENTS:

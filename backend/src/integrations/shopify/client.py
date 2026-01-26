@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
 )
@@ -209,7 +210,12 @@ class ShopifyClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
-        self._log_env_resolution_warning(env_source)
+        log_env_resolution_warning(
+            self._logger,
+            service="shopify",
+            env_source=env_source,
+            environment=self.environment,
+        )
         self._access_token = (
             access_token
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
@@ -259,7 +265,6 @@ class ShopifyClient:
                     "url": url,
                     "reason": reason,
                     "dry_run": True,
-                    "prod_write_ack_required": reason == "prod_write_ack_required",
                 },
             )
             return ShopifyResponse(
@@ -626,31 +631,6 @@ class ShopifyClient:
         if dry_run:
             return "dry_run_forced"
         return None
-
-    def _log_env_resolution_warning(self, env_source: Optional[str]) -> None:
-        if env_source != "ENV":
-            if (
-                env_source is None
-                and self.environment == "local"
-                and (
-                    os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
-                    or os.environ.get("AWS_EXECUTION_ENV")
-                )
-            ):
-                self._logger.warning(
-                    "shopify.env_resolution_default_local",
-                    extra={
-                        "environment": self.environment,
-                        "env_source": env_source,
-                    },
-                )
-            return
-        if self.environment not in PRODUCTION_ENVIRONMENTS:
-            return
-        self._logger.warning(
-            "shopify.env_resolution_from_env",
-            extra={"environment": self.environment, "env_source": env_source},
-        )
 
     def _prod_write_ack_required(self, method: str) -> bool:
         if method.upper() in {"GET", "HEAD"}:
