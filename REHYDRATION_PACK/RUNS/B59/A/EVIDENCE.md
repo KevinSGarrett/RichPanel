@@ -9,10 +9,10 @@ python scripts\test_shopify_client.py
 
 Output:
 ```
-Ran 17 tests in 0.003s
+Ran 17 tests in 0.004s
 OK
 
-Ran 12 tests in 0.004s
+Ran 12 tests in 0.006s
 OK
 ```
 
@@ -21,6 +21,7 @@ OK
 - Compare: https://github.com/KevinSGarrett/RichPanel/compare/main...run/B59-A
 - `backend/src/richpanel_middleware/integrations/richpanel/client.py`
 - `backend/src/integrations/shopify/client.py`
+- `backend/src/integrations/common.py`
 - `scripts/test_richpanel_client.py`
 - `scripts/test_shopify_client.py`
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`

@@ -12,6 +12,12 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
+from integrations.common import (
+    PROD_WRITE_ACK_ENV,
+    PRODUCTION_ENVIRONMENTS,
+    prod_write_acknowledged,
+)
+
 try:
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -51,9 +57,6 @@ def _resolve_env_name() -> str:
 
 
 READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
-PRODUCTION_ENVIRONMENTS = {"prod", "production"}
-PROD_WRITE_ACK_ENV = "MW_PROD_WRITES_ACK"
-PROD_WRITE_ACK_PHRASE = "I_UNDERSTAND_PROD_WRITES"
 
 
 @dataclass
@@ -580,12 +583,7 @@ class RichpanelClient:
 
     @staticmethod
     def _prod_write_acknowledged() -> bool:
-        raw = os.environ.get(PROD_WRITE_ACK_ENV)
-        if raw is None:
-            return False
-        if _to_bool(raw, default=False):
-            return True
-        return str(raw).strip().upper() == PROD_WRITE_ACK_PHRASE
+        return prod_write_acknowledged(os.environ.get(PROD_WRITE_ACK_ENV))
 
     @staticmethod
     def _writes_disabled() -> bool:

@@ -3,9 +3,13 @@
 - `backend/src/richpanel_middleware/integrations/richpanel/client.py`
   - Added prod-only write acknowledgment gating (`MW_PROD_WRITES_ACK`) for non-GET/HEAD calls.
   - Included `ENV` in environment resolution for prod detection.
+  - Reused shared prod write acknowledgment helper from `integrations.common`.
 - `backend/src/integrations/shopify/client.py`
   - Added prod-only write acknowledgment gating for non-GET/HEAD calls.
   - Included `ENV` in environment resolution for prod detection.
+  - Reused shared prod write acknowledgment helper from `integrations.common`.
+- `backend/src/integrations/common.py`
+  - Centralized prod write acknowledgment parsing to avoid drift.
 - `scripts/test_richpanel_client.py`
   - Added prod ack blocked/allowed tests plus non-prod regression coverage.
 - `scripts/test_shopify_client.py`
