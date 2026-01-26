@@ -25,6 +25,8 @@ OK
 - `scripts/test_richpanel_client.py`
 - `scripts/test_shopify_client.py`
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
+- `docs/08_Engineering/Secrets_and_Environments.md`
+- `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
 - `docs/_generated/doc_registry.json`
 - `docs/_generated/doc_registry.compact.json`
 - `docs/_generated/doc_outline.json`

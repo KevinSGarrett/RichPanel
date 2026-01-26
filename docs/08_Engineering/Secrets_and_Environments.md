@@ -50,8 +50,12 @@ The middleware resolves the active environment name from these variables (in ord
 1. `RICHPANEL_ENV`
 2. `RICH_PANEL_ENV`
 3. `MW_ENV`
-4. `ENVIRONMENT`
-5. Default: `local`
+4. `ENV`
+5. `ENVIRONMENT`
+6. Default: `local`
+
+**Note:** If `ENV` is set to `prod` in a non-prod environment, prod safety gates
+will apply. Verify `ENV` is unset or explicitly non-prod in dev/sandbox stacks.
 
 **Code reference:** `backend/src/richpanel_middleware/integrations/richpanel/client.py` L39-L49
 

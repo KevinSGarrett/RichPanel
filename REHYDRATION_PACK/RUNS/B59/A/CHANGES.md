@@ -17,6 +17,10 @@
   - Restored immutability assertion for `redact_headers()`.
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
   - Documented the two-man rule, required env var, and interlocks.
+- `docs/08_Engineering/Secrets_and_Environments.md`
+  - Added `ENV` to environment resolution order and noted prod gating caution.
+- `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
+  - Documented `prod_write_ack_required` dry-run reason and `ENV` in env chain.
 - `docs/_generated/doc_registry.json`
 - `docs/_generated/doc_registry.compact.json`
 - `docs/_generated/doc_outline.json`
