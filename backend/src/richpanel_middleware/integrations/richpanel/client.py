@@ -42,6 +42,7 @@ def _resolve_env_name() -> str:
         os.environ.get("RICHPANEL_ENV")
         or os.environ.get("RICH_PANEL_ENV")
         or os.environ.get("MW_ENV")
+        or os.environ.get("ENV")
         or os.environ.get("ENVIRONMENT")
         or "local"
     )
@@ -50,6 +51,9 @@ def _resolve_env_name() -> str:
 
 
 READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
+PRODUCTION_ENVIRONMENTS = {"prod", "production"}
+PROD_WRITE_ACK_ENV = "MW_PROD_WRITES_ACK"
+PROD_WRITE_ACK_PHRASE = "I_UNDERSTAND_PROD_WRITES"
 
 
 @dataclass
@@ -262,16 +266,20 @@ class RichpanelClient:
         log_body_excerpt: bool = True,
     ) -> RichpanelResponse:
         method_upper = method.upper()
-        if (self.read_only or self._writes_disabled()) and method_upper not in {
-            "GET",
-            "HEAD",
-        }:
+        writes_disabled = self._writes_disabled()
+        prod_write_ack_required = self._prod_write_ack_required()
+        if (
+            (self.read_only or writes_disabled or prod_write_ack_required)
+            and method_upper not in {"GET", "HEAD"}
+        ):
             self._logger.warning(
                 "richpanel.write_blocked",
                 extra={
                     "method": method_upper,
                     "read_only": self.read_only,
-                    "write_disabled": self._writes_disabled(),
+                    "write_disabled": writes_disabled,
+                    "prod_write_ack_required": prod_write_ack_required,
+                    "environment": self.environment,
                 },
             )
             raise RichpanelWriteDisabledError(
@@ -564,6 +572,20 @@ class RichpanelClient:
         if env_override is not None:
             return _to_bool(env_override, default=False)
         return self.environment in READ_ONLY_ENVIRONMENTS
+
+    def _prod_write_ack_required(self) -> bool:
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return False
+        return not self._prod_write_acknowledged()
+
+    @staticmethod
+    def _prod_write_acknowledged() -> bool:
+        raw = os.environ.get(PROD_WRITE_ACK_ENV)
+        if raw is None:
+            return False
+        if _to_bool(raw, default=False):
+            return True
+        return str(raw).strip().upper() == PROD_WRITE_ACK_PHRASE
 
     @staticmethod
     def _writes_disabled() -> bool:

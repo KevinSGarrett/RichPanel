@@ -53,6 +53,10 @@ class RichpanelClientTests(unittest.TestCase):
         os.environ.pop("RICHPANEL_ENV", None)
         os.environ.pop("RICH_PANEL_ENV", None)
         os.environ.pop("RICHPANEL_WRITE_DISABLED", None)
+        os.environ.pop("MW_ENV", None)
+        os.environ.pop("ENV", None)
+        os.environ.pop("ENVIRONMENT", None)
+        os.environ.pop("MW_PROD_WRITES_ACK", None)
 
     def test_dry_run_default_skips_transport(self) -> None:
         transport = _FailingTransport()
@@ -221,6 +225,67 @@ class RichpanelClientTests(unittest.TestCase):
 
         # Transport should only be called for GET/HEAD.
         self.assertEqual(len(transport.requests), 2)
+
+    def test_prod_write_requires_ack_even_when_write_enabled(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        os.environ["RICHPANEL_READ_ONLY"] = "0"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b'{"ok": true}')]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        with self.assertRaises(RichpanelWriteDisabledError):
+            client.request("POST", "/v1/blocked", json_body={"x": 1}, dry_run=False)
+
+        self.assertEqual(len(transport.requests), 0)
+
+    def test_prod_write_ack_allows_write_when_controls_allow(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        os.environ["RICHPANEL_READ_ONLY"] = "0"
+        os.environ["MW_PROD_WRITES_ACK"] = "I_UNDERSTAND_PROD_WRITES"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=202, headers={}, body=b"accepted")]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        response = client.request(
+            "POST", "/v1/tickets", json_body={"ticket_id": "t-1"}, dry_run=False
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(len(transport.requests), 1)
+
+    def test_prod_write_ack_does_not_bypass_write_disabled(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        os.environ["RICHPANEL_READ_ONLY"] = "0"
+        os.environ["RICHPANEL_WRITE_DISABLED"] = "1"
+        os.environ["MW_PROD_WRITES_ACK"] = "true"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b'{"ok": true}')]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        with self.assertRaises(RichpanelWriteDisabledError):
+            client.request("PATCH", "/v1/blocked", json_body={"x": 1}, dry_run=False)
+
+        self.assertEqual(len(transport.requests), 0)
+
+    def test_non_prod_write_unaffected_by_prod_ack(self) -> None:
+        os.environ["MW_ENV"] = "dev"
+        os.environ["RICHPANEL_READ_ONLY"] = "0"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b'{"ok": true}')]
+        )
+        client = RichpanelClient(api_key="test-key", transport=transport, dry_run=False)
+
+        response = client.request(
+            "POST", "/v1/tickets", json_body={"ticket_id": "t-2"}, dry_run=False
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 1)
 
     def test_get_ticket_metadata_handles_ticket_dict(self) -> None:
         body = (

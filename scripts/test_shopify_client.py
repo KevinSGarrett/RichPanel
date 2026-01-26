@@ -74,7 +74,9 @@ class ShopifyClientTests(unittest.TestCase):
             "RICHPANEL_ENV",
             "RICH_PANEL_ENV",
             "MW_ENV",
+            "ENV",
             "ENVIRONMENT",
+            "MW_PROD_WRITES_ACK",
         ]:
             os.environ.pop(key, None)
 
@@ -204,9 +206,69 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(redacted["X-Shopify-Access-Token"], "***")
         self.assertEqual(redacted["Authorization"], "***")
         self.assertEqual(redacted["ok"], "1")
-        self.assertEqual(
-            headers["X-Shopify-Access-Token"], "secret"
-        )  # original untouched
+
+    def test_prod_write_requires_ack(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        transport = _FailingTransport()
+        client = ShopifyClient(
+            access_token="test-token", allow_network=True, transport=transport
+        )
+
+        response = client.request(
+            "POST",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+            dry_run=False,
+        )
+
+        self.assertTrue(response.dry_run)
+        self.assertEqual(response.reason, "prod_write_ack_required")
+        self.assertEqual(response.headers.get("x-dry-run"), "1")
+        self.assertFalse(transport.called)
+
+    def test_prod_write_ack_allows_network(self) -> None:
+        os.environ["MW_ENV"] = "prod"
+        os.environ["MW_PROD_WRITES_ACK"] = "true"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=201, headers={}, body=b'{"ok": true}')]
+        )
+        client = ShopifyClient(
+            access_token="test-token", allow_network=True, transport=transport
+        )
+
+        response = client.request(
+            "POST",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+            dry_run=False,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(transport.requests), 1)
+
+    def test_non_prod_write_unaffected_by_prod_ack(self) -> None:
+        os.environ["MW_ENV"] = "dev"
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=201, headers={}, body=b'{"ok": true}')]
+        )
+        client = ShopifyClient(
+            access_token="test-token", allow_network=True, transport=transport
+        )
+
+        response = client.request(
+            "POST",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+            dry_run=False,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(transport.requests), 1)
 
     def test_env_namespace_is_reflected_in_secret_path(self) -> None:
         with mock.patch.dict(

@@ -42,11 +42,17 @@ def _resolve_env_name() -> str:
         os.environ.get("RICHPANEL_ENV")
         or os.environ.get("RICH_PANEL_ENV")
         or os.environ.get("MW_ENV")
+        or os.environ.get("ENV")
         or os.environ.get("ENVIRONMENT")
         or "local"
     )
     value = str(raw).strip().lower() or "local"
     return value
+
+
+PRODUCTION_ENVIRONMENTS = {"prod", "production"}
+PROD_WRITE_ACK_ENV = "MW_PROD_WRITES_ACK"
+PROD_WRITE_ACK_PHRASE = "I_UNDERSTAND_PROD_WRITES"
 
 
 @dataclass
@@ -231,16 +237,19 @@ class ShopifyClient:
         safe_mode: bool = False,
         automation_enabled: bool = True,
     ) -> ShopifyResponse:
+        method_upper = method.upper()
         url = self._build_url(path, params)
         body_bytes = self._encode_body(json_body)
         use_dry_run = self._resolve_dry_run(dry_run)
 
         reason = self._short_circuit_reason(safe_mode, automation_enabled, use_dry_run)
+        if reason is None and self._prod_write_ack_required(method_upper):
+            reason = "prod_write_ack_required"
         if reason:
             self._logger.info(
                 "shopify.dry_run",
                 extra={
-                    "method": method.upper(),
+                    "method": method_upper,
                     "url": url,
                     "reason": reason,
                     "dry_run": True,
@@ -282,7 +291,7 @@ class ShopifyClient:
             try:
                 transport_response = self.transport.send(
                     TransportRequest(
-                        method=method.upper(),
+                        method=method_upper,
                         url=url,
                         headers=request_headers,
                         body=body_bytes,
@@ -292,7 +301,7 @@ class ShopifyClient:
             except TransportError as exc:
                 self._logger.warning(
                     "shopify.transport_error",
-                    extra={"method": method.upper(), "url": url, "attempt": attempt},
+                    extra={"method": method_upper, "url": url, "attempt": attempt},
                 )
                 if attempt >= self.max_attempts:
                     raise ShopifyRequestError(
@@ -310,7 +319,7 @@ class ShopifyClient:
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
-                method.upper(),
+                method_upper,
                 response,
                 latency_ms,
                 attempt,
@@ -610,6 +619,22 @@ class ShopifyClient:
         if dry_run:
             return "dry_run_forced"
         return None
+
+    def _prod_write_ack_required(self, method: str) -> bool:
+        if method.upper() in {"GET", "HEAD"}:
+            return False
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return False
+        return not self._prod_write_acknowledged()
+
+    @staticmethod
+    def _prod_write_acknowledged() -> bool:
+        raw = os.environ.get(PROD_WRITE_ACK_ENV)
+        if raw is None:
+            return False
+        if _to_bool(raw, default=False):
+            return True
+        return str(raw).strip().upper() == PROD_WRITE_ACK_PHRASE
 
     @staticmethod
     def redact_headers(headers: Dict[str, str]) -> Dict[str, str]:
