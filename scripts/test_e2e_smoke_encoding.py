@@ -1033,14 +1033,26 @@ class PIISafetyTests(unittest.TestCase):
                 "1039",
                 "--event-id",
                 "evt:ac89d31a",
+                "--ticket-from-email",
+                "sandbox.test+autoticket@example.com",
+                "--ticket-subject",
+                "Sandbox smoke",
+                "--ticket-body",
+                "Automated smoke body",
                 "--scenario",
                 "order_status",
             ]
         )
         self.assertIn("--ticket-number <redacted>", cmd)
         self.assertIn("--event-id <redacted>", cmd)
+        self.assertIn("--ticket-from-email <redacted>", cmd)
+        self.assertIn("--ticket-subject <redacted>", cmd)
+        self.assertIn("--ticket-body <redacted>", cmd)
         self.assertNotIn("1039", cmd)
         self.assertNotIn("evt:ac89d31a", cmd)
+        self.assertNotIn("sandbox.test+autoticket@example.com", cmd)
+        self.assertNotIn("Sandbox smoke", cmd)
+        self.assertNotIn("Automated smoke body", cmd)
         self.assertTrue(cmd.startswith("python "))
 
     def test_sanitize_ts_action_id_fingerprints_event(self) -> None:
