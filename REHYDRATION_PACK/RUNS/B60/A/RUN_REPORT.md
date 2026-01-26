@@ -23,3 +23,7 @@ Harden Claude gate reliability and telemetry by making the mode explicit, improv
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B60/A/CHANGES.md`
 - `REHYDRATION_PACK/RUNS/B60/A/EVIDENCE.md`
+
+## PR
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/189
+- Claude gate workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/21378294625 (mode=shadow)
