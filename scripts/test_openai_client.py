@@ -77,6 +77,7 @@ class OpenAIClientTests(unittest.TestCase):
         os.environ.pop("RICHPANEL_ENV", None)
         os.environ.pop("RICH_PANEL_ENV", None)
         os.environ.pop("MW_ENV", None)
+        os.environ.pop("ENV", None)
         os.environ.pop("ENVIRONMENT", None)
 
     def test_safe_mode_short_circuits_transport(self) -> None:
@@ -174,6 +175,14 @@ class OpenAIClientTests(unittest.TestCase):
 
         self.assertEqual(client.environment, "staging")
         self.assertEqual(client.api_key_secret_id, "rp-mw/staging/openai/api_key")
+
+    def test_env_resolution_uses_env_var(self) -> None:
+        os.environ["ENV"] = "Prod"
+
+        client = OpenAIClient()
+
+        self.assertEqual(client.environment, "prod")
+        self.assertEqual(client.api_key_secret_id, "rp-mw/prod/openai/api_key")
 
     def test_missing_secret_short_circuits_to_dry_run(self) -> None:
         secrets_client = _StubSecretsClient(response={})

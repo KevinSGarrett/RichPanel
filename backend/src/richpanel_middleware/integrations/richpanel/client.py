@@ -12,6 +12,14 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
+from integrations.common import (
+    PROD_WRITE_ACK_ENV,
+    PRODUCTION_ENVIRONMENTS,
+    log_env_resolution_warning,
+    prod_write_acknowledged,
+    resolve_env_name,
+)
+
 try:
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -34,19 +42,6 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
-
-
-def _resolve_env_name() -> str:
-    """Choose an environment name for secret lookup; defaults to 'local'."""
-    raw = (
-        os.environ.get("RICHPANEL_ENV")
-        or os.environ.get("RICH_PANEL_ENV")
-        or os.environ.get("MW_ENV")
-        or os.environ.get("ENVIRONMENT")
-        or "local"
-    )
-    value = str(raw).strip().lower() or "local"
-    return value
 
 
 READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
@@ -217,7 +212,7 @@ class RichpanelClient:
             or os.environ.get("RICHPANEL_API_BASE_URL")
             or "https://api.richpanel.com"
         ).rstrip("/")
-        self.environment = _resolve_env_name()
+        self.environment, env_source = resolve_env_name()
         self.api_key_secret_id = (
             api_key_secret_id
             or os.environ.get("RICHPANEL_API_KEY_SECRET_ARN")
@@ -240,6 +235,12 @@ class RichpanelClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
+        log_env_resolution_warning(
+            self._logger,
+            service="richpanel",
+            env_source=env_source,
+            environment=self.environment,
+        )
         self._api_key = (
             api_key
             or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
@@ -262,16 +263,20 @@ class RichpanelClient:
         log_body_excerpt: bool = True,
     ) -> RichpanelResponse:
         method_upper = method.upper()
-        if (self.read_only or self._writes_disabled()) and method_upper not in {
-            "GET",
-            "HEAD",
-        }:
+        writes_disabled = self._writes_disabled()
+        prod_write_ack_required = self._prod_write_ack_required()
+        if (
+            (self.read_only or writes_disabled or prod_write_ack_required)
+            and method_upper not in {"GET", "HEAD"}
+        ):
             self._logger.warning(
                 "richpanel.write_blocked",
                 extra={
                     "method": method_upper,
                     "read_only": self.read_only,
-                    "write_disabled": self._writes_disabled(),
+                    "write_disabled": writes_disabled,
+                    "prod_write_ack_required": prod_write_ack_required,
+                    "environment": self.environment,
                 },
             )
             raise RichpanelWriteDisabledError(
@@ -564,6 +569,15 @@ class RichpanelClient:
         if env_override is not None:
             return _to_bool(env_override, default=False)
         return self.environment in READ_ONLY_ENVIRONMENTS
+
+    def _prod_write_ack_required(self) -> bool:
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return False
+        return not self._prod_write_acknowledged()
+
+    @staticmethod
+    def _prod_write_acknowledged() -> bool:
+        return prod_write_acknowledged(os.environ.get(PROD_WRITE_ACK_ENV))
 
     @staticmethod
     def _writes_disabled() -> bool:

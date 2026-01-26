@@ -35,7 +35,25 @@ Use these exact env var settings depending on mode.
 - `RICHPANEL_READ_ONLY=false`
 - `RICHPANEL_OUTBOUND_ENABLED=true`
 - `MW_OUTBOUND_ENABLED=true`
+- `MW_PROD_WRITES_ACK=I_UNDERSTAND_PROD_WRITES` (prod only; explicit two-man acknowledgment)
 - Checklist: [ ] Explicitly confirm "We are now live" (record in Progress Log)
+
+### Production write acknowledgment (two-man rule)
+
+To prevent accidental live-customer contact (see B54/B58), production writes
+require a **second explicit acknowledgment** in addition to the existing
+kill-switches. This fails closed even if other env vars are misconfigured.
+
+**Requirement (prod only):**
+- `MW_PROD_WRITES_ACK=I_UNDERSTAND_PROD_WRITES` (preferred) or `MW_PROD_WRITES_ACK=true`
+
+**Interlocks (all must allow):**
+- `safe_mode=false` and `automation_enabled=true` (SSM parameters)
+- `RICHPANEL_OUTBOUND_ENABLED=true` (outbound communications)
+- `RICHPANEL_WRITE_DISABLED=false` (no write lock)
+
+**Environment resolution:** prod is detected via `RICHPANEL_ENV` → `RICH_PANEL_ENV`
+→ `MW_ENV` → `ENV` → `ENVIRONMENT` (lowercased).
 
 ### Runtime kill switches (safe_mode + automation_enabled)
 
@@ -76,6 +94,9 @@ RICHPANEL_WRITE_DISABLED=true
 # Block ALL writes to Shopify (optional but recommended for full read-only guarantee)
 SHOPIFY_WRITE_DISABLED=true
 
+# Explicit production write acknowledgment (required for prod writes)
+MW_PROD_WRITES_ACK=I_UNDERSTAND_PROD_WRITES
+
 # Disable ALL outbound communications (email, SMS, push notifications)
 RICHPANEL_OUTBOUND_ENABLED=false
 ```
@@ -87,6 +108,7 @@ Before enabling shadow mode in production:
 - [ ] Confirm SSM parameters are set: `safe_mode=true`, `automation_enabled=false` (via workflow or SSM console)
 - [ ] Confirm Lambda env vars are set: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`
 - [ ] (Optional) Confirm `SHOPIFY_WRITE_DISABLED=true` is set
+- [ ] For go-live in prod, confirm `MW_PROD_WRITES_ACK=I_UNDERSTAND_PROD_WRITES` is set
 - [ ] Review CloudWatch logs to confirm no write operations are attempted
 - [ ] Run the "Prove zero writes" audit (see below)
 

@@ -1,0 +1,54 @@
+# Changes — B59/A
+
+- `backend/src/richpanel_middleware/integrations/richpanel/client.py`
+  - Added prod-only write acknowledgment gating (`MW_PROD_WRITES_ACK`) for non-GET/HEAD calls.
+  - Included `ENV` in environment resolution for prod detection.
+  - Reused shared prod write acknowledgment helper from `integrations.common`.
+  - Logged a warning when `ENV` drives prod resolution.
+  - Logged a warning when defaulting to `local` in AWS execution contexts.
+  - Switched env resolution warnings to shared helper.
+- `backend/src/integrations/shopify/client.py`
+  - Added prod-only write acknowledgment gating for non-GET/HEAD calls.
+  - Included `ENV` in environment resolution for prod detection.
+  - Reused shared prod write acknowledgment helper from `integrations.common`.
+  - Logged a warning when `ENV` drives prod resolution and flagged prod ack in dry-run logs.
+  - Raised `ShopifyWriteDisabledError` for prod writes without acknowledgment.
+  - Logged a warning when defaulting to `local` in AWS execution contexts.
+  - Switched env resolution warnings to shared helper and removed dead prod-ack log field.
+- `backend/src/integrations/common.py`
+  - Centralized prod write acknowledgment parsing to avoid drift.
+  - Added shared environment resolution helper for consistent precedence.
+  - Added shared env resolution warning logger to avoid duplication.
+- `backend/src/integrations/openai/client.py`
+  - Aligned environment resolution with shared helper (includes `ENV`).
+- `backend/src/richpanel_middleware/integrations/shopify/client.py`
+  - Re-exported `ShopifyWriteDisabledError` for middleware callers.
+- `backend/src/richpanel_middleware/integrations/shopify/__init__.py`
+  - Exposed `ShopifyWriteDisabledError` in module exports.
+- `scripts/test_richpanel_client.py`
+  - Added prod ack blocked/allowed tests plus non-prod regression coverage.
+- `scripts/test_shopify_client.py`
+  - Added prod ack blocked/allowed tests plus non-prod regression coverage.
+  - Restored immutability assertion for `redact_headers()`.
+  - Added safe-mode short-circuit test for prod ack gating.
+- `scripts/test_openai_client.py`
+  - Added ENV-based environment resolution coverage.
+- `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
+  - Documented the two-man rule, required env var, and interlocks.
+- `docs/08_Engineering/Secrets_and_Environments.md`
+  - Added `ENV` to environment resolution order and noted prod gating caution.
+- `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
+  - Documented `prod_write_ack_required` dry-run reason and `ENV` in env chain.
+- `docs/06_Security_Privacy_Compliance/Secrets_and_Key_Management.md`
+  - Added `ENV` to OpenAI environment resolution order.
+- `docs/_generated/doc_registry.json`
+- `docs/_generated/doc_registry.compact.json`
+- `docs/_generated/doc_outline.json`
+- `docs/_generated/heading_index.json`
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_EXTRACTED.md`
+- `docs/00_Project_Admin/To_Do/_generated/PLAN_CHECKLIST_SUMMARY.md`
+- `docs/00_Project_Admin/To_Do/_generated/plan_checklist.json`
+- `REHYDRATION_PACK/RUNS/B59/A/EVIDENCE.md`
+  - Added dev/sandbox E2E proof summary and artifact path.
+- `REHYDRATION_PACK/RUNS/B59/A/RUN_REPORT.md`
+  - Documented dev/sandbox E2E PASS_STRONG result.

@@ -13449,6 +13449,12 @@
       "anchor": "environment-contract-explicit"
     }
   ],
+  "production write acknowledgment (two-man rule)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "production-write-acknowledgment-two-man-rule"
+    }
+  ],
   "runtime kill switches (safe_mode + automation_enabled)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",

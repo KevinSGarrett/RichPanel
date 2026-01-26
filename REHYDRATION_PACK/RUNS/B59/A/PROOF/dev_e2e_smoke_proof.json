@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "run_id": "B59-DEV-20260126-1609Z",
+    "timestamp": "2026-01-26T17:25:21.568568+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "baseline",
+    "scenario_variant": "baseline"
+  },
+  "inputs": {
+    "ticket_ref": null,
+    "ticket_ref_fingerprint": null,
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario baseline --no-require-outbound --no-require-openai-routing --no-require-openai-rewrite --run-id B59-DEV-20260126-1609Z --proof-path REHYDRATION_PACK\\RUNS\\B59\\A\\PROOF\\dev_e2e_smoke_proof.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id_fingerprint": "4905eee4782a",
+    "conversation_id": "conv-d3a001ec",
+    "conversation_id_fingerprint": "663062f62d32",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 13
+    },
+    "state_record": {
+      "routing": {
+        "category": "general",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-unknown"
+        ],
+        "reason": "no customer message provided; default routing applied",
+        "intent": "unknown"
+      },
+      "action_count": 1,
+      "updated_at": "2026-01-26T17:25:19.095559+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "general",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-unknown"
+        ],
+        "reason": "no customer message provided; default routing applied",
+        "intent": "unknown"
+      },
+      "recorded_at": "2026-01-26T17:25:19.095559+00:00",
+      "ts_action_fingerprint": "2026-01-26T17:25:19.095559+00:00#fingerprint:4905eee4782a"
+    }
+  },
+  "openai": {
+    "routing": {
+      "llm_called": true,
+      "model": "gpt-5.2-chat-latest",
+      "confidence": 0.2,
+      "response_id": "chatcmpl-D2KcveWdbEt6KoRmGviwTqYTQu79u",
+      "response_id_unavailable_reason": null,
+      "final_intent": "unknown",
+      "primary_source": "deterministic",
+      "final_source": "deterministic",
+      "gated_reason": null
+    },
+    "rewrite": {
+      "rewrite_attempted": false,
+      "rewrite_applied": false,
+      "model": "gpt-5.2-chat-latest",
+      "response_id": null,
+      "response_id_unavailable_reason": "status_read_failed",
+      "fallback_used": false,
+      "reason": "status_read_failed",
+      "error_class": null,
+      "original_hash": null,
+      "rewritten_hash": null,
+      "rewritten_changed": null
+    }
+  },
+  "routing_metadata": {
+    "final": {
+      "source": "deterministic",
+      "intent": "unknown"
+    },
+    "openai": {
+      "called": true,
+      "model": "gpt-5.2-chat-latest",
+      "request_id": "chatcmpl-D2KcveWdbEt6KoRmGviwTqYTQu79u",
+      "response_id_unavailable_reason": null,
+      "confidence": 0.2
+    }
+  },
+  "rewriter_metadata": {
+    "used": false,
+    "model": "gpt-5.2-chat-latest",
+    "request_id": null,
+    "original_hash": null,
+    "rewritten_hash": null,
+    "changed": null
+  },
+  "order_status": {
+    "expected_delivery_estimate": null,
+    "eta_window_verified": null,
+    "eta_method_verified": null,
+    "eta_window_fallback_used": false,
+    "tracking_reply_verified": null,
+    "tracking_reply_source": null,
+    "tracking_number_present": null,
+    "tracking_url_present": null,
+    "tracking_number_fingerprint": null,
+    "tracking_url_fingerprint": null
+  },
+  "richpanel": {
+    "pre": null,
+    "post": null,
+    "tags_added": [],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "updated_at_delta_seconds": null,
+    "status_before": null,
+    "status_after": null,
+    "status_changed": null,
+    "message_count_before": null,
+    "message_count_after": null,
+    "message_count_delta": null,
+    "last_message_source_before": null,
+    "last_message_source_after": null,
+    "middleware_tags_added": [],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": null,
+    "auto_close_applied": false,
+    "auto_close_result": null,
+    "reply_update_success": null,
+    "reply_update_candidate": null,
+    "reply_fallback": null,
+    "success_tag_added_this_run": null,
+    "skip_or_escalation_tags_added_this_run": null,
+    "operator_reply_present": null,
+    "operator_reply_count_before": null,
+    "operator_reply_count_after": null,
+    "operator_reply_count_delta": null,
+    "latest_comment_is_operator": null,
+    "send_message_tag_present": null,
+    "send_message_tag_added": null
+  },
+  "followup": {
+    "performed": false,
+    "event_id_fingerprint": null,
+    "idempotency_record": null,
+    "tags_added": [],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "middleware_tags_added": [],
+    "status_after": null,
+    "message_count_delta": null,
+    "updated_at_delta_seconds": null,
+    "reply_sent": null,
+    "reply_reason": null,
+    "routed_to_support": null
+  },
+  "proof_fields": {
+    "ticket_channel": null,
+    "openai_routing_used": true,
+    "openai_rewrite_used": false,
+    "closed_after": null,
+    "message_count_delta": null,
+    "last_message_source_after": null,
+    "followup_routed_support": null,
+    "followup_reply_sent": false,
+    "followup_skip_tags_added": [],
+    "operator_reply_present": null,
+    "operator_reply_count_delta": null,
+    "latest_comment_is_operator": null,
+    "operator_reply_required": false,
+    "operator_reply_confirmed": null,
+    "send_message_tag_present": null,
+    "send_message_tag_added": null,
+    "send_message_path_required": false,
+    "send_message_path_confirmed": null
+  },
+  "result": {
+    "status": "PASS",
+    "classification": "PASS_STRONG",
+    "classification_reason": null,
+    "reply_evidence": null,
+    "reply_evidence_reason": null,
+    "fallback_close_used": null,
+    "followup_reply_sent": false,
+    "followup_reply_reason": "followup_not_performed",
+    "criteria": {
+      "scenario": "baseline",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": null,
+      "intent_order_status": null,
+      "middleware_outcome": null,
+      "status_resolved_or_closed": null,
+      "middleware_tag_applied": null,
+      "no_skip_tags": null,
+      "test_tag_verified": null,
+      "reply_evidence": null,
+      "outbound_message_count_delta_ge_1": null,
+      "outbound_last_message_source_middleware": null,
+      "openai_routing_called": null,
+      "openai_routing_source_openai": null,
+      "openai_rewrite_attempted": null,
+      "openai_rewrite_applied": null,
+      "followup_performed": null,
+      "followup_no_reply": null,
+      "followup_routed_support": null,
+      "followup_route_tag": null,
+      "followup_skip_followup_tag": null,
+      "operator_reply_present": null,
+      "operator_reply_count_delta_ge_1": null,
+      "send_message_tag_present": null,
+      "send_message_tag_added": null,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}

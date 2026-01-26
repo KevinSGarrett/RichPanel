@@ -12,6 +12,14 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
+from integrations.common import (
+    PROD_WRITE_ACK_ENV,
+    PRODUCTION_ENVIRONMENTS,
+    log_env_resolution_warning,
+    prod_write_acknowledged,
+    resolve_env_name,
+)
+
 try:
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -36,17 +44,6 @@ def _truncate(text: str, limit: int = 512) -> str:
     return f"{text[:limit]}..."
 
 
-def _resolve_env_name() -> str:
-    """Choose an environment name for secret lookup; defaults to 'local'."""
-    raw = (
-        os.environ.get("RICHPANEL_ENV")
-        or os.environ.get("RICH_PANEL_ENV")
-        or os.environ.get("MW_ENV")
-        or os.environ.get("ENVIRONMENT")
-        or "local"
-    )
-    value = str(raw).strip().lower() or "local"
-    return value
 
 
 @dataclass
@@ -102,6 +99,10 @@ class ShopifyRequestError(Exception):
     ) -> None:
         super().__init__(message)
         self.response = response
+
+
+class ShopifyWriteDisabledError(ShopifyRequestError):
+    """Raised when a Shopify write is attempted while writes are disabled."""
 
 
 class HttpTransport:
@@ -163,7 +164,7 @@ class ShopifyClient:
         rng: Optional[Callable[[], float]] = None,
         secrets_client: Optional[Any] = None,
     ) -> None:
-        self.environment = _resolve_env_name()
+        self.environment, env_source = resolve_env_name()
         self.shop_domain = (
             shop_domain
             or os.environ.get("SHOPIFY_SHOP_DOMAIN")
@@ -209,6 +210,12 @@ class ShopifyClient:
         )
         self.transport = transport or HttpTransport()
         self._logger = logger or logging.getLogger(__name__)
+        log_env_resolution_warning(
+            self._logger,
+            service="shopify",
+            env_source=env_source,
+            environment=self.environment,
+        )
         self._access_token = (
             access_token
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
@@ -231,16 +238,30 @@ class ShopifyClient:
         safe_mode: bool = False,
         automation_enabled: bool = True,
     ) -> ShopifyResponse:
+        method_upper = method.upper()
         url = self._build_url(path, params)
         body_bytes = self._encode_body(json_body)
         use_dry_run = self._resolve_dry_run(dry_run)
 
         reason = self._short_circuit_reason(safe_mode, automation_enabled, use_dry_run)
+        if reason is None and self._prod_write_ack_required(method_upper):
+            self._logger.warning(
+                "shopify.write_blocked",
+                extra={
+                    "method": method_upper,
+                    "url": url,
+                    "reason": "prod_write_ack_required",
+                    "environment": self.environment,
+                },
+            )
+            raise ShopifyWriteDisabledError(
+                "Shopify writes are disabled; request blocked"
+            )
         if reason:
             self._logger.info(
                 "shopify.dry_run",
                 extra={
-                    "method": method.upper(),
+                    "method": method_upper,
                     "url": url,
                     "reason": reason,
                     "dry_run": True,
@@ -282,7 +303,7 @@ class ShopifyClient:
             try:
                 transport_response = self.transport.send(
                     TransportRequest(
-                        method=method.upper(),
+                        method=method_upper,
                         url=url,
                         headers=request_headers,
                         body=body_bytes,
@@ -292,7 +313,7 @@ class ShopifyClient:
             except TransportError as exc:
                 self._logger.warning(
                     "shopify.transport_error",
-                    extra={"method": method.upper(), "url": url, "attempt": attempt},
+                    extra={"method": method_upper, "url": url, "attempt": attempt},
                 )
                 if attempt >= self.max_attempts:
                     raise ShopifyRequestError(
@@ -310,7 +331,7 @@ class ShopifyClient:
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
-                method.upper(),
+                method_upper,
                 response,
                 latency_ms,
                 attempt,
@@ -611,6 +632,17 @@ class ShopifyClient:
             return "dry_run_forced"
         return None
 
+    def _prod_write_ack_required(self, method: str) -> bool:
+        if method.upper() in {"GET", "HEAD"}:
+            return False
+        if self.environment not in PRODUCTION_ENVIRONMENTS:
+            return False
+        return not self._prod_write_acknowledged()
+
+    @staticmethod
+    def _prod_write_acknowledged() -> bool:
+        return prod_write_acknowledged(os.environ.get(PROD_WRITE_ACK_ENV))
+
     @staticmethod
     def redact_headers(headers: Dict[str, str]) -> Dict[str, str]:
         redacted = dict(headers or {})
@@ -629,6 +661,7 @@ __all__ = [
     "ShopifyClient",
     "ShopifyRequestError",
     "ShopifyResponse",
+    "ShopifyWriteDisabledError",
     "Transport",
     "TransportRequest",
     "TransportResponse",

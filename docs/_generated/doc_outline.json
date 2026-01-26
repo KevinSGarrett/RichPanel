@@ -12109,6 +12109,11 @@
       },
       {
         "level": 3,
+        "text": "Production write acknowledgment (two-man rule)",
+        "anchor": "production-write-acknowledgment-two-man-rule"
+      },
+      {
+        "level": 3,
         "text": "Runtime kill switches (safe_mode + automation_enabled)",
         "anchor": "runtime-kill-switches-safemode-automationenabled"
       },

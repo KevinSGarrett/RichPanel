@@ -745,8 +745,8 @@
     "section": "00_Project_Admin",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 11211,
-    "approx_tokens": 14574,
+    "word_count": 11226,
+    "approx_tokens": 14593,
     "last_updated": ""
   },
   {
@@ -1035,8 +1035,8 @@
     "section": "03_Richpanel_Integration",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 234,
-    "approx_tokens": 304,
+    "word_count": 249,
+    "approx_tokens": 323,
     "last_updated": ""
   },
   {
@@ -1635,8 +1635,8 @@
     "section": "06_Security_Privacy_Compliance",
     "status": "canonical",
     "in_index": true,
-    "word_count": 384,
-    "approx_tokens": 499,
+    "word_count": 385,
+    "approx_tokens": 500,
     "last_updated": "2025-12-22"
   },
   {
@@ -2025,8 +2025,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2791,
-    "approx_tokens": 3628,
+    "word_count": 2899,
+    "approx_tokens": 3768,
     "last_updated": "2026-01-17"
   },
   {
@@ -2055,8 +2055,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 1590,
-    "approx_tokens": 2067,
+    "word_count": 1621,
+    "approx_tokens": 2107,
     "last_updated": "2026-01-19"
   },
   {

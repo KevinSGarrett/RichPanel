@@ -12,6 +12,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
+from integrations.common import resolve_env_name
+
 try:
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -34,23 +36,6 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
-
-
-def _resolve_env_name() -> str:
-    """
-    Choose an environment name for secret lookup; defaults to 'local'.
-    Mirrors other integrations (Shopify, Richpanel) to stay consistent.
-    """
-
-    raw = (
-        os.environ.get("RICHPANEL_ENV")
-        or os.environ.get("RICH_PANEL_ENV")
-        or os.environ.get("MW_ENV")
-        or os.environ.get("ENVIRONMENT")
-        or "local"
-    )
-    value = str(raw).strip().lower() or "local"
-    return value
 
 
 def _uses_max_completion_tokens(model: str) -> bool:
@@ -198,7 +183,7 @@ class OpenAIClient:
         rng: Optional[Callable[[], float]] = None,
         secrets_client: Optional[Any] = None,
     ) -> None:
-        self.environment = _resolve_env_name()
+        self.environment, _ = resolve_env_name()
         self.base_url = (
             base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1"
         ).rstrip("/")
