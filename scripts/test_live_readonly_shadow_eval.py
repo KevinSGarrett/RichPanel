@@ -85,7 +85,6 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
         env = {
             "MW_ENV": "prod",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "false",
         }
         with mock.patch.dict(os.environ, env, clear=True):
@@ -138,7 +137,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_env_flags_success(self) -> None:
         env = {
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with mock.patch.dict(os.environ, env, clear=True):
@@ -984,7 +982,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1056,7 +1053,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         # Plan with NO order_summary to verify order_matched=False in non-explicit mode
@@ -1120,7 +1116,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
@@ -1217,7 +1212,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -1243,7 +1237,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1284,7 +1277,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -1314,7 +1306,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
@@ -1369,7 +1360,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1421,7 +1411,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1475,7 +1464,6 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
-            "RICHPANEL_OUTBOUND_ENABLED": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }

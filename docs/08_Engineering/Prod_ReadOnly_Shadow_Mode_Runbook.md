@@ -98,9 +98,9 @@ Before enabling shadow mode in production:
 - Required env vars (the script enforces/fails-closed):
   - `RICHPANEL_ENV=prod` (or `ENVIRONMENT=prod`)
   - `MW_ALLOW_NETWORK_READS=true`
-  - `RICHPANEL_OUTBOUND_ENABLED=true` (required for real GETs; still read-only)
   - `RICHPANEL_WRITE_DISABLED=true`
-- Note: This is **local script** configuration. Production worker shadow mode should still keep `RICHPANEL_OUTBOUND_ENABLED=false`.
+- Optional (recommended for prod shadow): `RICHPANEL_OUTBOUND_ENABLED=false`
+- Note: The local script no longer requires outbound enabled; production worker shadow mode should still keep `RICHPANEL_OUTBOUND_ENABLED=false`.
 - Optional overrides:
   - `RICHPANEL_API_KEY_OVERRIDE` (set to `PROD_RICHPANEL_API_KEY` for prod runs)
   - `SHOPIFY_SHOP_DOMAIN` (or `--shop-domain` flag) to target the correct store
@@ -110,7 +110,7 @@ Before enabling shadow mode in production:
 ```powershell
 $env:RICHPANEL_API_KEY_OVERRIDE = $env:PROD_RICHPANEL_API_KEY
 $env:MW_ALLOW_NETWORK_READS = "true"
-$env:RICHPANEL_OUTBOUND_ENABLED = "true"
+$env:RICHPANEL_OUTBOUND_ENABLED = "false"
 $env:RICHPANEL_WRITE_DISABLED = "true"
 
 python scripts/live_readonly_shadow_eval.py `

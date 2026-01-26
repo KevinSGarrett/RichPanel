@@ -66,7 +66,6 @@ PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
 
 REQUIRED_FLAGS = {
     "MW_ALLOW_NETWORK_READS": "true",
-    "RICHPANEL_OUTBOUND_ENABLED": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
 }
 
