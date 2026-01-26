@@ -5,6 +5,7 @@
 cd C:\RichPanel_GIT
 python scripts\test_richpanel_client.py
 python scripts\test_shopify_client.py
+python scripts\test_openai_client.py
 ```
 
 Output:
@@ -13,6 +14,9 @@ Ran 17 tests in 0.002s
 OK
 
 Ran 13 tests in 0.003s
+OK
+
+Ran 14 tests in 0.001s
 OK
 ```
 
@@ -35,11 +39,14 @@ botocore.exceptions.TokenRetrievalError: Error when retrieving token from sso: T
 - `backend/src/integrations/common.py`
 - `backend/src/richpanel_middleware/integrations/shopify/client.py`
 - `backend/src/richpanel_middleware/integrations/shopify/__init__.py`
+- `backend/src/integrations/openai/client.py`
 - `scripts/test_richpanel_client.py`
 - `scripts/test_shopify_client.py`
+- `scripts/test_openai_client.py`
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`
 - `docs/08_Engineering/Secrets_and_Environments.md`
 - `docs/03_Richpanel_Integration/Shopify_Integration_Skeleton.md`
+- `docs/06_Security_Privacy_Compliance/Secrets_and_Key_Management.md`
 - `docs/_generated/doc_registry.json`
 - `docs/_generated/doc_registry.compact.json`
 - `docs/_generated/doc_outline.json`

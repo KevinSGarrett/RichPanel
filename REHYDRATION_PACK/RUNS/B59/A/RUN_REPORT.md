@@ -14,6 +14,7 @@ require an explicit `MW_PROD_WRITES_ACK`.
 - Enforced a prod-only write acknowledgment gate in the Richpanel and Shopify clients.
 - Added unit tests for blocked/allowed prod writes and non-prod regression checks.
 - Documented the two-man rule + interlocks in the prod read-only runbook.
+- Aligned OpenAI env resolution with shared helper (includes `ENV`).
 
 ## PR Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/186
@@ -26,6 +27,7 @@ require an explicit `MW_PROD_WRITES_ACK`.
 ## Tests
 - `python scripts\test_richpanel_client.py` (PASS)
 - `python scripts\test_shopify_client.py` (PASS)
+- `python scripts\test_openai_client.py` (PASS)
 
 ## Dev/sandbox E2E
 - Attempted: `python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario baseline --no-require-outbound --no-require-openai-routing --no-require-openai-rewrite --run-id B59-DEV-20260126-1609Z --proof-path REHYDRATION_PACK\RUNS\B59\A\PROOF\dev_e2e_smoke_proof.json`
