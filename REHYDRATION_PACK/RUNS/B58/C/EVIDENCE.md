@@ -200,6 +200,6 @@ REQUIRED_FLAGS = {
 
 ## PR Gate Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/185
-- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344141065
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344274528
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
-- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344146995 (response id `msg_011mQGtPXAbsvNeY5Z5bRi5v`)
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344280148 (response id `msg_01YRaYJbJghtnuUk7GK6KiJG`)
