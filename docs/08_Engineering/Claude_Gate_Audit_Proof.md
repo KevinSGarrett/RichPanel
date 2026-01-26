@@ -1,12 +1,13 @@
 # Claude Gate Audit Proof
 
-Last updated: 2026-01-23  
+Last updated: 2026-01-26  
 Status: Canonical
 
 ## PR comment evidence (required)
 
 The Claude Gate PR comment must include:
 
+- Mode (`Mode: LEGACY|SHADOW|STRUCTURED`)
 - Model used (explicit string)
 - Anthropic Response ID
 - Anthropic Request ID (from response headers)
@@ -19,10 +20,11 @@ This comment is the human-readable audit trail that the gate performed a real An
 
 1. Confirm the PR has both `gate:claude` and exactly one `risk:R*` label.
 2. Locate the **Claude Review** PR comment and verify it includes:
-   - `Model used: ...`
-   - `Anthropic Response ID: ...`
-   - `Anthropic Request ID: ...`
-   - `Token Usage: input=..., output=...`
+   - `Mode: STRUCTURED`
+   - `Model used: claude-opus-4-5-20251101`
+   - `Anthropic Response ID: msg_xxx`
+   - `Anthropic Request ID: req_xxx`
+   - `Token Usage: input=1234, output=56`
    - `skip=false`
 3. Open the GitHub Actions run for **claude-gate-check** and download the
    `claude-gate-audit` artifact.
@@ -32,13 +34,28 @@ This comment is the human-readable audit trail that the gate performed a real An
 Example PR comment (redacted):
 
 ```
-Claude Review (risk=R2)
+Claude Review (gate:claude)
+Mode: STRUCTURED
+CLAUDE_REVIEW: PASS
+Risk: risk:R2
 Model used: claude-opus-4-5-20251101
 Anthropic Response ID: msg_xxx
 Anthropic Request ID: req_xxx
 Token Usage: input=1234, output=56
 skip=false
 ```
+
+## Job summary fields (fast verification)
+
+The workflow job summary for **claude-gate-check** lists:
+
+- Mode
+- Risk label
+- Model used
+- Anthropic Request ID
+- Anthropic Response ID
+
+Use the summary when you need quick confirmation without opening the PR comment.
 
 ## Confirm the run used the intended model
 
@@ -69,6 +86,19 @@ The JSON includes:
 Use this artifact to cross-check the PR comment and to reconcile usage with
 the Anthropic dashboard.
 
+## Correlating with the Anthropic dashboard
+
+Use either `Anthropic Request ID` or `Anthropic Response ID` from the PR comment
+or job summary. These identifiers map directly to the Anthropic dashboard logs
+for the API call and are the preferred way to reconcile usage or latency.
+
+## Audit check, not a quality gate
+
+The Claude gate exists to create an auditable trace of the model call and its
+telemetry. Treat it as an audit check: it confirms that the model was called,
+captures identifiers for correlation, and surfaces findings. It is not a
+replacement for human review or CI quality gates.
+
 ## Failure mode catalog (fail-closed)
 
 The gate must **fail closed** if any of the following occur:
@@ -80,6 +110,9 @@ The gate must **fail closed** if any of the following occur:
 - Missing `response_id` in the Anthropic response
 - Missing request id in response headers
 - Missing or zero token usage
+
+Structured parse failures are reported as warnings and should be investigated,
+but they do not block the gate on their own.
 
 ## Troubleshooting
 

@@ -43,6 +43,12 @@ class TestClaudeGateModelSelection(unittest.TestCase):
             claude_gate_review._select_model("risk:R1")
         self.assertIn("not allowlisted", str(ctx.exception))
 
+    def test_select_model_unknown_defaults_opus(self):
+        self.assertEqual(
+            claude_gate_review._select_model("risk:R9"),
+            claude_gate_review.DEFAULT_FALLBACK_MODEL,
+        )
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

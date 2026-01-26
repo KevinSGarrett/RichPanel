@@ -86,11 +86,10 @@ class TestClaudeGateReview(unittest.TestCase):
         finally:
             os.environ.pop("CLAUDE_GATE_MODEL_OVERRIDE", None)
 
-    def test_select_model_invalid_risk(self):
-        """Test that unsupported risk label raises."""
-        with self.assertRaises(RuntimeError) as ctx:
-            claude_gate_review._select_model("risk:R9")
-        self.assertIn("Unsupported risk label", str(ctx.exception))
+    def test_select_model_invalid_risk_defaults_opus(self):
+        """Test that unsupported risk label defaults to Opus."""
+        model = claude_gate_review._select_model("risk:R9")
+        self.assertEqual(model, claude_gate_review.DEFAULT_FALLBACK_MODEL)
 
     def test_parse_verdict_pass(self):
         """Test verdict parsing for PASS."""
@@ -159,6 +158,12 @@ FINDINGS:
         headers = {"x-request-id": "req_secondary", "request-id": "req_primary"}
         request_id = claude_gate_review._extract_request_id(headers)
         self.assertEqual(request_id, "req_primary")
+
+    def test_extract_request_id_case_insensitive(self):
+        """Test request id extraction handles mixed-case headers."""
+        headers = {"Request-Id": "req_caps"}
+        request_id = claude_gate_review._extract_request_id(headers)
+        self.assertEqual(request_id, "req_caps")
 
     def test_extract_request_id_missing(self):
         """Test request id extraction returns empty when missing."""
@@ -334,6 +339,13 @@ FINDINGS:
         self.assertEqual(claude_gate_review._coerce_json_text(fenced), '{"version":"1.0"}')
         wrapped = "prefix {\"version\":\"1.0\"} suffix"
         self.assertEqual(claude_gate_review._coerce_json_text(wrapped), '{"version":"1.0"}')
+        disclaimer = "Heads up:\n```json\n{\"version\":\"1.0\"}\n```\nThanks"
+        self.assertEqual(claude_gate_review._coerce_json_text(disclaimer), '{"version":"1.0"}')
+        balanced = 'prefix {"version":"1.0","note":"brace } inside"} suffix'
+        self.assertEqual(
+            claude_gate_review._coerce_json_text(balanced),
+            '{"version":"1.0","note":"brace } inside"}',
+        )
 
     def test_parse_structured_output_with_fence(self):
         raw = """```json
@@ -341,6 +353,17 @@ FINDINGS:
 ```"""
         payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
         self.assertEqual(payload.get("version"), "1.0")
+        self.assertEqual(findings, [])
+        self.assertEqual(errors, [])
+
+    def test_parse_structured_output_with_disclaimer(self):
+        raw = """Here is the JSON:
+```json
+{"version":"1.0","verdict":"PASS","risk":"risk:R2","reviewers":[]}
+```
+Let me know if you need more."""
+        payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertEqual(payload.get("verdict"), "PASS")
         self.assertEqual(findings, [])
         self.assertEqual(errors, [])
 
@@ -1337,16 +1360,26 @@ FINDINGS:
         os.environ["GITHUB_STEP_SUMMARY"] = summary_path
         try:
             summary = claude_gate_review._build_step_summary(
-                mode_label="LEGACY",
+                mode_label="STRUCTURED",
                 verdict="PASS",
                 bypass=False,
                 action_required_count=0,
                 warnings=["note"],
+                mode="structured",
+                risk="risk:R2",
+                model_used="claude-opus-4-5-20251101",
+                request_id="req_123",
+                response_id="msg_123",
             )
             claude_gate_review._write_step_summary(summary)
             with open(summary_path, "r", encoding="utf-8") as handle:
                 content = handle.read()
-            self.assertIn("Mode: LEGACY", content)
+            self.assertIn("Claude gate mode: structured", content)
+            self.assertIn("Mode: STRUCTURED", content)
+            self.assertIn("Risk label: risk:R2", content)
+            self.assertIn("Model used: claude-opus-4-5-20251101", content)
+            self.assertIn("Anthropic Request ID: req_123", content)
+            self.assertIn("Anthropic Response ID: msg_123", content)
             self.assertIn("Warning: note", content)
         finally:
             os.environ.pop("GITHUB_STEP_SUMMARY", None)
@@ -1392,6 +1425,7 @@ FINDINGS:
         self.assertTrue(errors)
         self.assertEqual(findings, [])
         self.assertEqual(payload, {})
+        self.assertTrue(any("len=" in error for error in errors))
 
     def test_parse_structured_output_non_dict_payload(self):
         payload, findings, errors = claude_gate_review._parse_structured_output("42", "")
@@ -1490,7 +1524,8 @@ FINDINGS:
                     with patch.object(sys, "argv", argv):
                         result = claude_gate_review.main()
             self.assertEqual(result, 0)
-            self.assertIn("CLAUDE_REVIEW: FAIL", captured.getvalue())
+            self.assertIn("CLAUDE_REVIEW: PASS", captured.getvalue())
+            self.assertIn("Structured output parse failure", captured.getvalue())
         finally:
             os.environ.pop("CLAUDE_REVIEW_MODE", None)
 
