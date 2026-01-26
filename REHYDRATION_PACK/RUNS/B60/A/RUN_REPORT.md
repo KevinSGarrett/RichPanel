@@ -14,6 +14,8 @@ Harden Claude gate reliability and telemetry by making the mode explicit, improv
 - Implemented balanced-brace JSON extraction with PII-safe parse warnings; structured parse failures are warnings only.
 - Normalized request-id header parsing and defaulted unknown risk mappings to Opus 4.5.
 - Updated workflow summary and audit documentation to reflect the new telemetry and audit intent.
+- Expanded parse-error redaction to cover emails and long numeric sequences.
+- Regenerated docs registries after documentation updates.
 
 ## Tests
 - `python -m unittest test_claude_gate_review` (from `scripts/`)

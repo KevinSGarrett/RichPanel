@@ -16,6 +16,14 @@ python scripts\claude_gate_review.py --dry-run --fixture legacy_small
 Remove-Item Env:CLAUDE_REVIEW_MODE
 ```
 
+## Regenerated docs
+```powershell
+cd C:\RichPanel_GIT
+python scripts\regen_doc_registry.py
+python scripts\regen_reference_registry.py
+python scripts\regen_plan_checklist.py
+```
+
 ## Notes
 - `python -m unittest scripts/test_claude_gate_review.py` from repo root failed due to module import path; reran from `scripts/` directory.
 

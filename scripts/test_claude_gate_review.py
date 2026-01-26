@@ -1267,6 +1267,18 @@ Let me know if you need more."""
     def test_redact_evidence_secret(self):
         self.assertEqual(claude_gate_review._redact_evidence("api_key=123"), "[REDACTED]")
 
+    def test_redact_evidence_email(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("Contact me at user@example.com"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_long_number(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("order=1234567890"),
+            "[REDACTED]",
+        )
+
     def test_redact_evidence_truncates(self):
         long_text = "a" * 250
         redacted = claude_gate_review._redact_evidence(long_text)

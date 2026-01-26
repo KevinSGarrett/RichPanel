@@ -765,7 +765,16 @@ def _extract_findings(text: str, max_findings: int) -> list[str]:
 
 
 _EVIDENCE_SECRET_RE = re.compile(
-    r"(AKIA[0-9A-Z]{16}|-----BEGIN|\bapi[_-]?key\b|\bsecret\b|\bpassword\b|\btoken\b)",
+    r"("
+    r"AKIA[0-9A-Z]{16}"
+    r"|-----BEGIN"
+    r"|\bapi[_-]?key\b"
+    r"|\bsecret\b"
+    r"|\bpassword\b"
+    r"|\btoken\b"
+    r"|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    r"|\b\d{9,}\b"
+    r")",
     re.IGNORECASE,
 )
 
