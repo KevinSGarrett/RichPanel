@@ -92,6 +92,6 @@ REQUIRED_FLAGS = {
 
 ## PR Gate Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/185
-- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344412169
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21346012477
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
-- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344417605 (response id `msg_01TaGW6zqkxasMwXm4RU8vfD`)
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21346016249 (response id `msg_01YHrDRoKUKYshuqqW7yrxoh`)

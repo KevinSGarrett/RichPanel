@@ -25,9 +25,9 @@ Produce the first live read-only shadow validation report proving the read path 
 ## PR Evidence
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/185
 - Labels: `risk:R2`, `gate:claude`
-- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344412169
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21346012477
 - Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
-- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344417605 (response id `msg_01TaGW6zqkxasMwXm4RU8vfD`)
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21346016249 (response id `msg_01YHrDRoKUKYshuqqW7yrxoh`)
 
 ## Notes
 - Shopify token sourced from `rp-mw/dev/shopify/admin_api_token` via `SHOPIFY_ACCESS_TOKEN_PROFILE=rp-admin-dev` (token not logged).
