@@ -653,12 +653,51 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
 
+    def test_http_trace_allows_aws_portal_get(self) -> None:
+        trace = shadow_eval._HttpTrace()
+        trace.entries.append(
+            {"method": "GET", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
+        trace.entries.append(
+            {"method": "PUT", "path": "/federation/credentials", "service": "aws_portal"}
+        )
+        with self.assertRaises(SystemExit):
+            trace.assert_read_only(allow_openai=False, trace_path=Path("trace.json"))
+
     def test_http_trace_service_mapping(self) -> None:
         trace = shadow_eval._HttpTrace()
         trace.record("GET", "https://shop.myshopify.com/admin/api/2024-01/orders/1")
         trace.record("GET", "https://ssapi.shipstation.com/shipments")
         self.assertEqual(trace.entries[0]["service"], "shopify")
         self.assertEqual(trace.entries[1]["service"], "shipstation")
+
+    def test_service_from_hostname(self) -> None:
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.richpanel.com"), "richpanel"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("shop.myshopify.com"), "shopify"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("ssapi.shipstation.com"), "shipstation"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.openai.com"), "openai"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("api.anthropic.com"), "anthropic"
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("secretsmanager.us-east-2.amazonaws.com"),
+            "aws_secretsmanager",
+        )
+        self.assertEqual(
+            shadow_eval._service_from_hostname("portal.sso.amazonaws.com"),
+            "aws_portal",
+        )
+        self.assertEqual(shadow_eval._service_from_hostname(""), "unknown")
 
     def test_http_trace_records_anthropic_and_unknown(self) -> None:
         trace = shadow_eval._HttpTrace()
@@ -774,6 +813,75 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
         req = _Req(body=b"Action=GetCallerIdentity&Version=2011-06-15")
         self.assertEqual(shadow_eval._extract_aws_operation(req), "GetCallerIdentity")
+
+    def test_resolve_shopify_secrets_client_no_profile(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(shadow_eval._resolve_shopify_secrets_client())
+
+    def test_resolve_shopify_secrets_client_with_profile(self) -> None:
+        class _StubSession:
+            def __init__(self, profile_name: str, region_name: str) -> None:
+                self.profile_name = profile_name
+                self.region_name = region_name
+
+            def client(self, service_name: str, region_name=None):
+                return {
+                    "service": service_name,
+                    "region": region_name,
+                    "profile": self.profile_name,
+                }
+
+        class _StubBoto3:
+            def Session(self, profile_name: str, region_name: str):
+                return _StubSession(profile_name, region_name)
+
+        env = {
+            "SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev",
+            "AWS_REGION": "us-east-2",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(shadow_eval, "boto3", _StubBoto3()):
+                client = shadow_eval._resolve_shopify_secrets_client()
+        assert client is not None
+        self.assertEqual(client["service"], "secretsmanager")
+        self.assertEqual(client["profile"], "rp-admin-dev")
+        self.assertEqual(client["region"], "us-east-2")
+
+    def test_resolve_shopify_secrets_client_requires_boto3(self) -> None:
+        env = {"SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(shadow_eval, "boto3", None):
+                with self.assertRaises(SystemExit):
+                    shadow_eval._resolve_shopify_secrets_client()
+
+    def test_aws_sdk_trace_capture_records(self) -> None:
+        try:
+            import botocore.endpoint  # type: ignore
+        except Exception:
+            self.skipTest("botocore not available")
+
+        entries: list[dict] = []
+        trace = shadow_eval._AwsSdkTrace(entries)
+
+        class _Req:
+            method = "POST"
+            url = "https://secretsmanager.us-east-2.amazonaws.com/"
+            headers = {"X-Amz-Target": "secretsmanager.GetSecretValue"}
+            body = b""
+            context = {"operation_name": "GetSecretValue"}
+
+        def _fake_send(self, request):
+            return {"ok": True}
+
+        with mock.patch("botocore.endpoint.Endpoint._send", new=_fake_send):
+            trace.capture()
+            botocore.endpoint.Endpoint._send(None, _Req())
+            trace.stop()
+
+        self.assertTrue(entries)
+        self.assertEqual(entries[0]["service"], "aws_secretsmanager")
+        self.assertEqual(entries[0]["operation"], "GetSecretValue")
+        self.assertEqual(entries[0]["source"], "aws_sdk")
 
     def test_delivery_estimate_present(self) -> None:
         self.assertFalse(shadow_eval._delivery_estimate_present("not a dict"))
