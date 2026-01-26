@@ -65,6 +65,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     RichpanelExecutor,
     RichpanelRequestError,
     RichpanelResponse,
+    RichpanelWriteDisabledError,
     SecretLoadError,
     TransportError,
 )
@@ -108,6 +109,27 @@ _ORDER_STATUS_VARIANTS = {
     "order_status_no_tracking_short_window": "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5": "order_status_no_tracking_standard_shipping_3_5",
 }
+
+_SMOKE_TICKET_FROM_EMAIL_ENV = "MW_SMOKE_TICKET_FROM_EMAIL"
+_SMOKE_TICKET_SUBJECT_ENV = "MW_SMOKE_TICKET_SUBJECT"
+_SMOKE_TICKET_BODY_ENV = "MW_SMOKE_TICKET_BODY"
+_SMOKE_CREATED_TICKET_PATH_ENV = "MW_SMOKE_CREATED_TICKET_PATH"
+_DEFAULT_SMOKE_TICKET_FROM_EMAIL = "sandbox.test+autoticket@example.com"
+_DEFAULT_SMOKE_TICKET_SUBJECT = "Sandbox E2E smoke (autoticket)"
+_DEFAULT_SMOKE_TICKET_BODY = "Automated sandbox E2E smoke test message. Please ignore."
+_DEFAULT_SMOKE_TICKET_TO_EMAIL = "support@example.com"
+_DEFAULT_SMOKE_TICKET_FIRST_NAME = "Sandbox"
+_DEFAULT_SMOKE_TICKET_LAST_NAME = "Test"
+_SMOKE_TICKET_TAGS = ["mw-smoke-autoticket"]
+_DEFAULT_CREATED_TICKET_PROOF_PATH = (
+    ROOT
+    / "REHYDRATION_PACK"
+    / "RUNS"
+    / "B59"
+    / "B"
+    / "PROOF"
+    / "created_ticket.json"
+)
 
 
 def _is_order_status_scenario(name: str) -> bool:
@@ -404,7 +426,13 @@ def _redact_command(argv: List[str]) -> str:
     """Return a PII-safe representation of the executed command."""
     redacted: List[str] = []
     skip_next = False
-    sensitive_flags = {"--ticket-number", "--event-id"}
+    sensitive_flags = {
+        "--ticket-number",
+        "--event-id",
+        "--ticket-from-email",
+        "--ticket-subject",
+        "--ticket-body",
+    }
     for arg in argv:
         if skip_next:
             skip_next = False
@@ -978,6 +1006,194 @@ def _build_richpanel_executor(
     return RichpanelExecutor(client=client, outbound_enabled=allow_network)
 
 
+def _resolve_smoke_ticket_text(
+    value: Optional[str], *, env_key: str, default: str
+) -> str:
+    candidate = value or os.environ.get(env_key) or default
+    try:
+        text = str(candidate).strip()
+    except Exception:
+        return default
+    return text or default
+
+
+def _redact_identifier(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    return f"redacted:{_fingerprint(value)}"
+
+
+def _extract_created_ticket_fields(payload: Any) -> Tuple[Optional[str], Optional[str]]:
+    ticket_obj: Dict[str, Any] = {}
+    if isinstance(payload, dict):
+        if isinstance(payload.get("ticket"), dict):
+            ticket_obj = payload["ticket"]
+        else:
+            ticket_obj = payload
+    ticket_number = (
+        ticket_obj.get("conversation_no")
+        or ticket_obj.get("ticket_number")
+        or ticket_obj.get("number")
+        or ticket_obj.get("conversation_number")
+    )
+    ticket_id = ticket_obj.get("id") or ticket_obj.get("ticket_id") or ticket_obj.get("_id")
+    ticket_number_str = str(ticket_number).strip() if ticket_number is not None else None
+    ticket_id_str = str(ticket_id).strip() if ticket_id is not None else None
+    return ticket_number_str or None, ticket_id_str or None
+
+
+def _build_create_ticket_payload(
+    *, from_email: str, to_email: str, subject: str, body: str, first_name: str, last_name: str
+) -> Dict[str, Any]:
+    ticket: Dict[str, Any] = {
+        "status": "OPEN",
+        "priority": "LOW",
+        "subject": subject,
+        "comment": {
+            "sender_type": "customer",
+            "body": body,
+            "public": True,
+        },
+        "via": {
+            "channel": "email",
+            "source": {
+                "from": {"address": from_email},
+                "to": {"address": to_email},
+            },
+        },
+        "customer_profile": {"firstName": first_name, "lastName": last_name},
+    }
+    if _SMOKE_TICKET_TAGS:
+        ticket["tags"] = list(_SMOKE_TICKET_TAGS)
+    return {"ticket": ticket}
+
+
+def _write_created_ticket_artifact(
+    *, path: Path, payload: Dict[str, Any]
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+
+
+def _create_sandbox_email_ticket(
+    *,
+    env_name: str,
+    region: str,
+    stack_name: str,
+    api_key_secret_id: Optional[str],
+    from_email: str,
+    to_email: str,
+    subject: str,
+    body: str,
+    first_name: str,
+    last_name: str,
+    proof_path: Optional[Path],
+) -> Dict[str, Any]:
+    os.environ.setdefault("RICHPANEL_ENV", env_name)
+    client = RichpanelClient(
+        api_key_secret_id=api_key_secret_id,
+        dry_run=False,
+    )
+    payload = _build_create_ticket_payload(
+        from_email=from_email,
+        to_email=to_email,
+        subject=subject,
+        body=body,
+        first_name=first_name,
+        last_name=last_name,
+    )
+    try:
+        response = client.request(
+            "POST",
+            "/v1/tickets",
+            json_body=payload,
+            dry_run=False,
+            log_body_excerpt=False,
+        )
+    except (
+        RichpanelRequestError,
+        RichpanelWriteDisabledError,
+        SecretLoadError,
+        TransportError,
+    ) as exc:
+        raise SmokeFailure(f"Ticket creation failed: {exc}") from exc
+
+    if response.dry_run:
+        raise SmokeFailure("Ticket creation skipped: Richpanel client is in dry-run.")
+
+    if response.status_code < 200 or response.status_code >= 300:
+        try:
+            body = response.json()
+        except Exception:
+            body = None
+        snippet = None
+        if body is None:
+            snippet = "<non-json response body>"
+        else:
+            try:
+                snippet = _truncate_text(json.dumps(body))
+            except Exception:
+                snippet = _truncate_text(str(body))
+        raise SmokeFailure(
+            "Ticket creation failed with status "
+            f"{response.status_code} (path={response.url}, body={snippet})."
+        )
+
+    ticket_number, ticket_id = _extract_created_ticket_fields(response.json())
+    if not ticket_number and not ticket_id:
+        raise SmokeFailure("Ticket creation response missing ticket identifiers.")
+
+    ticket_number_fp = _fingerprint(ticket_number) if ticket_number else None
+    ticket_id_fp = _fingerprint(ticket_id) if ticket_id else None
+
+    if proof_path:
+        artifact = {
+            "meta": {
+                "timestamp": _iso_timestamp_now(),
+                "env": env_name,
+                "region": region,
+                "stack_name": stack_name,
+            },
+            "request": {
+                "channel": "email",
+                "from_email_redacted": _redact_identifier(from_email),
+                "subject_fingerprint": _fingerprint(subject),
+                "body_fingerprint": _fingerprint(body),
+                "tags": list(_SMOKE_TICKET_TAGS),
+            },
+            "response": {
+                "status_code": response.status_code,
+                "ticket_number_redacted": _redact_identifier(ticket_number),
+                "ticket_number_fingerprint": ticket_number_fp,
+                "conversation_id_redacted": _redact_identifier(ticket_id),
+                "conversation_id_fingerprint": ticket_id_fp,
+            },
+            "result": {"status": "created"},
+        }
+        _write_created_ticket_artifact(path=proof_path, payload=artifact)
+        print(f"[OK] Wrote created-ticket artifact to {proof_path}")
+
+    display_ticket = _redact_identifier(ticket_number) or "<redacted>"
+    display_conversation = _redact_identifier(ticket_id) or "<redacted>"
+    print(
+        "[OK] Created sandbox email ticket "
+        f"(ticket_number={display_ticket}, conversation_id={display_conversation})."
+    )
+    print(
+        "[OK] Ticket fingerprints "
+        f"(ticket_number={ticket_number_fp or 'n/a'}, conversation_id={ticket_id_fp or 'n/a'})."
+    )
+
+    return {
+        "ticket_number": ticket_number,
+        "ticket_id": ticket_id,
+        "ticket_number_fingerprint": ticket_number_fp,
+        "ticket_id_fingerprint": ticket_id_fp,
+        "proof_path": str(proof_path) if proof_path else None,
+    }
+
+
 def _fetch_ticket_snapshot(
     executor: RichpanelExecutor,
     ticket_ref: str,
@@ -1485,6 +1701,44 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--ticket-number",
         help="Richpanel ticket number to resolve and target (optional; tries ID then number endpoint).",
+    )
+    parser.add_argument(
+        "--create-ticket",
+        action="store_true",
+        help="Create a fresh sandbox email ticket and use it for this run.",
+    )
+    parser.add_argument(
+        "--ticket-from-email",
+        dest="ticket_from_email",
+        help=(
+            "From-address for auto-created tickets "
+            f"(default: ${_SMOKE_TICKET_FROM_EMAIL_ENV} or {_DEFAULT_SMOKE_TICKET_FROM_EMAIL})."
+        ),
+    )
+    parser.add_argument(
+        "--ticket-subject",
+        dest="ticket_subject",
+        help=(
+            "Subject for auto-created tickets "
+            f"(default: ${_SMOKE_TICKET_SUBJECT_ENV} or {_DEFAULT_SMOKE_TICKET_SUBJECT})."
+        ),
+    )
+    parser.add_argument(
+        "--ticket-body",
+        dest="ticket_body",
+        help=(
+            "Body for auto-created tickets "
+            f"(default: ${_SMOKE_TICKET_BODY_ENV} or {_DEFAULT_SMOKE_TICKET_BODY})."
+        ),
+    )
+    parser.add_argument(
+        "--create-ticket-proof-path",
+        dest="create_ticket_proof_path",
+        help=(
+            "Optional path to write the created-ticket artifact "
+            f"(default: ${_SMOKE_CREATED_TICKET_PATH_ENV} or "
+            f"{_DEFAULT_CREATED_TICKET_PROOF_PATH})."
+        ),
     )
     parser.add_argument(
         "--run-id",
@@ -2773,6 +3027,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         require_operator_reply = False
         require_send_message = False
 
+    if args.create_ticket and env_name.strip().lower() in {"prod", "production"}:
+        raise SmokeFailure("Refusing to auto-create tickets in production.")
+
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
         print(f"[INFO] Scenario: {args.scenario}")
@@ -2780,9 +3037,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     # Scenario-specific validation
     if order_status_mode:
         ticket_ref_for_scenario = args.ticket_id or args.ticket_number
-        if not ticket_ref_for_scenario:
+        if not ticket_ref_for_scenario and not args.create_ticket:
             raise SmokeFailure(
-                "--scenario order_status* requires --ticket-id or --ticket-number."
+                "--scenario order_status* requires --ticket-id/--ticket-number "
+                "or --create-ticket."
             )
 
     session = _setup_boto_session(region, args.profile)
@@ -2827,6 +3085,68 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     token = load_webhook_token(secrets_client, artifacts.secrets_namespace)
 
     ticket_ref = args.ticket_id or args.ticket_number
+    created_ticket: Optional[Dict[str, Any]] = None
+    if args.create_ticket:
+        if ticket_ref:
+            print(
+                "[WARN] --create-ticket specified; ignoring --ticket-id/--ticket-number."
+            )
+        from_email = _resolve_smoke_ticket_text(
+            args.ticket_from_email,
+            env_key=_SMOKE_TICKET_FROM_EMAIL_ENV,
+            default=_DEFAULT_SMOKE_TICKET_FROM_EMAIL,
+        )
+        to_email = _resolve_smoke_ticket_text(
+            None,
+            env_key="MW_SMOKE_TICKET_TO_EMAIL",
+            default=_DEFAULT_SMOKE_TICKET_TO_EMAIL,
+        )
+        subject = _resolve_smoke_ticket_text(
+            args.ticket_subject,
+            env_key=_SMOKE_TICKET_SUBJECT_ENV,
+            default=_DEFAULT_SMOKE_TICKET_SUBJECT,
+        )
+        body = _resolve_smoke_ticket_text(
+            args.ticket_body,
+            env_key=_SMOKE_TICKET_BODY_ENV,
+            default=_DEFAULT_SMOKE_TICKET_BODY,
+        )
+        first_name = _resolve_smoke_ticket_text(
+            None,
+            env_key="MW_SMOKE_TICKET_FIRST_NAME",
+            default=_DEFAULT_SMOKE_TICKET_FIRST_NAME,
+        )
+        last_name = _resolve_smoke_ticket_text(
+            None,
+            env_key="MW_SMOKE_TICKET_LAST_NAME",
+            default=_DEFAULT_SMOKE_TICKET_LAST_NAME,
+        )
+        proof_path = (
+            args.create_ticket_proof_path
+            or os.environ.get(_SMOKE_CREATED_TICKET_PATH_ENV)
+            or str(_DEFAULT_CREATED_TICKET_PROOF_PATH)
+        )
+        created_ticket = _create_sandbox_email_ticket(
+            env_name=env_name,
+            region=region,
+            stack_name=args.stack_name,
+            api_key_secret_id=args.richpanel_secret_id,
+            from_email=from_email,
+            to_email=to_email,
+            subject=subject,
+            body=body,
+            first_name=first_name,
+            last_name=last_name,
+            proof_path=Path(proof_path) if proof_path else None,
+        )
+        ticket_ref = created_ticket.get("ticket_id") or created_ticket.get(
+            "ticket_number"
+        )
+        if not ticket_ref:
+            raise SmokeFailure("Auto-ticket creation did not return a ticket reference.")
+        payload_ticket_number = created_ticket.get("ticket_number")
+    else:
+        payload_ticket_number = ticket_ref
     if args.apply_test_tag and not ticket_ref:
         raise SmokeFailure("--apply-test-tag requires --ticket-id or --ticket-number.")
 
@@ -2907,7 +3227,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         conversation_id=payload_conversation,
         run_id=run_id,
         scenario=args.scenario,
-        ticket_number=ticket_ref,
+        ticket_number=payload_ticket_number,
     )
     payload["outbound_enabled"] = True
     payload["allow_network"] = True
@@ -3761,7 +4081,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     scenario_variant=scenario_variant,
                 )
                 followup_payload["run_id"] = run_id
-                followup_payload["ticket_number"] = ticket_ref
+                followup_payload["ticket_number"] = payload_ticket_number
                 followup_payload["outbound_enabled"] = True
                 followup_payload["allow_network"] = True
                 followup_payload["automation_enabled"] = True
