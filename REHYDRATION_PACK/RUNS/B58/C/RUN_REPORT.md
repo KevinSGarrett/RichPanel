@@ -22,6 +22,13 @@ Produce the first live read-only shadow validation report proving the read path 
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_RUN_20260126_0154Z.json`
 - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260126_0154Z.json`
 
+## PR Evidence
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/185
+- Labels: `risk:R2`, `gate:claude`
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344141065
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344146995 (response id `msg_011mQGtPXAbsvNeY5Z5bRi5v`)
+
 ## Notes
 - Shopify token sourced from `rp-mw/dev/shopify/admin_api_token` via override for this run (token not logged).
 - Conversation reads returned 403 for some endpoints; ticket + Shopify matching still succeeded.

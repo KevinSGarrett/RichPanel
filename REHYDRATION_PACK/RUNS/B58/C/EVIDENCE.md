@@ -197,3 +197,9 @@ REQUIRED_FLAGS = {
 
 ### No non-GET methods attempted
 - `http_trace_summary.allowed_methods_only` is `true` and the methods list contains only `GET` (see snippet above).
+
+## PR Gate Evidence
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/185
+- CI (validate): https://github.com/KevinSGarrett/RichPanel/actions/runs/21344141065
+- Codecov: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/185
+- Claude gate: https://github.com/KevinSGarrett/RichPanel/actions/runs/21344146995 (response id `msg_011mQGtPXAbsvNeY5Z5bRi5v`)
