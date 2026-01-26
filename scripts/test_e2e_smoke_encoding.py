@@ -1253,6 +1253,38 @@ class AutoTicketHelpersTests(unittest.TestCase):
                     proof_path=None,
                 )
 
+    def test_create_sandbox_email_ticket_non_json_error(self) -> None:
+        class _ErrorResponse:
+            status_code = 500
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                raise ValueError("not json")
+
+        class _ErrorClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _ErrorResponse:
+                return _ErrorResponse()
+
+        with patch("dev_e2e_smoke.RichpanelClient", _ErrorClient):
+            with self.assertRaises(SmokeFailure):
+                _create_sandbox_email_ticket(
+                    env_name="dev",
+                    region="us-east-2",
+                    stack_name="RichpanelMiddleware-dev",
+                    api_key_secret_id=None,
+                    from_email="from@example.com",
+                    to_email="support@example.com",
+                    subject="Subject",
+                    body="Body",
+                    first_name="Sandbox",
+                    last_name="Test",
+                    proof_path=None,
+                )
+
     def test_create_sandbox_email_ticket_write_disabled(self) -> None:
         class _WriteDisabledClient:
             def __init__(self, **_: Any) -> None:

@@ -6,6 +6,7 @@
 - Extended `scripts/test_e2e_smoke_encoding.py` to cover redaction of auto-ticket flags.
 - Expanded auto-ticket payloads with email `to` address and customer profile defaults to match Richpanel API expectations.
 - Caught `RichpanelWriteDisabledError` during auto-ticket creation and added unit coverage for the failure path.
+- Guarded auto-ticket error handling against non-JSON Richpanel responses with unit coverage.
 
 ## Artifacts
 - Created-ticket template: `REHYDRATION_PACK/RUNS/B59/B/PROOF/created_ticket.json`

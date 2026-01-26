@@ -1123,12 +1123,18 @@ def _create_sandbox_email_ticket(
         raise SmokeFailure("Ticket creation skipped: Richpanel client is in dry-run.")
 
     if response.status_code < 200 or response.status_code >= 300:
-        body = response.json()
-        snippet = None
         try:
-            snippet = _truncate_text(json.dumps(body) if body is not None else "")
+            body = response.json()
         except Exception:
-            snippet = _truncate_text(str(body))
+            body = None
+        snippet = None
+        if body is None:
+            snippet = "<non-json response body>"
+        else:
+            try:
+                snippet = _truncate_text(json.dumps(body))
+            except Exception:
+                snippet = _truncate_text(str(body))
         raise SmokeFailure(
             "Ticket creation failed with status "
             f"{response.status_code} (path={response.url}, body={snippet})."
