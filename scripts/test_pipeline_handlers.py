@@ -32,6 +32,8 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     plan_actions,
     build_no_tracking_reply,
     _fingerprint_reply_body,
+    _match_allowlist_email,
+    _parse_allowlist_entries,
     _resolve_author_id,
     _user_is_agent,
     _safe_ticket_snapshot_fetch,
@@ -509,6 +511,13 @@ class OutboundOrderStatusTests(unittest.TestCase):
         worker._SSM_CLIENT = None
         os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
         os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
+        os.environ.pop("MW_OUTBOUND_ALLOWLIST_EMAILS", None)
+        os.environ.pop("MW_OUTBOUND_ALLOWLIST_DOMAINS", None)
+        os.environ.pop("RICHPANEL_ENV", None)
+        os.environ.pop("RICH_PANEL_ENV", None)
+        os.environ.pop("MW_ENV", None)
+        os.environ.pop("ENV", None)
+        os.environ.pop("ENVIRONMENT", None)
 
     def _build_order_status_plan(self) -> tuple[Any, Any]:
         envelope = build_event_envelope(
@@ -779,6 +788,153 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("route-email-support-team", route_tags)
         self.assertIn("mw-escalated-human", route_tags)
         self.assertIn("mw-send-message-author-missing", route_tags)
+
+    def test_outbound_email_missing_bot_author_in_prod_blocks(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_customer_email="allow@example.com",
+            users=[{"id": "agent-1", "role": "agent"}],
+        )
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_ENV": "prod",
+                "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
+                "RICHPANEL_BOT_AUTHOR_ID": "",
+            },
+            clear=False,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "bot_author_missing")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        self.assertFalse(
+            any(call["path"].startswith("/v1/users") for call in executor.calls)
+        )
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-outbound-blocked-missing-bot-author", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
+    def test_outbound_email_allowlist_blocks_in_prod_when_unset(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_customer_email="customer@example.com",
+        )
+
+        with mock.patch.dict(os.environ, {"MW_ENV": "prod"}, clear=False):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "allowlist_blocked")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-outbound-blocked-allowlist", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
+    def test_outbound_email_allowlist_blocks_in_non_prod_when_set(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_customer_email="blocked@example.com",
+        )
+
+        with mock.patch.dict(
+            os.environ, {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "allowlist_blocked")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-outbound-blocked-allowlist", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
+    def test_outbound_allowlist_prefers_snapshot_email(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-email",
+                "order_id": "ord-123",
+                "shipping_method": "2 business days",
+                "created_at": "2024-12-20T00:00:00Z",
+                "message": "Where is my order?",
+                "email": "blocked@example.com",
+            }
+        )
+        plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_customer_email="allow@example.com",
+        )
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
+                "RICHPANEL_BOT_AUTHOR_ID": "agent-123",
+            },
+            clear=False,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        self.assertTrue(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
 
     def test_outbound_rewrite_hashes_populated(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -1069,6 +1225,7 @@ class _RecordingExecutor:
         ticket_status: str = "open",
         ticket_tags: list[str] | None = None,
         ticket_channel: str | None = None,
+        ticket_customer_email: str | None = None,
         users: list[dict[str, Any]] | None = None,
         raise_on_get: bool = False,
         reply_status_codes: list[int] | None = None,
@@ -1079,6 +1236,7 @@ class _RecordingExecutor:
         self.ticket_status = ticket_status
         self.ticket_tags = ticket_tags or []
         self.ticket_channel = ticket_channel
+        self.ticket_customer_email = ticket_customer_email
         self.users = users or []
         self.raise_on_get = raise_on_get
         self.reply_status_codes = reply_status_codes or [202]
@@ -1112,6 +1270,16 @@ class _RecordingExecutor:
             payload = {"status": self.ticket_status, "tags": self.ticket_tags}
             if self.ticket_channel is not None:
                 payload["via"] = {"channel": self.ticket_channel}
+            if self.ticket_customer_email is not None:
+                via = payload.get("via")
+                if not isinstance(via, dict):
+                    via = {}
+                    payload["via"] = via
+                source = via.get("source")
+                if not isinstance(source, dict):
+                    source = {}
+                    via["source"] = source
+                source["from"] = {"address": self.ticket_customer_email}
             body = json.dumps(payload).encode("utf-8")
             return RichpanelResponse(
                 status_code=200,
@@ -1265,13 +1433,61 @@ class AuthorResolutionTests(unittest.TestCase):
                     dry_run=kwargs.get("dry_run", False),
                 )
 
-        metadata, channel = _safe_ticket_snapshot_fetch(
+        metadata, channel, customer_email = _safe_ticket_snapshot_fetch(
             "ticket-1",
             executor=cast(RichpanelExecutor, _ChannelExecutor()),
             allow_network=True,
         )
         self.assertIsNotNone(metadata)
         self.assertEqual(channel, "email")
+        self.assertIsNone(customer_email)
+
+
+class OutboundAllowlistTests(unittest.TestCase):
+    def test_allowlist_exact_email_match_case_insensitive(self) -> None:
+        allowlist_emails = _parse_allowlist_entries("Test@Example.com")
+        allowed, reason = _match_allowlist_email(
+            "test@example.com",
+            allowlist_emails=allowlist_emails,
+            allowlist_domains=set(),
+        )
+        self.assertTrue(allowed)
+        self.assertEqual(reason, "email_match")
+
+    def test_allowlist_domain_match_case_insensitive(self) -> None:
+        allowlist_domains = _parse_allowlist_entries("Example.COM", strip_at=True)
+        allowed, reason = _match_allowlist_email(
+            "user@example.com",
+            allowlist_emails=set(),
+            allowlist_domains=allowlist_domains,
+        )
+        self.assertTrue(allowed)
+        self.assertEqual(reason, "domain_match")
+
+    def test_allowlist_whitespace_trimming(self) -> None:
+        allowlist_emails = _parse_allowlist_entries("  user@example.com ,  ")
+        allowlist_domains = _parse_allowlist_entries("  Example.com  ", strip_at=True)
+        email_allowed, _ = _match_allowlist_email(
+            "USER@example.com",
+            allowlist_emails=allowlist_emails,
+            allowlist_domains=set(),
+        )
+        domain_allowed, _ = _match_allowlist_email(
+            "other@example.com",
+            allowlist_emails=set(),
+            allowlist_domains=allowlist_domains,
+        )
+        self.assertTrue(email_allowed)
+        self.assertTrue(domain_allowed)
+
+    def test_allowlist_empty_denies(self) -> None:
+        allowed, reason = _match_allowlist_email(
+            "user@example.com",
+            allowlist_emails=set(),
+            allowlist_domains=set(),
+        )
+        self.assertFalse(allowed)
+        self.assertEqual(reason, "allowlist_empty")
 
 
 class OutboundRoutingTagsTests(unittest.TestCase):
@@ -1343,6 +1559,9 @@ def _build_suite() -> unittest.TestSuite:
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(AuthorResolutionTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(OutboundAllowlistTests)
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests)

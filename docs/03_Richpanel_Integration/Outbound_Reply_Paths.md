@@ -16,6 +16,8 @@ Channel is read from `ticket.via.channel` (lowercased). Missing `via` or `channe
 
 Only the selection strategy and a short hash of the id are logged (no names or emails).
 
+**Production guardrail:** When `MW_ENV`/`RICHPANEL_ENV` resolves to `prod` or `production`, `RICHPANEL_BOT_AUTHOR_ID` is required and fallback to `/v1/users` is disabled.
+
 ## Tags applied
 - Loop prevention + reply success: `mw-auto-replied`, `mw-order-status-answered`, `mw-reply-sent`.
 - Path tags for disambiguation:
@@ -25,3 +27,9 @@ Only the selection strategy and a short hash of the id are logged (no names or e
 
 ## Safety gates
 All outbound replies remain gated by `safe_mode`, `automation_enabled`, `allow_network`, and `outbound_enabled`. When gates fail, the worker stays read-only and routes to support.
+
+Email-channel replies also enforce a customer allowlist:
+- `MW_OUTBOUND_ALLOWLIST_EMAILS` (comma-separated full emails)
+- `MW_OUTBOUND_ALLOWLIST_DOMAINS` (comma-separated domains)
+
+Production is deny-by-default unless an allowlist entry matches the customer email.

@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "timestamp": "2026-01-27T01:11:23.652949+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "stack_name": "RichpanelMiddleware-dev"
+  },
+  "request": {
+    "channel": "email",
+    "from_email_redacted": "redacted:bd7b0dc44282",
+    "subject_fingerprint": "50958548edbd",
+    "body_fingerprint": "239d62776d95",
+    "tags": [
+      "mw-smoke-autoticket"
+    ]
+  },
+  "response": {
+    "status_code": 200,
+    "ticket_number_redacted": "redacted:63ecbfa3a1ad",
+    "ticket_number_fingerprint": "63ecbfa3a1ad",
+    "conversation_id_redacted": "redacted:224e9bc0c14b",
+    "conversation_id_fingerprint": "224e9bc0c14b"
+  },
+  "result": {
+    "status": "created"
+  }
+}

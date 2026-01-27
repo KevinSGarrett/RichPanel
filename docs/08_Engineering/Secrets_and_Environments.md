@@ -146,6 +146,8 @@ All integration clients support **environment variable overrides** for local dev
 | `RICHPANEL_API_KEY_OVERRIDE`         | Override API key (skip Secrets Manager)      | Uses AWS Secrets Manager if not set     |
 | `RICHPANEL_API_KEY_SECRET_ARN`       | Custom secret path                           | `rp-mw/<env>/richpanel/api_key`         |
 | `RICHPANEL_OUTBOUND_ENABLED`         | Enable outbound writes (default: dry-run)    | `false` (dry-run by default)            |
+| `MW_OUTBOUND_ALLOWLIST_EMAILS`       | Allowlist full customer emails               | Empty (no allowlist by default)         |
+| `MW_OUTBOUND_ALLOWLIST_DOMAINS`      | Allowlist customer email domains             | Empty (no allowlist by default)         |
 | `RICHPANEL_WRITE_DISABLED`           | Hard block all non-GET/HEAD requests         | `false` (write block off by default)    |
 | `RICHPANEL_READ_ONLY`                | Force GET/HEAD-only requests                 | `false` (read-only off by default)      |
 

@@ -28,6 +28,11 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     SecretLoadError,
     TransportError,
 )
+from integrations.common import (  # type: ignore
+    PROD_WRITE_ACK_ENV,
+    PROD_WRITE_ACK_PHRASE,
+    PRODUCTION_ENVIRONMENTS,
+)
 
 ENV_FROM_EMAIL = "MW_SMOKE_TICKET_FROM_EMAIL"
 ENV_SUBJECT = "MW_SMOKE_TICKET_SUBJECT"
@@ -83,6 +88,25 @@ def _resolve_text(value: Optional[str], env_key: str, default: str) -> str:
     except Exception:
         return default
     return candidate or default
+
+
+def _prod_write_ack_matches(value: Optional[str]) -> bool:
+    if value is None:
+        return False
+    return str(value).strip() == PROD_WRITE_ACK_PHRASE
+
+
+def _require_prod_write_ack(*, env_name: str, ack_token: Optional[str]) -> None:
+    if env_name.strip().lower() not in PRODUCTION_ENVIRONMENTS:
+        return
+    env_value = os.environ.get(PROD_WRITE_ACK_ENV)
+    if _prod_write_ack_matches(env_value) or _prod_write_ack_matches(ack_token):
+        return
+    raise SystemExit(
+        "[FAIL] Refusing to create tickets in production without "
+        f"{PROD_WRITE_ACK_ENV}={PROD_WRITE_ACK_PHRASE} or "
+        f"--i-understand-prod-writes {PROD_WRITE_ACK_PHRASE}."
+    )
 
 
 def _build_ticket_payload(
@@ -151,6 +175,14 @@ def parse_args() -> argparse.Namespace:
         "--env", default="dev", help="Environment name used for secrets (default: dev)."
     )
     parser.add_argument(
+        "--i-understand-prod-writes",
+        dest="prod_writes_ack",
+        help=(
+            "Acknowledge production ticket writes; must equal "
+            f"{PROD_WRITE_ACK_PHRASE}."
+        ),
+    )
+    parser.add_argument(
         "--region",
         required=True,
         help="AWS region for Secrets Manager (e.g. us-east-2).",
@@ -210,6 +242,7 @@ def main() -> int:
         )
 
     os.environ.setdefault("RICHPANEL_ENV", args.env)
+    _require_prod_write_ack(env_name=args.env, ack_token=args.prod_writes_ack)
 
     from_email = _resolve_text(args.from_email, ENV_FROM_EMAIL, DEFAULT_FROM_EMAIL)
     to_email = _resolve_text(os.environ.get(ENV_TO_EMAIL), ENV_TO_EMAIL, DEFAULT_TO_EMAIL)
