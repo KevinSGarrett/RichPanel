@@ -1526,10 +1526,22 @@ class CustomerEmailExtractionTests(unittest.TestCase):
             _extract_customer_email_from_payload(payload), "user@example.com"
         )
 
+    def test_extract_customer_email_from_via_from_string(self) -> None:
+        payload = {"via": {"from": "User@Example.com"}}
+        self.assertEqual(
+            _extract_customer_email_from_payload(payload), "user@example.com"
+        )
+
     def test_extract_customer_email_from_customer_profile(self) -> None:
         payload = {"customer_profile": {"email": "Person@Example.com"}}
         self.assertEqual(
             _extract_customer_email_from_payload(payload), "person@example.com"
+        )
+
+    def test_extract_customer_email_from_sender(self) -> None:
+        payload = {"sender": {"address": "Sender@Example.com"}}
+        self.assertEqual(
+            _extract_customer_email_from_payload(payload), "sender@example.com"
         )
 
     def test_extract_customer_email_returns_none_when_missing(self) -> None:
@@ -1631,11 +1643,11 @@ def load_tests(
     return _build_suite()
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover
     suite = _build_suite()
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

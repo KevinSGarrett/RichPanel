@@ -339,12 +339,12 @@ class ProdWriteAckTests(unittest.TestCase):
         self.assertFalse(prod_write_ack_matches("I_UNDERSTAND_PROD_WRITES "))
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(RichpanelClientTests)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ProdWriteAckTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
