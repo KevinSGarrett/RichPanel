@@ -97,6 +97,141 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
         self.assertIn("RICHPANEL_WRITE_DISABLED", str(ctx.exception))
 
 
+class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
+    """Tests for B61/C diagnostic functions."""
+
+    def test_extract_match_method_order_number(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "richpanel_order_number"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "order_number")
+
+    def test_extract_match_method_name_email(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "shopify_email_name"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "name_email")
+
+    def test_extract_match_method_email_only(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "shopify_email_only"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "email_only")
+
+    def test_extract_match_method_none(self) -> None:
+        result = {
+            "order_matched": False,
+            "order_resolution": {"resolvedBy": "no_match"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "none")
+
+    def test_extract_match_method_no_resolution(self) -> None:
+        result = {"order_matched": False}
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "none")
+
+    def test_extract_route_decision_order_status(self) -> None:
+        result = {"routing": {"intent": "order_status"}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "order_status")
+
+    def test_extract_route_decision_non_order_status(self) -> None:
+        result = {"routing": {"intent": "returns"}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "non_order_status")
+
+    def test_extract_route_decision_unknown(self) -> None:
+        result = {"routing": {}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "unknown")
+
+    def test_classify_failure_reason_bucket_no_identifiers(self) -> None:
+        result = {"failure_reason": "no_customer_email"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "no_identifiers")
+
+    def test_classify_failure_reason_bucket_shopify_api_error(self) -> None:
+        result = {"failure_reason": "shopify_api_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "shopify_api_error")
+
+    def test_classify_failure_reason_bucket_richpanel_api_error(self) -> None:
+        result = {"failure_reason": "richpanel_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "richpanel_api_error")
+
+    def test_classify_failure_reason_bucket_ambiguous_match(self) -> None:
+        result = {"failure_reason": "multiple_orders_ambiguous"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "ambiguous_match")
+
+    def test_classify_failure_reason_bucket_no_order_candidates(self) -> None:
+        result = {"failure_reason": "no_order_candidates"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "no_order_candidates")
+
+    def test_classify_failure_reason_bucket_parse_error(self) -> None:
+        result = {"failure_reason": "parse_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "parse_error")
+
+    def test_classify_failure_reason_bucket_none(self) -> None:
+        result = {}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertIsNone(bucket)
+
+    def test_build_drift_watch_no_alerts(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.02,
+            order_number_share=0.60,
+            schema_new_ratio=0.10,
+        )
+        self.assertFalse(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 0)
+        self.assertEqual(drift_watch["current_values"]["match_rate_pct"], 95.0)
+        self.assertEqual(drift_watch["current_values"]["api_error_rate_pct"], 2.0)
+
+    def test_build_drift_watch_api_error_alert(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.08,  # Above 5% threshold
+            order_number_share=0.60,
+            schema_new_ratio=0.10,
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "api_error_rate")
+
+    def test_build_drift_watch_schema_drift_alert(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.02,
+            order_number_share=0.60,
+            schema_new_ratio=0.25,  # Above 20% threshold
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "schema_drift")
+
+    def test_build_drift_watch_multiple_alerts(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.10,  # Above 5% threshold
+            order_number_share=0.60,
+            schema_new_ratio=0.30,  # Above 20% threshold
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 2)
+
+
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_prod_environment_blocks_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
