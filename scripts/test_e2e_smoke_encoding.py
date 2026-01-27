@@ -19,8 +19,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 from typing import Any, cast
 
-from botocore.exceptions import ClientError
-
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
@@ -31,6 +29,7 @@ if str(SCRIPTS) not in sys.path:
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     SmokeFailure,
+    ClientError,
     _check_pii_safe,
     _classify_order_status_result,
     _compute_middleware_outcome,
