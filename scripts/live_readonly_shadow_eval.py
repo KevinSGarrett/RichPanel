@@ -94,13 +94,30 @@ CHAT_CHANNELS = {
     "web",
 }
 
-# B61/C: Drift thresholds for diagnostic monitoring
-DRIFT_THRESHOLDS = {
-    "match_rate_drop_pct": 10.0,  # Alert if match rate drops > 10 percentage points
-    "api_error_rate_pct": 5.0,    # Alert if API errors exceed 5% of tickets
-    "order_number_share_drop_pct": 15.0,  # Alert if order_number match share drops > 15%
-    "schema_drift_new_ratio": 0.2,  # Alert if > 20% of schemas are new
-}
+# B61/C: Drift thresholds for diagnostic monitoring (configurable via env vars)
+def _get_drift_thresholds() -> Dict[str, float]:
+    """
+    Get drift thresholds from environment variables or defaults.
+    Allows operational tuning without code changes.
+    """
+    return {
+        "match_rate_drop_pct": float(
+            os.environ.get("SHADOW_EVAL_MATCH_RATE_DROP_THRESHOLD", "10.0")
+        ),
+        "api_error_rate_pct": float(
+            os.environ.get("SHADOW_EVAL_API_ERROR_RATE_THRESHOLD", "5.0")
+        ),
+        "order_number_share_drop_pct": float(
+            os.environ.get("SHADOW_EVAL_ORDER_NUMBER_DROP_THRESHOLD", "15.0")
+        ),
+        "schema_drift_new_ratio": float(
+            os.environ.get("SHADOW_EVAL_SCHEMA_DRIFT_THRESHOLD", "0.2")
+        ),
+    }
+
+
+# Default thresholds (for reference in tests and documentation)
+DRIFT_THRESHOLDS = _get_drift_thresholds()
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -383,10 +400,12 @@ def _classify_failure_reason_bucket(result: Dict[str, Any]) -> Optional[str]:
     
     reason_str = str(failure_reason).lower()
     
-    # API failures
-    if "shopify" in reason_str and ("api" in reason_str or "error" in reason_str):
+    # Shopify API failures (including timeouts, HTTP status codes)
+    if "shopify" in reason_str:
         return "shopify_api_error"
-    if "richpanel" in reason_str and ("api" in reason_str or "error" in reason_str):
+    
+    # Richpanel API failures (including timeouts, HTTP status codes)
+    if "richpanel" in reason_str:
         return "richpanel_api_error"
     
     # Match failures
