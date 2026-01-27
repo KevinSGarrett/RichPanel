@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "run_id": "B61-SANDBOX-NOT-ORDER-STATUS-20260127-1735Z",
+    "timestamp": "2026-01-27T17:15:51.134350+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "not_order_status",
+    "scenario_variant": "not_order_status"
+  },
+  "inputs": {
+    "ticket_ref": null,
+    "ticket_ref_fingerprint": "63e5603b5fd6",
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --wait-seconds 180 --profile rp-admin-kevin --scenario not_order_status --create-ticket --fail-on-outbound-block --run-id B61-SANDBOX-NOT-ORDER-STATUS-20260127-1735Z --proof-path REHYDRATION_PACK\\RUNS\\B61\\B\\PROOF\\not_order_status_proof.json --create-ticket-proof-path REHYDRATION_PACK\\RUNS\\B61\\B\\PROOF\\created_ticket_not_order_status.json"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id_fingerprint": "ff9245b52afb",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "63e5603b5fd6",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 19
+    },
+    "state_record": {
+      "routing": {
+        "category": "billing",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-cancel_subscription"
+        ],
+        "reason": "matched subscription cancellation keyword",
+        "intent": "cancel_subscription",
+        "department": "Email Support Team"
+      },
+      "action_count": 1,
+      "updated_at": "2026-01-27T17:15:47.845723+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "billing",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-cancel_subscription"
+        ],
+        "reason": "matched subscription cancellation keyword",
+        "intent": "cancel_subscription",
+        "department": "Email Support Team"
+      },
+      "recorded_at": "2026-01-27T17:15:47.845723+00:00",
+      "ts_action_fingerprint": "2026-01-27T17:15:47.845723+00:00#fingerprint:ff9245b52afb"
+    }
+  },
+  "openai": {
+    "routing": {
+      "llm_called": true,
+      "model": "gpt-5.2-chat-latest",
+      "confidence": 0.97,
+      "response_id": "chatcmpl-D2gxGUF4mmm55H8YYsCjMb8hohZId",
+      "response_id_unavailable_reason": null,
+      "final_intent": "cancel_subscription",
+      "primary_source": "deterministic",
+      "final_source": "deterministic",
+      "gated_reason": null
+    },
+    "rewrite": {
+      "rewrite_attempted": false,
+      "rewrite_applied": false,
+      "model": "gpt-5.2-chat-latest",
+      "response_id": null,
+      "response_id_unavailable_reason": "missing_order_status_action",
+      "fallback_used": false,
+      "reason": "missing_order_status_action",
+      "error_class": null,
+      "original_hash": null,
+      "rewritten_hash": null,
+      "rewritten_changed": null
+    }
+  },
+  "allowlist": {},
+  "routing_metadata": {
+    "final": {
+      "source": "deterministic",
+      "intent": "cancel_subscription"
+    },
+    "openai": {
+      "called": true,
+      "model": "gpt-5.2-chat-latest",
+      "request_id": "chatcmpl-D2gxGUF4mmm55H8YYsCjMb8hohZId",
+      "response_id_unavailable_reason": null,
+      "confidence": 0.97
+    }
+  },
+  "rewriter_metadata": {
+    "used": false,
+    "model": "gpt-5.2-chat-latest",
+    "request_id": null,
+    "original_hash": null,
+    "rewritten_hash": null,
+    "changed": null
+  },
+  "order_status": {
+    "expected_delivery_estimate": null,
+    "eta_window_verified": null,
+    "eta_method_verified": null,
+    "eta_window_fallback_used": false,
+    "tracking_reply_verified": null,
+    "tracking_reply_source": null,
+    "tracking_number_present": null,
+    "tracking_url_present": null,
+    "tracking_number_fingerprint": null,
+    "tracking_url_fingerprint": null
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket"
+      ],
+      "updated_at": "2026-01-27T17:15:39.735Z",
+      "message_count": 1,
+      "last_message_source": "unknown",
+      "operator_reply_present": false,
+      "operator_reply_count": 0,
+      "latest_comment_is_operator": false,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "63e5603b5fd6",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "post": {
+      "status": "OPEN",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-cancel_subscription",
+        "mw-routing-applied"
+      ],
+      "updated_at": "2026-01-27T17:15:48.446Z",
+      "message_count": 1,
+      "last_message_source": "unknown",
+      "operator_reply_present": false,
+      "operator_reply_count": 0,
+      "latest_comment_is_operator": false,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "63e5603b5fd6",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [
+      "mw-intent-cancel_subscription",
+      "mw-routing-applied"
+    ],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "updated_at_delta_seconds": 8.711,
+    "status_before": "open",
+    "status_after": "open",
+    "status_changed": false,
+    "message_count_before": 1,
+    "message_count_after": 1,
+    "message_count_delta": 0,
+    "last_message_source_before": "unknown",
+    "last_message_source_after": "unknown",
+    "middleware_tags_added": [
+      "mw-intent-cancel_subscription",
+      "mw-routing-applied"
+    ],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": null,
+    "auto_close_applied": false,
+    "auto_close_result": null,
+    "reply_update_success": null,
+    "reply_update_candidate": null,
+    "reply_fallback": null,
+    "success_tag_added_this_run": null,
+    "skip_or_escalation_tags_added_this_run": null,
+    "operator_reply_present": false,
+    "operator_reply_count_before": 0,
+    "operator_reply_count_after": 0,
+    "operator_reply_count_delta": 0,
+    "latest_comment_is_operator": false,
+    "send_message_tag_present": false,
+    "send_message_tag_added": false
+  },
+  "followup": {
+    "performed": false,
+    "event_id_fingerprint": null,
+    "idempotency_record": null,
+    "tags_added": [],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "middleware_tags_added": [],
+    "status_after": null,
+    "message_count_delta": null,
+    "updated_at_delta_seconds": null,
+    "reply_sent": null,
+    "reply_reason": null,
+    "routed_to_support": null
+  },
+  "proof_fields": {
+    "ticket_channel": "email",
+    "openai_routing_used": true,
+    "openai_rewrite_used": false,
+    "closed_after": null,
+    "message_count_delta": 0,
+    "last_message_source_after": "unknown",
+    "intent_after": "cancel_subscription",
+    "routing_department": "Email Support Team",
+    "outbound_attempted": false,
+    "routed_to_support": true,
+    "support_tag_present": false,
+    "support_department": true,
+    "order_match_success": null,
+    "order_match_failure_reason": null,
+    "allowlist_blocked_tag_present": false,
+    "allowlist_blocked_tag_added": false,
+    "send_message_tag_absent": true,
+    "followup_routed_support": null,
+    "followup_reply_sent": false,
+    "followup_skip_tags_added": [],
+    "operator_reply_present": false,
+    "operator_reply_count_delta": 0,
+    "latest_comment_is_operator": false,
+    "operator_reply_required": false,
+    "operator_reply_confirmed": null,
+    "send_message_tag_present": false,
+    "send_message_tag_added": false,
+    "send_message_path_required": false,
+    "send_message_path_confirmed": false
+  },
+  "result": {
+    "status": "PASS",
+    "classification": "PASS_STRONG",
+    "classification_reason": null,
+    "reply_evidence": null,
+    "reply_evidence_reason": null,
+    "fallback_close_used": null,
+    "followup_reply_sent": false,
+    "followup_reply_reason": "followup_not_performed",
+    "criteria": {
+      "scenario": "not_order_status",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": null,
+      "intent_not_order_status": true,
+      "middleware_outcome": null,
+      "status_resolved_or_closed": null,
+      "middleware_tag_applied": null,
+      "no_skip_tags": null,
+      "test_tag_verified": null,
+      "reply_evidence": null,
+      "outbound_message_count_delta_ge_1": false,
+      "outbound_last_message_source_middleware": false,
+      "outbound_attempted": false,
+      "routed_to_support": true,
+      "support_tag_present": false,
+      "support_department": true,
+      "order_match_success": null,
+      "order_match_failure_reason_present": null,
+      "openai_routing_called": null,
+      "openai_routing_source_openai": null,
+      "openai_rewrite_attempted": null,
+      "openai_rewrite_applied": null,
+      "allowlist_blocked_tag_present": false,
+      "allowlist_blocked_tag_added": false,
+      "send_message_tag_absent": true,
+      "no_unexpected_outbound_block": true,
+      "followup_performed": null,
+      "followup_no_reply": null,
+      "followup_routed_support": null,
+      "followup_route_tag": null,
+      "followup_skip_followup_tag": null,
+      "operator_reply_present": null,
+      "operator_reply_count_delta_ge_1": null,
+      "send_message_tag_present": false,
+      "send_message_tag_added": false,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_not_order_status",
+        "description": "Routing intent was not order_status*",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "no_outbound_attempt",
+        "description": "No outbound reply attempt detected",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "routed_to_support",
+        "description": "Non-order-status routed to support team",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "support_tag_present",
+        "description": "Support routing tag present (route-email-support-team/mw-escalated-human)",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "support_department",
+        "description": "Routing department resolved to Email Support Team",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "no_unexpected_outbound_block",
+        "description": "No unexpected allowlist block observed",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}
