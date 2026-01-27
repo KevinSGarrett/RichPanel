@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
+from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name
 from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
@@ -58,6 +59,10 @@ OUTBOUND_PATH_COMMENT_TAG = "mw-outbound-path-comment"
 SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
 SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
 SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
+OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
+OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG = "mw-outbound-blocked-missing-bot-author"
+MW_OUTBOUND_ALLOWLIST_EMAILS_ENV = "MW_OUTBOUND_ALLOWLIST_EMAILS"
+MW_OUTBOUND_ALLOWLIST_DOMAINS_ENV = "MW_OUTBOUND_ALLOWLIST_DOMAINS"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
@@ -73,6 +78,8 @@ _SKIP_REASON_TAGS = {
     "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
     "send_message_failed": SEND_MESSAGE_FAILED_TAG,
     "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
+    "allowlist_blocked": OUTBOUND_BLOCKED_ALLOWLIST_TAG,
+    "bot_author_missing": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
 
 
@@ -105,6 +112,90 @@ def _normalize_optional_text(value: Any) -> Optional[str]:
     except Exception:
         return None
     return normalized or None
+
+
+def _normalize_email(value: Any) -> Optional[str]:
+    normalized = _normalize_optional_text(value)
+    if not normalized:
+        return None
+    return normalized.lower()
+
+
+def _parse_allowlist_entries(value: Optional[str], *, strip_at: bool = False) -> set[str]:
+    if not value:
+        return set()
+    entries: set[str] = set()
+    for raw in str(value).split(","):
+        candidate = raw.strip().lower()
+        if not candidate:
+            continue
+        if strip_at and candidate.startswith("@"):
+            candidate = candidate[1:]
+        if candidate:
+            entries.add(candidate)
+    return entries
+
+
+def _load_outbound_allowlist() -> tuple[set[str], set[str], bool]:
+    emails = _parse_allowlist_entries(
+        os.environ.get(MW_OUTBOUND_ALLOWLIST_EMAILS_ENV)
+    )
+    domains = _parse_allowlist_entries(
+        os.environ.get(MW_OUTBOUND_ALLOWLIST_DOMAINS_ENV), strip_at=True
+    )
+    return emails, domains, bool(emails or domains)
+
+
+def _match_allowlist_email(
+    email: Optional[str],
+    *,
+    allowlist_emails: set[str],
+    allowlist_domains: set[str],
+) -> tuple[bool, str]:
+    if not allowlist_emails and not allowlist_domains:
+        return False, "allowlist_empty"
+    normalized = _normalize_email(email)
+    if not normalized:
+        return False, "missing_email"
+    if normalized in allowlist_emails:
+        return True, "email_match"
+    if "@" in normalized:
+        domain = normalized.split("@", 1)[1]
+        if domain in allowlist_domains:
+            return True, "domain_match"
+    return False, "not_allowlisted"
+
+
+def _extract_customer_email_from_payload(payload: Any) -> Optional[str]:
+    if not isinstance(payload, dict):
+        return None
+    candidates: List[Any] = []
+    for key in ("email", "customer_email", "customerEmail", "from_email", "fromEmail"):
+        candidates.append(payload.get(key))
+    for key in ("customer_profile", "customer", "requester", "sender", "user"):
+        nested = payload.get(key)
+        if isinstance(nested, dict):
+            candidates.append(nested.get("email"))
+            candidates.append(nested.get("address"))
+    via = payload.get("via")
+    if isinstance(via, dict):
+        source = via.get("source")
+        if isinstance(source, dict):
+            from_obj = source.get("from")
+            if isinstance(from_obj, dict):
+                candidates.append(from_obj.get("address") or from_obj.get("email"))
+            elif isinstance(from_obj, str):
+                candidates.append(from_obj)
+        from_obj = via.get("from")
+        if isinstance(from_obj, dict):
+            candidates.append(from_obj.get("address") or from_obj.get("email"))
+        elif isinstance(from_obj, str):
+            candidates.append(from_obj)
+    for candidate in candidates:
+        normalized = _normalize_email(candidate)
+        if normalized:
+            return normalized
+    return None
 
 
 def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
@@ -294,9 +385,9 @@ def _safe_ticket_snapshot_fetch(
     *,
     executor: RichpanelExecutor,
     allow_network: bool,
-) -> Tuple[Optional[TicketMetadata], Optional[str]]:
+) -> Tuple[Optional[TicketMetadata], Optional[str], Optional[str]]:
     """
-    Fetch PII-safe ticket metadata plus channel (via.channel) for outbound routing.
+    Fetch PII-safe ticket metadata plus channel (via.channel) and customer email.
     """
     try:
         encoded_id = urllib.parse.quote(str(ticket_id), safe="")
@@ -307,16 +398,19 @@ def _safe_ticket_snapshot_fetch(
             log_body_excerpt=False,
         )
     except (RichpanelRequestError, SecretLoadError, TransportError):
-        return None, None
+        return None, None, None
 
     if response.dry_run:
         return (
-            TicketMetadata(status=None, tags=set(), status_code=response.status_code, dry_run=True),
+            TicketMetadata(
+                status=None, tags=set(), status_code=response.status_code, dry_run=True
+            ),
+            None,
             None,
         )
 
     if response.status_code < 200 or response.status_code >= 300:
-        return None, None
+        return None, None, None
 
     payload = response.json() or {}
     if not isinstance(payload, dict):
@@ -339,6 +433,8 @@ def _safe_ticket_snapshot_fetch(
     if channel:
         channel = channel.lower()
 
+    customer_email = _extract_customer_email_from_payload(ticket_payload)
+
     return (
         TicketMetadata(
             status=status,
@@ -347,6 +443,7 @@ def _safe_ticket_snapshot_fetch(
             dry_run=response.dry_run,
         ),
         channel,
+        customer_email,
     )
 
 
@@ -859,6 +956,7 @@ def execute_order_status_reply(
     - requires a draft reply payload on the action plan
     """
     order_action = _find_order_status_action(plan)
+    payload = envelope.payload if isinstance(envelope.payload, dict) else {}
     reason = _outbound_block_reason(
         outbound_enabled=outbound_enabled,
         safe_mode=safe_mode,
@@ -901,7 +999,7 @@ def execute_order_status_reply(
             f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
         )
 
-        ticket_metadata, ticket_channel = _safe_ticket_snapshot_fetch(
+        ticket_metadata, ticket_channel, ticket_customer_email = _safe_ticket_snapshot_fetch(
             target_id,
             executor=executor,
             allow_network=allow_network,
@@ -959,6 +1057,8 @@ def execute_order_status_reply(
 
         ticket_status = ticket_metadata.status
         is_email_channel = ticket_channel == "email"
+        env_name, _ = resolve_env_name()
+        is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
@@ -981,6 +1081,39 @@ def execute_order_status_reply(
 
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)
+
+        if is_email_channel:
+            (
+                allowlist_emails,
+                allowlist_domains,
+                allowlist_configured,
+            ) = _load_outbound_allowlist()
+            allowlist_required = is_prod_env or allowlist_configured
+            if allowlist_required:
+                customer_email = ticket_customer_email or _extract_customer_email_from_payload(
+                    payload
+                )
+                allowlist_allowed, allowlist_reason = _match_allowlist_email(
+                    customer_email,
+                    allowlist_emails=allowlist_emails,
+                    allowlist_domains=allowlist_domains,
+                )
+                if not allowlist_allowed:
+                    LOGGER.info(
+                        "automation.order_status_reply.allowlist_blocked",
+                        extra={
+                            "event_id": envelope.event_id,
+                            "conversation_id": envelope.conversation_id,
+                            "environment": env_name,
+                            "allowlist_required": allowlist_required,
+                            "allowlist_configured": allowlist_configured,
+                            "allowlist_reason": allowlist_reason,
+                            "customer_email_hash": _hash_identifier(customer_email),
+                        },
+                    )
+                    return _route_email_support(
+                        "allowlist_blocked", ticket_status=ticket_status
+                    )
 
         parameters = order_action.get("parameters") or {}
         draft_reply = parameters.get("draft_reply") or {}
@@ -1174,9 +1307,30 @@ def execute_order_status_reply(
             return update_success
 
         if is_email_channel:
-            author_id, author_strategy = _resolve_author_id(
-                executor=executor, allow_network=allow_network
-            )
+            if is_prod_env:
+                author_id = _normalize_optional_text(
+                    os.environ.get("RICHPANEL_BOT_AUTHOR_ID")
+                )
+                author_strategy = "env_required"
+                if not author_id:
+                    LOGGER.info(
+                        "automation.order_status_reply.bot_author_missing",
+                        extra={
+                            "event_id": envelope.event_id,
+                            "conversation_id": envelope.conversation_id,
+                            "environment": env_name,
+                        },
+                    )
+                    result = _route_email_support(
+                        "bot_author_missing", ticket_status=ticket_status
+                    )
+                    if openai_rewrite is not None:
+                        result["openai_rewrite"] = openai_rewrite
+                    return result
+            else:
+                author_id, author_strategy = _resolve_author_id(
+                    executor=executor, allow_network=allow_network
+                )
             author_hash = _hash_identifier(author_id)
             if author_id:
                 LOGGER.info(

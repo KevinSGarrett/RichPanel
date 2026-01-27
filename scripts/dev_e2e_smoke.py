@@ -69,6 +69,12 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
     SecretLoadError,
     TransportError,
 )
+from integrations.common import (  # type: ignore  # noqa: E402
+    PROD_WRITE_ACK_ENV,
+    PROD_WRITE_ACK_PHRASE,
+    PRODUCTION_ENVIRONMENTS,
+    prod_write_ack_matches,
+)
 
 
 class SmokeFailure(RuntimeError):
@@ -81,6 +87,8 @@ _SKIP_MIDDLEWARE_TAGS = {
     "mw-skip-followup-after-auto-reply",
     "route-email-support-team",
     "mw-escalated-human",
+    "mw-outbound-blocked-allowlist",
+    "mw-outbound-blocked-missing-bot-author",
 }
 
 _POSITIVE_MIDDLEWARE_TAGS = {
@@ -91,6 +99,7 @@ _POSITIVE_MIDDLEWARE_TAGS = {
 
 _LOOP_PREVENTION_TAG = "mw-auto-replied"
 _OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
+_OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
 
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
@@ -130,6 +139,19 @@ _DEFAULT_CREATED_TICKET_PROOF_PATH = (
     / "PROOF"
     / "created_ticket.json"
 )
+
+
+def _require_prod_write_ack(*, env_name: str, ack_token: Optional[str]) -> None:
+    if env_name.strip().lower() not in PRODUCTION_ENVIRONMENTS:
+        return
+    env_value = os.environ.get(PROD_WRITE_ACK_ENV)
+    if prod_write_ack_matches(env_value) or prod_write_ack_matches(ack_token):
+        return
+    raise SmokeFailure(
+        "Refusing to auto-create tickets in production without "
+        f"{PROD_WRITE_ACK_ENV}={PROD_WRITE_ACK_PHRASE} or "
+        f"--i-understand-prod-writes {PROD_WRITE_ACK_PHRASE}."
+    )
 
 
 def _is_order_status_scenario(name: str) -> bool:
@@ -1089,7 +1111,9 @@ def _create_sandbox_email_ticket(
     first_name: str,
     last_name: str,
     proof_path: Optional[Path],
+    prod_writes_ack: Optional[str] = None,
 ) -> Dict[str, Any]:
+    _require_prod_write_ack(env_name=env_name, ack_token=prod_writes_ack)
     os.environ.setdefault("RICHPANEL_ENV", env_name)
     client = RichpanelClient(
         api_key_secret_id=api_key_secret_id,
@@ -1708,6 +1732,14 @@ def parse_args() -> argparse.Namespace:
         help="Create a fresh sandbox email ticket and use it for this run.",
     )
     parser.add_argument(
+        "--i-understand-prod-writes",
+        dest="prod_writes_ack",
+        help=(
+            "Acknowledge production ticket writes; must equal "
+            f"{PROD_WRITE_ACK_PHRASE}."
+        ),
+    )
+    parser.add_argument(
         "--ticket-from-email",
         dest="ticket_from_email",
         help=(
@@ -1843,6 +1875,15 @@ def parse_args() -> argparse.Namespace:
         help="Alias for --no-require-send-message-path (deprecated).",
     )
     parser.set_defaults(require_send_message=None)
+    parser.add_argument(
+        "--require-allowlist-blocked",
+        dest="require_allowlist_blocked",
+        action="store_true",
+        help=(
+            "Require mw-outbound-blocked-allowlist evidence and "
+            "no send-message path tags."
+        ),
+    )
     parser.add_argument(
         "--apply-test-tag",
         action="store_true",
@@ -2518,6 +2559,19 @@ def _evaluate_send_message_evidence(
     }
 
 
+def _evaluate_allowlist_blocked_evidence(
+    *,
+    tags_added: List[str],
+    post_tags: List[str],
+) -> Dict[str, bool]:
+    tag_present = _OUTBOUND_BLOCKED_ALLOWLIST_TAG in post_tags
+    tag_added = _OUTBOUND_BLOCKED_ALLOWLIST_TAG in tags_added
+    return {
+        "allowlist_blocked_tag_present": tag_present,
+        "allowlist_blocked_tag_added": tag_added,
+    }
+
+
 def _compute_operator_reply_metrics(
     pre_ticket_data: Dict[str, Any],
     post_ticket_data: Dict[str, Any],
@@ -3022,13 +3076,21 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     require_send_message = (
         args.require_send_message if args.require_send_message is not None else False
     )
+    require_allowlist_blocked = bool(args.require_allowlist_blocked)
     if not order_status_mode:
         require_outbound = False
         require_operator_reply = False
         require_send_message = False
+        require_allowlist_blocked = False
+    if require_allowlist_blocked:
+        require_outbound = False
+        require_operator_reply = False
+        require_send_message = False
+        require_openai_routing = False
+        require_openai_rewrite = False
 
-    if args.create_ticket and env_name.strip().lower() in {"prod", "production"}:
-        raise SmokeFailure("Refusing to auto-create tickets in production.")
+    if args.create_ticket:
+        _require_prod_write_ack(env_name=env_name, ack_token=args.prod_writes_ack)
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
@@ -3138,6 +3200,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             first_name=first_name,
             last_name=last_name,
             proof_path=Path(proof_path) if proof_path else None,
+            prod_writes_ack=args.prod_writes_ack,
         )
         ticket_ref = created_ticket.get("ticket_id") or created_ticket.get(
             "ticket_number"
@@ -4276,6 +4339,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     send_message_tag_present_ok = None
     send_message_tag_added_ok = None
     send_message_path_confirmed = None
+    allowlist_blocked_tag_present_ok = None
+    allowlist_blocked_tag_added_ok = None
+    send_message_tag_absent_ok = None
     if order_status_mode:
         outbound_evidence = _evaluate_outbound_evidence(
             message_count_delta=message_count_delta,
@@ -4306,6 +4372,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             ]
             send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
             send_message_path_confirmed = send_message_tag_present_ok
+            allowlist_evidence = _evaluate_allowlist_blocked_evidence(
+                tags_added=tags_added,
+                post_tags=post_ticket_data.get("tags") or [],
+            )
+            allowlist_blocked_tag_present_ok = allowlist_evidence[
+                "allowlist_blocked_tag_present"
+            ]
+            allowlist_blocked_tag_added_ok = allowlist_evidence[
+                "allowlist_blocked_tag_added"
+            ]
+            if send_message_tag_present_ok is not None:
+                send_message_tag_absent_ok = not send_message_tag_present_ok
 
     openai_routing_used = bool(openai_routing.get("llm_called"))
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
@@ -4356,6 +4434,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "openai_rewrite_attempted"
         ),
         "openai_rewrite_applied": openai_requirements.get("openai_rewrite_applied"),
+        "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
+        "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
+        "send_message_tag_absent": send_message_tag_absent_ok,
         "followup_performed": followup_performed,
         "followup_no_reply": followup_no_reply,
         "followup_routed_support": followup_routed_ok,
@@ -4407,29 +4488,31 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             }
         )
 
+    order_status_requirements = order_status_mode and not require_allowlist_blocked
     if order_status_mode:
-        required_checks.append(bool(intent_ok))
-        required_checks.append(bool(middleware_ok))
-        required_checks.append(bool(skip_tags_present_ok))
-        required_checks.append(bool(status_resolved_ok))
+        if order_status_requirements:
+            required_checks.append(bool(intent_ok))
+            required_checks.append(bool(middleware_ok))
+            required_checks.append(bool(skip_tags_present_ok))
+            required_checks.append(bool(status_resolved_ok))
         criteria_details.extend(
             [
                 {
                     "name": "intent_order_status",
                     "description": "Routing intent matched order-status keywords",
-                    "required": True,
+                    "required": order_status_requirements,
                     "value": intent_ok,
                 },
                 {
                     "name": "middleware_outcome",
                     "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
-                    "required": True,
+                    "required": order_status_requirements,
                     "value": middleware_ok,
                 },
                 {
                     "name": "status_resolved_or_closed",
                     "description": "Post status is resolved/closed",
-                    "required": True,
+                    "required": order_status_requirements,
                     "value": status_resolved_ok,
                 },
                 {
@@ -4441,7 +4524,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 {
                     "name": "no_skip_tags",
                     "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
-                    "required": True,
+                    "required": order_status_requirements,
                     "value": skip_tags_present_ok,
                 },
                 {
@@ -4452,7 +4535,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 },
             ]
         )
-        if tracking_reply_required:
+        if tracking_reply_required and order_status_requirements:
             required_checks.append(bool(tracking_reply_verified))
             criteria_details.append(
                 {
@@ -4479,6 +4562,34 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 "description": "Explicit last_message_source marked middleware",
                 "required": False,
                 "value": outbound_last_message_source_ok,
+            }
+        )
+
+    if require_allowlist_blocked:
+        required_checks.append(bool(allowlist_blocked_tag_present_ok))
+        required_checks.append(bool(send_message_tag_absent_ok))
+        criteria_details.append(
+            {
+                "name": "allowlist_blocked_tag_present",
+                "description": "Ticket tagged with mw-outbound-blocked-allowlist (allowlist gate)",
+                "required": True,
+                "value": allowlist_blocked_tag_present_ok,
+            }
+        )
+        criteria_details.append(
+            {
+                "name": "send_message_tag_absent",
+                "description": "No mw-outbound-path-send-message tag present",
+                "required": True,
+                "value": send_message_tag_absent_ok,
+            }
+        )
+        criteria_details.append(
+            {
+                "name": "allowlist_blocked_tag_added",
+                "description": "mw-outbound-blocked-allowlist tag added this run",
+                "required": False,
+                "value": allowlist_blocked_tag_added_ok,
             }
         )
 
@@ -4596,7 +4707,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     base_pass = all(required_checks) and not failed
     classification = "FAIL"
     classification_reason = None
-    if order_status_mode:
+    if order_status_mode and not require_allowlist_blocked:
         classification, classification_reason = _classify_order_status_result(
             base_pass=base_pass,
             status_resolved_ok=status_resolved_ok,
@@ -4647,6 +4758,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "closed_after": closed_after,
         "message_count_delta": message_count_delta,
         "last_message_source_after": last_message_source_after,
+        "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
+        "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
+        "send_message_tag_absent": send_message_tag_absent_ok,
         "followup_routed_support": followup_routed_support,
         "followup_reply_sent": followup_reply_sent,
         "followup_skip_tags_added": followup_skip_tags_added,

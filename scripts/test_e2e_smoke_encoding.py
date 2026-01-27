@@ -44,6 +44,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_outbound_evidence,
     _evaluate_operator_reply_evidence,
     _evaluate_send_message_evidence,
+    _evaluate_allowlist_blocked_evidence,
     _evaluate_openai_requirements,
     _build_operator_send_message_proof_fields,
     _build_operator_send_message_richpanel_fields,
@@ -72,6 +73,9 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _wait_for_ticket_ready,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
+)
+from create_sandbox_email_ticket import (  # type: ignore  # noqa: E402
+    _require_prod_write_ack as _require_prod_write_ack_script,
 )
 
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
@@ -611,6 +615,24 @@ class SendMessageEvidenceTests(unittest.TestCase):
         self.assertFalse(evidence["send_message_tag_added"])
 
 
+class AllowlistEvidenceTests(unittest.TestCase):
+    def test_allowlist_blocked_tag_present_and_added(self) -> None:
+        evidence = _evaluate_allowlist_blocked_evidence(
+            tags_added=["mw-outbound-blocked-allowlist"],
+            post_tags=["mw-outbound-blocked-allowlist"],
+        )
+        self.assertTrue(evidence["allowlist_blocked_tag_present"])
+        self.assertTrue(evidence["allowlist_blocked_tag_added"])
+
+    def test_allowlist_blocked_tag_present_not_added(self) -> None:
+        evidence = _evaluate_allowlist_blocked_evidence(
+            tags_added=[],
+            post_tags=["mw-outbound-blocked-allowlist"],
+        )
+        self.assertTrue(evidence["allowlist_blocked_tag_present"])
+        self.assertFalse(evidence["allowlist_blocked_tag_added"])
+
+
 class OperatorSendMessageHelperTests(unittest.TestCase):
     def test_compute_operator_reply_metrics(self) -> None:
         metrics = _compute_operator_reply_metrics(
@@ -1133,6 +1155,80 @@ class AutoTicketHelpersTests(unittest.TestCase):
         self.assertEqual(ticket["customer_profile"]["firstName"], "Sandbox")
         self.assertEqual(ticket["customer_profile"]["lastName"], "Test")
         self.assertEqual(ticket["tags"], _SMOKE_TICKET_TAGS)
+
+    def test_create_ticket_prod_requires_ack(self) -> None:
+        with patch.dict(os.environ, {}, clear=True), patch(
+            "dev_e2e_smoke.RichpanelClient"
+        ):
+            with self.assertRaises(SmokeFailure):
+                _create_sandbox_email_ticket(
+                    env_name="prod",
+                    region="us-east-2",
+                    stack_name="RichpanelMiddleware-prod",
+                    api_key_secret_id=None,
+                    from_email="from@example.com",
+                    to_email="support@example.com",
+                    subject="Subject",
+                    body="Body",
+                    first_name="Sandbox",
+                    last_name="Test",
+                    proof_path=None,
+                    prod_writes_ack=None,
+                )
+
+    def test_create_ticket_prod_ack_allows(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"ticket": {"conversation_no": 321, "id": "t-1"}}
+
+        class _StubClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _StubResponse:
+                return _StubResponse()
+
+        with patch("dev_e2e_smoke.RichpanelClient", _StubClient):
+            result = _create_sandbox_email_ticket(
+                env_name="prod",
+                region="us-east-2",
+                stack_name="RichpanelMiddleware-prod",
+                api_key_secret_id=None,
+                from_email="from@example.com",
+                to_email="support@example.com",
+                subject="Subject",
+                body="Body",
+                first_name="Sandbox",
+                last_name="Test",
+                proof_path=None,
+                prod_writes_ack="I_UNDERSTAND_PROD_WRITES",
+            )
+            self.assertEqual(result["ticket_number"], "321")
+
+    def test_create_ticket_script_prod_requires_ack(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(SystemExit):
+                _require_prod_write_ack_script(env_name="prod", ack_token=None)
+
+    def test_create_ticket_script_prod_ack_allows(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            _require_prod_write_ack_script(
+                env_name="production", ack_token="I_UNDERSTAND_PROD_WRITES"
+            )
+
+    def test_create_ticket_script_prod_ack_from_env_allows(self) -> None:
+        with patch.dict(
+            os.environ, {"MW_PROD_WRITES_ACK": "I_UNDERSTAND_PROD_WRITES"}, clear=True
+        ):
+            _require_prod_write_ack_script(env_name="prod", ack_token=None)
+
+    def test_create_ticket_script_non_prod_allows(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            _require_prod_write_ack_script(env_name="dev", ack_token=None)
 
     def test_create_sandbox_email_ticket_success(self) -> None:
         class _StubResponse:
