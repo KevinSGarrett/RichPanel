@@ -190,9 +190,52 @@ What it does:
 - Summary highlights (machine-readable): match success rate, channel counts, timing stats, top failure reasons, fetch failure counts, schema drift
 - Drift threshold: **warning** when >20% of samples have a new schema fingerprint (ticket snapshot or Shopify summary)
 
+#### B61/C: Enhanced Diagnostic Metrics
+
+The shadow eval report now includes **diagnostic and actionable metrics** to help identify drift and performance issues:
+
+**Route Decision Distribution:**
+- Tracks how tickets are classified: `order_status`, `non_order_status`, or `unknown`
+- Helps identify if fewer tickets are being classified as order status inquiries
+- Location: `route_decisions` and `route_decision_percentages` in summary JSON
+
+**Match Method Telemetry:**
+- Tracks which matching strategy succeeded for each order lookup:
+  - `order_number`: Matched via order number from ticket
+  - `name_email`: Matched via customer name + email
+  - `email_only`: Matched via email only (single or most recent)
+  - `none`: No match found
+  - `parse_error`: Match failed due to parsing issues
+- Helps identify if a specific match method is degrading
+- Location: `match_methods` and `match_method_percentages` in summary JSON
+
+**Failure Reason Buckets (PII-safe):**
+- Categorizes failures into stable buckets:
+  - `no_identifiers`: Missing customer email or order identifiers
+  - `shopify_api_error`: Shopify API failures (timeouts, 5xx, etc.)
+  - `richpanel_api_error`: Richpanel API failures
+  - `ambiguous_match`: Multiple orders matched, unable to disambiguate
+  - `no_order_candidates`: No matching orders found in Shopify
+  - `parse_error`: Data parsing or extraction failures
+  - `other_error` / `other_failure`: Catch-all for other issues
+- Location: `failure_buckets` in summary JSON
+
+**Drift Watch Thresholds:**
+- Compares current metrics to defined thresholds:
+  - **Match Rate Drop**: Alert if match rate drops > 10 percentage points (requires historical baseline)
+  - **API Error Rate**: Alert if API errors exceed 5% of tickets
+  - **Order Number Share Drop**: Alert if order_number match share drops > 15% (requires historical baseline)
+  - **Schema Drift**: Alert if > 20% of schemas are new
+- Location: `drift_watch` in summary JSON with `alerts` array
+- Note: Historical comparison not yet implemented; current version shows absolute thresholds only
+
 When drift or match failures spike:
 - If `run_warnings` includes `ticket_listing_403`, provide explicit `ticket-ids` or set `PROD_RICHPANEL_TICKET_IDS`
 - Review `top_failure_reasons` plus `richpanel_fetch_failures` / `shopify_fetch_failures`
+- **NEW (B61/C):** Check `failure_buckets` for PII-safe categorization of failures
+- **NEW (B61/C):** Review `route_decisions` to see if classification is shifting
+- **NEW (B61/C):** Check `match_methods` to identify if a specific match strategy is failing
+- **NEW (B61/C):** Review `drift_watch.alerts` for threshold violations
 - For `shopify_401`/`shopify_403`: verify token + `SHOPIFY_SHOP_DOMAIN`, confirm read-only scopes
 - For `no_customer_email` / `no_order_candidates`: inspect recent ticket payloads and extraction paths
 - Compare `ticket_schema_fingerprint` / `shopify_schema_fingerprint` in the report to identify new payload shapes
@@ -211,6 +254,94 @@ Success evidence for PRs:
 - Command used (including flags)
 - Paths to the report JSON/MD and HTTP trace JSON (GET/HEAD only)
 - Cross-reference Shopify data expectations in `docs/SHOPIFY_STRATEGY/` for store-specific nuances
+- **B61/C:** Include drift watch summary showing current values vs thresholds
+- **B61/C:** Include route decision and match method distributions
+
+---
+
+## Interpreting Shadow Eval Metrics (B61/C)
+
+The shadow eval report includes several diagnostic metrics to help you understand system behavior and identify drift:
+
+### Route Decision Distribution
+
+**What it measures:** How tickets are classified by the routing logic.
+
+**Values:**
+- `order_status`: Tickets classified as order status inquiries
+- `non_order_status`: Tickets classified as other intents (returns, general inquiry, etc.)
+- `unknown`: Tickets that couldn't be classified
+
+**When to investigate:**
+- If `order_status` percentage drops significantly, check:
+  - Are customers phrasing inquiries differently?
+  - Has the routing prompt or model changed?
+  - Are ticket payloads missing expected fields?
+
+### Match Method Telemetry
+
+**What it measures:** Which matching strategy successfully resolved each order lookup.
+
+**Values:**
+- `order_number`: Matched via explicit order number in ticket (highest confidence)
+- `name_email`: Matched via customer name + email (high confidence)
+- `email_only`: Matched via email only (medium confidence, may be ambiguous)
+- `none`: No match found
+- `parse_error`: Failed due to data parsing issues
+
+**When to investigate:**
+- If `order_number` share drops, check:
+  - Are customers including order numbers less often?
+  - Is order number extraction failing (regex patterns, field names)?
+- If `email_only` increases significantly, check:
+  - Are name fields missing or malformed?
+  - Is this causing ambiguous matches (multiple orders per email)?
+- If `none` increases, check:
+  - Are customer identifiers (email, name) missing?
+  - Is Shopify API returning empty results?
+
+### Failure Buckets (PII-safe)
+
+**What it measures:** Categorizes failures into stable, actionable buckets.
+
+**Buckets:**
+- `no_identifiers`: Missing customer email or order identifiers → Check ticket payload structure
+- `shopify_api_error`: Shopify API failures → Check API status, rate limits, token validity
+- `richpanel_api_error`: Richpanel API failures → Check API status, token validity
+- `ambiguous_match`: Multiple orders matched → Improve disambiguation logic or require order numbers
+- `no_order_candidates`: No matching orders in Shopify → Customer may not have orders, or email mismatch
+- `parse_error`: Data parsing failures → Check payload structure changes
+- `other_error` / `other_failure`: Catch-all → Review raw failure reasons in `failure_reasons`
+
+**When to investigate:**
+- If `shopify_api_error` or `richpanel_api_error` spike, check API health and credentials
+- If `no_identifiers` increases, check ticket payload structure (are email fields present?)
+- If `ambiguous_match` increases, consider requiring order numbers for disambiguation
+
+### Drift Watch Thresholds
+
+**What it measures:** Compares current metrics to defined thresholds to detect anomalies.
+
+**Thresholds:**
+- **Match Rate Drop**: Alert if match rate drops > 10 percentage points (requires historical baseline)
+- **API Error Rate**: Alert if API errors exceed 5% of tickets
+- **Order Number Share Drop**: Alert if order_number match share drops > 15% (requires historical baseline)
+- **Schema Drift**: Alert if > 20% of schemas are new (indicates payload structure changes)
+
+**When to investigate:**
+- If **API Error Rate** exceeds threshold:
+  - Check API status pages (Shopify, Richpanel)
+  - Verify tokens and credentials
+  - Check for rate limiting
+- If **Schema Drift** exceeds threshold:
+  - Review new schema fingerprints in report
+  - Check if Richpanel or Shopify changed their API response structure
+  - Update extraction logic if needed
+- If **Match Rate Drop** or **Order Number Share Drop** alerts trigger (future):
+  - Compare to historical baselines
+  - Investigate recent changes to routing, extraction, or customer behavior
+
+**Note:** Historical comparison is not yet implemented. Current version shows absolute thresholds only. Future enhancements will track metrics over time to detect drops.
 
 ---
 
