@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-01-27T03:38:33.085408+00:00",
+  "entries": [
+    {
+      "method": "GET",
+      "path": "/v1/tickets",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations",
+      "service": "richpanel",
+      "source": "urllib"
+    }
+  ],
+  "aws_sdk_trace_enabled": true,
+  "note": "Captured via urllib.request.urlopen and botocore Endpoint._send (AWS SDK); entries include source and optional aws operation."
+}
