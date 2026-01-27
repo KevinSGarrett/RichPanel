@@ -124,6 +124,7 @@ Before enabling shadow mode in production:
 - Required env vars (the script enforces/fails-closed):
   - `RICHPANEL_ENV=prod` (or `ENVIRONMENT=prod`)
   - `MW_ALLOW_NETWORK_READS=true`
+  - `RICHPANEL_READ_ONLY=true`
   - `RICHPANEL_WRITE_DISABLED=true`
 - Optional (recommended for prod shadow): `RICHPANEL_OUTBOUND_ENABLED=false`
 - Note: The local script no longer requires outbound enabled; production worker shadow mode should still keep `RICHPANEL_OUTBOUND_ENABLED=false`.
@@ -137,6 +138,7 @@ Before enabling shadow mode in production:
 $env:RICHPANEL_API_KEY_OVERRIDE = $env:PROD_RICHPANEL_API_KEY
 $env:MW_ALLOW_NETWORK_READS = "true"
 $env:RICHPANEL_OUTBOUND_ENABLED = "false"
+$env:RICHPANEL_READ_ONLY = "true"
 $env:RICHPANEL_WRITE_DISABLED = "true"
 
 python scripts/live_readonly_shadow_eval.py `
@@ -151,6 +153,7 @@ Use the probe to confirm the token + shop domain combination works (GET-only):
 ```powershell
 $env:RICHPANEL_ENV = "prod"
 $env:MW_ALLOW_NETWORK_READS = "true"
+$env:RICHPANEL_READ_ONLY = "true"
 $env:RICHPANEL_WRITE_DISABLED = "true"
 $env:RICHPANEL_OUTBOUND_ENABLED = "false"
 $env:SHOPIFY_OUTBOUND_ENABLED = "true"
@@ -172,6 +175,28 @@ What it does:
 - Writes a PII-safe JSON report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
 - Writes a PII-safe markdown report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
 - Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json` and fails if any non-GET calls are observed
+
+### Daily live read-only shadow eval (CI)
+- Workflow: `Shadow Live Read-Only Eval` (`.github/workflows/shadow_live_readonly_eval.yml`)
+- Schedule: daily at **03:00 UTC** (plus manual `workflow_dispatch`)
+- Scheduled runs require `PROD_SHOPIFY_SHOP_DOMAIN` (repo secret) for `SHOPIFY_SHOP_DOMAIN`
+- Optional: `PROD_RICHPANEL_TICKET_IDS` (comma-separated) to bypass 403 list endpoints
+- Artifact location: GitHub Actions run → `live-readonly-shadow-eval` artifact
+- Artifact contents (PII-safe):
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_summary_<RUN_ID>.json`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
+  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
+- Summary highlights (machine-readable): match success rate, channel counts, timing stats, top failure reasons, fetch failure counts, schema drift
+- Drift threshold: **warning** when >20% of samples have a new schema fingerprint (ticket snapshot or Shopify summary)
+
+When drift or match failures spike:
+- If `run_warnings` includes `ticket_listing_403`, provide explicit `ticket-ids` or set `PROD_RICHPANEL_TICKET_IDS`
+- Review `top_failure_reasons` plus `richpanel_fetch_failures` / `shopify_fetch_failures`
+- For `shopify_401`/`shopify_403`: verify token + `SHOPIFY_SHOP_DOMAIN`, confirm read-only scopes
+- For `no_customer_email` / `no_order_candidates`: inspect recent ticket payloads and extraction paths
+- Compare `ticket_schema_fingerprint` / `shopify_schema_fingerprint` in the report to identify new payload shapes
+- Re-run `workflow_dispatch` with explicit ticket IDs + `--shopify-probe` for deeper inspection
 
 ### Common failure modes (401 / 403)
 - **401 Unauthorized (Shopify):** token invalid/expired, wrong `SHOPIFY_SHOP_DOMAIN`, or secret still

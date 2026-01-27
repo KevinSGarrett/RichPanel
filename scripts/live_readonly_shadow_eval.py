@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
 from collections import Counter
@@ -49,6 +50,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
 from richpanel_middleware.integrations.shopify import (  # type: ignore
     ShopifyClient,
     ShopifyRequestError,
+    TransportError as ShopifyTransportError,
 )
 from readonly_shadow_utils import (
     build_route_info as _build_route_info,
@@ -72,10 +74,25 @@ PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
 REQUIRED_FLAGS = {
     "MW_ALLOW_NETWORK_READS": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_READ_ONLY": "true",
 }
 
 ALLOWED_PROD_ENVS = {"prod", "production"}
 DEFAULT_SAMPLE_SIZE = 10
+DRIFT_WARNING_THRESHOLD = 0.2
+SUMMARY_TOP_FAILURE_REASONS = 5
+SCHEMA_KEY_DEPTH_LIMIT = 5
+CHAT_CHANNELS = {
+    "chat",
+    "live_chat",
+    "livechat",
+    "messenger",
+    "facebook",
+    "instagram",
+    "sms",
+    "whatsapp",
+    "web",
+}
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -101,6 +118,291 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     return f"redacted:{_fingerprint(text)}"
+
+
+def _normalize_optional_text(value: Any) -> str:
+    if value is None:
+        return ""
+    try:
+        text = str(value).strip()
+    except Exception:
+        return ""
+    return text
+
+
+def _extract_channel(payload: Dict[str, Any]) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    channel = None
+    via = payload.get("via")
+    if isinstance(via, dict):
+        channel = via.get("channel")
+    if channel is None:
+        channel = payload.get("channel")
+    return _normalize_optional_text(channel).lower()
+
+
+def _classify_channel(channel: str) -> str:
+    if not channel:
+        return "unknown"
+    if channel == "email":
+        return "email"
+    if channel in CHAT_CHANNELS or "chat" in channel:
+        return "chat"
+    return "unknown"
+
+
+def _collect_schema_key_paths(
+    payload: Any,
+    *,
+    keys: set[str],
+    prefix: str = "",
+    depth: int = 0,
+    max_depth: int = SCHEMA_KEY_DEPTH_LIMIT,
+) -> None:
+    if depth > max_depth:
+        return
+    if isinstance(payload, dict):
+        for raw_key, value in payload.items():
+            key = _normalize_optional_text(raw_key)
+            if not key or key.startswith("__"):
+                continue
+            path = f"{prefix}.{key}" if prefix else key
+            keys.add(path)
+            _collect_schema_key_paths(
+                value, keys=keys, prefix=path, depth=depth + 1, max_depth=max_depth
+            )
+        return
+    if isinstance(payload, list):
+        list_prefix = f"{prefix}[]" if prefix else "[]"
+        keys.add(list_prefix)
+        for item in payload:
+            _collect_schema_key_paths(
+                item,
+                keys=keys,
+                prefix=list_prefix,
+                depth=depth + 1,
+                max_depth=max_depth,
+            )
+
+
+def _schema_fingerprint(payload: Any) -> Optional[str]:
+    if not isinstance(payload, (dict, list)):
+        return None
+    keys: set[str] = set()
+    _collect_schema_key_paths(payload, keys=keys)
+    canonical = "|".join(sorted(keys))
+    return _fingerprint(canonical)
+
+
+def _percentile(values: List[float], pct: float) -> float:
+    if not values:
+        return 0.0
+    sorted_values = sorted(values)
+    index = int(round((pct / 100.0) * (len(sorted_values) - 1)))
+    index = max(0, min(index, len(sorted_values) - 1))
+    return sorted_values[index]
+
+
+def _summarize_timing(
+    ticket_durations: List[float], *, run_duration_seconds: float
+) -> Dict[str, Any]:
+    if not ticket_durations:
+        return {
+            "run_duration_seconds": round(run_duration_seconds, 3),
+            "ticket_avg_seconds": 0.0,
+            "ticket_p50_seconds": 0.0,
+            "ticket_p95_seconds": 0.0,
+            "ticket_min_seconds": 0.0,
+            "ticket_max_seconds": 0.0,
+        }
+    avg = sum(ticket_durations) / len(ticket_durations)
+    return {
+        "run_duration_seconds": round(run_duration_seconds, 3),
+        "ticket_avg_seconds": round(avg, 3),
+        "ticket_p50_seconds": round(_percentile(ticket_durations, 50), 3),
+        "ticket_p95_seconds": round(_percentile(ticket_durations, 95), 3),
+        "ticket_min_seconds": round(min(ticket_durations), 3),
+        "ticket_max_seconds": round(max(ticket_durations), 3),
+    }
+
+
+def _is_timeout_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "timeout" in text or "timed out" in text or "time out" in text
+
+
+def _classify_status_code(prefix: str, status_code: Optional[int]) -> str:
+    if status_code is None:
+        return f"{prefix}_error"
+    if status_code == 401:
+        return f"{prefix}_401"
+    if status_code == 403:
+        return f"{prefix}_403"
+    if status_code == 404:
+        return f"{prefix}_404"
+    if status_code == 429:
+        return f"{prefix}_429"
+    if 500 <= status_code < 600:
+        return f"{prefix}_5xx"
+    if 400 <= status_code < 500:
+        return f"{prefix}_4xx"
+    return f"{prefix}_status"
+
+
+def _classify_richpanel_exception(exc: Exception) -> str:
+    if isinstance(exc, SecretLoadError):
+        return "richpanel_secret_load_error"
+    if isinstance(exc, TransportError):
+        if _is_timeout_error(exc):
+            return "richpanel_timeout"
+        return "richpanel_transport_error"
+    if isinstance(exc, RichpanelRequestError):
+        status = None
+        response = getattr(exc, "response", None)
+        if response is not None:
+            status = getattr(response, "status_code", None)
+        return _classify_status_code("richpanel", status)
+    if _is_timeout_error(exc):
+        return "richpanel_timeout"
+    return "richpanel_error"
+
+
+def _classify_shopify_exception(exc: Exception) -> str:
+    if isinstance(exc, ShopifyTransportError):
+        if _is_timeout_error(exc):
+            return "shopify_timeout"
+        return "shopify_transport_error"
+    if isinstance(exc, ShopifyRequestError):
+        status = None
+        response = getattr(exc, "response", None)
+        if response is not None:
+            status = getattr(response, "status_code", None)
+        if status is not None:
+            return _classify_status_code("shopify", status)
+        if _is_timeout_error(exc):
+            return "shopify_timeout"
+        return "shopify_error"
+    if _is_timeout_error(exc):
+        return "shopify_timeout"
+    return "shopify_error"
+
+
+def _map_order_resolution_reason(reason: str) -> Optional[str]:
+    mapping = {
+        "no_email_available": "no_customer_email",
+        "shopify_no_match": "no_order_candidates",
+        "email_only_multiple": "multiple_orders_ambiguous",
+    }
+    return mapping.get(reason)
+
+
+def _classify_order_match_failure(result: Dict[str, Any]) -> Optional[str]:
+    if result.get("order_matched"):
+        return None
+    resolution = result.get("order_resolution")
+    if isinstance(resolution, dict):
+        reason = _normalize_optional_text(resolution.get("reason"))
+        mapped = _map_order_resolution_reason(reason)
+        if mapped:
+            return mapped
+        if resolution.get("resolvedBy") == "no_match":
+            return "no_order_candidates"
+    if result.get("order_status_candidate") is False:
+        return "no_order_status_candidate"
+    return "order_match_failed"
+
+
+def _build_drift_summary(
+    *,
+    ticket_total: int,
+    ticket_new: int,
+    ticket_unique: int,
+    shopify_total: int,
+    shopify_new: int,
+    shopify_unique: int,
+    threshold: float,
+) -> Dict[str, Any]:
+    ticket_ratio = ticket_new / ticket_total if ticket_total else 0.0
+    shopify_ratio = shopify_new / shopify_total if shopify_total else 0.0
+    warning = ticket_ratio > threshold or shopify_ratio > threshold
+    return {
+        "threshold": threshold,
+        "warning": warning,
+        "ticket_schema": {
+            "total": ticket_total,
+            "unique": ticket_unique,
+            "new": ticket_new,
+            "new_ratio": round(ticket_ratio, 4),
+        },
+        "shopify_schema": {
+            "total": shopify_total,
+            "unique": shopify_unique,
+            "new": shopify_new,
+            "new_ratio": round(shopify_ratio, 4),
+        },
+    }
+
+
+def _build_summary_payload(
+    *,
+    run_id: str,
+    tickets_requested: int,
+    ticket_results: List[Dict[str, Any]],
+    timing: Dict[str, Any],
+    drift: Dict[str, Any],
+    run_warnings: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    tickets_evaluated = len(ticket_results)
+    channel_counts = Counter(
+        result.get("channel", "unknown") or "unknown" for result in ticket_results
+    )
+    order_match_success_count = sum(
+        1 for result in ticket_results if result.get("order_matched")
+    )
+    order_match_failure_count = tickets_evaluated - order_match_success_count
+    failure_reasons: Counter[str] = Counter()
+    richpanel_fetch_failures: Counter[str] = Counter()
+    shopify_fetch_failures: Counter[str] = Counter()
+    for result in ticket_results:
+        reason = result.get("failure_reason")
+        source = result.get("failure_source")
+        if reason:
+            failure_reasons[str(reason)] += 1
+            if source == "richpanel_fetch":
+                richpanel_fetch_failures[str(reason)] += 1
+            if source == "shopify_fetch":
+                shopify_fetch_failures[str(reason)] += 1
+    top_failure_reasons = [
+        {"reason": reason, "count": count}
+        for reason, count in sorted(
+            failure_reasons.items(), key=lambda item: (-item[1], item[0])
+        )[:SUMMARY_TOP_FAILURE_REASONS]
+    ]
+    success_rate = (
+        order_match_success_count / tickets_evaluated if tickets_evaluated else 0.0
+    )
+    warnings = sorted({str(item) for item in (run_warnings or []) if item})
+    return {
+        "run_id": run_id,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "sample_size_requested": tickets_requested,
+        "tickets_evaluated": tickets_evaluated,
+        "email_channel_count": channel_counts.get("email", 0),
+        "chat_channel_count": channel_counts.get("chat", 0),
+        "unknown_channel_count": channel_counts.get("unknown", 0),
+        "order_match_success_count": order_match_success_count,
+        "order_match_failure_count": order_match_failure_count,
+        "order_match_success_rate": round(success_rate, 4),
+        "top_failure_reasons": top_failure_reasons,
+        "failure_reasons": dict(failure_reasons),
+        "richpanel_fetch_failures": dict(richpanel_fetch_failures),
+        "shopify_fetch_failures": dict(shopify_fetch_failures),
+        "timing": timing,
+        "schema_drift": drift,
+        "run_warnings": warnings,
+        "status": "warning" if drift.get("warning") else "ok",
+    }
 
 
 def _resolve_env_name() -> str:
@@ -853,6 +1155,11 @@ def main() -> int:
         help="Richpanel API path for ticket listing (default: /v1/tickets)",
     )
     parser.add_argument(
+        "--allow-empty-sample",
+        action="store_true",
+        help="Allow run to complete when ticket listing fails or returns empty",
+    )
+    parser.add_argument(
         "--allow-non-prod",
         action="store_true",
         help="Allow non-prod runs for local tests",
@@ -904,6 +1211,17 @@ def main() -> int:
 
     run_id = args.run_id or _build_run_id()
     report_path, report_md_path, trace_path = _build_report_paths(run_id)
+    summary_path = report_path.parent / f"live_readonly_shadow_eval_summary_{run_id}.json"
+
+    run_started = time.monotonic()
+    run_warnings: List[str] = []
+    ticket_durations: List[float] = []
+    ticket_schema_seen: set[str] = set()
+    shopify_schema_seen: set[str] = set()
+    ticket_schema_total = 0
+    ticket_schema_new = 0
+    shopify_schema_total = 0
+    shopify_schema_new = 0
 
     trace = _HttpTrace().capture()
     had_errors = False
@@ -948,16 +1266,32 @@ def main() -> int:
             tickets_requested = len(explicit_refs)
             sample_mode = "explicit"
         else:
-            ticket_refs = _fetch_recent_ticket_refs(
-                rp_client,
-                sample_size=args.sample_size,
-                list_path=args.ticket_list_path,
-            )
+            try:
+                ticket_refs = _fetch_recent_ticket_refs(
+                    rp_client,
+                    sample_size=args.sample_size,
+                    list_path=args.ticket_list_path,
+                )
+            except SystemExit as exc:
+                if args.allow_empty_sample:
+                    reason = (
+                        "ticket_listing_403"
+                        if "status 403" in str(exc)
+                        else "ticket_listing_failed"
+                    )
+                    run_warnings.append(reason)
+                    LOGGER.warning("Ticket listing failed; continuing with empty sample")
+                    ticket_refs = []
+                else:
+                    raise
             tickets_requested = args.sample_size
             sample_mode = "recent"
 
         if not ticket_refs:
-            raise SystemExit("No tickets available for evaluation")
+            if args.allow_empty_sample and sample_mode == "recent":
+                LOGGER.warning("No tickets available for evaluation; continuing")
+            else:
+                raise SystemExit("No tickets available for evaluation")
         if len(ticket_refs) < tickets_requested:
             LOGGER.warning(
                 "Sample size reduced: requested %d got %d",
@@ -966,8 +1300,10 @@ def main() -> int:
             )
 
         for ticket_ref in ticket_refs:
+            ticket_started = time.monotonic()
             redacted = _redact_identifier(ticket_ref) or "redacted"
             result: Dict[str, Any] = {"ticket_id_redacted": redacted}
+            shopify_lookup_ok = True
             try:
                 ticket_payload = _fetch_ticket(rp_client, ticket_ref)
                 ticket_id = str(ticket_payload.get("id") or ticket_ref).strip()
@@ -977,12 +1313,22 @@ def main() -> int:
                     conversation_id=ticket_payload.get("conversation_id"),
                     conversation_no=ticket_payload.get("conversation_no"),
                 )
+                channel_value = _extract_channel(ticket_payload) or _extract_channel(
+                    convo_payload
+                )
+                result["channel"] = _classify_channel(channel_value)
+
+                ticket_schema = _schema_fingerprint(ticket_payload)
+                if ticket_schema:
+                    result["ticket_schema_fingerprint"] = ticket_schema
+                    ticket_schema_total += 1
+                    if ticket_schema not in ticket_schema_seen:
+                        ticket_schema_seen.add(ticket_schema)
+                        ticket_schema_new += 1
+
                 order_payload = _extract_order_payload(ticket_payload, convo_payload)
-                # probe_summary is intentionally empty for non-explicit modes (e.g., "recent")
-                # because we only perform full Shopify lookups when explicitly requested ticket IDs
-                # are provided to avoid excessive API calls during sampling operations.
                 probe_summary: Dict[str, Any] = {}
-                if sample_mode == "explicit":
+                try:
                     probe_summary = lookup_order_summary(
                         build_event_envelope(order_payload),
                         safe_mode=False,
@@ -990,14 +1336,22 @@ def main() -> int:
                         allow_network=True,
                         shopify_client=shopify_client,
                     )
-                    if isinstance(probe_summary, dict):
-                        result["order_resolution"] = probe_summary.get(
-                            "order_resolution"
-                        )
+                except (ShopifyRequestError, ShopifyTransportError) as exc:
+                    shopify_lookup_ok = False
+                    had_errors = True
+                    result["failure_reason"] = _classify_shopify_exception(exc)
+                    result["failure_source"] = "shopify_fetch"
+                    result["error"] = _safe_error(exc)
+
+                if isinstance(probe_summary, dict):
+                    result["order_resolution"] = probe_summary.get("order_resolution")
+                    if shopify_lookup_ok:
                         # Store tracking/shipping data from Shopify lookup (redacted for PII)
                         tracking_num = probe_summary.get("tracking_number")
                         result["shopify_tracking_number"] = bool(tracking_num)
-                        result["shopify_tracking_redacted"] = _redact_tracking_number(tracking_num)
+                        result["shopify_tracking_redacted"] = _redact_tracking_number(
+                            tracking_num
+                        )
                         result["shopify_carrier"] = probe_summary.get("carrier") or None
                         result["shopify_order_created_at"] = bool(
                             probe_summary.get("created_at")
@@ -1009,9 +1363,18 @@ def main() -> int:
                         )
                         # Compute ETA from order date + shipping method + ticket date
                         ticket_created = ticket_payload.get("created_at")
-                        eta_result = _compute_eta_for_ticket(probe_summary, ticket_created)
+                        eta_result = _compute_eta_for_ticket(
+                            probe_summary, ticket_created
+                        )
                         if eta_result:
                             result["computed_eta"] = eta_result
+
+                        shopify_schema = _schema_fingerprint(probe_summary)
+                        result["shopify_schema_fingerprint"] = shopify_schema
+                        shopify_schema_total += 1
+                        if shopify_schema not in shopify_schema_seen:
+                            shopify_schema_seen.add(shopify_schema)
+                            shopify_schema_new += 1
 
                 raw_customer_message = _extract_latest_customer_message(
                     ticket_payload, convo_payload
@@ -1059,11 +1422,15 @@ def main() -> int:
                     else {}
                 )
                 order_summary = (
-                    parameters.get("order_summary") if isinstance(parameters, dict) else {}
+                    parameters.get("order_summary")
+                    if isinstance(parameters, dict)
+                    else {}
                 )
                 # Merge probe_summary into order_summary if we have it
                 # Use isinstance check for consistency with other defensive checks
-                effective_summary = dict(probe_summary) if isinstance(probe_summary, dict) else {}
+                effective_summary = (
+                    dict(probe_summary) if isinstance(probe_summary, dict) else {}
+                )
                 if order_summary:
                     effective_summary.update(order_summary)
 
@@ -1105,7 +1472,8 @@ def main() -> int:
                 # Safely handle order_resolution being None (not just absent)
                 order_resolution = (
                     probe_summary.get("order_resolution")
-                    if isinstance(probe_summary, dict) else None
+                    if isinstance(probe_summary, dict)
+                    else None
                 )
                 order_resolved = (
                     isinstance(order_resolution, dict)
@@ -1120,12 +1488,28 @@ def main() -> int:
                         "eta_available": eta_available,
                     }
                 )
+                if "failure_reason" not in result:
+                    match_failure = _classify_order_match_failure(result)
+                    if match_failure:
+                        result["failure_reason"] = match_failure
+                        result["failure_source"] = "order_match"
             except SystemExit:
                 raise
+            except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                had_errors = True
+                result["failure_reason"] = _classify_richpanel_exception(exc)
+                result["failure_source"] = "richpanel_fetch"
+                result["error"] = _safe_error(exc)
             except Exception as exc:
                 had_errors = True
+                result["failure_reason"] = "unexpected_error"
+                result["failure_source"] = "unknown"
                 result["error"] = _safe_error(exc)
-            ticket_results.append(result)
+            finally:
+                elapsed = time.monotonic() - ticket_started
+                result["elapsed_seconds"] = round(elapsed, 3)
+                ticket_durations.append(elapsed)
+                ticket_results.append(result)
 
     finally:
         trace.stop()
@@ -1153,6 +1537,27 @@ def main() -> int:
         "errors": sum(1 for item in ticket_results if item.get("error")),
     }
 
+    drift_summary = _build_drift_summary(
+        ticket_total=ticket_schema_total,
+        ticket_new=ticket_schema_new,
+        ticket_unique=len(ticket_schema_seen),
+        shopify_total=shopify_schema_total,
+        shopify_new=shopify_schema_new,
+        shopify_unique=len(shopify_schema_seen),
+        threshold=DRIFT_WARNING_THRESHOLD,
+    )
+    timing_summary = _summarize_timing(
+        ticket_durations, run_duration_seconds=time.monotonic() - run_started
+    )
+    summary_payload = _build_summary_payload(
+        run_id=run_id,
+        tickets_requested=tickets_requested,
+        ticket_results=ticket_results,
+        timing=timing_summary,
+        drift=drift_summary,
+        run_warnings=run_warnings,
+    )
+
     report = {
         "run_id": run_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1163,6 +1568,8 @@ def main() -> int:
         "counts": counts,
         "shopify_probe": shopify_probe,
         "tickets": ticket_results,
+        "summary_path": str(summary_path),
+        "run_warnings": list(run_warnings),
         "http_trace_path": str(trace_path),
         "http_trace_summary": trace_summary,
         "notes": [
@@ -1175,6 +1582,9 @@ def main() -> int:
 
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    summary_path.write_text(
+        json.dumps(summary_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
     md_lines = [
@@ -1193,6 +1603,9 @@ def main() -> int:
         f"- Shopify probe enabled: {shopify_probe['enabled']}",
         f"- Shopify probe ok: {shopify_probe.get('ok')}",
         f"- Shopify probe status: {shopify_probe.get('status_code')}",
+        f"- Summary path: `{summary_path}`",
+        f"- Drift warning: {summary_payload['schema_drift']['warning']}",
+        f"- Run warnings: {', '.join(summary_payload['run_warnings']) or 'none'}",
         "",
         "## HTTP Trace Summary",
         f"- Total requests: {trace_summary['total_requests']}",
@@ -1222,6 +1635,7 @@ def main() -> int:
         counts["errors"],
     )
     LOGGER.info("Report written to %s", report_path)
+    LOGGER.info("Summary written to %s", summary_path)
     LOGGER.info("HTTP trace written to %s", trace_path)
     return 1 if had_errors else 0
 
