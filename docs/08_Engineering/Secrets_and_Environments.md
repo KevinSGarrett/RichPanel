@@ -1,6 +1,6 @@
 # Secrets and Environments
 
-Last updated: 2026-01-19  
+Last updated: 2026-01-27  
 Status: Canonical
 
 This document defines the **single source of truth** for secrets, environment configuration, and secret-to-environment mapping across all RichPanel Middleware environments (dev, staging, prod).
@@ -176,6 +176,59 @@ All integration clients support **environment variable overrides** for local dev
 
 **Code reference (secret path):** `backend/src/integrations/openai/client.py` L191-L195
 
+### Outbound & Write Safety Registry (Canonical)
+
+This registry lists environment variables that influence outbound behavior or write safety. Safe defaults are the recommended baseline for each environment; "unset" means not present in the Lambda config.
+
+| Environment Variable | Purpose | Safe default (dev / staging / prod) | Danger level |
+|---|---|---|---|
+| `RICHPANEL_OUTBOUND_ENABLED` | Enable Richpanel outbound writes and customer replies | `false / false / false` | High |
+| `MW_ALLOW_NETWORK_READS` | Allow read-only network calls when outbound is disabled | `false / false / false` | Medium |
+| `MW_OUTBOUND_ALLOWLIST_EMAILS` | Allowlist customer emails for email-channel replies | `empty / empty / empty` | High |
+| `MW_OUTBOUND_ALLOWLIST_DOMAINS` | Allowlist customer email domains | `empty / empty / empty` | High |
+| `RICHPANEL_BOT_AUTHOR_ID` | Bot author id for email-channel replies | `empty / empty / empty` | High |
+| `MW_PROD_WRITES_ACK` | Prod-only write acknowledgment gate | `unset / unset / unset` | Critical |
+| `RICHPANEL_READ_ONLY` (or `RICH_PANEL_READ_ONLY`) | Force GET/HEAD-only requests | `false / true / true` (effective default via env) | High |
+| `RICHPANEL_WRITE_DISABLED` | Hard block all non-GET/HEAD requests | `false / false / false` | Low |
+| `SHOPIFY_OUTBOUND_ENABLED` | Enable Shopify network calls | `false / false / false` | Medium |
+| `OPENAI_ALLOW_NETWORK` | Enable OpenAI network calls | `false / false / false` | Medium |
+| `SHIPSTATION_OUTBOUND_ENABLED` | Enable ShipStation network calls | `false / false / false` | Medium |
+
+Danger level legend: Low = safety-only; Medium = enables read-only network calls; High = enables or restricts customer-facing outbound; Critical = unlocks prod writes.
+
+Deployment source: `MW_OUTBOUND_ALLOWLIST_*` and `RICHPANEL_BOT_AUTHOR_ID` are wired into the worker Lambda via CDK. Set per-environment values in `infra/cdk/cdk.json` under `context.environments.<env>` as `outboundAllowlistEmails`, `outboundAllowlistDomains`, and `richpanelBotAuthorId` (or override via `cdk.context.json`).
+
+#### Gate behavior summary
+- Writes gate: `MW_PROD_WRITES_ACK` must be acknowledged for prod writes; `RICHPANEL_READ_ONLY` and `RICHPANEL_WRITE_DISABLED` force read-only regardless.
+- Outbound on/off: `RICHPANEL_OUTBOUND_ENABLED` controls Richpanel outbound writes and customer replies (default off).
+- Outbound restriction: `MW_OUTBOUND_ALLOWLIST_EMAILS` and `MW_OUTBOUND_ALLOWLIST_DOMAINS` must include the customer for email replies.
+- Bot identity: `RICHPANEL_BOT_AUTHOR_ID` is required for email-channel replies in prod; missing value blocks outbound.
+- Network reads: `MW_ALLOW_NETWORK_READS` allows read-only network calls when outbound is disabled.
+- Vendor network toggles: `SHOPIFY_OUTBOUND_ENABLED`, `OPENAI_ALLOW_NETWORK`, `SHIPSTATION_OUTBOUND_ENABLED` control external network calls for their integrations.
+- Environment resolution (`RICHPANEL_ENV` / `RICH_PANEL_ENV` / `MW_ENV` / `ENV` / `ENVIRONMENT`) determines prod safety gates; see Environment Configuration.
+
+#### Quick rollback (prod-safe)
+1. Set `RICHPANEL_OUTBOUND_ENABLED=false` (or unset).
+2. Unset `MW_PROD_WRITES_ACK`.
+3. Optional: set `RICHPANEL_WRITE_DISABLED=true` for an immediate hard block.
+
+#### Deployed config lint (PII-safe)
+Run:
+```bash
+python scripts/lint_middleware_lambda_config.py --env prod --region us-east-2
+```
+
+Sample output:
+```
+Environment: prod
+Function: rp-mw-prod-worker
+Outbound enabled: false
+Prod writes ACK acknowledged: false
+Allowlist emails: 0
+Allowlist domains: 0
+Bot author id set: false
+```
+
 ---
 
 ## Security Constraints
@@ -186,9 +239,10 @@ All integration clients support **environment variable overrides** for local dev
 
 **Solution:** The middleware enforces **read-only "shadow mode"** in production via code-level write blocking:
 
-1. **Environment-based enforcement:** When `MW_ENV=prod`, the worker sets `RICHPANEL_WRITE_DISABLED=true`
-2. **Request-level blocking:** The `RichpanelClient.request()` method checks for read-only or write-disabled mode; only `GET`/`HEAD` are allowed and all other methods (`POST`, `PUT`, `PATCH`, `DELETE`) raise `RichpanelWriteDisabledError` before the network call
-3. **Safety gates:** Worker logic checks `safe_mode` and `automation_enabled` SSM parameters before executing any automation
+1. **Environment-based enforcement:** The Richpanel client defaults to read-only for `staging`/`prod` (`READ_ONLY_ENVIRONMENTS`) unless explicitly overridden by `RICHPANEL_READ_ONLY`.
+2. **Request-level blocking:** The `RichpanelClient.request()` method checks for read-only or write-disabled mode; only `GET`/`HEAD` are allowed and all other methods (`POST`, `PUT`, `PATCH`, `DELETE`) raise `RichpanelWriteDisabledError` before the network call.
+3. **Optional hard block:** `RICHPANEL_WRITE_DISABLED=true` forces read-only regardless of environment.
+4. **Safety gates:** Worker logic checks `safe_mode` and `automation_enabled` SSM parameters before executing any automation.
 
 **Code reference (write gate):** `backend/src/richpanel_middleware/integrations/richpanel/client.py` L255-L264
 

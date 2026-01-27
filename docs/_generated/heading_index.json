@@ -13917,6 +13917,12 @@
       "anchor": "openai-client-overrides"
     }
   ],
+  "outbound & write safety registry (canonical)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "outbound-write-safety-registry-canonical"
+    }
+  ],
   "security constraints": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",

@@ -12518,6 +12518,11 @@
         "anchor": "openai-client-overrides"
       },
       {
+        "level": 3,
+        "text": "Outbound & Write Safety Registry (Canonical)",
+        "anchor": "outbound-write-safety-registry-canonical"
+      },
+      {
         "level": 2,
         "text": "Security Constraints",
         "anchor": "security-constraints"

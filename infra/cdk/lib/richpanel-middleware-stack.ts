@@ -267,6 +267,12 @@ export class RichpanelMiddlewareStack extends Stack {
         MW_ENV: this.environmentConfig.name,
         MW_ALLOW_ENV_FLAG_OVERRIDE: this.environmentConfig.name === "dev" ? "true" : "false",
         RICHPANEL_API_KEY_SECRET_ARN: this.secrets.richpanelApiKey.secretArn,
+        MW_OUTBOUND_ALLOWLIST_EMAILS:
+          this.environmentConfig.outboundAllowlistEmails ?? "",
+        MW_OUTBOUND_ALLOWLIST_DOMAINS:
+          this.environmentConfig.outboundAllowlistDomains ?? "",
+        RICHPANEL_BOT_AUTHOR_ID:
+          this.environmentConfig.richpanelBotAuthorId ?? "",
       },
 
       // IMPORTANT: package backend/src (not just the worker folder)
