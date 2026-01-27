@@ -94,6 +94,14 @@ CHAT_CHANNELS = {
     "web",
 }
 
+# B61/C: Drift thresholds for diagnostic monitoring
+DRIFT_THRESHOLDS = {
+    "match_rate_drop_pct": 10.0,  # Alert if match rate drops > 10 percentage points
+    "api_error_rate_pct": 5.0,    # Alert if API errors exceed 5% of tickets
+    "order_number_share_drop_pct": 15.0,  # Alert if order_number match share drops > 15%
+    "schema_drift_new_ratio": 0.2,  # Alert if > 20% of schemas are new
+}
+
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
     if value is None:
@@ -313,6 +321,149 @@ def _classify_order_match_failure(result: Dict[str, Any]) -> Optional[str]:
     return "order_match_failed"
 
 
+def _extract_match_method(result: Dict[str, Any]) -> str:
+    """
+    Extract the match method used for order lookup.
+    Returns one of: order_number, name_email, email_only, none, parse_error
+    """
+    if not result.get("order_matched"):
+        return "none"
+    
+    resolution = result.get("order_resolution")
+    if not isinstance(resolution, dict):
+        return "none"
+    
+    resolved_by = _normalize_optional_text(resolution.get("resolvedBy"))
+    
+    # Map resolvedBy values to standard match methods
+    if "order_number" in resolved_by:
+        return "order_number"
+    if "email_name" in resolved_by:
+        return "name_email"
+    if "email_only" in resolved_by:
+        return "email_only"
+    if resolved_by == "no_match":
+        return "none"
+    
+    # If we have order_matched=True but no clear resolution, check for parse_error
+    if result.get("failure_reason") == "parse_error":
+        return "parse_error"
+    
+    # Default to none if we can't determine
+    return "none"
+
+
+def _extract_route_decision(result: Dict[str, Any]) -> str:
+    """
+    Extract the route decision (order_status vs non_order_status vs unknown).
+    """
+    routing = result.get("routing")
+    if not isinstance(routing, dict):
+        return "unknown"
+    
+    intent = _normalize_optional_text(routing.get("intent"))
+    if not intent:
+        return "unknown"
+    
+    # Normalize intent to order_status or non_order_status
+    if intent in ("order_status", "order_tracking", "order_inquiry"):
+        return "order_status"
+    
+    return "non_order_status"
+
+
+def _classify_failure_reason_bucket(result: Dict[str, Any]) -> Optional[str]:
+    """
+    Classify failure into stable PII-safe buckets.
+    Returns bucket name or None if no failure.
+    """
+    failure_reason = result.get("failure_reason")
+    if not failure_reason:
+        return None
+    
+    reason_str = str(failure_reason).lower()
+    
+    # API failures
+    if "shopify" in reason_str and ("api" in reason_str or "error" in reason_str):
+        return "shopify_api_error"
+    if "richpanel" in reason_str and ("api" in reason_str or "error" in reason_str):
+        return "richpanel_api_error"
+    
+    # Match failures
+    if "no_customer_email" in reason_str or "no_email" in reason_str:
+        return "no_identifiers"
+    if "no_order_candidates" in reason_str or "no_match" in reason_str:
+        return "no_order_candidates"
+    if "multiple_orders_ambiguous" in reason_str or "ambiguous" in reason_str:
+        return "ambiguous_match"
+    
+    # Parse/data errors
+    if "parse" in reason_str:
+        return "parse_error"
+    
+    # Catch-all for other errors
+    if "error" in reason_str:
+        return "other_error"
+    
+    return "other_failure"
+
+
+def _build_drift_watch(
+    *,
+    match_rate: float,
+    api_error_rate: float,
+    order_number_share: float,
+    schema_new_ratio: float,
+) -> Dict[str, Any]:
+    """
+    B61/C: Build drift watch section comparing current values to thresholds.
+    Returns dict with current values, thresholds, and alert flags.
+    """
+    thresholds = DRIFT_THRESHOLDS
+    
+    # Convert rates to percentages for comparison
+    match_rate_pct = match_rate * 100
+    api_error_rate_pct = api_error_rate * 100
+    order_number_share_pct = order_number_share * 100
+    schema_new_ratio_pct = schema_new_ratio * 100
+    
+    alerts = []
+    
+    # Note: For initial runs without historical data, we can't detect drops
+    # We just report current values and thresholds
+    
+    # API error rate check (absolute)
+    if api_error_rate_pct > thresholds["api_error_rate_pct"]:
+        alerts.append({
+            "metric": "api_error_rate",
+            "threshold": thresholds["api_error_rate_pct"],
+            "current": round(api_error_rate_pct, 2),
+            "message": f"API error rate ({api_error_rate_pct:.1f}%) exceeds threshold ({thresholds['api_error_rate_pct']}%)"
+        })
+    
+    # Schema drift check (absolute)
+    if schema_new_ratio_pct > thresholds["schema_drift_new_ratio"] * 100:
+        alerts.append({
+            "metric": "schema_drift",
+            "threshold": thresholds["schema_drift_new_ratio"] * 100,
+            "current": round(schema_new_ratio_pct, 2),
+            "message": f"Schema drift ({schema_new_ratio_pct:.1f}%) exceeds threshold ({thresholds['schema_drift_new_ratio'] * 100}%)"
+        })
+    
+    return {
+        "thresholds": thresholds,
+        "current_values": {
+            "match_rate_pct": round(match_rate_pct, 2),
+            "api_error_rate_pct": round(api_error_rate_pct, 2),
+            "order_number_share_pct": round(order_number_share_pct, 2),
+            "schema_new_ratio_pct": round(schema_new_ratio_pct, 2),
+        },
+        "alerts": alerts,
+        "has_alerts": len(alerts) > 0,
+        "note": "Historical comparison not yet implemented; showing absolute thresholds only"
+    }
+
+
 def _build_drift_summary(
     *,
     ticket_total: int,
@@ -364,7 +515,14 @@ def _build_summary_payload(
     failure_reasons: Counter[str] = Counter()
     richpanel_fetch_failures: Counter[str] = Counter()
     shopify_fetch_failures: Counter[str] = Counter()
+    
+    # New B61/C metrics: route decisions, match methods, failure buckets
+    route_decisions: Counter[str] = Counter()
+    match_methods: Counter[str] = Counter()
+    failure_buckets: Counter[str] = Counter()
+    
     for result in ticket_results:
+        # Existing failure tracking
         reason = result.get("failure_reason")
         source = result.get("failure_source")
         if reason:
@@ -373,6 +531,20 @@ def _build_summary_payload(
                 richpanel_fetch_failures[str(reason)] += 1
             if source == "shopify_fetch":
                 shopify_fetch_failures[str(reason)] += 1
+        
+        # New: route decision distribution
+        route_decision = _extract_route_decision(result)
+        route_decisions[route_decision] += 1
+        
+        # New: match method telemetry
+        match_method = _extract_match_method(result)
+        match_methods[match_method] += 1
+        
+        # New: failure reason bucketing
+        failure_bucket = _classify_failure_reason_bucket(result)
+        if failure_bucket:
+            failure_buckets[failure_bucket] += 1
+    
     top_failure_reasons = [
         {"reason": reason, "count": count}
         for reason, count in sorted(
@@ -382,6 +554,17 @@ def _build_summary_payload(
     success_rate = (
         order_match_success_count / tickets_evaluated if tickets_evaluated else 0.0
     )
+    
+    # Calculate percentages for new metrics
+    route_decision_pcts = {
+        decision: round(count / tickets_evaluated, 4) if tickets_evaluated else 0.0
+        for decision, count in route_decisions.items()
+    }
+    match_method_pcts = {
+        method: round(count / tickets_evaluated, 4) if tickets_evaluated else 0.0
+        for method, count in match_methods.items()
+    }
+    
     warnings = sorted({str(item) for item in (run_warnings or []) if item})
     return {
         "run_id": run_id,
@@ -394,6 +577,14 @@ def _build_summary_payload(
         "order_match_success_count": order_match_success_count,
         "order_match_failure_count": order_match_failure_count,
         "order_match_success_rate": round(success_rate, 4),
+        # B61/C: Route decision distribution
+        "route_decisions": dict(route_decisions),
+        "route_decision_percentages": route_decision_pcts,
+        # B61/C: Match method telemetry
+        "match_methods": dict(match_methods),
+        "match_method_percentages": match_method_pcts,
+        # B61/C: Failure buckets (PII-safe categorization)
+        "failure_buckets": dict(failure_buckets),
         "top_failure_reasons": top_failure_reasons,
         "failure_reasons": dict(failure_reasons),
         "richpanel_fetch_failures": dict(richpanel_fetch_failures),
@@ -1546,6 +1737,32 @@ def main() -> int:
         shopify_unique=len(shopify_schema_seen),
         threshold=DRIFT_WARNING_THRESHOLD,
     )
+    
+    # B61/C: Build drift watch with current metrics
+    tickets_evaluated = len(ticket_results)
+    match_rate = counts["orders_matched"] / tickets_evaluated if tickets_evaluated else 0.0
+    api_errors = sum(
+        1 for result in ticket_results 
+        if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
+    )
+    api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
+    order_number_matches = sum(
+        1 for result in ticket_results 
+        if _extract_match_method(result) == "order_number"
+    )
+    order_number_share = order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
+    schema_new_ratio = max(
+        ticket_schema_new / ticket_schema_total if ticket_schema_total else 0.0,
+        shopify_schema_new / shopify_schema_total if shopify_schema_total else 0.0,
+    )
+    
+    drift_watch = _build_drift_watch(
+        match_rate=match_rate,
+        api_error_rate=api_error_rate,
+        order_number_share=order_number_share,
+        schema_new_ratio=schema_new_ratio,
+    )
+    
     timing_summary = _summarize_timing(
         ticket_durations, run_duration_seconds=time.monotonic() - run_started
     )
@@ -1557,6 +1774,8 @@ def main() -> int:
         drift=drift_summary,
         run_warnings=run_warnings,
     )
+    # Add drift watch to summary
+    summary_payload["drift_watch"] = drift_watch
 
     report = {
         "run_id": run_id,
@@ -1587,6 +1806,14 @@ def main() -> int:
         json.dumps(summary_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
+    # B61/C: Extract new metrics for markdown
+    route_decisions = summary_payload.get("route_decisions", {})
+    route_pcts = summary_payload.get("route_decision_percentages", {})
+    match_methods = summary_payload.get("match_methods", {})
+    match_pcts = summary_payload.get("match_method_percentages", {})
+    failure_buckets = summary_payload.get("failure_buckets", {})
+    drift_watch = summary_payload.get("drift_watch", {})
+    
     md_lines = [
         "# Live Read-Only Shadow Eval Report",
         "",
@@ -1607,6 +1834,41 @@ def main() -> int:
         f"- Drift warning: {summary_payload['schema_drift']['warning']}",
         f"- Run warnings: {', '.join(summary_payload['run_warnings']) or 'none'}",
         "",
+        "## Route Decision Distribution (B61/C)",
+        f"- Order Status: {route_decisions.get('order_status', 0)} ({route_pcts.get('order_status', 0) * 100:.1f}%)",
+        f"- Non-Order Status: {route_decisions.get('non_order_status', 0)} ({route_pcts.get('non_order_status', 0) * 100:.1f}%)",
+        f"- Unknown: {route_decisions.get('unknown', 0)} ({route_pcts.get('unknown', 0) * 100:.1f}%)",
+        "",
+        "## Match Method Telemetry (B61/C)",
+        f"- Order Number: {match_methods.get('order_number', 0)} ({match_pcts.get('order_number', 0) * 100:.1f}%)",
+        f"- Name + Email: {match_methods.get('name_email', 0)} ({match_pcts.get('name_email', 0) * 100:.1f}%)",
+        f"- Email Only: {match_methods.get('email_only', 0)} ({match_pcts.get('email_only', 0) * 100:.1f}%)",
+        f"- No Match: {match_methods.get('none', 0)} ({match_pcts.get('none', 0) * 100:.1f}%)",
+        f"- Parse Error: {match_methods.get('parse_error', 0)} ({match_pcts.get('parse_error', 0) * 100:.1f}%)",
+        "",
+        "## Failure Buckets (B61/C - PII Safe)",
+        f"- No Identifiers: {failure_buckets.get('no_identifiers', 0)}",
+        f"- Shopify API Error: {failure_buckets.get('shopify_api_error', 0)}",
+        f"- Richpanel API Error: {failure_buckets.get('richpanel_api_error', 0)}",
+        f"- Ambiguous Match: {failure_buckets.get('ambiguous_match', 0)}",
+        f"- No Order Candidates: {failure_buckets.get('no_order_candidates', 0)}",
+        f"- Parse Error: {failure_buckets.get('parse_error', 0)}",
+        f"- Other Errors: {failure_buckets.get('other_error', 0) + failure_buckets.get('other_failure', 0)}",
+        "",
+        "## Drift Watch (B61/C)",
+        f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",
+        f"- API Error Rate: {drift_watch.get('current_values', {}).get('api_error_rate_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['api_error_rate_pct']}%)",
+        f"- Order Number Share: {drift_watch.get('current_values', {}).get('order_number_share_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['order_number_share_drop_pct']}%)",
+        f"- Schema Drift: {drift_watch.get('current_values', {}).get('schema_new_ratio_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['schema_drift_new_ratio'] * 100}%)",
+        f"- **Alerts: {len(drift_watch.get('alerts', []))}**",
+    ]
+    
+    # Add alert details if any
+    for alert in drift_watch.get("alerts", []):
+        md_lines.append(f"  - ⚠️ {alert.get('message', 'Unknown alert')}")
+    
+    md_lines.extend([
+        "",
         "## HTTP Trace Summary",
         f"- Total requests: {trace_summary['total_requests']}",
         f"- Methods: {json.dumps(trace_summary['methods'], sort_keys=True)}",
@@ -1621,7 +1883,7 @@ def main() -> int:
         "- Ticket identifiers are hashed in the JSON report.",
         "- No message bodies or customer identifiers are stored.",
         "- HTTP trace captures urllib.request and AWS SDK (botocore) calls.",
-    ]
+    ])
     report_md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
 
     LOGGER.info(
