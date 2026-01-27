@@ -100,6 +100,10 @@ _POSITIVE_MIDDLEWARE_TAGS = {
 _LOOP_PREVENTION_TAG = "mw-auto-replied"
 _OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
 _OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
+_ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
+_ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
+_ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing:"
+_SUPPORT_ROUTE_TAG = "route-email-support-team"
 
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
@@ -108,6 +112,8 @@ _ORDER_STATUS_SCENARIOS = {
     "order_status_no_tracking",
     "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5",
+    "order_status_no_match",
+    "allowlist_blocked",
 }
 
 _ORDER_STATUS_VARIANTS = {
@@ -117,7 +123,16 @@ _ORDER_STATUS_VARIANTS = {
     "order_status_no_tracking": "order_status_no_tracking",
     "order_status_no_tracking_short_window": "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5": "order_status_no_tracking_standard_shipping_3_5",
+    "allowlist_blocked": "order_status_tracking",
 }
+
+_NEGATIVE_SCENARIOS = {
+    "not_order_status",
+    "order_status_no_match",
+    "allowlist_blocked",
+}
+
+_SCENARIOS_REQUIRE_TICKET = _ORDER_STATUS_SCENARIOS | {"not_order_status"}
 
 _SMOKE_TICKET_FROM_EMAIL_ENV = "MW_SMOKE_TICKET_FROM_EMAIL"
 _SMOKE_TICKET_SUBJECT_ENV = "MW_SMOKE_TICKET_SUBJECT"
@@ -595,6 +610,51 @@ def _seed_order_id(run_id: str, conversation_id: Optional[str]) -> str:
     return f"DEV-ORDER-{_fingerprint(run_id, length=8).upper()}"
 
 
+def _seed_order_number(seed: str) -> str:
+    """
+    Derive a deterministic (PII-safe) fake order number for lookup tests.
+    """
+    digest = _fingerprint(seed, length=10).upper()
+    return f"FAKE-{digest}"
+
+
+def _not_order_status_payload(
+    run_id: str, *, conversation_id: Optional[str]
+) -> Dict[str, Any]:
+    """
+    Build a deterministic non-order-status payload (e.g., subscription cancel).
+    """
+    _ = run_id, conversation_id
+    ticket_created_at = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    return {
+        "scenario": "not_order_status",
+        "customer_message": "Please cancel my subscription and stop future charges.",
+        "ticket_created_at": ticket_created_at,
+        "customer_profile": {
+            "firstName": "Sandbox",
+            "lastName": "Tester",
+        },
+    }
+
+
+def _order_status_no_match_payload(
+    run_id: str, *, conversation_id: Optional[str]
+) -> Dict[str, Any]:
+    """
+    Order-status payload with a fake order number that should not match.
+    """
+    _ = conversation_id
+    ticket_created_at = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    order_number = _seed_order_number(run_id or "order-status-no-match")
+    return {
+        "scenario": "order_status_no_match",
+        "customer_message": f"Where is my order #{order_number}? I need a status update.",
+        "ticket_created_at": ticket_created_at,
+        "order_number": order_number,
+        # Intentionally omit created_at/shipping/tracking to force lookup failure.
+    }
+
+
 def _order_status_scenario_payload(
     run_id: str, *, conversation_id: Optional[str]
 ) -> Dict[str, Any]:
@@ -1014,6 +1074,80 @@ def _check_pii_safe(payload_json: str) -> Optional[str]:
     return None
 
 
+def _build_skip_proof_payload(
+    *,
+    run_id: str,
+    env_name: str,
+    region: str,
+    scenario: str,
+    skip_reason: str,
+    allowlist_config: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    return {
+        "meta": {
+            "run_id": run_id,
+            "timestamp": _iso_timestamp_now(),
+            "env": env_name,
+            "region": region,
+            "scenario": scenario,
+            "scenario_variant": _ORDER_STATUS_VARIANTS.get(scenario, scenario),
+        },
+        "inputs": {
+            "command": _redact_command(sys.argv),
+        },
+        "allowlist": allowlist_config or {},
+        "proof_fields": {
+            "intent_after": None,
+            "outbound_attempted": None,
+            "routed_to_support": None,
+            "order_match_success": None,
+            "order_match_failure_reason": None,
+        },
+        "result": {
+            "status": "SKIP",
+            "classification": "SKIP",
+            "classification_reason": skip_reason,
+            "criteria": {"pii_safe": True},
+            "criteria_details": [
+                {
+                    "name": "skip_reason",
+                    "description": "Scenario skipped with explicit reason",
+                    "required": True,
+                    "value": skip_reason,
+                },
+                {
+                    "name": "pii_safe",
+                    "description": "Proof JSON passed PII guard scan",
+                    "required": True,
+                    "value": True,
+                },
+            ],
+            "failure_reason": None,
+        },
+    }
+
+
+def _write_proof_payload(path: Path, payload: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe_payload = _sanitize_decimals(payload)
+    proof_json_str = json.dumps(safe_payload, indent=2)
+    pii_error = _check_pii_safe(proof_json_str)
+    if pii_error:
+        result = safe_payload.setdefault("result", {})
+        result["status"] = "FAIL"
+        result["classification"] = "FAIL"
+        result["failure_reason"] = pii_error
+        criteria = result.get("criteria") or {}
+        criteria["pii_safe"] = False
+        result["criteria"] = criteria
+        for entry in result.get("criteria_details", []):
+            if entry.get("name") == "pii_safe":
+                entry["value"] = False
+        proof_json_str = json.dumps(safe_payload, indent=2)
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(proof_json_str)
+
+
 def _build_richpanel_executor(
     *,
     env_name: str,
@@ -1349,6 +1483,25 @@ def _wait_for_ticket_ready(
     return None
 
 
+def _wait_for_ticket_tags(
+    executor: RichpanelExecutor,
+    ticket_ref: str,
+    *,
+    allow_network: bool,
+    required_tags: List[str],
+    timeout_seconds: int,
+    poll_interval: float = 5.0,
+) -> Optional[Dict[str, Any]]:
+    deadline = time.time() + max(timeout_seconds, 0)
+    while time.time() < deadline:
+        snap = _fetch_ticket_snapshot(executor, ticket_ref, allow_network=allow_network)
+        tags = snap.get("tags") or []
+        if all(tag in tags for tag in required_tags):
+            return snap
+        time.sleep(poll_interval)
+    return None
+
+
 def _apply_test_tag(
     executor: RichpanelExecutor,
     ticket_id: str,
@@ -1405,6 +1558,12 @@ def _safe_int(value: Any) -> Optional[int]:
     except Exception:
         return None
     return None
+
+
+def _to_bool(value: Any) -> bool:
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _sanitize_response_metadata(response: Any) -> Dict[str, Any]:
@@ -1786,6 +1945,9 @@ def parse_args() -> argparse.Namespace:
             "order_status_no_tracking",
             "order_status_no_tracking_short_window",
             "order_status_no_tracking_standard_shipping_3_5",
+            "order_status_no_match",
+            "not_order_status",
+            "allowlist_blocked",
         ],
         default="baseline",
         help="Scenario to run (default: baseline).",
@@ -1882,6 +2044,14 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Require mw-outbound-blocked-allowlist evidence and "
             "no send-message path tags."
+        ),
+    )
+    parser.add_argument(
+        "--fail-on-outbound-block",
+        action="store_true",
+        help=(
+            "Fail if an outbound allowlist block is observed unexpectedly "
+            "(ignored when allowlist block is required)."
         ),
     )
     parser.add_argument(
@@ -2266,6 +2436,7 @@ def validate_routing(record: Dict[str, Any], *, label: str) -> Dict[str, Any]:
     tags = _normalize_tags(routing.get("tags"))
     reason = routing.get("reason") or routing.get("reasons")
     intent = routing.get("intent")
+    department = routing.get("department")
 
     if not category:
         raise SmokeFailure(f"{label} routing.category was missing or empty.")
@@ -2277,6 +2448,8 @@ def validate_routing(record: Dict[str, Any], *, label: str) -> Dict[str, Any]:
     validated = {"category": str(category), "tags": tags, "reason": reason}
     if intent:
         validated["intent"] = str(intent)
+    if department:
+        validated["department"] = str(department)
     return validated
 
 
@@ -2572,6 +2745,169 @@ def _evaluate_allowlist_blocked_evidence(
     }
 
 
+def _evaluate_outbound_attempted(
+    *,
+    message_count_delta: Optional[int],
+    last_message_source_after: Optional[str],
+    send_message_tag_present: Optional[bool],
+    allowlist_blocked_tag_present: Optional[bool],
+) -> Optional[bool]:
+    signals: List[bool] = []
+    if message_count_delta is not None:
+        signals.append(message_count_delta >= 1)
+    if isinstance(last_message_source_after, str):
+        signals.append(last_message_source_after.lower() == "middleware")
+    if send_message_tag_present is not None:
+        signals.append(bool(send_message_tag_present))
+    if allowlist_blocked_tag_present is not None:
+        signals.append(bool(allowlist_blocked_tag_present))
+    if not signals:
+        return None
+    return any(signals)
+
+
+def _evaluate_support_routing(
+    *,
+    routing_tags: List[str],
+    routing_department: Optional[str],
+    routing_intent: Optional[str],
+    ticket_tags: Optional[List[str]] = None,
+    tags_added: Optional[List[str]] = None,
+    skip_tags_added: Optional[List[str]] = None,
+) -> Dict[str, Optional[bool]]:
+    tag_sources = [
+        routing_tags,
+        ticket_tags or [],
+        tags_added or [],
+        skip_tags_added or [],
+    ]
+    support_tag_present = any(
+        _SUPPORT_ROUTE_TAG in tags or "mw-escalated-human" in tags
+        for tags in tag_sources
+        if tags
+    )
+    support_department = (
+        routing_department == "Email Support Team" if routing_department else None
+    )
+    intent_is_order_status = routing_intent in {
+        "order_status_tracking",
+        "shipping_delay_not_shipped",
+        "order_status_no_tracking",
+    }
+    routed_to_support = None
+    if support_tag_present:
+        routed_to_support = True
+    elif support_department is not None:
+        routed_to_support = bool(support_department and not intent_is_order_status)
+    return {
+        "routed_to_support": routed_to_support,
+        "support_tag_present": support_tag_present,
+        "support_department": support_department,
+    }
+
+
+def _evaluate_order_match_evidence(
+    *,
+    routing_tags: List[str],
+    draft_action_present: bool,
+    routing_intent: Optional[str],
+) -> Dict[str, Optional[str]]:
+    intent_is_order_status = routing_intent in {
+        "order_status_tracking",
+        "shipping_delay_not_shipped",
+        "order_status_no_tracking",
+    }
+    if not intent_is_order_status:
+        return {"order_match_success": None, "order_match_failure_reason": None}
+    if draft_action_present:
+        return {"order_match_success": True, "order_match_failure_reason": None}
+    if (
+        _ORDER_LOOKUP_FAILED_TAG in routing_tags
+        or _ORDER_STATUS_SUPPRESSED_TAG in routing_tags
+    ):
+        missing_tag = next(
+            (
+                tag
+                for tag in routing_tags
+                if tag.startswith(_ORDER_LOOKUP_MISSING_PREFIX)
+            ),
+            None,
+        )
+        if missing_tag:
+            failure_reason = f"missing_context:{missing_tag.split(':', 1)[1]}"
+        else:
+            failure_reason = "order_lookup_failed"
+        return {
+            "order_match_success": False,
+            "order_match_failure_reason": failure_reason,
+        }
+    return {"order_match_success": None, "order_match_failure_reason": None}
+
+
+def _parse_allowlist_entries(
+    value: Optional[str], *, strip_at: bool = False
+) -> set[str]:
+    if not value:
+        return set()
+    entries: set[str] = set()
+    for raw in str(value).split(","):
+        candidate = raw.strip().lower()
+        if not candidate:
+            continue
+        if strip_at and candidate.startswith("@"):
+            candidate = candidate[1:]
+        if candidate:
+            entries.add(candidate)
+    return entries
+
+
+def _fetch_lambda_allowlist_config(lambda_client: Any, *, function_name: str) -> Dict[str, Any]:
+    try:
+        response = lambda_client.get_function_configuration(
+            FunctionName=function_name
+        )
+    except (BotoCoreError, ClientError) as exc:
+        raise SmokeFailure(
+            f"Failed to read Lambda configuration for {function_name}: {exc}"
+        ) from exc
+    variables = response.get("Environment", {}).get("Variables", {}) or {}
+    allowlist_emails = _parse_allowlist_entries(
+        variables.get("MW_OUTBOUND_ALLOWLIST_EMAILS")
+    )
+    allowlist_domains = _parse_allowlist_entries(
+        variables.get("MW_OUTBOUND_ALLOWLIST_DOMAINS"), strip_at=True
+    )
+    return {
+        "allowlist_configured": bool(allowlist_emails or allowlist_domains),
+        "allowlist_emails_count": len(allowlist_emails),
+        "allowlist_domains_count": len(allowlist_domains),
+        "outbound_enabled": _to_bool(variables.get("RICHPANEL_OUTBOUND_ENABLED")),
+    }
+
+
+def _should_skip_allowlist_blocked(
+    *,
+    require_allowlist_blocked: bool,
+    allowlist_configured: Optional[bool],
+) -> Optional[str]:
+    if require_allowlist_blocked and allowlist_configured is False:
+        return "allowlist_not_configured"
+    return None
+
+
+def _unexpected_outbound_blocked(
+    *,
+    fail_on_outbound_block: bool,
+    allowlist_blocked_tag_present: Optional[bool],
+    require_allowlist_blocked: bool,
+) -> bool:
+    return bool(
+        fail_on_outbound_block
+        and allowlist_blocked_tag_present
+        and not require_allowlist_blocked
+    )
+
+
 def _compute_operator_reply_metrics(
     pre_ticket_data: Dict[str, Any],
     post_ticket_data: Dict[str, Any],
@@ -2852,7 +3188,17 @@ def build_payload(
     if ticket_number:
         payload["ticket_number"] = ticket_number
 
-    if _is_order_status_scenario(scenario):
+    if scenario == "not_order_status":
+        scenario_payload = _not_order_status_payload(
+            run_id or "smoke", conversation_id=conversation_id
+        )
+        payload["scenario_name"] = scenario
+    elif scenario == "order_status_no_match":
+        scenario_payload = _order_status_no_match_payload(
+            run_id or "smoke", conversation_id=conversation_id
+        )
+        payload["scenario_name"] = scenario
+    elif _is_order_status_scenario(scenario):
         scenario_variant = _ORDER_STATUS_VARIANTS.get(scenario, "order_status_tracking")
         if scenario_variant == "order_status_no_tracking":
             scenario_payload = _order_status_no_tracking_payload(
@@ -2875,6 +3221,10 @@ def build_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
         payload["scenario_name"] = scenario
+    else:
+        scenario_payload = None
+
+    if scenario_payload:
         # Merge scenario fields at top level for middleware visibility
         for key, value in scenario_payload.items():
             if key not in payload:
@@ -3050,23 +3400,28 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     region = args.region
     env_name = args.env
     order_status_mode = _is_order_status_scenario(args.scenario)
+    negative_scenario = args.scenario in _NEGATIVE_SCENARIOS
+    not_order_status_mode = args.scenario == "not_order_status"
+    order_status_no_match_mode = args.scenario == "order_status_no_match"
+    allowlist_blocked_mode = args.scenario == "allowlist_blocked"
     scenario_variant = _ORDER_STATUS_VARIANTS.get(args.scenario, args.scenario)
     run_id = args.run_id or os.environ.get("RUN_ID") or time.strftime("%Y%m%d%H%M%S")
     default_idempotency_table = f"rp_mw_{env_name}_idempotency"
+    fail_on_outbound_block = bool(args.fail_on_outbound_block)
     require_openai_routing = (
         args.require_openai_routing
         if args.require_openai_routing is not None
-        else order_status_mode
+        else (order_status_mode and not negative_scenario)
     )
     require_openai_rewrite = (
         args.require_openai_rewrite
         if args.require_openai_rewrite is not None
-        else order_status_mode
+        else (order_status_mode and not negative_scenario)
     )
     require_outbound = (
         args.require_outbound
         if args.require_outbound is not None
-        else order_status_mode
+        else (order_status_mode and not negative_scenario)
     )
     require_operator_reply = (
         args.require_operator_reply
@@ -3076,7 +3431,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     require_send_message = (
         args.require_send_message if args.require_send_message is not None else False
     )
-    require_allowlist_blocked = bool(args.require_allowlist_blocked)
+    require_allowlist_blocked = bool(
+        args.require_allowlist_blocked or allowlist_blocked_mode
+    )
     if not order_status_mode:
         require_outbound = False
         require_operator_reply = False
@@ -3097,11 +3454,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         print(f"[INFO] Scenario: {args.scenario}")
 
     # Scenario-specific validation
-    if order_status_mode:
+    if args.scenario in _SCENARIOS_REQUIRE_TICKET:
         ticket_ref_for_scenario = args.ticket_id or args.ticket_number
         if not ticket_ref_for_scenario and not args.create_ticket:
             raise SmokeFailure(
-                "--scenario order_status* requires --ticket-id/--ticket-number "
+                f"--scenario {args.scenario} requires --ticket-id/--ticket-number "
                 "or --create-ticket."
             )
 
@@ -3111,6 +3468,36 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     apigwv2_client = session.client("apigatewayv2")
     secrets_client = session.client("secretsmanager")
     ddb_resource = session.resource("dynamodb")
+    allowlist_config: Optional[Dict[str, Any]] = None
+    allowlist_configured: Optional[bool] = None
+    if require_allowlist_blocked:
+        lambda_client = session.client("lambda")
+        function_name = f"rp-mw-{env_name}-worker"
+        allowlist_config = _fetch_lambda_allowlist_config(
+            lambda_client, function_name=function_name
+        )
+        allowlist_configured = bool(allowlist_config.get("allowlist_configured"))
+        skip_reason = _should_skip_allowlist_blocked(
+            require_allowlist_blocked=require_allowlist_blocked,
+            allowlist_configured=allowlist_configured,
+        )
+        if skip_reason:
+            print(
+                f"[SKIP] Allowlist-blocked scenario skipped: {skip_reason} "
+                f"(function={function_name})."
+            )
+            if args.proof_path:
+                skip_payload = _build_skip_proof_payload(
+                    run_id=run_id,
+                    env_name=env_name,
+                    region=region,
+                    scenario=args.scenario,
+                    skip_reason=skip_reason,
+                    allowlist_config=allowlist_config,
+                )
+                _write_proof_payload(Path(args.proof_path), skip_payload)
+                print(f"[OK] Wrote skip proof artifact to {args.proof_path}")
+            return 0
 
     artifacts = load_stack_artifacts(
         cfn_client,
@@ -3455,11 +3842,19 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             draft_reply_hash = _fingerprint(draft_body)
 
     routing_intent = routing_state.get("intent") or routing_audit.get("intent")
+    routing_department = (
+        routing_state.get("department") or routing_audit.get("department")
+    )
     intent_matches_order_status = routing_intent in {
         "order_status_tracking",
         "shipping_delay_not_shipped",
         "order_status_no_tracking",
     }
+    order_match_evidence = _evaluate_order_match_evidence(
+        routing_tags=routing_state.get("tags") or [],
+        draft_action_present=draft_action_present,
+        routing_intent=routing_intent,
+    )
     openai_routing = _extract_openai_routing_evidence(
         state_item, audit_item, routing_intent=routing_intent
     )
@@ -3781,6 +4176,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 if waited:
                     post_ticket = waited
                     post_ticket_data = waited
+        if require_allowlist_blocked:
+            waited = _wait_for_ticket_tags(
+                ticket_executor,
+                payload_conversation,
+                allow_network=allow_network,
+                required_tags=[
+                    _OUTBOUND_BLOCKED_ALLOWLIST_TAG,
+                    _SUPPORT_ROUTE_TAG,
+                ],
+                timeout_seconds=min(args.wait_seconds, 60),
+            )
+            if waited:
+                post_ticket = waited
+                post_ticket_data = waited
         fallback_used = bool(fallback_used)
 
         def _recompute_deltas(
@@ -4250,6 +4659,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     ticket_lookup_ok = bool(pre_ticket) if ticket_ref else None
     intent_ok = intent_matches_order_status if order_status_mode else None
+    intent_not_order_status = (
+        (not intent_matches_order_status) if routing_intent else None
+    )
     middleware_ok = (
         (
             middleware_outcome.get("middleware_outcome")
@@ -4342,17 +4754,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     allowlist_blocked_tag_present_ok = None
     allowlist_blocked_tag_added_ok = None
     send_message_tag_absent_ok = None
+    outbound_evidence = _evaluate_outbound_evidence(
+        message_count_delta=message_count_delta,
+        last_message_source_after=last_message_source_after,
+    )
+    outbound_message_count_ok = outbound_evidence["outbound_message_count_delta_ge_1"]
+    outbound_last_message_source_ok = outbound_evidence[
+        "outbound_last_message_source_middleware"
+    ]
     if order_status_mode:
-        outbound_evidence = _evaluate_outbound_evidence(
-            message_count_delta=message_count_delta,
-            last_message_source_after=last_message_source_after,
-        )
-        outbound_message_count_ok = outbound_evidence[
-            "outbound_message_count_delta_ge_1"
-        ]
-        outbound_last_message_source_ok = outbound_evidence[
-            "outbound_last_message_source_middleware"
-        ]
         operator_reply_evidence = _evaluate_operator_reply_evidence(
             latest_comment_is_operator=latest_comment_is_operator,
             operator_reply_count_delta=operator_reply_count_delta,
@@ -4362,28 +4772,38 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "operator_reply_count_delta_ge_1"
         ]
         operator_reply_confirmed = operator_reply_present_ok
-        if post_ticket_data:
-            send_message_evidence = _evaluate_send_message_evidence(
-                tags_added=tags_added,
-                post_tags=post_ticket_data.get("tags") or [],
-            )
-            send_message_tag_present_ok = send_message_evidence[
-                "send_message_tag_present"
-            ]
-            send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
-            send_message_path_confirmed = send_message_tag_present_ok
-            allowlist_evidence = _evaluate_allowlist_blocked_evidence(
-                tags_added=tags_added,
-                post_tags=post_ticket_data.get("tags") or [],
-            )
-            allowlist_blocked_tag_present_ok = allowlist_evidence[
-                "allowlist_blocked_tag_present"
-            ]
-            allowlist_blocked_tag_added_ok = allowlist_evidence[
-                "allowlist_blocked_tag_added"
-            ]
-            if send_message_tag_present_ok is not None:
-                send_message_tag_absent_ok = not send_message_tag_present_ok
+    if post_ticket_data:
+        send_message_evidence = _evaluate_send_message_evidence(
+            tags_added=tags_added,
+            post_tags=post_ticket_data.get("tags") or [],
+        )
+        send_message_tag_present_ok = send_message_evidence["send_message_tag_present"]
+        send_message_tag_added_ok = send_message_evidence["send_message_tag_added"]
+        send_message_path_confirmed = send_message_tag_present_ok
+        allowlist_evidence = _evaluate_allowlist_blocked_evidence(
+            tags_added=tags_added,
+            post_tags=post_ticket_data.get("tags") or [],
+        )
+        allowlist_blocked_tag_present_ok = allowlist_evidence[
+            "allowlist_blocked_tag_present"
+        ]
+        allowlist_blocked_tag_added_ok = allowlist_evidence[
+            "allowlist_blocked_tag_added"
+        ]
+        if send_message_tag_present_ok is not None:
+            send_message_tag_absent_ok = not send_message_tag_present_ok
+
+    outbound_attempted = _evaluate_outbound_attempted(
+        message_count_delta=message_count_delta,
+        last_message_source_after=last_message_source_after,
+        send_message_tag_present=send_message_tag_present_ok,
+        allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
+    )
+    unexpected_outbound_block = _unexpected_outbound_blocked(
+        fail_on_outbound_block=fail_on_outbound_block,
+        allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
+        require_allowlist_blocked=require_allowlist_blocked,
+    )
 
     openai_routing_used = bool(openai_routing.get("llm_called"))
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
@@ -4412,12 +4832,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         followup_reply_sent = False
         followup_reply_reason = "followup_not_performed"
 
+    support_routing = _evaluate_support_routing(
+        routing_tags=routing_state.get("tags") or [],
+        routing_department=routing_department,
+        routing_intent=routing_intent,
+        ticket_tags=post_ticket_data.get("tags") if post_ticket_data else None,
+        tags_added=tags_added,
+        skip_tags_added=skip_tags_added,
+    )
+
     criteria = {
         "scenario": args.scenario,
         "webhook_accepted": True,
         "dynamo_records": True,
         "ticket_lookup": ticket_lookup_ok,
         "intent_order_status": intent_ok,
+        "intent_not_order_status": intent_not_order_status,
         "middleware_outcome": middleware_ok,
         "status_resolved_or_closed": status_resolved_ok,
         "middleware_tag_applied": middleware_tag_ok,
@@ -4426,6 +4856,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_evidence": reply_evidence,
         "outbound_message_count_delta_ge_1": outbound_message_count_ok,
         "outbound_last_message_source_middleware": outbound_last_message_source_ok,
+        "outbound_attempted": outbound_attempted,
+        "routed_to_support": support_routing.get("routed_to_support"),
+        "support_tag_present": support_routing.get("support_tag_present"),
+        "support_department": support_routing.get("support_department"),
+        "order_match_success": order_match_evidence.get("order_match_success"),
+        "order_match_failure_reason_present": bool(
+            order_match_evidence.get("order_match_failure_reason")
+        )
+        if order_match_evidence.get("order_match_success") is False
+        else None,
         "openai_routing_called": openai_requirements.get("openai_routing_called"),
         "openai_routing_source_openai": openai_requirements.get(
             "openai_routing_source_openai"
@@ -4437,6 +4877,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
         "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
         "send_message_tag_absent": send_message_tag_absent_ok,
+        "no_unexpected_outbound_block": (
+            not unexpected_outbound_block if fail_on_outbound_block else None
+        ),
         "followup_performed": followup_performed,
         "followup_no_reply": followup_no_reply,
         "followup_routed_support": followup_routed_ok,
@@ -4483,12 +4926,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             {
                 "name": "ticket_lookup",
                 "description": "Richpanel ticket snapshot was fetched (pre/post)",
-                "required": order_status_mode,
+                "required": order_status_mode or negative_scenario,
                 "value": ticket_lookup_ok,
             }
         )
 
-    order_status_requirements = order_status_mode and not require_allowlist_blocked
+    order_status_requirements = (
+        order_status_mode and not require_allowlist_blocked and not negative_scenario
+    )
     if order_status_mode:
         if order_status_requirements:
             required_checks.append(bool(intent_ok))
@@ -4546,6 +4991,119 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 }
             )
 
+    if negative_scenario:
+        routed_to_support = support_routing.get("routed_to_support")
+        support_tag_present = support_routing.get("support_tag_present")
+        support_department = support_routing.get("support_department")
+        if not_order_status_mode:
+            required_checks.extend(
+                [
+                    bool(intent_not_order_status),
+                    outbound_attempted is False,
+                    bool(routed_to_support),
+                ]
+            )
+            criteria_details.extend(
+                [
+                    {
+                        "name": "intent_not_order_status",
+                        "description": "Routing intent was not order_status*",
+                        "required": True,
+                        "value": intent_not_order_status,
+                    },
+                    {
+                        "name": "no_outbound_attempt",
+                        "description": "No outbound reply attempt detected",
+                        "required": True,
+                        "value": outbound_attempted is False,
+                    },
+                    {
+                        "name": "routed_to_support",
+                        "description": "Non-order-status routed to support team",
+                        "required": True,
+                        "value": routed_to_support,
+                    },
+                    {
+                        "name": "support_tag_present",
+                        "description": "Support routing tag present (route-email-support-team/mw-escalated-human)",
+                        "required": False,
+                        "value": support_tag_present,
+                    },
+                    {
+                        "name": "support_department",
+                        "description": "Routing department resolved to Email Support Team",
+                        "required": False,
+                        "value": support_department,
+                    },
+                ]
+            )
+        elif order_status_no_match_mode:
+            match_success = order_match_evidence.get("order_match_success")
+            match_failure_reason = order_match_evidence.get("order_match_failure_reason")
+            required_checks.extend(
+                [
+                    bool(intent_matches_order_status),
+                    match_success is False,
+                    bool(match_failure_reason),
+                    outbound_attempted is False,
+                    bool(routed_to_support),
+                ]
+            )
+            criteria_details.extend(
+                [
+                    {
+                        "name": "intent_order_status_expected",
+                        "description": "Routing intent matched order-status keywords",
+                        "required": True,
+                        "value": intent_matches_order_status,
+                    },
+                    {
+                        "name": "order_match_failed",
+                        "description": "Order match failed (no order context resolved)",
+                        "required": True,
+                        "value": match_success is False,
+                    },
+                    {
+                        "name": "order_match_failure_reason_present",
+                        "description": "Order match failure reason captured",
+                        "required": True,
+                        "value": bool(match_failure_reason),
+                    },
+                    {
+                        "name": "no_outbound_attempt",
+                        "description": "No outbound reply attempt detected",
+                        "required": True,
+                        "value": outbound_attempted is False,
+                    },
+                    {
+                        "name": "routed_to_support",
+                        "description": "Order-status no-match routed to support",
+                        "required": True,
+                        "value": routed_to_support,
+                    },
+                ]
+            )
+        elif allowlist_blocked_mode:
+            required_checks.extend(
+                [bool(intent_matches_order_status), bool(routed_to_support)]
+            )
+            criteria_details.extend(
+                [
+                    {
+                        "name": "intent_order_status_expected",
+                        "description": "Routing intent matched order-status keywords",
+                        "required": True,
+                        "value": intent_matches_order_status,
+                    },
+                    {
+                        "name": "routed_to_support",
+                        "description": "Allowlist-blocked reply routed to support",
+                        "required": True,
+                        "value": routed_to_support,
+                    },
+                ]
+            )
+
     if require_outbound:
         required_checks.append(bool(outbound_message_count_ok))
         criteria_details.append(
@@ -4562,6 +5120,17 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 "description": "Explicit last_message_source marked middleware",
                 "required": False,
                 "value": outbound_last_message_source_ok,
+            }
+        )
+
+    if fail_on_outbound_block and not require_allowlist_blocked:
+        required_checks.append(not unexpected_outbound_block)
+        criteria_details.append(
+            {
+                "name": "no_unexpected_outbound_block",
+                "description": "No unexpected allowlist block observed",
+                "required": True,
+                "value": not unexpected_outbound_block,
             }
         )
 
@@ -4707,7 +5276,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     base_pass = all(required_checks) and not failed
     classification = "FAIL"
     classification_reason = None
-    if order_status_mode and not require_allowlist_blocked:
+    if order_status_mode and not require_allowlist_blocked and not negative_scenario:
         classification, classification_reason = _classify_order_status_result(
             base_pass=base_pass,
             status_resolved_ok=status_resolved_ok,
@@ -4758,6 +5327,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "closed_after": closed_after,
         "message_count_delta": message_count_delta,
         "last_message_source_after": last_message_source_after,
+        "intent_after": routing_intent,
+        "routing_department": routing_department,
+        "outbound_attempted": outbound_attempted,
+        "routed_to_support": support_routing.get("routed_to_support"),
+        "support_tag_present": support_routing.get("support_tag_present"),
+        "support_department": support_routing.get("support_department"),
+        "order_match_success": order_match_evidence.get("order_match_success"),
+        "order_match_failure_reason": order_match_evidence.get(
+            "order_match_failure_reason"
+        ),
         "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
         "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
         "send_message_tag_absent": send_message_tag_absent_ok,
@@ -4881,6 +5460,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "routing": openai_routing,
             "rewrite": openai_rewrite,
         },
+        "allowlist": allowlist_config or {},
         "routing_metadata": routing_metadata,
         "rewriter_metadata": rewriter_metadata,
         "order_status": {

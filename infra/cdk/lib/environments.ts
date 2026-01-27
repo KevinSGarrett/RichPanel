@@ -6,6 +6,9 @@ export interface EnvironmentSettings {
   readonly owner?: string;
   readonly costCenter?: string;
   readonly tags?: Record<string, string>;
+  readonly outboundAllowlistEmails?: string;
+  readonly outboundAllowlistDomains?: string;
+  readonly richpanelBotAuthorId?: string;
 }
 
 export interface EnvironmentConfig extends EnvironmentSettings {
@@ -81,6 +84,12 @@ export function buildEnvironmentConfig(
     region: overrides?.region ?? base.region,
     owner: overrides?.owner ?? base.owner,
     costCenter: overrides?.costCenter ?? base.costCenter,
+    outboundAllowlistEmails:
+      overrides?.outboundAllowlistEmails ?? base.outboundAllowlistEmails,
+    outboundAllowlistDomains:
+      overrides?.outboundAllowlistDomains ?? base.outboundAllowlistDomains,
+    richpanelBotAuthorId:
+      overrides?.richpanelBotAuthorId ?? base.richpanelBotAuthorId,
     tags: {
       ...(base.tags ?? {}),
       ...(overrides?.tags ?? {}),

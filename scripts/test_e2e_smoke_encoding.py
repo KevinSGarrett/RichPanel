@@ -29,6 +29,7 @@ if str(SCRIPTS) not in sys.path:
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     SmokeFailure,
+    ClientError,
     _check_pii_safe,
     _classify_order_status_result,
     _compute_middleware_outcome,
@@ -42,9 +43,14 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
     _evaluate_outbound_evidence,
+    _evaluate_outbound_attempted,
     _evaluate_operator_reply_evidence,
     _evaluate_send_message_evidence,
     _evaluate_allowlist_blocked_evidence,
+    _evaluate_support_routing,
+    _evaluate_order_match_evidence,
+    _should_skip_allowlist_blocked,
+    _unexpected_outbound_blocked,
     _evaluate_openai_requirements,
     _build_operator_send_message_proof_fields,
     _build_operator_send_message_richpanel_fields,
@@ -59,6 +65,11 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_status_no_tracking_short_window_payload,
     _order_status_no_tracking_standard_shipping_3_5_payload,
     _order_status_tracking_standard_shipping_payload,
+    _not_order_status_payload,
+    _order_status_no_match_payload,
+    _seed_order_number,
+    _build_skip_proof_payload,
+    _write_proof_payload,
     _apply_fallback_close,
     _build_create_ticket_payload,
     _diagnose_ticket_update,
@@ -67,12 +78,19 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _redact_identifier,
     _resolve_smoke_ticket_text,
     _SMOKE_TICKET_TAGS,
+    _parse_allowlist_entries,
+    _fetch_lambda_allowlist_config,
+    _to_bool,
     _sanitize_decimals,
     _sanitize_response_metadata,
     _sanitize_ts_action_id,
     _wait_for_ticket_ready,
+    _wait_for_ticket_tags,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
+    build_payload,
+    parse_args,
+    validate_routing,
 )
 from create_sandbox_email_ticket import (  # type: ignore  # noqa: E402
     _require_prod_write_ack as _require_prod_write_ack_script,
@@ -289,6 +307,25 @@ class ScenarioPayloadTests(unittest.TestCase):
         )
         self.assertEqual(payload["tracking"]["status_url"], payload["tracking_url"])
 
+    def test_not_order_status_payload_shape(self) -> None:
+        payload = _not_order_status_payload("RUN_NOT_OS", conversation_id="conv-123")
+        self.assertEqual(payload["scenario"], "not_order_status")
+        self.assertIn("cancel", payload["customer_message"].lower())
+        self.assertNotIn("tracking_number", payload)
+        self.assertNotIn("order_id", payload)
+        serialized = json.dumps(payload)
+        self.assertNotIn("@", serialized)
+
+    def test_order_status_no_match_payload_shape(self) -> None:
+        payload = _order_status_no_match_payload(
+            "RUN_NO_MATCH", conversation_id="conv-456"
+        )
+        self.assertEqual(payload["scenario"], "order_status_no_match")
+        self.assertTrue(payload["order_number"].startswith("FAKE-"))
+        self.assertNotIn("tracking_number", payload)
+        serialized = json.dumps(payload)
+        self.assertNotIn("@", serialized)
+
     def test_business_day_anchor_skips_weekend(self) -> None:
         saturday = datetime(2024, 1, 6, 12, tzinfo=timezone.utc)
         monday = _business_day_anchor(saturday)
@@ -410,17 +447,14 @@ class DraftReplyHelperTests(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_fetch_latest_reply_hash_no_network(self) -> None:
-        class _Exec:
-            def execute(self, *args: Any, **kwargs: Any) -> None:
-                raise AssertionError("execute should not be called")
-
-        executor = _Exec()
+        executor = MagicMock()
         result = _fetch_latest_reply_hash(
             cast(Any, executor),
             "ticket-123",
             allow_network=False,
         )
         self.assertIsNone(result)
+        executor.execute.assert_not_called()
 
 
 class DiagnosticsTests(unittest.TestCase):
@@ -472,6 +506,7 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(result["winning_payload"], {"status": "resolved"})
         self.assertTrue(any(entry["ok"] for entry in result["results"]))
         self.assertIsNotNone(result.get("apply_result"))
+        self.assertEqual(self._MockResponse(200, False, "/v1/tickets").json(), {})
         # Ensure response metadata redaction works
         sanitized = _sanitize_response_metadata(
             self._MockResponse(200, False, "/v1/tickets/abc")
@@ -631,6 +666,355 @@ class AllowlistEvidenceTests(unittest.TestCase):
         )
         self.assertTrue(evidence["allowlist_blocked_tag_present"])
         self.assertFalse(evidence["allowlist_blocked_tag_added"])
+
+
+class OutboundAttemptedTests(unittest.TestCase):
+    def test_outbound_attempted_with_message_delta(self) -> None:
+        attempted = _evaluate_outbound_attempted(
+            message_count_delta=1,
+            last_message_source_after=None,
+            send_message_tag_present=None,
+            allowlist_blocked_tag_present=None,
+        )
+        self.assertTrue(attempted)
+
+    def test_outbound_attempted_with_allowlist_block(self) -> None:
+        attempted = _evaluate_outbound_attempted(
+            message_count_delta=0,
+            last_message_source_after="agent",
+            send_message_tag_present=False,
+            allowlist_blocked_tag_present=True,
+        )
+        self.assertTrue(attempted)
+
+    def test_outbound_attempted_false_when_all_signals_false(self) -> None:
+        attempted = _evaluate_outbound_attempted(
+            message_count_delta=0,
+            last_message_source_after="agent",
+            send_message_tag_present=False,
+            allowlist_blocked_tag_present=False,
+        )
+        self.assertFalse(attempted)
+
+    def test_outbound_attempted_unknown_when_no_signals(self) -> None:
+        attempted = _evaluate_outbound_attempted(
+            message_count_delta=None,
+            last_message_source_after=None,
+            send_message_tag_present=None,
+            allowlist_blocked_tag_present=None,
+        )
+        self.assertIsNone(attempted)
+
+
+class SupportRoutingTests(unittest.TestCase):
+    def test_support_routing_tag_forces_support(self) -> None:
+        result = _evaluate_support_routing(
+            routing_tags=["route-email-support-team"],
+            routing_department=None,
+            routing_intent="order_status_tracking",
+        )
+        self.assertTrue(result["routed_to_support"])
+        self.assertTrue(result["support_tag_present"])
+
+    def test_support_routing_department_for_non_order_status(self) -> None:
+        result = _evaluate_support_routing(
+            routing_tags=["mw-routing-applied"],
+            routing_department="Email Support Team",
+            routing_intent="cancel_subscription",
+        )
+        self.assertTrue(result["routed_to_support"])
+        self.assertFalse(result["support_tag_present"])
+
+    def test_support_routing_order_status_without_tag(self) -> None:
+        result = _evaluate_support_routing(
+            routing_tags=["mw-routing-applied"],
+            routing_department="Email Support Team",
+            routing_intent="order_status_tracking",
+        )
+        self.assertFalse(result["routed_to_support"])
+
+    def test_support_routing_ticket_tags(self) -> None:
+        result = _evaluate_support_routing(
+            routing_tags=["mw-routing-applied"],
+            routing_department="Email Support Team",
+            routing_intent="order_status_tracking",
+            ticket_tags=["route-email-support-team"],
+        )
+        self.assertTrue(result["routed_to_support"])
+        self.assertTrue(result["support_tag_present"])
+
+
+class OrderMatchEvidenceTests(unittest.TestCase):
+    def test_order_match_success_with_draft_action(self) -> None:
+        result = _evaluate_order_match_evidence(
+            routing_tags=["mw-routing-applied"],
+            draft_action_present=True,
+            routing_intent="order_status_tracking",
+        )
+        self.assertTrue(result["order_match_success"])
+        self.assertIsNone(result["order_match_failure_reason"])
+
+    def test_order_match_failure_from_missing_context_tag(self) -> None:
+        result = _evaluate_order_match_evidence(
+            routing_tags=[
+                "mw-order-lookup-failed",
+                "mw-order-lookup-missing:created_at",
+            ],
+            draft_action_present=False,
+            routing_intent="order_status_tracking",
+        )
+        self.assertFalse(result["order_match_success"])
+        self.assertEqual(
+            result["order_match_failure_reason"], "missing_context:created_at"
+        )
+
+    def test_order_match_failure_without_missing_tag(self) -> None:
+        result = _evaluate_order_match_evidence(
+            routing_tags=["mw-order-lookup-failed"],
+            draft_action_present=False,
+            routing_intent="order_status_tracking",
+        )
+        self.assertFalse(result["order_match_success"])
+        self.assertEqual(result["order_match_failure_reason"], "order_lookup_failed")
+
+    def test_order_match_no_signal_returns_none(self) -> None:
+        result = _evaluate_order_match_evidence(
+            routing_tags=["mw-routing-applied"],
+            draft_action_present=False,
+            routing_intent="order_status_tracking",
+        )
+        self.assertIsNone(result["order_match_success"])
+        self.assertIsNone(result["order_match_failure_reason"])
+
+    def test_order_match_ignored_for_non_order_status(self) -> None:
+        result = _evaluate_order_match_evidence(
+            routing_tags=["mw-routing-applied"],
+            draft_action_present=False,
+            routing_intent="refund_request",
+        )
+        self.assertIsNone(result["order_match_success"])
+        self.assertIsNone(result["order_match_failure_reason"])
+
+
+class AllowlistSkipTests(unittest.TestCase):
+    def test_should_skip_allowlist_blocked_when_unconfigured(self) -> None:
+        reason = _should_skip_allowlist_blocked(
+            require_allowlist_blocked=True, allowlist_configured=False
+        )
+        self.assertEqual(reason, "allowlist_not_configured")
+
+    def test_should_not_skip_allowlist_blocked_when_configured(self) -> None:
+        reason = _should_skip_allowlist_blocked(
+            require_allowlist_blocked=True, allowlist_configured=True
+        )
+        self.assertIsNone(reason)
+
+    def test_unexpected_outbound_blocked(self) -> None:
+        unexpected = _unexpected_outbound_blocked(
+            fail_on_outbound_block=True,
+            allowlist_blocked_tag_present=True,
+            require_allowlist_blocked=False,
+        )
+        self.assertTrue(unexpected)
+
+    def test_unexpected_outbound_blocked_ignored_when_required(self) -> None:
+        unexpected = _unexpected_outbound_blocked(
+            fail_on_outbound_block=True,
+            allowlist_blocked_tag_present=True,
+            require_allowlist_blocked=True,
+        )
+        self.assertFalse(unexpected)
+
+
+class SkipProofPayloadTests(unittest.TestCase):
+    def test_build_skip_proof_payload_has_status_and_fields(self) -> None:
+        payload = _build_skip_proof_payload(
+            run_id="RUN_SKIP",
+            env_name="dev",
+            region="us-east-2",
+            scenario="allowlist_blocked",
+            skip_reason="allowlist_not_configured",
+            allowlist_config={"allowlist_emails_count": 0},
+        )
+        self.assertEqual(payload["result"]["status"], "SKIP")
+        self.assertEqual(payload["result"]["classification"], "SKIP")
+        self.assertIn("proof_fields", payload)
+        self.assertIn("intent_after", payload["proof_fields"])
+        self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
+
+
+class AllowlistConfigTests(unittest.TestCase):
+    def test_parse_allowlist_entries_empty(self) -> None:
+        entries = _parse_allowlist_entries(None)
+        self.assertEqual(entries, set())
+
+    def test_parse_allowlist_entries_basic(self) -> None:
+        entries = _parse_allowlist_entries("A@example.com, ,b@example.com")
+        self.assertEqual(entries, {"a@example.com", "b@example.com"})
+
+    def test_parse_allowlist_entries_strip_at(self) -> None:
+        entries = _parse_allowlist_entries("@example.com,@foo.com", strip_at=True)
+        self.assertEqual(entries, {"example.com", "foo.com"})
+
+    def test_to_bool_parses_truthy_values(self) -> None:
+        for value in ("1", "true", "yes", "on", "TRUE"):
+            self.assertTrue(_to_bool(value))
+        self.assertFalse(_to_bool(None))
+        self.assertFalse(_to_bool("false"))
+
+    def test_fetch_lambda_allowlist_config(self) -> None:
+        class _LambdaClient:
+            def get_function_configuration(self, **_: Any) -> dict:
+                return {
+                    "Environment": {
+                        "Variables": {
+                            "MW_OUTBOUND_ALLOWLIST_EMAILS": "a@example.com,b@example.com",
+                            "MW_OUTBOUND_ALLOWLIST_DOMAINS": "@example.com",
+                            "RICHPANEL_OUTBOUND_ENABLED": "true",
+                        }
+                    }
+                }
+
+        result = _fetch_lambda_allowlist_config(
+            _LambdaClient(), function_name="rp-mw-dev-worker"
+        )
+        self.assertTrue(result["allowlist_configured"])
+        self.assertEqual(result["allowlist_emails_count"], 2)
+        self.assertEqual(result["allowlist_domains_count"], 1)
+        self.assertTrue(result["outbound_enabled"])
+
+    def test_fetch_lambda_allowlist_config_error(self) -> None:
+        class _FailLambdaClient:
+            def get_function_configuration(self, **_: Any) -> dict:
+                raise ClientError(
+                    {"Error": {"Code": "AccessDenied", "Message": "denied"}},
+                    "GetFunctionConfiguration",
+                )
+
+        with self.assertRaises(SmokeFailure):
+            _fetch_lambda_allowlist_config(
+                _FailLambdaClient(), function_name="rp-mw-dev-worker"
+            )
+
+
+class ProofPayloadWriteTests(unittest.TestCase):
+    def test_write_proof_payload_pii_safe(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "proof.json"
+            payload = {
+                "result": {
+                    "status": "PASS",
+                    "classification": "PASS",
+                    "criteria": {"pii_safe": True},
+                    "criteria_details": [{"name": "pii_safe", "value": True}],
+                }
+            }
+            _write_proof_payload(path, payload)
+            stored = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(stored["result"]["status"], "PASS")
+            self.assertTrue(stored["result"]["criteria"]["pii_safe"])
+
+    def test_write_proof_payload_marks_pii_fail(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "proof.json"
+            payload = {
+                "inputs": {
+                    "command": "python scripts/dev_e2e_smoke.py --ticket-number 123"
+                },
+                "result": {
+                    "status": "PASS",
+                    "classification": "PASS",
+                    "criteria": {"pii_safe": True},
+                    "criteria_details": [{"name": "pii_safe", "value": True}],
+                },
+            }
+            _write_proof_payload(path, payload)
+            stored = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(stored["result"]["status"], "FAIL")
+            self.assertEqual(stored["result"]["classification"], "FAIL")
+            self.assertFalse(stored["result"]["criteria"]["pii_safe"])
+            self.assertFalse(stored["result"]["criteria_details"][0]["value"])
+
+
+class PayloadBuilderTests(unittest.TestCase):
+    def test_build_payload_not_order_status(self) -> None:
+        payload = build_payload(
+            "evt-123",
+            conversation_id="conv-1",
+            run_id="RUN",
+            scenario="not_order_status",
+        )
+        self.assertEqual(payload["scenario_name"], "not_order_status")
+        self.assertEqual(payload["scenario"], "not_order_status")
+        self.assertIn("customer_message", payload)
+
+    def test_build_payload_order_status_tracking(self) -> None:
+        payload = build_payload(
+            "evt-789",
+            conversation_id="conv-3",
+            run_id="RUN",
+            scenario="order_status_tracking",
+        )
+        self.assertEqual(payload["scenario_name"], "order_status_tracking")
+        self.assertIn("order_id", payload)
+        self.assertIn("tracking_number", payload)
+
+    def test_build_payload_order_status_no_match(self) -> None:
+        payload = build_payload(
+            "evt-456",
+            conversation_id="conv-2",
+            run_id="RUN",
+            scenario="order_status_no_match",
+        )
+        self.assertEqual(payload["scenario_name"], "order_status_no_match")
+        self.assertTrue(payload["order_number"].startswith("FAKE-"))
+
+    def test_build_payload_baseline_has_no_scenario(self) -> None:
+        payload = build_payload(
+            "evt-000",
+            conversation_id="conv-0",
+            run_id="RUN",
+            scenario="baseline",
+        )
+        self.assertNotIn("scenario_name", payload)
+        self.assertNotIn("scenario", payload)
+
+
+class ParseArgsTests(unittest.TestCase):
+    def test_parse_args_accepts_allowlist_flags(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--scenario",
+                "allowlist_blocked",
+                "--require-allowlist-blocked",
+                "--fail-on-outbound-block",
+            ],
+        ):
+            args = parse_args()
+        self.assertEqual(args.scenario, "allowlist_blocked")
+        self.assertTrue(args.require_allowlist_blocked)
+        self.assertTrue(args.fail_on_outbound_block)
+
+
+class RoutingValidationTests(unittest.TestCase):
+    def test_validate_routing_includes_optional_fields(self) -> None:
+        record = {
+            "routing": {
+                "category": "general",
+                "tags": ["mw-routing-applied"],
+                "reason": "test",
+                "intent": "refund_request",
+                "department": "Email Support Team",
+            }
+        }
+        validated = validate_routing(record, label="test")
+        self.assertEqual(validated["intent"], "refund_request")
+        self.assertEqual(validated["department"], "Email Support Team")
 
 
 class OperatorSendMessageHelperTests(unittest.TestCase):
@@ -1302,6 +1686,7 @@ class AutoTicketHelpersTests(unittest.TestCase):
                 return _DryRunResponse()
 
         with patch("dev_e2e_smoke.RichpanelClient", _DryRunClient):
+            self.assertEqual(_DryRunResponse().json(), {})
             with self.assertRaises(SmokeFailure):
                 _create_sandbox_email_ticket(
                     env_name="dev",
@@ -1707,6 +2092,44 @@ class WaitForTicketReadyTests(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class WaitForTicketTagsTests(unittest.TestCase):
+    def test_wait_for_ticket_tags_returns_snapshot(self) -> None:
+        snapshots = [
+            {"tags": []},
+            {"tags": ["mw-outbound-blocked-allowlist"]},
+        ]
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot", side_effect=snapshots
+        ) as fetch_mock:
+            result = _wait_for_ticket_tags(
+                MagicMock(),
+                "conv-3",
+                allow_network=True,
+                required_tags=["mw-outbound-blocked-allowlist"],
+                timeout_seconds=5,
+                poll_interval=0.0,
+            )
+
+        self.assertEqual(fetch_mock.call_count, 2)
+        self.assertEqual(result, snapshots[-1])
+
+    def test_wait_for_ticket_tags_times_out(self) -> None:
+        with patch(
+            "dev_e2e_smoke._fetch_ticket_snapshot",
+            return_value={"tags": []},
+        ):
+            result = _wait_for_ticket_tags(
+                MagicMock(),
+                "conv-4",
+                allow_network=True,
+                required_tags=["mw-outbound-blocked-allowlist"],
+                timeout_seconds=0,
+                poll_interval=0.0,
+            )
+
+        self.assertIsNone(result)
+
+
 class OpenAIRewriteWaitTests(unittest.TestCase):
     def test_wait_for_openai_rewrite_state_record(self) -> None:
         table = MagicMock()
@@ -2014,22 +2437,55 @@ class URLEncodingTests(unittest.TestCase):
         self.assertIn("%2B", path_arg)
 
 
-def main() -> int:
-    loader = unittest.TestLoader()
+def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
+    suite.addTests(loader.loadTestsFromTestCase(PayloadBuilderTests))
+    suite.addTests(loader.loadTestsFromTestCase(ParseArgsTests))
+    suite.addTests(loader.loadTestsFromTestCase(RoutingValidationTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
+    suite.addTests(loader.loadTestsFromTestCase(DraftReplyHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(DiagnosticsTests))
+    suite.addTests(loader.loadTestsFromTestCase(ReplyEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(CriteriaTests))
     suite.addTests(loader.loadTestsFromTestCase(OutboundEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(OutboundAttemptedTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorReplyEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(SendMessageEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(AllowlistEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(SupportRoutingTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(AllowlistSkipTests))
+    suite.addTests(loader.loadTestsFromTestCase(SkipProofPayloadTests))
+    suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))
+    suite.addTests(loader.loadTestsFromTestCase(ProofPayloadWriteTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
-    suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
+    suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))
+    suite.addTests(loader.loadTestsFromTestCase(PIISafetyTests))
+    suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
+    suite.addTests(loader.loadTestsFromTestCase(FollowupProofTests))
+    suite.addTests(loader.loadTestsFromTestCase(SummaryAppendTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(WaitForTicketReadyTests))
+    suite.addTests(loader.loadTestsFromTestCase(WaitForTicketTagsTests))
+    suite.addTests(loader.loadTestsFromTestCase(OpenAIRewriteWaitTests))
+    suite.addTests(loader.loadTestsFromTestCase(FallbackCloseTests))
+    return suite
+
+
+def load_tests(
+    loader: unittest.TestLoader, tests: unittest.TestSuite, pattern: str
+) -> unittest.TestSuite:
+    return _build_suite(loader)
+
+
+def main() -> int:  # pragma: no cover - CLI entrypoint
+    loader = unittest.TestLoader()
+    suite = _build_suite(loader)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     raise SystemExit(main())
