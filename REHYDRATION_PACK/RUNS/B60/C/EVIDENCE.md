@@ -29,4 +29,8 @@
 
 ## Notes
 - Explicit ticket IDs are provided via `PROD_RICHPANEL_TICKET_IDS` to bypass list endpoint 403s.
+- `schema_drift.warning=true` because >20% of ticket schemas were new in this sample.
+- Order match success rate was 0% (`no_order_candidates` / `no_customer_email`). This reflects the
+  selected ticket sample rather than a code regression; refresh `PROD_RICHPANEL_TICKET_IDS` with
+  known order-status tickets if you want a non-zero match baseline.
 - Artifacts are stored under `REHYDRATION_PACK/RUNS/B60/C/PROOF/`.
