@@ -81,6 +81,7 @@ jobs:
           {
             echo "## Claude Gate Proof"
             echo ""
+            echo "- Mode: ${{ steps.claude_gate.outputs.mode }}"
             echo "- Risk label: ${{ steps.claude_gate.outputs.risk }}"
             echo "- Model used: ${{ steps.claude_gate.outputs.model_used }}"
             echo "- Request ID: ${{ steps.claude_gate.outputs.request_id }}"
@@ -110,7 +111,7 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}, request_id=${{ steps.claude_gate.outputs.request_id }}, usage_input=${{ steps.claude_gate.outputs.usage_input_tokens }}, usage_output=${{ steps.claude_gate.outputs.usage_output_tokens }}"
+          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, mode=${{ steps.claude_gate.outputs.mode }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}, request_id=${{ steps.claude_gate.outputs.request_id }}, usage_input=${{ steps.claude_gate.outputs.usage_input_tokens }}, usage_output=${{ steps.claude_gate.outputs.usage_output_tokens }}"
           if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
             echo "::error::Claude gate failed to run. Check logs above for details."
             exit 1

@@ -86,11 +86,17 @@ class TestClaudeGateReview(unittest.TestCase):
         finally:
             os.environ.pop("CLAUDE_GATE_MODEL_OVERRIDE", None)
 
-    def test_select_model_invalid_risk(self):
-        """Test that unsupported risk label raises."""
-        with self.assertRaises(RuntimeError) as ctx:
-            claude_gate_review._select_model("risk:R9")
-        self.assertIn("Unsupported risk label", str(ctx.exception))
+    def test_select_model_invalid_risk_defaults_opus(self):
+        """Test that unsupported risk label defaults to Opus."""
+        model = claude_gate_review._select_model("risk:R9")
+        self.assertEqual(model, claude_gate_review.DEFAULT_FALLBACK_MODEL)
+
+    def test_select_model_unknown_risk_warns(self):
+        captured = io.StringIO()
+        with contextlib.redirect_stderr(captured):
+            model = claude_gate_review._select_model("risk:R9")
+        self.assertEqual(model, claude_gate_review.DEFAULT_FALLBACK_MODEL)
+        self.assertIn("Unknown risk label", captured.getvalue())
 
     def test_parse_verdict_pass(self):
         """Test verdict parsing for PASS."""
@@ -160,10 +166,31 @@ FINDINGS:
         request_id = claude_gate_review._extract_request_id(headers)
         self.assertEqual(request_id, "req_primary")
 
+    def test_extract_request_id_case_insensitive(self):
+        """Test request id extraction handles mixed-case headers."""
+        headers = {"Request-Id": "req_caps"}
+        request_id = claude_gate_review._extract_request_id(headers)
+        self.assertEqual(request_id, "req_caps")
+
     def test_extract_request_id_missing(self):
         """Test request id extraction returns empty when missing."""
         request_id = claude_gate_review._extract_request_id({})
         self.assertEqual(request_id, "")
+
+    def test_normalize_headers_handles_none(self):
+        self.assertEqual(claude_gate_review._normalize_headers(None), {})
+
+    def test_normalize_headers_handles_non_mapping(self):
+        self.assertEqual(claude_gate_review._normalize_headers(123), {})
+
+    def test_normalize_headers_empty_dict(self):
+        self.assertEqual(claude_gate_review._normalize_headers({}), {})
+
+    def test_normalize_headers_skips_none_key(self):
+        self.assertEqual(
+            claude_gate_review._normalize_headers({None: "value", "Ok": "yes"}),
+            {"ok": "yes"},
+        )
 
     def test_coerce_token_count_invalid(self):
         """Test token count coercion for invalid values."""
@@ -334,6 +361,37 @@ FINDINGS:
         self.assertEqual(claude_gate_review._coerce_json_text(fenced), '{"version":"1.0"}')
         wrapped = "prefix {\"version\":\"1.0\"} suffix"
         self.assertEqual(claude_gate_review._coerce_json_text(wrapped), '{"version":"1.0"}')
+        disclaimer = "Heads up:\n```json\n{\"version\":\"1.0\"}\n```\nThanks"
+        self.assertEqual(claude_gate_review._coerce_json_text(disclaimer), '{"version":"1.0"}')
+        balanced = 'prefix {"version":"1.0","note":"brace } inside"} suffix'
+        self.assertEqual(
+            claude_gate_review._coerce_json_text(balanced),
+            '{"version":"1.0","note":"brace } inside"}',
+        )
+        escaped = (
+            'prefix {"version":"1.0","note":"escaped \\\\\"quote\\\\\" and brace } '
+            'inside","unicode":"\\u2603"} suffix'
+        )
+        self.assertEqual(
+            claude_gate_review._coerce_json_text(escaped),
+            '{"version":"1.0","note":"escaped \\\\\"quote\\\\\" and brace } inside","unicode":"\\u2603"}',
+        )
+
+    def test_extract_first_json_object_none(self):
+        self.assertIsNone(claude_gate_review._extract_first_json_object("no json here"))
+
+    def test_extract_first_json_object_unbalanced(self):
+        self.assertIsNone(claude_gate_review._extract_first_json_object("{\"a\": 1"))
+
+    def test_extract_json_candidate_empty(self):
+        self.assertIsNone(claude_gate_review._extract_json_candidate(""))
+
+    def test_extract_json_candidate_empty_fence(self):
+        raw = "```json\nnot-json\n```"
+        self.assertIsNone(claude_gate_review._extract_json_candidate(raw))
+
+    def test_extract_json_candidate_no_json(self):
+        self.assertIsNone(claude_gate_review._extract_json_candidate("prefix only"))
 
     def test_parse_structured_output_with_fence(self):
         raw = """```json
@@ -341,6 +399,17 @@ FINDINGS:
 ```"""
         payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
         self.assertEqual(payload.get("version"), "1.0")
+        self.assertEqual(findings, [])
+        self.assertEqual(errors, [])
+
+    def test_parse_structured_output_with_disclaimer(self):
+        raw = """Here is the JSON:
+```json
+{"version":"1.0","verdict":"PASS","risk":"risk:R2","reviewers":[]}
+```
+Let me know if you need more."""
+        payload, findings, errors = claude_gate_review._parse_structured_output(raw, "")
+        self.assertEqual(payload.get("verdict"), "PASS")
         self.assertEqual(findings, [])
         self.assertEqual(errors, [])
 
@@ -1244,6 +1313,33 @@ FINDINGS:
     def test_redact_evidence_secret(self):
         self.assertEqual(claude_gate_review._redact_evidence("api_key=123"), "[REDACTED]")
 
+    def test_redact_evidence_empty(self):
+        self.assertEqual(claude_gate_review._redact_evidence(""), "")
+
+    def test_redact_evidence_email(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("Contact me at user@example.com"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_long_number(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("order=1234567890"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_phone(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("call 415-555-1212"),
+            "[REDACTED]",
+        )
+
+    def test_redact_evidence_address(self):
+        self.assertEqual(
+            claude_gate_review._redact_evidence("ship to 123 Main St"),
+            "[REDACTED]",
+        )
+
     def test_redact_evidence_truncates(self):
         long_text = "a" * 250
         redacted = claude_gate_review._redact_evidence(long_text)
@@ -1251,6 +1347,29 @@ FINDINGS:
 
     def test_redact_evidence_no_false_positive(self):
         self.assertEqual(claude_gate_review._redact_evidence("timeout=None"), "timeout=None")
+
+    def test_summarize_parse_error_redacts(self):
+        snippet, length = claude_gate_review._summarize_parse_error("user@example.com")
+        self.assertEqual(snippet, "[REDACTED]")
+        self.assertEqual(length, len("user@example.com"))
+
+    def test_summarize_parse_error_empty(self):
+        snippet, length = claude_gate_review._summarize_parse_error("")
+        self.assertEqual(snippet, "")
+        self.assertEqual(length, 0)
+
+    def test_summarize_parse_error_whitespace(self):
+        snippet, length = claude_gate_review._summarize_parse_error("   \n\t  ")
+        self.assertEqual(snippet, "")
+        self.assertEqual(length, len("   \n\t  "))
+
+    def test_format_parse_error_includes_length(self):
+        message = claude_gate_review._format_parse_error("Invalid JSON: oops.", "abc")
+        self.assertIn("len=3", message)
+
+    def test_format_parse_error_empty_snippet(self):
+        message = claude_gate_review._format_parse_error("Invalid JSON: oops.", "")
+        self.assertIn("len=0", message)
 
     def test_stable_finding_id_uses_raw_evidence(self):
         finding = {
@@ -1331,22 +1450,37 @@ FINDINGS:
         self.assertEqual(payload["errors"], ["oops"])
         self.assertEqual(payload["verdict"], "FAIL")
 
+    def test_structured_parse_failure_payload_empty_raw(self):
+        payload = claude_gate_review._structured_parse_failure_payload(["oops"], "")
+        self.assertEqual(payload["raw_length"], 0)
+        self.assertNotIn("raw", payload)
+
     def test_step_summary_written(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as summary_file:
             summary_path = summary_file.name
         os.environ["GITHUB_STEP_SUMMARY"] = summary_path
         try:
             summary = claude_gate_review._build_step_summary(
-                mode_label="LEGACY",
+                mode_label="STRUCTURED",
                 verdict="PASS",
                 bypass=False,
                 action_required_count=0,
                 warnings=["note"],
+                mode="structured",
+                risk="risk:R2",
+                model_used="claude-opus-4-5-20251101",
+                request_id="req_123",
+                response_id="msg_123",
             )
             claude_gate_review._write_step_summary(summary)
             with open(summary_path, "r", encoding="utf-8") as handle:
                 content = handle.read()
-            self.assertIn("Mode: LEGACY", content)
+            self.assertIn("Claude gate mode: structured", content)
+            self.assertIn("Mode: STRUCTURED", content)
+            self.assertIn("Risk label: risk:R2", content)
+            self.assertIn("Model used: claude-opus-4-5-20251101", content)
+            self.assertIn("Anthropic Request ID: req_123", content)
+            self.assertIn("Anthropic Response ID: msg_123", content)
             self.assertIn("Warning: note", content)
         finally:
             os.environ.pop("GITHUB_STEP_SUMMARY", None)
@@ -1392,6 +1526,7 @@ FINDINGS:
         self.assertTrue(errors)
         self.assertEqual(findings, [])
         self.assertEqual(payload, {})
+        self.assertTrue(any("len=" in error for error in errors))
 
     def test_parse_structured_output_non_dict_payload(self):
         payload, findings, errors = claude_gate_review._parse_structured_output("42", "")
@@ -1490,7 +1625,8 @@ FINDINGS:
                     with patch.object(sys, "argv", argv):
                         result = claude_gate_review.main()
             self.assertEqual(result, 0)
-            self.assertIn("CLAUDE_REVIEW: FAIL", captured.getvalue())
+            self.assertIn("CLAUDE_REVIEW: PASS", captured.getvalue())
+            self.assertIn("Structured output parse failure", captured.getvalue())
         finally:
             os.environ.pop("CLAUDE_REVIEW_MODE", None)
 

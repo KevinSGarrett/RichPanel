@@ -11439,6 +11439,11 @@
       },
       {
         "level": 2,
+        "text": "Job summary fields (fast verification)",
+        "anchor": "job-summary-fields-fast-verification"
+      },
+      {
+        "level": 2,
         "text": "Confirm the run used the intended model",
         "anchor": "confirm-the-run-used-the-intended-model"
       },
@@ -11446,6 +11451,16 @@
         "level": 2,
         "text": "Audit artifact (why it exists)",
         "anchor": "audit-artifact-why-it-exists"
+      },
+      {
+        "level": 2,
+        "text": "Correlating with the Anthropic dashboard",
+        "anchor": "correlating-with-the-anthropic-dashboard"
+      },
+      {
+        "level": 2,
+        "text": "Audit check, not a quality gate",
+        "anchor": "audit-check-not-a-quality-gate"
       },
       {
         "level": 2,

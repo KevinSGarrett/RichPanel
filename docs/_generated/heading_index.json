@@ -12715,6 +12715,12 @@
       "anchor": "how-to-verify-audit-proof-step-by-step"
     }
   ],
+  "job summary fields (fast verification)": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "job-summary-fields-fast-verification"
+    }
+  ],
   "confirm the run used the intended model": [
     {
       "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
@@ -12725,6 +12731,18 @@
     {
       "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
       "anchor": "audit-artifact-why-it-exists"
+    }
+  ],
+  "correlating with the anthropic dashboard": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "correlating-with-the-anthropic-dashboard"
+    }
+  ],
+  "audit check, not a quality gate": [
+    {
+      "path": "08_Engineering/Claude_Gate_Audit_Proof.md",
+      "anchor": "audit-check-not-a-quality-gate"
     }
   ],
   "failure mode catalog (fail-closed)": [

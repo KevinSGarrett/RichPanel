@@ -28,3 +28,4 @@ Richpanel + prod Shopify credentials (no writes).
 ## Notes
 - Richpanel conversation endpoints returned 403 for several tickets; ticket reads still succeeded.
 - Ticket identifiers are hashed in artifacts; no PII stored.
+- Decision (B59/C): prod Shopify secret is aligned to the dev token (single-store setup).

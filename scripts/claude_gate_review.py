@@ -29,15 +29,22 @@ _ALLOWED_MODELS = {
     "claude-sonnet-4-5-20250929",
     "claude-opus-4-5-20251101",
 }
+DEFAULT_FALLBACK_MODEL = "claude-opus-4-5-20251101"
 _DEFAULT_MODELS = {
     "risk:R0": "claude-haiku-4-5-20251001",
     "risk:R1": "claude-sonnet-4-5-20250929",
-    "risk:R2": "claude-opus-4-5-20251101",
-    "risk:R3": "claude-opus-4-5-20251101",
-    "risk:R4": "claude-opus-4-5-20251101",
+    "risk:R2": DEFAULT_FALLBACK_MODEL,
+    "risk:R3": DEFAULT_FALLBACK_MODEL,
+    "risk:R4": DEFAULT_FALLBACK_MODEL,
 }
 MODEL_BY_RISK = dict(_DEFAULT_MODELS)
-_REQUEST_ID_HEADERS = ("request-id", "x-request-id", "x-amzn-requestid")
+_REQUEST_ID_HEADERS = (
+    "request-id",
+    "x-request-id",
+    "x-amzn-requestid",
+    "anthropic-request-id",
+    "x-anthropic-request-id",
+)
 
 DEFAULT_MAX_DIFF_CHARS = 60000
 DEFAULT_MAX_BODY_CHARS = 8000
@@ -136,8 +143,25 @@ def _build_step_summary(
     bypass: bool,
     action_required_count: int | None = None,
     warnings: list[str] | None = None,
+    mode: str | None = None,
+    risk: str | None = None,
+    model_used: str | None = None,
+    request_id: str | None = None,
+    response_id: str | None = None,
 ) -> str:
-    lines = [f"Mode: {mode_label}", f"Verdict: {verdict}"]
+    lines: list[str] = []
+    if mode:
+        lines.append(f"Claude gate mode: {mode}")
+    lines.append(f"Mode: {mode_label}")
+    if risk:
+        lines.append(f"Risk label: {risk}")
+    if model_used:
+        lines.append(f"Model used: {model_used}")
+    if request_id:
+        lines.append(f"Anthropic Request ID: {request_id}")
+    if response_id:
+        lines.append(f"Anthropic Response ID: {response_id}")
+    lines.append(f"Verdict: {verdict}")
     if action_required_count is not None:
         lines.append(f"Action Required: {action_required_count}")
     if bypass:
@@ -406,7 +430,7 @@ def _evaluate_structured_response(
         structured_verdict = "FAIL"
 
     if mode == MODE_SHADOW and structured_verdict != "PASS":
-        warnings.append(f"Shadow mode: structured verdict {structured_verdict} is non-blocking.")
+        warnings.append(f"Shadow mode (mode=shadow): structured verdict {structured_verdict} is non-blocking.")
 
     fail_min_points = int(risk_defaults.get("fail_min_points", 999))
     min_sev = int(risk_defaults.get("action_required_min_severity", 3))
@@ -423,10 +447,10 @@ def _evaluate_structured_response(
     highest_severity_action_required = max(
         (int(item.get("severity", 0)) for item in action_required), default=0
     )
-    if parse_error_message and mode == MODE_SHADOW:
+    if parse_error_message:
         action_required_count = 0
     else:
-        action_required_count = 1 if parse_error_message else len(action_required)
+        action_required_count = len(action_required)
     summary = {
         "action_required_count": action_required_count,
         "total_points": total_points,
@@ -439,7 +463,7 @@ def _evaluate_structured_response(
         for item in findings
     )
     if parse_error_message:
-        verdict = "FAIL" if mode == MODE_STRUCTURED else "PASS"
+        verdict = "PASS"
     elif mode == MODE_STRUCTURED:
         verdict = "FAIL" if total_points >= fail_min_points or explicit_blocker else "PASS"
     else:
@@ -607,17 +631,37 @@ def _select_model(risk: str, model_override: str | None = None) -> str:
         override = os.environ.get("CLAUDE_GATE_MODEL_OVERRIDE", "").strip()
     if override:
         return _require_allowed_model(override, "model override")
+    unknown_risk = risk not in _DEFAULT_MODELS
+    model = _DEFAULT_MODELS.get(risk, DEFAULT_FALLBACK_MODEL)
+    source = f"risk mapping {risk}" if not unknown_risk else "risk mapping default"
+    if unknown_risk:
+        print(
+            f"WARNING: Unknown risk label '{risk}'; defaulting to {DEFAULT_FALLBACK_MODEL}.",
+            file=sys.stderr,
+        )
+    return _require_allowed_model(model, source)
+
+
+def _normalize_headers(headers: Mapping[str, str] | None) -> dict[str, str]:
+    if not headers:
+        return {}
     try:
-        model = _DEFAULT_MODELS[risk]
-    except KeyError as exc:
-        raise RuntimeError(f"Unsupported risk label: {risk}") from exc
-    return _require_allowed_model(model, f"risk mapping {risk}")
+        items = headers.items()
+    except AttributeError:
+        return {}
+    normalized: dict[str, str] = {}
+    for key, value in items:
+        if key is None:
+            continue
+        normalized[str(key).lower()] = str(value)
+    return normalized
 
 
 def _extract_request_id(headers: Mapping[str, str] | None) -> str:
     """Extract the Anthropic request id from response headers."""
+    normalized = _normalize_headers(headers)
     for header in _REQUEST_ID_HEADERS:
-        value = headers.get(header) if headers else None
+        value = normalized.get(header)
         if value:
             return value
     return ""
@@ -727,7 +771,18 @@ def _extract_findings(text: str, max_findings: int) -> list[str]:
 
 
 _EVIDENCE_SECRET_RE = re.compile(
-    r"(AKIA[0-9A-Z]{16}|-----BEGIN|\bapi[_-]?key\b|\bsecret\b|\bpassword\b|\btoken\b)",
+    r"("
+    r"AKIA[0-9A-Z]{16}"
+    r"|-----BEGIN"
+    r"|\bapi[_-]?key\b"
+    r"|\bsecret\b"
+    r"|\bpassword\b"
+    r"|\btoken\b"
+    r"|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+    r"|\b(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}\b"
+    r"|\b\d{1,5}\s+[A-Za-z0-9.\-]+\s+(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|drive|dr)\b"
+    r"|\b\d{9,}\b"
+    r")",
     re.IGNORECASE,
 )
 
@@ -772,22 +827,84 @@ def _is_action_required(finding: dict) -> bool:
     )
 
 
+def _summarize_parse_error(raw_text: str, max_chars: int = 200) -> tuple[str, int]:
+    length = len(raw_text or "")
+    condensed = " ".join((raw_text or "").split())
+    if not condensed:
+        return "", length
+    snippet = condensed[:max_chars]
+    snippet = _redact_evidence(snippet)
+    return snippet, length
+
+
+def _format_parse_error(detail: str, raw_text: str) -> str:
+    snippet, length = _summarize_parse_error(raw_text)
+    if snippet:
+        return f"{detail} Snippet='{snippet}' (len={length})"
+    return f"{detail} (len={length})"
+
+
+def _extract_first_json_object(text: str) -> str | None:
+    if not text:
+        return None
+    in_string = False
+    escape = False
+    depth = 0
+    start_idx: int | None = None
+    for idx, char in enumerate(text):
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if char == "\\":
+                escape = True
+                continue
+            if char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+            continue
+        if char == "{":
+            if depth == 0:
+                start_idx = idx
+            depth += 1
+            continue
+        if char == "}":
+            if depth == 0:
+                continue
+            depth -= 1
+            if depth == 0 and start_idx is not None:
+                return text[start_idx : idx + 1]
+    return None
+
+
+def _extract_json_candidate(raw_text: str) -> str | None:
+    text = (raw_text or "").strip()
+    if not text:
+        return None
+    for match in re.finditer(r"```(?:json)?\s*(.*?)```", text, re.IGNORECASE | re.DOTALL):
+        block = match.group(1).strip()
+        if not block:
+            continue
+        extracted = _extract_first_json_object(block)
+        if extracted:
+            return extracted
+    return _extract_first_json_object(text)
+
+
 def _coerce_json_text(raw_text: str) -> str:
     text = (raw_text or "").strip()
     if not text:
         return text
-    fence_match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
-    if fence_match:
-        return fence_match.group(1).strip()
-    start = text.find("{")
-    end = text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        return text[start : end + 1].strip()
-    return text
+    candidate = _extract_json_candidate(text)
+    return candidate or text
 
 
 def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[dict], list[str]]:
     errors: list[str] = []
+    if not (raw_text or "").strip():
+        return {}, [], ["Structured output is empty."]
     try:
         payload = json.loads(raw_text)
     except json.JSONDecodeError as exc:
@@ -796,9 +913,9 @@ def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[
             try:
                 payload = json.loads(coerced)
             except json.JSONDecodeError as exc2:
-                return {}, [], [f"Invalid JSON: {exc2.msg}"]
+                return {}, [], [_format_parse_error(f"Invalid JSON: {exc2.msg}.", raw_text)]
         else:
-            return {}, [], [f"Invalid JSON: {exc.msg}"]
+            return {}, [], [_format_parse_error(f"Invalid JSON: {exc.msg}.", raw_text)]
     if not isinstance(payload, dict):
         return payload, [], ["Structured output must be a JSON object."]
     if payload.get("version") != "1.0":
@@ -875,12 +992,16 @@ def _parse_structured_output(raw_text: str, diff_text: str) -> tuple[dict, list[
 
 
 def _structured_parse_failure_payload(errors: list[str], raw_text: str) -> dict:
-    return {
+    snippet, length = _summarize_parse_error(raw_text)
+    payload = {
         "version": "1.0",
         "verdict": "FAIL",
         "errors": errors,
-        "raw": raw_text[:500],
+        "raw_length": length,
     }
+    if snippet:
+        payload["raw"] = snippet
+    return payload
 
 
 def _is_approved_false_positive(findings) -> bool:
@@ -1073,13 +1194,10 @@ def _format_structured_comment(
         f"total_points={summary.get('total_points', 0)}, "
         f"highest_severity_action_required={summary.get('highest_severity_action_required', 0)}\n"
     )
-    show_parse_error = bool(parse_error_message) and mode_label != "SHADOW"
     comment += "\nAction Required:\n"
-    if show_parse_error:
-        comment += f"- Structured output parse failure: {parse_error_message}\n"
     if action_required:
         comment += "\n".join(_format_item(item) for item in action_required) + "\n"
-    if not action_required and not show_parse_error:
+    if not action_required:
         comment += "- None\n"
 
     if fyi:
@@ -1177,6 +1295,11 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
             verdict=verdict,
             bypass=bypass_enabled,
             warnings=warnings,
+            mode=mode,
+            risk=risk,
+            model_used=model_used,
+            request_id=request_id,
+            response_id=response_id,
         )
     else:
         structured_text = bundle["structured_response"]
@@ -1222,6 +1345,11 @@ def _run_dry_run(args, mode: str, mode_label: str, bypass_enabled: bool) -> int:
             bypass=bypass_enabled,
             action_required_count=summary_payload.get("action_required_count"),
             warnings=warnings,
+            mode=mode,
+            risk=risk,
+            model_used=model_used,
+            request_id=request_id,
+            response_id=response_id,
         )
 
     print("=== DRY RUN: CANONICAL COMMENT ===")
@@ -1257,6 +1385,7 @@ def main() -> int:
     mode = _normalize_mode(os.environ.get("CLAUDE_REVIEW_MODE", MODE_LEGACY))
     mode_label = _format_mode_label(mode)
     bypass_enabled = _is_break_glass_enabled(os.environ.get("CLAUDE_REVIEW_BREAK_GLASS_BYPASS", "0"))
+    print(f"Claude gate mode: {mode}")
 
     if args.dry_run:
         return _run_dry_run(args, mode, mode_label, bypass_enabled)
@@ -1282,7 +1411,7 @@ def main() -> int:
 
     risk = _normalize_risk(labels)
     model_used = _select_model(risk, args.model_override)
-    print(f"Claude gate enforced: skip=false, Risk={risk}, Model={model_used}")
+    print(f"Claude gate enforced: mode={mode}, skip=false, Risk={risk}, Model={model_used}")
     review_config = _load_review_config()
     risk_defaults = _get_risk_defaults(review_config, risk)
 
@@ -1510,6 +1639,11 @@ def main() -> int:
         bypass=bypass_enabled,
         action_required_count=action_required_count,
         warnings=warnings,
+        mode=mode,
+        risk=risk,
+        model_used=model_used,
+        request_id=request_id,
+        response_id=response_id,
     )
     _write_step_summary(summary_text)
     comment_dir = os.path.dirname(args.comment_path)
@@ -1535,6 +1669,7 @@ def main() -> int:
 
     _write_output("skip", "false")
     _write_output("verdict", verdict)
+    _write_output("mode", mode)
     _write_output("model_used", model_used)
     _write_output("model", model_used)
     _write_output("risk", risk)
@@ -1548,14 +1683,14 @@ def main() -> int:
 
     print(
         "Claude gate completed. "
-        f"Verdict={verdict}, Risk={risk}, ModelUsed={model_used}, "
+        f"Mode={mode}, Verdict={verdict}, Risk={risk}, ModelUsed={model_used}, "
         f"ResponseModel={response_model}, ResponseID={response_id}, RequestID={request_id}, "
         f"Usage=input={input_tokens}, output={output_tokens}"
     )
     pr_link = f"https://github.com/{repo}/pull/{pr_number}"
     print(
         "Claude Gate "
-        f"{verdict} | model={model_used} | request_id={request_id} | response_id={response_id} "
+        f"{verdict} | mode={mode} | model={model_used} | request_id={request_id} | response_id={response_id} "
         f"| risk={_risk_key(risk)} | pr={pr_link}"
     )
     return 0
