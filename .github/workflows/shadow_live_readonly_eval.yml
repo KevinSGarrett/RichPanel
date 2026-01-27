@@ -1,6 +1,8 @@
 name: Shadow Live Read-Only Eval
 
 on:
+  schedule:
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       sample-size:
@@ -47,7 +49,7 @@ jobs:
       OPENAI_REPLY_REWRITE_ENABLED: "false"
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
       SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ secrets.PROD_SHOPIFY_ADMIN_API_TOKEN || secrets.PROD_SHOPIFY_API_TOKEN }}
-      SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain }}
+      SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -130,11 +132,15 @@ jobs:
       - name: Run live read-only shadow evaluation
         shell: bash
         env:
-          INPUT_SAMPLE_SIZE: ${{ inputs.sample-size }}
-          INPUT_TICKET_IDS: ${{ inputs.ticket-ids }}
-          INPUT_SHOPIFY_PROBE: ${{ inputs.shopify-probe }}
+          INPUT_SAMPLE_SIZE: ${{ inputs.sample-size || '10' }}
+          INPUT_TICKET_IDS: ${{ inputs.ticket-ids || secrets.PROD_RICHPANEL_TICKET_IDS || '' }}
+          INPUT_SHOPIFY_PROBE: ${{ inputs.shopify-probe || 'false' }}
         run: |
           set -euo pipefail
+          if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
+            echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
+            exit 2
+          fi
           TICKET_ARGS=()
           if [ -n "${INPUT_TICKET_IDS:-}" ]; then
             IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"
@@ -163,7 +169,8 @@ jobs:
           python scripts/live_readonly_shadow_eval.py \
             "${SAMPLE_ARGS[@]}" \
             "${TICKET_ARGS[@]}" \
-            "${PROBE_ARGS[@]}"
+            "${PROBE_ARGS[@]}" \
+            --allow-empty-sample
 
       - name: Upload shadow eval artifacts
         uses: actions/upload-artifact@v4

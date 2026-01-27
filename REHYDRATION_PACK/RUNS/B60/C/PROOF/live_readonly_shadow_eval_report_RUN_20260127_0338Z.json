@@ -1,0 +1,52 @@
+{
+  "run_id": "RUN_20260127_0338Z",
+  "timestamp": "2026-01-27T03:38:33.085701+00:00",
+  "environment": "prod",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_READ_ONLY": "true"
+  },
+  "prod_target": true,
+  "sample_mode": "recent",
+  "counts": {
+    "tickets_requested": 10,
+    "tickets_selected": 0,
+    "tickets_scanned": 0,
+    "order_status_candidates": 0,
+    "orders_matched": 0,
+    "tracking_found": 0,
+    "eta_available": 0,
+    "errors": 0
+  },
+  "shopify_probe": {
+    "enabled": false
+  },
+  "tickets": [],
+  "summary_path": "/home/runner/work/RichPanel/RichPanel/artifacts/readonly_shadow/live_readonly_shadow_eval_summary_RUN_20260127_0338Z.json",
+  "run_warnings": [
+    "ticket_listing_403"
+  ],
+  "http_trace_path": "/home/runner/work/RichPanel/RichPanel/artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_RUN_20260127_0338Z.json",
+  "http_trace_summary": {
+    "total_requests": 3,
+    "methods": {
+      "GET": 3
+    },
+    "services": {
+      "richpanel": 3
+    },
+    "sources": {
+      "urllib": 3
+    },
+    "aws_operations": {},
+    "aws_missing_operations": 0,
+    "aws_sdk_trace_enabled": true,
+    "allowed_methods_only": true
+  },
+  "notes": [
+    "Ticket identifiers are hashed.",
+    "No message bodies or customer identifiers are stored.",
+    "HTTP trace captures urllib.request and AWS SDK (botocore) calls; entries include source and AWS operation metadata."
+  ]
+}

@@ -4,6 +4,16 @@ from datetime import datetime, timezone
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
+    RichpanelRequestError,
+    SecretLoadError,
+    TransportError as RichpanelTransportError,
+)
+from richpanel_middleware.integrations.shopify import (  # type: ignore
+    ShopifyRequestError,
+    TransportError as ShopifyTransportError,
+)
+
 
 def extract_ticket_list(payload: Any) -> List[Dict[str, Any]]:
     if isinstance(payload, list):
@@ -73,10 +83,11 @@ def fetch_recent_ticket_refs(
 
 
 def safe_error(exc: Exception) -> Dict[str, str]:
-    name = exc.__class__.__name__
-    if name in {"RichpanelRequestError", "SecretLoadError", "TransportError"}:
+    if isinstance(
+        exc, (RichpanelRequestError, SecretLoadError, RichpanelTransportError)
+    ):
         return {"type": "richpanel_error"}
-    if name in {"ShopifyRequestError"}:
+    if isinstance(exc, (ShopifyRequestError, ShopifyTransportError)):
         return {"type": "shopify_error"}
     return {"type": "error"}
 

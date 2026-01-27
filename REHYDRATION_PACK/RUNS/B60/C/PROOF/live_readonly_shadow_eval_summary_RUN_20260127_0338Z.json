@@ -1,0 +1,44 @@
+{
+  "run_id": "RUN_20260127_0338Z",
+  "generated_at": "2026-01-27T03:38:33.085689+00:00",
+  "sample_size_requested": 10,
+  "tickets_evaluated": 0,
+  "email_channel_count": 0,
+  "chat_channel_count": 0,
+  "unknown_channel_count": 0,
+  "order_match_success_count": 0,
+  "order_match_failure_count": 0,
+  "order_match_success_rate": 0.0,
+  "top_failure_reasons": [],
+  "failure_reasons": {},
+  "richpanel_fetch_failures": {},
+  "shopify_fetch_failures": {},
+  "timing": {
+    "run_duration_seconds": 0.367,
+    "ticket_avg_seconds": 0.0,
+    "ticket_p50_seconds": 0.0,
+    "ticket_p95_seconds": 0.0,
+    "ticket_min_seconds": 0.0,
+    "ticket_max_seconds": 0.0
+  },
+  "schema_drift": {
+    "threshold": 0.2,
+    "warning": false,
+    "ticket_schema": {
+      "total": 0,
+      "unique": 0,
+      "new": 0,
+      "new_ratio": 0.0
+    },
+    "shopify_schema": {
+      "total": 0,
+      "unique": 0,
+      "new": 0,
+      "new_ratio": 0.0
+    }
+  },
+  "run_warnings": [
+    "ticket_listing_403"
+  ],
+  "status": "ok"
+}

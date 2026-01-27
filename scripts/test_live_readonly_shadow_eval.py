@@ -87,6 +87,7 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
             "MW_ENV": "prod",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "false",
+            "RICHPANEL_READ_ONLY": "true",
         }
         with mock.patch.dict(os.environ, env, clear=True):
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "123"]
@@ -139,6 +140,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         env = {
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         with mock.patch.dict(os.environ, env, clear=True):
             applied = shadow_eval._require_env_flags("test")
@@ -171,6 +173,231 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_redact_identifier_none(self) -> None:
         self.assertIsNone(shadow_eval._redact_identifier(None))
+
+    def test_normalize_optional_text_handles_exception(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        self.assertEqual(shadow_eval._normalize_optional_text(_BadStr()), "")
+
+    def test_channel_extraction_and_classification(self) -> None:
+        self.assertEqual(shadow_eval._extract_channel(["not", "dict"]), "")
+        self.assertEqual(
+            shadow_eval._extract_channel({"via": {"channel": "Email"}}), "email"
+        )
+        self.assertEqual(
+            shadow_eval._extract_channel({"channel": "chat"}), "chat"
+        )
+        self.assertEqual(shadow_eval._classify_channel("email"), "email")
+        self.assertEqual(shadow_eval._classify_channel("webchat"), "chat")
+        self.assertEqual(shadow_eval._classify_channel("phone"), "unknown")
+        self.assertEqual(shadow_eval._classify_channel(""), "unknown")
+
+    def test_schema_helpers_cover_edges(self) -> None:
+        keys: set[str] = set()
+        shadow_eval._collect_schema_key_paths(
+            {"a": {"b": {"c": 1}}}, keys=keys, max_depth=0
+        )
+        self.assertTrue(keys)
+        keys = set()
+        shadow_eval._collect_schema_key_paths(
+            {"a": {"b": {"c": 1}}}, keys=keys, depth=2, max_depth=1
+        )
+        self.assertFalse(keys)
+        keys = set()
+        shadow_eval._collect_schema_key_paths([{"id": 1}], keys=keys)
+        self.assertIn("[]", keys)
+
+        self.assertIsNone(shadow_eval._schema_fingerprint("not-iterable"))
+        self.assertEqual(shadow_eval._percentile([], 50), 0.0)
+
+    def test_classify_helpers(self) -> None:
+        self.assertTrue(shadow_eval._is_timeout_error(RuntimeError("timeout")))
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 401), "shopify_401")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 403), "shopify_403")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 404), "shopify_404")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 429), "shopify_429")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 500), "shopify_5xx")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 418), "shopify_4xx")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", 200), "shopify_status")
+        self.assertEqual(shadow_eval._classify_status_code("shopify", None), "shopify_error")
+
+        richpanel_exc = shadow_eval.RichpanelRequestError(
+            "boom", response=SimpleNamespace(status_code=401)
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(richpanel_exc), "richpanel_401"
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(
+                shadow_eval.TransportError("timeout")
+            ),
+            "richpanel_timeout",
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(shadow_eval.TransportError("boom")),
+            "richpanel_transport_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(shadow_eval.SecretLoadError("boom")),
+            "richpanel_secret_load_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(RuntimeError("timeout")),
+            "richpanel_timeout",
+        )
+        self.assertEqual(
+            shadow_eval._classify_richpanel_exception(RuntimeError("boom")),
+            "richpanel_error",
+        )
+
+        shopify_exc = shadow_eval.ShopifyRequestError(
+            "boom", response=SimpleNamespace(status_code=401)
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(shopify_exc), "shopify_401"
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(
+                shadow_eval.ShopifyTransportError("timeout")
+            ),
+            "shopify_timeout",
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(
+                shadow_eval.ShopifyTransportError("boom")
+            ),
+            "shopify_transport_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(shadow_eval.ShopifyRequestError("timeout")),
+            "shopify_timeout",
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(shadow_eval.ShopifyRequestError("boom")),
+            "shopify_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(RuntimeError("timeout")),
+            "shopify_timeout",
+        )
+        self.assertEqual(
+            shadow_eval._classify_shopify_exception(RuntimeError("boom")),
+            "shopify_error",
+        )
+
+        self.assertEqual(
+            shadow_eval._map_order_resolution_reason("no_email_available"),
+            "no_customer_email",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure(
+                {
+                    "order_matched": False,
+                    "order_resolution": {"reason": "no_email_available"},
+                }
+            ),
+            "no_customer_email",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure(
+                {
+                    "order_matched": False,
+                    "order_resolution": {"resolvedBy": "no_match"},
+                }
+            ),
+            "no_order_candidates",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure(
+                {"order_matched": False, "order_status_candidate": False}
+            ),
+            "no_order_status_candidate",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure({"order_matched": False}),
+            "order_match_failed",
+        )
+        self.assertIsNone(
+            shadow_eval._classify_order_match_failure({"order_matched": True})
+        )
+
+    def test_schema_fingerprint_deterministic(self) -> None:
+        payload_a = {
+            "id": "t-1",
+            "customer": {"email": "a@example.com", "name": "A"},
+            "orders": [{"id": "o-1"}],
+            "__source_path": "/v1/tickets/1",
+        }
+        payload_b = {
+            "orders": [{"id": "o-2"}],
+            "customer": {"email": "b@example.com", "name": "B"},
+            "id": "t-2",
+        }
+        payload_c = {
+            "orders": [{"id": "o-3"}],
+            "customer": {"name": "C"},
+            "id": "t-3",
+            "new_field": {"sub": 1},
+        }
+        fingerprint_a = shadow_eval._schema_fingerprint(payload_a)
+        fingerprint_b = shadow_eval._schema_fingerprint(payload_b)
+        fingerprint_c = shadow_eval._schema_fingerprint(payload_c)
+        self.assertEqual(fingerprint_a, fingerprint_b)
+        self.assertNotEqual(fingerprint_a, fingerprint_c)
+
+    def test_build_summary_payload_rollups(self) -> None:
+        ticket_results = [
+            {"channel": "email", "order_matched": True},
+            {
+                "channel": "chat",
+                "order_matched": False,
+                "failure_reason": "no_customer_email",
+                "failure_source": "order_match",
+            },
+            {
+                "channel": "unknown",
+                "order_matched": False,
+                "failure_reason": "shopify_401",
+                "failure_source": "shopify_fetch",
+            },
+            {
+                "channel": "email",
+                "order_matched": False,
+                "failure_reason": "richpanel_timeout",
+                "failure_source": "richpanel_fetch",
+            },
+        ]
+        timing = shadow_eval._summarize_timing(
+            [0.1, 0.2, 0.3], run_duration_seconds=0.6
+        )
+        drift = shadow_eval._build_drift_summary(
+            ticket_total=4,
+            ticket_new=1,
+            ticket_unique=1,
+            shopify_total=2,
+            shopify_new=1,
+            shopify_unique=1,
+            threshold=0.2,
+        )
+        summary = shadow_eval._build_summary_payload(
+            run_id="RUN_TEST",
+            tickets_requested=5,
+            ticket_results=ticket_results,
+            timing=timing,
+            drift=drift,
+        )
+        self.assertEqual(summary["tickets_evaluated"], 4)
+        self.assertEqual(summary["email_channel_count"], 2)
+        self.assertEqual(summary["chat_channel_count"], 1)
+        self.assertEqual(summary["unknown_channel_count"], 1)
+        self.assertEqual(summary["order_match_success_count"], 1)
+        self.assertEqual(summary["order_match_failure_count"], 3)
+        self.assertEqual(summary["failure_reasons"]["shopify_401"], 1)
+        self.assertEqual(summary["failure_reasons"]["richpanel_timeout"], 1)
+        self.assertEqual(summary["shopify_fetch_failures"]["shopify_401"], 1)
+        self.assertEqual(summary["richpanel_fetch_failures"]["richpanel_timeout"], 1)
 
     def test_build_shopify_client(self) -> None:
         client = shadow_eval._build_shopify_client(
@@ -543,6 +770,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_utils.extract_ticket_list([{"id": "t-1"}, "bad"]),
             [{"id": "t-1"}],
         )
+        self.assertEqual(shadow_utils.extract_ticket_list({"foo": "bar"}), [])
         self.assertEqual(shadow_utils.extract_ticket_list({"data": []}), [])
         with self.assertRaises(SystemExit):
             shadow_utils.fetch_recent_ticket_refs(
@@ -557,6 +785,16 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_utils.fetch_recent_ticket_refs(
                 _DryRunClient({}), sample_size=1, list_path="/v1/tickets"
             )
+
+        class _SkipClient(_ListingClient):
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                payload = {"tickets": [{"id": ""}, {"id": "t-1"}, {"id": "t-1"}]}
+                return _StubResponse(payload, status_code=200)
+
+        results = shadow_utils.fetch_recent_ticket_refs(
+            _SkipClient({}), sample_size=1, list_path="/v1/tickets"
+        )
+        self.assertEqual(results, ["t-1"])
 
     def test_shadow_utils_text_parsing_edges(self) -> None:
         class _BadStr:
@@ -1269,6 +1507,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         plan = SimpleNamespace(
             actions=[
@@ -1313,6 +1552,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "plan_actions", return_value=plan
             ), mock.patch.object(
                 shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1", "t-2"]
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
             ):
                 result = shadow_eval.main()
             self.assertEqual(result, 0)
@@ -1325,21 +1566,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             )
             self.assertIn("order_id_present", payload["tickets"][0])
             self.assertIn("order_context_missing", payload["tickets"][0])
-            # In non-explicit mode (sample_mode="recent"), probe_summary stays empty
-            # so order_matched is based only on order_summary from plan_actions
-            # which contains {"order_id": "order-123"} - so order_matched should be True
             self.assertTrue(payload["tickets"][0]["order_matched"])
 
-    def test_non_explicit_mode_skips_shopify_lookup(self) -> None:
-        """Test that sample_mode='recent' intentionally skips Shopify lookup.
-        
-        This verifies the documented behavior where probe_summary stays empty
-        for non-explicit modes to avoid excessive API calls during sampling.
-        """
+    def test_non_explicit_mode_performs_shopify_lookup(self) -> None:
+        """Test that sample_mode='recent' performs Shopify lookup for metrics."""
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         # Plan with NO order_summary to verify order_matched=False in non-explicit mode
         plan = SimpleNamespace(
@@ -1363,7 +1598,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
             def mock_lookup(*args, **kwargs):
                 lookup_calls.append(True)
-                return {"order_id": "should-not-be-called"}
+                return {}
 
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -1388,21 +1623,22 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ):
                 result = shadow_eval.main()
             self.assertEqual(result, 0)
-            # Verify lookup_order_summary was NOT called in non-explicit mode
-            self.assertEqual(len(lookup_calls), 0, "lookup_order_summary should not be called in 'recent' mode")
+            # Verify lookup_order_summary was called in non-explicit mode
+            self.assertEqual(len(lookup_calls), 1)
             payload = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["sample_mode"], "recent")
-            # With no order_summary and no probe_summary, order_matched should be False
+            # With no order_summary and an empty Shopify summary, order_matched should be False
             self.assertFalse(payload["tickets"][0]["order_matched"])
-            # Verify no Shopify-specific fields are populated
-            self.assertNotIn("shopify_tracking_number", payload["tickets"][0])
-            self.assertNotIn("order_resolution", payload["tickets"][0])
+            # Shopify fields are populated from the lookup summary
+            self.assertIn("shopify_tracking_number", payload["tickets"][0])
+            self.assertIn("order_resolution", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1499,6 +1735,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -1519,11 +1756,148 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 with self.assertRaises(SystemExit):
                     shadow_eval.main()
 
+    def test_listing_failure_raises_without_allow_empty(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--sample-size", "1", "--allow-non-prod"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval,
+                "_fetch_recent_ticket_refs",
+                side_effect=SystemExit("Ticket listing failed: status 403 dry_run=False"),
+            ):
+                with self.assertRaises(SystemExit):
+                    shadow_eval.main()
+
+    def test_allow_empty_sample_on_listing_failure(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "live_readonly_shadow_eval_summary_RUN_TEST.json"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-non-prod",
+                "--allow-empty-sample",
+                "--run-id",
+                "RUN_TEST",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval,
+                "_fetch_recent_ticket_refs",
+                side_effect=SystemExit("Ticket listing failed: status 403 dry_run=False"),
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["counts"]["tickets_scanned"], 0)
+            self.assertIn("ticket_listing_403", payload["run_warnings"])
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            self.assertIn("ticket_listing_403", summary["run_warnings"])
+
+    def test_main_records_shopify_lookup_error(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1", "--allow-non-prod"]
+            shopify_error = shadow_eval.ShopifyRequestError(
+                "boom", response=SimpleNamespace(status_code=401)
+            )
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=SimpleNamespace(actions=[])
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", side_effect=shopify_error
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 1)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["tickets"][0]["failure_reason"], "shopify_401")
+
+    def test_main_records_richpanel_request_error(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1", "--allow-non-prod"]
+            richpanel_error = shadow_eval.RichpanelRequestError(
+                "boom", response=SimpleNamespace(status_code=401)
+            )
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_report_paths",
+                return_value=(report_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", side_effect=richpanel_error
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 1)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["tickets"][0]["failure_reason"], "richpanel_401")
+
     def test_main_warns_when_sample_reduced(self) -> None:
         env = {
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -1554,6 +1928,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
                 shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
             ):
                 with self.assertLogs("readonly_shadow_eval", level="WARNING") as logs:
                     shadow_eval.main()
@@ -1564,6 +1940,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -1593,6 +1970,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "prod",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -1618,6 +1996,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -1672,6 +2051,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -1723,6 +2103,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -1776,6 +2157,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ENV": "dev",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
