@@ -32,6 +32,7 @@ from integrations.common import (  # type: ignore
     PROD_WRITE_ACK_ENV,
     PROD_WRITE_ACK_PHRASE,
     PRODUCTION_ENVIRONMENTS,
+    prod_write_ack_matches,
 )
 
 ENV_FROM_EMAIL = "MW_SMOKE_TICKET_FROM_EMAIL"
@@ -90,17 +91,11 @@ def _resolve_text(value: Optional[str], env_key: str, default: str) -> str:
     return candidate or default
 
 
-def _prod_write_ack_matches(value: Optional[str]) -> bool:
-    if value is None:
-        return False
-    return str(value).strip() == PROD_WRITE_ACK_PHRASE
-
-
 def _require_prod_write_ack(*, env_name: str, ack_token: Optional[str]) -> None:
     if env_name.strip().lower() not in PRODUCTION_ENVIRONMENTS:
         return
     env_value = os.environ.get(PROD_WRITE_ACK_ENV)
-    if _prod_write_ack_matches(env_value) or _prod_write_ack_matches(ack_token):
+    if prod_write_ack_matches(env_value) or prod_write_ack_matches(ack_token):
         return
     raise SystemExit(
         "[FAIL] Refusing to create tickets in production without "

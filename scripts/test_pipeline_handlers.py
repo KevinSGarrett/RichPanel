@@ -32,6 +32,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     plan_actions,
     build_no_tracking_reply,
     _fingerprint_reply_body,
+    _extract_customer_email_from_payload,
     _match_allowlist_email,
     _parse_allowlist_entries,
     _resolve_author_id,
@@ -1480,6 +1481,16 @@ class OutboundAllowlistTests(unittest.TestCase):
         self.assertTrue(email_allowed)
         self.assertTrue(domain_allowed)
 
+    def test_allowlist_domain_strips_at_prefix(self) -> None:
+        allowlist_domains = _parse_allowlist_entries("@Example.com", strip_at=True)
+        allowed, reason = _match_allowlist_email(
+            "user@example.com",
+            allowlist_emails=set(),
+            allowlist_domains=allowlist_domains,
+        )
+        self.assertTrue(allowed)
+        self.assertEqual(reason, "domain_match")
+
     def test_allowlist_empty_denies(self) -> None:
         allowed, reason = _match_allowlist_email(
             "user@example.com",
@@ -1488,6 +1499,41 @@ class OutboundAllowlistTests(unittest.TestCase):
         )
         self.assertFalse(allowed)
         self.assertEqual(reason, "allowlist_empty")
+
+    def test_allowlist_missing_email_denies(self) -> None:
+        allowed, reason = _match_allowlist_email(
+            None,
+            allowlist_emails={"user@example.com"},
+            allowlist_domains={"example.com"},
+        )
+        self.assertFalse(allowed)
+        self.assertEqual(reason, "missing_email")
+
+    def test_allowlist_not_allowlisted_denies(self) -> None:
+        allowed, reason = _match_allowlist_email(
+            "user@other.com",
+            allowlist_emails={"allow@example.com"},
+            allowlist_domains={"example.com"},
+        )
+        self.assertFalse(allowed)
+        self.assertEqual(reason, "not_allowlisted")
+
+
+class CustomerEmailExtractionTests(unittest.TestCase):
+    def test_extract_customer_email_from_via_source(self) -> None:
+        payload = {"via": {"source": {"from": {"address": "User@Example.com"}}}}
+        self.assertEqual(
+            _extract_customer_email_from_payload(payload), "user@example.com"
+        )
+
+    def test_extract_customer_email_from_customer_profile(self) -> None:
+        payload = {"customer_profile": {"email": "Person@Example.com"}}
+        self.assertEqual(
+            _extract_customer_email_from_payload(payload), "person@example.com"
+        )
+
+    def test_extract_customer_email_returns_none_when_missing(self) -> None:
+        self.assertIsNone(_extract_customer_email_from_payload({"foo": "bar"}))
 
 
 class OutboundRoutingTagsTests(unittest.TestCase):
@@ -1562,6 +1608,9 @@ def _build_suite() -> unittest.TestSuite:
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundAllowlistTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(CustomerEmailExtractionTests)
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundRoutingTagsTests)

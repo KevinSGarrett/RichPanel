@@ -30,6 +30,12 @@ def prod_write_acknowledged(value: Optional[str]) -> bool:
     return str(value).strip().upper() == PROD_WRITE_ACK_PHRASE
 
 
+def prod_write_ack_matches(value: Optional[str]) -> bool:
+    if value is None:
+        return False
+    return str(value) == PROD_WRITE_ACK_PHRASE
+
+
 def resolve_env_name() -> Tuple[str, Optional[str]]:
     raw = None
     source = None
@@ -80,5 +86,6 @@ __all__ = [
     "PROD_WRITE_ACK_PHRASE",
     "log_env_resolution_warning",
     "prod_write_acknowledged",
+    "prod_write_ack_matches",
     "resolve_env_name",
 ]

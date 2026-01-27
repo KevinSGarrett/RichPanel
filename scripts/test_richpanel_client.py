@@ -19,6 +19,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     TransportRequest,
     TransportResponse,
 )
+from integrations.common import PROD_WRITE_ACK_PHRASE, prod_write_ack_matches  # noqa: E402
 
 
 class _RecordingTransport:
@@ -329,8 +330,18 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertIsNone(meta.conversation_no)
 
 
+class ProdWriteAckTests(unittest.TestCase):
+    def test_prod_write_ack_matches_exact_phrase(self) -> None:
+        self.assertTrue(prod_write_ack_matches(PROD_WRITE_ACK_PHRASE))
+
+    def test_prod_write_ack_matches_rejects_other_values(self) -> None:
+        self.assertFalse(prod_write_ack_matches("true"))
+        self.assertFalse(prod_write_ack_matches("I_UNDERSTAND_PROD_WRITES "))
+
+
 def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(RichpanelClientTests)
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ProdWriteAckTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

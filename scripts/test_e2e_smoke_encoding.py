@@ -1220,6 +1220,12 @@ class AutoTicketHelpersTests(unittest.TestCase):
                 env_name="production", ack_token="I_UNDERSTAND_PROD_WRITES"
             )
 
+    def test_create_ticket_script_prod_ack_from_env_allows(self) -> None:
+        with patch.dict(
+            os.environ, {"MW_PROD_WRITES_ACK": "I_UNDERSTAND_PROD_WRITES"}, clear=True
+        ):
+            _require_prod_write_ack_script(env_name="prod", ack_token=None)
+
     def test_create_sandbox_email_ticket_success(self) -> None:
         class _StubResponse:
             status_code = 200
