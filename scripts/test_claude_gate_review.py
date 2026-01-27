@@ -91,6 +91,13 @@ class TestClaudeGateReview(unittest.TestCase):
         model = claude_gate_review._select_model("risk:R9")
         self.assertEqual(model, claude_gate_review.DEFAULT_FALLBACK_MODEL)
 
+    def test_select_model_unknown_risk_warns(self):
+        captured = io.StringIO()
+        with contextlib.redirect_stderr(captured):
+            model = claude_gate_review._select_model("risk:R9")
+        self.assertEqual(model, claude_gate_review.DEFAULT_FALLBACK_MODEL)
+        self.assertIn("Unknown risk label", captured.getvalue())
+
     def test_parse_verdict_pass(self):
         """Test verdict parsing for PASS."""
         text = "VERDICT: PASS\nFINDINGS:\n- No issues found."
@@ -169,6 +176,18 @@ FINDINGS:
         """Test request id extraction returns empty when missing."""
         request_id = claude_gate_review._extract_request_id({})
         self.assertEqual(request_id, "")
+
+    def test_normalize_headers_handles_none(self):
+        self.assertEqual(claude_gate_review._normalize_headers(None), {})
+
+    def test_normalize_headers_handles_non_mapping(self):
+        self.assertEqual(claude_gate_review._normalize_headers(123), {})
+
+    def test_normalize_headers_skips_none_key(self):
+        self.assertEqual(
+            claude_gate_review._normalize_headers({None: "value", "Ok": "yes"}),
+            {"ok": "yes"},
+        )
 
     def test_coerce_token_count_invalid(self):
         """Test token count coercion for invalid values."""
@@ -354,6 +373,19 @@ FINDINGS:
             claude_gate_review._coerce_json_text(escaped),
             '{"version":"1.0","note":"escaped \\\\\"quote\\\\\" and brace } inside","unicode":"\\u2603"}',
         )
+
+    def test_extract_first_json_object_none(self):
+        self.assertIsNone(claude_gate_review._extract_first_json_object("no json here"))
+
+    def test_extract_first_json_object_unbalanced(self):
+        self.assertIsNone(claude_gate_review._extract_first_json_object("{\"a\": 1"))
+
+    def test_extract_json_candidate_empty(self):
+        self.assertIsNone(claude_gate_review._extract_json_candidate(""))
+
+    def test_extract_json_candidate_empty_fence(self):
+        raw = "```json\nnot-json\n```"
+        self.assertIsNone(claude_gate_review._extract_json_candidate(raw))
 
     def test_parse_structured_output_with_fence(self):
         raw = """```json
@@ -1307,6 +1339,24 @@ Let me know if you need more."""
     def test_redact_evidence_no_false_positive(self):
         self.assertEqual(claude_gate_review._redact_evidence("timeout=None"), "timeout=None")
 
+    def test_summarize_parse_error_redacts(self):
+        snippet, length = claude_gate_review._summarize_parse_error("user@example.com")
+        self.assertEqual(snippet, "[REDACTED]")
+        self.assertEqual(length, len("user@example.com"))
+
+    def test_summarize_parse_error_empty(self):
+        snippet, length = claude_gate_review._summarize_parse_error("")
+        self.assertEqual(snippet, "")
+        self.assertEqual(length, 0)
+
+    def test_format_parse_error_includes_length(self):
+        message = claude_gate_review._format_parse_error("Invalid JSON: oops.", "abc")
+        self.assertIn("len=3", message)
+
+    def test_format_parse_error_empty_snippet(self):
+        message = claude_gate_review._format_parse_error("Invalid JSON: oops.", "")
+        self.assertIn("len=0", message)
+
     def test_stable_finding_id_uses_raw_evidence(self):
         finding = {
             "category": "security",
@@ -1385,6 +1435,11 @@ Let me know if you need more."""
         payload = claude_gate_review._structured_parse_failure_payload(["oops"], "raw")
         self.assertEqual(payload["errors"], ["oops"])
         self.assertEqual(payload["verdict"], "FAIL")
+
+    def test_structured_parse_failure_payload_empty_raw(self):
+        payload = claude_gate_review._structured_parse_failure_payload(["oops"], "")
+        self.assertEqual(payload["raw_length"], 0)
+        self.assertNotIn("raw", payload)
 
     def test_step_summary_written(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as summary_file:
