@@ -12164,6 +12164,31 @@
       },
       {
         "level": 2,
+        "text": "Interpreting Shadow Eval Metrics (B61/C)",
+        "anchor": "interpreting-shadow-eval-metrics-b61c"
+      },
+      {
+        "level": 3,
+        "text": "Route Decision Distribution",
+        "anchor": "route-decision-distribution"
+      },
+      {
+        "level": 3,
+        "text": "Match Method Telemetry",
+        "anchor": "match-method-telemetry"
+      },
+      {
+        "level": 3,
+        "text": "Failure Buckets (PII-safe)",
+        "anchor": "failure-buckets-pii-safe"
+      },
+      {
+        "level": 3,
+        "text": "Drift Watch Thresholds",
+        "anchor": "drift-watch-thresholds"
+      },
+      {
+        "level": 2,
         "text": "How to enable shadow mode",
         "anchor": "how-to-enable-shadow-mode"
       },
