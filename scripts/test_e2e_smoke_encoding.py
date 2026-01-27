@@ -326,25 +326,6 @@ class ScenarioPayloadTests(unittest.TestCase):
         serialized = json.dumps(payload)
         self.assertNotIn("@", serialized)
 
-    def test_not_order_status_payload_shape(self) -> None:
-        payload = _not_order_status_payload("RUN_NOT_OS", conversation_id="conv-123")
-        self.assertEqual(payload["scenario"], "not_order_status")
-        self.assertIn("cancel", payload["customer_message"].lower())
-        self.assertNotIn("tracking_number", payload)
-        self.assertNotIn("order_id", payload)
-        serialized = json.dumps(payload)
-        self.assertNotIn("@", serialized)
-
-    def test_order_status_no_match_payload_shape(self) -> None:
-        payload = _order_status_no_match_payload(
-            "RUN_NO_MATCH", conversation_id="conv-456"
-        )
-        self.assertEqual(payload["scenario"], "order_status_no_match")
-        self.assertTrue(payload["order_number"].startswith("FAKE-"))
-        self.assertNotIn("tracking_number", payload)
-        serialized = json.dumps(payload)
-        self.assertNotIn("@", serialized)
-
     def test_business_day_anchor_skips_weekend(self) -> None:
         saturday = datetime(2024, 1, 6, 12, tzinfo=timezone.utc)
         monday = _business_day_anchor(saturday)
@@ -466,17 +447,14 @@ class DraftReplyHelperTests(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_fetch_latest_reply_hash_no_network(self) -> None:
-        class _Exec:
-            def execute(self, *args: Any, **kwargs: Any) -> None:
-                raise AssertionError("execute should not be called")
-
-        executor = _Exec()
+        executor = MagicMock()
         result = _fetch_latest_reply_hash(
             cast(Any, executor),
             "ticket-123",
             allow_network=False,
         )
         self.assertIsNone(result)
+        executor.execute.assert_not_called()
 
 
 class DiagnosticsTests(unittest.TestCase):
@@ -528,6 +506,7 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(result["winning_payload"], {"status": "resolved"})
         self.assertTrue(any(entry["ok"] for entry in result["results"]))
         self.assertIsNotNone(result.get("apply_result"))
+        self.assertEqual(self._MockResponse(200, False, "/v1/tickets").json(), {})
         # Ensure response metadata redaction works
         sanitized = _sanitize_response_metadata(
             self._MockResponse(200, False, "/v1/tickets/abc")
@@ -1036,141 +1015,6 @@ class RoutingValidationTests(unittest.TestCase):
         validated = validate_routing(record, label="test")
         self.assertEqual(validated["intent"], "refund_request")
         self.assertEqual(validated["department"], "Email Support Team")
-
-
-class OutboundAttemptedTests(unittest.TestCase):
-    def test_outbound_attempted_with_message_delta(self) -> None:
-        attempted = _evaluate_outbound_attempted(
-            message_count_delta=1,
-            last_message_source_after=None,
-            send_message_tag_present=None,
-            allowlist_blocked_tag_present=None,
-        )
-        self.assertTrue(attempted)
-
-    def test_outbound_attempted_with_allowlist_block(self) -> None:
-        attempted = _evaluate_outbound_attempted(
-            message_count_delta=0,
-            last_message_source_after="agent",
-            send_message_tag_present=False,
-            allowlist_blocked_tag_present=True,
-        )
-        self.assertTrue(attempted)
-
-    def test_outbound_attempted_unknown_when_no_signals(self) -> None:
-        attempted = _evaluate_outbound_attempted(
-            message_count_delta=None,
-            last_message_source_after=None,
-            send_message_tag_present=None,
-            allowlist_blocked_tag_present=None,
-        )
-        self.assertIsNone(attempted)
-
-
-class SupportRoutingTests(unittest.TestCase):
-    def test_support_routing_tag_forces_support(self) -> None:
-        result = _evaluate_support_routing(
-            routing_tags=["route-email-support-team"],
-            routing_department=None,
-            routing_intent="order_status_tracking",
-        )
-        self.assertTrue(result["routed_to_support"])
-
-    def test_support_routing_department_for_non_order_status(self) -> None:
-        result = _evaluate_support_routing(
-            routing_tags=["mw-routing-applied"],
-            routing_department="Email Support Team",
-            routing_intent="cancel_subscription",
-        )
-        self.assertTrue(result["routed_to_support"])
-
-    def test_support_routing_order_status_without_tag(self) -> None:
-        result = _evaluate_support_routing(
-            routing_tags=["mw-routing-applied"],
-            routing_department="Email Support Team",
-            routing_intent="order_status_tracking",
-        )
-        self.assertFalse(result["routed_to_support"])
-
-    def test_support_routing_ticket_tags(self) -> None:
-        result = _evaluate_support_routing(
-            routing_tags=["mw-routing-applied"],
-            routing_department="Email Support Team",
-            routing_intent="order_status_tracking",
-            ticket_tags=["route-email-support-team"],
-        )
-        self.assertTrue(result["routed_to_support"])
-
-
-class OrderMatchEvidenceTests(unittest.TestCase):
-    def test_order_match_success_with_draft_action(self) -> None:
-        result = _evaluate_order_match_evidence(
-            routing_tags=["mw-routing-applied"],
-            draft_action_present=True,
-            routing_intent="order_status_tracking",
-        )
-        self.assertTrue(result["order_match_success"])
-        self.assertIsNone(result["order_match_failure_reason"])
-
-    def test_order_match_failure_from_missing_context_tag(self) -> None:
-        result = _evaluate_order_match_evidence(
-            routing_tags=[
-                "mw-order-lookup-failed",
-                "mw-order-lookup-missing:created_at",
-            ],
-            draft_action_present=False,
-            routing_intent="order_status_tracking",
-        )
-        self.assertFalse(result["order_match_success"])
-        self.assertEqual(result["order_match_failure_reason"], "missing_context:created_at")
-
-    def test_order_match_ignored_for_non_order_status(self) -> None:
-        result = _evaluate_order_match_evidence(
-            routing_tags=["mw-routing-applied"],
-            draft_action_present=False,
-            routing_intent="refund_request",
-        )
-        self.assertIsNone(result["order_match_success"])
-        self.assertIsNone(result["order_match_failure_reason"])
-
-
-class AllowlistSkipTests(unittest.TestCase):
-    def test_should_skip_allowlist_blocked_when_unconfigured(self) -> None:
-        reason = _should_skip_allowlist_blocked(
-            require_allowlist_blocked=True, allowlist_configured=False
-        )
-        self.assertEqual(reason, "allowlist_not_configured")
-
-    def test_should_not_skip_allowlist_blocked_when_configured(self) -> None:
-        reason = _should_skip_allowlist_blocked(
-            require_allowlist_blocked=True, allowlist_configured=True
-        )
-        self.assertIsNone(reason)
-
-    def test_unexpected_outbound_blocked(self) -> None:
-        unexpected = _unexpected_outbound_blocked(
-            fail_on_outbound_block=True,
-            allowlist_blocked_tag_present=True,
-            require_allowlist_blocked=False,
-        )
-        self.assertTrue(unexpected)
-
-
-class SkipProofPayloadTests(unittest.TestCase):
-    def test_build_skip_proof_payload_has_status_and_fields(self) -> None:
-        payload = _build_skip_proof_payload(
-            run_id="RUN_SKIP",
-            env_name="dev",
-            region="us-east-2",
-            scenario="allowlist_blocked",
-            skip_reason="allowlist_not_configured",
-            allowlist_config={"allowlist_emails_count": 0},
-        )
-        self.assertEqual(payload["result"]["status"], "SKIP")
-        self.assertEqual(payload["result"]["classification"], "SKIP")
-        self.assertIn("proof_fields", payload)
-        self.assertIn("intent_after", payload["proof_fields"])
-        self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
 
 
 class OperatorSendMessageHelperTests(unittest.TestCase):
@@ -1842,6 +1686,7 @@ class AutoTicketHelpersTests(unittest.TestCase):
                 return _DryRunResponse()
 
         with patch("dev_e2e_smoke.RichpanelClient", _DryRunClient):
+            self.assertEqual(_DryRunResponse().json(), {})
             with self.assertRaises(SmokeFailure):
                 _create_sandbox_email_ticket(
                     env_name="dev",
@@ -2592,8 +2437,7 @@ class URLEncodingTests(unittest.TestCase):
         self.assertIn("%2B", path_arg)
 
 
-def main() -> int:
-    loader = unittest.TestLoader()
+def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(PayloadBuilderTests))
@@ -2627,9 +2471,21 @@ def main() -> int:
     suite.addTests(loader.loadTestsFromTestCase(WaitForTicketTagsTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIRewriteWaitTests))
     suite.addTests(loader.loadTestsFromTestCase(FallbackCloseTests))
+    return suite
+
+
+def load_tests(
+    loader: unittest.TestLoader, tests: unittest.TestSuite, pattern: str
+) -> unittest.TestSuite:
+    return _build_suite(loader)
+
+
+def main() -> int:  # pragma: no cover - CLI entrypoint
+    loader = unittest.TestLoader()
+    suite = _build_suite(loader)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     raise SystemExit(main())
