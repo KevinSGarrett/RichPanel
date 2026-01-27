@@ -29,17 +29,17 @@ python scripts\regen_plan_checklist.py
 
 ## Claude gate run (CI)
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/189
-- Workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/21378404990
+- Checks: https://github.com/KevinSGarrett/RichPanel/pull/189/checks
+- Claude review comment: https://github.com/KevinSGarrett/RichPanel/pull/189 (latest `Claude Review` comment)
 - Mode: shadow
 - Model used: claude-opus-4-5-20251101
-- Anthropic request id: req_011CXWstCCuLkEGmuhHhJKJ9
-- Anthropic response id: msg_01HdSQeLSnbxrpZ8i1Umy9FS
+- Anthropic request/response IDs: see latest Claude Review comment (canonical marker).
 
 ## PII-safe output snippet
 ```
 Mode: SHADOW
 CLAUDE_REVIEW: PASS
 Model used: claude-opus-4-5-20251101
-Anthropic Request ID: req_011CXWstCCuLkEGmuhHhJKJ9
-Anthropic Response ID: msg_01HdSQeLSnbxrpZ8i1Umy9FS
+Anthropic Request ID: (see PR comment)
+Anthropic Response ID: (see PR comment)
 ```

@@ -29,4 +29,5 @@ Harden Claude gate reliability and telemetry by making the mode explicit, improv
 
 ## PR
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/189
-- Claude gate workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/21378404990 (mode=shadow)
+- Checks: https://github.com/KevinSGarrett/RichPanel/pull/189/checks
+- Claude review comment: https://github.com/KevinSGarrett/RichPanel/pull/189 (latest `Claude Review` comment)
