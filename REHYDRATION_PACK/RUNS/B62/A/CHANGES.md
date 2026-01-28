@@ -13,13 +13,13 @@
  REHYDRATION_PACK/RUNS/B62/A/EVIDENCE.md            | 162 +---
  .../RUNS/B62/A/PROOF/created_ticket.json           |  12 +-
  REHYDRATION_PACK/RUNS/B62/A/PROOF/golden_path.json |  86 +-
- .../RUNS/B62/A/PROOF/run_ci_checks_output.txt      | 893 +++++++++++++++++++++
+ .../RUNS/B62/A/PROOF/run_ci_checks_output.txt      | 912 +++++++++++++++++++++
  .../B62/A/PROOF/sandbox_golden_path_proof.json     |  86 +-
  REHYDRATION_PACK/RUNS/B62/A/RUN_REPORT.md          |   4 +-
  scripts/b62_sandbox_golden_path.py                 |   9 +
  scripts/dev_e2e_smoke.py                           | 172 ++++
- scripts/test_b62_golden_path.py                    |   5 +
- scripts/test_e2e_smoke_encoding.py                 | 101 +++
+ scripts/test_b62_golden_path.py                    |  48 ++
+ scripts/test_e2e_smoke_encoding.py                 | 298 ++++++-
  scripts/test_shopify_client.py                     |   3 +
- 12 files changed, 1329 insertions(+), 237 deletions(-)
+ 12 files changed, 1571 insertions(+), 254 deletions(-)
 ```

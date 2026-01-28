@@ -46,7 +46,7 @@ test_standard_shipping_canonical_remaining_window (__main__.DeliveryEstimateTest
 test_weekend_crossing_remaining_window (__main__.DeliveryEstimateTests.test_weekend_crossing_remaining_window) ... ok
 
 ----------------------------------------------------------------------
-Ran 22 tests in 0.008s
+Ran 22 tests in 0.009s
 
 OK
 [OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
@@ -206,7 +206,7 @@ test_read_only_env_override_allows_false_but_write_disabled_blocks (backend.test
 ok
 
 ----------------------------------------------------------------------
-Ran 122 tests in 7.339s
+Ran 122 tests in 6.609s
 
 OK
 test_dry_run_default_skips_transport (__main__.RichpanelClientTests.test_dry_run_default_skips_transport) ... ok
@@ -256,18 +256,18 @@ test_fetch_recent_ticket_ids_success (__main__.OrderStatusIntentEvalTests.test_f
 test_is_prod_target_variants (__main__.OrderStatusIntentEvalTests.test_is_prod_target_variants) ... ok
 test_label_and_redaction_helpers (__main__.OrderStatusIntentEvalTests.test_label_and_redaction_helpers) ... ok
 test_load_jsonl_dataset_errors (__main__.OrderStatusIntentEvalTests.test_load_jsonl_dataset_errors) ... ok
-test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-27 22:50:38,364 WARNING Skipping ticket with no message
-2026-01-27 22:50:38,364 WARNING Skipping ticket with no message
+test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-01-27 23:56:26,620 WARNING Skipping ticket with no message
+2026-01-27 23:56:26,621 WARNING Skipping ticket with no message
 ok
-test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-27 22:50:38,367 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpxqdqtdn5\out.json
-2026-01-27 22:50:38,367 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
-2026-01-27 22:50:38,367 INFO LLM metrics: unavailable (llm_not_called)
-2026-01-27 22:50:38,368 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpxqdqtdn5\richpanel.json
-2026-01-27 22:50:38,368 INFO Deterministic metrics: unavailable (None)
-2026-01-27 22:50:38,368 INFO LLM metrics: unavailable (None)
+test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-01-27 23:56:26,622 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpksacrioi\out.json
+2026-01-27 23:56:26,622 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+2026-01-27 23:56:26,622 INFO LLM metrics: unavailable (llm_not_called)
+2026-01-27 23:56:26,624 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpksacrioi\richpanel.json
+2026-01-27 23:56:26,624 INFO Deterministic metrics: unavailable (None)
+2026-01-27 23:56:26,624 INFO LLM metrics: unavailable (None)
 ok
 test_main_requires_write_disabled_for_prod (__main__.OrderStatusIntentEvalTests.test_main_requires_write_disabled_for_prod) ... ok
-test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-27 22:50:38,369 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-01-27 23:56:26,624 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
 ok
 test_require_env_flag (__main__.OrderStatusIntentEvalTests.test_require_env_flag) ... ok
 test_resolve_env_name_priority (__main__.OrderStatusIntentEvalTests.test_resolve_env_name_priority) ... ok
@@ -275,7 +275,7 @@ test_run_richpanel_eval_source_metadata (__main__.OrderStatusIntentEvalTests.tes
 test_write_summary (__main__.OrderStatusIntentEvalTests.test_write_summary) ... ok
 
 ----------------------------------------------------------------------
-Ran 21 tests in 0.025s
+Ran 21 tests in 0.020s
 
 OK
 test_automation_disabled_short_circuits_transport (__main__.OpenAIClientTests.test_automation_disabled_short_circuits_transport) ... ok
@@ -316,7 +316,7 @@ ok
 test_safe_mode_short_circuits_before_prod_ack (__main__.ShopifyClientTests.test_safe_mode_short_circuits_before_prod_ack) ... ok
 
 ----------------------------------------------------------------------
-Ran 13 tests in 0.003s
+Ran 13 tests in 0.002s
 
 OK
 test_dry_run_default_skips_transport (__main__.ShipStationClientTests.test_dry_run_default_skips_transport) ... ok
@@ -331,7 +331,7 @@ test_retry_honors_retry_after_header (__main__.ShipStationClientTests.test_retry
 ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 2.446s
+Ran 8 tests in 2.900s
 
 OK
 test_baseline_and_payload_field_counts (__main__.OrderIdResolutionCoverageTests.test_baseline_and_payload_field_counts) ... ok
@@ -392,7 +392,7 @@ test_shopify_enrichment_merges_fields_when_network_enabled (__main__.OrderLookup
 test_shopify_fallback_used_when_payload_has_no_shipping_fields (__main__.OrderLookupTests.test_shopify_fallback_used_when_payload_has_no_shipping_fields) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 24.287s
+Ran 54 tests in 24.620s
 
 OK
 test_fallback_on_parse_failure_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_parse_failure_preserves_original) ... reply_rewrite.parse_failed
@@ -471,19 +471,19 @@ Ran 2 tests in 0.001s
 
 OK
 test_prod_requires_write_disabled (__main__.LiveReadonlyShadowEvalGuardTests.test_prod_requires_write_disabled) ... ok
-test_allow_empty_sample_on_listing_failure (__main__.LiveReadonlyShadowEvalHelpersTests.test_allow_empty_sample_on_listing_failure) ... 2026-01-27 22:51:07,793 WARNING Ticket listing failed; continuing with empty sample
-2026-01-27 22:51:07,793 WARNING No tickets available for evaluation; continuing
-2026-01-27 22:51:07,793 WARNING Sample size reduced: requested 1 got 0
-2026-01-27 22:51:07,795 INFO Shadow eval summary: run_id=RUN_TEST tickets_scanned=0 orders_matched=0 tracking_found=0 eta_available=0 errors=0
-2026-01-27 22:51:07,795 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpyalxbon1\report.json
-2026-01-27 22:51:07,795 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpyalxbon1\live_readonly_shadow_eval_summary_RUN_TEST.json
-2026-01-27 22:51:07,795 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpyalxbon1\trace.json
+test_allow_empty_sample_on_listing_failure (__main__.LiveReadonlyShadowEvalHelpersTests.test_allow_empty_sample_on_listing_failure) ... 2026-01-27 23:56:56,947 WARNING Ticket listing failed; continuing with empty sample
+2026-01-27 23:56:56,948 WARNING No tickets available for evaluation; continuing
+2026-01-27 23:56:56,948 WARNING Sample size reduced: requested 1 got 0
+2026-01-27 23:56:56,951 INFO Shadow eval summary: run_id=RUN_TEST tickets_scanned=0 orders_matched=0 tracking_found=0 eta_available=0 errors=0
+2026-01-27 23:56:56,951 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmprhulo8r2\report.json
+2026-01-27 23:56:56,951 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmprhulo8r2\live_readonly_shadow_eval_summary_RUN_TEST.json
+2026-01-27 23:56:56,951 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmprhulo8r2\trace.json
 ok
 test_aws_sdk_trace_capture_handles_missing_botocore (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_capture_handles_missing_botocore) ... ok
 test_aws_sdk_trace_capture_noop_when_wrapped (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_capture_noop_when_wrapped) ... ok
 test_aws_sdk_trace_capture_records (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_capture_records) ... ok
 test_aws_sdk_trace_stop_handles_import_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_stop_handles_import_error) ... ok
-test_aws_sdk_trace_wrap_exception_path (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_wrap_exception_path) ... 2026-01-27 22:51:07,796 WARNING AWS SDK trace capture failed
+test_aws_sdk_trace_wrap_exception_path (__main__.LiveReadonlyShadowEvalHelpersTests.test_aws_sdk_trace_wrap_exception_path) ... 2026-01-27 23:56:56,954 WARNING AWS SDK trace capture failed
 Traceback (most recent call last):
   File "C:\RichPanel_GIT\scripts\live_readonly_shadow_eval.py", line 857, in _wrapped_send
     url = getattr(request, "url", "")
@@ -504,10 +504,10 @@ test_compute_eta_for_ticket_returns_none_when_missing_data (__main__.LiveReadonl
 test_compute_eta_for_ticket_uses_shipping_method_name (__main__.LiveReadonlyShadowEvalHelpersTests.test_compute_eta_for_ticket_uses_shipping_method_name) ... ok
 test_delivery_estimate_present (__main__.LiveReadonlyShadowEvalHelpersTests.test_delivery_estimate_present) ... ok
 test_eta_available_with_shipping_method_name (__main__.LiveReadonlyShadowEvalHelpersTests.test_eta_available_with_shipping_method_name)
-Test that eta_available checks shipping_method_name field too. ... 2026-01-27 22:51:07,804 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=1 errors=0
-2026-01-27 22:51:07,804 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpr04mq2b3\artifact.json
-2026-01-27 22:51:07,804 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpr04mq2b3\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,804 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpr04mq2b3\trace.json
+Test that eta_available checks shipping_method_name field too. ... 2026-01-27 23:56:56,961 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=1 errors=0
+2026-01-27 23:56:56,961 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpwd6662y2\artifact.json
+2026-01-27 23:56:56,961 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpwd6662y2\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,961 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpwd6662y2\trace.json
 ok
 test_extract_aws_operation_sources (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_aws_operation_sources) ... ok
 test_extract_comment_message_variants (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_comment_message_variants) ... ok
@@ -515,24 +515,24 @@ test_extract_latest_customer_message (__main__.LiveReadonlyShadowEvalHelpersTest
 test_extract_order_number (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_order_number) ... ok
 test_extract_order_payload_adds_order_number (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_order_payload_adds_order_number) ... ok
 test_extract_order_payload_merges (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_order_payload_merges) ... ok
-test_fetch_conversation_falls_back_to_messages (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_falls_back_to_messages) ... 2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:36524fd8f674 status=403 dry_run=False
-2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /v1/conversations/redacted:36524fd8f674 status=404 dry_run=False
+test_fetch_conversation_falls_back_to_messages (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_falls_back_to_messages) ... 2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:36524fd8f674 status=403 dry_run=False
+2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /v1/conversations/redacted:36524fd8f674 status=404 dry_run=False
 ok
 test_fetch_conversation_flattens_conversation_wrapper (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_flattens_conversation_wrapper) ... ok
-test_fetch_conversation_handles_bad_json (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_bad_json) ... 2026-01-27 22:51:07,806 WARNING Conversation parse failed for /api/v1/conversations/redacted:d13e077ecb8f
-2026-01-27 22:51:07,806 WARNING Conversation parse failed for /v1/conversations/redacted:d13e077ecb8f
-2026-01-27 22:51:07,806 WARNING Conversation parse failed for /api/v1/conversations/redacted:d13e077ecb8f/messages
-2026-01-27 22:51:07,806 WARNING Conversation parse failed for /v1/conversations/redacted:d13e077ecb8f/messages
+test_fetch_conversation_handles_bad_json (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_bad_json) ... 2026-01-27 23:56:56,963 WARNING Conversation parse failed for /api/v1/conversations/redacted:d13e077ecb8f
+2026-01-27 23:56:56,963 WARNING Conversation parse failed for /v1/conversations/redacted:d13e077ecb8f
+2026-01-27 23:56:56,963 WARNING Conversation parse failed for /api/v1/conversations/redacted:d13e077ecb8f/messages
+2026-01-27 23:56:56,963 WARNING Conversation parse failed for /v1/conversations/redacted:d13e077ecb8f/messages
 ok
-test_fetch_conversation_handles_error_status (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_error_status) ... 2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:d13e077ecb8f status=500 dry_run=False
-2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /v1/conversations/redacted:d13e077ecb8f status=500 dry_run=False
-2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:d13e077ecb8f/messages status=500 dry_run=False
-2026-01-27 22:51:07,806 WARNING Conversation fetch skipped for /v1/conversations/redacted:d13e077ecb8f/messages status=500 dry_run=False
+test_fetch_conversation_handles_error_status (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_error_status) ... 2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:d13e077ecb8f status=500 dry_run=False
+2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /v1/conversations/redacted:d13e077ecb8f status=500 dry_run=False
+2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /api/v1/conversations/redacted:d13e077ecb8f/messages status=500 dry_run=False
+2026-01-27 23:56:56,963 WARNING Conversation fetch skipped for /v1/conversations/redacted:d13e077ecb8f/messages status=500 dry_run=False
 ok
-test_fetch_conversation_handles_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_exception) ... 2026-01-27 22:51:07,806 WARNING Conversation fetch failed for /api/v1/conversations/redacted:d13e077ecb8f
-2026-01-27 22:51:07,806 WARNING Conversation fetch failed for /v1/conversations/redacted:d13e077ecb8f
-2026-01-27 22:51:07,806 WARNING Conversation fetch failed for /api/v1/conversations/redacted:d13e077ecb8f/messages
-2026-01-27 22:51:07,806 WARNING Conversation fetch failed for /v1/conversations/redacted:d13e077ecb8f/messages
+test_fetch_conversation_handles_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_conversation_handles_exception) ... 2026-01-27 23:56:56,963 WARNING Conversation fetch failed for /api/v1/conversations/redacted:d13e077ecb8f
+2026-01-27 23:56:56,963 WARNING Conversation fetch failed for /v1/conversations/redacted:d13e077ecb8f
+2026-01-27 23:56:56,963 WARNING Conversation fetch failed for /api/v1/conversations/redacted:d13e077ecb8f/messages
+2026-01-27 23:56:56,963 WARNING Conversation fetch failed for /v1/conversations/redacted:d13e077ecb8f/messages
 ok
 test_fetch_recent_ticket_refs_errors_on_status (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_recent_ticket_refs_errors_on_status) ... ok
 test_fetch_recent_ticket_refs_fallbacks_on_forbidden (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_recent_ticket_refs_fallbacks_on_forbidden) ... ok
@@ -543,7 +543,7 @@ test_http_trace_allows_aws_portal_get (__main__.LiveReadonlyShadowEvalHelpersTes
 test_http_trace_allows_aws_readonly_ops (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_allows_aws_readonly_ops) ... ok
 test_http_trace_assert_read_only_unknown_service (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_assert_read_only_unknown_service) ... ok
 test_http_trace_blocks_aws_non_post (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_blocks_aws_non_post) ... ok
-test_http_trace_capture_handles_bad_request (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_capture_handles_bad_request) ... 2026-01-27 22:51:07,807 WARNING HTTP trace capture failed
+test_http_trace_capture_handles_bad_request (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_capture_handles_bad_request) ... 2026-01-27 23:56:56,964 WARNING HTTP trace capture failed
 Traceback (most recent call last):
   File "C:\RichPanel_GIT\scripts\live_readonly_shadow_eval.py", line 914, in _wrapped_urlopen
     req.get_method() if hasattr(req, "get_method") else "GET"
@@ -563,57 +563,57 @@ test_is_prod_target_detects_secret_hint (__main__.LiveReadonlyShadowEvalHelpersT
 test_is_prod_target_false_for_non_prod (__main__.LiveReadonlyShadowEvalHelpersTests.test_is_prod_target_false_for_non_prod) ... ok
 test_listing_failure_raises_without_allow_empty (__main__.LiveReadonlyShadowEvalHelpersTests.test_listing_failure_raises_without_allow_empty) ... ok
 test_main_raises_when_no_ticket_refs (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_raises_when_no_ticket_refs) ... ok
-test_main_records_error_when_ticket_processing_fails (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_error_when_ticket_processing_fails) ... 2026-01-27 22:51:07,815 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
-2026-01-27 22:51:07,815 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpul8js3qx\report.json
-2026-01-27 22:51:07,815 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpul8js3qx\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,816 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpul8js3qx\trace.json
+test_main_records_error_when_ticket_processing_fails (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_error_when_ticket_processing_fails) ... 2026-01-27 23:56:56,975 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
+2026-01-27 23:56:56,975 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp_fkxfx9a\report.json
+2026-01-27 23:56:56,975 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp_fkxfx9a\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,975 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp_fkxfx9a\trace.json
 ok
-test_main_records_probe_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_probe_error) ... 2026-01-27 22:51:07,818 WARNING Shopify probe failed
-2026-01-27 22:51:07,820 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
-2026-01-27 22:51:07,820 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmphz2oxymb\artifact.json
-2026-01-27 22:51:07,820 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmphz2oxymb\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,820 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmphz2oxymb\trace.json
+test_main_records_probe_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_probe_error) ... 2026-01-27 23:56:56,977 WARNING Shopify probe failed
+2026-01-27 23:56:56,979 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
+2026-01-27 23:56:56,979 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpj6lqj8el\artifact.json
+2026-01-27 23:56:56,979 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpj6lqj8el\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,979 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpj6lqj8el\trace.json
 ok
-test_main_records_probe_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_probe_exception) ... 2026-01-27 22:51:07,822 WARNING Shopify probe exception
-2026-01-27 22:51:07,823 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
-2026-01-27 22:51:07,823 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmppvfkx7uz\artifact.json
-2026-01-27 22:51:07,823 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmppvfkx7uz\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,823 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmppvfkx7uz\trace.json
+test_main_records_probe_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_probe_exception) ... 2026-01-27 23:56:56,982 WARNING Shopify probe exception
+2026-01-27 23:56:56,984 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
+2026-01-27 23:56:56,984 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp_gxg0l1b\artifact.json
+2026-01-27 23:56:56,984 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp_gxg0l1b\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,984 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp_gxg0l1b\trace.json
 ok
-test_main_records_richpanel_request_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_richpanel_request_error) ... 2026-01-27 22:51:07,827 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
-2026-01-27 22:51:07,827 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpdujzulg0\report.json
-2026-01-27 22:51:07,827 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpdujzulg0\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,827 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpdujzulg0\trace.json
+test_main_records_richpanel_request_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_richpanel_request_error) ... 2026-01-27 23:56:56,989 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
+2026-01-27 23:56:56,989 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpnxh_s6jm\report.json
+2026-01-27 23:56:56,989 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpnxh_s6jm\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,989 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpnxh_s6jm\trace.json
 ok
-test_main_records_shopify_lookup_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_shopify_lookup_error) ... 2026-01-27 22:51:07,831 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
-2026-01-27 22:51:07,831 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp4au6qswr\report.json
-2026-01-27 22:51:07,831 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp4au6qswr\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,832 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp4au6qswr\trace.json
+test_main_records_shopify_lookup_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_records_shopify_lookup_error) ... 2026-01-27 23:56:56,995 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=1
+2026-01-27 23:56:56,995 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpeedmkemc\report.json
+2026-01-27 23:56:56,995 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpeedmkemc\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:56,995 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpeedmkemc\trace.json
 ok
 test_main_reraises_system_exit_in_ticket_loop (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_reraises_system_exit_in_ticket_loop) ... ok
-test_main_runs_with_stubbed_client (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_runs_with_stubbed_client) ... 2026-01-27 22:51:07,837 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=1 tracking_found=1 eta_available=1 errors=0
-2026-01-27 22:51:07,837 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpd1otqf0f\artifact.json
-2026-01-27 22:51:07,837 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpd1otqf0f\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,837 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpd1otqf0f\trace.json
+test_main_runs_with_stubbed_client (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_runs_with_stubbed_client) ... 2026-01-27 23:56:57,001 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=1 tracking_found=1 eta_available=1 errors=0
+2026-01-27 23:56:57,001 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpiu3khg77\artifact.json
+2026-01-27 23:56:57,001 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpiu3khg77\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:57,001 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpiu3khg77\trace.json
 ok
-test_main_uses_recent_sample_when_no_ticket_id (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_uses_recent_sample_when_no_ticket_id) ... 2026-01-27 22:51:07,842 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=2 orders_matched=2 tracking_found=0 eta_available=2 errors=0
-2026-01-27 22:51:07,842 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp0vn9znll\report.json
-2026-01-27 22:51:07,842 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp0vn9znll\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,842 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp0vn9znll\trace.json
+test_main_uses_recent_sample_when_no_ticket_id (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_uses_recent_sample_when_no_ticket_id) ... 2026-01-27 23:56:57,007 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=2 orders_matched=2 tracking_found=0 eta_available=2 errors=0
+2026-01-27 23:56:57,007 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmpazv3rtgz\report.json
+2026-01-27 23:56:57,007 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmpazv3rtgz\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:57,007 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmpazv3rtgz\trace.json
 ok
 test_main_warns_when_sample_reduced (__main__.LiveReadonlyShadowEvalHelpersTests.test_main_warns_when_sample_reduced) ... ok
 test_non_explicit_mode_performs_shopify_lookup (__main__.LiveReadonlyShadowEvalHelpersTests.test_non_explicit_mode_performs_shopify_lookup)
-Test that sample_mode='recent' performs Shopify lookup for metrics. ... 2026-01-27 22:51:07,850 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
-2026-01-27 22:51:07,850 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp2zv_9yok\report.json
-2026-01-27 22:51:07,850 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp2zv_9yok\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,850 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp2zv_9yok\trace.json
+Test that sample_mode='recent' performs Shopify lookup for metrics. ... 2026-01-27 23:56:57,016 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
+2026-01-27 23:56:57,016 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp3zfi_fvg\report.json
+2026-01-27 23:56:57,016 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp3zfi_fvg\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:57,017 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp3zfi_fvg\trace.json
 ok
 test_normalize_optional_text_handles_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_normalize_optional_text_handles_exception) ... ok
 test_order_resolution_none_handling (__main__.LiveReadonlyShadowEvalHelpersTests.test_order_resolution_none_handling)
-Test that order_resolution being None (not just absent) is handled safely. ... 2026-01-27 22:51:07,854 INFO Shadow eval summary: run_id=RUN_20260128_0451Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
-2026-01-27 22:51:07,854 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmph8d3r35t\artifact.json
-2026-01-27 22:51:07,854 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmph8d3r35t\live_readonly_shadow_eval_summary_RUN_20260128_0451Z.json
-2026-01-27 22:51:07,854 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmph8d3r35t\trace.json
+Test that order_resolution being None (not just absent) is handled safely. ... 2026-01-27 23:56:57,021 INFO Shadow eval summary: run_id=RUN_20260128_0556Z tickets_scanned=1 orders_matched=0 tracking_found=0 eta_available=0 errors=0
+2026-01-27 23:56:57,021 INFO Report written to C:\Users\kevin\AppData\Local\Temp\tmp_u8lokd_\artifact.json
+2026-01-27 23:56:57,021 INFO Summary written to C:\Users\kevin\AppData\Local\Temp\tmp_u8lokd_\live_readonly_shadow_eval_summary_RUN_20260128_0556Z.json
+2026-01-27 23:56:57,021 INFO HTTP trace written to C:\Users\kevin\AppData\Local\Temp\tmp_u8lokd_\trace.json
 ok
 test_parse_timestamp_variants (__main__.LiveReadonlyShadowEvalHelpersTests.test_parse_timestamp_variants) ... ok
 test_probe_shopify_dry_run (__main__.LiveReadonlyShadowEvalHelpersTests.test_probe_shopify_dry_run) ... ok
@@ -655,7 +655,7 @@ test_to_bool_defaults (__main__.LiveReadonlyShadowEvalHelpersTests.test_to_bool_
 test_tracking_present_checks_fields (__main__.LiveReadonlyShadowEvalHelpersTests.test_tracking_present_checks_fields) ... ok
 
 ----------------------------------------------------------------------
-Ran 101 tests in 0.074s
+Ran 101 tests in 0.088s
 
 OK
 test_business_day_anchor_skips_weekend (__main__.ScenarioPayloadTests.test_business_day_anchor_skips_weekend) ... ok
@@ -674,13 +674,14 @@ Scenario payload must not contain PII patterns. ... ok
 test_order_status_tracking_standard_shipping_shape (__main__.ScenarioPayloadTests.test_order_status_tracking_standard_shipping_shape) ... ok
 test_build_payload_baseline_has_no_scenario (__main__.PayloadBuilderTests.test_build_payload_baseline_has_no_scenario) ... ok
 test_build_payload_not_order_status (__main__.PayloadBuilderTests.test_build_payload_not_order_status) ... ok
-[OK] Wrote created-ticket artifact to C:\Users\kevin\AppData\Local\Temp\tmpk8l7btat\created.json
-[OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
-[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
-[OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
-[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
+test_build_payload_order_status_includes_order_number (__main__.PayloadBuilderTests.test_build_payload_order_status_includes_order_number) ... ok
 test_build_payload_order_status_no_match (__main__.PayloadBuilderTests.test_build_payload_order_status_no_match) ... ok
 test_build_payload_order_status_tracking (__main__.PayloadBuilderTests.test_build_payload_order_status_tracking) ... ok
+[OK] Wrote created-ticket artifact to C:\Users\kevin\AppData\Local\Temp\tmpm8_cjti4\created.json
+[OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
+[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
+[OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
+[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
 test_parse_args_accepts_allowlist_flags (__main__.ParseArgsTests.test_parse_args_accepts_allowlist_flags) ... ok
 test_parse_args_accepts_order_match_by_number_flag (__main__.ParseArgsTests.test_parse_args_accepts_order_match_by_number_flag) ... ok
 test_parse_args_accepts_order_number (__main__.ParseArgsTests.test_parse_args_accepts_order_number) ... ok
@@ -745,6 +746,13 @@ test_order_match_failure_without_missing_tag (__main__.OrderMatchEvidenceTests.t
 test_order_match_ignored_for_non_order_status (__main__.OrderMatchEvidenceTests.test_order_match_ignored_for_non_order_status) ... ok
 test_order_match_no_signal_returns_none (__main__.OrderMatchEvidenceTests.test_order_match_no_signal_returns_none) ... ok
 test_order_match_success_with_draft_action (__main__.OrderMatchEvidenceTests.test_order_match_success_with_draft_action) ... ok
+test_detect_order_match_by_number (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number) ... ok
+test_detect_order_match_by_number_exception (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_exception) ... ok
+test_detect_order_match_by_number_missing (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_missing) ... ok
+test_detect_order_match_by_number_missing_order (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_missing_order) ... ok
+test_detect_order_match_by_number_network_disabled (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_network_disabled) ... ok
+test_detect_order_match_by_number_non_dict_summary (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_non_dict_summary) ... ok
+test_detect_order_match_by_number_success (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_success) ... ok
 test_order_resolution_is_not_order_number (__main__.OrderMatchResolutionTests.test_order_resolution_is_not_order_number) ... ok
 test_order_resolution_is_order_number (__main__.OrderMatchResolutionTests.test_order_resolution_is_order_number) ... ok
 test_order_resolution_is_order_number_none (__main__.OrderMatchResolutionTests.test_order_resolution_is_order_number_none) ... ok
@@ -757,6 +765,17 @@ test_reply_contains_tracking_url (__main__.ReplyContentFlagsTests.test_reply_con
 test_reply_contains_tracking_url_false (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_url_false) ... ok
 test_reply_contains_tracking_url_with_expected (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_url_with_expected) ... ok
 test_reply_content_flags_empty_candidates (__main__.ReplyContentFlagsTests.test_reply_content_flags_empty_candidates) ... ok
+test_fetch_recent_shopify_order_number_dry_run (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_dry_run) ... ok
+test_fetch_recent_shopify_order_number_exception (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_exception) ... ok
+test_fetch_recent_shopify_order_number_name_fallback (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_name_fallback) ... ok
+test_fetch_recent_shopify_order_number_no_orders (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_no_orders) ... ok
+test_fetch_recent_shopify_order_number_skips_when_disabled (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_skips_when_disabled) ... ok
+test_fetch_recent_shopify_order_number_success (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_success) ... ok
+test_resolve_order_number_empty_candidate (__main__.OrderNumberResolutionTests.test_resolve_order_number_empty_candidate) ... ok
+test_resolve_order_number_env (__main__.OrderNumberResolutionTests.test_resolve_order_number_env) ... ok
+test_resolve_order_number_missing_candidate (__main__.OrderNumberResolutionTests.test_resolve_order_number_missing_candidate) ... ok
+test_resolve_order_number_prefers_arg (__main__.OrderNumberResolutionTests.test_resolve_order_number_prefers_arg) ... ok
+test_resolve_order_number_str_failure (__main__.OrderNumberResolutionTests.test_resolve_order_number_str_failure) ... ok
 test_should_not_skip_allowlist_blocked_when_configured (__main__.AllowlistSkipTests.test_should_not_skip_allowlist_blocked_when_configured) ... ok
 test_should_skip_allowlist_blocked_when_unconfigured (__main__.AllowlistSkipTests.test_should_skip_allowlist_blocked_when_unconfigured) ... ok
 test_unexpected_outbound_blocked (__main__.AllowlistSkipTests.test_unexpected_outbound_blocked) ... ok
@@ -833,7 +852,7 @@ test_wait_for_openai_rewrite_state_record (__main__.OpenAIRewriteWaitTests.test_
 test_fallback_close_records_alt_paths_and_metadata (__main__.FallbackCloseTests.test_fallback_close_records_alt_paths_and_metadata) ... ok
 
 ----------------------------------------------------------------------
-Ran 163 tests in 0.024s
+Ran 182 tests in 0.034s
 
 OK
 [OK] No unapproved protected deletes/renames detected (local diff).
