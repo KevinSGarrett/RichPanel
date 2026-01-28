@@ -110,6 +110,7 @@ from create_sandbox_chat_ticket import (  # type: ignore  # noqa: E402
     _redact_emails as _chat_redact_emails,
     _extract_ticket_fields as _extract_chat_ticket_fields,
     _require_prod_write_ack as _require_prod_write_ack_chat,
+    main as _chat_ticket_main,
 )
 
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
@@ -2155,6 +2156,127 @@ class ChatTicketHelpersTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit):
                 _require_prod_write_ack_chat(env_name="prod", ack_token=None)
+
+    def test_chat_ticket_main_requires_boto3(self) -> None:
+        with patch.object(sys, "argv", ["create_sandbox_chat_ticket.py", "--env", "dev", "--region", "us-east-2"]):
+            with patch("create_sandbox_chat_ticket.boto3", None):
+                self.assertEqual(_chat_ticket_main(), 1)
+
+    def test_chat_ticket_main_success(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"ticket": {"conversation_no": 123, "id": "t-1"}}
+
+        class _StubClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _StubResponse:
+                return _StubResponse()
+
+        class _StubBoto3:
+            def setup_default_session(self, **_: Any) -> None:
+                return None
+
+        with TemporaryDirectory() as tmp_dir:
+            proof_path = str(Path(tmp_dir) / "created_chat_ticket.json")
+            argv = [
+                "create_sandbox_chat_ticket.py",
+                "--env",
+                "dev",
+                "--region",
+                "us-east-2",
+                "--proof-path",
+                proof_path,
+            ]
+            with patch.object(sys, "argv", argv):
+                with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
+                    with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
+                        result = _chat_ticket_main()
+            self.assertEqual(result, 0)
+            self.assertTrue(Path(proof_path).exists())
+
+    def test_chat_ticket_main_dry_run_fails(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = True
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"ticket": {"conversation_no": 123, "id": "t-1"}}
+
+        class _StubClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _StubResponse:
+                return _StubResponse()
+
+        class _StubBoto3:
+            def setup_default_session(self, **_: Any) -> None:
+                return None
+
+        argv = ["create_sandbox_chat_ticket.py", "--env", "dev", "--region", "us-east-2"]
+        with patch.object(sys, "argv", argv):
+            with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
+                with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
+                    self.assertEqual(_chat_ticket_main(), 1)
+
+    def test_chat_ticket_main_http_error(self) -> None:
+        class _StubResponse:
+            status_code = 400
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"error": "Invalid value for support@example.com"}
+
+        class _StubClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _StubResponse:
+                return _StubResponse()
+
+        class _StubBoto3:
+            def setup_default_session(self, **_: Any) -> None:
+                return None
+
+        argv = ["create_sandbox_chat_ticket.py", "--env", "dev", "--region", "us-east-2"]
+        with patch.object(sys, "argv", argv):
+            with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
+                with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
+                    self.assertEqual(_chat_ticket_main(), 1)
+
+    def test_chat_ticket_main_missing_identifiers(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+            url = "https://api.richpanel.com/v1/tickets"
+
+            def json(self) -> dict:
+                return {"ticket": {}}
+
+        class _StubClient:
+            def __init__(self, **_: Any) -> None:
+                pass
+
+            def request(self, *_: Any, **__: Any) -> _StubResponse:
+                return _StubResponse()
+
+        class _StubBoto3:
+            def setup_default_session(self, **_: Any) -> None:
+                return None
+
+        argv = ["create_sandbox_chat_ticket.py", "--env", "dev", "--region", "us-east-2"]
+        with patch.object(sys, "argv", argv):
+            with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
+                with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
+                    self.assertEqual(_chat_ticket_main(), 1)
 
     def test_create_ticket_script_prod_ack_from_env_allows(self) -> None:
         with patch.dict(

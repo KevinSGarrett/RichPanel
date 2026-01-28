@@ -14,6 +14,15 @@ python scripts\test_pipeline_handlers.py 2>&1 | Tee-Object -FilePath REHYDRATION
 
 - Output: `REHYDRATION_PACK/RUNS/B62/B/PROOF/unit_test_output.txt`
 
+## E2E smoke encoding tests
+
+```powershell
+cd C:\RichPanel_GIT
+python scripts\test_e2e_smoke_encoding.py 2>&1 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B62\B\PROOF\test_e2e_smoke_encoding_output.txt
+```
+
+- Output: `REHYDRATION_PACK/RUNS/B62/B/PROOF/test_e2e_smoke_encoding_output.txt`
+
 ## CI-equivalent (local)
 
 ```powershell

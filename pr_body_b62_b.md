@@ -53,6 +53,7 @@
 
 **Tests:**
 - `scripts/test_pipeline_handlers.py`
+- `python scripts/test_e2e_smoke_encoding.py`
 
 **CI / workflows:**
 - None
@@ -97,6 +98,7 @@ Local CI-equivalent status: `python scripts/run_ci_checks.py --ci` failed due to
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_proof.json`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_output.txt`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/unit_test_output.txt`
+- `REHYDRATION_PACK/RUNS/B62/B/PROOF/test_e2e_smoke_encoding_output.txt`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/run_ci_checks_output.txt`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/created_ticket.json`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/create_chat_ticket_error.txt`
