@@ -1292,6 +1292,74 @@ Let me know if you need more."""
                 os.unlink(output_path)
 
 
+    def test_fetch_graphql_success(self):
+        payload = {"data": {"repository": {"pullRequest": {"title": "PR"}}}}
+
+        class _Response:
+            def __init__(self, data):
+                self._data = data
+
+            def read(self):
+                return json.dumps(self._data).encode("utf-8")
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with patch("urllib.request.urlopen", return_value=_Response(payload)):
+            data = claude_gate_review._fetch_graphql("query", {"n": 1}, "token")
+        self.assertEqual(data, payload["data"])
+
+    def test_fetch_graphql_raises_on_errors(self):
+        payload = {"errors": [{"message": "boom"}]}
+
+        class _Response:
+            def __init__(self, data):
+                self._data = data
+
+            def read(self):
+                return json.dumps(self._data).encode("utf-8")
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with patch("urllib.request.urlopen", return_value=_Response(payload)):
+            with self.assertRaises(RuntimeError):
+                claude_gate_review._fetch_graphql("query", {"n": 1}, "token")
+
+    def test_fetch_pr_metadata_fallback_uses_graphql(self):
+        graphql_payload = {
+            "repository": {
+                "pullRequest": {
+                    "title": "PR title",
+                    "body": "PR body",
+                    "labels": {"nodes": [{"name": "gate:claude"}]},
+                }
+            }
+        }
+        with patch.object(
+            claude_gate_review,
+            "_fetch_json",
+            side_effect=RuntimeError("too many files changed"),
+        ), patch.object(
+            claude_gate_review, "_fetch_graphql", return_value=graphql_payload
+        ):
+            result = claude_gate_review._fetch_pr_metadata("owner/repo", 123, "token")
+        self.assertEqual(result["title"], "PR title")
+        self.assertEqual(result["labels"], [{"name": "gate:claude"}])
+
+    def test_fetch_pr_metadata_reraises_other_errors(self):
+        with patch.object(
+            claude_gate_review, "_fetch_json", side_effect=RuntimeError("boom")
+        ):
+            with self.assertRaises(RuntimeError):
+                claude_gate_review._fetch_pr_metadata("owner/repo", 123, "token")
+
     def test_mode_normalization(self):
         self.assertEqual(claude_gate_review._normalize_mode("legacy"), "legacy")
         self.assertEqual(claude_gate_review._normalize_mode("SHADOW"), "shadow")

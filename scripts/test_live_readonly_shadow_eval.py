@@ -567,6 +567,78 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             shadow_eval._classify_order_match_failure({"order_matched": True})
         )
 
+    def test_classify_match_failure_bucket(self) -> None:
+        self.assertIsNone(
+            shadow_eval._classify_match_failure_bucket({"order_matched": True})
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket({"order_matched": False}),
+            "unknown",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {"order_matched": False, "failure_reason": "no_customer_email"}
+            ),
+            "no_email",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {
+                    "order_matched": False,
+                    "failure_reason": "multiple_orders_ambiguous",
+                }
+            ),
+            "ambiguous_customer",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {
+                    "order_matched": False,
+                    "failure_reason": "no_order_candidates",
+                    "order_number_present": False,
+                }
+            ),
+            "no_order_number",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {
+                    "order_matched": False,
+                    "failure_reason": "no_order_candidates",
+                    "order_number_present": True,
+                }
+            ),
+            "no_order_candidates",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {
+                    "order_matched": False,
+                    "failure_reason": "no_order_status_candidate",
+                    "order_number_present": True,
+                }
+            ),
+            "order_match_failed",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {"order_matched": False, "failure_reason": "parse_error"}
+            ),
+            "parse_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {"order_matched": False, "failure_reason": "shopify_401"}
+            ),
+            "api_error",
+        )
+        self.assertEqual(
+            shadow_eval._classify_match_failure_bucket(
+                {"order_matched": False, "failure_reason": "something_else"}
+            ),
+            "other_failure",
+        )
+
     def test_schema_fingerprint_deterministic(self) -> None:
         payload_a = {
             "id": "t-1",
@@ -593,15 +665,29 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_build_summary_payload_rollups(self) -> None:
         ticket_results = [
-            {"channel": "email", "order_matched": True},
+            {
+                "channel": "email",
+                "order_matched": True,
+                "tracking_found": True,
+                "eta_available": True,
+                "would_reply_send": True,
+            },
             {
                 "channel": "chat",
                 "order_matched": False,
                 "failure_reason": "no_customer_email",
                 "failure_source": "order_match",
+                "order_number_present": False,
             },
             {
                 "channel": "unknown",
+                "order_matched": False,
+                "failure_reason": "no_order_candidates",
+                "failure_source": "order_match",
+                "order_number_present": True,
+            },
+            {
+                "channel": "email",
                 "order_matched": False,
                 "failure_reason": "shopify_401",
                 "failure_source": "shopify_fetch",
@@ -632,16 +718,24 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             timing=timing,
             drift=drift,
         )
-        self.assertEqual(summary["tickets_evaluated"], 4)
-        self.assertEqual(summary["email_channel_count"], 2)
+        self.assertEqual(summary["ticket_count"], 5)
+        self.assertEqual(summary["tickets_evaluated"], 5)
+        self.assertEqual(summary["email_channel_count"], 3)
         self.assertEqual(summary["chat_channel_count"], 1)
         self.assertEqual(summary["unknown_channel_count"], 1)
         self.assertEqual(summary["order_match_success_count"], 1)
-        self.assertEqual(summary["order_match_failure_count"], 3)
+        self.assertEqual(summary["order_match_failure_count"], 4)
+        self.assertEqual(summary["match_success_rate"], 0.2)
+        self.assertEqual(summary["tracking_or_eta_available_count"], 1)
+        self.assertEqual(summary["tracking_or_eta_available_rate"], 0.2)
+        self.assertTrue(summary["would_reply_send"])
         self.assertEqual(summary["failure_reasons"]["shopify_401"], 1)
         self.assertEqual(summary["failure_reasons"]["richpanel_timeout"], 1)
         self.assertEqual(summary["shopify_fetch_failures"]["shopify_401"], 1)
         self.assertEqual(summary["richpanel_fetch_failures"]["richpanel_timeout"], 1)
+        self.assertEqual(summary["match_failure_buckets"]["no_email"], 1)
+        self.assertEqual(summary["match_failure_buckets"]["no_order_candidates"], 1)
+        self.assertEqual(summary["match_failure_buckets"]["api_error"], 2)
 
     def test_build_shopify_client(self) -> None:
         client = shadow_eval._build_shopify_client(
@@ -1746,6 +1840,122 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertTrue(report_md_path.parent.exists())
             self.assertTrue(trace_path.parent.exists())
 
+    def test_resolve_report_path_variants(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            report_file = Path(tmpdir) / "report.json"
+            self.assertEqual(
+                shadow_eval._resolve_report_path(str(report_file)), report_file
+            )
+            report_file_no_ext = Path(tmpdir) / "report"
+            self.assertEqual(
+                shadow_eval._resolve_report_path(str(report_file_no_ext)),
+                report_file_no_ext.with_suffix(".json"),
+            )
+            self.assertEqual(
+                shadow_eval._resolve_report_path(tmpdir),
+                Path(tmpdir) / shadow_eval.CUSTOM_REPORT_FILENAME,
+            )
+            trailing = str(Path(tmpdir)) + os.sep
+            self.assertEqual(
+                shadow_eval._resolve_report_path(trailing),
+                Path(tmpdir) / shadow_eval.CUSTOM_REPORT_FILENAME,
+            )
+
+    def test_resolve_output_paths_with_out_dir(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            report_path, summary_path, report_md_path, trace_path = (
+                shadow_eval._resolve_output_paths(
+                    "RUN_TEST", out_path=tmpdir, summary_md_out=None
+                )
+            )
+            self.assertEqual(
+                report_path.name, shadow_eval.CUSTOM_REPORT_FILENAME
+            )
+            self.assertEqual(
+                summary_path.name, shadow_eval.CUSTOM_SUMMARY_JSON_FILENAME
+            )
+            self.assertEqual(
+                report_md_path.name, shadow_eval.CUSTOM_SUMMARY_MD_FILENAME
+            )
+            self.assertEqual(
+                trace_path.name, shadow_eval.CUSTOM_TRACE_FILENAME
+            )
+            custom_md = Path(tmpdir) / "custom.md"
+            report_path, summary_path, report_md_path, trace_path = (
+                shadow_eval._resolve_output_paths(
+                    "RUN_TEST",
+                    out_path=str(Path(tmpdir) / "report.json"),
+                    summary_md_out=str(custom_md),
+                )
+            )
+            self.assertEqual(report_md_path, custom_md)
+
+    def test_resolve_output_paths_with_summary_override(self) -> None:
+        with TemporaryDirectory() as tmpdir, mock.patch.object(
+            shadow_eval, "ROOT", Path(tmpdir)
+        ):
+            custom_md = Path(tmpdir) / "alt_summary.md"
+            report_path, summary_path, report_md_path, trace_path = (
+                shadow_eval._resolve_output_paths(
+                    "RUN_TEST", out_path=None, summary_md_out=str(custom_md)
+                )
+            )
+            self.assertEqual(report_md_path, custom_md)
+            self.assertIn("live_readonly_shadow_eval_summary_RUN_TEST.json", str(summary_path))
+
+    def test_main_records_target_metadata_with_overrides(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            report_path = Path(tmpdir) / "report.json"
+            summary_md_path = Path(tmpdir) / "summary.md"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-empty-sample",
+                "--allow-non-prod",
+                "--env",
+                "staging",
+                "--region",
+                "us-west-2",
+                "--stack-name",
+                "stack-1",
+                "--shop-domain",
+                "example.myshopify.com",
+                "--out",
+                str(report_path),
+                "--summary-md-out",
+                str(summary_md_path),
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_shopify_client",
+                return_value=SimpleNamespace(shop_domain="example.myshopify.com"),
+            ), mock.patch.object(
+                shadow_eval, "_resolve_shopify_secrets_client", return_value=None
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=[]
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            target = payload["target"]
+            self.assertEqual(target["env"], "staging")
+            self.assertEqual(target["region"], "us-west-2")
+            self.assertEqual(target["stack_name"], "stack-1")
+            self.assertEqual(target["shop_domain"], "example.myshopify.com")
+            self.assertIn("tracking_or_eta_available", payload["counts"])
+
     def test_main_uses_recent_sample_when_no_ticket_id(self) -> None:
         env = {
             "MW_ENV": "dev",
@@ -2037,6 +2247,19 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             ):
                 with self.assertRaises(SystemExit):
                     shadow_eval.main()
+
+    def test_main_rejects_conflicting_sample_size(self) -> None:
+        argv = [
+            "live_readonly_shadow_eval.py",
+            "--sample-size",
+            "1",
+            "--max-tickets",
+            "2",
+        ]
+        with mock.patch.object(sys, "argv", argv):
+            with self.assertRaises(SystemExit) as ctx:
+                shadow_eval.main()
+        self.assertIn("Use --sample-size or --max-tickets", str(ctx.exception))
 
     def test_allow_empty_sample_on_listing_failure(self) -> None:
         env = {
