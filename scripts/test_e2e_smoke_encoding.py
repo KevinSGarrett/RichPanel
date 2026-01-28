@@ -21,11 +21,9 @@ from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(SRC))
 SCRIPTS = ROOT / "scripts"
-if str(SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS))
+sys.path.insert(0, str(SCRIPTS))
 
 from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     SmokeFailure,
@@ -59,6 +57,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _build_operator_send_message_criteria,
     _append_operator_send_message_criteria_details,
     _fetch_ticket_snapshot,
+    _fetch_latest_reply_body,
     _fetch_latest_reply_hash,
     _reply_contains_tracking_url,
     _reply_contains_tracking_number_like,
@@ -747,6 +746,39 @@ class OutboundFailureClassificationTests(unittest.TestCase):
         )
         self.assertIsNone(result)
 
+    def test_outbound_failure_requires_send_message(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=False,
+            outbound_attempted=True,
+            outbound_message_count_ok=True,
+            send_message_tag_present=False,
+            require_outbound=False,
+            require_send_message=True,
+        )
+        self.assertEqual(result, "request_failed")
+
+    def test_outbound_failure_requires_outbound(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=False,
+            outbound_attempted=True,
+            outbound_message_count_ok=False,
+            send_message_tag_present=True,
+            require_outbound=True,
+            require_send_message=False,
+        )
+        self.assertEqual(result, "request_failed")
+
+    def test_outbound_failure_none_when_requirements_met(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=False,
+            outbound_attempted=True,
+            outbound_message_count_ok=True,
+            send_message_tag_present=True,
+            require_outbound=True,
+            require_send_message=True,
+        )
+        self.assertIsNone(result)
+
 
 class SendMessageStatusTests(unittest.TestCase):
     def test_send_message_status_happy_path(self) -> None:
@@ -773,6 +805,22 @@ class SendMessageStatusTests(unittest.TestCase):
             send_message_tag_present=True,
             allowlist_blocked_tag_present=False,
             latest_comment_is_operator=True,
+        )
+        self.assertIsNone(status)
+
+    def test_send_message_status_blocked_or_not_operator(self) -> None:
+        status = _evaluate_send_message_status(
+            post_tags=["mw-outbound-path-send-message"],
+            send_message_tag_present=True,
+            allowlist_blocked_tag_present=True,
+            latest_comment_is_operator=True,
+        )
+        self.assertIsNone(status)
+        status = _evaluate_send_message_status(
+            post_tags=["mw-outbound-path-send-message"],
+            send_message_tag_present=True,
+            allowlist_blocked_tag_present=False,
+            latest_comment_is_operator=False,
         )
         self.assertIsNone(status)
 
@@ -871,10 +919,29 @@ class ReplyContentFlagsTests(unittest.TestCase):
     def test_reply_contains_tracking_url(self) -> None:
         body = "Tracking link: https://tracking.example.com/track/ABC123"
         self.assertTrue(_reply_contains_tracking_url(body))
+        self.assertFalse(_reply_contains_tracking_url(None))
+
+    def test_reply_contains_tracking_url_with_expected(self) -> None:
+        body = "Link: https://tracking.example.com/track/ABC123"
+        self.assertTrue(
+            _reply_contains_tracking_url(body, expected_url="ABC123")
+        )
+        self.assertFalse(
+            _reply_contains_tracking_url("No url here", expected_url="missing")
+        )
 
     def test_reply_contains_tracking_number_like(self) -> None:
         body = "Tracking number: 1Z999AA10123456784"
         self.assertTrue(_reply_contains_tracking_number_like(body))
+        self.assertTrue(
+            _reply_contains_tracking_number_like(
+                "Code: ABC12345", expected_number="ABC12345"
+            )
+        )
+        self.assertFalse(
+            _reply_contains_tracking_number_like("Tracking: N/A")
+        )
+        self.assertFalse(_reply_contains_tracking_number_like(None))
 
     def test_reply_contains_tracking_url_false(self) -> None:
         body = "Tracking link: (not available)"
@@ -883,6 +950,8 @@ class ReplyContentFlagsTests(unittest.TestCase):
     def test_reply_contains_eta_date_iso(self) -> None:
         body = "Your order was placed on 2026-02-04. It should arrive soon."
         self.assertTrue(_reply_contains_eta_date_like(body))
+        self.assertFalse(_reply_contains_eta_date_like("No dates here"))
+        self.assertFalse(_reply_contains_eta_date_like(None))
 
     def test_collect_reply_body_candidates_and_flags(self) -> None:
         candidates = _collect_reply_body_candidates(
@@ -904,6 +973,44 @@ class ReplyContentFlagsTests(unittest.TestCase):
         self.assertTrue(contains_tracking)
         self.assertTrue(contains_tracking_number)
         self.assertTrue(contains_eta)
+
+    def test_collect_reply_body_candidates_from_drafts(self) -> None:
+        candidates = _collect_reply_body_candidates(
+            latest_reply_body="",
+            draft_replies=[{"body": "Draft body"}, "skip", {"body": "  "}],
+            computed_draft_body="Fallback",
+        )
+        self.assertEqual(candidates, ["Draft body"])
+        contains_tracking, contains_tracking_number, contains_eta = (
+            _evaluate_reply_content_flags(
+                candidates=candidates,
+                expected_tracking_url="missing",
+                expected_tracking_number="missing",
+            )
+        )
+        self.assertFalse(contains_tracking)
+        self.assertFalse(contains_tracking_number)
+        self.assertFalse(contains_eta)
+
+    def test_reply_content_flags_empty_candidates(self) -> None:
+        contains_tracking, contains_tracking_number, contains_eta = (
+            _evaluate_reply_content_flags(
+                candidates=[],
+                expected_tracking_url=None,
+                expected_tracking_number=None,
+            )
+        )
+        self.assertFalse(contains_tracking)
+        self.assertFalse(contains_tracking_number)
+        self.assertFalse(contains_eta)
+
+    def test_collect_reply_body_candidates_prefers_latest(self) -> None:
+        candidates = _collect_reply_body_candidates(
+            latest_reply_body="Latest body",
+            draft_replies="not-a-list",  # type: ignore[arg-type]
+            computed_draft_body="Fallback body",
+        )
+        self.assertEqual(candidates, ["Latest body"])
 
 
 class AllowlistSkipTests(unittest.TestCase):
@@ -1353,6 +1460,40 @@ class TicketSnapshotTests(unittest.TestCase):
         self.assertEqual(result.get("last_message_source"), "unknown")
         self.assertIsNone(result.get("operator_reply_present"))
         self.assertIsNone(result.get("latest_comment_is_operator"))
+
+    def test_fetch_latest_reply_body_handles_non_dict(self) -> None:
+        class _Resp:
+            def __init__(self, payload: Any) -> None:
+                self._payload = payload
+
+            def json(self) -> Any:
+                return self._payload
+
+        class _Exec:
+            def __init__(self, payload: Any) -> None:
+                self.payload = payload
+
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp(self.payload)
+
+        result = _fetch_latest_reply_body(
+            cast(Any, _Exec(["not", "a", "dict"])),
+            "ticket-4",
+            allow_network=True,
+        )
+        self.assertIsNone(result)
+
+        payload = {
+            "comments": [
+                {"is_operator": True, "body": "Reply body"},
+            ]
+        }
+        result = _fetch_latest_reply_body(
+            cast(Any, _Exec(payload)),
+            "ticket-5",
+            allow_network=True,
+        )
+        self.assertEqual(result, "Reply body")
 
     def test_fetch_ticket_snapshot_operator_reply(self) -> None:
         payload = {
@@ -2564,11 +2705,14 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(CriteriaTests))
     suite.addTests(loader.loadTestsFromTestCase(OutboundEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(OutboundAttemptedTests))
+    suite.addTests(loader.loadTestsFromTestCase(OutboundFailureClassificationTests))
+    suite.addTests(loader.loadTestsFromTestCase(SendMessageStatusTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorReplyEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(SendMessageEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(AllowlistEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(SupportRoutingTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(ReplyContentFlagsTests))
     suite.addTests(loader.loadTestsFromTestCase(AllowlistSkipTests))
     suite.addTests(loader.loadTestsFromTestCase(SkipProofPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))

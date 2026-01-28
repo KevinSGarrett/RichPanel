@@ -73,8 +73,10 @@ def _redact_command(cmd: List[str]) -> str:
     return " ".join(redacted)
 
 
-def _run_command(cmd: List[str], *, env: Optional[Dict[str, str]] = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, text=True, capture_output=True, env=env)
+def _run_command(
+    cmd: List[str], *, env: Optional[Dict[str, str]] = None
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, text=True, capture_output=True, env=env, check=False)
 
 
 def _extract_ticket_ref(output: str) -> Dict[str, Optional[str]]:
@@ -106,6 +108,7 @@ def _git_diffstat(root: Path) -> str:
             ["git", "-C", str(root), "diff", "--stat"],
             text=True,
             capture_output=True,
+            check=False,
         )
     except FileNotFoundError:
         return "(git not available)"
@@ -327,7 +330,7 @@ def main() -> int:
         tried_refs: set[str] = set()
         last_failure: Optional[RuntimeError] = None
 
-        for attempt in range(1, max_attempts + 1):
+        for _attempt in range(1, max_attempts + 1):
             if not explicit_ticket:
                 ticket_number = None
                 ticket_id = None
@@ -483,5 +486,5 @@ def main() -> int:
     return 1 if error else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     raise SystemExit(main())
