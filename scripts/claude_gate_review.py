@@ -1499,6 +1499,7 @@ def main() -> int:
     lens_names = [name for name, _ in lenses]
     lens_text = _build_lens_prompt(lenses)
 
+    pr_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     diff_raw = _fetch_raw(pr_url, github_token, accept="application/vnd.github.v3.diff").decode("utf-8", "replace")
     diff_text = _truncate(diff_raw, args.max_diff_chars)
 
