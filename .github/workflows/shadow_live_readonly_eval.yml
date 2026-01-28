@@ -146,6 +146,9 @@ jobs:
             echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
             exit 2
           fi
+          if [[ "${INPUT_TICKET_IDS:-}" == "__none__" ]]; then
+            INPUT_TICKET_IDS=""
+          fi
           TICKET_ARGS=()
           if [ -n "${INPUT_TICKET_IDS:-}" ]; then
             IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"
