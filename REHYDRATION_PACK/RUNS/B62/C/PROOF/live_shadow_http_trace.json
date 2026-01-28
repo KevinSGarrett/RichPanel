@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-28T17:20:27.729185+00:00",
+  "generated_at": "2026-01-28T18:11:43.263481+00:00",
   "entries": [
     {
       "method": "GET",
@@ -681,12 +681,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:2a7ecc5e705d",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/conversations/redacted:2a7ecc5e705d",
       "service": "richpanel",
       "source": "urllib"
@@ -957,12 +951,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:4966ad2d08e3",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/conversations/redacted:4966ad2d08e3",
       "service": "richpanel",
       "source": "urllib"
@@ -1090,12 +1078,6 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:34de44a65a2f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:34de44a65a2f",
       "service": "richpanel",
       "source": "urllib"
     },

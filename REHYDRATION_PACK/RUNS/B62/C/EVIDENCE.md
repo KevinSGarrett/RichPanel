@@ -16,7 +16,7 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
   -f shopify-token-source=api `
   -f shop-domain=<redacted>.myshopify.com
 
-gh run download 21448350416 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval
+gh run download 21450058346 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval
 ```
 
 ## Attempted run (AWS Secrets Manager; failed)
@@ -30,7 +30,7 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 ```
 - Failure: `ResourceNotFoundException` for `rp-mw/prod/*` secrets (run `21447011102`).
 
-## Key metrics (live report `RUN_20260128_1719Z`)
+## Key metrics (live report `RUN_20260128_1811Z`)
 - ticket_count: 17 (sample_mode: explicit)
 - match_success_rate: 100.0%
 - tracking_or_eta_available_rate: 100.0%
@@ -49,16 +49,16 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 - Trace file: `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_http_trace.json`
 
 ## Claude gate (real run)
-- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21449231106
+- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21449960554
 - Audit artifact: `REHYDRATION_PACK/RUNS/B62/C/PROOF/claude_gate_audit.json`
 - model_used: `claude-opus-4-5-20251101`
-- response_id: `msg_01NdjPqqQCr39r3khM1D8M76`
-- request_id: `req_011CXaCAQ75ErUshhqEJu15h`
-- usage: input_tokens=26451; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+- response_id: `msg_01DghXpcYPKLEKd4yWqtWaW5`
+- request_id: `req_011CXaDsRVfvgNpjep1tU5mf`
+- usage: input_tokens=26343; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ## B61/C merge status
 - PR #197 (B61/C) merged: https://github.com/KevinSGarrett/RichPanel/pull/197
 
 ## Notes
-- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21449213856
+- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21450058346
 - Claude gate initial runs failed due to PR metadata fetch; fixed via GraphQL fallback in `scripts/claude_gate_review.py`.

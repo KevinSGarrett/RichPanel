@@ -1,7 +1,7 @@
 # Live Read-Only Shadow Eval Report
 
-- Run ID: `RUN_20260128_1719Z`
-- Generated (UTC): 2026-01-28T17:20:27.730611+00:00
+- Run ID: `RUN_20260128_1811Z`
+- Generated (UTC): 2026-01-28T18:11:43.264869+00:00
 - Environment: `prod`
 - Region: `us-east-2`
 - Stack name: `n/a`
@@ -62,10 +62,10 @@
   - ⚠️ Schema drift (52.9%) exceeds threshold (20.0%)
 
 ## HTTP Trace Summary
-- Total requests: 193
-- Methods: {"GET": 193}
-- Services: {"richpanel": 173, "shopify": 20}
-- Sources: {"urllib": 193}
+- Total requests: 190
+- Methods: {"GET": 190}
+- Services: {"richpanel": 170, "shopify": 20}
+- Sources: {"urllib": 190}
 - AWS operations: {}
 - AWS missing operations: 0
 - Allowed methods only: True

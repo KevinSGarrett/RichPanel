@@ -2,7 +2,7 @@
 
 ## Metadata
 - Date (UTC): 2026-01-28
-- Run ID: `RUN_20260128_1719Z`
+- Run ID: `RUN_20260128_1811Z`
 - Environment: `prod` (read-only)
 - Status: `WARN` (schema drift alert; gate blocked)
 - Workspace: `C:\RichPanel_GIT`
@@ -27,5 +27,5 @@ Move live read-only shadow validation into a repeatable report + CI gate with re
 - `REHYDRATION_PACK/RUNS/B62/C/PROOF/generate_sample_report.py`
 
 ## Notes
-- Run executed via `Shadow Live Read-Only Eval` workflow (run `21448350416`).
+- Run executed via `Shadow Live Read-Only Eval` workflow (run `21450058346`).
 - `RICHPANEL_OUTBOUND_ENABLED=false` enforced in workflow and script.
