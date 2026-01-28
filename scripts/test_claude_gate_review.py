@@ -1283,7 +1283,9 @@ Let me know if you need more."""
             self.assertIn("model_used=claude-sonnet-4-5-20250929", content)
             self.assertIn("response_model=claude-opus-4-5-20251101", content)
             self.assertIn("request_id=req_test123", content)
+            self.assertIn("anthropic_request_id=req_test123", content)
             self.assertIn("response_id=msg_test123", content)
+            self.assertIn("claude_response_id=msg_test123", content)
         finally:
             os.environ.pop("GITHUB_OUTPUT", None)
             os.environ.pop("GITHUB_TOKEN", None)
@@ -1549,6 +1551,10 @@ Let me know if you need more."""
             self.assertIn("Model used: claude-opus-4-5-20251101", content)
             self.assertIn("Anthropic Request ID: req_123", content)
             self.assertIn("Anthropic Response ID: msg_123", content)
+            self.assertIn("Copy/paste for PR description:", content)
+            self.assertIn('"model_used": "claude-opus-4-5-20251101"', content)
+            self.assertIn('"anthropic_request_id": "req_123"', content)
+            self.assertIn('"claude_response_id": "msg_123"', content)
             self.assertIn("Warning: note", content)
         finally:
             os.environ.pop("GITHUB_STEP_SUMMARY", None)
@@ -1836,6 +1842,11 @@ Let me know if you need more."""
             self.assertIn("Lenses applied:", comment_body)
             self.assertIn("ORDER_STATUS_SAFETY", comment_body)
             self.assertIn(claude_gate_review.STATE_MARKER, comment_body)
+            with open(audit_path, "r", encoding="utf-8") as handle:
+                audit_payload = json.load(handle)
+            self.assertEqual(audit_payload.get("model_used"), "claude-opus-4-5-20251101")
+            self.assertEqual(audit_payload.get("anthropic_request_id"), "req_structured")
+            self.assertEqual(audit_payload.get("claude_response_id"), "msg_structured")
         finally:
             for var in (
                 "GITHUB_OUTPUT",

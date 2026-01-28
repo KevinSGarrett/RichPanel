@@ -169,6 +169,21 @@ def _build_step_summary(
     if warnings:
         for warning in warnings:
             lines.append(f"Warning: {warning}")
+    if model_used and request_id and response_id:
+        lines.append("")
+        lines.append("Copy/paste for PR description:")
+        lines.append("```json")
+        lines.append(
+            json.dumps(
+                {
+                    "model_used": model_used,
+                    "anthropic_request_id": request_id,
+                    "claude_response_id": response_id,
+                },
+                indent=2,
+            )
+        )
+        lines.append("```")
     return "\n".join(lines) + "\n"
 
 
@@ -1713,8 +1728,11 @@ def main() -> int:
         "pr": pr_number,
         "risk_label": risk,
         "model": model_used,
+        "model_used": model_used,
         "response_id": response_id,
+        "claude_response_id": response_id,
         "request_id": request_id,
+        "anthropic_request_id": request_id,
         "usage": usage,
         "mode": mode,
     }
@@ -1730,7 +1748,9 @@ def main() -> int:
     _write_output("model_used", model_used)
     _write_output("model", model_used)
     _write_output("risk", risk)
+    _write_output("claude_response_id", response_id)
     _write_output("response_id", response_id)
+    _write_output("anthropic_request_id", request_id)
     _write_output("request_id", request_id)
     _write_output("usage_input_tokens", str(input_tokens))
     _write_output("usage_output_tokens", str(output_tokens))
