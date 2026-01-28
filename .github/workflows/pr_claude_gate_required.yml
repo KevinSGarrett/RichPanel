@@ -76,18 +76,83 @@ jobs:
 
       - name: Write Claude gate proof summary
         if: steps.claude_gate.outcome == 'success'
+        env:
+          CLAUDE_MODE: ${{ steps.claude_gate.outputs.mode }}
+          CLAUDE_RISK: ${{ steps.claude_gate.outputs.risk }}
+          CLAUDE_MODEL_USED: ${{ steps.claude_gate.outputs.model_used }}
+          CLAUDE_MODEL_ALIAS: ${{ steps.claude_gate.outputs.model }}
+          CLAUDE_REQUEST_ID: ${{ steps.claude_gate.outputs.anthropic_request_id || steps.claude_gate.outputs.request_id }}
+          CLAUDE_RESPONSE_ID: ${{ steps.claude_gate.outputs.claude_response_id || steps.claude_gate.outputs.response_id }}
+          CLAUDE_AUDIT_PATH: ${{ steps.claude_gate.outputs.audit_path }}
         run: |
           set -euo pipefail
-          {
-            echo "## Claude Gate Proof"
-            echo ""
-            echo "- Mode: ${{ steps.claude_gate.outputs.mode }}"
-            echo "- Risk label: ${{ steps.claude_gate.outputs.risk }}"
-            echo "- Model used: ${{ steps.claude_gate.outputs.model_used }}"
-            echo "- Request ID: ${{ steps.claude_gate.outputs.request_id }}"
-            echo "- Response ID: ${{ steps.claude_gate.outputs.response_id }}"
-            echo "- Timestamp (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          } >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime
+
+          def coalesce(*values):
+              for value in values:
+                  if value:
+                      return value
+              return ""
+
+          audit_path = os.environ.get("CLAUDE_AUDIT_PATH") or "claude_gate_audit.json"
+          audit = {}
+          if os.path.exists(audit_path):
+              try:
+                  with open(audit_path, "r", encoding="utf-8") as handle:
+                      audit = json.load(handle) or {}
+              except Exception:
+                  audit = {}
+
+          def audit_get(*keys):
+              for key in keys:
+                  value = audit.get(key)
+                  if value:
+                      return value
+              return ""
+
+          model_used = coalesce(
+              os.environ.get("CLAUDE_MODEL_USED", ""),
+              os.environ.get("CLAUDE_MODEL_ALIAS", ""),
+              audit_get("model_used", "model"),
+          )
+          request_id = coalesce(
+              os.environ.get("CLAUDE_REQUEST_ID", ""),
+              audit_get("anthropic_request_id", "request_id"),
+          )
+          response_id = coalesce(
+              os.environ.get("CLAUDE_RESPONSE_ID", ""),
+              audit_get("claude_response_id", "response_id"),
+          )
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as handle:
+                  handle.write("## Claude Gate Proof\n\n")
+                  handle.write(f"- Mode: {os.environ.get('CLAUDE_MODE', '')}\n")
+                  handle.write(f"- Risk label: {os.environ.get('CLAUDE_RISK', '')}\n")
+                  handle.write(f"- Model used: {model_used}\n")
+                  handle.write(f"- Anthropic request id: {request_id}\n")
+                  handle.write(f"- Claude response id: {response_id}\n")
+                  handle.write(
+                      f"- Timestamp (UTC): {datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}\n\n"
+                  )
+                  handle.write("Copy/paste for PR description:\n\n")
+                  handle.write("```json\n")
+                  handle.write(
+                      json.dumps(
+                          {
+                              "model_used": model_used,
+                              "anthropic_request_id": request_id,
+                              "claude_response_id": response_id,
+                          },
+                          indent=2,
+                      )
+                  )
+                  handle.write("\n```\n")
+          PY
 
       - name: Post Claude review comment
         if: steps.claude_gate.outcome == 'success' && steps.claude_gate.outputs.skip != 'true'
@@ -109,34 +174,95 @@ jobs:
 
       - name: Enforce Claude gate verdict
         if: always()
+        env:
+          CLAUDE_OUTCOME: ${{ steps.claude_gate.outcome }}
+          CLAUDE_MODE: ${{ steps.claude_gate.outputs.mode }}
+          CLAUDE_SKIP: ${{ steps.claude_gate.outputs.skip }}
+          CLAUDE_VERDICT: ${{ steps.claude_gate.outputs.verdict }}
+          CLAUDE_MODEL_USED: ${{ steps.claude_gate.outputs.model_used }}
+          CLAUDE_MODEL_ALIAS: ${{ steps.claude_gate.outputs.model }}
+          CLAUDE_REQUEST_ID: ${{ steps.claude_gate.outputs.anthropic_request_id || steps.claude_gate.outputs.request_id }}
+          CLAUDE_RESPONSE_ID: ${{ steps.claude_gate.outputs.claude_response_id || steps.claude_gate.outputs.response_id }}
+          CLAUDE_USAGE_INPUT: ${{ steps.claude_gate.outputs.usage_input_tokens }}
+          CLAUDE_USAGE_OUTPUT: ${{ steps.claude_gate.outputs.usage_output_tokens }}
+          CLAUDE_AUDIT_PATH: ${{ steps.claude_gate.outputs.audit_path }}
         run: |
           set -euo pipefail
-          echo "Claude gate status: outcome=${{ steps.claude_gate.outcome }}, mode=${{ steps.claude_gate.outputs.mode }}, skip=${{ steps.claude_gate.outputs.skip }}, verdict=${{ steps.claude_gate.outputs.verdict }}, model_used=${{ steps.claude_gate.outputs.model_used }}, response_id=${{ steps.claude_gate.outputs.response_id }}, request_id=${{ steps.claude_gate.outputs.request_id }}, usage_input=${{ steps.claude_gate.outputs.usage_input_tokens }}, usage_output=${{ steps.claude_gate.outputs.usage_output_tokens }}"
-          if [ "${{ steps.claude_gate.outcome }}" != "success" ]; then
-            echo "::error::Claude gate failed to run. Check logs above for details."
-            exit 1
-          fi
-          if [ "${{ steps.claude_gate.outputs.skip }}" != "false" ]; then
-            echo "::error::Claude gate was skipped or did not report skip=false. This workflow requires a real Anthropic API call."
-            exit 1
-          fi
-          if [ -z "${{ steps.claude_gate.outputs.response_id }}" ]; then
-            echo "::error::Claude gate did not return an Anthropic response id."
-            exit 1
-          fi
-          if [ -z "${{ steps.claude_gate.outputs.request_id }}" ]; then
-            echo "::error::Claude gate did not return an Anthropic request id."
-            exit 1
-          fi
-          if [ -z "${{ steps.claude_gate.outputs.model_used }}" ]; then
-            echo "::error::Claude gate did not report model_used."
-            exit 1
-          fi
-          if [ -z "${{ steps.claude_gate.outputs.usage_input_tokens }}" ] || [ -z "${{ steps.claude_gate.outputs.usage_output_tokens }}" ]; then
-            echo "::error::Claude gate did not return token usage."
-            exit 1
-          fi
-          if [ "${{ steps.claude_gate.outputs.verdict }}" != "PASS" ]; then
-            echo "::error::Claude gate verdict FAIL."
-            exit 1
-          fi
+          python - <<'PY'
+          import json
+          import os
+          import sys
+
+          def coalesce(*values):
+              for value in values:
+                  if value:
+                      return value
+              return ""
+
+          def fail(message: str) -> None:
+              print(f"::error::{message}")
+              sys.exit(1)
+
+          audit_path = os.environ.get("CLAUDE_AUDIT_PATH") or "claude_gate_audit.json"
+          audit = {}
+          if os.path.exists(audit_path):
+              try:
+                  with open(audit_path, "r", encoding="utf-8") as handle:
+                      audit = json.load(handle) or {}
+              except Exception as exc:
+                  fail(f"Failed to read Claude gate audit file: {exc}")
+
+          def audit_get(*keys):
+              for key in keys:
+                  value = audit.get(key)
+                  if value:
+                      return value
+              return ""
+
+          outcome = os.environ.get("CLAUDE_OUTCOME", "")
+          mode = os.environ.get("CLAUDE_MODE", "")
+          skip = os.environ.get("CLAUDE_SKIP", "")
+          verdict = os.environ.get("CLAUDE_VERDICT", "")
+          usage_in = os.environ.get("CLAUDE_USAGE_INPUT", "")
+          usage_out = os.environ.get("CLAUDE_USAGE_OUTPUT", "")
+          model_used = coalesce(
+              os.environ.get("CLAUDE_MODEL_USED", ""),
+              os.environ.get("CLAUDE_MODEL_ALIAS", ""),
+              audit_get("model_used", "model"),
+          )
+          request_id = coalesce(
+              os.environ.get("CLAUDE_REQUEST_ID", ""),
+              audit_get("anthropic_request_id", "request_id"),
+          )
+          response_id = coalesce(
+              os.environ.get("CLAUDE_RESPONSE_ID", ""),
+              audit_get("claude_response_id", "response_id"),
+          )
+
+          print(
+              "Claude gate status: "
+              f"outcome={outcome}, mode={mode}, skip={skip}, verdict={verdict}, "
+              f"model_used={model_used}, response_id={response_id}, request_id={request_id}, "
+              f"usage_input={usage_in}, usage_output={usage_out}"
+          )
+
+          if outcome != "success":
+              fail("Claude gate failed to run. Check logs above for details.")
+          if skip != "false":
+              fail(
+                  "Claude gate was skipped or did not report skip=false. "
+                  "This workflow requires a real Anthropic API call."
+              )
+          if not response_id:
+              fail("Claude gate did not return an Anthropic response id.")
+          if not request_id:
+              fail("Claude gate did not return an Anthropic request id.")
+          if not model_used:
+              fail("Claude gate did not report model_used.")
+          if not usage_in or not usage_out:
+              fail("Claude gate did not return token usage.")
+          if verdict != "PASS":
+              fail("Claude gate verdict FAIL.")
+
+          print(f"Claude gate OK | model={model_used} | req_id={request_id} | msg_id={response_id}")
+          PY
