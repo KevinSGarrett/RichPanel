@@ -1,0 +1,18 @@
+# B62/C Changes
+
+## Code
+- Enforced `RICHPANEL_OUTBOUND_ENABLED=false` as a required guard in `scripts/live_readonly_shadow_eval.py`.
+- Added `--max-tickets`, `--env`, `--region`, `--stack-name`, `--out`, and `--summary-md-out` to make runs reproducible.
+- Added match failure buckets, tracking/ETA availability rate, and `would_reply_send` to the JSON report schema.
+- Added stable report filenames (`live_shadow_report.json`, `live_shadow_summary.md`) when `--out` is used.
+
+## Tests
+- Updated `scripts/test_live_readonly_shadow_eval.py` to include outbound-disabled flags.
+
+## CI / Workflows
+- Updated `.github/workflows/shadow_live_readonly_eval.yml` to enforce outbound off, use `--max-tickets`,
+  and emit `live_shadow_report.json` + `live_shadow_summary.md`.
+
+## Docs / Artifacts
+- Updated `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md` with new outputs, required flags, and gate criteria.
+- Added B62/C proof artifacts under `REHYDRATION_PACK/RUNS/B62/C/PROOF/`.

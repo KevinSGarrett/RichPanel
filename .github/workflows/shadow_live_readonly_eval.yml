@@ -18,6 +18,10 @@ on:
         description: "Shopify shop domain (e.g. shop.myshopify.com)"
         required: true
         type: string
+      stack-name:
+        description: "Optional stack name to record in the report"
+        required: false
+        type: string
       use-aws-secrets:
         description: "Resolve AWS Secrets Manager IDs for API keys"
         required: false
@@ -41,7 +45,7 @@ jobs:
       ENVIRONMENT: prod
       RICHPANEL_ENV: prod
       MW_ALLOW_NETWORK_READS: "true"
-      RICHPANEL_OUTBOUND_ENABLED: "true"
+      RICHPANEL_OUTBOUND_ENABLED: "false"
       RICHPANEL_WRITE_DISABLED: "true"
       RICHPANEL_READ_ONLY: "true"
       SHOPIFY_OUTBOUND_ENABLED: "true"
@@ -135,6 +139,7 @@ jobs:
           INPUT_SAMPLE_SIZE: ${{ inputs.sample-size || '10' }}
           INPUT_TICKET_IDS: ${{ inputs.ticket-ids || secrets.PROD_RICHPANEL_TICKET_IDS || '' }}
           INPUT_SHOPIFY_PROBE: ${{ inputs.shopify-probe || 'false' }}
+          INPUT_STACK_NAME: ${{ inputs.stack-name || '' }}
         run: |
           set -euo pipefail
           if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
@@ -158,7 +163,7 @@ jobs:
               echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"
               exit 2
             fi
-            SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
+            SAMPLE_ARGS=(--max-tickets "${INPUT_SAMPLE_SIZE}")
           fi
 
           PROBE_ARGS=()
@@ -166,10 +171,20 @@ jobs:
             PROBE_ARGS=(--shopify-probe)
           fi
 
+          STACK_ARGS=()
+          if [ -n "${INPUT_STACK_NAME:-}" ]; then
+            STACK_ARGS=(--stack-name "${INPUT_STACK_NAME}")
+          fi
+
           python scripts/live_readonly_shadow_eval.py \
+            --env prod \
+            --region "${AWS_REGION}" \
             "${SAMPLE_ARGS[@]}" \
             "${TICKET_ARGS[@]}" \
             "${PROBE_ARGS[@]}" \
+            "${STACK_ARGS[@]}" \
+            --out artifacts/readonly_shadow/live_shadow_report.json \
+            --summary-md-out artifacts/readonly_shadow/live_shadow_summary.md \
             --allow-empty-sample
 
       - name: Upload shadow eval artifacts

@@ -88,6 +88,7 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "false",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with mock.patch.dict(os.environ, env, clear=True):
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "123"]
@@ -383,6 +384,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with mock.patch.dict(os.environ, env, clear=True):
             applied = shadow_eval._require_env_flags("test")
@@ -1750,6 +1752,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         plan = SimpleNamespace(
             actions=[
@@ -1775,6 +1778,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -1786,8 +1790,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -1817,6 +1821,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         # Plan with NO order_summary to verify order_matched=False in non-explicit mode
         plan = SimpleNamespace(
@@ -1835,6 +1840,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             lookup_calls = []
 
@@ -1852,8 +1858,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -1881,6 +1887,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         plan = SimpleNamespace(
@@ -1911,6 +1918,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             captured: dict[str, dict] = {}
             def _capture_event(payload: dict) -> SimpleNamespace:
@@ -1929,8 +1937,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(artifact_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(artifact_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", side_effect=_capture_event
             ), mock.patch.object(
@@ -1978,6 +1986,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -1985,13 +1994,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--allow-non-prod"]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "_fetch_recent_ticket_refs", return_value=[]
             ):
@@ -2004,6 +2014,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2011,13 +2022,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--sample-size", "1", "--allow-non-prod"]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval,
                 "_fetch_recent_ticket_refs",
@@ -2032,6 +2044,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2053,8 +2066,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval,
                 "_fetch_recent_ticket_refs",
@@ -2074,6 +2087,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2081,6 +2095,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1", "--allow-non-prod"]
             shopify_error = shadow_eval.ShopifyRequestError(
                 "boom", response=SimpleNamespace(status_code=401)
@@ -2089,8 +2104,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -2109,6 +2124,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2116,6 +2132,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1", "--allow-non-prod"]
             richpanel_error = shadow_eval.RichpanelRequestError(
                 "boom", response=SimpleNamespace(status_code=401)
@@ -2124,8 +2141,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "_fetch_ticket", side_effect=richpanel_error
             ):
@@ -2140,6 +2157,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -2153,13 +2171,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--sample-size", "2", "--allow-non-prod"]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
             ), mock.patch.object(
@@ -2183,6 +2202,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2190,13 +2210,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--sample-size", "1", "--allow-non-prod"]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
             ), mock.patch.object(
@@ -2213,6 +2234,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
             os.environ, env, clear=True
@@ -2220,13 +2242,14 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "t-1"]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(
                 shadow_eval, "_build_richpanel_client", return_value=_StubClient()
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(report_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "_fetch_ticket", side_effect=SystemExit("boom")
             ):
@@ -2239,6 +2262,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -2247,6 +2271,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -2269,8 +2294,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(artifact_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(artifact_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -2294,6 +2319,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -2309,6 +2335,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -2321,8 +2348,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(artifact_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(artifact_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -2346,6 +2373,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         plan = SimpleNamespace(
             actions=[],
@@ -2361,6 +2389,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -2373,8 +2402,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(artifact_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(artifact_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(
@@ -2400,6 +2429,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
@@ -2408,6 +2438,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
             report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
             stub_client = _StubClient()
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -2430,8 +2461,8 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 shadow_eval, "_build_richpanel_client", return_value=stub_client
             ), mock.patch.object(
                 shadow_eval,
-                "_build_report_paths",
-                return_value=(artifact_path, report_md_path, trace_path),
+                "_resolve_output_paths",
+                return_value=(artifact_path, summary_path, report_md_path, trace_path),
             ), mock.patch.object(
                 shadow_eval, "normalize_event", return_value=SimpleNamespace()
             ), mock.patch.object(

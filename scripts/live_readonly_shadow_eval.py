@@ -75,6 +75,7 @@ REQUIRED_FLAGS = {
     "MW_ALLOW_NETWORK_READS": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
     "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false",
 }
 
 ALLOWED_PROD_ENVS = {"prod", "production"}
@@ -82,6 +83,28 @@ DEFAULT_SAMPLE_SIZE = 10
 DRIFT_WARNING_THRESHOLD = 0.2
 SUMMARY_TOP_FAILURE_REASONS = 5
 SCHEMA_KEY_DEPTH_LIMIT = 5
+CUSTOM_REPORT_FILENAME = "live_shadow_report.json"
+CUSTOM_SUMMARY_JSON_FILENAME = "live_shadow_summary.json"
+CUSTOM_SUMMARY_MD_FILENAME = "live_shadow_summary.md"
+CUSTOM_TRACE_FILENAME = "live_shadow_http_trace.json"
+SEND_ACTION_TYPES = {
+    "send_message",
+    "send_ticket_reply",
+    "send_reply",
+    "send_message_failed",
+    "send_message_operator_missing",
+}
+MATCH_FAILURE_BUCKET_KEYS = (
+    "no_email",
+    "no_order_number",
+    "ambiguous_customer",
+    "no_order_candidates",
+    "order_match_failed",
+    "parse_error",
+    "api_error",
+    "other_failure",
+    "unknown",
+)
 CHAT_CHANNELS = {
     "chat",
     "live_chat",
@@ -427,6 +450,35 @@ def _classify_failure_reason_bucket(result: Dict[str, Any]) -> Optional[str]:
     return "other_failure"
 
 
+def _classify_match_failure_bucket(result: Dict[str, Any]) -> Optional[str]:
+    """
+    Classify match failures into PII-safe, reviewer-friendly buckets.
+    Returns bucket name or None if no match failure.
+    """
+    if result.get("order_matched"):
+        return None
+    failure_reason = _normalize_optional_text(result.get("failure_reason")).lower()
+    if not failure_reason:
+        return "unknown"
+    if "no_customer_email" in failure_reason or "no_email" in failure_reason:
+        return "no_email"
+    if "multiple_orders_ambiguous" in failure_reason or "ambiguous" in failure_reason:
+        return "ambiguous_customer"
+    if "no_order_candidates" in failure_reason:
+        if not result.get("order_number_present"):
+            return "no_order_number"
+        return "no_order_candidates"
+    if "no_order_status_candidate" in failure_reason or "order_match_failed" in failure_reason:
+        if not result.get("order_number_present"):
+            return "no_order_number"
+        return "order_match_failed"
+    if "parse" in failure_reason:
+        return "parse_error"
+    if "shopify" in failure_reason or "richpanel" in failure_reason:
+        return "api_error"
+    return "other_failure"
+
+
 def _build_drift_watch(
     *,
     match_rate: float,
@@ -539,6 +591,9 @@ def _build_summary_payload(
     route_decisions: Counter[str] = Counter()
     match_methods: Counter[str] = Counter()
     failure_buckets: Counter[str] = Counter()
+    match_failure_buckets: Counter[str] = Counter()
+    tracking_or_eta_available_count = 0
+    would_reply_send = False
     
     for result in ticket_results:
         # Existing failure tracking
@@ -563,6 +618,18 @@ def _build_summary_payload(
         failure_bucket = _classify_failure_reason_bucket(result)
         if failure_bucket:
             failure_buckets[failure_bucket] += 1
+
+        # New: match failure bucket with reviewer-friendly labels
+        match_failure_bucket = _classify_match_failure_bucket(result)
+        if match_failure_bucket:
+            match_failure_buckets[match_failure_bucket] += 1
+
+        # Tracking/ETA availability
+        if result.get("tracking_found") or result.get("eta_available"):
+            tracking_or_eta_available_count += 1
+
+        if result.get("would_reply_send"):
+            would_reply_send = True
     
     top_failure_reasons = [
         {"reason": reason, "count": count}
@@ -572,6 +639,9 @@ def _build_summary_payload(
     ]
     success_rate = (
         order_match_success_count / tickets_evaluated if tickets_evaluated else 0.0
+    )
+    tracking_or_eta_rate = (
+        tracking_or_eta_available_count / tickets_evaluated if tickets_evaluated else 0.0
     )
     
     # Calculate percentages for new metrics
@@ -583,12 +653,19 @@ def _build_summary_payload(
         method: round(count / tickets_evaluated, 4) if tickets_evaluated else 0.0
         for method, count in match_methods.items()
     }
+    match_failure_payload: Dict[str, int] = {
+        key: match_failure_buckets.get(key, 0) for key in MATCH_FAILURE_BUCKET_KEYS
+    }
+    for bucket, count in match_failure_buckets.items():
+        if bucket not in match_failure_payload:
+            match_failure_payload[bucket] = count
     
     warnings = sorted({str(item) for item in (run_warnings or []) if item})
     return {
         "run_id": run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_size_requested": tickets_requested,
+        "ticket_count": tickets_evaluated,
         "tickets_evaluated": tickets_evaluated,
         "email_channel_count": channel_counts.get("email", 0),
         "chat_channel_count": channel_counts.get("chat", 0),
@@ -596,6 +673,10 @@ def _build_summary_payload(
         "order_match_success_count": order_match_success_count,
         "order_match_failure_count": order_match_failure_count,
         "order_match_success_rate": round(success_rate, 4),
+        "match_success_rate": round(success_rate, 4),
+        "tracking_or_eta_available_count": tracking_or_eta_available_count,
+        "tracking_or_eta_available_rate": round(tracking_or_eta_rate, 4),
+        "would_reply_send": bool(would_reply_send),
         # B61/C: Route decision distribution
         "route_decisions": dict(route_decisions),
         "route_decision_percentages": route_decision_pcts,
@@ -604,6 +685,7 @@ def _build_summary_payload(
         "match_method_percentages": match_method_pcts,
         # B61/C: Failure buckets (PII-safe categorization)
         "failure_buckets": dict(failure_buckets),
+        "match_failure_buckets": match_failure_payload,
         "top_failure_reasons": top_failure_reasons,
         "failure_reasons": dict(failure_reasons),
         "richpanel_fetch_failures": dict(richpanel_fetch_failures),
@@ -1346,6 +1428,43 @@ def _build_report_paths(run_id: str) -> Tuple[Path, Path, Path]:
     return json_path, md_path, trace_path
 
 
+def _resolve_report_path(out_path: str) -> Path:
+    candidate = Path(out_path)
+    if candidate.suffix.lower() == ".json":
+        return candidate
+    if candidate.exists() and candidate.is_dir():
+        return candidate / CUSTOM_REPORT_FILENAME
+    if str(out_path).endswith(("/", "\\")):
+        return candidate / CUSTOM_REPORT_FILENAME
+    return candidate.with_suffix(".json")
+
+
+def _resolve_output_paths(
+    run_id: str,
+    *,
+    out_path: Optional[str],
+    summary_md_out: Optional[str],
+) -> Tuple[Path, Path, Path, Path]:
+    if out_path:
+        report_path = _resolve_report_path(out_path)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        summary_path = report_path.parent / CUSTOM_SUMMARY_JSON_FILENAME
+        trace_path = report_path.parent / CUSTOM_TRACE_FILENAME
+        if summary_md_out:
+            report_md_path = Path(summary_md_out)
+        else:
+            report_md_path = report_path.parent / CUSTOM_SUMMARY_MD_FILENAME
+        report_md_path.parent.mkdir(parents=True, exist_ok=True)
+        return report_path, summary_path, report_md_path, trace_path
+
+    report_path, report_md_path, trace_path = _build_report_paths(run_id)
+    if summary_md_out:
+        report_md_path = Path(summary_md_out)
+        report_md_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path = report_path.parent / f"live_readonly_shadow_eval_summary_{run_id}.json"
+    return report_path, summary_path, report_md_path, trace_path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run live read-only shadow evaluation.")
     parser.add_argument(
@@ -1356,8 +1475,13 @@ def main() -> int:
     parser.add_argument(
         "--sample-size",
         type=int,
-        default=DEFAULT_SAMPLE_SIZE,
+        default=None,
         help="Number of recent tickets to sample when --ticket-id is not provided",
+    )
+    parser.add_argument(
+        "--max-tickets",
+        type=int,
+        help="Alias for --sample-size",
     )
     parser.add_argument(
         "--ticket-list-path",
@@ -1375,8 +1499,29 @@ def main() -> int:
         help="Allow non-prod runs for local tests",
     )
     parser.add_argument(
+        "--env",
+        dest="env_name",
+        help="Target environment (prod/staging/dev).",
+    )
+    parser.add_argument(
+        "--region",
+        help="AWS region for secrets or HTTP trace metadata.",
+    )
+    parser.add_argument(
+        "--stack-name",
+        help="Optional stack name (metadata only).",
+    )
+    parser.add_argument(
         "--run-id",
         help="Optional run id override for artifact filenames",
+    )
+    parser.add_argument(
+        "--out",
+        help="Write JSON report to this path (file or directory).",
+    )
+    parser.add_argument(
+        "--summary-md-out",
+        help="Optional path for the PII-safe markdown summary.",
     )
     parser.add_argument(
         "--richpanel-secret-id",
@@ -1392,6 +1537,33 @@ def main() -> int:
         help="Probe Shopify with a read-only GET to verify access",
     )
     args = parser.parse_args()
+
+    if args.env_name:
+        normalized_env = str(args.env_name).strip().lower()
+        if normalized_env:
+            os.environ["RICHPANEL_ENV"] = normalized_env
+            os.environ["MW_ENV"] = normalized_env
+            os.environ["ENVIRONMENT"] = normalized_env
+            os.environ["RICH_PANEL_ENV"] = normalized_env
+
+    if args.region:
+        os.environ["AWS_REGION"] = args.region
+        os.environ["AWS_DEFAULT_REGION"] = args.region
+
+    if args.stack_name:
+        os.environ["MW_STACK_NAME"] = str(args.stack_name).strip()
+
+    if (
+        args.sample_size is not None
+        and args.max_tickets is not None
+        and args.sample_size != args.max_tickets
+    ):
+        raise SystemExit("Use --sample-size or --max-tickets (not both)")
+    sample_size = (
+        args.max_tickets
+        if args.max_tickets is not None
+        else (args.sample_size if args.sample_size is not None else DEFAULT_SAMPLE_SIZE)
+    )
 
     env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
     if not os.environ.get("RICHPANEL_ENV"):
@@ -1418,10 +1590,24 @@ def main() -> int:
         shop_domain=args.shop_domain,
         secrets_client=shopify_secrets_client,
     )
+    resolved_shop_domain = _normalize_optional_text(
+        args.shop_domain or os.environ.get("SHOPIFY_SHOP_DOMAIN")
+    )
+    resolved_region = _normalize_optional_text(
+        args.region
+        or os.environ.get("AWS_REGION")
+        or os.environ.get("AWS_DEFAULT_REGION")
+    )
+    resolved_stack_name = _normalize_optional_text(
+        args.stack_name or os.environ.get("MW_STACK_NAME")
+    )
 
     run_id = args.run_id or _build_run_id()
-    report_path, report_md_path, trace_path = _build_report_paths(run_id)
-    summary_path = report_path.parent / f"live_readonly_shadow_eval_summary_{run_id}.json"
+    report_path, summary_path, report_md_path, trace_path = _resolve_output_paths(
+        run_id,
+        out_path=args.out,
+        summary_md_out=args.summary_md_out,
+    )
 
     run_started = time.monotonic()
     run_warnings: List[str] = []
@@ -1479,7 +1665,7 @@ def main() -> int:
             try:
                 ticket_refs = _fetch_recent_ticket_refs(
                     rp_client,
-                    sample_size=args.sample_size,
+                    sample_size=sample_size,
                     list_path=args.ticket_list_path,
                 )
             except SystemExit as exc:
@@ -1494,7 +1680,7 @@ def main() -> int:
                     ticket_refs = []
                 else:
                     raise
-            tickets_requested = args.sample_size
+            tickets_requested = sample_size
             sample_mode = "recent"
 
         if not ticket_refs:
@@ -1615,6 +1801,11 @@ def main() -> int:
                 result["routing"] = _build_route_info(
                     getattr(plan, "routing", None),
                     getattr(plan, "routing_artifact", None),
+                )
+                result["would_reply_send"] = any(
+                    isinstance(action, dict)
+                    and action.get("type") in SEND_ACTION_TYPES
+                    for action in plan.actions
                 )
 
                 order_action = next(
@@ -1744,6 +1935,11 @@ def main() -> int:
         "orders_matched": sum(1 for item in ticket_results if item.get("order_matched")),
         "tracking_found": sum(1 for item in ticket_results if item.get("tracking_found")),
         "eta_available": sum(1 for item in ticket_results if item.get("eta_available")),
+        "tracking_or_eta_available": sum(
+            1
+            for item in ticket_results
+            if item.get("tracking_found") or item.get("eta_available")
+        ),
         "errors": sum(1 for item in ticket_results if item.get("error")),
     }
 
@@ -1801,8 +1997,23 @@ def main() -> int:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": env_name,
         "env_flags": enforced_env,
+        "target": {
+            "env": env_name,
+            "region": resolved_region or None,
+            "stack_name": resolved_stack_name or None,
+            "richpanel_base_url": richpanel_base_url,
+            "shop_domain": resolved_shop_domain or None,
+        },
         "prod_target": is_prod_target,
         "sample_mode": sample_mode,
+        "ticket_count": summary_payload.get("ticket_count", counts["tickets_scanned"]),
+        "match_success_rate": summary_payload.get("match_success_rate", 0.0),
+        "match_failure_buckets": summary_payload.get("match_failure_buckets", {}),
+        "tracking_or_eta_available_rate": summary_payload.get(
+            "tracking_or_eta_available_rate", 0.0
+        ),
+        "would_reply_send": summary_payload.get("would_reply_send", False),
+        "top_failure_reasons": summary_payload.get("top_failure_reasons", []),
         "counts": counts,
         "shopify_probe": shopify_probe,
         "tickets": ticket_results,
@@ -1831,6 +2042,7 @@ def main() -> int:
     match_methods = summary_payload.get("match_methods", {})
     match_pcts = summary_payload.get("match_method_percentages", {})
     failure_buckets = summary_payload.get("failure_buckets", {})
+    match_failure_buckets = summary_payload.get("match_failure_buckets", {})
     drift_watch = summary_payload.get("drift_watch", {})
     
     md_lines = [
@@ -1839,12 +2051,17 @@ def main() -> int:
         f"- Run ID: `{run_id}`",
         f"- Generated (UTC): {report['timestamp']}",
         f"- Environment: `{env_name}`",
+        f"- Region: `{resolved_region or 'n/a'}`",
+        f"- Stack name: `{resolved_stack_name or 'n/a'}`",
         f"- Sample mode: `{sample_mode}`",
         f"- Tickets requested: {counts['tickets_requested']}",
         f"- Tickets scanned: {counts['tickets_scanned']}",
         f"- Orders matched: {counts['orders_matched']}",
         f"- Tracking found: {counts['tracking_found']}",
         f"- ETA available: {counts['eta_available']}",
+        f"- Tracking or ETA available: {counts['tracking_or_eta_available']}",
+        f"- Match success rate: {summary_payload.get('match_success_rate', 0) * 100:.1f}%",
+        f"- Would reply send: {summary_payload.get('would_reply_send', False)}",
         f"- Errors: {counts['errors']}",
         f"- Shopify probe enabled: {shopify_probe['enabled']}",
         f"- Shopify probe ok: {shopify_probe.get('ok')}",
@@ -1873,6 +2090,16 @@ def main() -> int:
         f"- No Order Candidates: {failure_buckets.get('no_order_candidates', 0)}",
         f"- Parse Error: {failure_buckets.get('parse_error', 0)}",
         f"- Other Errors: {failure_buckets.get('other_error', 0) + failure_buckets.get('other_failure', 0)}",
+        "",
+        "## Match Failure Buckets (Deployment Gate)",
+        f"- No Email: {match_failure_buckets.get('no_email', 0)}",
+        f"- No Order Number: {match_failure_buckets.get('no_order_number', 0)}",
+        f"- Ambiguous Customer: {match_failure_buckets.get('ambiguous_customer', 0)}",
+        f"- No Order Candidates: {match_failure_buckets.get('no_order_candidates', 0)}",
+        f"- Order Match Failed: {match_failure_buckets.get('order_match_failed', 0)}",
+        f"- Parse Error: {match_failure_buckets.get('parse_error', 0)}",
+        f"- API Error: {match_failure_buckets.get('api_error', 0)}",
+        f"- Other/Unknown: {match_failure_buckets.get('other_failure', 0) + match_failure_buckets.get('unknown', 0)}",
         "",
         "## Drift Watch (B61/C)",
         f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",

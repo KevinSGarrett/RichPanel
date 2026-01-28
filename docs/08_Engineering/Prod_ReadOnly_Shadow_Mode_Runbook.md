@@ -126,8 +126,7 @@ Before enabling shadow mode in production:
   - `MW_ALLOW_NETWORK_READS=true`
   - `RICHPANEL_READ_ONLY=true`
   - `RICHPANEL_WRITE_DISABLED=true`
-- Optional (recommended for prod shadow): `RICHPANEL_OUTBOUND_ENABLED=false`
-- Note: The local script no longer requires outbound enabled; production worker shadow mode should still keep `RICHPANEL_OUTBOUND_ENABLED=false`.
+- `RICHPANEL_OUTBOUND_ENABLED=false` (required; outbound must stay off)
 - Optional overrides:
   - `RICHPANEL_API_KEY_OVERRIDE` (set to `PROD_RICHPANEL_API_KEY` for prod runs)
   - `SHOPIFY_SHOP_DOMAIN` (or `--shop-domain` flag) to target the correct store
@@ -142,7 +141,7 @@ $env:RICHPANEL_READ_ONLY = "true"
 $env:RICHPANEL_WRITE_DISABLED = "true"
 
 python scripts/live_readonly_shadow_eval.py `
-  --sample-size 10 `
+  --max-tickets 10 `
   --richpanel-secret-id rp-mw/prod/richpanel/api_key `
   --shop-domain <myshop.myshopify.com>
 ```
@@ -173,8 +172,11 @@ What it does:
 - Reads ticket + conversation, performs order lookup (Shopify fallback) with `allow_network` gated to reads only
 - Builds a dry-run action plan without sending messages, tagging, or closing tickets
 - Writes a PII-safe JSON report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
+  (or `live_shadow_report.json` when `--out` is used)
 - Writes a PII-safe markdown report to `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
-- Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json` and fails if any non-GET calls are observed
+  (or `live_shadow_summary.md` when `--summary-md-out` is used)
+- Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
+  (or `live_shadow_http_trace.json` when `--out` is used) and fails if any non-GET calls are observed
 
 ### Daily live read-only shadow eval (CI)
 - Workflow: `Shadow Live Read-Only Eval` (`.github/workflows/shadow_live_readonly_eval.yml`)
@@ -183,11 +185,12 @@ What it does:
 - Optional: `PROD_RICHPANEL_TICKET_IDS` (comma-separated) to bypass 403 list endpoints
 - Artifact location: GitHub Actions run → `live-readonly-shadow-eval` artifact
 - Artifact contents (PII-safe):
-  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.json`
-  - `artifacts/readonly_shadow/live_readonly_shadow_eval_summary_<RUN_ID>.json`
-  - `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
-  - `artifacts/readonly_shadow/live_readonly_shadow_eval_report_<RUN_ID>.md`
-- Summary highlights (machine-readable): match success rate, channel counts, timing stats, top failure reasons, fetch failure counts, schema drift
+  - `artifacts/readonly_shadow/live_shadow_report.json`
+  - `artifacts/readonly_shadow/live_shadow_summary.json`
+  - `artifacts/readonly_shadow/live_shadow_http_trace.json`
+  - `artifacts/readonly_shadow/live_shadow_summary.md`
+- Summary highlights (machine-readable): match success rate, tracking/ETA availability rate, match failure buckets, channel counts, timing stats, top failure reasons, fetch failure counts, schema drift
+- Note: local runs without `--out` continue to write `live_readonly_shadow_eval_report_<RUN_ID>.json` and related legacy filenames.
 - Drift threshold: **warning** when >20% of samples have a new schema fingerprint (ticket snapshot or Shopify summary)
 
 #### B61/C: Enhanced Diagnostic Metrics
@@ -220,6 +223,11 @@ The shadow eval report now includes **diagnostic and actionable metrics** to hel
   - `other_error` / `other_failure`: Catch-all for other issues
 - Location: `failure_buckets` in summary JSON
 
+**Match Failure Buckets (Deployment Gate):**
+- Categorizes order-match failures into gate-friendly buckets:
+  - `no_email`, `no_order_number`, `ambiguous_customer`, `no_order_candidates`
+- Location: `match_failure_buckets` in summary JSON
+
 **Drift Watch Thresholds:**
 - Compares current metrics to defined thresholds:
   - **Match Rate Drop**: Alert if match rate drops > 10 percentage points (requires historical baseline)
@@ -240,6 +248,19 @@ When drift or match failures spike:
 - For `no_customer_email` / `no_order_candidates`: inspect recent ticket payloads and extraction paths
 - Compare `ticket_schema_fingerprint` / `shopify_schema_fingerprint` in the report to identify new payload shapes
 - Re-run `workflow_dispatch` with explicit ticket IDs + `--shopify-probe` for deeper inspection
+
+### Deployment gate criteria (recommended)
+
+Block deployment if any of the following occur:
+
+- Script exits non-zero (read-only guard tripped or API failures).
+- `http_trace_summary.allowed_methods_only=false` or non-read-only HTTP entries appear.
+- `would_reply_send=true` in the report (should be false for prod read-only).
+- `ticket_count=0` or `run_warnings` includes `ticket_listing_failed` (no usable sample).
+- `drift_watch.has_alerts=true` (API error rate or schema drift exceeds thresholds).
+
+Treat `match_success_rate` and `tracking_or_eta_available_rate` as baseline health signals;
+compare to the most recent successful run for that environment, and block if they regress materially.
 
 ### Common failure modes (401 / 403)
 - **401 Unauthorized (Shopify):** token invalid/expired, wrong `SHOPIFY_SHOP_DOMAIN`, or secret still
