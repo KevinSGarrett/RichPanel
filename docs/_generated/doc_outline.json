@@ -12455,6 +12455,41 @@
     ]
   },
   {
+    "path": "08_Engineering/Richpanel_Reply_Paths.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Richpanel Reply Paths",
+        "anchor": "richpanel-reply-paths"
+      },
+      {
+        "level": 2,
+        "text": "Overview",
+        "anchor": "overview"
+      },
+      {
+        "level": 2,
+        "text": "Channel detection",
+        "anchor": "channel-detection"
+      },
+      {
+        "level": 2,
+        "text": "Email channel path (delivery-critical)",
+        "anchor": "email-channel-path-delivery-critical"
+      },
+      {
+        "level": 2,
+        "text": "Non-email channel path (chat/widget/etc.)",
+        "anchor": "non-email-channel-path-chatwidgetetc"
+      },
+      {
+        "level": 2,
+        "text": "Safety behavior summary",
+        "anchor": "safety-behavior-summary"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Secrets_and_Environments.md",
     "outline": [
       {

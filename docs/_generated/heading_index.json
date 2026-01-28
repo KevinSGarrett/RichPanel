@@ -13845,6 +13845,46 @@
       "anchor": "source-of-truth-rules"
     }
   ],
+  "richpanel reply paths": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "richpanel-reply-paths"
+    }
+  ],
+  "overview": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "overview"
+    },
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "overview"
+    }
+  ],
+  "channel detection": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "channel-detection"
+    }
+  ],
+  "email channel path (delivery-critical)": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "email-channel-path-delivery-critical"
+    }
+  ],
+  "non-email channel path (chat/widget/etc.)": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "non-email-channel-path-chatwidgetetc"
+    }
+  ],
+  "safety behavior summary": [
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "safety-behavior-summary"
+    }
+  ],
   "secrets and environments": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
@@ -13855,12 +13895,6 @@
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
       "anchor": "table-of-contents"
-    }
-  ],
-  "overview": [
-    {
-      "path": "08_Engineering/Secrets_and_Environments.md",
-      "anchor": "overview"
     }
   ],
   "environment configuration": [
