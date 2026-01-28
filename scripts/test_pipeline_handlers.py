@@ -38,6 +38,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _resolve_author_id,
     _user_is_agent,
     _safe_ticket_snapshot_fetch,
+    _AUTHOR_ID_CACHE,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -510,6 +511,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
+        _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
         os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
         os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
         os.environ.pop("MW_OUTBOUND_ALLOWLIST_EMAILS", None)
@@ -550,9 +552,9 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertFalse(result["sent"])
         self.assertEqual(len(executor.calls), 0)
 
-    def test_outbound_executes_when_enabled(self) -> None:
+    def test_outbound_non_email_uses_comment_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
-        executor = _RecordingExecutor()
+        executor = _RecordingExecutor(ticket_channel="chat")
 
         result = execute_order_status_reply(
             envelope,
@@ -635,9 +637,20 @@ class OutboundOrderStatusTests(unittest.TestCase):
         ]
         self.assertEqual(len(send_calls), 1)
         send_call = send_calls[0]
+        send_index = executor.calls.index(send_call)
         self.assertEqual(
             send_call["kwargs"]["json_body"].get("author_id"), "agent-123"
         )
+        verify_calls = [
+            (idx, call)
+            for idx, call in enumerate(executor.calls)
+            if call["method"] == "GET"
+            and call["path"].startswith("/v1/tickets/")
+            and "/add-tags" not in call["path"]
+            and idx > send_index
+        ]
+        self.assertTrue(verify_calls)
+        verify_index = verify_calls[0][0]
         close_calls = [
             call
             for call in executor.calls
@@ -647,7 +660,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
             and "/add-tags" not in call["path"]
         ]
         self.assertTrue(close_calls)
-        close_payload = close_calls[0]["kwargs"]["json_body"]
+        close_call = close_calls[0]
+        close_payload = close_call["kwargs"]["json_body"]
         self.assertFalse(_payload_contains_comment(close_payload))
         add_tag_calls = [
             call for call in executor.calls if "/add-tags" in call["path"]
@@ -655,8 +669,11 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertEqual(len(add_tag_calls), 1)
         tags_payload = add_tag_calls[0]["kwargs"]["json_body"]["tags"]
         self.assertIn("mw-outbound-path-send-message", tags_payload)
-        self.assertLess(executor.calls.index(send_call), executor.calls.index(close_calls[0]))
-        self.assertLess(executor.calls.index(close_calls[0]), executor.calls.index(add_tag_calls[0]))
+        self.assertLess(send_index, verify_index)
+        self.assertLess(verify_index, executor.calls.index(close_call))
+        self.assertLess(
+            executor.calls.index(close_call), executor.calls.index(add_tag_calls[0])
+        )
 
     def test_outbound_email_author_resolution_role_match(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -790,6 +807,47 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("mw-escalated-human", route_tags)
         self.assertIn("mw-send-message-author-missing", route_tags)
 
+    def test_outbound_email_operator_missing_routes_to_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email", send_message_operator_flag=False
+        )
+
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "send_message_operator_missing")
+        self.assertTrue(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        close_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/send-message" not in call["path"]
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertEqual(close_calls, [])
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-send-message-operator-missing", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
     def test_outbound_email_missing_bot_author_in_prod_blocks(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(
@@ -889,6 +947,48 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertFalse(
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-outbound-blocked-allowlist", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
+    def test_outbound_allowlist_blocks_non_email_channel(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="chat",
+            ticket_customer_email="blocked@example.com",
+        )
+
+        with mock.patch.dict(
+            os.environ, {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "allowlist_blocked")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        close_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/send-message" not in call["path"]
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertEqual(close_calls, [])
         route_calls = [
             call for call in executor.calls if "/add-tags" in call["path"]
         ]
@@ -1227,17 +1327,20 @@ class _RecordingExecutor:
         ticket_tags: list[str] | None = None,
         ticket_channel: str | None = None,
         ticket_customer_email: str | None = None,
+        ticket_comments: list[dict[str, Any]] | None = None,
         users: list[dict[str, Any]] | None = None,
         raise_on_get: bool = False,
         reply_status_codes: list[int] | None = None,
         send_message_status_codes: list[int] | None = None,
         force_dry_run: bool = False,
+        send_message_operator_flag: bool | None = True,
     ) -> None:
         self.calls: list[dict[str, Any]] = []
         self.ticket_status = ticket_status
         self.ticket_tags = ticket_tags or []
         self.ticket_channel = ticket_channel
         self.ticket_customer_email = ticket_customer_email
+        self.ticket_comments = ticket_comments or []
         self.users = users or []
         self.raise_on_get = raise_on_get
         self.reply_status_codes = reply_status_codes or [202]
@@ -1245,6 +1348,7 @@ class _RecordingExecutor:
         self.send_message_status_codes = send_message_status_codes or [200]
         self._send_message_index = 0
         self.force_dry_run = force_dry_run
+        self.send_message_operator_flag = send_message_operator_flag
 
     def execute(self, method: str, path: str, **kwargs: Any) -> RichpanelResponse:
         effective_dry_run = self.force_dry_run or kwargs.get("dry_run", False)
@@ -1281,6 +1385,8 @@ class _RecordingExecutor:
                     source = {}
                     via["source"] = source
                 source["from"] = {"address": self.ticket_customer_email}
+            if self.ticket_comments:
+                payload["comments"] = list(self.ticket_comments)
             body = json.dumps(payload).encode("utf-8")
             return RichpanelResponse(
                 status_code=200,
@@ -1301,6 +1407,14 @@ class _RecordingExecutor:
                 else self.send_message_status_codes[-1]
             )
             self._send_message_index += 1
+            if not effective_dry_run and 200 <= status_code < 300:
+                if self.send_message_operator_flag is not None:
+                    self.ticket_comments.append(
+                        {
+                            "is_operator": self.send_message_operator_flag,
+                            "source": "middleware",
+                        }
+                    )
             return RichpanelResponse(
                 status_code=status_code,
                 headers={},
@@ -1407,6 +1521,9 @@ class _CommentRetryExecutor:
 
 
 class AuthorResolutionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
+
     def test_resolve_author_id_network_disabled(self) -> None:
         executor = _RecordingExecutor()
         author_id, strategy = _resolve_author_id(
@@ -1414,6 +1531,23 @@ class AuthorResolutionTests(unittest.TestCase):
         )
         self.assertIsNone(author_id)
         self.assertEqual(strategy, "network_disabled")
+
+    def test_resolve_author_id_caches_success(self) -> None:
+        executor = _RecordingExecutor(users=[{"id": "agent-1", "role": "agent"}])
+        author_id, strategy = _resolve_author_id(
+            executor=cast(RichpanelExecutor, executor), allow_network=True
+        )
+        self.assertEqual(author_id, "agent-1")
+        self.assertEqual(strategy, "role_match")
+        author_id_cached, cached_strategy = _resolve_author_id(
+            executor=cast(RichpanelExecutor, executor), allow_network=True
+        )
+        self.assertEqual(author_id_cached, "agent-1")
+        self.assertTrue(cached_strategy.startswith("cache"))
+        user_calls = [
+            call for call in executor.calls if call["path"].startswith("/v1/users")
+        ]
+        self.assertEqual(len(user_calls), 1)
 
     def test_user_is_agent_role_variants(self) -> None:
         self.assertTrue(_user_is_agent({"role": ["support", "operator"]}))

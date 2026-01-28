@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 import urllib.parse
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -59,6 +60,7 @@ OUTBOUND_PATH_COMMENT_TAG = "mw-outbound-path-comment"
 SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
 SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
 SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
+SEND_MESSAGE_OPERATOR_MISSING_TAG = "mw-send-message-operator-missing"
 OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
 OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG = "mw-outbound-blocked-missing-bot-author"
 MW_OUTBOUND_ALLOWLIST_EMAILS_ENV = "MW_OUTBOUND_ALLOWLIST_EMAILS"
@@ -77,10 +79,13 @@ _SKIP_REASON_TAGS = {
     "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
     "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
     "send_message_failed": SEND_MESSAGE_FAILED_TAG,
+    "send_message_operator_missing": SEND_MESSAGE_OPERATOR_MISSING_TAG,
     "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
     "allowlist_blocked": OUTBOUND_BLOCKED_ALLOWLIST_TAG,
     "bot_author_missing": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
+_AUTHOR_ID_CACHE: Dict[str, Any] = {"author_id": None, "strategy": None, "expires_at": 0.0}
+_AUTHOR_ID_CACHE_TTL_SECONDS = 900.0
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -119,6 +124,33 @@ def _normalize_email(value: Any) -> Optional[str]:
     if not normalized:
         return None
     return normalized.lower()
+
+
+def _normalize_ticket_channel(value: Any) -> Optional[str]:
+    normalized = _normalize_optional_text(value)
+    if not normalized:
+        return None
+    return normalized.lower()
+
+
+def _extract_ticket_channel_from_payload(payload: Any) -> Optional[str]:
+    if not isinstance(payload, dict):
+        return None
+    via = payload.get("via")
+    if isinstance(via, dict):
+        channel = _normalize_ticket_channel(via.get("channel"))
+        if channel:
+            return channel
+    channel = _normalize_ticket_channel(payload.get("channel"))
+    if channel:
+        return channel
+    for nested_key in ("ticket", "data", "conversation"):
+        nested = payload.get(nested_key)
+        if isinstance(nested, dict):
+            channel = _extract_ticket_channel_from_payload(nested)
+            if channel:
+                return channel
+    return None
 
 
 def _parse_allowlist_entries(value: Optional[str], *, strip_at: bool = False) -> set[str]:
@@ -424,14 +456,7 @@ def _safe_ticket_snapshot_fetch(
     )
     tags = dedupe_tags(ticket_payload.get("tags"))
 
-    channel = None
-    via = ticket_payload.get("via")
-    if isinstance(via, dict):
-        channel = _normalize_optional_text(via.get("channel"))
-    if channel is None:
-        channel = _normalize_optional_text(ticket_payload.get("channel"))
-    if channel:
-        channel = channel.lower()
+    channel = _extract_ticket_channel_from_payload(ticket_payload)
 
     customer_email = _extract_customer_email_from_payload(ticket_payload)
 
@@ -445,6 +470,96 @@ def _safe_ticket_snapshot_fetch(
         channel,
         customer_email,
     )
+
+
+def _comment_operator_flag(comment: Any) -> Optional[bool]:
+    if not isinstance(comment, dict):
+        return None
+    value = comment.get("is_operator")
+    if value is None:
+        value = comment.get("isOperator")
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "false"}:
+            return lowered == "true"
+    return None
+
+
+def _comment_created_at(comment: Any) -> Optional[datetime]:
+    if not isinstance(comment, dict):
+        return None
+    raw = comment.get("created_at") or comment.get("createdAt")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    value = raw.strip()
+    if value.endswith("Z"):
+        value = f"{value[:-1]}+00:00"
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _latest_comment_entry(comments: Any) -> Optional[Dict[str, Any]]:
+    if not isinstance(comments, list) or not comments:
+        return None
+    latest_comment = None
+    latest_timestamp = None
+    for comment in comments:
+        if not isinstance(comment, dict):
+            continue
+        timestamp = _comment_created_at(comment)
+        if timestamp is None:
+            continue
+        if latest_timestamp is None or timestamp > latest_timestamp:
+            latest_timestamp = timestamp
+            latest_comment = comment
+    if latest_comment is not None:
+        return latest_comment
+    for comment in reversed(comments):
+        if isinstance(comment, dict):
+            return comment
+    return None
+
+
+def _latest_comment_is_operator(comments: Any) -> Optional[bool]:
+    latest_comment = _latest_comment_entry(comments)
+    if latest_comment is None:
+        return None
+    return _comment_operator_flag(latest_comment)
+
+
+def _safe_ticket_comment_operator_fetch(
+    ticket_id: str,
+    *,
+    executor: RichpanelExecutor,
+    allow_network: bool,
+) -> Optional[bool]:
+    try:
+        encoded_id = urllib.parse.quote(str(ticket_id), safe="")
+        response = executor.execute(
+            "GET",
+            f"/v1/tickets/{encoded_id}",
+            dry_run=not allow_network,
+            log_body_excerpt=False,
+        )
+    except (RichpanelRequestError, SecretLoadError, TransportError):
+        return None
+    if response.dry_run:
+        return None
+    if response.status_code < 200 or response.status_code >= 300:
+        return None
+    payload = response.json() or {}
+    if not isinstance(payload, dict):
+        return None
+    ticket_obj = payload.get("ticket")
+    ticket_payload = ticket_obj if isinstance(ticket_obj, dict) else payload
+    comments = ticket_payload.get("comments") if isinstance(ticket_payload, dict) else None
+    return _latest_comment_is_operator(comments)
 
 
 def _user_id_from_payload(user: Dict[str, Any]) -> Optional[str]:
@@ -501,6 +616,13 @@ def _resolve_author_id(
         return env_author_id, "env"
     if not allow_network:
         return None, "network_disabled"
+    cached_author_id = _normalize_optional_text(_AUTHOR_ID_CACHE.get("author_id"))
+    cached_expires_at = _AUTHOR_ID_CACHE.get("expires_at")
+    if cached_author_id and isinstance(cached_expires_at, (int, float)):
+        if cached_expires_at > time.time():
+            cached_strategy = _AUTHOR_ID_CACHE.get("strategy")
+            cached_label = f"cache:{cached_strategy}" if cached_strategy else "cache"
+            return cached_author_id, cached_label
     try:
         response = executor.execute(
             "GET",
@@ -524,11 +646,25 @@ def _resolve_author_id(
         if not user_id:
             continue
         if _user_is_agent(user):
+            _AUTHOR_ID_CACHE.update(
+                {
+                    "author_id": user_id,
+                    "strategy": "role_match",
+                    "expires_at": time.time() + _AUTHOR_ID_CACHE_TTL_SECONDS,
+                }
+            )
             return user_id, "role_match"
 
     for user in users:
         user_id = _user_id_from_payload(user)
         if user_id:
+            _AUTHOR_ID_CACHE.update(
+                {
+                    "author_id": user_id,
+                    "strategy": "first_available",
+                    "expires_at": time.time() + _AUTHOR_ID_CACHE_TTL_SECONDS,
+                }
+            )
             return user_id, "first_available"
 
     return None, "user_id_missing"
@@ -1056,7 +1192,9 @@ def execute_order_status_reply(
             return _route_email_support("status_read_failed")
 
         ticket_status = ticket_metadata.status
-        is_email_channel = ticket_channel == "email"
+        payload_channel = _extract_ticket_channel_from_payload(payload)
+        resolved_channel = payload_channel or ticket_channel
+        is_email_channel = resolved_channel == "email"
         env_name, _ = resolve_env_name()
         is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
 
@@ -1082,38 +1220,38 @@ def execute_order_status_reply(
         if _is_closed_status(ticket_status):
             return _route_email_support("already_resolved", ticket_status=ticket_status)
 
-        if is_email_channel:
-            (
-                allowlist_emails,
-                allowlist_domains,
-                allowlist_configured,
-            ) = _load_outbound_allowlist()
-            allowlist_required = is_prod_env or allowlist_configured
-            if allowlist_required:
-                customer_email = ticket_customer_email or _extract_customer_email_from_payload(
-                    payload
+        (
+            allowlist_emails,
+            allowlist_domains,
+            allowlist_configured,
+        ) = _load_outbound_allowlist()
+        allowlist_required = is_prod_env or allowlist_configured
+        if allowlist_required:
+            customer_email = ticket_customer_email or _extract_customer_email_from_payload(
+                payload
+            )
+            allowlist_allowed, allowlist_reason = _match_allowlist_email(
+                customer_email,
+                allowlist_emails=allowlist_emails,
+                allowlist_domains=allowlist_domains,
+            )
+            if not allowlist_allowed:
+                LOGGER.info(
+                    "automation.order_status_reply.allowlist_blocked",
+                    extra={
+                        "event_id": envelope.event_id,
+                        "conversation_id": envelope.conversation_id,
+                        "environment": env_name,
+                        "allowlist_required": allowlist_required,
+                        "allowlist_configured": allowlist_configured,
+                        "allowlist_reason": allowlist_reason,
+                        "ticket_channel": resolved_channel,
+                        "customer_email_hash": _hash_identifier(customer_email),
+                    },
                 )
-                allowlist_allowed, allowlist_reason = _match_allowlist_email(
-                    customer_email,
-                    allowlist_emails=allowlist_emails,
-                    allowlist_domains=allowlist_domains,
+                return _route_email_support(
+                    "allowlist_blocked", ticket_status=ticket_status
                 )
-                if not allowlist_allowed:
-                    LOGGER.info(
-                        "automation.order_status_reply.allowlist_blocked",
-                        extra={
-                            "event_id": envelope.event_id,
-                            "conversation_id": envelope.conversation_id,
-                            "environment": env_name,
-                            "allowlist_required": allowlist_required,
-                            "allowlist_configured": allowlist_configured,
-                            "allowlist_reason": allowlist_reason,
-                            "customer_email_hash": _hash_identifier(customer_email),
-                        },
-                    )
-                    return _route_email_support(
-                        "allowlist_blocked", ticket_status=ticket_status
-                    )
 
         parameters = order_action.get("parameters") or {}
         draft_reply = parameters.get("draft_reply") or {}
@@ -1383,6 +1521,23 @@ def execute_order_status_reply(
             if send_response.status_code < 200 or send_response.status_code >= 300:
                 result = _route_email_support(
                     "send_message_failed", ticket_status=ticket_status
+                )
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
+
+            latest_comment_is_operator = _safe_ticket_comment_operator_fetch(
+                target_id, executor=executor, allow_network=allow_network
+            )
+            responses.append(
+                {
+                    "action": "verify_send_message_operator",
+                    "latest_comment_is_operator": latest_comment_is_operator,
+                }
+            )
+            if latest_comment_is_operator is not True:
+                result = _route_email_support(
+                    "send_message_operator_missing", ticket_status=ticket_status
                 )
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
