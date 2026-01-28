@@ -49,16 +49,16 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 - Trace file: `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_http_trace.json`
 
 ## Claude gate (real run)
-- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21448599396
+- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21449231106
 - Audit artifact: `REHYDRATION_PACK/RUNS/B62/C/PROOF/claude_gate_audit.json`
 - model_used: `claude-opus-4-5-20251101`
-- response_id: `msg_01HdCvJbez2AXRFX4Vgps1Vr`
-- request_id: `req_011CXaAjeqHX3cNJzRjvXkU3`
-- usage: input_tokens=26252; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+- response_id: `msg_01NdjPqqQCr39r3khM1D8M76`
+- request_id: `req_011CXaCAQ75ErUshhqEJu15h`
+- usage: input_tokens=26451; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ## B61/C merge status
 - PR #197 (B61/C) merged: https://github.com/KevinSGarrett/RichPanel/pull/197
 
 ## Notes
-- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21448589779
+- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21449213856
 - Claude gate initial runs failed due to PR metadata fetch; fixed via GraphQL fallback in `scripts/claude_gate_review.py`.
