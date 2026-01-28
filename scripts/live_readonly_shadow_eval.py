@@ -1470,6 +1470,122 @@ def _resolve_output_paths(
     return report_path, summary_path, report_md_path, trace_path
 
 
+def _build_markdown_report(
+    report: Dict[str, Any], summary_payload: Dict[str, Any]
+) -> List[str]:
+    counts = report.get("counts", {})
+    target = report.get("target", {})
+    shopify_probe = report.get("shopify_probe", {})
+    trace_summary = report.get("http_trace_summary", {})
+
+    run_id = report.get("run_id", "RUN_UNKNOWN")
+    timestamp = report.get("timestamp", "")
+    env_name = report.get("environment", "unknown")
+    sample_mode = report.get("sample_mode", "unknown")
+    summary_path = report.get("summary_path", "n/a")
+    trace_path = report.get("http_trace_path", "n/a")
+
+    route_decisions = summary_payload.get("route_decisions", {})
+    route_pcts = summary_payload.get("route_decision_percentages", {})
+    match_methods = summary_payload.get("match_methods", {})
+    match_pcts = summary_payload.get("match_method_percentages", {})
+    failure_buckets = summary_payload.get("failure_buckets", {})
+    match_failure_buckets = summary_payload.get("match_failure_buckets", {})
+    drift_watch = summary_payload.get("drift_watch", {})
+    drift_warning = summary_payload.get("schema_drift", {}).get("warning", False)
+    run_warnings = summary_payload.get("run_warnings", [])
+
+    md_lines = [
+        "# Live Read-Only Shadow Eval Report",
+        "",
+        f"- Run ID: `{run_id}`",
+        f"- Generated (UTC): {timestamp}",
+        f"- Environment: `{env_name}`",
+        f"- Region: `{target.get('region') or 'n/a'}`",
+        f"- Stack name: `{target.get('stack_name') or 'n/a'}`",
+        f"- Sample mode: `{sample_mode}`",
+        f"- Tickets requested: {counts.get('tickets_requested', 0)}",
+        f"- Tickets scanned: {counts.get('tickets_scanned', 0)}",
+        f"- Orders matched: {counts.get('orders_matched', 0)}",
+        f"- Tracking found: {counts.get('tracking_found', 0)}",
+        f"- ETA available: {counts.get('eta_available', 0)}",
+        f"- Tracking or ETA available: {counts.get('tracking_or_eta_available', 0)}",
+        f"- Match success rate: {summary_payload.get('match_success_rate', 0) * 100:.1f}%",
+        f"- Would reply send: {summary_payload.get('would_reply_send', False)}",
+        f"- Errors: {counts.get('errors', 0)}",
+        f"- Shopify probe enabled: {shopify_probe.get('enabled')}",
+        f"- Shopify probe ok: {shopify_probe.get('ok')}",
+        f"- Shopify probe status: {shopify_probe.get('status_code')}",
+        f"- Summary path: `{summary_path}`",
+        f"- Drift warning: {drift_warning}",
+        f"- Run warnings: {', '.join(run_warnings) or 'none'}",
+        "",
+        "## Route Decision Distribution (B61/C)",
+        f"- Order Status: {route_decisions.get('order_status', 0)} ({route_pcts.get('order_status', 0) * 100:.1f}%)",
+        f"- Non-Order Status: {route_decisions.get('non_order_status', 0)} ({route_pcts.get('non_order_status', 0) * 100:.1f}%)",
+        f"- Unknown: {route_decisions.get('unknown', 0)} ({route_pcts.get('unknown', 0) * 100:.1f}%)",
+        "",
+        "## Match Method Telemetry (B61/C)",
+        f"- Order Number: {match_methods.get('order_number', 0)} ({match_pcts.get('order_number', 0) * 100:.1f}%)",
+        f"- Name + Email: {match_methods.get('name_email', 0)} ({match_pcts.get('name_email', 0) * 100:.1f}%)",
+        f"- Email Only: {match_methods.get('email_only', 0)} ({match_pcts.get('email_only', 0) * 100:.1f}%)",
+        f"- No Match: {match_methods.get('none', 0)} ({match_pcts.get('none', 0) * 100:.1f}%)",
+        f"- Parse Error: {match_methods.get('parse_error', 0)} ({match_pcts.get('parse_error', 0) * 100:.1f}%)",
+        "",
+        "## Failure Buckets (B61/C - PII Safe)",
+        f"- No Identifiers: {failure_buckets.get('no_identifiers', 0)}",
+        f"- Shopify API Error: {failure_buckets.get('shopify_api_error', 0)}",
+        f"- Richpanel API Error: {failure_buckets.get('richpanel_api_error', 0)}",
+        f"- Ambiguous Match: {failure_buckets.get('ambiguous_match', 0)}",
+        f"- No Order Candidates: {failure_buckets.get('no_order_candidates', 0)}",
+        f"- Parse Error: {failure_buckets.get('parse_error', 0)}",
+        f"- Other Errors: {failure_buckets.get('other_error', 0) + failure_buckets.get('other_failure', 0)}",
+        "",
+        "## Match Failure Buckets (Deployment Gate)",
+        f"- No Email: {match_failure_buckets.get('no_email', 0)}",
+        f"- No Order Number: {match_failure_buckets.get('no_order_number', 0)}",
+        f"- Ambiguous Customer: {match_failure_buckets.get('ambiguous_customer', 0)}",
+        f"- No Order Candidates: {match_failure_buckets.get('no_order_candidates', 0)}",
+        f"- Order Match Failed: {match_failure_buckets.get('order_match_failed', 0)}",
+        f"- Parse Error: {match_failure_buckets.get('parse_error', 0)}",
+        f"- API Error: {match_failure_buckets.get('api_error', 0)}",
+        f"- Other/Unknown: {match_failure_buckets.get('other_failure', 0) + match_failure_buckets.get('unknown', 0)}",
+        "",
+        "## Drift Watch (B61/C)",
+        f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",
+        f"- API Error Rate: {drift_watch.get('current_values', {}).get('api_error_rate_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['api_error_rate_pct']}%)",
+        f"- Order Number Share: {drift_watch.get('current_values', {}).get('order_number_share_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['order_number_share_drop_pct']}%)",
+        f"- Schema Drift: {drift_watch.get('current_values', {}).get('schema_new_ratio_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['schema_drift_new_ratio'] * 100}%)",
+        f"- **Alerts: {len(drift_watch.get('alerts', []))}**",
+    ]
+
+    for alert in drift_watch.get("alerts", []):
+        md_lines.append(f"  - ⚠️ {alert.get('message', 'Unknown alert')}")
+
+    md_lines.extend(
+        [
+            "",
+            "## HTTP Trace Summary",
+            f"- Total requests: {trace_summary.get('total_requests', 0)}",
+            f"- Methods: {json.dumps(trace_summary.get('methods', {}), sort_keys=True)}",
+            f"- Services: {json.dumps(trace_summary.get('services', {}), sort_keys=True)}",
+            f"- Sources: {json.dumps(trace_summary.get('sources', {}), sort_keys=True)}",
+            f"- AWS operations: {json.dumps(trace_summary.get('aws_operations', {}), sort_keys=True)}",
+            f"- AWS missing operations: {trace_summary.get('aws_missing_operations', 0)}",
+            f"- Allowed methods only: {trace_summary.get('allowed_methods_only', False)}",
+            f"- Trace path: `{trace_path}`",
+            "",
+            "## Notes",
+            "- Ticket identifiers are hashed in the JSON report.",
+            "- Shopify shop domains are hashed in the JSON report.",
+            "- No message bodies or customer identifiers are stored.",
+            "- HTTP trace captures urllib.request and AWS SDK (botocore) calls.",
+        ]
+    )
+
+    return md_lines
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run live read-only shadow evaluation.")
     parser.add_argument(
@@ -2055,100 +2171,7 @@ def main() -> int:
         json.dumps(summary_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    # B61/C: Extract new metrics for markdown
-    route_decisions = summary_payload.get("route_decisions", {})
-    route_pcts = summary_payload.get("route_decision_percentages", {})
-    match_methods = summary_payload.get("match_methods", {})
-    match_pcts = summary_payload.get("match_method_percentages", {})
-    failure_buckets = summary_payload.get("failure_buckets", {})
-    match_failure_buckets = summary_payload.get("match_failure_buckets", {})
-    drift_watch = summary_payload.get("drift_watch", {})
-    
-    md_lines = [
-        "# Live Read-Only Shadow Eval Report",
-        "",
-        f"- Run ID: `{run_id}`",
-        f"- Generated (UTC): {report['timestamp']}",
-        f"- Environment: `{env_name}`",
-        f"- Region: `{resolved_region or 'n/a'}`",
-        f"- Stack name: `{resolved_stack_name or 'n/a'}`",
-        f"- Sample mode: `{sample_mode}`",
-        f"- Tickets requested: {counts['tickets_requested']}",
-        f"- Tickets scanned: {counts['tickets_scanned']}",
-        f"- Orders matched: {counts['orders_matched']}",
-        f"- Tracking found: {counts['tracking_found']}",
-        f"- ETA available: {counts['eta_available']}",
-        f"- Tracking or ETA available: {counts['tracking_or_eta_available']}",
-        f"- Match success rate: {summary_payload.get('match_success_rate', 0) * 100:.1f}%",
-        f"- Would reply send: {summary_payload.get('would_reply_send', False)}",
-        f"- Errors: {counts['errors']}",
-        f"- Shopify probe enabled: {shopify_probe['enabled']}",
-        f"- Shopify probe ok: {shopify_probe.get('ok')}",
-        f"- Shopify probe status: {shopify_probe.get('status_code')}",
-        f"- Summary path: `{summary_path}`",
-        f"- Drift warning: {summary_payload['schema_drift']['warning']}",
-        f"- Run warnings: {', '.join(summary_payload['run_warnings']) or 'none'}",
-        "",
-        "## Route Decision Distribution (B61/C)",
-        f"- Order Status: {route_decisions.get('order_status', 0)} ({route_pcts.get('order_status', 0) * 100:.1f}%)",
-        f"- Non-Order Status: {route_decisions.get('non_order_status', 0)} ({route_pcts.get('non_order_status', 0) * 100:.1f}%)",
-        f"- Unknown: {route_decisions.get('unknown', 0)} ({route_pcts.get('unknown', 0) * 100:.1f}%)",
-        "",
-        "## Match Method Telemetry (B61/C)",
-        f"- Order Number: {match_methods.get('order_number', 0)} ({match_pcts.get('order_number', 0) * 100:.1f}%)",
-        f"- Name + Email: {match_methods.get('name_email', 0)} ({match_pcts.get('name_email', 0) * 100:.1f}%)",
-        f"- Email Only: {match_methods.get('email_only', 0)} ({match_pcts.get('email_only', 0) * 100:.1f}%)",
-        f"- No Match: {match_methods.get('none', 0)} ({match_pcts.get('none', 0) * 100:.1f}%)",
-        f"- Parse Error: {match_methods.get('parse_error', 0)} ({match_pcts.get('parse_error', 0) * 100:.1f}%)",
-        "",
-        "## Failure Buckets (B61/C - PII Safe)",
-        f"- No Identifiers: {failure_buckets.get('no_identifiers', 0)}",
-        f"- Shopify API Error: {failure_buckets.get('shopify_api_error', 0)}",
-        f"- Richpanel API Error: {failure_buckets.get('richpanel_api_error', 0)}",
-        f"- Ambiguous Match: {failure_buckets.get('ambiguous_match', 0)}",
-        f"- No Order Candidates: {failure_buckets.get('no_order_candidates', 0)}",
-        f"- Parse Error: {failure_buckets.get('parse_error', 0)}",
-        f"- Other Errors: {failure_buckets.get('other_error', 0) + failure_buckets.get('other_failure', 0)}",
-        "",
-        "## Match Failure Buckets (Deployment Gate)",
-        f"- No Email: {match_failure_buckets.get('no_email', 0)}",
-        f"- No Order Number: {match_failure_buckets.get('no_order_number', 0)}",
-        f"- Ambiguous Customer: {match_failure_buckets.get('ambiguous_customer', 0)}",
-        f"- No Order Candidates: {match_failure_buckets.get('no_order_candidates', 0)}",
-        f"- Order Match Failed: {match_failure_buckets.get('order_match_failed', 0)}",
-        f"- Parse Error: {match_failure_buckets.get('parse_error', 0)}",
-        f"- API Error: {match_failure_buckets.get('api_error', 0)}",
-        f"- Other/Unknown: {match_failure_buckets.get('other_failure', 0) + match_failure_buckets.get('unknown', 0)}",
-        "",
-        "## Drift Watch (B61/C)",
-        f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",
-        f"- API Error Rate: {drift_watch.get('current_values', {}).get('api_error_rate_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['api_error_rate_pct']}%)",
-        f"- Order Number Share: {drift_watch.get('current_values', {}).get('order_number_share_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['order_number_share_drop_pct']}%)",
-        f"- Schema Drift: {drift_watch.get('current_values', {}).get('schema_new_ratio_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['schema_drift_new_ratio'] * 100}%)",
-        f"- **Alerts: {len(drift_watch.get('alerts', []))}**",
-    ]
-    
-    # Add alert details if any
-    for alert in drift_watch.get("alerts", []):
-        md_lines.append(f"  - ⚠️ {alert.get('message', 'Unknown alert')}")
-    
-    md_lines.extend([
-        "",
-        "## HTTP Trace Summary",
-        f"- Total requests: {trace_summary['total_requests']}",
-        f"- Methods: {json.dumps(trace_summary['methods'], sort_keys=True)}",
-        f"- Services: {json.dumps(trace_summary['services'], sort_keys=True)}",
-        f"- Sources: {json.dumps(trace_summary.get('sources', {}), sort_keys=True)}",
-        f"- AWS operations: {json.dumps(trace_summary.get('aws_operations', {}), sort_keys=True)}",
-        f"- AWS missing operations: {trace_summary.get('aws_missing_operations', 0)}",
-        f"- Allowed methods only: {trace_summary['allowed_methods_only']}",
-        f"- Trace path: `{trace_path}`",
-        "",
-        "## Notes",
-        "- Ticket identifiers are hashed in the JSON report.",
-        "- No message bodies or customer identifiers are stored.",
-        "- HTTP trace captures urllib.request and AWS SDK (botocore) calls.",
-    ])
+    md_lines = _build_markdown_report(report, summary_payload)
     report_md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
 
     LOGGER.info(

@@ -8,6 +8,7 @@
 - Added `--allow-ticket-fetch-failures` to continue when explicit ticket IDs are stale, recording warnings instead.
 - Added GraphQL fallback in `scripts/claude_gate_review.py` when PR metadata fetch hits API size limits.
 - Redacted Shopify shop domain in report output to keep artifacts PII-safe.
+- Deduplicated markdown report generation by sharing the builder with the proof script.
 
 ## Tests
 - Updated `scripts/test_live_readonly_shadow_eval.py` to include outbound-disabled flags.

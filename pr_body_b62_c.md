@@ -15,6 +15,7 @@
 - Updated the nightly workflow and prod runbook with gate criteria and new report outputs.
 - Added ticket-fetch failure handling so stale ticket IDs no longer abort the report run.
 - Added `shopify-token-source` input to select the correct prod Shopify token.
+- Deduplicated markdown report generation for proof scripts and noted shop domain hashing.
 
 ### 2) Why
 - **Problem / risk:** The live shadow validation was a one-off script run with non-deterministic outputs and no gate-ready summary.
