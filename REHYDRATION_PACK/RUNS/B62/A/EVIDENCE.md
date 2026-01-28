@@ -78,3 +78,6 @@ C:\Users\kevin\AppData\Local\Programs\Python\Python312\python.exe C:\RichPanel_G
   "followup_routed_support": true
 }
 ```
+
+## Claude gate audit (CI artifact)
+- `REHYDRATION_PACK/RUNS/B62/A/claude_gate_audit.json`
