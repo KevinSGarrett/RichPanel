@@ -1,0 +1,22 @@
+{
+  "pr": 202,
+  "risk_label": "risk:R2",
+  "model": "claude-opus-4-5-20251101",
+  "model_used": "claude-opus-4-5-20251101",
+  "response_id": "msg_01S6RFS7Gd6BZnTbDPjnq8VU",
+  "claude_response_id": "msg_01S6RFS7Gd6BZnTbDPjnq8VU",
+  "request_id": "req_011CXaVWpucXJYVNkZf9WENA",
+  "anthropic_request_id": "req_011CXaVWpucXJYVNkZf9WENA",
+  "usage": {
+    "input_tokens": 8433,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 600,
+    "service_tier": "standard"
+  },
+  "mode": "shadow"
+}
