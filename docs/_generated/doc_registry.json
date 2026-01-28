@@ -2050,6 +2050,16 @@
     "last_updated": ""
   },
   {
+    "path": "08_Engineering/Richpanel_Reply_Paths.md",
+    "title": "Richpanel Reply Paths",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 301,
+    "approx_tokens": 391,
+    "last_updated": "2026-01-28"
+  },
+  {
     "path": "08_Engineering/Secrets_and_Environments.md",
     "title": "Secrets and Environments",
     "section": "08_Engineering",

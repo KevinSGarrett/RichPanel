@@ -19,3 +19,4 @@
 - Added `scripts/create_sandbox_chat_ticket.py` to attempt non-email ticket creation for proofs.
 - Added `REHYDRATION_PACK/RUNS/B62/B/PROOF/*` artifacts for unit tests and dev smoke proof.
 - Added Claude gate and CI-equivalent proof outputs under `REHYDRATION_PACK/RUNS/B62/B/PROOF/`.
+- Regenerated docs registries (`docs/REGISTRY.md`, `docs/_generated/*`) after adding new doc.

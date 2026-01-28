@@ -265,6 +265,7 @@ Legend:
 - 📎 [Production Read-Only Shadow Mode Runbook](08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md)  (`08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`)
 - ✅ [Protected Paths and Safe Deletion Rules](08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md)  (`08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md`)
 - ✅ [Repository Conventions](08_Engineering/Repository_Conventions.md)  (`08_Engineering/Repository_Conventions.md`)
+- 📎 [Richpanel Reply Paths](08_Engineering/Richpanel_Reply_Paths.md)  (`08_Engineering/Richpanel_Reply_Paths.md`)
 - 📎 [Secrets and Environments](08_Engineering/Secrets_and_Environments.md)  (`08_Engineering/Secrets_and_Environments.md`)
 
 ## 08_Observability_Analytics
