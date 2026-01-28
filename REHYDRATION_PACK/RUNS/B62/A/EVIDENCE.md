@@ -91,7 +91,7 @@ Remove-Item -Path $scriptPath -Force
 ## Patch coverage summary (PII-safe)
 ```text
 Patch coverage (executable lines):
-scripts\b62_sandbox_golden_path.py: 225/225 covered (100.0%)
+scripts\b62_sandbox_golden_path.py: 221/221 covered (100.0%)
 scripts\create_sandbox_email_ticket.py: 4/4 covered (100.0%)
 scripts\dev_e2e_smoke.py: 75/75 covered (100.0%)
 scripts\sandbox_golden_path_proof.py: 4/4 covered (100.0%)
