@@ -1953,7 +1953,10 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertEqual(target["env"], "staging")
             self.assertEqual(target["region"], "us-west-2")
             self.assertEqual(target["stack_name"], "stack-1")
-            self.assertEqual(target["shop_domain"], "example.myshopify.com")
+            self.assertEqual(
+                target["shop_domain"],
+                shadow_eval._redact_shop_domain("example.myshopify.com"),
+            )
             self.assertIn("tracking_or_eta_available", payload["counts"])
 
     def test_main_uses_recent_sample_when_no_ticket_id(self) -> None:

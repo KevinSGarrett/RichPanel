@@ -168,6 +168,11 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     return f"redacted:{_fingerprint(text)}"
 
 
+def _redact_shop_domain(domain: Optional[str]) -> Optional[str]:
+    """Treat shop domain as sensitive; hash for report output."""
+    return _redact_identifier(domain)
+
+
 def _normalize_optional_text(value: Any) -> str:
     if value is None:
         return ""
@@ -2015,7 +2020,7 @@ def main() -> int:
             "region": resolved_region or None,
             "stack_name": resolved_stack_name or None,
             "richpanel_base_url": richpanel_base_url,
-            "shop_domain": resolved_shop_domain or None,
+            "shop_domain": _redact_shop_domain(resolved_shop_domain),
         },
         "prod_target": is_prod_target,
         "sample_mode": sample_mode,
@@ -2036,6 +2041,7 @@ def main() -> int:
         "http_trace_summary": trace_summary,
         "notes": [
             "Ticket identifiers are hashed.",
+            "Shopify shop domains are hashed.",
             "No message bodies or customer identifiers are stored.",
             "HTTP trace captures urllib.request and AWS SDK (botocore) calls; "
             "entries include source and AWS operation metadata.",
