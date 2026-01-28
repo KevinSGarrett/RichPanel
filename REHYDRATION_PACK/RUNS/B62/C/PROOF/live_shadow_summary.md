@@ -73,5 +73,6 @@
 
 ## Notes
 - Ticket identifiers are hashed in the JSON report.
+- Shopify shop domains are hashed in the JSON report.
 - No message bodies or customer identifiers are stored.
 - HTTP trace captures urllib.request and AWS SDK (botocore) calls.
