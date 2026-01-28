@@ -44,6 +44,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_openai_rewrite_evidence,
     _evaluate_outbound_evidence,
     _evaluate_outbound_attempted,
+    _classify_outbound_failure,
+    _evaluate_send_message_status,
     _evaluate_operator_reply_evidence,
     _evaluate_send_message_evidence,
     _evaluate_allowlist_blocked_evidence,
@@ -58,6 +60,11 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _append_operator_send_message_criteria_details,
     _fetch_ticket_snapshot,
     _fetch_latest_reply_hash,
+    _reply_contains_tracking_url,
+    _reply_contains_tracking_number_like,
+    _reply_contains_eta_date_like,
+    _collect_reply_body_candidates,
+    _evaluate_reply_content_flags,
     append_summary,
     _redact_command,
     _iso_business_days_before,
@@ -706,6 +713,70 @@ class OutboundAttemptedTests(unittest.TestCase):
         self.assertIsNone(attempted)
 
 
+class OutboundFailureClassificationTests(unittest.TestCase):
+    def test_outbound_failure_blocked_by_allowlist(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=True,
+            outbound_attempted=True,
+            outbound_message_count_ok=False,
+            send_message_tag_present=False,
+            require_outbound=True,
+            require_send_message=True,
+        )
+        self.assertEqual(result, "blocked_by_allowlist")
+
+    def test_outbound_failure_request_failed(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=False,
+            outbound_attempted=False,
+            outbound_message_count_ok=False,
+            send_message_tag_present=False,
+            require_outbound=True,
+            require_send_message=True,
+        )
+        self.assertEqual(result, "request_failed")
+
+    def test_outbound_failure_none_when_not_required(self) -> None:
+        result = _classify_outbound_failure(
+            allowlist_blocked_tag_present=False,
+            outbound_attempted=None,
+            outbound_message_count_ok=None,
+            send_message_tag_present=None,
+            require_outbound=False,
+            require_send_message=False,
+        )
+        self.assertIsNone(result)
+
+
+class SendMessageStatusTests(unittest.TestCase):
+    def test_send_message_status_happy_path(self) -> None:
+        status = _evaluate_send_message_status(
+            post_tags=["mw-outbound-path-send-message"],
+            send_message_tag_present=True,
+            allowlist_blocked_tag_present=False,
+            latest_comment_is_operator=True,
+        )
+        self.assertEqual(status, 200)
+
+    def test_send_message_status_missing_tag(self) -> None:
+        status = _evaluate_send_message_status(
+            post_tags=[],
+            send_message_tag_present=False,
+            allowlist_blocked_tag_present=False,
+            latest_comment_is_operator=True,
+        )
+        self.assertIsNone(status)
+
+    def test_send_message_status_failure_tag(self) -> None:
+        status = _evaluate_send_message_status(
+            post_tags=["mw-send-message-failed"],
+            send_message_tag_present=True,
+            allowlist_blocked_tag_present=False,
+            latest_comment_is_operator=True,
+        )
+        self.assertIsNone(status)
+
+
 class SupportRoutingTests(unittest.TestCase):
     def test_support_routing_tag_forces_support(self) -> None:
         result = _evaluate_support_routing(
@@ -796,6 +867,45 @@ class OrderMatchEvidenceTests(unittest.TestCase):
         self.assertIsNone(result["order_match_failure_reason"])
 
 
+class ReplyContentFlagsTests(unittest.TestCase):
+    def test_reply_contains_tracking_url(self) -> None:
+        body = "Tracking link: https://tracking.example.com/track/ABC123"
+        self.assertTrue(_reply_contains_tracking_url(body))
+
+    def test_reply_contains_tracking_number_like(self) -> None:
+        body = "Tracking number: 1Z999AA10123456784"
+        self.assertTrue(_reply_contains_tracking_number_like(body))
+
+    def test_reply_contains_tracking_url_false(self) -> None:
+        body = "Tracking link: (not available)"
+        self.assertFalse(_reply_contains_tracking_url(body))
+
+    def test_reply_contains_eta_date_iso(self) -> None:
+        body = "Your order was placed on 2026-02-04. It should arrive soon."
+        self.assertTrue(_reply_contains_eta_date_like(body))
+
+    def test_collect_reply_body_candidates_and_flags(self) -> None:
+        candidates = _collect_reply_body_candidates(
+            latest_reply_body=None,
+            draft_replies=None,
+            computed_draft_body=(
+                "Computed reply with 2026-02-04, tracking number: ABC12345, and "
+                "https://tracking.example.com/t/1"
+            ),
+        )
+        self.assertEqual(len(candidates), 1)
+        contains_tracking, contains_tracking_number, contains_eta = (
+            _evaluate_reply_content_flags(
+                candidates=candidates,
+                expected_tracking_url=None,
+                expected_tracking_number=None,
+            )
+        )
+        self.assertTrue(contains_tracking)
+        self.assertTrue(contains_tracking_number)
+        self.assertTrue(contains_eta)
+
+
 class AllowlistSkipTests(unittest.TestCase):
     def test_should_skip_allowlist_blocked_when_unconfigured(self) -> None:
         reason = _should_skip_allowlist_blocked(
@@ -841,6 +951,10 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("proof_fields", payload)
         self.assertIn("intent_after", payload["proof_fields"])
         self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
+        self.assertIn("outbound_send_message_status", payload["proof_fields"])
+        self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
+        self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
+        self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
 
 
 class AllowlistConfigTests(unittest.TestCase):

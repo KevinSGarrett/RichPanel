@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -100,10 +100,40 @@ _POSITIVE_MIDDLEWARE_TAGS = {
 _LOOP_PREVENTION_TAG = "mw-auto-replied"
 _OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
 _OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
+_OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG = "mw-outbound-blocked-missing-bot-author"
+_SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
+_SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
+_SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
 _ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 _ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 _ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing:"
 _SUPPORT_ROUTE_TAG = "route-email-support-team"
+_REPLY_URL_REGEX = re.compile(
+    r"(https?://[^\s<>()\"']+|www\.[^\s<>()\"']+)", re.IGNORECASE
+)
+_REPLY_TRACKING_NUMBER_REGEX = re.compile(
+    r"(?i)\btracking(?:\s*(?:number|no\.?|#))?\s*[:\-]?\s*([A-Za-z0-9-]{6,})"
+)
+_REPLY_DATE_LIKE_REGEX = re.compile(
+    r"\b("
+    r"\d{4}-\d{2}-\d{2}"
+    r"|"
+    r"\d{1,2}/\d{1,2}/\d{2,4}"
+    r"|"
+    r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*"
+    r"\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s+\d{2,4})?"
+    r"|"
+    r"\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*"
+    r"(?:\s+\d{2,4})?"
+    r")\b",
+    re.IGNORECASE,
+)
+_SEND_MESSAGE_FAILURE_TAGS = {
+    _SEND_MESSAGE_FAILED_TAG,
+    _SEND_MESSAGE_AUTHOR_MISSING_TAG,
+    _SEND_MESSAGE_CLOSE_FAILED_TAG,
+    _OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
+}
 
 _ORDER_STATUS_SCENARIOS = {
     "order_status",
@@ -430,6 +460,78 @@ def _fetch_latest_reply_body(
     return _extract_latest_comment_body(
         ticket.get("comments") if isinstance(ticket, dict) else None
     )
+
+
+def _reply_contains_tracking_url(
+    text: Optional[str], *, expected_url: Optional[str] = None
+) -> bool:
+    if not isinstance(text, str) or not text.strip():
+        return False
+    if expected_url and expected_url in text:
+        return True
+    return bool(_REPLY_URL_REGEX.search(text))
+
+
+def _reply_contains_tracking_number_like(
+    text: Optional[str], *, expected_number: Optional[str] = None
+) -> bool:
+    if not isinstance(text, str) or not text.strip():
+        return False
+    if expected_number and expected_number in text:
+        return True
+    return bool(_REPLY_TRACKING_NUMBER_REGEX.search(text))
+
+
+def _reply_contains_eta_date_like(text: Optional[str]) -> bool:
+    if not isinstance(text, str) or not text.strip():
+        return False
+    return bool(_REPLY_DATE_LIKE_REGEX.search(text))
+
+
+def _collect_reply_body_candidates(
+    *,
+    latest_reply_body: Optional[str],
+    draft_replies: Optional[List[Dict[str, Any]]],
+    computed_draft_body: Optional[str],
+) -> List[str]:
+    candidates: List[str] = []
+    if isinstance(latest_reply_body, str) and latest_reply_body.strip():
+        candidates.append(latest_reply_body)
+    if isinstance(draft_replies, list):
+        for reply in draft_replies:
+            if not isinstance(reply, dict):
+                continue
+            body = reply.get("body")
+            if isinstance(body, str) and body.strip():
+                candidates.append(body)
+    if not candidates and isinstance(computed_draft_body, str) and computed_draft_body.strip():
+        candidates.append(computed_draft_body)
+    return candidates
+
+
+def _evaluate_reply_content_flags(
+    *,
+    candidates: Iterable[str],
+    expected_tracking_url: Optional[str],
+    expected_tracking_number: Optional[str],
+) -> Tuple[bool, bool, bool]:
+    contains_tracking = False
+    contains_tracking_number = False
+    contains_eta_date = False
+    for body in candidates:
+        if not contains_tracking and _reply_contains_tracking_url(
+            body, expected_url=expected_tracking_url
+        ):
+            contains_tracking = True
+        if not contains_tracking_number and _reply_contains_tracking_number_like(
+            body, expected_number=expected_tracking_number
+        ):
+            contains_tracking_number = True
+        if not contains_eta_date and _reply_contains_eta_date_like(body):
+            contains_eta_date = True
+        if contains_tracking and contains_tracking_number and contains_eta_date:
+            break
+    return contains_tracking, contains_tracking_number, contains_eta_date
 
 
 def _fetch_latest_reply_hash(
@@ -1099,9 +1201,14 @@ def _build_skip_proof_payload(
         "proof_fields": {
             "intent_after": None,
             "outbound_attempted": None,
+            "outbound_failure_classification": None,
+            "outbound_send_message_status": None,
             "routed_to_support": None,
             "order_match_success": None,
             "order_match_failure_reason": None,
+            "reply_contains_tracking_url": None,
+            "reply_contains_tracking_number_like": None,
+            "reply_contains_eta_date_like": None,
         },
         "result": {
             "status": "SKIP",
@@ -2766,6 +2873,46 @@ def _evaluate_outbound_attempted(
     return any(signals)
 
 
+def _classify_outbound_failure(
+    *,
+    allowlist_blocked_tag_present: Optional[bool],
+    outbound_attempted: Optional[bool],
+    outbound_message_count_ok: Optional[bool],
+    send_message_tag_present: Optional[bool],
+    require_outbound: bool,
+    require_send_message: bool,
+) -> Optional[str]:
+    if allowlist_blocked_tag_present:
+        return "blocked_by_allowlist"
+    if not (require_outbound or require_send_message):
+        return None
+    if outbound_attempted is False:
+        return "request_failed"
+    if require_outbound and outbound_message_count_ok is False:
+        return "request_failed"
+    if require_send_message and send_message_tag_present is False:
+        return "request_failed"
+    return None
+
+
+def _evaluate_send_message_status(
+    *,
+    post_tags: List[str],
+    send_message_tag_present: Optional[bool],
+    allowlist_blocked_tag_present: Optional[bool],
+    latest_comment_is_operator: Optional[bool],
+) -> Optional[int]:
+    if allowlist_blocked_tag_present:
+        return None
+    if send_message_tag_present is not True:
+        return None
+    if any(tag in _SEND_MESSAGE_FAILURE_TAGS for tag in post_tags or []):
+        return None
+    if latest_comment_is_operator is False:
+        return None
+    return 200
+
+
 def _evaluate_support_routing(
     *,
     routing_tags: List[str],
@@ -3806,6 +3953,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     tracking_reply_verified = None
     draft_reply_hash = None
     reply_body_hash = None
+    latest_reply_body: Optional[str] = None
+    computed_draft_body: Optional[str] = None
     try:
         expected_estimate = compute_delivery_estimate(
             payload.get("order_created_at"),
@@ -3839,6 +3988,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             inquiry_date=payload.get("ticket_created_at"),
         )
         if draft_body:
+            computed_draft_body = draft_body
             draft_reply_hash = _fingerprint(draft_body)
 
     routing_intent = routing_state.get("intent") or routing_audit.get("intent")
@@ -3934,6 +4084,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if not reply_body_candidate.strip():
             raise SmokeFailure("Tracking scenario reply body is empty.")
 
+        latest_reply_body = reply_body_candidate
         tracking_number_present = tracking_number_expected in reply_body_candidate
         tracking_url_present = tracking_url_expected in reply_body_candidate
         tracking_reply_verified = tracking_number_present and tracking_url_present
@@ -4497,12 +4648,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             f"updated_at_delta={updated_at_delta}s."
         )
 
-        if reply_body_hash is None and payload_conversation:
-            reply_body_hash = _fetch_latest_reply_hash(
-                ticket_executor,
-                payload_conversation,
-                allow_network=allow_network,
-            )
+        if reply_body_hash is None and payload_conversation and ticket_executor:
+            if latest_reply_body is None:
+                latest_reply_body = _fetch_latest_reply_body(
+                    ticket_executor,
+                    payload_conversation,
+                    allow_network=allow_network,
+                )
+            if latest_reply_body:
+                reply_body_hash = _fingerprint(latest_reply_body)
 
         if args.simulate_followup and order_status_mode and status_resolved:
             required_tags = [_LOOP_PREVENTION_TAG]
@@ -4804,6 +4958,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
         require_allowlist_blocked=require_allowlist_blocked,
     )
+    outbound_failure_classification = _classify_outbound_failure(
+        allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
+        outbound_attempted=outbound_attempted,
+        outbound_message_count_ok=outbound_message_count_ok,
+        send_message_tag_present=send_message_tag_present_ok,
+        require_outbound=require_outbound,
+        require_send_message=require_send_message,
+    )
 
     openai_routing_used = bool(openai_routing.get("llm_called"))
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
@@ -4839,6 +5001,27 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         ticket_tags=post_ticket_data.get("tags") if post_ticket_data else None,
         tags_added=tags_added,
         skip_tags_added=skip_tags_added,
+    )
+    outbound_send_message_status = _evaluate_send_message_status(
+        post_tags=post_ticket_data.get("tags") if post_ticket_data else [],
+        send_message_tag_present=send_message_tag_present_ok,
+        allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
+        latest_comment_is_operator=latest_comment_is_operator,
+    )
+
+    reply_body_candidates = _collect_reply_body_candidates(
+        latest_reply_body=latest_reply_body,
+        draft_replies=draft_replies,
+        computed_draft_body=computed_draft_body,
+    )
+    (
+        reply_contains_tracking_url,
+        reply_contains_tracking_number_like,
+        reply_contains_eta_date_like,
+    ) = _evaluate_reply_content_flags(
+        candidates=reply_body_candidates,
+        expected_tracking_url=tracking_url_expected,
+        expected_tracking_number=tracking_number_expected,
     )
 
     criteria = {
@@ -5330,6 +5513,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "intent_after": routing_intent,
         "routing_department": routing_department,
         "outbound_attempted": outbound_attempted,
+        "outbound_failure_classification": outbound_failure_classification,
+        "outbound_send_message_status": outbound_send_message_status,
         "routed_to_support": support_routing.get("routed_to_support"),
         "support_tag_present": support_routing.get("support_tag_present"),
         "support_department": support_routing.get("support_department"),
@@ -5337,6 +5522,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "order_match_failure_reason": order_match_evidence.get(
             "order_match_failure_reason"
         ),
+        "reply_contains_tracking_url": reply_contains_tracking_url,
+        "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
+        "reply_contains_eta_date_like": reply_contains_eta_date_like,
         "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
         "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
         "send_message_tag_absent": send_message_tag_absent_ok,
@@ -5490,6 +5678,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "classification_reason": classification_reason,
             "reply_evidence": reply_evidence,
             "reply_evidence_reason": reply_evidence_reason,
+            "outbound_failure_classification": outbound_failure_classification,
             "fallback_close_used": fallback_used if order_status_mode else None,
             "followup_reply_sent": followup_reply_sent,
             "followup_reply_reason": followup_reply_reason,
