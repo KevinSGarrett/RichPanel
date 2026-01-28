@@ -1,79 +1,94 @@
 {
-  "run_id": "RUN_20260126_0319Z",
-  "generated_at": "2026-01-28T16:17:21.610818+00:00",
+  "run_id": "RUN_20260128_1637Z",
+  "generated_at": "2026-01-28T16:39:10.756276+00:00",
   "sample_size_requested": 17,
   "ticket_count": 17,
   "tickets_evaluated": 17,
-  "email_channel_count": 0,
+  "email_channel_count": 7,
   "chat_channel_count": 0,
-  "unknown_channel_count": 17,
-  "order_match_success_count": 16,
-  "order_match_failure_count": 1,
-  "order_match_success_rate": 0.9412,
-  "match_success_rate": 0.9412,
-  "tracking_or_eta_available_count": 16,
-  "tracking_or_eta_available_rate": 0.9412,
+  "unknown_channel_count": 10,
+  "order_match_success_count": 0,
+  "order_match_failure_count": 17,
+  "order_match_success_rate": 0.0,
+  "match_success_rate": 0.0,
+  "tracking_or_eta_available_count": 0,
+  "tracking_or_eta_available_rate": 0.0,
   "would_reply_send": false,
   "route_decisions": {
-    "non_order_status": 17
+    "non_order_status": 9,
+    "unknown": 8
   },
   "route_decision_percentages": {
-    "non_order_status": 1.0
+    "non_order_status": 0.5294,
+    "unknown": 0.4706
   },
   "match_methods": {
-    "order_number": 10,
-    "name_email": 3,
-    "none": 1,
-    "email_only": 3
+    "none": 17
   },
   "match_method_percentages": {
-    "order_number": 0.5882,
-    "name_email": 0.1765,
-    "none": 0.0588,
-    "email_only": 0.1765
+    "none": 1.0
   },
-  "failure_buckets": {},
+  "failure_buckets": {
+    "no_order_candidates": 9,
+    "other_failure": 8
+  },
   "match_failure_buckets": {
     "no_email": 0,
-    "no_order_number": 0,
+    "no_order_number": 3,
     "ambiguous_customer": 0,
-    "no_order_candidates": 0,
+    "no_order_candidates": 6,
     "order_match_failed": 0,
     "parse_error": 0,
     "api_error": 0,
-    "other_failure": 0,
-    "unknown": 1
+    "other_failure": 8,
+    "unknown": 0
   },
-  "top_failure_reasons": [],
-  "failure_reasons": {},
-  "richpanel_fetch_failures": {},
+  "top_failure_reasons": [
+    {
+      "reason": "no_order_candidates",
+      "count": 9
+    },
+    {
+      "reason": "ticket_fetch_failed",
+      "count": 8
+    }
+  ],
+  "failure_reasons": {
+    "no_order_candidates": 9,
+    "ticket_fetch_failed": 8
+  },
+  "richpanel_fetch_failures": {
+    "ticket_fetch_failed": 8
+  },
   "shopify_fetch_failures": {},
   "timing": {
-    "run_duration_seconds": 0.0,
-    "ticket_avg_seconds": 0.0,
-    "ticket_p50_seconds": 0.0,
-    "ticket_p95_seconds": 0.0,
-    "ticket_min_seconds": 0.0,
-    "ticket_max_seconds": 0.0
+    "run_duration_seconds": 80.103,
+    "ticket_avg_seconds": 4.7,
+    "ticket_p50_seconds": 5.067,
+    "ticket_p95_seconds": 6.619,
+    "ticket_min_seconds": 2.813,
+    "ticket_max_seconds": 6.715
   },
   "schema_drift": {
     "threshold": 0.2,
-    "warning": false,
+    "warning": true,
     "ticket_schema": {
-      "total": 0,
-      "unique": 0,
-      "new": 0,
-      "new_ratio": 0.0
+      "total": 9,
+      "unique": 6,
+      "new": 6,
+      "new_ratio": 0.6667
     },
     "shopify_schema": {
-      "total": 0,
-      "unique": 0,
-      "new": 0,
-      "new_ratio": 0.0
+      "total": 9,
+      "unique": 1,
+      "new": 1,
+      "new_ratio": 0.1111
     }
   },
-  "run_warnings": [],
-  "status": "ok",
+  "run_warnings": [
+    "ticket_fetch_failed"
+  ],
+  "status": "warning",
   "drift_watch": {
     "thresholds": {
       "match_rate_drop_pct": 10.0,
@@ -82,13 +97,26 @@
       "schema_drift_new_ratio": 0.2
     },
     "current_values": {
-      "match_rate_pct": 94.12,
-      "api_error_rate_pct": 0.0,
-      "order_number_share_pct": 58.82,
-      "schema_new_ratio_pct": 0.0
+      "match_rate_pct": 0.0,
+      "api_error_rate_pct": 47.06,
+      "order_number_share_pct": 0.0,
+      "schema_new_ratio_pct": 66.67
     },
-    "alerts": [],
-    "has_alerts": false,
+    "alerts": [
+      {
+        "metric": "api_error_rate",
+        "threshold": 5.0,
+        "current": 47.06,
+        "message": "API error rate (47.1%) exceeds threshold (5.0%)"
+      },
+      {
+        "metric": "schema_drift",
+        "threshold": 20.0,
+        "current": 66.67,
+        "message": "Schema drift (66.7%) exceeds threshold (20.0%)"
+      }
+    ],
+    "has_alerts": true,
     "note": "Historical comparison not yet implemented; showing absolute thresholds only"
   }
 }

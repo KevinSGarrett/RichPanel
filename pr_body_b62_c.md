@@ -1,18 +1,19 @@
 <!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-01-28 -->
 
-**Run ID:** `RUN_20260126_0319Z`  
+**Run ID:** `RUN_20260128_1637Z`  
 **Agents:** C  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01QLAztiiKBABLxqnbcV5bv2`  
-**Anthropic request id:** `req_011CXZHWftEi1sSA9cc7tnu6`  
-**Anthropic usage:** input_tokens=24406; output_tokens=441; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+**Anthropic response id:** `msg_018M4ZC5A1bjxaLrHvWZMANz`  
+**Anthropic request id:** `req_011CXa7zv77tRw7JSX2D79Fk`  
+**Anthropic usage:** input_tokens=25917; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ### 1) Summary
 - Produced a repeatable live read-only shadow report with stable filenames and required deployment-gate metrics.
 - Enforced outbound-disabled guardrails and added `--max-tickets`/`--out`/env selection for reproducible runs.
 - Updated the nightly workflow and prod runbook with gate criteria and new report outputs.
+- Added ticket-fetch failure handling so stale ticket IDs no longer abort the report run.
 
 ### 2) Why
 - **Problem / risk:** The live shadow validation was a one-off script run with non-deterministic outputs and no gate-ready summary.
@@ -36,6 +37,7 @@
 - Added match-failure buckets, tracking/ETA availability rate, and `would_reply_send` to the report schema.
 - Enforced outbound-disabled guard in `scripts/live_readonly_shadow_eval.py`.
 - Updated the nightly workflow to emit `live_shadow_report.json` and `live_shadow_summary.md`.
+- Added `--allow-ticket-fetch-failures` and a `ticket-ids=__none__` override for stale secrets.
 
 **Design decisions (why this way):**
 - Use `--out` to produce stable artifact filenames for CI uploads and deployment-gate automation.
@@ -73,10 +75,10 @@
 - `python REHYDRATION_PACK/RUNS/B62/C/PROOF/generate_sample_report.py`
 
 ### 7) Results & evidence
-**CI:** pending - https://github.com/KevinSGarrett/RichPanel/actions  
+**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21446879808  
 **Codecov:** pending - https://codecov.io/gh/KevinSGarrett/RichPanel  
 **Bugbot:** pending - https://github.com/KevinSGarrett/RichPanel (trigger via `@cursor review`)  
-**Claude gate:** `REHYDRATION_PACK/RUNS/B62/A/claude_gate_audit.json` (response id `msg_01QLAztiiKBABLxqnbcV5bv2`)
+**Claude gate:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21447344671
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_report.json`
@@ -87,9 +89,12 @@
 **Proof snippet(s) (PII-safe):**
 ```text
 ticket_count: 17
-match_success_rate: 0.9412
-tracking_or_eta_available_rate: 0.9412
+match_success_rate: 0.0
+tracking_or_eta_available_rate: 0.0
 would_reply_send: false
+run_warnings: ticket_fetch_failed
+drift_watch.has_alerts: true
+shopify_probe.status_code: 401
 http_trace_summary.allowed_methods_only: true
 ```
 
