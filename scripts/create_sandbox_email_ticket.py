@@ -222,6 +222,14 @@ def parse_args() -> argparse.Namespace:
         "--richpanel-secret-id",
         help="Optional override for the Richpanel API key secret ARN/ID.",
     )
+    parser.add_argument(
+        "--emit-ticket-ref",
+        action="store_true",
+        help=(
+            "Emit unredacted ticket_number/ticket_id JSON to stdout for chaining. "
+            "Do not copy into artifacts."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -335,6 +343,14 @@ def main() -> int:
             f"(ticket_number={ticket_number_fp or 'n/a'}, "
             f"conversation_id={ticket_id_fp or 'n/a'})."
         )
+    if args.emit_ticket_ref:
+        ref_payload = {
+            "ticket_number": ticket_number,
+            "ticket_id": ticket_id,
+            "ticket_number_fingerprint": ticket_number_fp,
+            "ticket_id_fingerprint": ticket_id_fp,
+        }
+        print(f"TICKET_REF_JSON:{json.dumps(ref_payload)}")
 
     return 0
 
