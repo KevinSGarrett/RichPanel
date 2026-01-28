@@ -18,6 +18,15 @@ on:
         description: "Shopify shop domain (e.g. shop.myshopify.com)"
         required: true
         type: string
+      shopify-token-source:
+        description: "Which repo secret to use for Shopify (admin|api)."
+        required: false
+        default: "admin"
+        type: string
+      stack-name:
+        description: "Optional stack name to record in the report"
+        required: false
+        type: string
       use-aws-secrets:
         description: "Resolve AWS Secrets Manager IDs for API keys"
         required: false
@@ -41,14 +50,15 @@ jobs:
       ENVIRONMENT: prod
       RICHPANEL_ENV: prod
       MW_ALLOW_NETWORK_READS: "true"
-      RICHPANEL_OUTBOUND_ENABLED: "true"
+      RICHPANEL_OUTBOUND_ENABLED: "false"
       RICHPANEL_WRITE_DISABLED: "true"
       RICHPANEL_READ_ONLY: "true"
       SHOPIFY_OUTBOUND_ENABLED: "true"
       OPENAI_ALLOW_NETWORK: "false"
       OPENAI_REPLY_REWRITE_ENABLED: "false"
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
-      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ secrets.PROD_SHOPIFY_ADMIN_API_TOKEN || secrets.PROD_SHOPIFY_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_FALLBACK: ${{ secrets.PROD_SHOPIFY_API_TOKEN }}
       SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
     steps:
       - name: Checkout repository
@@ -135,11 +145,18 @@ jobs:
           INPUT_SAMPLE_SIZE: ${{ inputs.sample-size || '10' }}
           INPUT_TICKET_IDS: ${{ inputs.ticket-ids || secrets.PROD_RICHPANEL_TICKET_IDS || '' }}
           INPUT_SHOPIFY_PROBE: ${{ inputs.shopify-probe || 'false' }}
+          INPUT_STACK_NAME: ${{ inputs.stack-name || '' }}
         run: |
           set -euo pipefail
+          if [ -z "${SHOPIFY_ACCESS_TOKEN_OVERRIDE:-}" ] && [ -n "${SHOPIFY_ACCESS_TOKEN_FALLBACK:-}" ]; then
+            export SHOPIFY_ACCESS_TOKEN_OVERRIDE="${SHOPIFY_ACCESS_TOKEN_FALLBACK}"
+          fi
           if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
             echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
             exit 2
+          fi
+          if [[ "${INPUT_TICKET_IDS:-}" == "__none__" ]]; then
+            INPUT_TICKET_IDS=""
           fi
           TICKET_ARGS=()
           if [ -n "${INPUT_TICKET_IDS:-}" ]; then
@@ -158,7 +175,7 @@ jobs:
               echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"
               exit 2
             fi
-            SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
+            SAMPLE_ARGS=(--max-tickets "${INPUT_SAMPLE_SIZE}")
           fi
 
           PROBE_ARGS=()
@@ -166,10 +183,21 @@ jobs:
             PROBE_ARGS=(--shopify-probe)
           fi
 
+          STACK_ARGS=()
+          if [ -n "${INPUT_STACK_NAME:-}" ]; then
+            STACK_ARGS=(--stack-name "${INPUT_STACK_NAME}")
+          fi
+
           python scripts/live_readonly_shadow_eval.py \
+            --env prod \
+            --region "${AWS_REGION}" \
             "${SAMPLE_ARGS[@]}" \
             "${TICKET_ARGS[@]}" \
             "${PROBE_ARGS[@]}" \
+            "${STACK_ARGS[@]}" \
+            --out artifacts/readonly_shadow/live_shadow_report.json \
+            --summary-md-out artifacts/readonly_shadow/live_shadow_summary.md \
+            --allow-ticket-fetch-failures \
             --allow-empty-sample
 
       - name: Upload shadow eval artifacts

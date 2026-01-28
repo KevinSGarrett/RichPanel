@@ -13509,6 +13509,12 @@
       "anchor": "daily-live-read-only-shadow-eval-ci"
     }
   ],
+  "deployment gate criteria (recommended)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "deployment-gate-criteria-recommended"
+    }
+  ],
   "common failure modes (401 / 403)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",

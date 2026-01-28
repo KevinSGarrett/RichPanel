@@ -43,7 +43,7 @@ def fetch_recent_ticket_refs(
     client: Any, *, sample_size: int, list_path: str
 ) -> List[str]:
     if sample_size < 1:
-        raise SystemExit("--sample-size must be >= 1")
+        raise SystemExit("--sample-size/--max-tickets must be >= 1")
     list_paths = [list_path]
     if list_path == "/v1/tickets":
         list_paths.append("/api/v1/conversations")

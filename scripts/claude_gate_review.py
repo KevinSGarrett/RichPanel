@@ -496,6 +496,63 @@ def _fetch_raw(url: str, token: str, accept: str) -> bytes:
         raise RuntimeError(f"GitHub API request failed for {url}: {exc}") from exc
 
 
+def _fetch_graphql(query: str, variables: dict, token: str) -> dict:
+    payload = json.dumps({"query": query, "variables": variables}).encode("utf-8")
+    request = urllib.request.Request("https://api.github.com/graphql", data=payload)
+    request.add_header("Authorization", f"Bearer {token}")
+    request.add_header("Content-Type", "application/json")
+    request.add_header("X-GitHub-Api-Version", "2022-11-28")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")
+        raise RuntimeError(f"GitHub GraphQL error {exc.code}: {body[:300]}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"GitHub GraphQL request failed: {exc}") from exc
+    if "errors" in data:
+        raise RuntimeError(f"GitHub GraphQL returned errors: {data['errors']}")
+    return data.get("data", {})
+
+
+def _fetch_pr_metadata(repo: str, pr_number: int, token: str) -> dict:
+    pr_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
+    try:
+        return _fetch_json(pr_url, token)
+    except RuntimeError as exc:
+        if "too many files changed" not in str(exc):
+            raise
+    owner, name = repo.split("/", 1)
+    query = """
+    query($owner: String!, $name: String!, $number: Int!) {
+      repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+          title
+          body
+          labels(first: 100) {
+            nodes { name }
+          }
+        }
+      }
+    }
+    """
+    data = _fetch_graphql(
+        query,
+        {"owner": owner, "name": name, "number": pr_number},
+        token,
+    )
+    pr = (
+        data.get("repository", {})
+        .get("pullRequest", {})
+    )
+    labels = [{"name": node.get("name", "")} for node in pr.get("labels", {}).get("nodes", [])]
+    return {
+        "title": pr.get("title", ""),
+        "body": pr.get("body", ""),
+        "labels": labels,
+    }
+
+
 def _fetch_all_files(repo: str, pr_number: int, token: str) -> list[dict]:
     files: list[dict] = []
     page = 1
@@ -1401,8 +1458,7 @@ def main() -> int:
         print("ERROR: GITHUB_TOKEN is required but missing.", file=sys.stderr)
         return 2
 
-    pr_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
-    pr_data = _fetch_json(pr_url, github_token)
+    pr_data = _fetch_pr_metadata(repo, pr_number, github_token)
     labels = [label.get("name", "") for label in pr_data.get("labels", [])]
 
     # Fail closed if the gating label is absent: skip is not allowed.
@@ -1443,6 +1499,7 @@ def main() -> int:
     lens_names = [name for name, _ in lenses]
     lens_text = _build_lens_prompt(lenses)
 
+    pr_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     diff_raw = _fetch_raw(pr_url, github_token, accept="application/vnd.github.v3.diff").decode("utf-8", "replace")
     diff_text = _truncate(diff_raw, args.max_diff_chars)
 

@@ -1,0 +1,99 @@
+{
+  "run_id": "RUN_20260128_1811Z",
+  "generated_at": "2026-01-28T18:11:43.264856+00:00",
+  "sample_size_requested": 17,
+  "ticket_count": 17,
+  "tickets_evaluated": 17,
+  "email_channel_count": 12,
+  "chat_channel_count": 0,
+  "unknown_channel_count": 5,
+  "order_match_success_count": 17,
+  "order_match_failure_count": 0,
+  "order_match_success_rate": 1.0,
+  "match_success_rate": 1.0,
+  "tracking_or_eta_available_count": 17,
+  "tracking_or_eta_available_rate": 1.0,
+  "would_reply_send": false,
+  "route_decisions": {
+    "non_order_status": 17
+  },
+  "route_decision_percentages": {
+    "non_order_status": 1.0
+  },
+  "match_methods": {
+    "order_number": 11,
+    "name_email": 3,
+    "email_only": 3
+  },
+  "match_method_percentages": {
+    "order_number": 0.6471,
+    "name_email": 0.1765,
+    "email_only": 0.1765
+  },
+  "failure_buckets": {},
+  "match_failure_buckets": {
+    "no_email": 0,
+    "no_order_number": 0,
+    "ambiguous_customer": 0,
+    "no_order_candidates": 0,
+    "order_match_failed": 0,
+    "parse_error": 0,
+    "api_error": 0,
+    "other_failure": 0,
+    "unknown": 0
+  },
+  "top_failure_reasons": [],
+  "failure_reasons": {},
+  "richpanel_fetch_failures": {},
+  "shopify_fetch_failures": {},
+  "timing": {
+    "run_duration_seconds": 34.533,
+    "ticket_avg_seconds": 2.015,
+    "ticket_p50_seconds": 1.887,
+    "ticket_p95_seconds": 2.355,
+    "ticket_min_seconds": 1.81,
+    "ticket_max_seconds": 2.489
+  },
+  "schema_drift": {
+    "threshold": 0.2,
+    "warning": true,
+    "ticket_schema": {
+      "total": 17,
+      "unique": 9,
+      "new": 9,
+      "new_ratio": 0.5294
+    },
+    "shopify_schema": {
+      "total": 17,
+      "unique": 2,
+      "new": 2,
+      "new_ratio": 0.1176
+    }
+  },
+  "run_warnings": [],
+  "status": "warning",
+  "drift_watch": {
+    "thresholds": {
+      "match_rate_drop_pct": 10.0,
+      "api_error_rate_pct": 5.0,
+      "order_number_share_drop_pct": 15.0,
+      "schema_drift_new_ratio": 0.2
+    },
+    "current_values": {
+      "match_rate_pct": 100.0,
+      "api_error_rate_pct": 0.0,
+      "order_number_share_pct": 64.71,
+      "schema_new_ratio_pct": 52.94
+    },
+    "alerts": [
+      {
+        "metric": "schema_drift",
+        "threshold": 20.0,
+        "current": 52.94,
+        "message": "Schema drift (52.9%) exceeds threshold (20.0%)"
+      }
+    ],
+    "has_alerts": true,
+    "note": "Historical comparison not yet implemented; showing absolute thresholds only"
+  }
+}

@@ -12159,6 +12159,11 @@
       },
       {
         "level": 3,
+        "text": "Deployment gate criteria (recommended)",
+        "anchor": "deployment-gate-criteria-recommended"
+      },
+      {
+        "level": 3,
         "text": "Common failure modes (401 / 403)",
         "anchor": "common-failure-modes-401-403"
       },
