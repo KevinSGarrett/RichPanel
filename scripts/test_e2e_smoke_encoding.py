@@ -49,6 +49,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_allowlist_blocked_evidence,
     _evaluate_support_routing,
     _evaluate_order_match_evidence,
+    _order_resolution_is_order_number,
     _should_skip_allowlist_blocked,
     _unexpected_outbound_blocked,
     _evaluate_openai_requirements,
@@ -83,6 +84,9 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _create_sandbox_email_ticket,
     _redact_identifier,
     _resolve_smoke_ticket_text,
+    _resolve_order_number,
+    _fetch_recent_shopify_order_number,
+    _detect_order_match_by_number,
     _SMOKE_TICKET_TAGS,
     _parse_allowlist_entries,
     _fetch_lambda_allowlist_config,
@@ -915,6 +919,30 @@ class OrderMatchEvidenceTests(unittest.TestCase):
         self.assertIsNone(result["order_match_failure_reason"])
 
 
+class OrderMatchResolutionTests(unittest.TestCase):
+    def test_order_resolution_is_order_number(self) -> None:
+        self.assertTrue(
+            _order_resolution_is_order_number(
+                {"resolvedBy": "richpanel_order_number"}
+            )
+        )
+        self.assertTrue(
+            _order_resolution_is_order_number(
+                {"resolvedBy": "richpanel_order_number_then_shopify_identity"}
+            )
+        )
+
+    def test_order_resolution_is_not_order_number(self) -> None:
+        self.assertFalse(
+            _order_resolution_is_order_number({"resolvedBy": "shopify_email_only"})
+        )
+        self.assertFalse(_order_resolution_is_order_number({"resolvedBy": "no_match"}))
+
+    def test_order_resolution_is_order_number_none(self) -> None:
+        self.assertIsNone(_order_resolution_is_order_number(None))
+        self.assertIsNone(_order_resolution_is_order_number({}))
+
+
 class ReplyContentFlagsTests(unittest.TestCase):
     def test_reply_contains_tracking_url(self) -> None:
         body = "Tracking link: https://tracking.example.com/track/ABC123"
@@ -1062,6 +1090,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
+        self.assertIn("order_match_by_number", payload["proof_fields"])
 
 
 class AllowlistConfigTests(unittest.TestCase):
@@ -1221,6 +1250,34 @@ class ParseArgsTests(unittest.TestCase):
         self.assertTrue(args.require_allowlist_blocked)
         self.assertTrue(args.fail_on_outbound_block)
 
+    def test_parse_args_accepts_order_match_by_number_flag(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--require-order-match-by-number",
+            ],
+        ):
+            args = parse_args()
+        self.assertTrue(args.require_order_match_by_number)
+
+    def test_parse_args_accepts_order_number(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--order-number",
+                "12345",
+            ],
+        ):
+            args = parse_args()
+        self.assertEqual(args.order_number, "12345")
 
 class RoutingValidationTests(unittest.TestCase):
     def test_validate_routing_includes_optional_fields(self) -> None:
@@ -1693,6 +1750,10 @@ class PIISafetyTests(unittest.TestCase):
     def test_pii_scan_detects_ticket_number_flag(self) -> None:
         payload = '{"command":"python scripts/dev_e2e_smoke.py --ticket-number 1040"}'
         self.assertIsNotNone(_check_pii_safe(payload))
+    def test_pii_scan_detects_order_number_flag(self) -> None:
+        payload = '{"command":"python scripts/dev_e2e_smoke.py --order-number 8123"}'
+        self.assertIsNotNone(_check_pii_safe(payload))
+
 
     def test_pii_scan_allows_openai_response_id(self) -> None:
         payload = '{"openai":{"routing":{"response_id":"resp_abc123"}}}'
@@ -1712,6 +1773,8 @@ class PIISafetyTests(unittest.TestCase):
                 "Sandbox smoke",
                 "--ticket-body",
                 "Automated smoke body",
+                "--order-number",
+                "55555",
                 "--scenario",
                 "order_status",
             ]
@@ -1721,12 +1784,49 @@ class PIISafetyTests(unittest.TestCase):
         self.assertIn("--ticket-from-email <redacted>", cmd)
         self.assertIn("--ticket-subject <redacted>", cmd)
         self.assertIn("--ticket-body <redacted>", cmd)
+        self.assertIn("--order-number <redacted>", cmd)
         self.assertNotIn("1039", cmd)
         self.assertNotIn("evt:ac89d31a", cmd)
         self.assertNotIn("sandbox.test+autoticket@example.com", cmd)
         self.assertNotIn("Sandbox smoke", cmd)
         self.assertNotIn("Automated smoke body", cmd)
+        self.assertNotIn("55555", cmd)
         self.assertTrue(cmd.startswith("python "))
+
+
+class OrderNumberResolutionTests(unittest.TestCase):
+    def test_resolve_order_number_prefers_arg(self) -> None:
+        with patch.dict(os.environ, {"MW_SMOKE_ORDER_NUMBER": "111"}, clear=True):
+            self.assertEqual(_resolve_order_number(" #987 "), "987")
+
+    def test_resolve_order_number_env(self) -> None:
+        with patch.dict(os.environ, {"MW_SMOKE_ORDER_NUMBER": " 456 "}, clear=True):
+            self.assertEqual(_resolve_order_number(None), "456")
+
+    def test_fetch_recent_shopify_order_number_success(self) -> None:
+        class _Resp:
+            def __init__(self) -> None:
+                self.status_code = 200
+                self.dry_run = False
+
+            def json(self) -> dict:
+                return {"orders": [{"order_number": "12345"}]}
+
+        class _Client:
+            def request(self, *_args: Any, **_kwargs: Any) -> _Resp:
+                return _Resp()
+
+        with patch("dev_e2e_smoke.ShopifyClient", return_value=_Client()):
+            value = _fetch_recent_shopify_order_number(
+                allow_network=True, safe_mode=False, automation_enabled=True
+            )
+        self.assertEqual(value, "12345")
+
+    def test_fetch_recent_shopify_order_number_skips_when_disabled(self) -> None:
+        value = _fetch_recent_shopify_order_number(
+            allow_network=False, safe_mode=False, automation_enabled=True
+        )
+        self.assertIsNone(value)
 
 
 class AutoTicketHelpersTests(unittest.TestCase):
@@ -2712,6 +2812,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AllowlistEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(SupportRoutingTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchEvidenceTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchResolutionTests))
     suite.addTests(loader.loadTestsFromTestCase(ReplyContentFlagsTests))
     suite.addTests(loader.loadTestsFromTestCase(AllowlistSkipTests))
     suite.addTests(loader.loadTestsFromTestCase(SkipProofPayloadTests))

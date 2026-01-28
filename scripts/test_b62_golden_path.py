@@ -44,12 +44,15 @@ class RedactionTests(unittest.TestCase):
             "12345",
             "--allowlist-email",
             "test.user@example.com",
+            "--order-number",
+            "98765",
             "--ticket-id",
             "conv-abc",
         ]
         redacted = _redact_command(cmd)
         self.assertNotIn("12345", redacted)
         self.assertNotIn("test.user@example.com", redacted)
+        self.assertNotIn("98765", redacted)
         self.assertNotIn("conv-abc", redacted)
         self.assertIn("<redacted>", redacted)
         redacted = _redact_command(
@@ -155,6 +158,7 @@ class ProofExcerptTests(unittest.TestCase):
             "proof_fields": {
                 "openai_routing_used": True,
                 "openai_rewrite_used": True,
+                "order_match_by_number": True,
                 "outbound_send_message_status": 200,
                 "send_message_path_confirmed": True,
                 "send_message_tag_present": True,
@@ -167,6 +171,7 @@ class ProofExcerptTests(unittest.TestCase):
         excerpt = json.loads(_proof_excerpt(proof))
         self.assertIn("openai_routing_used", excerpt)
         self.assertIn("openai_rewrite_used", excerpt)
+        self.assertIn("order_match_by_number", excerpt)
         self.assertIn("outbound_send_message_status", excerpt)
         self.assertIn("latest_comment_is_operator", excerpt)
         self.assertIn("followup_reply_sent", excerpt)

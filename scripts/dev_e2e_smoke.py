@@ -60,6 +60,13 @@ from richpanel_middleware.automation.delivery_estimate import (  # type: ignore 
     build_tracking_reply,
     compute_delivery_estimate,
 )
+from richpanel_middleware.commerce.order_lookup import (  # type: ignore  # noqa: E402
+    lookup_order_summary,
+)
+from richpanel_middleware.ingest.envelope import (  # type: ignore  # noqa: E402
+    build_event_envelope,
+)
+from integrations.shopify.client import ShopifyClient  # type: ignore  # noqa: E402
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
     RichpanelClient,
     RichpanelExecutor,
@@ -168,6 +175,7 @@ _SMOKE_TICKET_FROM_EMAIL_ENV = "MW_SMOKE_TICKET_FROM_EMAIL"
 _SMOKE_TICKET_SUBJECT_ENV = "MW_SMOKE_TICKET_SUBJECT"
 _SMOKE_TICKET_BODY_ENV = "MW_SMOKE_TICKET_BODY"
 _SMOKE_CREATED_TICKET_PATH_ENV = "MW_SMOKE_CREATED_TICKET_PATH"
+_SMOKE_ORDER_NUMBER_ENV = "MW_SMOKE_ORDER_NUMBER"
 _DEFAULT_SMOKE_TICKET_FROM_EMAIL = "sandbox.test+autoticket@example.com"
 _DEFAULT_SMOKE_TICKET_SUBJECT = "Sandbox E2E smoke (autoticket)"
 _DEFAULT_SMOKE_TICKET_BODY = "Automated sandbox E2E smoke test message. Please ignore."
@@ -571,6 +579,7 @@ def _redact_command(argv: List[str]) -> str:
         "--ticket-from-email",
         "--ticket-subject",
         "--ticket-body",
+        "--order-number",
     }
     for arg in argv:
         if skip_next:
@@ -1143,6 +1152,8 @@ _PII_PATTERNS = [
 _PII_REGEX_PATTERNS = [
     r"evt:[a-zA-Z0-9:-]{6,}",  # webhook/followup event identifiers
     r"--ticket-number(?:\s+|=)\d+",  # command-line ticket numbers
+    r"--order-number(?:\s+|=)\d+",  # command-line order numbers
+    r"order\s+number\s+\d+",  # human readable order numbers
     r"ticket\s+number\s+\d+",  # human readable ticket numbers
 ]
 
@@ -1206,6 +1217,7 @@ def _build_skip_proof_payload(
             "routed_to_support": None,
             "order_match_success": None,
             "order_match_failure_reason": None,
+            "order_match_by_number": None,
             "reply_contains_tracking_url": None,
             "reply_contains_tracking_number_like": None,
             "reply_contains_eta_date_like": None,
@@ -1278,6 +1290,50 @@ def _resolve_smoke_ticket_text(
     except Exception:
         return default
     return text or default
+
+
+def _resolve_order_number(value: Optional[str]) -> Optional[str]:
+    candidate = value or os.environ.get(_SMOKE_ORDER_NUMBER_ENV)
+    if not candidate:
+        return None
+    try:
+        text = str(candidate).strip()
+    except Exception:
+        return None
+    return text.lstrip("#") if text else None
+
+
+def _fetch_recent_shopify_order_number(
+    *, allow_network: bool, safe_mode: bool, automation_enabled: bool
+) -> Optional[str]:
+    if not allow_network or safe_mode or not automation_enabled:
+        return None
+    client = ShopifyClient(allow_network=allow_network)
+    try:
+        response = client.request(
+            "GET",
+            "orders.json",
+            params={"status": "any", "limit": "1", "fields": "order_number,name"},
+            dry_run=not allow_network,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+    except Exception:
+        return None
+    if response.dry_run or response.status_code >= 400:
+        return None
+    data = response.json() or {}
+    orders = data.get("orders")
+    if isinstance(orders, list) and orders:
+        order = orders[0] if isinstance(orders[0], dict) else {}
+        for key in ("order_number", "name"):
+            value = order.get(key)
+            if value is None:
+                continue
+            text = str(value).strip()
+            if text:
+                return text.lstrip("#")
+    return None
 
 
 def _redact_identifier(value: Optional[str]) -> Optional[str]:
@@ -1993,6 +2049,13 @@ def parse_args() -> argparse.Namespace:
         help="Richpanel ticket number to resolve and target (optional; tries ID then number endpoint).",
     )
     parser.add_argument(
+        "--order-number",
+        help=(
+            "Optional order number to embed in the payload for order-number match proof "
+            f"(default: ${_SMOKE_ORDER_NUMBER_ENV})."
+        ),
+    )
+    parser.add_argument(
         "--create-ticket",
         action="store_true",
         help="Create a fresh sandbox email ticket and use it for this run.",
@@ -2085,6 +2148,19 @@ def parse_args() -> argparse.Namespace:
         help="Disable OpenAI rewrite requirement.",
     )
     parser.set_defaults(require_openai_rewrite=None)
+    parser.add_argument(
+        "--require-order-match-by-number",
+        dest="require_order_match_by_number",
+        action="store_true",
+        help="Require order match resolved by order number evidence.",
+    )
+    parser.add_argument(
+        "--no-require-order-match-by-number",
+        dest="require_order_match_by_number",
+        action="store_false",
+        help="Disable order match by order number requirement.",
+    )
+    parser.set_defaults(require_order_match_by_number=None)
     parser.add_argument(
         "--require-outbound",
         dest="require_outbound",
@@ -2991,6 +3067,48 @@ def _evaluate_order_match_evidence(
     return {"order_match_success": None, "order_match_failure_reason": None}
 
 
+def _order_resolution_is_order_number(
+    order_resolution: Optional[Dict[str, Any]]
+) -> Optional[bool]:
+    if not isinstance(order_resolution, dict):
+        return None
+    resolved_by = order_resolution.get("resolvedBy")
+    if not resolved_by:
+        return None
+    normalized = str(resolved_by).lower()
+    return "order_number" in normalized
+
+
+def _detect_order_match_by_number(
+    *,
+    payload: Dict[str, Any],
+    allow_network: bool,
+    safe_mode: Optional[bool],
+    automation_enabled: Optional[bool],
+) -> Optional[bool]:
+    if not allow_network:
+        return None
+    order_number = payload.get("order_number") or payload.get("orderNumber")
+    if not order_number:
+        return None
+    try:
+        probe_payload = {"order_number": order_number}
+        envelope = build_event_envelope(probe_payload)
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=bool(safe_mode),
+            automation_enabled=bool(automation_enabled)
+            if automation_enabled is not None
+            else True,
+            allow_network=allow_network,
+        )
+    except Exception:
+        return None
+    if not isinstance(summary, dict):
+        return None
+    return _order_resolution_is_order_number(summary.get("order_resolution"))
+
+
 def _parse_allowlist_entries(
     value: Optional[str], *, strip_at: bool = False
 ) -> set[str]:
@@ -3319,6 +3437,7 @@ def build_payload(
     run_id: Optional[str] = None,
     scenario: str = "baseline",
     ticket_number: Optional[str] = None,
+    order_number: Optional[str] = None,
 ) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "event_id": event_id or f"evt:{uuid.uuid4()}",
@@ -3376,6 +3495,13 @@ def build_payload(
         for key, value in scenario_payload.items():
             if key not in payload:
                 payload[key] = value
+
+    if (
+        order_number
+        and _is_order_status_scenario(scenario)
+        and scenario != "order_status_no_match"
+    ):
+        payload["order_number"] = str(order_number).strip()
 
     return payload
 
@@ -3546,6 +3672,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     args = parse_args()
     region = args.region
     env_name = args.env
+    if args.profile:
+        os.environ.setdefault("AWS_PROFILE", args.profile)
+    os.environ.setdefault("AWS_DEFAULT_REGION", region)
+    os.environ.setdefault("AWS_REGION", region)
     order_status_mode = _is_order_status_scenario(args.scenario)
     negative_scenario = args.scenario in _NEGATIVE_SCENARIOS
     not_order_status_mode = args.scenario == "not_order_status"
@@ -3564,6 +3694,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         args.require_openai_rewrite
         if args.require_openai_rewrite is not None
         else (order_status_mode and not negative_scenario)
+    )
+    require_order_match_by_number = (
+        args.require_order_match_by_number
+        if args.require_order_match_by_number is not None
+        else False
     )
     require_outbound = (
         args.require_outbound
@@ -3586,12 +3721,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         require_operator_reply = False
         require_send_message = False
         require_allowlist_blocked = False
+        require_order_match_by_number = False
     if require_allowlist_blocked:
         require_outbound = False
         require_operator_reply = False
         require_send_message = False
         require_openai_routing = False
         require_openai_rewrite = False
+        require_order_match_by_number = False
+    if negative_scenario or order_status_no_match_mode:
+        require_order_match_by_number = False
 
     if args.create_ticket:
         _require_prod_write_ack(env_name=env_name, ack_token=args.prod_writes_ack)
@@ -3819,12 +3958,27 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     else:
         payload_conversation = None
 
+    order_number = _resolve_order_number(args.order_number)
+    if require_order_match_by_number and not order_number:
+        order_number = _fetch_recent_shopify_order_number(
+            allow_network=allow_network,
+            safe_mode=False,
+            automation_enabled=True,
+        )
+    if require_order_match_by_number and not order_number:
+        raise SmokeFailure(
+            "Order match by number is required. Provide --order-number or "
+            f"{_SMOKE_ORDER_NUMBER_ENV}."
+        )
+
+
     payload = build_payload(
         args.event_id,
         conversation_id=payload_conversation,
         run_id=run_id,
         scenario=args.scenario,
         ticket_number=payload_ticket_number,
+        order_number=order_number,
     )
     payload["outbound_enabled"] = True
     payload["allow_network"] = True
@@ -4005,6 +4159,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         draft_action_present=draft_action_present,
         routing_intent=routing_intent,
     )
+    order_match_by_number = None
+    if order_status_mode and not negative_scenario and require_order_match_by_number:
+        order_match_by_number = _detect_order_match_by_number(
+            payload=payload,
+            allow_network=allow_network,
+            safe_mode=item.get("safe_mode"),
+            automation_enabled=item.get("automation_enabled"),
+        )
     openai_routing = _extract_openai_routing_evidence(
         state_item, audit_item, routing_intent=routing_intent
     )
@@ -5044,6 +5206,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "support_tag_present": support_routing.get("support_tag_present"),
         "support_department": support_routing.get("support_department"),
         "order_match_success": order_match_evidence.get("order_match_success"),
+        "order_match_by_number": order_match_by_number,
         "order_match_failure_reason_present": bool(
             order_match_evidence.get("order_match_failure_reason")
         )
@@ -5123,6 +5286,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             required_checks.append(bool(middleware_ok))
             required_checks.append(bool(skip_tags_present_ok))
             required_checks.append(bool(status_resolved_ok))
+            if require_order_match_by_number:
+                required_checks.append(order_match_by_number is True)
         criteria_details.extend(
             [
                 {
@@ -5148,6 +5313,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                     "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
                     "required": False,
                     "value": middleware_tag_ok,
+                },
+                {
+                    "name": "order_match_by_number",
+                    "description": "Order match resolved by order number",
+                    "required": require_order_match_by_number,
+                    "value": order_match_by_number,
                 },
                 {
                     "name": "no_skip_tags",
@@ -5522,6 +5693,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "order_match_failure_reason": order_match_evidence.get(
             "order_match_failure_reason"
         ),
+        "order_match_by_number": order_match_by_number,
         "reply_contains_tracking_url": reply_contains_tracking_url,
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
         "reply_contains_eta_date_like": reply_contains_eta_date_like,

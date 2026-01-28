@@ -34,6 +34,7 @@ SENSITIVE_FLAGS = {
     "--ticket-subject",
     "--ticket-body",
     "--allowlist-email",
+    "--order-number",
 }
 
 
@@ -120,6 +121,7 @@ def _proof_excerpt(proof: Optional[Dict[str, Any]]) -> str:
     excerpt = {
         "openai_routing_used": fields.get("openai_routing_used"),
         "openai_rewrite_used": fields.get("openai_rewrite_used"),
+        "order_match_by_number": fields.get("order_match_by_number"),
         "outbound_send_message_status": fields.get("outbound_send_message_status"),
         "send_message_path_confirmed": fields.get("send_message_path_confirmed"),
         "send_message_tag_present": fields.get("send_message_tag_present"),
@@ -294,6 +296,10 @@ def parse_args() -> argparse.Namespace:
         help="Directory for run artifacts.",
     )
     parser.add_argument(
+        "--order-number",
+        help="Order number to embed in payload for order-number match proof.",
+    )
+    parser.add_argument(
         "--proof-path",
         default=str(DEFAULT_PROOF_PATH),
         help="Path to write proof JSON.",
@@ -423,6 +429,7 @@ def main() -> int:
                 "order_status",
                 "--require-openai-routing",
                 "--require-openai-rewrite",
+                "--require-order-match-by-number",
                 "--require-outbound",
                 "--require-send-message",
                 "--require-operator-reply",
@@ -434,6 +441,8 @@ def main() -> int:
                 smoke_cmd.extend(["--profile", args.profile])
             if args.run_id:
                 smoke_cmd.extend(["--run-id", args.run_id])
+            if args.order_number:
+                smoke_cmd.extend(["--order-number", args.order_number])
             if ticket_number:
                 smoke_cmd.extend(["--ticket-number", ticket_number])
             elif ticket_id:

@@ -1,24 +1,25 @@
 # Changes — B62/A
 
 ## Intent
+
 - Add B62 sandbox golden path wrapper and proof-field strengthening.
 - Add unit tests for outbound classification and reply content flags.
+- Stabilize Shopify client tests against host env shop domain overrides.
 
 ## Diffstat
-```
-REHYDRATION_PACK/RUNS/B62/A/CHANGES.md             |  24 +
-REHYDRATION_PACK/RUNS/B62/A/EVIDENCE.md            | 173 +++++++
-REHYDRATION_PACK/RUNS/B62/A/PROOF/created_ticket.json           |  27 ++
-REHYDRATION_PACK/RUNS/B62/A/PROOF/golden_path.json | 502 +++++++++++++++++++++
-REHYDRATION_PACK/RUNS/B62/A/PROOF/patch_coverage_summary.txt    |   8 +
-REHYDRATION_PACK/RUNS/B62/A/PROOF/sandbox_golden_path_proof.json     | 502 +++++++++++++++++++++
-REHYDRATION_PACK/RUNS/B62/A/RUN_REPORT.md          |   8 +
-REHYDRATION_PACK/RUNS/B62/A/claude_gate_audit.json |  19 +
-scripts/b62_sandbox_golden_path.py                 | 490 ++++++++++++++++++++
-scripts/create_sandbox_email_ticket.py             |  16 +
-scripts/dev_e2e_smoke.py                           | 203 ++++++++-
-scripts/sandbox_golden_path_proof.py               |  14 +
-scripts/test_b62_golden_path.py                    | 507 +++++++++++++++++++++
-scripts/test_create_sandbox_email_ticket.py        |  72 +++
-scripts/test_e2e_smoke_encoding.py                 | 266 ++++++++++-
+
+```text
+ REHYDRATION_PACK/RUNS/B62/A/CHANGES.md             |  33 +-
+ REHYDRATION_PACK/RUNS/B62/A/EVIDENCE.md            | 162 +---
+ .../RUNS/B62/A/PROOF/created_ticket.json           |  12 +-
+ REHYDRATION_PACK/RUNS/B62/A/PROOF/golden_path.json |  86 +-
+ .../RUNS/B62/A/PROOF/run_ci_checks_output.txt      | 893 +++++++++++++++++++++
+ .../B62/A/PROOF/sandbox_golden_path_proof.json     |  86 +-
+ REHYDRATION_PACK/RUNS/B62/A/RUN_REPORT.md          |   4 +-
+ scripts/b62_sandbox_golden_path.py                 |   9 +
+ scripts/dev_e2e_smoke.py                           | 172 ++++
+ scripts/test_b62_golden_path.py                    |   5 +
+ scripts/test_e2e_smoke_encoding.py                 | 101 +++
+ scripts/test_shopify_client.py                     |   3 +
+ 12 files changed, 1329 insertions(+), 237 deletions(-)
 ```
