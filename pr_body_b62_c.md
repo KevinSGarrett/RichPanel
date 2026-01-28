@@ -16,6 +16,7 @@
 - Added ticket-fetch failure handling so stale ticket IDs no longer abort the report run.
 - Added `shopify-token-source` input to select the correct prod Shopify token.
 - Deduplicated markdown report generation for proof scripts and noted shop domain hashing.
+- Made the proof script repo-root aware and clarified Shopify token fallback handling.
 
 ### 2) Why
 - **Problem / risk:** The live shadow validation was a one-off script run with non-deterministic outputs and no gate-ready summary.
@@ -41,6 +42,7 @@
 - Updated the nightly workflow to emit `live_shadow_report.json` and `live_shadow_summary.md`.
 - Added `--allow-ticket-fetch-failures` and a `ticket-ids=__none__` override for stale secrets.
 - Added `shopify-token-source` input to force the API token when admin tokens are stale.
+- Removed duplicated drift-watch math in `generate_sample_report.py` and avoided hardcoded repo paths.
 
 **Design decisions (why this way):**
 - Use `--out` to produce stable artifact filenames for CI uploads and deployment-gate automation.

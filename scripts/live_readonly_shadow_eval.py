@@ -571,6 +571,45 @@ def _build_drift_summary(
     }
 
 
+def _compute_drift_watch(
+    *,
+    ticket_results: List[Dict[str, Any]],
+    ticket_schema_total: int,
+    ticket_schema_new: int,
+    shopify_schema_total: int,
+    shopify_schema_new: int,
+) -> Dict[str, Any]:
+    tickets_evaluated = len(ticket_results)
+    match_rate = (
+        sum(1 for result in ticket_results if result.get("order_matched"))
+        / tickets_evaluated
+        if tickets_evaluated
+        else 0.0
+    )
+    api_errors = sum(
+        1
+        for result in ticket_results
+        if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
+    )
+    api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
+    order_number_matches = sum(
+        1 for result in ticket_results if _extract_match_method(result) == "order_number"
+    )
+    order_number_share = (
+        order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
+    )
+    schema_new_ratio = max(
+        ticket_schema_new / ticket_schema_total if ticket_schema_total else 0.0,
+        shopify_schema_new / shopify_schema_total if shopify_schema_total else 0.0,
+    )
+    return _build_drift_watch(
+        match_rate=match_rate,
+        api_error_rate=api_error_rate,
+        order_number_share=order_number_share,
+        schema_new_ratio=schema_new_ratio,
+    )
+
+
 def _build_summary_payload(
     *,
     run_id: str,
@@ -2088,28 +2127,12 @@ def main() -> int:
     )
     
     # B61/C: Build drift watch with current metrics
-    tickets_evaluated = len(ticket_results)
-    match_rate = counts["orders_matched"] / tickets_evaluated if tickets_evaluated else 0.0
-    api_errors = sum(
-        1 for result in ticket_results 
-        if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
-    )
-    api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
-    order_number_matches = sum(
-        1 for result in ticket_results 
-        if _extract_match_method(result) == "order_number"
-    )
-    order_number_share = order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
-    schema_new_ratio = max(
-        ticket_schema_new / ticket_schema_total if ticket_schema_total else 0.0,
-        shopify_schema_new / shopify_schema_total if shopify_schema_total else 0.0,
-    )
-    
-    drift_watch = _build_drift_watch(
-        match_rate=match_rate,
-        api_error_rate=api_error_rate,
-        order_number_share=order_number_share,
-        schema_new_ratio=schema_new_ratio,
+    drift_watch = _compute_drift_watch(
+        ticket_results=ticket_results,
+        ticket_schema_total=ticket_schema_total,
+        ticket_schema_new=ticket_schema_new,
+        shopify_schema_total=shopify_schema_total,
+        shopify_schema_new=shopify_schema_new,
     )
     
     timing_summary = _summarize_timing(

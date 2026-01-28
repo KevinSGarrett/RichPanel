@@ -57,7 +57,8 @@ jobs:
       OPENAI_ALLOW_NETWORK: "false"
       OPENAI_REPLY_REWRITE_ENABLED: "false"
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
-      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN || secrets.PROD_SHOPIFY_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_FALLBACK: ${{ secrets.PROD_SHOPIFY_API_TOKEN }}
       SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
     steps:
       - name: Checkout repository
@@ -147,6 +148,9 @@ jobs:
           INPUT_STACK_NAME: ${{ inputs.stack-name || '' }}
         run: |
           set -euo pipefail
+          if [ -z "${SHOPIFY_ACCESS_TOKEN_OVERRIDE:-}" ] && [ -n "${SHOPIFY_ACCESS_TOKEN_FALLBACK:-}" ]; then
+            export SHOPIFY_ACCESS_TOKEN_OVERRIDE="${SHOPIFY_ACCESS_TOKEN_FALLBACK}"
+          fi
           if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
             echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
             exit 2

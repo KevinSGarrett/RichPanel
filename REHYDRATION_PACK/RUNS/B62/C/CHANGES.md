@@ -9,6 +9,8 @@
 - Added GraphQL fallback in `scripts/claude_gate_review.py` when PR metadata fetch hits API size limits.
 - Redacted Shopify shop domain in report output to keep artifacts PII-safe.
 - Deduplicated markdown report generation by sharing the builder with the proof script.
+- Made `generate_sample_report.py` repo-root aware and reused shared drift-watch calculations.
+- Simplified Shopify token fallback selection in the shadow eval workflow.
 
 ## Tests
 - Updated `scripts/test_live_readonly_shadow_eval.py` to include outbound-disabled flags.

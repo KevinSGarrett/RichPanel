@@ -5,8 +5,18 @@ from pathlib import Path
 import sys
 
 
+def _resolve_repo_root(start: Path) -> Path:
+    start_path = start.parent if start.is_file() else start
+    for candidate in [start_path] + list(start_path.parents):
+        if (candidate / ".git").exists():
+            return candidate
+        if (candidate / "scripts").exists() and (candidate / "backend").exists():
+            return candidate
+    return start_path
+
+
 def main() -> int:
-    root = Path(r"C:\RichPanel_GIT")
+    root = _resolve_repo_root(Path(__file__).resolve())
     source_report = (
         root
         / "artifacts"
@@ -70,43 +80,18 @@ def main() -> int:
         run_warnings=report.get("run_warnings", []),
     )
 
-    tickets_evaluated = len(tickets)
-    match_rate = (
-        counts.get("orders_matched", 0) / tickets_evaluated
-        if tickets_evaluated
-        else 0.0
-    )
-    api_errors = sum(
-        1
-        for result in tickets
-        if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
-    )
-    api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
-    order_number_matches = sum(
-        1 for result in tickets if shadow._extract_match_method(result) == "order_number"
-    )
-    order_number_share = (
-        order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
-    )
-    schema_new_ratio = max(
-        len(ticket_schema_seen) / ticket_schema_total if ticket_schema_total else 0.0,
-        len(shopify_schema_seen) / shopify_schema_total
-        if shopify_schema_total
-        else 0.0,
-    )
-    summary_payload["drift_watch"] = shadow._build_drift_watch(
-        match_rate=match_rate,
-        api_error_rate=api_error_rate,
-        order_number_share=order_number_share,
-        schema_new_ratio=schema_new_ratio,
+    summary_payload["drift_watch"] = shadow._compute_drift_watch(
+        ticket_results=tickets,
+        ticket_schema_total=ticket_schema_total,
+        ticket_schema_new=len(ticket_schema_seen),
+        shopify_schema_total=shopify_schema_total,
+        shopify_schema_new=len(shopify_schema_seen),
     )
 
-    tracking_or_eta_available = sum(
-        1
-        for result in tickets
-        if result.get("tracking_found") or result.get("eta_available")
+    counts["tracking_or_eta_available"] = counts.get(
+        "tracking_or_eta_available",
+        summary_payload.get("tracking_or_eta_available_count", 0),
     )
-    counts["tracking_or_eta_available"] = tracking_or_eta_available
 
     proof_dir = root / "REHYDRATION_PACK" / "RUNS" / "B62" / "C" / "PROOF"
     proof_dir.mkdir(parents=True, exist_ok=True)
@@ -116,6 +101,8 @@ def main() -> int:
     trace_path = proof_dir / "live_shadow_http_trace.json"
     report_path = proof_dir / "live_shadow_report.json"
 
+    source_target = report.get("target", {})
+    source_target = source_target if isinstance(source_target, dict) else {}
     out_report = {
         "run_id": run_id,
         "timestamp": report.get("timestamp"),
@@ -123,11 +110,11 @@ def main() -> int:
         "env_flags": dict(shadow.REQUIRED_FLAGS),
         "target": {
             "env": report.get("environment", "prod"),
-            "region": None,
-            "stack_name": None,
-            "richpanel_base_url": report.get("target", {}).get("richpanel_base_url")
+            "region": source_target.get("region"),
+            "stack_name": source_target.get("stack_name"),
+            "richpanel_base_url": source_target.get("richpanel_base_url")
             or "https://api.richpanel.com",
-            "shop_domain": None,
+            "shop_domain": shadow._redact_shop_domain(source_target.get("shop_domain")),
         },
         "prod_target": report.get("prod_target", True),
         "sample_mode": report.get("sample_mode", "explicit"),
