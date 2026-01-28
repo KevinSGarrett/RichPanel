@@ -105,6 +105,12 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
 from create_sandbox_email_ticket import (  # type: ignore  # noqa: E402
     _require_prod_write_ack as _require_prod_write_ack_script,
 )
+from create_sandbox_chat_ticket import (  # type: ignore  # noqa: E402
+    _build_ticket_payload as _build_chat_ticket_payload,
+    _redact_emails as _chat_redact_emails,
+    _extract_ticket_fields as _extract_chat_ticket_fields,
+    _require_prod_write_ack as _require_prod_write_ack_chat,
+)
 
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
     RichpanelWriteDisabledError,
@@ -2098,6 +2104,58 @@ class AutoTicketHelpersTests(unittest.TestCase):
                 env_name="production", ack_token="I_UNDERSTAND_PROD_WRITES"
             )
 
+
+class ChatTicketHelpersTests(unittest.TestCase):
+    def test_build_chat_ticket_payload_omits_source_for_non_email(self) -> None:
+        payload = _build_chat_ticket_payload(
+            channel="chat",
+            from_email="from@example.com",
+            to_email="support@example.com",
+            subject="Subject",
+            body="Body",
+            first_name="Sandbox",
+            last_name="Test",
+        )
+        ticket = payload["ticket"]
+        self.assertEqual(ticket["via"]["channel"], "chat")
+        self.assertNotIn("source", ticket["via"])
+
+    def test_build_chat_ticket_payload_includes_source_for_email(self) -> None:
+        payload = _build_chat_ticket_payload(
+            channel="email",
+            from_email="from@example.com",
+            to_email="support@example.com",
+            subject="Subject",
+            body="Body",
+            first_name="Sandbox",
+            last_name="Test",
+        )
+        ticket = payload["ticket"]
+        self.assertEqual(
+            ticket["via"]["source"]["from"]["address"], "from@example.com"
+        )
+        self.assertEqual(ticket["via"]["source"]["to"]["address"], "support@example.com")
+
+    def test_chat_redact_emails_masks_addresses(self) -> None:
+        redacted = _chat_redact_emails(
+            "contact us at support@example.com or test+1@demo.co"
+        )
+        self.assertNotIn("support@example.com", redacted)
+        self.assertNotIn("test+1@demo.co", redacted)
+        self.assertIn("<redacted-email>", redacted)
+
+    def test_chat_extract_ticket_fields(self) -> None:
+        ticket_number, ticket_id = _extract_chat_ticket_fields(
+            {"ticket": {"conversation_no": 123, "id": "t-1"}}
+        )
+        self.assertEqual(ticket_number, "123")
+        self.assertEqual(ticket_id, "t-1")
+
+    def test_chat_require_prod_write_ack_blocks(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(SystemExit):
+                _require_prod_write_ack_chat(env_name="prod", ack_token=None)
+
     def test_create_ticket_script_prod_ack_from_env_allows(self) -> None:
         with patch.dict(
             os.environ, {"MW_PROD_WRITES_ACK": "I_UNDERSTAND_PROD_WRITES"}, clear=True
@@ -2963,6 +3021,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))
     suite.addTests(loader.loadTestsFromTestCase(PIISafetyTests))
     suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
+    suite.addTests(loader.loadTestsFromTestCase(ChatTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(FollowupProofTests))
     suite.addTests(loader.loadTestsFromTestCase(SummaryAppendTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
