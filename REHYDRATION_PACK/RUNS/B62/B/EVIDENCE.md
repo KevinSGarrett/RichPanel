@@ -28,7 +28,7 @@ python scripts\run_ci_checks.py --ci 2>&1 | Tee-Object -FilePath REHYDRATION_PAC
 
 ```powershell
 cd C:\RichPanel_GIT
-python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-outbound --require-send-message-path --require-operator-reply --create-ticket --create-ticket-proof-path REHYDRATION_PACK\RUNS\B62\B\PROOF\created_ticket.json --proof-path REHYDRATION_PACK\RUNS\B62\B\PROOF\dev_e2e_smoke_proof.json --profile rp-admin-kevin --run-id b62-20260128-b
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-outbound --require-send-message-path --require-operator-reply --create-ticket --create-ticket-proof-path REHYDRATION_PACK\RUNS\B62\B\PROOF\created_ticket.json --proof-path REHYDRATION_PACK\RUNS\B62\B\PROOF\dev_e2e_smoke_proof.json --profile rp-admin-kevin --run-id b62-20260128-b2
 ```
 
 - Output: `REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_output.txt`

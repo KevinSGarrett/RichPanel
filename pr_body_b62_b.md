@@ -1,6 +1,6 @@
 <!-- PR_QUALITY: title_score=98/100; body_score=98/100; rubric_title=07; rubric_body=03; risk=risk:R3; p0_ok=true; timestamp=2026-01-28 -->
 
-**Run ID:** `b62-20260128-b`  
+**Run ID:** `b62-20260128-b2`  
 **Agents:** B  
 **Labels:** `risk:R3`, `gate:claude`  
 **Risk:** `risk:R3`  
@@ -76,7 +76,7 @@
 - `python scripts/test_pipeline_handlers.py`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
-- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-outbound --require-send-message-path --require-operator-reply --create-ticket --create-ticket-proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/created_ticket.json --proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_proof.json --profile rp-admin-kevin --run-id b62-20260128-b`
+- `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-outbound --require-send-message-path --require-operator-reply --create-ticket --create-ticket-proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/created_ticket.json --proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_proof.json --profile rp-admin-kevin --run-id b62-20260128-b2`
 - `python scripts/create_sandbox_chat_ticket.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/created_chat_ticket.json --emit-ticket-ref --profile rp-admin-kevin --channel chat`
 
 ### 7) Results & evidence
