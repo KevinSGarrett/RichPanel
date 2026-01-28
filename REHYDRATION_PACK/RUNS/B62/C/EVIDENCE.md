@@ -4,6 +4,7 @@
 ```powershell
 cd C:\RichPanel_GIT
 python scripts\test_live_readonly_shadow_eval.py
+python scripts\test_claude_gate_review.py
 ```
 
 ## Commands run (CI workflow, prod read-only)
