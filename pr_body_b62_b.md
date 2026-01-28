@@ -1,13 +1,13 @@
-<!-- PR_QUALITY: title_score=96/100; body_score=98/100; rubric_title=07; rubric_body=03; risk=risk:R3; p0_ok=true; timestamp=2026-01-28 -->
+<!-- PR_QUALITY: title_score=98/100; body_score=98/100; rubric_title=07; rubric_body=03; risk=risk:R3; p0_ok=true; timestamp=2026-01-28 -->
 
 **Run ID:** `b62-20260128-b`  
 **Agents:** B  
 **Labels:** `risk:R3`, `gate:claude`  
 **Risk:** `risk:R3`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01QLAztiiKBABLxqnbcV5bv2`  
-**Anthropic request id:** `req_011CXZHWftEi1sSA9cc7tnu6`  
-**Anthropic usage:** input_tokens=24406; output_tokens=441; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+**Anthropic response id:** `msg_01LpAGJVjW8mNNcBsDjMbmc1`  
+**Anthropic request id:** `req_011CXZqqT9H5qhabqyr87esN`  
+**Anthropic usage:** input_tokens=23857; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ### 1) Summary
 - Made outbound reply path selection channel-aware to avoid mis-sending on non-email tickets.
@@ -25,6 +25,7 @@
 - Email-channel tickets send via `PUT /v1/tickets/{id}/send-message` and verify `is_operator=true` before closing.
 - Non-email channels never call `/send-message`.
 - Allowlist/safety gating blocks outbound for any channel when not permitted.
+- Unknown channel is treated as non-email (comment path only).
 - Missing bot author id blocks email outbound (no comment fallback).
 - Proof artifacts remain PII-safe (no raw emails, ticket IDs, or order numbers).
 
@@ -70,6 +71,7 @@
 
 ### 6) Test plan
 **Local / CI-equivalent:**
+- `python scripts/run_ci_checks.py --ci`
 - `python scripts/test_pipeline_handlers.py`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
@@ -77,16 +79,21 @@
 - `python scripts/create_sandbox_chat_ticket.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/created_chat_ticket.json --emit-ticket-ref --profile rp-admin-kevin --channel chat`
 
 ### 7) Results & evidence
-**CI:** pending - https://github.com/KevinSGarrett/RichPanel/actions  
-**Codecov:** pending - https://codecov.io/gh/KevinSGarrett/RichPanel  
-**Bugbot:** pending - https://cursor.com  
+**CI:** pending - https://github.com/KevinSGarrett/RichPanel/pull/200/checks  
+**Codecov:** pending - https://codecov.io/gh/KevinSGarrett/RichPanel/pull/200  
+**Bugbot:** pending - https://github.com/KevinSGarrett/RichPanel/pull/200 (trigger via `@cursor review`)  
+**Claude gate:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21439788645  
+
+Local CI-equivalent status: `python scripts/run_ci_checks.py --ci` failed due to regenerated docs/registry changes already present; see `REHYDRATION_PACK/RUNS/B62/B/PROOF/run_ci_checks_output.txt`.
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_proof.json`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_output.txt`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/unit_test_output.txt`
+- `REHYDRATION_PACK/RUNS/B62/B/PROOF/run_ci_checks_output.txt`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/created_ticket.json`
 - `REHYDRATION_PACK/RUNS/B62/B/PROOF/create_chat_ticket_error.txt`
+- `REHYDRATION_PACK/RUNS/B62/B/PROOF/claude_gate_audit.json`
 
 **Proof snippet(s) (PII-safe):**
 ```text

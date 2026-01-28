@@ -14,6 +14,16 @@ python scripts\test_pipeline_handlers.py 2>&1 | Tee-Object -FilePath REHYDRATION
 
 - Output: `REHYDRATION_PACK/RUNS/B62/B/PROOF/unit_test_output.txt`
 
+## CI-equivalent (local)
+
+```powershell
+cd C:\RichPanel_GIT
+python scripts\run_ci_checks.py --ci 2>&1 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B62\B\PROOF\run_ci_checks_output.txt
+```
+
+- Output: `REHYDRATION_PACK/RUNS/B62/B/PROOF/run_ci_checks_output.txt`
+- Result: failed due to regenerated docs/registry changes already present in repo; see log tail.
+
 ## dev_e2e_smoke (email send-message path)
 
 ```powershell
@@ -35,6 +45,11 @@ Proof excerpt (PII-safe):
   "closed_after": true
 }
 ```
+
+## Claude gate (real)
+
+- Run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21439788645
+- Audit artifact: `REHYDRATION_PACK/RUNS/B62/B/PROOF/claude_gate_audit.json`
 
 ## Non-email outbound proof
 
