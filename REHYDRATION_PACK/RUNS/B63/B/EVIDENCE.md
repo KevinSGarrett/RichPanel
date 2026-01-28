@@ -20,14 +20,20 @@ Anthropic Response ID: msg_fixture_legacy
 Verdict: PASS
 
 Copy/paste for PR description:
-```
-
 ```json
 {
   "model_used": "claude-opus-4-5-20251101",
   "anthropic_request_id": "req_fixture_legacy",
   "claude_response_id": "msg_fixture_legacy"
 }
+```
+
+## Claude gate workflow log snippet (summary line)
+
+From `REHYDRATION_PACK/RUNS/B63/B/PROOF/claude_gate_run_log.txt`:
+
+```text
+Claude gate OK | model=claude-opus-4-5-20251101 | req_id=req_011CXaVWpucXJYVNkZf9WENA | msg_id=msg_01S6RFS7Gd6BZnTbDPjnq8VU
 ```
 
 ## Unit tests (Claude gate review)
@@ -39,6 +45,7 @@ python -m unittest test_claude_gate_review 2>&1 | Tee-Object -FilePath ..\REHYDR
 
 - Output: `REHYDRATION_PACK/RUNS/B63/B/PROOF/test_claude_gate_review_output.txt`
 - Note: error lines (missing ANTHROPIC_API_KEY / usage) are expected in negative-path tests.
+ - Workflow log proof: `REHYDRATION_PACK/RUNS/B63/B/PROOF/claude_gate_run_log.txt`
 
 ## CI-equivalent (local)
 
