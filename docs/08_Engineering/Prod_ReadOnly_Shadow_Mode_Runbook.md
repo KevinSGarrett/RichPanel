@@ -183,6 +183,7 @@ What it does:
 - Schedule: daily at **03:00 UTC** (plus manual `workflow_dispatch`)
 - Scheduled runs require `PROD_SHOPIFY_SHOP_DOMAIN` (repo secret) for `SHOPIFY_SHOP_DOMAIN`
 - Optional: `PROD_RICHPANEL_TICKET_IDS` (comma-separated) to bypass 403 list endpoints
+- Optional input: `shopify-token-source=api` to force `PROD_SHOPIFY_API_TOKEN` when the admin token is stale
 - Artifact location: GitHub Actions run → `live-readonly-shadow-eval` artifact
 - Artifact contents (PII-safe):
   - `artifacts/readonly_shadow/live_shadow_report.json`

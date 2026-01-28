@@ -18,6 +18,11 @@ on:
         description: "Shopify shop domain (e.g. shop.myshopify.com)"
         required: true
         type: string
+      shopify-token-source:
+        description: "Which repo secret to use for Shopify (admin|api)."
+        required: false
+        default: "admin"
+        type: string
       stack-name:
         description: "Optional stack name to record in the report"
         required: false
@@ -52,7 +57,7 @@ jobs:
       OPENAI_ALLOW_NETWORK: "false"
       OPENAI_REPLY_REWRITE_ENABLED: "false"
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
-      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ secrets.PROD_SHOPIFY_ADMIN_API_TOKEN || secrets.PROD_SHOPIFY_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN || secrets.PROD_SHOPIFY_API_TOKEN }}
       SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
     steps:
       - name: Checkout repository
