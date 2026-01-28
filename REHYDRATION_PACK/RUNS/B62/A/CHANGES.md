@@ -6,7 +6,7 @@
 
 ## Diffstat
 ```
-REHYDRATION_PACK/RUNS/B62/A/CHANGES.md             |  22 +
+REHYDRATION_PACK/RUNS/B62/A/CHANGES.md             |  23 +
 REHYDRATION_PACK/RUNS/B62/A/EVIDENCE.md            |  83 ++++
 REHYDRATION_PACK/RUNS/B62/A/PROOF/created_ticket.json           |  27 ++
 REHYDRATION_PACK/RUNS/B62/A/PROOF/golden_path.json | 502 +++++++++++++++++++++

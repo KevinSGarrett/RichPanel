@@ -106,6 +106,11 @@ class HelperTests(unittest.TestCase):
             mocked.return_value = CompletedProcess([], 0, "", "")
             self.assertEqual(_git_diffstat(ROOT), "(no changes)")
 
+    def test_wrapper_imports(self) -> None:
+        import sandbox_golden_path_proof  # type: ignore
+
+        self.assertTrue(callable(sandbox_golden_path_proof.main))
+
     def test_write_run_report_and_evidence(self) -> None:
         proof = {
             "result": {"status": "PASS", "classification": "PASS_STRONG"},
