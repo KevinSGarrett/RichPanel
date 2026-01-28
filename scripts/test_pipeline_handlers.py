@@ -845,6 +845,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
         ]
         self.assertEqual(len(route_calls), 1)
         route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-auto-replied", route_tags)
+        self.assertIn("mw-order-status-answered", route_tags)
+        self.assertIn("mw-reply-sent", route_tags)
+        self.assertIn("mw-outbound-path-send-message", route_tags)
         self.assertIn("mw-send-message-operator-missing", route_tags)
         self.assertIn("route-email-support-team", route_tags)
 

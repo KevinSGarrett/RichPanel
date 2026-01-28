@@ -37,6 +37,7 @@
 **Core changes:**
 - Added channel detection helpers to select the outbound path deterministically.
 - Added operator-comment verification after `/send-message` and before close.
+- Added loop-prevention tags when operator verification fails after `/send-message`.
 - Applied allowlist gating to all outbound reply paths.
 - Cached bot author id resolution when falling back to `/v1/users`.
 

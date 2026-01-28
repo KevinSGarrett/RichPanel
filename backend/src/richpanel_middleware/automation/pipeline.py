@@ -1537,7 +1537,15 @@ def execute_order_status_reply(
             )
             if latest_comment_is_operator is not True:
                 result = _route_email_support(
-                    "send_message_operator_missing", ticket_status=ticket_status
+                    "send_message_operator_missing",
+                    ticket_status=ticket_status,
+                    extra_tags=[
+                        loop_prevention_tag,
+                        ORDER_STATUS_REPLY_TAG,
+                        REPLY_SENT_TAG,
+                        run_specific_reply_tag,
+                        OUTBOUND_PATH_SEND_MESSAGE_TAG,
+                    ],
                 )
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
