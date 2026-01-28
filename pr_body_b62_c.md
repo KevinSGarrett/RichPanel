@@ -5,9 +5,9 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_016mP6X3FRcEp7WL7wTP4ttm`  
-**Anthropic request id:** `req_011CXa8v7Pke4EJnmaPAG33F`  
-**Anthropic usage:** input_tokens=25896; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+**Anthropic response id:** `msg_01HdCvJbez2AXRFX4Vgps1Vr`  
+**Anthropic request id:** `req_011CXaAjeqHX3cNJzRjvXkU3`  
+**Anthropic usage:** input_tokens=26252; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ### 1) Summary
 - Produced a repeatable live read-only shadow report with stable filenames and required deployment-gate metrics.
@@ -77,10 +77,10 @@
 - `python REHYDRATION_PACK/RUNS/B62/C/PROOF/generate_sample_report.py`
 
 ### 7) Results & evidence
-**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21448350416  
+**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21448589779  
 **Codecov:** pending - https://codecov.io/gh/KevinSGarrett/RichPanel  
 **Bugbot:** pending - https://github.com/KevinSGarrett/RichPanel (trigger via `@cursor review`)  
-**Claude gate:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21447771247
+**Claude gate:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21448599396
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_report.json`
