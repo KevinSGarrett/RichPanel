@@ -44,12 +44,15 @@ class RedactionTests(unittest.TestCase):
             "12345",
             "--allowlist-email",
             "test.user@example.com",
+            "--order-number",
+            "98765",
             "--ticket-id",
             "conv-abc",
         ]
         redacted = _redact_command(cmd)
         self.assertNotIn("12345", redacted)
         self.assertNotIn("test.user@example.com", redacted)
+        self.assertNotIn("98765", redacted)
         self.assertNotIn("conv-abc", redacted)
         self.assertIn("<redacted>", redacted)
         redacted = _redact_command(
@@ -155,6 +158,7 @@ class ProofExcerptTests(unittest.TestCase):
             "proof_fields": {
                 "openai_routing_used": True,
                 "openai_rewrite_used": True,
+                "order_match_by_number": True,
                 "outbound_send_message_status": 200,
                 "send_message_path_confirmed": True,
                 "send_message_tag_present": True,
@@ -167,6 +171,7 @@ class ProofExcerptTests(unittest.TestCase):
         excerpt = json.loads(_proof_excerpt(proof))
         self.assertIn("openai_routing_used", excerpt)
         self.assertIn("openai_rewrite_used", excerpt)
+        self.assertIn("order_match_by_number", excerpt)
         self.assertIn("outbound_send_message_status", excerpt)
         self.assertIn("latest_comment_is_operator", excerpt)
         self.assertIn("followup_reply_sent", excerpt)
@@ -212,6 +217,49 @@ class MainFlowTests(unittest.TestCase):
             ]
             with patch.object(sys, "argv", argv):
                 self.assertEqual(main(), 0)
+
+    def test_main_includes_order_number(self) -> None:
+        captured = {"smoke": None}
+
+        def fake_run(cmd, **_kwargs):  # type: ignore[override]
+            joined = " ".join(cmd)
+            if "create_sandbox_email_ticket.py" in joined:
+                payload = {
+                    "ticket_number": "T123",
+                    "ticket_id": "conv-123",
+                    "ticket_number_fingerprint": "abc",
+                    "ticket_id_fingerprint": "def",
+                }
+                return CompletedProcess(cmd, 0, f"TICKET_REF_JSON:{json.dumps(payload)}", "")
+            if "dev_e2e_smoke.py" in joined:
+                captured["smoke"] = cmd
+            return CompletedProcess(cmd, 0, "", "")
+
+        proof = {"proof_fields": {"outbound_failure_classification": None}}
+        with TemporaryDirectory() as tmpdir, patch(
+            "b62_sandbox_golden_path._run_command", side_effect=fake_run
+        ), patch("b62_sandbox_golden_path._read_proof", return_value=proof):
+            argv = [
+                "prog",
+                "--env",
+                "dev",
+                "--region",
+                "us-east-2",
+                "--stack-name",
+                "Stack",
+                "--artifacts-dir",
+                tmpdir,
+                "--proof-path",
+                str(Path(tmpdir) / "proof.json"),
+                "--order-number",
+                "ORDER-123",
+            ]
+            with patch.object(sys, "argv", argv):
+                self.assertEqual(main(), 0)
+
+        self.assertIsNotNone(captured["smoke"])
+        self.assertIn("--order-number", captured["smoke"])
+        self.assertIn("ORDER-123", captured["smoke"])
 
     def test_main_fallback_to_recent(self) -> None:
         calls = {"create": 0, "recent": 0}

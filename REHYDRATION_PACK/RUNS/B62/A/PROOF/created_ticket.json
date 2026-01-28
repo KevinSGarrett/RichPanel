@@ -1,13 +1,13 @@
 {
   "meta": {
-    "timestamp": "2026-01-27T22:45:53.362283+00:00",
+    "timestamp": "2026-01-28T04:39:11.497718+00:00",
     "env": "dev",
     "region": "us-east-2",
     "stack_name": "RichpanelMiddleware-dev"
   },
   "request": {
     "channel": "email",
-    "from_email_redacted": "redacted:571abc2d0add",
+    "from_email_redacted": "redacted:bd7b0dc44282",
     "subject_fingerprint": "7952ecef0ebf",
     "body_fingerprint": "273d941da5cc",
     "tags": [
@@ -16,10 +16,10 @@
   },
   "response": {
     "status_code": 200,
-    "ticket_number_redacted": "redacted:e754478c35f2",
-    "ticket_number_fingerprint": "e754478c35f2",
-    "conversation_id_redacted": "redacted:07828af40c7f",
-    "conversation_id_fingerprint": "07828af40c7f"
+    "ticket_number_redacted": "redacted:7ec62885a6b7",
+    "ticket_number_fingerprint": "7ec62885a6b7",
+    "conversation_id_redacted": "redacted:439f065297de",
+    "conversation_id_fingerprint": "439f065297de"
   },
   "result": {
     "status": "created"

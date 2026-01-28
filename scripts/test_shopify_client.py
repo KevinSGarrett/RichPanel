@@ -72,6 +72,9 @@ class ShopifyClientTests(unittest.TestCase):
         for key in [
             "SHOPIFY_OUTBOUND_ENABLED",
             "SHOPIFY_ACCESS_TOKEN_OVERRIDE",
+            "SHOPIFY_SHOP_DOMAIN",
+            "SHOPIFY_SHOP",
+            "SHOPIFY_API_VERSION",
             "RICHPANEL_ENV",
             "RICH_PANEL_ENV",
             "MW_ENV",
