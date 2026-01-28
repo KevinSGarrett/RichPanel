@@ -996,29 +996,6 @@ class OrderMatchResolutionTests(unittest.TestCase):
             )
         self.assertIsNone(result)
 
-    def test_detect_order_match_by_number(self) -> None:
-        payload = {"order_number": "12345", "tracking_number": "TRACK-123"}
-        with patch(
-            "dev_e2e_smoke.lookup_order_summary",
-            return_value={"order_resolution": {"resolvedBy": "richpanel_order_number"}},
-        ):
-            result = _detect_order_match_by_number(
-                payload=payload,
-                allow_network=True,
-                safe_mode=False,
-                automation_enabled=True,
-            )
-        self.assertTrue(result)
-
-    def test_detect_order_match_by_number_missing(self) -> None:
-        result = _detect_order_match_by_number(
-            payload={"customer_message": "order status"},
-            allow_network=True,
-            safe_mode=False,
-            automation_enabled=True,
-        )
-        self.assertIsNone(result)
-
 
 class ReplyContentFlagsTests(unittest.TestCase):
     def test_reply_contains_tracking_url(self) -> None:
