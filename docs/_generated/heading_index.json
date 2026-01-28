@@ -13515,6 +13515,36 @@
       "anchor": "common-failure-modes-401-403"
     }
   ],
+  "interpreting shadow eval metrics (b61/c)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "interpreting-shadow-eval-metrics-b61c"
+    }
+  ],
+  "route decision distribution": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "route-decision-distribution"
+    }
+  ],
+  "match method telemetry": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "match-method-telemetry"
+    }
+  ],
+  "failure buckets (pii-safe)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "failure-buckets-pii-safe"
+    }
+  ],
+  "drift watch thresholds": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "drift-watch-thresholds"
+    }
+  ],
   "how to enable shadow mode": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",

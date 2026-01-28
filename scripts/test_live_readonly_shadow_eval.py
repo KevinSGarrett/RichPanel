@@ -97,6 +97,248 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
         self.assertIn("RICHPANEL_WRITE_DISABLED", str(ctx.exception))
 
 
+class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
+    """Tests for B61/C diagnostic functions."""
+
+    def test_extract_match_method_order_number(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "richpanel_order_number"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "order_number")
+
+    def test_extract_match_method_name_email(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "shopify_email_name"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "name_email")
+
+    def test_extract_match_method_email_only(self) -> None:
+        result = {
+            "order_matched": True,
+            "order_resolution": {"resolvedBy": "shopify_email_only"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "email_only")
+
+    def test_extract_match_method_none(self) -> None:
+        result = {
+            "order_matched": False,
+            "order_resolution": {"resolvedBy": "no_match"},
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "none")
+
+    def test_extract_match_method_no_resolution(self) -> None:
+        result = {"order_matched": False}
+        method = shadow_eval._extract_match_method(result)
+        self.assertEqual(method, "none")
+
+    def test_extract_route_decision_order_status(self) -> None:
+        result = {"routing": {"intent": "order_status"}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "order_status")
+
+    def test_extract_route_decision_non_order_status(self) -> None:
+        result = {"routing": {"intent": "returns"}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "non_order_status")
+
+    def test_extract_route_decision_unknown(self) -> None:
+        result = {"routing": {}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "unknown")
+
+    def test_classify_failure_reason_bucket_no_identifiers(self) -> None:
+        result = {"failure_reason": "no_customer_email"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "no_identifiers")
+
+    def test_classify_failure_reason_bucket_shopify_api_error(self) -> None:
+        result = {"failure_reason": "shopify_api_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "shopify_api_error")
+
+    def test_classify_failure_reason_bucket_richpanel_api_error(self) -> None:
+        result = {"failure_reason": "richpanel_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "richpanel_api_error")
+
+    def test_classify_failure_reason_bucket_ambiguous_match(self) -> None:
+        result = {"failure_reason": "multiple_orders_ambiguous"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "ambiguous_match")
+
+    def test_classify_failure_reason_bucket_no_order_candidates(self) -> None:
+        result = {"failure_reason": "no_order_candidates"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "no_order_candidates")
+
+    def test_classify_failure_reason_bucket_parse_error(self) -> None:
+        result = {"failure_reason": "parse_error"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "parse_error")
+
+    def test_classify_failure_reason_bucket_none(self) -> None:
+        result = {}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertIsNone(bucket)
+
+    def test_classify_failure_reason_bucket_shopify_timeout(self) -> None:
+        """Test that shopify_timeout is correctly classified as shopify_api_error."""
+        result = {"failure_reason": "shopify_timeout"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "shopify_api_error")
+
+    def test_classify_failure_reason_bucket_shopify_401(self) -> None:
+        """Test that shopify_401 is correctly classified as shopify_api_error."""
+        result = {"failure_reason": "shopify_401"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "shopify_api_error")
+
+    def test_classify_failure_reason_bucket_shopify_5xx(self) -> None:
+        """Test that shopify_5xx is correctly classified as shopify_api_error."""
+        result = {"failure_reason": "shopify_5xx"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "shopify_api_error")
+
+    def test_classify_failure_reason_bucket_richpanel_timeout(self) -> None:
+        """Test that richpanel_timeout is correctly classified as richpanel_api_error."""
+        result = {"failure_reason": "richpanel_timeout"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result)
+        self.assertEqual(bucket, "richpanel_api_error")
+
+    def test_failure_buckets_are_pii_safe(self) -> None:
+        """
+        Test that failure buckets do not contain PII even when input has PII.
+        This verifies the PII safety claim in the PR.
+        """
+        # Test with failure reason containing email
+        result_with_email = {"failure_reason": "customer email customer@example.com not found"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result_with_email)
+        self.assertIsNotNone(bucket)
+        self.assertNotIn("customer@example.com", bucket)
+        self.assertNotIn("@", bucket)
+        
+        # Test with failure reason containing order number
+        result_with_order = {"failure_reason": "order #12345 not found"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result_with_order)
+        self.assertIsNotNone(bucket)
+        self.assertNotIn("12345", bucket)
+        self.assertNotIn("#", bucket)
+        
+        # Test with failure reason containing customer name
+        result_with_name = {"failure_reason": "customer John Doe not found"}
+        bucket = shadow_eval._classify_failure_reason_bucket(result_with_name)
+        self.assertIsNotNone(bucket)
+        self.assertNotIn("John", bucket)
+        self.assertNotIn("Doe", bucket)
+        
+        # Verify all buckets are from the expected PII-safe set
+        expected_buckets = {
+            "no_identifiers",
+            "shopify_api_error",
+            "richpanel_api_error",
+            "ambiguous_match",
+            "no_order_candidates",
+            "parse_error",
+            "other_error",
+            "other_failure",
+        }
+        for test_result in [result_with_email, result_with_order, result_with_name]:
+            bucket = shadow_eval._classify_failure_reason_bucket(test_result)
+            self.assertIn(bucket, expected_buckets, 
+                         f"Bucket '{bucket}' not in expected PII-safe set")
+
+    def test_route_decision_is_pii_safe(self) -> None:
+        """Test that route decisions do not contain PII."""
+        # Test with routing containing customer info
+        result = {
+            "routing": {
+                "intent": "order_status",
+                "customer_email": "customer@example.com",
+                "customer_name": "John Doe"
+            }
+        }
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertIsNotNone(decision)
+        self.assertNotIn("customer@example.com", decision)
+        self.assertNotIn("@", decision)
+        self.assertNotIn("John", decision)
+        self.assertNotIn("Doe", decision)
+        # Decision should only be one of the expected values
+        self.assertIn(decision, {"order_status", "non_order_status", "unknown"})
+
+    def test_match_method_is_pii_safe(self) -> None:
+        """Test that match methods do not contain PII."""
+        # Test with order resolution containing PII
+        result = {
+            "order_matched": True,
+            "order_resolution": {
+                "resolvedBy": "shopify_email_name",
+                "customer_email": "customer@example.com",
+                "customer_name": "John Doe",
+                "order_number": "12345"
+            }
+        }
+        method = shadow_eval._extract_match_method(result)
+        self.assertIsNotNone(method)
+        self.assertNotIn("customer@example.com", method)
+        self.assertNotIn("@", method)
+        self.assertNotIn("John", method)
+        self.assertNotIn("Doe", method)
+        self.assertNotIn("12345", method)
+        # Method should only be one of the expected values
+        self.assertIn(method, {"order_number", "name_email", "email_only", "none", "parse_error"})
+
+    def test_build_drift_watch_no_alerts(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.02,
+            order_number_share=0.60,
+            schema_new_ratio=0.10,
+        )
+        self.assertFalse(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 0)
+        self.assertEqual(drift_watch["current_values"]["match_rate_pct"], 95.0)
+        self.assertEqual(drift_watch["current_values"]["api_error_rate_pct"], 2.0)
+
+    def test_build_drift_watch_api_error_alert(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.08,  # Above 5% threshold
+            order_number_share=0.60,
+            schema_new_ratio=0.10,
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "api_error_rate")
+
+    def test_build_drift_watch_schema_drift_alert(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.02,
+            order_number_share=0.60,
+            schema_new_ratio=0.25,  # Above 20% threshold
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "schema_drift")
+
+    def test_build_drift_watch_multiple_alerts(self) -> None:
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=0.95,
+            api_error_rate=0.10,  # Above 5% threshold
+            order_number_share=0.60,
+            schema_new_ratio=0.30,  # Above 20% threshold
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 2)
+
+
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_prod_environment_blocks_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
