@@ -47,12 +47,12 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 - Trace file: `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_http_trace.json`
 
 ## Claude gate (real run)
-- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21447344671
+- Workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21447463728
 - Audit artifact: `REHYDRATION_PACK/RUNS/B62/C/PROOF/claude_gate_audit.json`
 - model_used: `claude-opus-4-5-20251101`
-- response_id: `msg_018M4ZC5A1bjxaLrHvWZMANz`
-- request_id: `req_011CXa7zv77tRw7JSX2D79Fk`
-- usage: input_tokens=25917; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
+- response_id: `msg_01TzoW8AyKY4s41zCfGMUuXW`
+- request_id: `req_011CXa8FeC5PqgGJLSCo5nPf`
+- usage: input_tokens=25946; output_tokens=600; cache_creation_input_tokens=0; cache_read_input_tokens=0; service_tier=standard
 
 ## B61/C merge status
 - PR #197 (B61/C) merged: https://github.com/KevinSGarrett/RichPanel/pull/197
