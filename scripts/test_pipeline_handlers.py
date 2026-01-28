@@ -39,6 +39,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _user_is_agent,
     _safe_ticket_snapshot_fetch,
     _AUTHOR_ID_CACHE,
+    _latest_comment_is_operator,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -851,6 +852,13 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("mw-outbound-path-send-message", route_tags)
         self.assertIn("mw-send-message-operator-missing", route_tags)
         self.assertIn("route-email-support-team", route_tags)
+
+    def test_latest_comment_operator_handles_mixed_timezones(self) -> None:
+        comments = [
+            {"created_at": "2026-01-01T01:00:00Z", "is_operator": True},
+            {"created_at": "2026-01-01T02:00:00", "is_operator": False},
+        ]
+        self.assertFalse(_latest_comment_is_operator(comments))
 
     def test_outbound_email_missing_bot_author_in_prod_blocks(self) -> None:
         envelope, plan = self._build_order_status_plan()

@@ -8,6 +8,7 @@
 - Added caching for bot author ID resolution to avoid repeated `/v1/users` calls.
 - Added a send-message operator-missing tag for deterministic failure routing.
 - Added loop-prevention tags when operator verification fails after `/send-message`.
+- Normalized comment timestamps to timezone-aware datetimes to avoid mixed TZ comparison errors.
 
 ## Tests
 

@@ -499,9 +499,12 @@ def _comment_created_at(comment: Any) -> Optional[datetime]:
     if value.endswith("Z"):
         value = f"{value[:-1]}+00:00"
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
     except ValueError:
         return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 def _latest_comment_entry(comments: Any) -> Optional[Dict[str, Any]]:

@@ -38,6 +38,7 @@
 - Added channel detection helpers to select the outbound path deterministically.
 - Added operator-comment verification after `/send-message` and before close.
 - Added loop-prevention tags when operator verification fails after `/send-message`.
+- Normalized comment timestamps to UTC to prevent mixed timezone comparison crashes.
 - Applied allowlist gating to all outbound reply paths.
 - Cached bot author id resolution when falling back to `/v1/users`.
 
@@ -58,6 +59,11 @@
 
 **Docs / artifacts:**
 - `docs/08_Engineering/Richpanel_Reply_Paths.md`
+- `docs/REGISTRY.md`
+- `docs/_generated/doc_outline.json`
+- `docs/_generated/doc_registry.compact.json`
+- `docs/_generated/doc_registry.json`
+- `docs/_generated/heading_index.json`
 - `REHYDRATION_PACK/RUNS/B62/B/RUN_REPORT.md`
 - `REHYDRATION_PACK/RUNS/B62/B/CHANGES.md`
 - `REHYDRATION_PACK/RUNS/B62/B/EVIDENCE.md`
@@ -128,3 +134,4 @@ Non-email limitation (PII-safe):
 
 **Please ignore:**
 - Rehydration pack artifacts except referenced proof files.
+- Generated docs registries in `docs/_generated/*` unless CI fails.
