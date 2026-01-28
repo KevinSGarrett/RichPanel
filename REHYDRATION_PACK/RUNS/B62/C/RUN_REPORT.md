@@ -16,6 +16,7 @@ Move live read-only shadow validation into a repeatable report + CI gate with re
 - match_failure_buckets: no_order_candidates=6, no_order_number=3, other_failure=8
 - top_failure_reasons: no_order_candidates=9, ticket_fetch_failed=8
 - run_warnings: ticket_fetch_failed
+- shopify_probe.status_code: 401
 - http_trace_summary.allowed_methods_only: true; drift_watch.has_alerts: true
 
 ## Artifacts
