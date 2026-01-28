@@ -81,6 +81,7 @@
 **Local / CI-equivalent:**
 - `python scripts/run_ci_checks.py --ci`
 - `python scripts/test_pipeline_handlers.py`
+- `python scripts/test_e2e_smoke_encoding.py`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-outbound --require-send-message-path --require-operator-reply --create-ticket --create-ticket-proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/created_ticket.json --proof-path REHYDRATION_PACK/RUNS/B62/B/PROOF/dev_e2e_smoke_proof.json --profile rp-admin-kevin --run-id b62-20260128-b2`

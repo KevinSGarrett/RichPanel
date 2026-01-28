@@ -13,6 +13,7 @@
 ## Tests
 
 - Added/updated outbound tests for non-email routing, allowlist blocking, operator verification, and author cache.
+- Added chat ticket helper tests in `scripts/test_e2e_smoke_encoding.py`.
 
 ## Docs / Artifacts
 

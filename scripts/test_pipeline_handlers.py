@@ -40,6 +40,10 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _safe_ticket_snapshot_fetch,
     _AUTHOR_ID_CACHE,
     _latest_comment_is_operator,
+    _comment_operator_flag,
+    _comment_created_at,
+    _latest_comment_entry,
+    _safe_ticket_comment_operator_fetch,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -859,6 +863,92 @@ class OutboundOrderStatusTests(unittest.TestCase):
             {"created_at": "2026-01-01T02:00:00", "is_operator": False},
         ]
         self.assertFalse(_latest_comment_is_operator(comments))
+
+    def test_comment_operator_flag_parses_numeric_and_string(self) -> None:
+        self.assertTrue(_comment_operator_flag({"is_operator": 1}))
+        self.assertFalse(_comment_operator_flag({"is_operator": 0}))
+        self.assertTrue(_comment_operator_flag({"isOperator": "true"}))
+        self.assertFalse(_comment_operator_flag({"isOperator": "false"}))
+
+    def test_comment_created_at_handles_invalid_and_naive(self) -> None:
+        self.assertIsNone(_comment_created_at({"created_at": "not-a-date"}))
+        parsed = _comment_created_at({"created_at": "2026-01-01T01:00:00"})
+        self.assertIsNotNone(parsed)
+        assert parsed is not None
+        self.assertIsNotNone(parsed.tzinfo)
+
+    def test_latest_comment_entry_falls_back_to_last_dict(self) -> None:
+        comments = [
+            "bad",
+            {"body": "first"},
+            {"body": "last"},
+        ]
+        latest = _latest_comment_entry(comments)
+        self.assertEqual(latest, {"body": "last"})
+
+    def test_safe_ticket_comment_operator_fetch_handles_dry_run(self) -> None:
+        class _DryRunExecutor:
+            def execute(self, *_args: Any, **_kwargs: Any) -> RichpanelResponse:
+                return RichpanelResponse(
+                    status_code=200,
+                    headers={},
+                    body=b"{}",
+                    url="/v1/tickets/123",
+                    dry_run=True,
+                )
+
+        self.assertIsNone(
+            _safe_ticket_comment_operator_fetch(
+                "ticket-1",
+                executor=cast(RichpanelExecutor, _DryRunExecutor()),
+                allow_network=True,
+            )
+        )
+
+    def test_safe_ticket_comment_operator_fetch_handles_non_200(self) -> None:
+        class _ErrorExecutor:
+            def execute(self, *_args: Any, **_kwargs: Any) -> RichpanelResponse:
+                return RichpanelResponse(
+                    status_code=500,
+                    headers={},
+                    body=b"{}",
+                    url="/v1/tickets/123",
+                    dry_run=False,
+                )
+
+        self.assertIsNone(
+            _safe_ticket_comment_operator_fetch(
+                "ticket-1",
+                executor=cast(RichpanelExecutor, _ErrorExecutor()),
+                allow_network=True,
+            )
+        )
+
+    def test_safe_ticket_comment_operator_fetch_reads_wrapped_ticket(self) -> None:
+        class _WrappedExecutor:
+            def execute(self, *_args: Any, **_kwargs: Any) -> RichpanelResponse:
+                payload = {
+                    "ticket": {
+                        "comments": [
+                            {"created_at": "2026-01-01T00:00:00Z", "is_operator": True}
+                        ]
+                    }
+                }
+                return RichpanelResponse(
+                    status_code=200,
+                    headers={"content-type": "application/json"},
+                    body=json.dumps(payload).encode("utf-8"),
+                    url="/v1/tickets/123",
+                    dry_run=False,
+                )
+
+        self.assertTrue(
+            _safe_ticket_comment_operator_fetch(
+                "ticket-1",
+                executor=cast(RichpanelExecutor, _WrappedExecutor()),
+                allow_network=True,
+            )
+        )
 
     def test_outbound_email_missing_bot_author_in_prod_blocks(self) -> None:
         envelope, plan = self._build_order_status_plan()
