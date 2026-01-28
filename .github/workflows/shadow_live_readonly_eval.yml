@@ -188,6 +188,7 @@ jobs:
             "${STACK_ARGS[@]}" \
             --out artifacts/readonly_shadow/live_shadow_report.json \
             --summary-md-out artifacts/readonly_shadow/live_shadow_summary.md \
+            --allow-ticket-fetch-failures \
             --allow-empty-sample
 
       - name: Upload shadow eval artifacts

@@ -257,6 +257,7 @@ Block deployment if any of the following occur:
 - `http_trace_summary.allowed_methods_only=false` or non-read-only HTTP entries appear.
 - `would_reply_send=true` in the report (should be false for prod read-only).
 - `ticket_count=0` or `run_warnings` includes `ticket_listing_failed` (no usable sample).
+- `run_warnings` includes `ticket_fetch_failed` (ticket IDs stale or access revoked).
 - `drift_watch.has_alerts=true` (API error rate or schema drift exceeds thresholds).
 
 Treat `match_success_rate` and `tracking_or_eta_available_rate` as baseline health signals;

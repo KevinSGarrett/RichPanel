@@ -1494,6 +1494,11 @@ def main() -> int:
         help="Allow run to complete when ticket listing fails or returns empty",
     )
     parser.add_argument(
+        "--allow-ticket-fetch-failures",
+        action="store_true",
+        help="Continue when a ticket lookup fails; record a warning instead of aborting.",
+    )
+    parser.add_argument(
         "--allow-non-prod",
         action="store_true",
         help="Allow non-prod runs for local tests",
@@ -1894,8 +1899,16 @@ def main() -> int:
                     if match_failure:
                         result["failure_reason"] = match_failure
                         result["failure_source"] = "order_match"
-            except SystemExit:
-                raise
+            except SystemExit as exc:
+                if args.allow_ticket_fetch_failures and "Ticket lookup failed" in str(
+                    exc
+                ):
+                    result["failure_reason"] = "ticket_fetch_failed"
+                    result["failure_source"] = "richpanel_fetch"
+                    result["error"] = {"type": "richpanel_error"}
+                    run_warnings.append("ticket_fetch_failed")
+                else:
+                    raise
             except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
                 had_errors = True
                 result["failure_reason"] = _classify_richpanel_exception(exc)

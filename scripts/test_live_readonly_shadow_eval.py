@@ -2151,6 +2151,47 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             payload = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["tickets"][0]["failure_reason"], "richpanel_401")
 
+    def test_allows_ticket_fetch_failure_when_flag_set(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-non-prod",
+                "--allow-ticket-fetch-failures",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=["t-1"]
+            ), mock.patch.object(
+                shadow_eval,
+                "_fetch_ticket",
+                side_effect=SystemExit("Ticket lookup failed for redacted:t-1: boom"),
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertIn("ticket_fetch_failed", payload["run_warnings"])
+            self.assertEqual(payload["tickets"][0]["failure_reason"], "ticket_fetch_failed")
+
     def test_main_warns_when_sample_reduced(self) -> None:
         env = {
             "MW_ENV": "dev",
