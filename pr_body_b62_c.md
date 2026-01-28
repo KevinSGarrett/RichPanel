@@ -1,6 +1,6 @@
 <!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-01-28 -->
 
-**Run ID:** `RUN_20260128_1637Z`  
+**Run ID:** `RUN_20260128_1719Z`  
 **Agents:** C  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
@@ -14,6 +14,7 @@
 - Enforced outbound-disabled guardrails and added `--max-tickets`/`--out`/env selection for reproducible runs.
 - Updated the nightly workflow and prod runbook with gate criteria and new report outputs.
 - Added ticket-fetch failure handling so stale ticket IDs no longer abort the report run.
+- Added `shopify-token-source` input to select the correct prod Shopify token.
 
 ### 2) Why
 - **Problem / risk:** The live shadow validation was a one-off script run with non-deterministic outputs and no gate-ready summary.
@@ -38,6 +39,7 @@
 - Enforced outbound-disabled guard in `scripts/live_readonly_shadow_eval.py`.
 - Updated the nightly workflow to emit `live_shadow_report.json` and `live_shadow_summary.md`.
 - Added `--allow-ticket-fetch-failures` and a `ticket-ids=__none__` override for stale secrets.
+- Added `shopify-token-source` input to force the API token when admin tokens are stale.
 
 **Design decisions (why this way):**
 - Use `--out` to produce stable artifact filenames for CI uploads and deployment-gate automation.
@@ -75,7 +77,7 @@
 - `python REHYDRATION_PACK/RUNS/B62/C/PROOF/generate_sample_report.py`
 
 ### 7) Results & evidence
-**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21446879808  
+**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21448350416  
 **Codecov:** pending - https://codecov.io/gh/KevinSGarrett/RichPanel  
 **Bugbot:** pending - https://github.com/KevinSGarrett/RichPanel (trigger via `@cursor review`)  
 **Claude gate:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21447771247
@@ -89,12 +91,11 @@
 **Proof snippet(s) (PII-safe):**
 ```text
 ticket_count: 17
-match_success_rate: 0.0
-tracking_or_eta_available_rate: 0.0
+match_success_rate: 1.0
+tracking_or_eta_available_rate: 1.0
 would_reply_send: false
-run_warnings: ticket_fetch_failed
 drift_watch.has_alerts: true
-shopify_probe.status_code: 401
+shopify_probe.status_code: 200
 http_trace_summary.allowed_methods_only: true
 ```
 

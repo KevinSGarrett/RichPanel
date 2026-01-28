@@ -12,9 +12,10 @@ cd C:\RichPanel_GIT
 gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
   -f sample-size=10 `
   -f shopify-probe=true `
+  -f shopify-token-source=api `
   -f shop-domain=<redacted>.myshopify.com
 
-gh run download 21446879808 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval
+gh run download 21448350416 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval
 ```
 
 ## Attempted run (AWS Secrets Manager; failed)
@@ -28,16 +29,16 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 ```
 - Failure: `ResourceNotFoundException` for `rp-mw/prod/*` secrets (run `21447011102`).
 
-## Key metrics (live report `RUN_20260128_1637Z`)
+## Key metrics (live report `RUN_20260128_1719Z`)
 - ticket_count: 17 (sample_mode: explicit)
-- match_success_rate: 0.0%
-- tracking_or_eta_available_rate: 0.0%
+- match_success_rate: 100.0%
+- tracking_or_eta_available_rate: 100.0%
 - would_reply_send: false
-- match_failure_buckets: no_order_number=3, no_order_candidates=6, other_failure=8
-- top_failure_reasons: no_order_candidates=9, ticket_fetch_failed=8
-- run_warnings: ticket_fetch_failed
-- drift_watch.has_alerts: true (api_error_rate + schema_drift)
-- shopify_probe.status_code: 401
+- match_methods: order_number=11, name_email=3, email_only=3
+- match_failure_buckets: all zero
+- run_warnings: none
+- drift_watch.has_alerts: true (schema_drift)
+- shopify_probe.status_code: 200
 
 ## Read-only confirmation
 - `env_flags` in `REHYDRATION_PACK/RUNS/B62/C/PROOF/live_shadow_report.json`:
@@ -58,5 +59,5 @@ gh workflow run shadow_live_readonly_eval.yml --ref b62-channel-aware-outbound `
 - PR #197 (B61/C) merged: https://github.com/KevinSGarrett/RichPanel/pull/197
 
 ## Notes
-- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21446879808
+- CI run: https://github.com/KevinSGarrett/RichPanel/actions/runs/21448350416
 - Claude gate initial runs failed due to PR metadata fetch; fixed via GraphQL fallback in `scripts/claude_gate_review.py`.
