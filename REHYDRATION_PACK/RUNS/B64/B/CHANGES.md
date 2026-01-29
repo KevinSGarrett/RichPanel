@@ -8,3 +8,4 @@
 - Updated unit tests to stub order-status intent in offline contexts and to reflect new rewrite validation reasons (`backend/tests`, `scripts/test_pipeline_handlers.py`, `scripts/test_read_only_shadow_mode.py`).
 - Added script-level contract tests for order-status intent and extended rewrite/e2e smoke coverage to satisfy Codecov thresholds (`scripts/test_order_status_intent_contract.py`, `scripts/test_llm_reply_rewriter.py`, `scripts/test_e2e_smoke_encoding.py`).
 - Addressed Bugbot feedback by removing unreachable retry raise in `dev_e2e_smoke.py` and aligning rewrite validation test with unexpected-tracking behavior.
+- Ensured intent parse failures report `order_status_intent_parse_failed:*` by not treating parse errors as gating reasons (`backend/src/richpanel_middleware/automation/order_status_intent.py`, tests).
