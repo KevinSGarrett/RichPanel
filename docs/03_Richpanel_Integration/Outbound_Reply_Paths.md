@@ -8,15 +8,15 @@
 - **Email channel**: use `/send-message` with a valid `author_id`, then close the ticket via the safe update-candidate strategy (no middleware comment).
 - **Non-email/unknown channel**: use the existing middleware comment + close flow.
 
-Channel is read from `ticket.via.channel` (lowercased). Missing `via` or `channel` falls back to the comment path.
+Channel is read from `ticket.via.channel` (lowercased) after a ticket fetch, then falls back to any payload channel. Missing `via` or `channel` falls back to the comment path.
 
 ## Author resolution (email channel)
-1. Use `RICHPANEL_BOT_AUTHOR_ID` if set.
+1. Use `RICHPANEL_BOT_AGENT_ID` if set (fallback: `RICHPANEL_BOT_AUTHOR_ID`).
 2. Else call `GET /v1/users` and select a stable agent/operator id (role/type contains "agent" or "operator"), or the first user with an id.
 
 Only the selection strategy and a short hash of the id are logged (no names or emails).
 
-**Production guardrail:** When `MW_ENV`/`RICHPANEL_ENV` resolves to `prod` or `production`, `RICHPANEL_BOT_AUTHOR_ID` is required and fallback to `/v1/users` is disabled.
+**Production guardrail:** When `MW_ENV`/`RICHPANEL_ENV` resolves to `prod` or `production`, `RICHPANEL_BOT_AGENT_ID` (or fallback `RICHPANEL_BOT_AUTHOR_ID`) is required and fallback to `/v1/users` is disabled.
 
 ## Tags applied
 - Loop prevention + reply success: `mw-auto-replied`, `mw-order-status-answered`, `mw-reply-sent`.
