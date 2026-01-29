@@ -343,6 +343,8 @@ def _parse_response(
     risk_flags = parsed.get("risk_flags") or []
     if body is None or not isinstance(body, str):
         return None, 0.0, [], "missing_body"
+    if not body.strip():
+        return None, 0.0, [], "empty_body"
     try:
         confidence = float(confidence)
     except (TypeError, ValueError):

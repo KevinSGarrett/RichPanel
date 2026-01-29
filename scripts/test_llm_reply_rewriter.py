@@ -183,6 +183,31 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "invalid_json")
 
+    def test_empty_body_is_rejected(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "", "confidence": 0.9}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-empty",
+            event_id="evt-empty",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, "original body")
+        self.assertEqual(result.reason, "empty_body")
+
     def test_parse_response_extracts_embedded_json(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(

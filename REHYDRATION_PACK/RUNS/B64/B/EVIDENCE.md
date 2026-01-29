@@ -21,7 +21,7 @@ python -m pytest -q 2>&1 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B64\B\PROO
 ```
 
 - Output: `REHYDRATION_PACK/RUNS/B64/B/PROOF/pytest_output.txt`
-- Result: `PASS` (1037 passed, 14 subtests passed)
+- Result: `PASS` (1038 passed, 14 subtests passed)
 
 ## Lint (ruff)
 
