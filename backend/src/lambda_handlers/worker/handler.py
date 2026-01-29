@@ -113,6 +113,9 @@ def lambda_handler(event: Dict[str, Any], _context: Any) -> Dict[str, Any]:
             _record_openai_rewrite_evidence(
                 envelope, execution, outbound_result=outbound_result
             )
+            _record_outbound_evidence(
+                envelope, execution, outbound_result=outbound_result
+            )
             LOGGER.info(
                 "worker.processed",
                 extra={
@@ -271,6 +274,96 @@ def _record_openai_rewrite_evidence(
             "event_id": envelope.event_id,
             "conversation_id": conversation_id,
             "keys": sorted(sanitized.keys()),
+        },
+    )
+
+
+def _sanitize_outbound_responses(responses: Any) -> List[Dict[str, Any]]:
+    if not isinstance(responses, list):
+        return []
+    sanitized: List[Dict[str, Any]] = []
+    for entry in responses:
+        if not isinstance(entry, dict):
+            continue
+        action = entry.get("action")
+        status = entry.get("status")
+        dry_run = entry.get("dry_run")
+        sanitized_entry: Dict[str, Any] = {}
+        if isinstance(action, str) and action.strip():
+            sanitized_entry["action"] = action
+        if isinstance(status, int):
+            sanitized_entry["status"] = status
+        elif isinstance(status, float) and status.is_integer():
+            sanitized_entry["status"] = int(status)
+        elif isinstance(status, str) and status.strip().isdigit():
+            sanitized_entry["status"] = int(status.strip())
+        if isinstance(dry_run, bool):
+            sanitized_entry["dry_run"] = dry_run
+        if sanitized_entry:
+            sanitized.append(sanitized_entry)
+    return sanitized
+
+
+def _resolve_outbound_evidence(
+    outbound_result: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    if not isinstance(outbound_result, dict):
+        return None
+    sent_value = outbound_result.get("sent")
+    reason_value = outbound_result.get("reason")
+    responses_value = outbound_result.get("responses")
+    return {
+        "sent": sent_value if isinstance(sent_value, bool) else None,
+        "reason": str(reason_value) if reason_value is not None else None,
+        "responses": _sanitize_outbound_responses(responses_value),
+    }
+
+
+def _record_outbound_evidence(
+    envelope: EventEnvelope,
+    execution: ExecutionResult,
+    *,
+    outbound_result: Dict[str, Any],
+) -> None:
+    evidence = _resolve_outbound_evidence(outbound_result)
+    if not evidence:
+        return
+
+    sanitized = _ddb_sanitize(evidence)
+    conversation_id = _safe_str(envelope.conversation_id or envelope.group_id or "unknown")
+
+    if CONVERSATION_STATE_TABLE_NAME:
+        _table(CONVERSATION_STATE_TABLE_NAME).update_item(
+            Key={"conversation_id": conversation_id},
+            UpdateExpression="SET outbound_result = :val",
+            ExpressionAttributeValues={":val": sanitized},
+        )
+
+    if AUDIT_TRAIL_TABLE_NAME:
+        audit_record = (
+            execution.audit_record
+            if isinstance(getattr(execution, "audit_record", None), dict)
+            else {}
+        )
+        recorded_at = audit_record.get("recorded_at")
+        event_id = envelope.event_id
+        if recorded_at and event_id:
+            ts_action_id = f"{recorded_at}#{event_id}"
+            _table(AUDIT_TRAIL_TABLE_NAME).update_item(
+                Key={
+                    "conversation_id": conversation_id,
+                    "ts_action_id": ts_action_id,
+                },
+                UpdateExpression="SET outbound_result = :val",
+                ExpressionAttributeValues={":val": sanitized},
+            )
+
+    LOGGER.info(
+        "worker.outbound_evidence.recorded",
+        extra={
+            "event_id": envelope.event_id,
+            "conversation_id": conversation_id,
+            "response_count": len(sanitized.get("responses") or []),
         },
     )
 

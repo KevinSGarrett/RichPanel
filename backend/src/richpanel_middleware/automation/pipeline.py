@@ -614,9 +614,12 @@ def _resolve_author_id(
     executor: RichpanelExecutor,
     allow_network: bool,
 ) -> Tuple[Optional[str], str]:
+    env_agent_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AGENT_ID"))
+    if env_agent_id:
+        return env_agent_id, "env:bot_agent_id"
     env_author_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AUTHOR_ID"))
     if env_author_id:
-        return env_author_id, "env"
+        return env_author_id, "env:bot_author_id"
     if not allow_network:
         return None, "network_disabled"
     cached_author_id = _normalize_optional_text(_AUTHOR_ID_CACHE.get("author_id"))
@@ -1196,7 +1199,7 @@ def execute_order_status_reply(
 
         ticket_status = ticket_metadata.status
         payload_channel = _extract_ticket_channel_from_payload(payload)
-        resolved_channel = payload_channel or ticket_channel
+        resolved_channel = ticket_channel or payload_channel
         is_email_channel = resolved_channel == "email"
         env_name, _ = resolve_env_name()
         is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
@@ -1450,9 +1453,15 @@ def execute_order_status_reply(
         if is_email_channel:
             if is_prod_env:
                 author_id = _normalize_optional_text(
+                    os.environ.get("RICHPANEL_BOT_AGENT_ID")
+                ) or _normalize_optional_text(
                     os.environ.get("RICHPANEL_BOT_AUTHOR_ID")
                 )
-                author_strategy = "env_required"
+                author_strategy = (
+                    "env_required:bot_agent_id"
+                    if _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AGENT_ID"))
+                    else "env_required:bot_author_id"
+                )
                 if not author_id:
                     LOGGER.info(
                         "automation.order_status_reply.bot_author_missing",

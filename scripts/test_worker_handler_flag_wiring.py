@@ -300,6 +300,90 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         ]
         self.assertTrue(any(key.get("conversation_id") == "group-10" for key in keys))
 
+    def test_record_outbound_evidence_updates_tables(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-11",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-11",
+            dedupe_id="dedupe-11",
+            payload={},
+            source="test",
+            conversation_id="conv-11",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-11",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"},
+        )
+        outbound_result = {
+            "sent": True,
+            "reason": "sent",
+            "responses": [
+                {"action": "send_message", "status": 200, "dry_run": False},
+                {"action": "add_tag", "status": 200, "dry_run": False},
+            ],
+        }
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_outbound_evidence(
+                envelope,
+                execution,
+                outbound_result=outbound_result,
+            )
+
+        self.assertGreaterEqual(table.update_item.call_count, 2)
+
+    def test_record_outbound_evidence_uses_group_id_fallback(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-12",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-12",
+            dedupe_id="dedupe-12",
+            payload={},
+            source="test",
+            conversation_id="",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-12",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"},
+        )
+        outbound_result = {"sent": False, "reason": "send_message_failed", "responses": []}
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_outbound_evidence(
+                envelope,
+                execution,
+                outbound_result=outbound_result,
+            )
+
+        keys = [
+            call.kwargs.get("Key", {}) for call in table.update_item.mock_calls
+        ]
+        self.assertTrue(any(key.get("conversation_id") == "group-12" for key in keys))
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()  # pragma: no cover

@@ -1148,10 +1148,14 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("intent_after", payload["proof_fields"])
         self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
+        self.assertIn("send_message_used", payload["proof_fields"])
+        self.assertIn("send_message_status_code", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
+        self.assertIn("operator_reply_confirmed", payload["proof_fields"])
+        self.assertIn("operator_reply_reason", payload["proof_fields"])
 
 
 class AllowlistConfigTests(unittest.TestCase):
@@ -1390,20 +1394,26 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             latest_comment_is_operator=True,
             operator_reply_required=True,
             operator_reply_confirmed=True,
+            operator_reply_reason="confirmed",
             send_message_tag_present=True,
             send_message_tag_added=False,
             send_message_path_required=True,
             send_message_path_confirmed=True,
+            send_message_used=True,
+            send_message_status_code=200,
         )
         self.assertEqual(fields["operator_reply_present"], True)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
         self.assertEqual(fields["latest_comment_is_operator"], True)
         self.assertEqual(fields["operator_reply_required"], True)
         self.assertEqual(fields["operator_reply_confirmed"], True)
+        self.assertEqual(fields["operator_reply_reason"], "confirmed")
         self.assertEqual(fields["send_message_tag_present"], True)
         self.assertEqual(fields["send_message_tag_added"], False)
         self.assertEqual(fields["send_message_path_required"], True)
         self.assertEqual(fields["send_message_path_confirmed"], True)
+        self.assertEqual(fields["send_message_used"], True)
+        self.assertEqual(fields["send_message_status_code"], 200)
 
     def test_build_operator_send_message_richpanel_fields(self) -> None:
         fields = _build_operator_send_message_richpanel_fields(
@@ -1429,59 +1439,68 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             operator_reply_delta_ok=False,
             send_message_tag_present_ok=True,
             send_message_tag_added_ok=False,
+            send_message_used_ok=True,
         )
         self.assertTrue(criteria["operator_reply_present"])
         self.assertFalse(criteria["operator_reply_count_delta_ge_1"])
         self.assertTrue(criteria["send_message_tag_present"])
         self.assertFalse(criteria["send_message_tag_added"])
+        self.assertTrue(criteria["send_message_used"])
 
     def test_append_operator_send_message_criteria_details(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=True,
             require_send_message=True,
+            require_send_message_used=True,
             operator_reply_present_ok=True,
             send_message_tag_present_ok=True,
             send_message_tag_added_ok=False,
+            send_message_used_ok=True,
         )
         self.assertTrue(required_checks)
         names = [entry["name"] for entry in criteria_details]
         self.assertIn("operator_reply_present", names)
         self.assertIn("send_message_tag_present", names)
         self.assertIn("send_message_tag_added", names)
+        self.assertIn("send_message_used", names)
 
     def test_append_operator_reply_required_unknown_fails(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=True,
             require_send_message=False,
+            require_send_message_used=False,
             operator_reply_present_ok=None,
             send_message_tag_present_ok=None,
             send_message_tag_added_ok=None,
+            send_message_used_ok=None,
         )
         self.assertEqual(required_checks, [False])
         self.assertIsNone(criteria_details[0]["value"])
 
     def test_append_send_message_required_missing_fails(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=False,
             require_send_message=True,
+            require_send_message_used=False,
             operator_reply_present_ok=None,
             send_message_tag_present_ok=False,
             send_message_tag_added_ok=None,
+            send_message_used_ok=None,
         )
         self.assertEqual(required_checks, [False])
         names = [entry["name"] for entry in criteria_details]
