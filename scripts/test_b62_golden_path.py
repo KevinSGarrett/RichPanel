@@ -84,7 +84,7 @@ class HelperTests(unittest.TestCase):
             _extract_ticket_ref("no ticket")
 
     def test_run_command_wrapper(self) -> None:
-        with patch("b62_sandbox_golden_path.subprocess.run") as mocked:
+        with patch("sandbox_scenario_utils.subprocess.run") as mocked:
             mocked.return_value = CompletedProcess(["cmd"], 0, "ok", "")
             result = _run_command(["cmd"])
             self.assertEqual(result.stdout, "ok")
@@ -99,13 +99,13 @@ class HelperTests(unittest.TestCase):
             self.assertEqual(_read_proof(path), {"ok": True})
 
     def test_git_diffstat_branches(self) -> None:
-        with patch("b62_sandbox_golden_path.subprocess.run") as mocked:
+        with patch("sandbox_scenario_utils.subprocess.run") as mocked:
             mocked.side_effect = FileNotFoundError()
             self.assertEqual(_git_diffstat(ROOT), "(git not available)")
-        with patch("b62_sandbox_golden_path.subprocess.run") as mocked:
+        with patch("sandbox_scenario_utils.subprocess.run") as mocked:
             mocked.return_value = CompletedProcess([], 1, "", "boom")
             self.assertIn("git diff failed", _git_diffstat(ROOT))
-        with patch("b62_sandbox_golden_path.subprocess.run") as mocked:
+        with patch("sandbox_scenario_utils.subprocess.run") as mocked:
             mocked.return_value = CompletedProcess([], 0, "", "")
             self.assertEqual(_git_diffstat(ROOT), "(no changes)")
 
