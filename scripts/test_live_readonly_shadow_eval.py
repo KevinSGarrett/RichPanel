@@ -413,6 +413,27 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
             shopify_schema_new=0,
         )
         self.assertEqual(drift_watch["current_values"]["api_error_rate_pct"], 50.0)
+        self.assertEqual(
+            drift_watch["current_values"]["ticket_fetch_failure_rate_pct"], 25.0
+        )
+
+    def test_schema_skip_descent_keys_log_nested_paths(self) -> None:
+        payload = {
+            "comments": [
+                {"body": "hello", "metadata": {"sentiment": "neutral"}},
+                {"body": "bye", "metadata": {"sentiment": "positive"}},
+            ],
+            "status": "open",
+        }
+        key_counts = Counter()
+        ignored_counts = Counter()
+        shadow_eval._schema_fingerprint(
+            payload, key_counter=key_counts, ignored_counter=ignored_counts
+        )
+        self.assertIn("comments", key_counts)
+        self.assertIn("comments[]", key_counts)
+        self.assertIn("comments[].body", ignored_counts)
+        self.assertIn("comments[].metadata", ignored_counts)
 
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):

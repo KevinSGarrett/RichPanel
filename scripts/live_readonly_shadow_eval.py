@@ -327,11 +327,14 @@ def _collect_schema_key_paths(
     *,
     keys: set[str],
     ignored_keys: Optional[set[str]] = None,
+    collect_only_ignored: bool = False,
     prefix: str = "",
     depth: int = 0,
     max_depth: int = SCHEMA_KEY_DEPTH_LIMIT,
 ) -> None:
     if depth > max_depth:
+        return
+    if collect_only_ignored and ignored_keys is None:
         return
     if isinstance(payload, dict):
         for raw_key, value in payload.items():
@@ -339,6 +342,20 @@ def _collect_schema_key_paths(
             if not key or key.startswith("__"):
                 continue
             path = f"{prefix}.{key}" if prefix else key
+            if collect_only_ignored:
+                ignored_keys.add(path)
+                if isinstance(value, list):
+                    ignored_keys.add(f"{path}[]")
+                _collect_schema_key_paths(
+                    value,
+                    keys=keys,
+                    ignored_keys=ignored_keys,
+                    collect_only_ignored=True,
+                    prefix=path,
+                    depth=depth + 1,
+                    max_depth=max_depth,
+                )
+                continue
             if _should_ignore_schema_key(key):
                 if ignored_keys is not None:
                     ignored_keys.add(path)
@@ -349,11 +366,22 @@ def _collect_schema_key_paths(
             if _should_skip_schema_descent(key):
                 if isinstance(value, list):
                     keys.add(f"{path}[]")
+                if ignored_keys is not None:
+                    _collect_schema_key_paths(
+                        value,
+                        keys=keys,
+                        ignored_keys=ignored_keys,
+                        collect_only_ignored=True,
+                        prefix=path,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                    )
                 continue
             _collect_schema_key_paths(
                 value,
                 keys=keys,
                 ignored_keys=ignored_keys,
+                collect_only_ignored=collect_only_ignored,
                 prefix=path,
                 depth=depth + 1,
                 max_depth=max_depth,
@@ -361,12 +389,16 @@ def _collect_schema_key_paths(
         return
     if isinstance(payload, list):
         list_prefix = f"{prefix}[]" if prefix else "[]"
-        keys.add(list_prefix)
+        if collect_only_ignored:
+            ignored_keys.add(list_prefix)
+        else:
+            keys.add(list_prefix)
         for item in payload:
             _collect_schema_key_paths(
                 item,
                 keys=keys,
                 ignored_keys=ignored_keys,
+                collect_only_ignored=collect_only_ignored,
                 prefix=list_prefix,
                 depth=depth + 1,
                 max_depth=max_depth,
@@ -421,7 +453,7 @@ def _build_schema_key_stats(
     return {
         "note": (
             "Key paths include field names only; schema drift excludes ids, timestamps, "
-            "pagination, and volatile subtrees."
+            "pagination, and volatile subtrees (ignored paths include nested keys)."
         ),
         "ticket": _build_entry(ticket_keys, ticket_ignored),
         "shopify": _build_entry(shopify_keys, shopify_ignored),
@@ -670,6 +702,7 @@ def _build_drift_watch(
     api_error_rate: float,
     order_number_share: float,
     schema_new_ratio: float,
+    ticket_fetch_failure_rate: float = 0.0,
 ) -> Dict[str, Any]:
     """
     B61/C: Build drift watch section comparing current values to thresholds.
@@ -682,6 +715,7 @@ def _build_drift_watch(
     api_error_rate_pct = api_error_rate * 100
     order_number_share_pct = order_number_share * 100
     schema_new_ratio_pct = schema_new_ratio * 100
+    ticket_fetch_failure_rate_pct = ticket_fetch_failure_rate * 100
     
     alerts = []
     
@@ -713,6 +747,7 @@ def _build_drift_watch(
             "api_error_rate_pct": round(api_error_rate_pct, 2),
             "order_number_share_pct": round(order_number_share_pct, 2),
             "schema_new_ratio_pct": round(schema_new_ratio_pct, 2),
+            "ticket_fetch_failure_rate_pct": round(ticket_fetch_failure_rate_pct, 2),
         },
         "alerts": alerts,
         "has_alerts": len(alerts) > 0,
@@ -782,6 +817,14 @@ def _compute_drift_watch(
     order_number_share = (
         order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
     )
+    ticket_fetch_failures = sum(
+        1
+        for result in ticket_results
+        if result.get("failure_reason") == "ticket_fetch_failed"
+    )
+    ticket_fetch_failure_rate = (
+        ticket_fetch_failures / tickets_evaluated if tickets_evaluated else 0.0
+    )
     schema_new_ratio = max(
         ticket_schema_new / ticket_schema_total if ticket_schema_total else 0.0,
         shopify_schema_new / shopify_schema_total if shopify_schema_total else 0.0,
@@ -791,6 +834,7 @@ def _compute_drift_watch(
         api_error_rate=api_error_rate,
         order_number_share=order_number_share,
         schema_new_ratio=schema_new_ratio,
+        ticket_fetch_failure_rate=ticket_fetch_failure_rate,
     )
 
 
@@ -1781,6 +1825,7 @@ def _build_markdown_report(
         "## Drift Watch (B61/C)",
         f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",
         f"- API Error Rate: {drift_watch.get('current_values', {}).get('api_error_rate_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['api_error_rate_pct']}%)",
+        f"- Ticket Fetch Failure Rate: {drift_watch.get('current_values', {}).get('ticket_fetch_failure_rate_pct', 0):.1f}% (warning-only)",
         f"- Order Number Share: {drift_watch.get('current_values', {}).get('order_number_share_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['order_number_share_drop_pct']}%)",
         f"- Schema Drift: {drift_watch.get('current_values', {}).get('schema_new_ratio_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['schema_drift_new_ratio'] * 100}%)",
         f"- **Alerts: {len(drift_watch.get('alerts', []))}**",
