@@ -121,6 +121,8 @@ from create_sandbox_chat_ticket import (  # type: ignore  # noqa: E402
 )
 
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore  # noqa: E402
+    RichpanelRequestError,
+    RichpanelResponse,
     RichpanelWriteDisabledError,
 )
 
@@ -1810,6 +1812,48 @@ class TicketSnapshotTests(unittest.TestCase):
         self.assertEqual(result.get("last_message_source"), "unknown")
         self.assertIsNone(result.get("operator_reply_present"))
         self.assertIsNone(result.get("latest_comment_is_operator"))
+
+    def test_fetch_ticket_snapshot_retries_on_rate_limit(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-rl",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [{"type": "text", "is_operator": False}],
+            }
+        }
+
+        class _Exec:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def execute(self, *args: Any, **kwargs: Any) -> Any:
+                self.calls += 1
+                if self.calls == 1:
+                    response = RichpanelResponse(
+                        status_code=429,
+                        headers={},
+                        body=b"{}",
+                        url="https://example.com",
+                        dry_run=False,
+                    )
+                    raise RichpanelRequestError("rate_limited", response=response)
+                return RichpanelResponse(
+                    status_code=200,
+                    headers={},
+                    body=json.dumps(payload).encode("utf-8"),
+                    url="https://example.com",
+                    dry_run=False,
+                )
+
+        executor = _Exec()
+        result = _fetch_ticket_snapshot(
+            cast(Any, executor),
+            "ticket-rl",
+            allow_network=True,
+        )
+        self.assertEqual(executor.calls, 2)
+        self.assertEqual(result.get("status"), "OPEN")
 
     def test_fetch_latest_reply_body_handles_non_dict(self) -> None:
         class _Resp:

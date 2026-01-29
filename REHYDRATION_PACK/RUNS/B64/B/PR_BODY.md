@@ -49,6 +49,8 @@
 - `backend/tests/test_order_status_intent.py`
 - `backend/tests/test_order_status_context.py`
 - `backend/tests/test_reply_rewrite_validation.py`
+- `scripts/test_order_status_intent_contract.py`
+- `scripts/test_llm_reply_rewriter.py`
 - `scripts/test_pipeline_handlers.py`
 - `scripts/test_read_only_shadow_mode.py`
 - `scripts/test_e2e_smoke_encoding.py`
@@ -66,6 +68,7 @@
 **Local / CI-equivalent:**
 - `python -m pytest -q`
 - `ruff check .`
+- `coverage run -m unittest discover -s scripts -p "test_*.py"`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status_tracking --require-openai-routing --require-openai-rewrite --ticket-id <redacted> --proof-path REHYDRATION_PACK/RUNS/B64/B/PROOF/openai_intent_rewrite_proof.json --run-id b64-20260129-b11 --wait-seconds 120 --profile rp-admin-kevin`
