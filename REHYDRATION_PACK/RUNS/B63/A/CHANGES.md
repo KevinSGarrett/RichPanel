@@ -16,10 +16,20 @@
 
 ## Diffstat
 ```
-REHYDRATION_PACK/RUNS/B63/A/CHANGES.md |   5 +-
-scripts/b62_sandbox_golden_path.py     | 111 ++++---------------------------
-scripts/b63_sandbox_scenarios.py       | 115 +++------------------------------
-scripts/sandbox_scenario_utils.py      | 102 +++++++++++++++++++++++++++++
-scripts/test_b62_golden_path.py        |   8 +--
-5 files changed, 133 insertions(+), 208 deletions(-)
+REHYDRATION_PACK/RUNS/B63/A/CHANGES.md             |  25 +
+REHYDRATION_PACK/RUNS/B63/A/EVIDENCE.md            |  51 ++
+REHYDRATION_PACK/RUNS/B63/A/PROOF/created_ticket_golden_path.json    |  27 +
+REHYDRATION_PACK/RUNS/B63/A/PROOF/created_ticket_non_order_status.json   |  27 +
+REHYDRATION_PACK/RUNS/B63/A/PROOF/created_ticket_order_status_no_match.json      |  27 +
+REHYDRATION_PACK/RUNS/B63/A/PROOF/created_ticket_order_status_order_number.json  |  27 +
+REHYDRATION_PACK/RUNS/B63/A/PROOF/sandbox_golden_path_proof.json     | 501 +++++++++++++
+REHYDRATION_PACK/RUNS/B63/A/PROOF/sandbox_non_order_status_proof.json    | 403 +++++++++++
+REHYDRATION_PACK/RUNS/B63/A/PROOF/sandbox_order_status_no_match_proof.json | 469 ++++++++++++
+REHYDRATION_PACK/RUNS/B63/A/PROOF/sandbox_order_status_order_number_proof.json   | 478 ++++++++++++
+REHYDRATION_PACK/RUNS/B63/A/RUN_REPORT.md          |  23 +
+scripts/b62_sandbox_golden_path.py                 | 111 +--
+scripts/b63_sandbox_scenarios.py                   | 802 +++++++++++++++++++++
+scripts/sandbox_scenario_utils.py                  | 102 +++
+scripts/test_b62_golden_path.py                    |   8 +-
+15 files changed, 2980 insertions(+), 101 deletions(-)
 ```
