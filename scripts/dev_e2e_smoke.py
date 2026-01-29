@@ -1647,9 +1647,6 @@ def _fetch_ticket_snapshot(
             "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
         )
 
-    raise SmokeFailure(
-        "Ticket lookup failed; attempted paths: " + "; ".join(attempts)
-    )
 
 
 def _wait_for_ticket_ready(

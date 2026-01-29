@@ -240,7 +240,7 @@ def test_rewrite_rejects_unexpected_url() -> None:
 def test_rewrite_rejects_unexpected_tracking_number() -> None:
     draft = "Tracking number: ABC123"
     client = _StubClient(
-        _response("Tracking numbers: ABC123 and XYZ999")
+        _response("Tracking number: ABC123. Tracking number: XYZ999.")
     )
 
     result = rewrite_reply(
@@ -257,7 +257,7 @@ def test_rewrite_rejects_unexpected_tracking_number() -> None:
 
     assert result.rewritten is False
     assert result.body == draft
-    assert result.reason == "missing_required_tracking"
+    assert result.reason == "unexpected_tracking"
 
 
 def test_rewrite_rejects_internal_tags() -> None:
