@@ -2,7 +2,7 @@
 
 ## Code
 - Added `scripts/b63_sandbox_scenarios.py` wrapper for golden path + new sandbox scenarios.
-- Added shared helpers in `scripts/sandbox_scenario_utils.py` and reused in B62/B63 to avoid duplication.
+- Added shared helpers in `scripts/sandbox_scenario_utils.py` and reused in B62/B63, dev smoke, and sandbox ticket scripts to avoid duplication.
 - Added `--wait-seconds` passthrough for slower sandbox ticket updates.
 - Removed unused follow-up scaffolding from the B63 wrapper.
 

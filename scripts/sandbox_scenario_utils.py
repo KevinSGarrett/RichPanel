@@ -5,6 +5,7 @@ Shared helpers for sandbox scenario wrappers.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 from datetime import datetime, timezone
@@ -28,6 +29,11 @@ SENSITIVE_FLAGS = {
 
 def _iso_timestamp() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _fingerprint(value: str, length: int = 12) -> str:
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return digest[:length]
 
 
 def _ensure_parent(path: Path) -> None:

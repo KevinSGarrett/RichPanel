@@ -55,6 +55,8 @@ BACKEND_SRC = ROOT / "backend" / "src"
 if str(BACKEND_SRC) not in sys.path:
     sys.path.insert(0, str(BACKEND_SRC))
 
+from sandbox_scenario_utils import _fingerprint  # type: ignore
+
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore  # noqa: E402
     build_no_tracking_reply,
     build_tracking_reply,
@@ -341,11 +343,6 @@ def _seconds_delta(before: Optional[str], after: Optional[str]) -> Optional[floa
     if not start or not end:
         return None
     return (end - start).total_seconds()
-
-
-def _fingerprint(value: str, length: int = 12) -> str:
-    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
-    return digest[:length]
 
 
 def _compute_draft_reply_body(
@@ -1152,9 +1149,9 @@ _PII_PATTERNS = [
 _PII_REGEX_PATTERNS = [
     r"evt:[a-zA-Z0-9:-]{6,}",  # webhook/followup event identifiers
     r"--ticket-number(?:\s+|=)\d+",  # command-line ticket numbers
+    r"ticket\s+number\s+\d+",  # human readable ticket numbers
     r"--order-number(?:\s+|=)\d+",  # command-line order numbers
     r"order\s+number\s+\d+",  # human readable order numbers
-    r"ticket\s+number\s+\d+",  # human readable ticket numbers
 ]
 
 
@@ -3672,10 +3669,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     args = parse_args()
     region = args.region
     env_name = args.env
-    if args.profile:
-        os.environ.setdefault("AWS_PROFILE", args.profile)
-    os.environ.setdefault("AWS_DEFAULT_REGION", region)
-    os.environ.setdefault("AWS_REGION", region)
     order_status_mode = _is_order_status_scenario(args.scenario)
     negative_scenario = args.scenario in _NEGATIVE_SCENARIOS
     not_order_status_mode = args.scenario == "not_order_status"
@@ -3970,7 +3963,6 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "Order match by number is required. Provide --order-number or "
             f"{_SMOKE_ORDER_NUMBER_ENV}."
         )
-
 
     payload = build_payload(
         args.event_id,

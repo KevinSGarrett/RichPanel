@@ -12,7 +12,6 @@ One-command sandbox scenario harness for B63:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import sys
@@ -24,6 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sandbox_scenario_utils import (  # type: ignore
     _ensure_parent,
     _extract_ticket_ref,
+    _fingerprint,
     _git_diffstat,
     _iso_timestamp,
     _read_proof,
@@ -56,11 +56,6 @@ class ScenarioSpec:
     require_operator_reply: bool = False
     order_number: Optional[str] = None
     order_number_fingerprint: Optional[str] = None
-
-
-def _fingerprint(value: str, length: int = 12) -> str:
-    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
-    return digest[:length]
 
 
 def _seed_order_number(seed: str) -> str:

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -35,6 +34,7 @@ from integrations.common import (  # type: ignore
     PRODUCTION_ENVIRONMENTS,
     prod_write_ack_matches,
 )
+from sandbox_scenario_utils import _fingerprint  # type: ignore
 
 ENV_FROM_EMAIL = "MW_SMOKE_TICKET_FROM_EMAIL"
 ENV_SUBJECT = "MW_SMOKE_TICKET_SUBJECT"
@@ -63,11 +63,6 @@ ENV_TO_EMAIL = "MW_SMOKE_TICKET_TO_EMAIL"
 ENV_FIRST_NAME = "MW_SMOKE_TICKET_FIRST_NAME"
 ENV_LAST_NAME = "MW_SMOKE_TICKET_LAST_NAME"
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-
-
-def _fingerprint(value: str, length: int = 12) -> str:
-    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
-    return digest[:length]
 
 
 def _coerce_str(value: Any) -> Optional[str]:
