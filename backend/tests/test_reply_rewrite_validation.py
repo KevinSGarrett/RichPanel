@@ -212,3 +212,72 @@ def test_rewrite_accepts_equivalent_eta_separator() -> None:
 
     assert result.rewritten is True
     assert result.body == "It should arrive in about 1-3 business days."
+
+
+def test_rewrite_rejects_unexpected_url() -> None:
+    draft = "Thanks for your patience. We'll update you soon."
+    client = _StubClient(
+        _response("Track it here: https://tracking.example.com/track/ABC123")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "unexpected_tokens"
+
+
+def test_rewrite_rejects_unexpected_tracking_number() -> None:
+    draft = "Tracking number: ABC123"
+    client = _StubClient(
+        _response("Tracking number: ABC123. Tracking number: XYZ999.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "unexpected_tracking"
+
+
+def test_rewrite_rejects_internal_tags() -> None:
+    draft = "Thanks for your patience. We'll take a look."
+    client = _StubClient(
+        _response("We updated your request. Tag: mw-order-status-answered.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "contains_internal_tags"

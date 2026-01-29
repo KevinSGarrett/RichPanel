@@ -1,0 +1,490 @@
+{
+  "meta": {
+    "run_id": "b64-20260129-b11",
+    "timestamp": "2026-01-29T21:21:22.933991+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status_tracking",
+    "scenario_variant": "order_status_tracking"
+  },
+  "inputs": {
+    "ticket_ref": null,
+    "ticket_ref_fingerprint": "bc1982e1a5de",
+    "apply_test_tag": false,
+    "test_tag_value": null,
+    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status_tracking --require-openai-routing --require-openai-rewrite --ticket-id api-scentimenttesting3300-7ed66dc1-f575-431d-bdf9-9748d639e19f --proof-path REHYDRATION_PACK\\RUNS\\B64\\B\\PROOF\\openai_intent_rewrite_proof.json --run-id b64-20260129-b11 --wait-seconds 120 --profile rp-admin-kevin"
+  },
+  "webhook": {
+    "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
+    "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
+    "event_id_fingerprint": "60dc299fdfe6",
+    "conversation_id": null,
+    "conversation_id_fingerprint": "bc1982e1a5de",
+    "accepted": true
+  },
+  "dynamo": {
+    "idempotency_table": "rp_mw_dev_idempotency",
+    "conversation_state_table": "rp_mw_dev_conversation_state",
+    "audit_trail_table": "rp_mw_dev_audit_trail",
+    "links": {
+      "idempotency": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_idempotency",
+      "conversation_state": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_conversation_state",
+      "audit": "https://us-east-2.console.aws.amazon.com/dynamodbv2/home?region=us-east-2#item-explorer?initialTagKey=&initialTagValue=&table=rp_mw_dev_audit_trail",
+      "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Faws$252Flambda$252Frp-mw-dev-worker"
+    },
+    "idempotency_record": {
+      "status": "processed",
+      "mode": "automation_candidate",
+      "safe_mode": false,
+      "automation_enabled": true,
+      "payload_field_count": 34
+    },
+    "state_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking",
+          "mw-llm-routed"
+        ],
+        "reason": "llm_routing (confidence=0.92)",
+        "intent": "order_status_tracking",
+        "department": "Email Support Team"
+      },
+      "action_count": 2,
+      "updated_at": "2026-01-29T21:21:07.370975+00:00"
+    },
+    "audit_record": {
+      "routing": {
+        "category": "order_status",
+        "tags": [
+          "mw-routing-applied",
+          "mw-intent-order_status_tracking",
+          "mw-llm-routed"
+        ],
+        "reason": "llm_routing (confidence=0.92)",
+        "intent": "order_status_tracking",
+        "department": "Email Support Team"
+      },
+      "recorded_at": "2026-01-29T21:21:07.370975+00:00",
+      "ts_action_fingerprint": "2026-01-29T21:21:07.370975+00:00#fingerprint:60dc299fdfe6"
+    }
+  },
+  "openai": {
+    "routing": {
+      "llm_called": true,
+      "model": "gpt-5.2-chat-latest",
+      "confidence": 0.92,
+      "response_id": "chatcmpl-D3Tjmr5Dn1ET5Sb9u28wEraHXGQN0",
+      "response_id_unavailable_reason": null,
+      "final_intent": "order_status_tracking",
+      "primary_source": "llm",
+      "final_source": "openai",
+      "gated_reason": null
+    },
+    "rewrite": {
+      "rewrite_attempted": true,
+      "rewrite_applied": false,
+      "model": "gpt-5.2-chat-latest",
+      "response_id": "chatcmpl-D3TjpufE3zqkMoXSESgNootEXg4th",
+      "response_id_unavailable_reason": null,
+      "fallback_used": true,
+      "reason": "risk_flagged",
+      "error_class": "OpenAIRiskFlagged",
+      "original_hash": "dbd5484b7629",
+      "rewritten_hash": "dbd5484b7629",
+      "rewritten_changed": false
+    },
+    "order_status_intent": {
+      "llm_called": false,
+      "model": null,
+      "response_id": null,
+      "response_id_unavailable_reason": "order_status_intent_missing",
+      "confidence": null,
+      "is_order_status": null,
+      "language": null,
+      "extracted_order_number_redacted": null,
+      "accepted": null,
+      "confidence_threshold": null,
+      "gated_reason": null,
+      "parse_error": null,
+      "ticket_excerpt_redacted": null,
+      "ticket_excerpt_fingerprint": null
+    }
+  },
+  "allowlist": {},
+  "routing_metadata": {
+    "final": {
+      "source": "openai",
+      "intent": "order_status_tracking"
+    },
+    "openai": {
+      "called": true,
+      "model": "gpt-5.2-chat-latest",
+      "request_id": "chatcmpl-D3Tjmr5Dn1ET5Sb9u28wEraHXGQN0",
+      "response_id_unavailable_reason": null,
+      "confidence": 0.92
+    }
+  },
+  "rewriter_metadata": {
+    "used": false,
+    "model": "gpt-5.2-chat-latest",
+    "request_id": "chatcmpl-D3TjpufE3zqkMoXSESgNootEXg4th",
+    "original_hash": "dbd5484b7629",
+    "rewritten_hash": "dbd5484b7629",
+    "changed": false
+  },
+  "order_status": {
+    "expected_delivery_estimate": {
+      "eta_human": "0-2 business days",
+      "normalized_method": "Standard (3-5 business days)",
+      "elapsed_business_days": 3,
+      "remaining_min_days": 0,
+      "remaining_max_days": 2
+    },
+    "eta_window_verified": null,
+    "eta_method_verified": null,
+    "eta_window_fallback_used": false,
+    "tracking_reply_verified": null,
+    "tracking_reply_source": null,
+    "tracking_number_present": null,
+    "tracking_url_present": null,
+    "tracking_number_fingerprint": null,
+    "tracking_url_fingerprint": null
+  },
+  "richpanel": {
+    "pre": {
+      "status": "OPEN",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-llm-routed",
+        "mw-routing-applied"
+      ],
+      "updated_at": "2026-01-29T21:14:28.165Z",
+      "message_count": 2,
+      "last_message_source": "operator",
+      "operator_reply_present": true,
+      "operator_reply_count": 1,
+      "latest_comment_is_operator": true,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "bc1982e1a5de",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "post": {
+      "status": "CLOSED",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-llm-routed",
+        "mw-routing-applied",
+        "mw-auto-replied",
+        "mw-order-status-answered",
+        "mw-order-status-answered:b64-20260129-b11",
+        "mw-outbound-path-send-message",
+        "mw-reply-sent"
+      ],
+      "updated_at": "2026-01-29T21:21:17.558Z",
+      "message_count": 3,
+      "last_message_source": "operator",
+      "operator_reply_present": true,
+      "operator_reply_count": 2,
+      "latest_comment_is_operator": true,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "bc1982e1a5de",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>"
+    },
+    "tags_added": [
+      "mw-auto-replied",
+      "mw-order-status-answered",
+      "mw-order-status-answered:b64-20260129-b11",
+      "mw-outbound-path-send-message",
+      "mw-reply-sent"
+    ],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "updated_at_delta_seconds": 409.393,
+    "status_before": "open",
+    "status_after": "closed",
+    "status_changed": true,
+    "message_count_before": 2,
+    "message_count_after": 3,
+    "message_count_delta": 1,
+    "last_message_source_before": "operator",
+    "last_message_source_after": "operator",
+    "middleware_tags_added": [
+      "mw-auto-replied",
+      "mw-order-status-answered",
+      "mw-order-status-answered:b64-20260129-b11",
+      "mw-outbound-path-send-message",
+      "mw-reply-sent"
+    ],
+    "test_tag_verified": null,
+    "tag_result": null,
+    "tag_error": null,
+    "diagnostics": null,
+    "auto_close_applied": false,
+    "auto_close_result": null,
+    "reply_update_success": true,
+    "reply_update_candidate": "mw-auto-replied",
+    "reply_fallback": null,
+    "success_tag_added_this_run": true,
+    "skip_or_escalation_tags_added_this_run": false,
+    "operator_reply_present": true,
+    "operator_reply_count_before": 1,
+    "operator_reply_count_after": 2,
+    "operator_reply_count_delta": 1,
+    "latest_comment_is_operator": true,
+    "send_message_tag_present": true,
+    "send_message_tag_added": true
+  },
+  "followup": {
+    "performed": false,
+    "event_id_fingerprint": null,
+    "idempotency_record": null,
+    "tags_added": [],
+    "tags_removed": [],
+    "skip_tags_added": [],
+    "middleware_tags_added": [],
+    "status_after": null,
+    "message_count_delta": null,
+    "updated_at_delta_seconds": null,
+    "reply_sent": null,
+    "reply_reason": null,
+    "routed_to_support": null
+  },
+  "proof_fields": {
+    "ticket_channel": "email",
+    "openai_routing_used": true,
+    "openai_rewrite_used": true,
+    "openai_routing_response_id": "chatcmpl-D3Tjmr5Dn1ET5Sb9u28wEraHXGQN0",
+    "openai_rewrite_response_id": "chatcmpl-D3TjpufE3zqkMoXSESgNootEXg4th",
+    "final_route": "order_status_automation",
+    "closed_after": true,
+    "message_count_delta": 1,
+    "last_message_source_after": "operator",
+    "intent_after": "order_status_tracking",
+    "routing_department": "Email Support Team",
+    "outbound_attempted": true,
+    "outbound_failure_classification": null,
+    "outbound_send_message_status": 200,
+    "routed_to_support": false,
+    "support_tag_present": false,
+    "support_department": true,
+    "order_match_success": true,
+    "order_match_failure_reason": null,
+    "order_match_by_number": null,
+    "reply_contains_tracking_url": true,
+    "reply_contains_tracking_number_like": true,
+    "reply_contains_eta_date_like": false,
+    "routing_ticket_excerpt_redacted": "Where is my order? Please share the tracking update.",
+    "allowlist_blocked_tag_present": false,
+    "allowlist_blocked_tag_added": false,
+    "send_message_tag_absent": false,
+    "followup_routed_support": null,
+    "followup_reply_sent": false,
+    "followup_skip_tags_added": [],
+    "operator_reply_present": true,
+    "operator_reply_count_delta": 1,
+    "latest_comment_is_operator": true,
+    "operator_reply_required": false,
+    "operator_reply_confirmed": true,
+    "operator_reply_reason": "confirmed",
+    "send_message_tag_present": true,
+    "send_message_tag_added": true,
+    "send_message_path_required": false,
+    "send_message_path_confirmed": true,
+    "send_message_used": true,
+    "send_message_status_code": 200
+  },
+  "result": {
+    "status": "PASS",
+    "classification": "PASS_STRONG",
+    "classification_reason": null,
+    "reply_evidence": true,
+    "reply_evidence_reason": "message_count_delta=1; positive_middleware_tag_added; reply_update_success:mw-auto-replied",
+    "outbound_failure_classification": null,
+    "fallback_close_used": false,
+    "followup_reply_sent": false,
+    "followup_reply_reason": "followup_not_performed",
+    "criteria": {
+      "scenario": "order_status_tracking",
+      "webhook_accepted": true,
+      "dynamo_records": true,
+      "ticket_lookup": true,
+      "intent_order_status": true,
+      "intent_not_order_status": false,
+      "middleware_outcome": true,
+      "status_resolved_or_closed": true,
+      "middleware_tag_applied": true,
+      "no_skip_tags": true,
+      "test_tag_verified": null,
+      "reply_evidence": true,
+      "outbound_message_count_delta_ge_1": true,
+      "outbound_last_message_source_middleware": false,
+      "outbound_attempted": true,
+      "routed_to_support": false,
+      "support_tag_present": false,
+      "support_department": true,
+      "order_match_success": true,
+      "order_match_by_number": null,
+      "order_match_failure_reason_present": null,
+      "openai_routing_called": true,
+      "openai_routing_source_openai": true,
+      "openai_rewrite_attempted": true,
+      "openai_rewrite_applied": true,
+      "allowlist_blocked_tag_present": false,
+      "allowlist_blocked_tag_added": false,
+      "send_message_tag_absent": false,
+      "no_unexpected_outbound_block": null,
+      "followup_performed": null,
+      "followup_no_reply": null,
+      "followup_routed_support": null,
+      "followup_route_tag": null,
+      "followup_skip_followup_tag": null,
+      "operator_reply_present": true,
+      "operator_reply_count_delta_ge_1": true,
+      "send_message_tag_present": true,
+      "send_message_tag_added": true,
+      "send_message_used": true,
+      "pii_safe": true
+    },
+    "criteria_details": [
+      {
+        "name": "webhook_accepted",
+        "description": "Webhook /webhook returned status=accepted",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "dynamo_records",
+        "description": "Idempotency, state, and audit records were written",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "ticket_lookup",
+        "description": "Richpanel ticket snapshot was fetched (pre/post)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "intent_order_status",
+        "description": "Routing intent matched order-status keywords",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_outcome",
+        "description": "Ticket resolved/closed or success middleware tag added this run; fails if skip/escalation tags added",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "status_resolved_or_closed",
+        "description": "Post status is resolved/closed",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "middleware_tag_applied",
+        "description": "Success middleware tag (mw-auto-replied/mw-order-status-answered/mw-reply-sent) added this run",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "order_match_by_number",
+        "description": "Order match resolved by order number",
+        "required": false,
+        "value": null
+      },
+      {
+        "name": "no_skip_tags",
+        "description": "No skip/error tags added this run (mw-skip-*, route-*-support-team, mw-escalated-human)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "reply_evidence",
+        "description": "Middleware reply evidence observed (message_count_delta>0 or last_message_source=middleware or positive middleware tag added)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "outbound_message_count_delta_ge_1",
+        "description": "Outbound reply increased message count (message_count_delta>=1)",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "outbound_last_message_source_middleware",
+        "description": "Explicit last_message_source marked middleware",
+        "required": false,
+        "value": false
+      },
+      {
+        "name": "operator_reply_present",
+        "description": "Latest comment flagged is_operator=true (operator reply)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "send_message_tag_present",
+        "description": "Ticket tagged with mw-outbound-path-send-message (send-message path)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "send_message_tag_added",
+        "description": "mw-outbound-path-send-message tag added this run",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "send_message_used",
+        "description": "Outbound reply used /send-message (operator reply path)",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "openai_routing_called",
+        "description": "OpenAI routing was invoked for intent detection",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "openai_routing_source_openai",
+        "description": "OpenAI routing selected as the final routing source",
+        "required": false,
+        "value": true
+      },
+      {
+        "name": "openai_rewrite_attempted",
+        "description": "OpenAI rewrite was attempted for the draft reply",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "openai_rewrite_applied",
+        "description": "OpenAI rewrite applied or fallback recorded",
+        "required": true,
+        "value": true
+      },
+      {
+        "name": "pii_safe",
+        "description": "Proof JSON passed PII guard scan",
+        "required": true,
+        "value": true
+      }
+    ],
+    "failure_reason": null
+  }
+}

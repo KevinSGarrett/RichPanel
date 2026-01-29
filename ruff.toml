@@ -1,0 +1,21 @@
+extend-exclude = [
+  "RichPanel",
+  "REHYDRATION_PACK",
+  "_tmp_*",
+]
+
+
+
+[lint.per-file-ignores]
+"backend/tests/test_claude_gate_model_selection.py" = ["E402"]
+"backend/tests/test_order_lookup_order_id_resolution.py" = ["F401"]
+"scripts/audit_secrets_in_logs.py" = ["F401"]
+"scripts/claude_gate_review.py" = ["E402"]
+"scripts/claude_review_calibration_harness.py" = ["F541"]
+"scripts/create_sandbox_chat_ticket.py" = ["E402"]
+"scripts/create_sandbox_email_ticket.py" = ["E402"]
+"scripts/eval_order_status_intent.py" = ["E402", "F401"]
+"scripts/find_recent_sandbox_ticket.py" = ["E402"]
+"scripts/live_readonly_shadow_eval.py" = ["E402", "F401"]
+"scripts/shadow_order_status.py" = ["E402", "F401"]
+"scripts/test_e2e_smoke_encoding.py" = ["F401"]

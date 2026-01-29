@@ -183,6 +183,31 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "invalid_json")
 
+    def test_empty_body_is_rejected(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "", "confidence": 0.9}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-empty",
+            event_id="evt-empty",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, "original body")
+        self.assertEqual(result.reason, "empty_body")
+
     def test_parse_response_extracts_embedded_json(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
@@ -447,11 +472,14 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         backend_rewrite_tests.test_rewrite_rejects_missing_tracking_url()
         backend_rewrite_tests.test_rewrite_rejects_modified_url()
         backend_rewrite_tests.test_rewrite_rejects_missing_tracking_number()
+        backend_rewrite_tests.test_rewrite_rejects_unexpected_url()
+        backend_rewrite_tests.test_rewrite_rejects_unexpected_tracking_number()
         backend_rewrite_tests.test_rewrite_applies_when_tokens_preserved()
         backend_rewrite_tests.test_extract_urls_and_tracking_tokens()
         backend_rewrite_tests.test_missing_required_tokens_detects_missing_values()
         backend_rewrite_tests.test_rewrite_rejects_modified_eta_window()
         backend_rewrite_tests.test_rewrite_accepts_equivalent_eta_separator()
+        backend_rewrite_tests.test_rewrite_rejects_internal_tags()
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"

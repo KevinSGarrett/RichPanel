@@ -48,6 +48,7 @@ _ETA_RANGE_REGEX = re.compile(
 _ETA_SINGLE_REGEX = re.compile(
     r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
 )
+_INTERNAL_TAG_REGEX = re.compile(r"(?i)\b(?:mw-[a-z0-9-]+|route-[a-z0-9-]+)\b")
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -254,6 +255,27 @@ def _missing_required_tokens(
     return missing_urls, missing_tracking, missing_eta
 
 
+def _unexpected_tokens(
+    original: str, rewritten: str
+) -> Tuple[List[str], List[str], List[str]]:
+    original_urls = _extract_urls(original)
+    rewritten_urls = _extract_urls(rewritten)
+    original_tracking = _extract_tracking_tokens(original)
+    rewritten_tracking = _extract_tracking_tokens(rewritten)
+    original_eta = _extract_eta_windows(original)
+    rewritten_eta = _extract_eta_windows(rewritten)
+    unexpected_urls = [url for url in rewritten_urls if url not in original_urls]
+    unexpected_tracking = [
+        token for token in rewritten_tracking if token not in original_tracking
+    ]
+    unexpected_eta = [window for window in rewritten_eta if window not in original_eta]
+    return unexpected_urls, unexpected_tracking, unexpected_eta
+
+
+def _contains_internal_tags(text: str) -> bool:
+    return bool(_INTERNAL_TAG_REGEX.search(text or ""))
+
+
 def _extract_json_object(content: str) -> Optional[str]:
     start = content.find("{")
     if start == -1:
@@ -321,6 +343,8 @@ def _parse_response(
     risk_flags = parsed.get("risk_flags") or []
     if body is None or not isinstance(body, str):
         return None, 0.0, [], "missing_body"
+    if not body.strip():
+        return None, 0.0, [], "empty_body"
     try:
         confidence = float(confidence)
     except (TypeError, ValueError):
@@ -380,6 +404,7 @@ def rewrite_reply(
     outbound_enabled: bool,
     rewrite_enabled: Optional[bool] = None,
     client: Optional[OpenAIClient] = None,
+    prompt_messages: Optional[List[ChatMessage]] = None,
 ) -> ReplyRewriteResult:
     """
     Attempt to rewrite a deterministic reply via OpenAI.
@@ -430,7 +455,7 @@ def rewrite_reply(
             gated_reason=gating_reason,
         )
 
-    messages = _build_prompt(reply_body)
+    messages = prompt_messages or _build_prompt(reply_body)
     request = ChatCompletionRequest(
         model=DEFAULT_MODEL,
         messages=messages,
@@ -542,6 +567,66 @@ def rewrite_reply(
             body=reply_body,
             rewritten=False,
             reason=reason,
+            model=response.model,
+            confidence=confidence,
+            dry_run=response.dry_run,
+            fingerprint=fingerprint,
+            llm_called=llm_called,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
+            risk_flags=risk_flags,
+        )
+
+    unexpected_urls, unexpected_tracking, unexpected_eta = _unexpected_tokens(
+        reply_body, rewritten_body
+    )
+    if unexpected_urls or unexpected_tracking or unexpected_eta:
+        reason = "unexpected_tokens"
+        if unexpected_urls and not unexpected_tracking and not unexpected_eta:
+            reason = "unexpected_urls"
+        elif unexpected_tracking and not unexpected_urls and not unexpected_eta:
+            reason = "unexpected_tracking"
+        elif unexpected_eta and not unexpected_urls and not unexpected_tracking:
+            reason = "unexpected_eta"
+        LOGGER.info(
+            "reply_rewrite.validation_failed",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "unexpected_urls": len(unexpected_urls),
+                "unexpected_tracking": len(unexpected_tracking),
+                "unexpected_eta": len(unexpected_eta),
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason=reason,
+            model=response.model,
+            confidence=confidence,
+            dry_run=response.dry_run,
+            fingerprint=fingerprint,
+            llm_called=llm_called,
+            response_id=response_id,
+            response_id_unavailable_reason=response_id_reason,
+            risk_flags=risk_flags,
+        )
+
+    if _contains_internal_tags(rewritten_body):
+        LOGGER.info(
+            "reply_rewrite.validation_failed",
+            extra={
+                "conversation_id": conversation_id,
+                "event_id": event_id,
+                "fingerprint": fingerprint,
+                "reason": "contains_internal_tags",
+            },
+        )
+        return ReplyRewriteResult(
+            body=reply_body,
+            rewritten=False,
+            reason="contains_internal_tags",
             model=response.model,
             confidence=confidence,
             dry_run=response.dry_run,

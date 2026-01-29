@@ -48,6 +48,10 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
 )
+from richpanel_middleware.automation.order_status_intent import (  # noqa: E402
+    OrderStatusIntentArtifact,
+    OrderStatusIntentResult,
+)
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 from lambda_handlers.worker import handler as worker  # noqa: E402
@@ -66,6 +70,24 @@ def _contains_float(value: Any) -> bool:
     if isinstance(value, (list, tuple, set)):
         return any(_contains_float(v) for v in value)
     return False
+
+
+def _accepted_intent_artifact() -> OrderStatusIntentArtifact:
+    return OrderStatusIntentArtifact(
+        result=OrderStatusIntentResult(
+            is_order_status=True,
+            confidence=0.95,
+            reason="stubbed",
+            extracted_order_number=None,
+            language="en",
+        ),
+        llm_called=False,
+        model="gpt-test",
+        response_id=None,
+        response_id_unavailable_reason="stubbed",
+        confidence_threshold=0.85,
+        accepted=True,
+    )
 
 
 class FingerprintReplyBodyTests(unittest.TestCase):
@@ -95,6 +117,12 @@ class FingerprintReplyBodyTests(unittest.TestCase):
 class PipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         # Reset worker caches so each test is deterministic and offline-safe.
+        intent_patcher = mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=_accepted_intent_artifact(),
+        )
+        intent_patcher.start()
+        self.addCleanup(intent_patcher.stop)
         worker.boto3 = None  # type: ignore
         worker._FLAG_CACHE.update(
             {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}
@@ -509,6 +537,12 @@ class PipelineTests(unittest.TestCase):
 
 class OutboundOrderStatusTests(unittest.TestCase):
     def setUp(self) -> None:
+        intent_patcher = mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=_accepted_intent_artifact(),
+        )
+        intent_patcher.start()
+        self.addCleanup(intent_patcher.stop)
         worker.boto3 = None  # type: ignore
         worker._FLAG_CACHE.update(
             {"safe_mode": True, "automation_enabled": False, "expires_at": 0.0}

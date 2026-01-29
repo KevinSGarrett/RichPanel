@@ -60,6 +60,9 @@ from richpanel_middleware.automation.delivery_estimate import (  # type: ignore 
     build_tracking_reply,
     compute_delivery_estimate,
 )
+from richpanel_middleware.automation.order_status_intent import (  # type: ignore  # noqa: E402
+    redact_ticket_text,
+)
 from richpanel_middleware.commerce.order_lookup import (  # type: ignore  # noqa: E402
     lookup_order_summary,
 )
@@ -1225,6 +1228,10 @@ def _build_skip_proof_payload(
             "reply_contains_eta_date_like": None,
             "operator_reply_confirmed": None,
             "operator_reply_reason": None,
+            "openai_routing_response_id": None,
+            "openai_rewrite_response_id": None,
+            "final_route": None,
+            "routing_ticket_excerpt_redacted": None,
         },
         "result": {
             "status": "SKIP",
@@ -1530,99 +1537,116 @@ def _fetch_ticket_snapshot(
         f"/v1/tickets/{encoded_ref}",
         f"/v1/tickets/number/{encoded_ref}",
     ]
-    errors: List[str] = []
-    for path in attempts:
-        try:
-            response = executor.execute(
-                "GET",
-                path,
-                dry_run=not allow_network,
-                log_body_excerpt=False,
+    retry_attempts = 5
+    for attempt in range(retry_attempts):
+        errors: List[str] = []
+        saw_rate_limit = False
+        for path in attempts:
+            try:
+                response = executor.execute(
+                    "GET",
+                    path,
+                    dry_run=not allow_network,
+                    log_body_excerpt=False,
+                )
+            except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                if isinstance(exc, RichpanelRequestError) and exc.response is not None:
+                    if exc.response.status_code == 429:
+                        saw_rate_limit = True
+                errors.append(f"{path}: {exc}")
+                continue
+
+            if response.status_code < 200 or response.status_code >= 300:
+                if response.status_code == 429:
+                    saw_rate_limit = True
+                errors.append(f"{path}: status {response.status_code}")
+                continue
+
+            payload = response.json() or {}
+            if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
+                payload = payload["ticket"]
+            status = payload.get("status")
+            state = payload.get("state")
+            tags = _normalize_tags(payload.get("tags"))
+            updated_at = payload.get("updated_at") or payload.get("updatedAt")
+            message_count = _safe_int(
+                payload.get("messages_count")
+                or payload.get("message_count")
+                or payload.get("messagesCount")
             )
-        except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
-            errors.append(f"{path}: {exc}")
+            last_message_source_raw = payload.get("last_message_source") or payload.get(
+                "lastMessageSource"
+            )
+            last_message_source = (
+                last_message_source_raw.strip().lower()
+                if isinstance(last_message_source_raw, str)
+                and last_message_source_raw.strip()
+                else None
+            )
+            ticket_channel = _ticket_channel_from_payload(payload)
+            comment_count = None
+            operator_reply_count = None
+            operator_reply_present = None
+            latest_comment_is_operator = None
+            latest_comment_source = None
+            comments = payload.get("comments")
+            if isinstance(comments, list):
+                comment_count = len(comments)
+                operator_reply_count = 0
+                for comment in comments:
+                    is_operator = _comment_operator_flag(comment)
+                    if is_operator is True:
+                        operator_reply_count += 1
+                for comment in reversed(comments):
+                    if isinstance(comment, dict):
+                        latest_comment_is_operator = _comment_operator_flag(comment)
+                        latest_comment_source = _comment_source_marker(comment)
+                        break
+                if isinstance(latest_comment_is_operator, bool):
+                    operator_reply_present = latest_comment_is_operator
+            if message_count is None and comment_count is not None:
+                message_count = comment_count
+            if latest_comment_is_operator is True:
+                last_message_source = "operator"
+            else:
+                explicit_source = None
+                if (
+                    isinstance(last_message_source, str)
+                    and "middleware" in last_message_source
+                ):
+                    explicit_source = "middleware"
+                elif (
+                    isinstance(latest_comment_source, str)
+                    and "middleware" in latest_comment_source
+                ):
+                    explicit_source = "middleware"
+                last_message_source = explicit_source or "unknown"
+
+            return {
+                "ticket_id": str(payload.get("id") or ticket_ref),
+                "status": status.strip() if isinstance(status, str) else status,
+                "state": state.strip() if isinstance(state, str) else state,
+                "tags": tags,
+                "updated_at": updated_at,
+                "message_count": message_count,
+                "last_message_source": last_message_source,
+                "operator_reply_present": operator_reply_present,
+                "operator_reply_count": operator_reply_count,
+                "latest_comment_is_operator": latest_comment_is_operator,
+                "ticket_channel": ticket_channel,
+                "status_code": response.status_code,
+                "dry_run": response.dry_run,
+                "path": path,
+            }
+
+        if saw_rate_limit and attempt < retry_attempts - 1:
+            time.sleep(2 * (attempt + 1))
             continue
 
-        if response.status_code < 200 or response.status_code >= 300:
-            errors.append(f"{path}: status {response.status_code}")
-            continue
-
-        payload = response.json() or {}
-        if isinstance(payload, dict) and isinstance(payload.get("ticket"), dict):
-            payload = payload["ticket"]
-        status = payload.get("status")
-        state = payload.get("state")
-        tags = _normalize_tags(payload.get("tags"))
-        updated_at = payload.get("updated_at") or payload.get("updatedAt")
-        message_count = _safe_int(
-            payload.get("messages_count")
-            or payload.get("message_count")
-            or payload.get("messagesCount")
+        raise SmokeFailure(
+            "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
         )
-        last_message_source_raw = payload.get("last_message_source") or payload.get(
-            "lastMessageSource"
-        )
-        last_message_source = (
-            last_message_source_raw.strip().lower()
-            if isinstance(last_message_source_raw, str) and last_message_source_raw.strip()
-            else None
-        )
-        ticket_channel = _ticket_channel_from_payload(payload)
-        comment_count = None
-        operator_reply_count = None
-        operator_reply_present = None
-        latest_comment_is_operator = None
-        latest_comment_source = None
-        comments = payload.get("comments")
-        if isinstance(comments, list):
-            comment_count = len(comments)
-            operator_reply_count = 0
-            for comment in comments:
-                is_operator = _comment_operator_flag(comment)
-                if is_operator is True:
-                    operator_reply_count += 1
-            for comment in reversed(comments):
-                if isinstance(comment, dict):
-                    latest_comment_is_operator = _comment_operator_flag(comment)
-                    latest_comment_source = _comment_source_marker(comment)
-                    break
-            if isinstance(latest_comment_is_operator, bool):
-                operator_reply_present = latest_comment_is_operator
-        if message_count is None and comment_count is not None:
-            message_count = comment_count
-        if latest_comment_is_operator is True:
-            last_message_source = "operator"
-        else:
-            explicit_source = None
-            if isinstance(last_message_source, str) and "middleware" in last_message_source:
-                explicit_source = "middleware"
-            elif (
-                isinstance(latest_comment_source, str)
-                and "middleware" in latest_comment_source
-            ):
-                explicit_source = "middleware"
-            last_message_source = explicit_source or "unknown"
 
-        return {
-            "ticket_id": str(payload.get("id") or ticket_ref),
-            "status": status.strip() if isinstance(status, str) else status,
-            "state": state.strip() if isinstance(state, str) else state,
-            "tags": tags,
-            "updated_at": updated_at,
-            "message_count": message_count,
-            "last_message_source": last_message_source,
-            "operator_reply_present": operator_reply_present,
-            "operator_reply_count": operator_reply_count,
-            "latest_comment_is_operator": latest_comment_is_operator,
-            "ticket_channel": ticket_channel,
-            "status_code": response.status_code,
-            "dry_run": response.dry_run,
-            "path": path,
-        }
-
-    raise SmokeFailure(
-        "Ticket lookup failed; attempted paths: " + "; ".join(errors or attempts)
-    )
 
 
 def _wait_for_ticket_ready(
@@ -2730,6 +2754,59 @@ def _extract_routing_artifact(
             if isinstance(artifact, dict):
                 return artifact
     return None
+
+
+def _extract_order_status_intent(
+    state_item: Dict[str, Any], audit_item: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    for record in (state_item, audit_item):
+        if isinstance(record, dict):
+            intent = record.get("order_status_intent")
+            if isinstance(intent, dict):
+                return intent
+    return None
+
+
+def _extract_order_status_intent_evidence(
+    state_item: Dict[str, Any], audit_item: Dict[str, Any]
+) -> Dict[str, Any]:
+    intent = _extract_order_status_intent(state_item, audit_item)
+    if not intent:
+        return {
+            "llm_called": False,
+            "model": None,
+            "response_id": None,
+            "response_id_unavailable_reason": "order_status_intent_missing",
+            "confidence": None,
+            "is_order_status": None,
+            "language": None,
+            "extracted_order_number_redacted": None,
+            "accepted": None,
+            "confidence_threshold": None,
+            "gated_reason": None,
+            "parse_error": None,
+            "ticket_excerpt_redacted": None,
+            "ticket_excerpt_fingerprint": None,
+        }
+
+    result = intent.get("result") if isinstance(intent.get("result"), dict) else {}
+    extracted_order_number = result.get("extracted_order_number")
+    return {
+        "llm_called": bool(intent.get("llm_called")),
+        "model": intent.get("model"),
+        "response_id": intent.get("response_id"),
+        "response_id_unavailable_reason": intent.get("response_id_unavailable_reason"),
+        "confidence": result.get("confidence"),
+        "is_order_status": result.get("is_order_status"),
+        "language": result.get("language"),
+        "extracted_order_number_redacted": _redact_identifier(extracted_order_number),
+        "accepted": intent.get("accepted"),
+        "confidence_threshold": intent.get("confidence_threshold"),
+        "gated_reason": intent.get("gated_reason"),
+        "parse_error": intent.get("parse_error"),
+        "ticket_excerpt_redacted": intent.get("ticket_excerpt_redacted"),
+        "ticket_excerpt_fingerprint": intent.get("ticket_excerpt_fingerprint"),
+    }
 
 
 def _extract_openai_routing_evidence(
@@ -4302,6 +4379,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         state_item, audit_item, routing_intent=routing_intent
     )
     openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
+    order_status_intent = _extract_order_status_intent_evidence(
+        state_item, audit_item
+    )
+    payload_message = payload.get("customer_message") if isinstance(payload, dict) else None
+    fallback_ticket_excerpt_redacted = (
+        redact_ticket_text(str(payload_message))
+        if isinstance(payload_message, str) and payload_message
+        else None
+    )
     outbound_result = _extract_outbound_result(state_item, audit_item)
 
     if scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
@@ -4579,6 +4665,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     post_ticket_data: Dict[str, Any] = {}
 
     if ticket_executor and payload_conversation:
+        ticket_snapshot_ref = payload_conversation
         if args.apply_test_tag:
             try:
                 tag_result = _apply_test_tag(
@@ -4595,9 +4682,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
                 tag_error = str(exc)
                 print(f"[FAIL] Test tag could not be applied: {tag_error}")
 
-        post_ticket = _fetch_ticket_snapshot(
-            ticket_executor, payload_conversation, allow_network=allow_network
-        )
+        try:
+            post_ticket = _fetch_ticket_snapshot(
+                ticket_executor, ticket_snapshot_ref, allow_network=allow_network
+            )
+        except SmokeFailure as exc:
+            if ticket_ref and ticket_ref != ticket_snapshot_ref:
+                print(
+                    f"[WARN] Post-ticket fetch failed for conversation ref; "
+                    f"retrying with ticket_ref. error={exc}"
+                )
+                ticket_snapshot_ref = ticket_ref
+                post_ticket = _fetch_ticket_snapshot(
+                    ticket_executor, ticket_snapshot_ref, allow_network=allow_network
+                )
+            else:
+                raise
         pre_ticket_data = pre_ticket or {}
         post_ticket_data = post_ticket or {}
         if order_status_mode:
@@ -4612,11 +4712,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             }:
                 waited = _wait_for_ticket_ready(
                     ticket_executor,
-                    payload_conversation,
+                    ticket_snapshot_ref,
                     allow_network=allow_network,
                     required_tags=[_LOOP_PREVENTION_TAG],
                     required_statuses=["resolved", "closed"],
-                    timeout_seconds=min(args.wait_seconds, 60),
+                    timeout_seconds=args.wait_seconds,
                 )
                 if waited:
                     post_ticket = waited
@@ -4624,13 +4724,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if require_allowlist_blocked:
             waited = _wait_for_ticket_tags(
                 ticket_executor,
-                payload_conversation,
+                ticket_snapshot_ref,
                 allow_network=allow_network,
                 required_tags=[
                     _OUTBOUND_BLOCKED_ALLOWLIST_TAG,
                     _SUPPORT_ROUTE_TAG,
                 ],
-                timeout_seconds=min(args.wait_seconds, 60),
+                timeout_seconds=args.wait_seconds,
             )
             if waited:
                 post_ticket = waited
@@ -5269,7 +5369,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         require_send_message=require_send_message,
     )
 
-    openai_routing_used = bool(openai_routing.get("llm_called"))
+    openai_routing_used = bool(order_status_intent.get("llm_called")) or bool(
+        openai_routing.get("llm_called")
+    )
     openai_rewrite_used = bool(openai_rewrite.get("rewrite_applied")) or (
         bool(openai_rewrite.get("rewrite_attempted"))
         and bool(openai_rewrite.get("fallback_used"))
@@ -5833,10 +5935,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         safe_diagnostics = dict(diagnostic_result)
         safe_diagnostics.pop("winning_payload", None)
 
+    final_route = "route_to_support"
+    if order_status_mode and support_routing.get("routed_to_support") is False:
+        final_route = "order_status_automation"
+
     proof_fields = {
         "ticket_channel": ticket_channel,
         "openai_routing_used": openai_routing_used,
         "openai_rewrite_used": openai_rewrite_used,
+        "openai_routing_response_id": (
+            order_status_intent.get("response_id")
+            or openai_routing.get("response_id")
+        ),
+        "openai_rewrite_response_id": openai_rewrite.get("response_id"),
+        "final_route": final_route,
         "closed_after": closed_after,
         "message_count_delta": message_count_delta,
         "last_message_source_after": last_message_source_after,
@@ -5856,6 +5968,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_contains_tracking_url": reply_contains_tracking_url,
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
         "reply_contains_eta_date_like": reply_contains_eta_date_like,
+        "routing_ticket_excerpt_redacted": (
+            order_status_intent.get("ticket_excerpt_redacted")
+            or fallback_ticket_excerpt_redacted
+        ),
         "allowlist_blocked_tag_present": allowlist_blocked_tag_present_ok,
         "allowlist_blocked_tag_added": allowlist_blocked_tag_added_ok,
         "send_message_tag_absent": send_message_tag_absent_ok,
@@ -5981,6 +6097,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "openai": {
             "routing": openai_routing,
             "rewrite": openai_rewrite,
+            "order_status_intent": order_status_intent,
         },
         "allowlist": allowlist_config or {},
         "routing_metadata": routing_metadata,

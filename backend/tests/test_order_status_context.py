@@ -26,11 +26,42 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _tracking_signal_present,
     plan_actions,
 )
+from richpanel_middleware.automation.order_status_intent import (  # noqa: E402
+    OrderStatusIntentArtifact,
+    OrderStatusIntentResult,
+)
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 
 
+def _accepted_intent_artifact() -> OrderStatusIntentArtifact:
+    return OrderStatusIntentArtifact(
+        result=OrderStatusIntentResult(
+            is_order_status=True,
+            confidence=0.95,
+            reason="stubbed",
+            extracted_order_number=None,
+            language="en",
+        ),
+        llm_called=False,
+        model="gpt-test",
+        response_id=None,
+        response_id_unavailable_reason="stubbed",
+        confidence_threshold=0.85,
+        accepted=True,
+    )
+
+
 class OrderStatusContextGateTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        patcher = mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=_accepted_intent_artifact(),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_missing_order_id_no_reply(self) -> None:
         envelope = build_event_envelope(
             {
@@ -247,6 +278,164 @@ class OrderStatusContextGateTests(unittest.TestCase):
         self.assertIsNotNone(routing)
         assert routing is not None
         self.assertNotIn("mw-order-lookup-failed", routing.tags)
+
+    def test_openai_intent_rejection_routes_to_support(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-intent-reject",
+                "order_id": "ord-123",
+                "created_at": "2025-01-01T00:00:00Z",
+                "tracking_number": "1Z222",
+                "carrier": "UPS",
+                "message": "Where is my order?",
+            }
+        )
+        intent_result = OrderStatusIntentResult(
+            is_order_status=False,
+            confidence=0.92,
+            reason="not order status",
+            extracted_order_number=None,
+            language="en",
+        )
+        intent_artifact = OrderStatusIntentArtifact(
+            result=intent_result,
+            llm_called=True,
+            model="gpt-test",
+            response_id="resp_test",
+            response_id_unavailable_reason=None,
+            confidence_threshold=0.85,
+            accepted=False,
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=["mw-routing-applied"],
+            reason="stubbed",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=intent_artifact,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_dual_routing",
+            return_value=(routing, mock.Mock()),
+        ):
+            plan = plan_actions(
+                envelope,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+            )
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_status_intent_not_order_status", plan.reasons)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertIn("route-email-support-team", routing.tags)
+        self.assertIn("mw-order-status-suppressed", routing.tags)
+
+    def test_openai_intent_low_confidence_routes_to_support(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-intent-ambiguous",
+                "order_id": "ord-123",
+                "created_at": "2025-01-01T00:00:00Z",
+                "tracking_number": "1Z222",
+                "carrier": "UPS",
+                "message": "Where is my order?",
+            }
+        )
+        intent_result = OrderStatusIntentResult(
+            is_order_status=True,
+            confidence=0.4,
+            reason="ambiguous",
+            extracted_order_number=None,
+            language="en",
+        )
+        intent_artifact = OrderStatusIntentArtifact(
+            result=intent_result,
+            llm_called=True,
+            model="gpt-test",
+            response_id="resp_test",
+            response_id_unavailable_reason=None,
+            confidence_threshold=0.85,
+            accepted=False,
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=["mw-routing-applied"],
+            reason="stubbed",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=intent_artifact,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_dual_routing",
+            return_value=(routing, mock.Mock()),
+        ):
+            plan = plan_actions(
+                envelope,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+            )
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_status_intent_low_confidence", plan.reasons)
+
+    def test_openai_intent_failure_routes_to_support(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-intent-fail",
+                "order_id": "ord-123",
+                "created_at": "2025-01-01T00:00:00Z",
+                "tracking_number": "1Z222",
+                "carrier": "UPS",
+                "message": "Where is my order?",
+            }
+        )
+        intent_artifact = OrderStatusIntentArtifact(
+            result=None,
+            llm_called=True,
+            model="gpt-test",
+            response_id=None,
+            response_id_unavailable_reason="request_failed",
+            confidence_threshold=0.85,
+            accepted=False,
+            parse_error="request_failed",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=["mw-routing-applied"],
+            reason="stubbed",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=intent_artifact,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_dual_routing",
+            return_value=(routing, mock.Mock()),
+        ):
+            plan = plan_actions(
+                envelope,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+            )
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        self.assertIn("order_status_intent_parse_failed:request_failed", plan.reasons)
 
 
 if __name__ == "__main__":
