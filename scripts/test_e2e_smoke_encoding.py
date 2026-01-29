@@ -1526,6 +1526,26 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         names = [entry["name"] for entry in criteria_details]
         self.assertIn("send_message_tag_present", names)
 
+    def test_append_operator_send_message_criteria_details_skips_non_order_status(
+        self,
+    ) -> None:
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
+        _append_operator_send_message_criteria_details(
+            criteria_details=criteria_details,
+            required_checks=required_checks,
+            order_status_mode=False,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            operator_reply_present_ok=True,
+            send_message_tag_present_ok=True,
+            send_message_tag_added_ok=True,
+            send_message_used_ok=True,
+        )
+        self.assertEqual(criteria_details, [])
+        self.assertEqual(required_checks, [])
+
 
 class OutboundResultHelperTests(unittest.TestCase):
     def test_extract_outbound_result_prefers_state(self) -> None:
@@ -1556,6 +1576,9 @@ class OutboundResultHelperTests(unittest.TestCase):
                 {"responses": [{"action": "add_tag", "status": 200}]}
             )
         )
+        self.assertIsNone(
+            _send_message_used_from_outbound_result({"responses": "bad"})
+        )
 
     def test_send_message_status_from_outbound_result(self) -> None:
         self.assertIsNone(_send_message_status_from_outbound_result(None))
@@ -1564,6 +1587,14 @@ class OutboundResultHelperTests(unittest.TestCase):
                 {"responses": [{"action": "send_message", "status": "202"}]}
             ),
             202,
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result({"responses": "bad"})
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result(
+                {"responses": ["bad", {"action": "add_tag", "status": 200}]}
+            )
         )
         self.assertIsNone(
             _send_message_status_from_outbound_result(
@@ -2141,6 +2172,7 @@ class OrderNumberResolutionTests(unittest.TestCase):
                 allow_network=True, safe_mode=False, automation_enabled=True
             )
         self.assertIsNone(value)
+        self.assertEqual(_Resp().json(), {"orders": [{"order_number": "12345"}]})
 
     def test_fetch_recent_shopify_order_number_exception(self) -> None:
         class _Client:
@@ -2410,6 +2442,9 @@ class ChatTicketHelpersTests(unittest.TestCase):
             with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
                 with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
                     self.assertEqual(_chat_ticket_main(), 1)
+        self.assertEqual(
+            _StubResponse().json(), {"ticket": {"conversation_no": 123, "id": "t-1"}}
+        )
 
     def test_chat_ticket_main_http_error(self) -> None:
         class _StubResponse:
@@ -3324,6 +3359,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))
     suite.addTests(loader.loadTestsFromTestCase(ProofPayloadWriteTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(OutboundResultHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))
     suite.addTests(loader.loadTestsFromTestCase(PIISafetyTests))

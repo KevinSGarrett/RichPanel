@@ -6,10 +6,15 @@ from gmail_delivery_verify import (
     _fingerprint,
     _parse_internal_date,
     _redact_query,
+    _header_map,
+    _assert_pii_safe,
+    _load_env,
     _sanitize_message_entry,
     _build_proof_payload,
     _normalize_query,
+    parse_args,
 )
+from unittest import mock
 
 
 class GmailVerifyHelperTests(unittest.TestCase):
@@ -40,6 +45,7 @@ class GmailVerifyHelperTests(unittest.TestCase):
                     {"name": "Delivered-To", "value": "receiver@example.com"},
                     {"name": "X-Original-To", "value": "alias@example.com"},
                     {"name": "Date", "value": "Mon, 01 Jan 2026 00:00:00 +0000"},
+                    "bad",
                 ],
             },
             expected_to="receiver@example.com",
@@ -51,6 +57,55 @@ class GmailVerifyHelperTests(unittest.TestCase):
         self.assertTrue(entry.get("matches_expected_to"))
         self.assertIsNotNone(entry.get("delivered_to_hash"))
         self.assertIsNotNone(entry.get("original_to_hash"))
+
+    def test_header_map_skips_non_dict(self) -> None:
+        mapped = _header_map([{"name": "Subject", "value": "Hello"}, "bad"])
+        self.assertEqual(mapped["Subject"], "Hello")
+
+    def test_assert_pii_safe_raises(self) -> None:
+        with self.assertRaises(RuntimeError):
+            _assert_pii_safe({"email": "user@example.com"})
+
+    def test_load_env_missing_raises(self) -> None:
+        with mock.patch.dict("os.environ", {}, clear=True):
+            with self.assertRaises(RuntimeError):
+                _load_env()
+
+    def test_load_env_success(self) -> None:
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "GMAIL_CLIENT_ID": "client",
+                "GMAIL_CLIENT_SECRET": "secret",
+                "GMAIL_REFRESH_TOKEN": "refresh",
+                "GMAIL_USER": "me",
+            },
+            clear=True,
+        ):
+            env = _load_env()
+        self.assertEqual(env.client_id, "client")
+        self.assertEqual(env.client_secret, "secret")
+        self.assertEqual(env.refresh_token, "refresh")
+        self.assertEqual(env.user, "me")
+
+    def test_parse_args(self) -> None:
+        args = parse_args(
+            [
+                "--query",
+                "newer_than:1d",
+                "in:anywhere",
+                "--expected-to",
+                "user@example.com",
+                "--out",
+                "proof.json",
+                "--max-results",
+                "25",
+            ]
+        )
+        self.assertEqual(args.query, ["newer_than:1d", "in:anywhere"])
+        self.assertEqual(args.expected_to, "user@example.com")
+        self.assertEqual(args.out, "proof.json")
+        self.assertEqual(args.max_results, 25)
 
     def test_build_proof_payload_no_messages(self) -> None:
         payload = _build_proof_payload(
@@ -116,5 +171,5 @@ class GmailVerifyHelperTests(unittest.TestCase):
         self.assertEqual(query, "subject:(Order Status) to:(user@example.com)")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()
