@@ -147,6 +147,7 @@ def main() -> int:
     allowlist_domains = _parse_allowlist(
         variables.get("MW_OUTBOUND_ALLOWLIST_DOMAINS"), strip_at=True
     )
+    bot_agent_present = _safe_len(variables.get("RICHPANEL_BOT_AGENT_ID")) > 0
     bot_author_present = _safe_len(variables.get("RICHPANEL_BOT_AUTHOR_ID")) > 0
 
     print(f"Environment: {env_name}")
@@ -155,6 +156,7 @@ def main() -> int:
     print(f"Prod writes ACK acknowledged: {str(ack_ok).lower()}")
     print(f"Allowlist emails: {len(allowlist_emails)}")
     print(f"Allowlist domains: {len(allowlist_domains)}")
+    print(f"Bot agent id set: {str(bot_agent_present).lower()}")
     print(f"Bot author id set: {str(bot_author_present).lower()}")
 
     return 0

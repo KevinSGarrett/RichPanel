@@ -271,6 +271,8 @@ export class RichpanelMiddlewareStack extends Stack {
           this.environmentConfig.outboundAllowlistEmails ?? "",
         MW_OUTBOUND_ALLOWLIST_DOMAINS:
           this.environmentConfig.outboundAllowlistDomains ?? "",
+        RICHPANEL_BOT_AGENT_ID:
+          this.environmentConfig.richpanelBotAuthorId ?? "",
         RICHPANEL_BOT_AUTHOR_ID:
           this.environmentConfig.richpanelBotAuthorId ?? "",
       },

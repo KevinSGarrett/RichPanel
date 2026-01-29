@@ -186,7 +186,8 @@ This registry lists environment variables that influence outbound behavior or wr
 | `MW_ALLOW_NETWORK_READS` | Allow read-only network calls when outbound is disabled | `false / false / false` | Medium |
 | `MW_OUTBOUND_ALLOWLIST_EMAILS` | Allowlist customer emails for email-channel replies | `empty / empty / empty` | High |
 | `MW_OUTBOUND_ALLOWLIST_DOMAINS` | Allowlist customer email domains | `empty / empty / empty` | High |
-| `RICHPANEL_BOT_AUTHOR_ID` | Bot author id for email-channel replies | `empty / empty / empty` | High |
+| `RICHPANEL_BOT_AGENT_ID` | Bot agent id for email-channel replies (preferred) | `empty / empty / empty` | High |
+| `RICHPANEL_BOT_AUTHOR_ID` | Bot author id for email-channel replies (legacy fallback) | `empty / empty / empty` | High |
 | `MW_PROD_WRITES_ACK` | Prod-only write acknowledgment gate | `unset / unset / unset` | Critical |
 | `RICHPANEL_READ_ONLY` (or `RICH_PANEL_READ_ONLY`) | Force GET/HEAD-only requests | `false / true / true` (effective default via env) | High |
 | `RICHPANEL_WRITE_DISABLED` | Hard block all non-GET/HEAD requests | `false / false / false` | Low |
@@ -196,13 +197,13 @@ This registry lists environment variables that influence outbound behavior or wr
 
 Danger level legend: Low = safety-only; Medium = enables read-only network calls; High = enables or restricts customer-facing outbound; Critical = unlocks prod writes.
 
-Deployment source: `MW_OUTBOUND_ALLOWLIST_*` and `RICHPANEL_BOT_AUTHOR_ID` are wired into the worker Lambda via CDK. Set per-environment values in `infra/cdk/cdk.json` under `context.environments.<env>` as `outboundAllowlistEmails`, `outboundAllowlistDomains`, and `richpanelBotAuthorId` (or override via `cdk.context.json`).
+Deployment source: `MW_OUTBOUND_ALLOWLIST_*`, `RICHPANEL_BOT_AGENT_ID`, and `RICHPANEL_BOT_AUTHOR_ID` are wired into the worker Lambda via CDK. Set per-environment values in `infra/cdk/cdk.json` under `context.environments.<env>` as `outboundAllowlistEmails`, `outboundAllowlistDomains`, and `richpanelBotAuthorId` (or override via `cdk.context.json`).
 
 #### Gate behavior summary
 - Writes gate: `MW_PROD_WRITES_ACK` must be acknowledged for prod writes; `RICHPANEL_READ_ONLY` and `RICHPANEL_WRITE_DISABLED` force read-only regardless.
 - Outbound on/off: `RICHPANEL_OUTBOUND_ENABLED` controls Richpanel outbound writes and customer replies (default off).
 - Outbound restriction: `MW_OUTBOUND_ALLOWLIST_EMAILS` and `MW_OUTBOUND_ALLOWLIST_DOMAINS` must include the customer for email replies.
-- Bot identity: `RICHPANEL_BOT_AUTHOR_ID` is required for email-channel replies in prod; missing value blocks outbound.
+- Bot identity: `RICHPANEL_BOT_AGENT_ID` (or fallback `RICHPANEL_BOT_AUTHOR_ID`) is required for email-channel replies in prod; missing value blocks outbound.
 - Network reads: `MW_ALLOW_NETWORK_READS` allows read-only network calls when outbound is disabled.
 - Vendor network toggles: `SHOPIFY_OUTBOUND_ENABLED`, `OPENAI_ALLOW_NETWORK`, `SHIPSTATION_OUTBOUND_ENABLED` control external network calls for their integrations.
 - Environment resolution (`RICHPANEL_ENV` / `RICH_PANEL_ENV` / `MW_ENV` / `ENV` / `ENVIRONMENT`) determines prod safety gates; see Environment Configuration.
@@ -226,6 +227,7 @@ Outbound enabled: false
 Prod writes ACK acknowledged: false
 Allowlist emails: 0
 Allowlist domains: 0
+Bot agent id set: false
 Bot author id set: false
 ```
 

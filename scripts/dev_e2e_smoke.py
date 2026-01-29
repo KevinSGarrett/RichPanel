@@ -1214,6 +1214,8 @@ def _build_skip_proof_payload(
             "outbound_attempted": None,
             "outbound_failure_classification": None,
             "outbound_send_message_status": None,
+            "send_message_used": None,
+            "send_message_status_code": None,
             "routed_to_support": None,
             "order_match_success": None,
             "order_match_failure_reason": None,
@@ -1221,6 +1223,8 @@ def _build_skip_proof_payload(
             "reply_contains_tracking_url": None,
             "reply_contains_tracking_number_like": None,
             "reply_contains_eta_date_like": None,
+            "operator_reply_confirmed": None,
+            "operator_reply_reason": None,
         },
         "result": {
             "status": "SKIP",
@@ -2221,6 +2225,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.set_defaults(require_send_message=None)
     parser.add_argument(
+        "--require-send-message-used",
+        dest="require_send_message_used",
+        action="store_true",
+        help="Require outbound replies to use /send-message.",
+    )
+    parser.add_argument(
+        "--no-require-send-message-used",
+        dest="require_send_message_used",
+        action="store_false",
+        help="Disable send-message used requirement.",
+    )
+    parser.set_defaults(require_send_message_used=None)
+    parser.add_argument(
         "--require-allowlist-blocked",
         dest="require_allowlist_blocked",
         action="store_true",
@@ -2839,6 +2856,92 @@ def _extract_openai_rewrite_evidence(
     }
 
 
+def _extract_outbound_result(
+    state_item: Dict[str, Any], audit_item: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    for record in (state_item, audit_item):
+        if isinstance(record, dict):
+            outbound_result = record.get("outbound_result")
+            if isinstance(outbound_result, dict):
+                return outbound_result
+    return None
+
+
+def _send_message_used_from_outbound_result(
+    outbound_result: Optional[Dict[str, Any]]
+) -> Optional[bool]:
+    if not isinstance(outbound_result, dict):
+        return None
+    responses = outbound_result.get("responses")
+    if not isinstance(responses, list):
+        return None
+    for entry in responses:
+        if isinstance(entry, dict) and entry.get("action") == "send_message":
+            return True
+    return False
+
+
+def _send_message_status_from_outbound_result(
+    outbound_result: Optional[Dict[str, Any]]
+) -> Optional[int]:
+    if not isinstance(outbound_result, dict):
+        return None
+    responses = outbound_result.get("responses")
+    if not isinstance(responses, list):
+        return None
+    for entry in responses:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("action") != "send_message":
+            continue
+        status = entry.get("status")
+        return _safe_int(status)
+    return None
+
+
+def _resolve_send_message_used(
+    *,
+    outbound_result: Optional[Dict[str, Any]],
+    send_message_tag_present: Optional[bool],
+) -> Optional[bool]:
+    send_message_used = _send_message_used_from_outbound_result(outbound_result)
+    if send_message_used is None and send_message_tag_present is not None:
+        send_message_used = bool(send_message_tag_present)
+    return send_message_used
+
+
+def _resolve_send_message_status_code(
+    *,
+    outbound_result: Optional[Dict[str, Any]],
+    outbound_send_message_status: Optional[int],
+) -> Optional[int]:
+    status = _send_message_status_from_outbound_result(outbound_result)
+    return status if status is not None else outbound_send_message_status
+
+
+def _resolve_operator_reply_reason(
+    *,
+    operator_reply_confirmed: Optional[bool],
+    require_operator_reply: bool,
+    outbound_reason: Optional[str],
+    send_message_used: Optional[bool],
+    latest_comment_is_operator: Optional[bool],
+) -> str:
+    if operator_reply_confirmed is True:
+        return "confirmed"
+    if not require_operator_reply:
+        return "not_required"
+    if isinstance(outbound_reason, str) and outbound_reason:
+        return outbound_reason
+    if send_message_used is False:
+        return "send_message_not_used"
+    if latest_comment_is_operator is False:
+        return "latest_comment_not_operator"
+    if latest_comment_is_operator is None:
+        return "operator_flag_missing"
+    return "unconfirmed"
+
+
 def _evaluate_openai_requirements(
     openai_routing: Dict[str, Any],
     openai_rewrite: Dict[str, Any],
@@ -3204,10 +3307,13 @@ def _build_operator_send_message_proof_fields(
     latest_comment_is_operator: Optional[bool],
     operator_reply_required: bool,
     operator_reply_confirmed: Optional[bool],
+    operator_reply_reason: Optional[str],
     send_message_tag_present: Optional[bool],
     send_message_tag_added: Optional[bool],
     send_message_path_required: bool,
     send_message_path_confirmed: Optional[bool],
+    send_message_used: Optional[bool],
+    send_message_status_code: Optional[int],
 ) -> Dict[str, Optional[Any]]:
     return {
         "operator_reply_present": operator_reply_present,
@@ -3215,10 +3321,13 @@ def _build_operator_send_message_proof_fields(
         "latest_comment_is_operator": latest_comment_is_operator,
         "operator_reply_required": operator_reply_required,
         "operator_reply_confirmed": operator_reply_confirmed,
+        "operator_reply_reason": operator_reply_reason,
         "send_message_tag_present": send_message_tag_present,
         "send_message_tag_added": send_message_tag_added,
         "send_message_path_required": send_message_path_required,
         "send_message_path_confirmed": send_message_path_confirmed,
+        "send_message_used": send_message_used,
+        "send_message_status_code": send_message_status_code,
     }
 
 
@@ -3249,12 +3358,14 @@ def _build_operator_send_message_criteria(
     operator_reply_delta_ok: Optional[bool],
     send_message_tag_present_ok: Optional[bool],
     send_message_tag_added_ok: Optional[bool],
+    send_message_used_ok: Optional[bool],
 ) -> Dict[str, Optional[bool]]:
     return {
         "operator_reply_present": operator_reply_present_ok,
         "operator_reply_count_delta_ge_1": operator_reply_delta_ok,
         "send_message_tag_present": send_message_tag_present_ok,
         "send_message_tag_added": send_message_tag_added_ok,
+        "send_message_used": send_message_used_ok,
     }
 
 
@@ -3265,9 +3376,11 @@ def _append_operator_send_message_criteria_details(
     order_status_mode: bool,
     require_operator_reply: bool,
     require_send_message: bool,
+    require_send_message_used: bool,
     operator_reply_present_ok: Optional[bool],
     send_message_tag_present_ok: Optional[bool],
     send_message_tag_added_ok: Optional[bool],
+    send_message_used_ok: Optional[bool],
 ) -> None:
     if not order_status_mode:
         return
@@ -3299,6 +3412,17 @@ def _append_operator_send_message_criteria_details(
                 "description": "mw-outbound-path-send-message tag added this run",
                 "required": False,
                 "value": send_message_tag_added_ok,
+            }
+        )
+    if send_message_used_ok is not None or require_send_message_used:
+        if require_send_message_used:
+            required_checks.append(bool(send_message_used_ok))
+        criteria_details.append(
+            {
+                "name": "send_message_used",
+                "description": "Outbound reply used /send-message (operator reply path)",
+                "required": require_send_message_used,
+                "value": send_message_used_ok,
             }
         )
 
@@ -3713,6 +3837,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     require_send_message = (
         args.require_send_message if args.require_send_message is not None else False
     )
+    require_send_message_used = (
+        args.require_send_message_used
+        if args.require_send_message_used is not None
+        else False
+    )
     require_allowlist_blocked = bool(
         args.require_allowlist_blocked or allowlist_blocked_mode
     )
@@ -3720,12 +3849,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         require_outbound = False
         require_operator_reply = False
         require_send_message = False
+        require_send_message_used = False
         require_allowlist_blocked = False
         require_order_match_by_number = False
     if require_allowlist_blocked:
         require_outbound = False
         require_operator_reply = False
         require_send_message = False
+        require_send_message_used = False
         require_openai_routing = False
         require_openai_rewrite = False
         require_order_match_by_number = False
@@ -4171,6 +4302,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         state_item, audit_item, routing_intent=routing_intent
     )
     openai_rewrite = _extract_openai_rewrite_evidence(state_item, audit_item)
+    outbound_result = _extract_outbound_result(state_item, audit_item)
 
     if scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
         order_dt = _parse_iso8601(payload.get("order_created_at"))
@@ -5067,6 +5199,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     send_message_tag_present_ok = None
     send_message_tag_added_ok = None
     send_message_path_confirmed = None
+    send_message_used = None
+    send_message_used_ok = None
+    send_message_status_code = None
+    operator_reply_reason = None
     allowlist_blocked_tag_present_ok = None
     allowlist_blocked_tag_added_ok = None
     send_message_tag_absent_ok = None
@@ -5108,6 +5244,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         ]
         if send_message_tag_present_ok is not None:
             send_message_tag_absent_ok = not send_message_tag_present_ok
+
+    outbound_reason = (
+        outbound_result.get("reason") if isinstance(outbound_result, dict) else None
+    )
 
     outbound_attempted = _evaluate_outbound_attempted(
         message_count_delta=message_count_delta,
@@ -5168,6 +5308,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         post_tags=post_ticket_data.get("tags") if post_ticket_data else [],
         send_message_tag_present=send_message_tag_present_ok,
         allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
+        latest_comment_is_operator=latest_comment_is_operator,
+    )
+    send_message_used = _resolve_send_message_used(
+        outbound_result=outbound_result,
+        send_message_tag_present=send_message_tag_present_ok,
+    )
+    send_message_used_ok = send_message_used if isinstance(send_message_used, bool) else None
+    send_message_status_code = _resolve_send_message_status_code(
+        outbound_result=outbound_result,
+        outbound_send_message_status=outbound_send_message_status,
+    )
+    operator_reply_reason = _resolve_operator_reply_reason(
+        operator_reply_confirmed=operator_reply_confirmed,
+        require_operator_reply=require_operator_reply,
+        outbound_reason=outbound_reason if isinstance(outbound_reason, str) else None,
+        send_message_used=send_message_used,
         latest_comment_is_operator=latest_comment_is_operator,
     )
 
@@ -5238,6 +5394,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             operator_reply_delta_ok=operator_reply_delta_ok,
             send_message_tag_present_ok=send_message_tag_present_ok,
             send_message_tag_added_ok=send_message_tag_added_ok,
+            send_message_used_ok=send_message_used_ok,
         )
     )
     tracking_reply_required = (
@@ -5522,9 +5679,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         order_status_mode=order_status_mode,
         require_operator_reply=require_operator_reply,
         require_send_message=require_send_message,
+        require_send_message_used=require_send_message_used,
         operator_reply_present_ok=operator_reply_present_ok,
         send_message_tag_present_ok=send_message_tag_present_ok,
         send_message_tag_added_ok=send_message_tag_added_ok,
+        send_message_used_ok=send_message_used_ok,
     )
 
     if require_openai_routing:
@@ -5711,10 +5870,13 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             latest_comment_is_operator=latest_comment_is_operator,
             operator_reply_required=require_operator_reply,
             operator_reply_confirmed=operator_reply_confirmed,
+            operator_reply_reason=operator_reply_reason,
             send_message_tag_present=send_message_tag_present,
             send_message_tag_added=send_message_tag_added,
             send_message_path_required=require_send_message,
             send_message_path_confirmed=send_message_path_confirmed,
+            send_message_used=send_message_used,
+            send_message_status_code=send_message_status_code,
         )
     )
 

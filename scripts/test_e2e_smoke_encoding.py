@@ -96,6 +96,12 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _sanitize_ts_action_id,
     _wait_for_ticket_ready,
     _wait_for_ticket_tags,
+    _extract_outbound_result,
+    _send_message_used_from_outbound_result,
+    _send_message_status_from_outbound_result,
+    _resolve_send_message_used,
+    _resolve_send_message_status_code,
+    _resolve_operator_reply_reason,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1148,10 +1154,14 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("intent_after", payload["proof_fields"])
         self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
+        self.assertIn("send_message_used", payload["proof_fields"])
+        self.assertIn("send_message_status_code", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
+        self.assertIn("operator_reply_confirmed", payload["proof_fields"])
+        self.assertIn("operator_reply_reason", payload["proof_fields"])
 
 
 class AllowlistConfigTests(unittest.TestCase):
@@ -1350,6 +1360,20 @@ class ParseArgsTests(unittest.TestCase):
             args = parse_args()
         self.assertEqual(args.order_number, "12345")
 
+    def test_parse_args_accepts_require_send_message_used(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--require-send-message-used",
+            ],
+        ):
+            args = parse_args()
+        self.assertTrue(args.require_send_message_used)
+
 
 class RoutingValidationTests(unittest.TestCase):
     def test_validate_routing_includes_optional_fields(self) -> None:
@@ -1390,20 +1414,26 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             latest_comment_is_operator=True,
             operator_reply_required=True,
             operator_reply_confirmed=True,
+            operator_reply_reason="confirmed",
             send_message_tag_present=True,
             send_message_tag_added=False,
             send_message_path_required=True,
             send_message_path_confirmed=True,
+            send_message_used=True,
+            send_message_status_code=200,
         )
         self.assertEqual(fields["operator_reply_present"], True)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
         self.assertEqual(fields["latest_comment_is_operator"], True)
         self.assertEqual(fields["operator_reply_required"], True)
         self.assertEqual(fields["operator_reply_confirmed"], True)
+        self.assertEqual(fields["operator_reply_reason"], "confirmed")
         self.assertEqual(fields["send_message_tag_present"], True)
         self.assertEqual(fields["send_message_tag_added"], False)
         self.assertEqual(fields["send_message_path_required"], True)
         self.assertEqual(fields["send_message_path_confirmed"], True)
+        self.assertEqual(fields["send_message_used"], True)
+        self.assertEqual(fields["send_message_status_code"], 200)
 
     def test_build_operator_send_message_richpanel_fields(self) -> None:
         fields = _build_operator_send_message_richpanel_fields(
@@ -1429,63 +1459,249 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             operator_reply_delta_ok=False,
             send_message_tag_present_ok=True,
             send_message_tag_added_ok=False,
+            send_message_used_ok=True,
         )
         self.assertTrue(criteria["operator_reply_present"])
         self.assertFalse(criteria["operator_reply_count_delta_ge_1"])
         self.assertTrue(criteria["send_message_tag_present"])
         self.assertFalse(criteria["send_message_tag_added"])
+        self.assertTrue(criteria["send_message_used"])
 
     def test_append_operator_send_message_criteria_details(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=True,
             require_send_message=True,
+            require_send_message_used=True,
             operator_reply_present_ok=True,
             send_message_tag_present_ok=True,
             send_message_tag_added_ok=False,
+            send_message_used_ok=True,
         )
         self.assertTrue(required_checks)
         names = [entry["name"] for entry in criteria_details]
         self.assertIn("operator_reply_present", names)
         self.assertIn("send_message_tag_present", names)
         self.assertIn("send_message_tag_added", names)
+        self.assertIn("send_message_used", names)
 
     def test_append_operator_reply_required_unknown_fails(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=True,
             require_send_message=False,
+            require_send_message_used=False,
             operator_reply_present_ok=None,
             send_message_tag_present_ok=None,
             send_message_tag_added_ok=None,
+            send_message_used_ok=None,
         )
         self.assertEqual(required_checks, [False])
         self.assertIsNone(criteria_details[0]["value"])
 
     def test_append_send_message_required_missing_fails(self) -> None:
-        required_checks = []
-        criteria_details = []
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
         _append_operator_send_message_criteria_details(
             criteria_details=criteria_details,
             required_checks=required_checks,
             order_status_mode=True,
             require_operator_reply=False,
             require_send_message=True,
+            require_send_message_used=False,
             operator_reply_present_ok=None,
             send_message_tag_present_ok=False,
             send_message_tag_added_ok=None,
+            send_message_used_ok=None,
         )
         self.assertEqual(required_checks, [False])
         names = [entry["name"] for entry in criteria_details]
         self.assertIn("send_message_tag_present", names)
+
+    def test_append_operator_send_message_criteria_details_skips_non_order_status(
+        self,
+    ) -> None:
+        required_checks: list[bool] = []
+        criteria_details: list[dict[str, Any]] = []
+        _append_operator_send_message_criteria_details(
+            criteria_details=criteria_details,
+            required_checks=required_checks,
+            order_status_mode=False,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            operator_reply_present_ok=True,
+            send_message_tag_present_ok=True,
+            send_message_tag_added_ok=True,
+            send_message_used_ok=True,
+        )
+        self.assertEqual(criteria_details, [])
+        self.assertEqual(required_checks, [])
+
+
+class OutboundResultHelperTests(unittest.TestCase):
+    def test_extract_outbound_result_prefers_state(self) -> None:
+        state_item = {"outbound_result": {"sent": True, "reason": "sent"}}
+        audit_item = {"outbound_result": {"sent": False, "reason": "skipped"}}
+        self.assertEqual(
+            _extract_outbound_result(state_item, audit_item),
+            state_item["outbound_result"],
+        )
+
+    def test_extract_outbound_result_falls_back_to_audit(self) -> None:
+        audit_item = {"outbound_result": {"sent": False, "reason": "skipped"}}
+        self.assertEqual(
+            _extract_outbound_result({}, audit_item),
+            audit_item["outbound_result"],
+        )
+        self.assertIsNone(_extract_outbound_result({}, {}))
+
+    def test_send_message_used_from_outbound_result(self) -> None:
+        self.assertIsNone(_send_message_used_from_outbound_result(None))
+        self.assertTrue(
+            _send_message_used_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": 200}]}
+            )
+        )
+        self.assertFalse(
+            _send_message_used_from_outbound_result(
+                {"responses": [{"action": "add_tag", "status": 200}]}
+            )
+        )
+        self.assertIsNone(
+            _send_message_used_from_outbound_result({"responses": "bad"})
+        )
+
+    def test_send_message_status_from_outbound_result(self) -> None:
+        self.assertIsNone(_send_message_status_from_outbound_result(None))
+        self.assertEqual(
+            _send_message_status_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": "202"}]}
+            ),
+            202,
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result({"responses": "bad"})
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result(
+                {"responses": ["bad", {"action": "add_tag", "status": 200}]}
+            )
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": 200.5}]}
+            )
+        )
+
+    def test_resolve_send_message_used_fallbacks(self) -> None:
+        self.assertTrue(
+            _resolve_send_message_used(
+                outbound_result=None, send_message_tag_present=True
+            )
+        )
+        self.assertIsNone(
+            _resolve_send_message_used(
+                outbound_result=None, send_message_tag_present=None
+            )
+        )
+
+    def test_resolve_send_message_status_code_fallbacks(self) -> None:
+        self.assertEqual(
+            _resolve_send_message_status_code(
+                outbound_result=None, outbound_send_message_status=200
+            ),
+            200,
+        )
+        self.assertEqual(
+            _resolve_send_message_status_code(
+                outbound_result={
+                    "responses": [{"action": "send_message", "status": 201}]
+                },
+                outbound_send_message_status=200,
+            ),
+            201,
+        )
+
+    def test_resolve_operator_reply_reason_variants(self) -> None:
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=True,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=True,
+            ),
+            "confirmed",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=False,
+                outbound_reason=None,
+                send_message_used=None,
+                latest_comment_is_operator=None,
+            ),
+            "not_required",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason="send_message_failed",
+                send_message_used=None,
+                latest_comment_is_operator=None,
+            ),
+            "send_message_failed",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=False,
+                latest_comment_is_operator=None,
+            ),
+            "send_message_not_used",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=False,
+            ),
+            "latest_comment_not_operator",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=None,
+            ),
+            "operator_flag_missing",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=True,
+            ),
+            "unconfirmed",
+        )
 
 
 class TicketSnapshotTests(unittest.TestCase):
@@ -1956,6 +2172,7 @@ class OrderNumberResolutionTests(unittest.TestCase):
                 allow_network=True, safe_mode=False, automation_enabled=True
             )
         self.assertIsNone(value)
+        self.assertEqual(_Resp().json(), {"orders": [{"order_number": "12345"}]})
 
     def test_fetch_recent_shopify_order_number_exception(self) -> None:
         class _Client:
@@ -2225,6 +2442,9 @@ class ChatTicketHelpersTests(unittest.TestCase):
             with patch("create_sandbox_chat_ticket.boto3", _StubBoto3()):
                 with patch("create_sandbox_chat_ticket.RichpanelClient", _StubClient):
                     self.assertEqual(_chat_ticket_main(), 1)
+        self.assertEqual(
+            _StubResponse().json(), {"ticket": {"conversation_no": 123, "id": "t-1"}}
+        )
 
     def test_chat_ticket_main_http_error(self) -> None:
         class _StubResponse:
@@ -3139,6 +3359,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))
     suite.addTests(loader.loadTestsFromTestCase(ProofPayloadWriteTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(OutboundResultHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))
     suite.addTests(loader.loadTestsFromTestCase(PIISafetyTests))

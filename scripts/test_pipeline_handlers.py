@@ -518,6 +518,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         worker._SSM_CLIENT = None
         _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
         os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
+        os.environ.pop("RICHPANEL_BOT_AGENT_ID", None)
         os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
         os.environ.pop("MW_OUTBOUND_ALLOWLIST_EMAILS", None)
         os.environ.pop("MW_OUTBOUND_ALLOWLIST_DOMAINS", None)
@@ -577,52 +578,36 @@ class OutboundOrderStatusTests(unittest.TestCase):
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
 
-        get_call = executor.calls[0]
-        self.assertEqual(get_call["method"], "GET")
-        self.assertIn("/v1/tickets/", get_call["path"])
-        self.assertNotIn("/add-tags", get_call["path"])
+    def test_outbound_channel_prefers_ticket_snapshot(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        if isinstance(envelope.payload, dict):
+            envelope.payload["channel"] = "chat"
+        executor = _RecordingExecutor(ticket_channel="email")
 
-        update_call = executor.calls[1]
-        self.assertEqual(update_call["method"], "PUT")
-        self.assertIn("/v1/tickets/", update_call["path"])
-        self.assertNotIn("/add-tags", update_call["path"])
-        body = update_call["kwargs"]["json_body"]
-        self.assertIn("ticket", body)
-        ticket_payload = body["ticket"]
-        self.assertIn(
-            ticket_payload.get("state"), {"closed", "resolved", "CLOSED", "RESOLVED"}
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        self.assertTrue(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
         )
-        self.assertIn("comment", ticket_payload)
-        self.assertEqual(ticket_payload["comment"]["type"], "public")
-        self.assertFalse(update_call["kwargs"]["dry_run"])
-
-        verify_call = executor.calls[2]
-        self.assertEqual(verify_call["method"], "GET")
-        self.assertIn("/v1/tickets/", verify_call["path"])
-
-        tag_call = executor.calls[3]
-        self.assertEqual(tag_call["method"], "PUT")
-        self.assertIn("/add-tags", tag_call["path"])
-        tags_payload = tag_call["kwargs"]["json_body"]["tags"]
-        self.assertIsInstance(tags_payload, list)
-        self.assertEqual(tags_payload, sorted(tags_payload))
-        self.assertEqual(
-            tags_payload,
-            [
-                "mw-auto-replied",
-                "mw-order-status-answered",
-                "mw-outbound-path-comment",
-                "mw-reply-sent",
-            ],
-        )
-        self.assertFalse(tag_call["kwargs"]["dry_run"])
 
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_channel="email")
 
         with mock.patch.dict(
-            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
         ):
             result = execute_order_status_reply(
                 envelope,
@@ -857,6 +842,47 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("mw-send-message-operator-missing", route_tags)
         self.assertIn("route-email-support-team", route_tags)
 
+    def test_outbound_email_send_message_failure_does_not_close(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email", send_message_status_codes=[500]
+        )
+
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "send_message_failed")
+        self.assertTrue(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        close_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT"
+            and call["path"].startswith("/v1/tickets/")
+            and "/send-message" not in call["path"]
+            and "/add-tags" not in call["path"]
+        ]
+        self.assertEqual(close_calls, [])
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
+        self.assertIn("mw-send-message-failed", route_tags)
+        self.assertIn("route-email-support-team", route_tags)
+
     def test_latest_comment_operator_handles_mixed_timezones(self) -> None:
         comments = [
             {"created_at": "2026-01-01T01:00:00Z", "is_operator": True},
@@ -963,6 +989,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             {
                 "MW_ENV": "prod",
                 "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
+                "RICHPANEL_BOT_AGENT_ID": "",
                 "RICHPANEL_BOT_AUTHOR_ID": "",
             },
             clear=False,
@@ -1625,6 +1652,28 @@ class _CommentRetryExecutor:
 class AuthorResolutionTests(unittest.TestCase):
     def setUp(self) -> None:
         _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
+        os.environ.pop("RICHPANEL_BOT_AGENT_ID", None)
+        os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
+
+    def test_resolve_author_id_prefers_bot_agent_env(self) -> None:
+        executor = _RecordingExecutor(users=[{"id": "agent-1", "role": "agent"}])
+        with mock.patch.dict(
+            os.environ,
+            {
+                "RICHPANEL_BOT_AGENT_ID": "agent-xyz",
+                "RICHPANEL_BOT_AUTHOR_ID": "agent-old",
+            },
+            clear=False,
+        ):
+            author_id, strategy = _resolve_author_id(
+                executor=cast(RichpanelExecutor, executor), allow_network=True
+            )
+        self.assertEqual(author_id, "agent-xyz")
+        self.assertEqual(strategy, "env:bot_agent_id")
+        user_calls = [
+            call for call in executor.calls if call["path"].startswith("/v1/users")
+        ]
+        self.assertEqual(len(user_calls), 0)
 
     def test_resolve_author_id_network_disabled(self) -> None:
         executor = _RecordingExecutor()

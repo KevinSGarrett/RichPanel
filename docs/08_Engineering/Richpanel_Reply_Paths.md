@@ -11,10 +11,10 @@ when safety gates or allowlists block outbound.
 
 ## Channel detection
 
-1. Prefer the channel already present in the envelope payload:
+1. Prefer the channel fetched from the ticket (`GET /v1/tickets/{id}`) and inspect
+   `ticket.via.channel` (or `ticket.channel`).
+2. If missing, fall back to the envelope payload:
    - `via.channel`, `channel`, or nested `ticket.via.channel`.
-2. If missing, fetch the ticket (`GET /v1/tickets/{id}`) and inspect `ticket.via.channel`
-   (or `ticket.channel`).
 3. If the channel is still unknown, treat it as **non-email** (no `send-message`).
 
 ## Email channel path (delivery-critical)
@@ -25,7 +25,7 @@ When `channel == email` and outbound is permitted:
    `allow_network=true`, `RICHPANEL_OUTBOUND_ENABLED=true`.
 2. **Allowlist gate** (prod or configured): if not allowlisted, **no outbound attempt**.
 3. **Author id**:
-   - Prefer `RICHPANEL_BOT_AUTHOR_ID`.
+   - Prefer `RICHPANEL_BOT_AGENT_ID` (fallback: `RICHPANEL_BOT_AUTHOR_ID`).
    - In dev, fallback to `GET /v1/users` with caching.
    - If unresolved, **block outbound** and route to support (do not comment instead).
 4. **Send**: `PUT /v1/tickets/{id}/send-message` with `author_id` + body.
