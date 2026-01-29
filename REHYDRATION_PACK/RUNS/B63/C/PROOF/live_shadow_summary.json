@@ -1,0 +1,376 @@
+{
+  "run_id": "RUN_20260129_0150Z",
+  "generated_at": "2026-01-29T01:55:25.434837+00:00",
+  "sample_size_requested": 109,
+  "ticket_count": 109,
+  "tickets_evaluated": 109,
+  "email_channel_count": 59,
+  "chat_channel_count": 0,
+  "unknown_channel_count": 50,
+  "order_match_success_count": 89,
+  "order_match_failure_count": 20,
+  "order_match_success_rate": 0.8165,
+  "match_success_rate": 0.8165,
+  "tracking_or_eta_available_count": 87,
+  "tracking_or_eta_available_rate": 0.7982,
+  "would_reply_send": false,
+  "route_decisions": {
+    "non_order_status": 96,
+    "unknown": 13
+  },
+  "route_decision_percentages": {
+    "non_order_status": 0.8807,
+    "unknown": 0.1193
+  },
+  "match_methods": {
+    "order_number": 51,
+    "name_email": 23,
+    "email_only": 15,
+    "none": 20
+  },
+  "match_method_percentages": {
+    "order_number": 0.4679,
+    "name_email": 0.211,
+    "email_only": 0.1376,
+    "none": 0.1835
+  },
+  "failure_buckets": {
+    "other_failure": 13,
+    "no_identifiers": 1,
+    "no_order_candidates": 6
+  },
+  "match_failure_buckets": {
+    "no_email": 1,
+    "no_order_number": 5,
+    "ambiguous_customer": 0,
+    "no_order_candidates": 1,
+    "order_match_failed": 0,
+    "parse_error": 0,
+    "api_error": 0,
+    "other_failure": 13,
+    "unknown": 0
+  },
+  "top_failure_reasons": [
+    {
+      "reason": "ticket_fetch_failed",
+      "count": 13
+    },
+    {
+      "reason": "no_order_candidates",
+      "count": 6
+    },
+    {
+      "reason": "no_customer_email",
+      "count": 1
+    }
+  ],
+  "failure_reasons": {
+    "ticket_fetch_failed": 13,
+    "no_customer_email": 1,
+    "no_order_candidates": 6
+  },
+  "richpanel_fetch_failures": {
+    "ticket_fetch_failed": 13
+  },
+  "shopify_fetch_failures": {},
+  "timing": {
+    "run_duration_seconds": 314.689,
+    "ticket_avg_seconds": 2.885,
+    "ticket_p50_seconds": 2.518,
+    "ticket_p95_seconds": 4.665,
+    "ticket_min_seconds": 2.165,
+    "ticket_max_seconds": 5.515
+  },
+  "schema_drift": {
+    "threshold": 0.2,
+    "warning": false,
+    "ticket_schema": {
+      "total": 96,
+      "unique": 13,
+      "new": 13,
+      "new_ratio": 0.1354
+    },
+    "shopify_schema": {
+      "total": 96,
+      "unique": 5,
+      "new": 5,
+      "new_ratio": 0.0521
+    }
+  },
+  "run_warnings": [
+    "ticket_fetch_failed"
+  ],
+  "status": "ok",
+  "schema_key_stats": {
+    "note": "Key paths include field names only; schema drift excludes ids, timestamps, pagination, and volatile subtrees.",
+    "ticket": {
+      "filtered_total_unique": 29,
+      "ignored_total_unique": 17,
+      "filtered_top_paths": [
+        {
+          "path": "satisfaction_rating",
+          "count": 96
+        },
+        {
+          "path": "recipient",
+          "count": 96
+        },
+        {
+          "path": "status",
+          "count": 96
+        },
+        {
+          "path": "priority",
+          "count": 96
+        },
+        {
+          "path": "conversation_no",
+          "count": 96
+        },
+        {
+          "path": "via.source.from",
+          "count": 96
+        },
+        {
+          "path": "via",
+          "count": 96
+        },
+        {
+          "path": "scenario_name",
+          "count": 96
+        },
+        {
+          "path": "scenarioName",
+          "count": 96
+        },
+        {
+          "path": "via.source",
+          "count": 96
+        },
+        {
+          "path": "comments",
+          "count": 96
+        },
+        {
+          "path": "subject",
+          "count": 96
+        },
+        {
+          "path": "customFields",
+          "count": 96
+        },
+        {
+          "path": "via.channel",
+          "count": 96
+        },
+        {
+          "path": "comments[]",
+          "count": 96
+        },
+        {
+          "path": "via.source.to",
+          "count": 96
+        },
+        {
+          "path": "tags",
+          "count": 96
+        },
+        {
+          "path": "tags[]",
+          "count": 95
+        },
+        {
+          "path": "customer_profile.email",
+          "count": 86
+        },
+        {
+          "path": "customer_profile.type",
+          "count": 86
+        },
+        {
+          "path": "customer_profile",
+          "count": 86
+        },
+        {
+          "path": "customer_profile.name",
+          "count": 86
+        },
+        {
+          "path": "via.source.to.address",
+          "count": 59
+        },
+        {
+          "path": "via.source.from.address",
+          "count": 59
+        },
+        {
+          "path": "first_response_duration",
+          "count": 48
+        }
+      ],
+      "ignored_top_paths": [
+        {
+          "path": "id",
+          "count": 96
+        },
+        {
+          "path": "scenario_id",
+          "count": 96
+        },
+        {
+          "path": "cookieId",
+          "count": 96
+        },
+        {
+          "path": "organization_id",
+          "count": 96
+        },
+        {
+          "path": "url",
+          "count": 96
+        },
+        {
+          "path": "scenarioId",
+          "count": 96
+        },
+        {
+          "path": "app_client_id",
+          "count": 96
+        },
+        {
+          "path": "created_at",
+          "count": 96
+        },
+        {
+          "path": "updated_at",
+          "count": 96
+        },
+        {
+          "path": "assignee_id",
+          "count": 96
+        },
+        {
+          "path": "customer_profile.id",
+          "count": 86
+        },
+        {
+          "path": "first_closed_at",
+          "count": 48
+        },
+        {
+          "path": "first_response_time",
+          "count": 48
+        },
+        {
+          "path": "closed_at",
+          "count": 48
+        },
+        {
+          "path": "via.source.from.id",
+          "count": 37
+        },
+        {
+          "path": "via.source.to.id",
+          "count": 37
+        },
+        {
+          "path": "satisfaction_rating.rating_given_at",
+          "count": 1
+        }
+      ]
+    },
+    "shopify": {
+      "filtered_total_unique": 13,
+      "ignored_total_unique": 4,
+      "filtered_top_paths": [
+        {
+          "path": "status",
+          "count": 96
+        },
+        {
+          "path": "order_resolution",
+          "count": 96
+        },
+        {
+          "path": "items_count",
+          "count": 96
+        },
+        {
+          "path": "order_resolution.confidence",
+          "count": 96
+        },
+        {
+          "path": "tracking_number",
+          "count": 96
+        },
+        {
+          "path": "order_resolution.reason",
+          "count": 96
+        },
+        {
+          "path": "total_price",
+          "count": 96
+        },
+        {
+          "path": "carrier",
+          "count": 96
+        },
+        {
+          "path": "order_resolution.resolvedBy",
+          "count": 96
+        },
+        {
+          "path": "order_number",
+          "count": 89
+        },
+        {
+          "path": "shipping_method",
+          "count": 84
+        },
+        {
+          "path": "shipping_method_name",
+          "count": 84
+        },
+        {
+          "path": "order_resolution.order_number_source",
+          "count": 50
+        }
+      ],
+      "ignored_top_paths": [
+        {
+          "path": "id",
+          "count": 96
+        },
+        {
+          "path": "created_at",
+          "count": 96
+        },
+        {
+          "path": "order_id",
+          "count": 96
+        },
+        {
+          "path": "updated_at",
+          "count": 96
+        }
+      ]
+    }
+  },
+  "drift_watch": {
+    "thresholds": {
+      "match_rate_drop_pct": 10.0,
+      "api_error_rate_pct": 5.0,
+      "order_number_share_drop_pct": 15.0,
+      "schema_drift_new_ratio": 0.2
+    },
+    "current_values": {
+      "match_rate_pct": 81.65,
+      "api_error_rate_pct": 0.0,
+      "order_number_share_pct": 46.79,
+      "schema_new_ratio_pct": 13.54
+    },
+    "alerts": [],
+    "has_alerts": false,
+    "note": "Historical comparison not yet implemented; schema drift uses filtered key paths (ids, timestamps, pagination, and volatile subtrees ignored)."
+  }
+}

@@ -12184,6 +12184,11 @@
       },
       {
         "level": 3,
+        "text": "Schema Key Stats (PII-safe)",
+        "anchor": "schema-key-stats-pii-safe"
+      },
+      {
+        "level": 3,
         "text": "Failure Buckets (PII-safe)",
         "anchor": "failure-buckets-pii-safe"
       },
