@@ -2899,6 +2899,49 @@ def _send_message_status_from_outbound_result(
     return None
 
 
+def _resolve_send_message_used(
+    *,
+    outbound_result: Optional[Dict[str, Any]],
+    send_message_tag_present: Optional[bool],
+) -> Optional[bool]:
+    send_message_used = _send_message_used_from_outbound_result(outbound_result)
+    if send_message_used is None and send_message_tag_present is not None:
+        send_message_used = bool(send_message_tag_present)
+    return send_message_used
+
+
+def _resolve_send_message_status_code(
+    *,
+    outbound_result: Optional[Dict[str, Any]],
+    outbound_send_message_status: Optional[int],
+) -> Optional[int]:
+    status = _send_message_status_from_outbound_result(outbound_result)
+    return status if status is not None else outbound_send_message_status
+
+
+def _resolve_operator_reply_reason(
+    *,
+    operator_reply_confirmed: Optional[bool],
+    require_operator_reply: bool,
+    outbound_reason: Optional[str],
+    send_message_used: Optional[bool],
+    latest_comment_is_operator: Optional[bool],
+) -> str:
+    if operator_reply_confirmed is True:
+        return "confirmed"
+    if not require_operator_reply:
+        return "not_required"
+    if isinstance(outbound_reason, str) and outbound_reason:
+        return outbound_reason
+    if send_message_used is False:
+        return "send_message_not_used"
+    if latest_comment_is_operator is False:
+        return "latest_comment_not_operator"
+    if latest_comment_is_operator is None:
+        return "operator_flag_missing"
+    return "unconfirmed"
+
+
 def _evaluate_openai_requirements(
     openai_routing: Dict[str, Any],
     openai_rewrite: Dict[str, Any],
@@ -5202,11 +5245,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if send_message_tag_present_ok is not None:
             send_message_tag_absent_ok = not send_message_tag_present_ok
 
-    send_message_used = _send_message_used_from_outbound_result(outbound_result)
-    send_message_status_code = _send_message_status_from_outbound_result(outbound_result)
-    outbound_reason = None
-    if isinstance(outbound_result, dict):
-        outbound_reason = outbound_result.get("reason")
+    outbound_reason = (
+        outbound_result.get("reason") if isinstance(outbound_result, dict) else None
+    )
 
     outbound_attempted = _evaluate_outbound_attempted(
         message_count_delta=message_count_delta,
@@ -5269,26 +5310,22 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         allowlist_blocked_tag_present=allowlist_blocked_tag_present_ok,
         latest_comment_is_operator=latest_comment_is_operator,
     )
-    if send_message_used is None and send_message_tag_present_ok is not None:
-        send_message_used = bool(send_message_tag_present_ok)
+    send_message_used = _resolve_send_message_used(
+        outbound_result=outbound_result,
+        send_message_tag_present=send_message_tag_present_ok,
+    )
     send_message_used_ok = send_message_used if isinstance(send_message_used, bool) else None
-    if send_message_status_code is None:
-        send_message_status_code = outbound_send_message_status
-    if operator_reply_confirmed is True:
-        operator_reply_reason = "confirmed"
-    elif require_operator_reply:
-        if isinstance(outbound_reason, str) and outbound_reason:
-            operator_reply_reason = outbound_reason
-        elif send_message_used is False:
-            operator_reply_reason = "send_message_not_used"
-        elif latest_comment_is_operator is False:
-            operator_reply_reason = "latest_comment_not_operator"
-        elif latest_comment_is_operator is None:
-            operator_reply_reason = "operator_flag_missing"
-        else:
-            operator_reply_reason = "unconfirmed"
-    else:
-        operator_reply_reason = "not_required"
+    send_message_status_code = _resolve_send_message_status_code(
+        outbound_result=outbound_result,
+        outbound_send_message_status=outbound_send_message_status,
+    )
+    operator_reply_reason = _resolve_operator_reply_reason(
+        operator_reply_confirmed=operator_reply_confirmed,
+        require_operator_reply=require_operator_reply,
+        outbound_reason=outbound_reason if isinstance(outbound_reason, str) else None,
+        send_message_used=send_message_used,
+        latest_comment_is_operator=latest_comment_is_operator,
+    )
 
     reply_body_candidates = _collect_reply_body_candidates(
         latest_reply_body=latest_reply_body,

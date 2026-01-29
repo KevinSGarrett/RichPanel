@@ -96,6 +96,12 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _sanitize_ts_action_id,
     _wait_for_ticket_ready,
     _wait_for_ticket_tags,
+    _extract_outbound_result,
+    _send_message_used_from_outbound_result,
+    _send_message_status_from_outbound_result,
+    _resolve_send_message_used,
+    _resolve_send_message_status_code,
+    _resolve_operator_reply_reason,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1354,6 +1360,20 @@ class ParseArgsTests(unittest.TestCase):
             args = parse_args()
         self.assertEqual(args.order_number, "12345")
 
+    def test_parse_args_accepts_require_send_message_used(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--require-send-message-used",
+            ],
+        ):
+            args = parse_args()
+        self.assertTrue(args.require_send_message_used)
+
 
 class RoutingValidationTests(unittest.TestCase):
     def test_validate_routing_includes_optional_fields(self) -> None:
@@ -1505,6 +1525,152 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         self.assertEqual(required_checks, [False])
         names = [entry["name"] for entry in criteria_details]
         self.assertIn("send_message_tag_present", names)
+
+
+class OutboundResultHelperTests(unittest.TestCase):
+    def test_extract_outbound_result_prefers_state(self) -> None:
+        state_item = {"outbound_result": {"sent": True, "reason": "sent"}}
+        audit_item = {"outbound_result": {"sent": False, "reason": "skipped"}}
+        self.assertEqual(
+            _extract_outbound_result(state_item, audit_item),
+            state_item["outbound_result"],
+        )
+
+    def test_extract_outbound_result_falls_back_to_audit(self) -> None:
+        audit_item = {"outbound_result": {"sent": False, "reason": "skipped"}}
+        self.assertEqual(
+            _extract_outbound_result({}, audit_item),
+            audit_item["outbound_result"],
+        )
+        self.assertIsNone(_extract_outbound_result({}, {}))
+
+    def test_send_message_used_from_outbound_result(self) -> None:
+        self.assertIsNone(_send_message_used_from_outbound_result(None))
+        self.assertTrue(
+            _send_message_used_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": 200}]}
+            )
+        )
+        self.assertFalse(
+            _send_message_used_from_outbound_result(
+                {"responses": [{"action": "add_tag", "status": 200}]}
+            )
+        )
+
+    def test_send_message_status_from_outbound_result(self) -> None:
+        self.assertIsNone(_send_message_status_from_outbound_result(None))
+        self.assertEqual(
+            _send_message_status_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": "202"}]}
+            ),
+            202,
+        )
+        self.assertIsNone(
+            _send_message_status_from_outbound_result(
+                {"responses": [{"action": "send_message", "status": 200.5}]}
+            )
+        )
+
+    def test_resolve_send_message_used_fallbacks(self) -> None:
+        self.assertTrue(
+            _resolve_send_message_used(
+                outbound_result=None, send_message_tag_present=True
+            )
+        )
+        self.assertIsNone(
+            _resolve_send_message_used(
+                outbound_result=None, send_message_tag_present=None
+            )
+        )
+
+    def test_resolve_send_message_status_code_fallbacks(self) -> None:
+        self.assertEqual(
+            _resolve_send_message_status_code(
+                outbound_result=None, outbound_send_message_status=200
+            ),
+            200,
+        )
+        self.assertEqual(
+            _resolve_send_message_status_code(
+                outbound_result={
+                    "responses": [{"action": "send_message", "status": 201}]
+                },
+                outbound_send_message_status=200,
+            ),
+            201,
+        )
+
+    def test_resolve_operator_reply_reason_variants(self) -> None:
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=True,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=True,
+            ),
+            "confirmed",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=False,
+                outbound_reason=None,
+                send_message_used=None,
+                latest_comment_is_operator=None,
+            ),
+            "not_required",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason="send_message_failed",
+                send_message_used=None,
+                latest_comment_is_operator=None,
+            ),
+            "send_message_failed",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=False,
+                latest_comment_is_operator=None,
+            ),
+            "send_message_not_used",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=False,
+            ),
+            "latest_comment_not_operator",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=None,
+            ),
+            "operator_flag_missing",
+        )
+        self.assertEqual(
+            _resolve_operator_reply_reason(
+                operator_reply_confirmed=None,
+                require_operator_reply=True,
+                outbound_reason=None,
+                send_message_used=True,
+                latest_comment_is_operator=True,
+            ),
+            "unconfirmed",
+        )
 
 
 class TicketSnapshotTests(unittest.TestCase):

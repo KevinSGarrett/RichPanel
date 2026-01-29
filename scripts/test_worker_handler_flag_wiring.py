@@ -384,6 +384,96 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         ]
         self.assertTrue(any(key.get("conversation_id") == "group-12" for key in keys))
 
+    def test_sanitize_outbound_responses_filters_and_coerces(self) -> None:
+        responses = [
+            {"action": "send_message", "status": "201", "dry_run": False},
+            {"action": "add_tag", "status": 200.0, "dry_run": True},
+            {"action": "noop", "status": "bad", "dry_run": "nope"},
+            "bad",
+        ]
+        sanitized = worker._sanitize_outbound_responses(responses)
+        self.assertEqual(len(sanitized), 3)
+        self.assertEqual(sanitized[0]["status"], 201)
+        self.assertEqual(sanitized[1]["status"], 200)
+        self.assertIn("action", sanitized[2])
+        self.assertNotIn("dry_run", sanitized[2])
+
+    def test_resolve_outbound_evidence_handles_invalid(self) -> None:
+        self.assertIsNone(worker._resolve_outbound_evidence("nope"))
+        self.assertEqual(
+            worker._resolve_outbound_evidence({"sent": "yes", "responses": "bad"}),
+            {"sent": None, "reason": None, "responses": []},
+        )
+
+    def test_record_outbound_evidence_skips_when_invalid(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-13",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-13",
+            dedupe_id="dedupe-13",
+            payload={},
+            source="test",
+            conversation_id="conv-13",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-13",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={"recorded_at": "2026-01-20T00:00:00Z"},
+        )
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_outbound_evidence(
+                envelope, execution, outbound_result="not-a-dict"
+            )
+        table.update_item.assert_not_called()
+
+    def test_record_outbound_evidence_skips_audit_without_recorded_at(self) -> None:
+        envelope = EventEnvelope(
+            event_id="evt-14",
+            received_at="2026-01-20T00:00:00Z",
+            group_id="group-14",
+            dedupe_id="dedupe-14",
+            payload={},
+            source="test",
+            conversation_id="conv-14",
+        )
+        routing = RoutingDecision(
+            category="order_status",
+            tags=[],
+            reason="test",
+            department="Email Support Team",
+            intent="order_status_tracking",
+        )
+        execution = ExecutionResult(
+            event_id="evt-14",
+            mode="automation_candidate",
+            dry_run=True,
+            actions=[],
+            routing=routing,
+            state_record={},
+            audit_record={},
+        )
+        outbound_result = {"sent": False, "reason": "send_message_failed", "responses": []}
+        table = mock.Mock()
+        with mock.patch.object(worker, "_table", return_value=table):
+            worker._record_outbound_evidence(
+                envelope,
+                execution,
+                outbound_result=outbound_result,
+            )
+        self.assertEqual(table.update_item.call_count, 1)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()  # pragma: no cover
