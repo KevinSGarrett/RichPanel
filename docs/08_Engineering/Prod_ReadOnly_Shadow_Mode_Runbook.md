@@ -239,6 +239,7 @@ The shadow eval report now includes **diagnostic and actionable metrics** to hel
 - Note: Historical comparison not yet implemented; current version shows absolute thresholds only
   - Filtered schema drift ignores ids, timestamps, pagination, and volatile subtrees (comments, tags, custom fields)
   - See `schema_key_stats` in summary JSON for the top filtered vs ignored key paths
+  - `ticket_fetch_failed` is treated as a run warning and excluded from API error rate
 
 When drift or match failures spike:
 - If `run_warnings` includes `ticket_listing_403`, provide explicit `ticket-ids` or set `PROD_RICHPANEL_TICKET_IDS`

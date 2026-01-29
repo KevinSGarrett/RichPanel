@@ -398,6 +398,22 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
         self.assertEqual(len(drift_watch["alerts"]), 1)
         self.assertEqual(drift_watch["alerts"][0]["metric"], "schema_drift")
 
+    def test_drift_watch_excludes_ticket_fetch_failed_from_api_errors(self) -> None:
+        ticket_results = [
+            {"failure_source": "richpanel_fetch", "failure_reason": "ticket_fetch_failed"},
+            {"failure_source": "richpanel_fetch", "failure_reason": "richpanel_403"},
+            {"failure_source": "shopify_fetch", "failure_reason": "shopify_401"},
+            {"order_matched": True},
+        ]
+        drift_watch = shadow_eval._compute_drift_watch(
+            ticket_results=ticket_results,
+            ticket_schema_total=1,
+            ticket_schema_new=0,
+            shopify_schema_total=1,
+            shopify_schema_new=0,
+        )
+        self.assertEqual(drift_watch["current_values"]["api_error_rate_pct"], 50.0)
+
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_prod_environment_blocks_non_prod(self) -> None:

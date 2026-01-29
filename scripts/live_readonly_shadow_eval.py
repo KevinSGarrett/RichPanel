@@ -773,6 +773,7 @@ def _compute_drift_watch(
         1
         for result in ticket_results
         if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
+        and result.get("failure_reason") != "ticket_fetch_failed"
     )
     api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
     order_number_matches = sum(
