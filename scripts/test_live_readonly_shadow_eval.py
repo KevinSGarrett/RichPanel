@@ -339,6 +339,65 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
         self.assertTrue(drift_watch["has_alerts"])
         self.assertEqual(len(drift_watch["alerts"]), 2)
 
+    def test_drift_watch_ignores_noisy_schema_keys(self) -> None:
+        payloads = []
+        for idx in range(6):
+            payloads.append(
+                {
+                    "id": f"t-{idx}",
+                    "created_at": f"2025-01-{idx + 1:02d}T00:00:00Z",
+                    "updated_at": f"2025-01-{idx + 1:02d}T01:00:00Z",
+                    "status": "open",
+                    "customer": {
+                        "email": f"user{idx}@example.com",
+                        "name": "Test User",
+                    },
+                    "custom_fields": {"Order Number": str(1000 + idx)},
+                    "comments": [
+                        {
+                            "body": f"Message {idx}",
+                            "created_at": f"2025-01-{idx + 1:02d}T00:00:00Z",
+                        }
+                    ],
+                    "tags": ["tag", str(idx)],
+                    "metadata": {"page": idx, "cursor": f"c{idx}"},
+                }
+            )
+        fingerprints = [
+            fp for fp in (shadow_eval._schema_fingerprint(p) for p in payloads) if fp
+        ]
+        schema_new_ratio = len(set(fingerprints)) / len(fingerprints)
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=1.0,
+            api_error_rate=0.0,
+            order_number_share=1.0,
+            schema_new_ratio=schema_new_ratio,
+        )
+        self.assertFalse(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 0)
+
+    def test_drift_watch_catches_real_schema_drift(self) -> None:
+        payloads = [
+            {"status": "open", "customer": {"email": "a@example.com"}},
+            {"status": "open", "customer": {"email": "b@example.com"}},
+            {"status": "open", "customer": {"email": "c@example.com"}},
+            {"status": "open", "customer": {"email": "d@example.com"}},
+            {"state": "open", "customer": {"email": "e@example.com"}},
+        ]
+        fingerprints = [
+            fp for fp in (shadow_eval._schema_fingerprint(p) for p in payloads) if fp
+        ]
+        schema_new_ratio = len(set(fingerprints)) / len(fingerprints)
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=1.0,
+            api_error_rate=0.0,
+            order_number_share=1.0,
+            schema_new_ratio=schema_new_ratio,
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "schema_drift")
+
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
     def test_require_prod_environment_blocks_non_prod(self) -> None:

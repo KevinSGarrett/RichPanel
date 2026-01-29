@@ -234,9 +234,11 @@ The shadow eval report now includes **diagnostic and actionable metrics** to hel
   - **Match Rate Drop**: Alert if match rate drops > 10 percentage points (requires historical baseline)
   - **API Error Rate**: Alert if API errors exceed 5% of tickets
   - **Order Number Share Drop**: Alert if order_number match share drops > 15% (requires historical baseline)
-  - **Schema Drift**: Alert if > 20% of schemas are new
+  - **Schema Drift**: Alert if > 20% of schemas are new (uses filtered key paths)
 - Location: `drift_watch` in summary JSON with `alerts` array
 - Note: Historical comparison not yet implemented; current version shows absolute thresholds only
+  - Filtered schema drift ignores ids, timestamps, pagination, and volatile subtrees (comments, tags, custom fields)
+  - See `schema_key_stats` in summary JSON for the top filtered vs ignored key paths
 
 When drift or match failures spike:
 - If `run_warnings` includes `ticket_listing_403`, provide explicit `ticket-ids` or set `PROD_RICHPANEL_TICKET_IDS`
@@ -322,6 +324,16 @@ The shadow eval report includes several diagnostic metrics to help you understan
 - If `none` increases, check:
   - Are customer identifiers (email, name) missing?
   - Is Shopify API returning empty results?
+
+### Schema Key Stats (PII-safe)
+
+**What it measures:** Top field-path frequencies for ticket + Shopify payloads after filtering noisy keys.
+
+**Location:** `schema_key_stats` in summary JSON.
+
+**When to investigate:**
+- Review `filtered_top_paths` to understand stable contract shape.
+- Review `ignored_top_paths` to confirm the noisy keys being suppressed (ids, timestamps, pagination, comments/tags/custom fields).
 
 ### Failure Buckets (PII-safe)
 
