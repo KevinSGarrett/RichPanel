@@ -2,8 +2,10 @@
 
 ## Code
 - Filtered schema key paths in `scripts/live_readonly_shadow_eval.py` to ignore noisy IDs/timestamps/pagination and stop descent into volatile subtrees (comments, tags, custom fields, metadata).
+- Logged ignored schema paths (including nested keys under skipped subtrees) for drift triage.
 - Added `schema_key_stats` to the summary payload for drift triage.
 - Excluded `ticket_fetch_failed` from drift-watch API error rate (still surfaced via `run_warnings`).
+- Added `ticket_fetch_failure_rate_pct` to drift-watch current values (warning-only visibility).
 
 ## Tests
 - Added drift-watch fixtures that ignore noisy schema-only changes and still alert on real contract drift.

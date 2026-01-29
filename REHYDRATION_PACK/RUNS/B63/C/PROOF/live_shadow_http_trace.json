@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-29T01:55:25.428364+00:00",
+  "generated_at": "2026-01-29T02:17:36.544510+00:00",
   "entries": [
     {
       "method": "GET",
@@ -477,12 +477,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:b645a23fd354",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/v1/tickets/number/redacted:b645a23fd354",
       "service": "richpanel",
       "source": "urllib"
@@ -621,12 +615,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:e7cf89bcb59f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/conversations/redacted:e7cf89bcb59f",
       "service": "richpanel",
       "source": "urllib"
@@ -693,37 +681,67 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:2a7ecc5e705d",
+      "path": "/api/v1/conversations/redacted:2a7ecc5e705d",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:2a7ecc5e705d",
+      "path": "/v1/conversations/redacted:2a7ecc5e705d",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:2a7ecc5e705d/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:2a7ecc5e705d/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:4a2d3fcc1a76",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:4a2d3fcc1a76",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:4a2d3fcc1a76/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:4a2d3fcc1a76/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:2a88c7506c07",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:2a88c7506c07",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:2a88c7506c07",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:2a88c7506c07",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -851,6 +869,18 @@
       "method": "GET",
       "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
       "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:90064405d18e",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:90064405d18e",
+      "service": "richpanel",
       "source": "urllib"
     },
     {
@@ -1017,6 +1047,12 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:f9ead722d06e",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:f9ead722d06e",
       "service": "richpanel",
       "source": "urllib"
@@ -1167,7 +1203,13 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:99e7f9b10b88",
+      "path": "/v1/tickets/redacted:99e7f9b10b88",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:99e7f9b10b88",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1181,6 +1223,66 @@
       "method": "GET",
       "path": "/v1/tickets/number/redacted:99e7f9b10b88",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:99e7f9b10b88",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:99e7f9b10b88",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:99e7f9b10b88",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:99e7f9b10b88/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:99e7f9b10b88/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a107645634de",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a107645634de",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a107645634de/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a107645634de/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -1197,61 +1299,43 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:4a5faeafedd7",
+      "path": "/v1/tickets/number/redacted:4a5faeafedd7",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:4a5faeafedd7",
+      "path": "/v1/tickets/number/redacted:4a5faeafedd7",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:4a5faeafedd7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:4a5faeafedd7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:3e7607c791e5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:3e7607c791e5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:3e7607c791e5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:3e7607c791e5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:c4f06322e912",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:c4f06322e912",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:c4f06322e912",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:c4f06322e912",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:c4f06322e912",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1461,6 +1545,18 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:7e3b013d79fb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:7e3b013d79fb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:7e3b013d79fb",
       "service": "richpanel",
       "source": "urllib"
@@ -1522,6 +1618,12 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:6d7d5d5e9258",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:6d7d5d5e9258",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1599,61 +1701,31 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:93a32770c319",
+      "path": "/v1/tickets/number/redacted:93a32770c319",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:93a32770c319",
+      "path": "/v1/tickets/number/redacted:93a32770c319",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:93a32770c319/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:93a32770c319/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:145a166e1672",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:145a166e1672",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:145a166e1672/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:145a166e1672/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:b75e54bbe35e",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:b75e54bbe35e",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:b75e54bbe35e",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1731,56 +1803,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:82ed2c7947ba",
+      "path": "/v1/tickets/number/redacted:82ed2c7947ba",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:82ed2c7947ba",
+      "path": "/v1/tickets/number/redacted:82ed2c7947ba",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:82ed2c7947ba/messages",
+      "path": "/v1/tickets/redacted:e5a5dbc761d2",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:82ed2c7947ba/messages",
+      "path": "/v1/tickets/redacted:e5a5dbc761d2",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:70fd06a3100f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:70fd06a3100f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:70fd06a3100f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:70fd06a3100f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -1852,6 +1894,24 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:8425136bbcc1",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:8425136bbcc1",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:8425136bbcc1",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:8425136bbcc1",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1983,6 +2043,24 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:d7c38faf1ddb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:d7c38faf1ddb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:d7c38faf1ddb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:d7c38faf1ddb",
       "service": "richpanel",
       "source": "urllib"
@@ -2049,68 +2127,32 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:07d295c15663",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:07d295c15663",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:07d295c15663",
+      "path": "/v1/tickets/number/redacted:07d295c15663",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:07d295c15663",
+      "path": "/v1/tickets/number/redacted:07d295c15663",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:07d295c15663/messages",
+      "path": "/v1/tickets/redacted:f2d58caf1b90",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:07d295c15663/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:360ce36abfc7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:360ce36abfc7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:360ce36abfc7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:360ce36abfc7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -2127,56 +2169,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:f2d58caf1b90",
+      "path": "/v1/tickets/number/redacted:f2d58caf1b90",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:f2d58caf1b90",
+      "path": "/v1/tickets/number/redacted:f2d58caf1b90",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:f2d58caf1b90/messages",
+      "path": "/v1/tickets/redacted:4644cf13aa37",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:f2d58caf1b90/messages",
+      "path": "/v1/tickets/redacted:4644cf13aa37",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:bf60ded3cf26",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:bf60ded3cf26",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:bf60ded3cf26/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:bf60ded3cf26/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -2193,62 +2205,14 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:4644cf13aa37",
+      "path": "/v1/tickets/number/redacted:4644cf13aa37",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:4644cf13aa37",
+      "path": "/v1/tickets/number/redacted:4644cf13aa37",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:4644cf13aa37/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:4644cf13aa37/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:1f41441b3dcd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:1f41441b3dcd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:1f41441b3dcd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:1f41441b3dcd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -2325,6 +2289,30 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:5b96ec6ee4cb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:5b96ec6ee4cb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:5b96ec6ee4cb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:5b96ec6ee4cb",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:5b96ec6ee4cb",
       "service": "richpanel",
       "source": "urllib"
@@ -2386,6 +2374,12 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:337afa43c02b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:337afa43c02b",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -2470,6 +2464,12 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:b0c2fa68def3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:b0c2fa68def3",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -3747,12 +3747,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:955bb0b01536",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/v1/tickets/number/redacted:955bb0b01536",
       "service": "richpanel",
       "source": "urllib"
@@ -3946,24 +3940,6 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:0020a5f0369e",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:0020a5f0369e",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:0020a5f0369e",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:0020a5f0369e",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -4173,12 +4149,6 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:5fb23854d2fc",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/conversations/redacted:5fb23854d2fc",
       "service": "richpanel",
       "source": "urllib"
@@ -4300,12 +4270,6 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:0d84c1cbce3e",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:0d84c1cbce3e",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -4443,67 +4407,49 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:da1c7b0ec6a3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:da1c7b0ec6a3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:da1c7b0ec6a3",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:da1c7b0ec6a3",
+      "path": "/v1/tickets/number/redacted:da1c7b0ec6a3",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:da1c7b0ec6a3",
+      "path": "/v1/tickets/number/redacted:da1c7b0ec6a3",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:da1c7b0ec6a3/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:da1c7b0ec6a3/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:b35fe39bcc63",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:b35fe39bcc63",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:b35fe39bcc63/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:b35fe39bcc63/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:619b8ed5b3b7",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:619b8ed5b3b7",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:619b8ed5b3b7",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -4575,62 +4521,32 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:a33d69e93b75",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:a33d69e93b75",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:a33d69e93b75",
+      "path": "/v1/tickets/number/redacted:a33d69e93b75",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:a33d69e93b75",
+      "path": "/v1/tickets/number/redacted:a33d69e93b75",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:a33d69e93b75/messages",
+      "path": "/v1/tickets/redacted:10785efd8c4d",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:a33d69e93b75/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:0b7e27a384fd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:0b7e27a384fd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:0b7e27a384fd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:0b7e27a384fd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -4707,6 +4623,18 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:e7f78fbfa3f4",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:e7f78fbfa3f4",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:e7f78fbfa3f4",
       "service": "richpanel",
       "source": "urllib"
@@ -4773,67 +4701,43 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:63bf3fab9397",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:63bf3fab9397",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:63bf3fab9397",
+      "path": "/v1/tickets/number/redacted:63bf3fab9397",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:63bf3fab9397",
+      "path": "/v1/tickets/number/redacted:63bf3fab9397",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:63bf3fab9397/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:63bf3fab9397/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:973a4b682bfa",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:973a4b682bfa",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:973a4b682bfa/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:973a4b682bfa/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:5aae4725d17f",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:5aae4725d17f",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:5aae4725d17f",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -4911,6 +4815,18 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/number/redacted:7138f3ca9e9b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:7138f3ca9e9b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/conversations/redacted:7138f3ca9e9b",
       "service": "richpanel",
       "source": "urllib"
@@ -4966,6 +4882,24 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:5a86fec68037",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:5a86fec68037",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:5a86fec68037",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:5a86fec68037",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -5043,6 +4977,18 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/number/redacted:77e8a80f3c94",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:77e8a80f3c94",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/conversations/redacted:77e8a80f3c94",
       "service": "richpanel",
       "source": "urllib"
@@ -5098,6 +5044,24 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:22ee4dd306ff",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:22ee4dd306ff",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:22ee4dd306ff",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:22ee4dd306ff",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -5159,6 +5123,12 @@
       "method": "GET",
       "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
       "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:76044435bdf4",
+      "service": "richpanel",
       "source": "urllib"
     },
     {
@@ -5235,62 +5205,44 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:2650b4bc83ab",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:2650b4bc83ab",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:2650b4bc83ab",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:2650b4bc83ab",
+      "path": "/v1/tickets/number/redacted:2650b4bc83ab",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:2650b4bc83ab",
+      "path": "/v1/tickets/number/redacted:2650b4bc83ab",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:2650b4bc83ab/messages",
+      "path": "/v1/tickets/redacted:9e03d14c8b5c",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:2650b4bc83ab/messages",
+      "path": "/v1/tickets/redacted:9e03d14c8b5c",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8b24cddd1346",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8b24cddd1346",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8b24cddd1346/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8b24cddd1346/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5307,56 +5259,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:9e03d14c8b5c",
+      "path": "/v1/tickets/number/redacted:9e03d14c8b5c",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:9e03d14c8b5c",
+      "path": "/v1/tickets/number/redacted:9e03d14c8b5c",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:9e03d14c8b5c/messages",
+      "path": "/v1/tickets/redacted:92229f768b7c",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:9e03d14c8b5c/messages",
+      "path": "/v1/tickets/redacted:92229f768b7c",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8a3d69e8854f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8a3d69e8854f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8a3d69e8854f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8a3d69e8854f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5439,6 +5361,12 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/number/redacted:8457272c3cb0",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/conversations/redacted:8457272c3cb0",
       "service": "richpanel",
       "source": "urllib"
@@ -5505,68 +5433,44 @@
     },
     {
       "method": "GET",
+      "path": "/v1/tickets/redacted:17e5c122a305",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:17e5c122a305",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
       "path": "/v1/tickets/number/redacted:17e5c122a305",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:17e5c122a305",
+      "path": "/v1/tickets/number/redacted:17e5c122a305",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:17e5c122a305",
+      "path": "/v1/tickets/number/redacted:17e5c122a305",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:17e5c122a305/messages",
+      "path": "/v1/tickets/redacted:daf031367e74",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:17e5c122a305/messages",
+      "path": "/v1/tickets/redacted:daf031367e74",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:fb1866712895",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:fb1866712895",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:fb1866712895/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:fb1866712895/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5583,56 +5487,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:daf031367e74",
+      "path": "/v1/tickets/number/redacted:daf031367e74",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:daf031367e74",
+      "path": "/v1/tickets/number/redacted:daf031367e74",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:daf031367e74/messages",
+      "path": "/v1/tickets/redacted:f4cf378600d7",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:daf031367e74/messages",
+      "path": "/v1/tickets/redacted:f4cf378600d7",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8a7da7367077",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8a7da7367077",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8a7da7367077/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8a7da7367077/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5649,56 +5523,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:f4cf378600d7",
+      "path": "/v1/tickets/number/redacted:f4cf378600d7",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:f4cf378600d7",
+      "path": "/v1/tickets/number/redacted:f4cf378600d7",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:f4cf378600d7/messages",
+      "path": "/v1/tickets/redacted:bed6aa520068",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:f4cf378600d7/messages",
+      "path": "/v1/tickets/redacted:bed6aa520068",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:09bd2ab475e2",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:09bd2ab475e2",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:09bd2ab475e2/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:09bd2ab475e2/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5715,56 +5559,26 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:bed6aa520068",
+      "path": "/v1/tickets/number/redacted:bed6aa520068",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:bed6aa520068",
+      "path": "/v1/tickets/number/redacted:bed6aa520068",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:bed6aa520068/messages",
+      "path": "/v1/tickets/redacted:ca4f949b07bd",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:bed6aa520068/messages",
+      "path": "/v1/tickets/redacted:ca4f949b07bd",
       "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:2ed47d8188c5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:2ed47d8188c5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:2ed47d8188c5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:2ed47d8188c5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -5787,61 +5601,7 @@
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:ca4f949b07bd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ca4f949b07bd",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:ca4f949b07bd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ca4f949b07bd/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:7dca86c54e03",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:7dca86c54e03",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:7dca86c54e03/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:7dca86c54e03/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:aecd3f24cfac",
+      "path": "/v1/tickets/number/redacted:ca4f949b07bd",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -5883,7 +5643,7 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:2f0f8b217ebe",
+      "path": "/v1/tickets/number/redacted:2f0f8b217ebe",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -5973,26 +5733,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:b59932f40df0",
+      "path": "/api/v1/conversations/redacted:b59932f40df0",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:b59932f40df0",
+      "path": "/v1/conversations/redacted:b59932f40df0",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a4afd6ab19ac",
+      "path": "/api/v1/conversations/redacted:b59932f40df0/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a4afd6ab19ac",
+      "path": "/v1/conversations/redacted:b59932f40df0/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:b8fd0f40cfea",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:b8fd0f40cfea",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:b8fd0f40cfea/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:b8fd0f40cfea/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6009,14 +5799,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a4afd6ab19ac",
+      "path": "/api/v1/conversations/redacted:a4afd6ab19ac",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a4afd6ab19ac",
+      "path": "/v1/conversations/redacted:a4afd6ab19ac",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a4afd6ab19ac/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a4afd6ab19ac/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:837cd03388a4",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:837cd03388a4",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:837cd03388a4/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:837cd03388a4/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6033,26 +5865,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:cf71338c3f7b",
+      "path": "/api/v1/conversations/redacted:cf71338c3f7b",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:cf71338c3f7b",
+      "path": "/v1/conversations/redacted:cf71338c3f7b",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:4a276071e9f6",
+      "path": "/api/v1/conversations/redacted:cf71338c3f7b/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:4a276071e9f6",
+      "path": "/v1/conversations/redacted:cf71338c3f7b/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:7f0badd74cfe",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:7f0badd74cfe",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:7f0badd74cfe/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:7f0badd74cfe/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6069,26 +5931,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:4a276071e9f6",
+      "path": "/api/v1/conversations/redacted:4a276071e9f6",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:4a276071e9f6",
+      "path": "/v1/conversations/redacted:4a276071e9f6",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:8710745f5c11",
+      "path": "/api/v1/conversations/redacted:4a276071e9f6/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:8710745f5c11",
+      "path": "/v1/conversations/redacted:4a276071e9f6/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:c313258086f0",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:c313258086f0",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:c313258086f0/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:c313258086f0/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6105,26 +5997,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:8710745f5c11",
+      "path": "/api/v1/conversations/redacted:8710745f5c11",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:8710745f5c11",
+      "path": "/v1/conversations/redacted:8710745f5c11",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a1522cf17d36",
+      "path": "/api/v1/conversations/redacted:8710745f5c11/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a1522cf17d36",
+      "path": "/v1/conversations/redacted:8710745f5c11/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:8bc6684ef386",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:8bc6684ef386",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:8bc6684ef386/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:8bc6684ef386/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6141,26 +6063,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a1522cf17d36",
+      "path": "/api/v1/conversations/redacted:a1522cf17d36",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a1522cf17d36",
+      "path": "/v1/conversations/redacted:a1522cf17d36",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:acaa4783503d",
+      "path": "/api/v1/conversations/redacted:a1522cf17d36/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:acaa4783503d",
+      "path": "/v1/conversations/redacted:a1522cf17d36/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ef44f3dfa58d",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ef44f3dfa58d",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ef44f3dfa58d/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ef44f3dfa58d/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6177,26 +6129,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:acaa4783503d",
+      "path": "/api/v1/conversations/redacted:acaa4783503d",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:acaa4783503d",
+      "path": "/v1/conversations/redacted:acaa4783503d",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:6934c913ba36",
+      "path": "/api/v1/conversations/redacted:acaa4783503d/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:6934c913ba36",
+      "path": "/v1/conversations/redacted:acaa4783503d/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:150a6728dc19",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:150a6728dc19",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:150a6728dc19/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:150a6728dc19/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6213,26 +6195,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:6934c913ba36",
+      "path": "/api/v1/conversations/redacted:6934c913ba36",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:6934c913ba36",
+      "path": "/v1/conversations/redacted:6934c913ba36",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a13514678f0b",
+      "path": "/api/v1/conversations/redacted:6934c913ba36/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:a13514678f0b",
+      "path": "/v1/conversations/redacted:6934c913ba36/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:588030aca7ab",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:588030aca7ab",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:588030aca7ab/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:588030aca7ab/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6249,26 +6261,56 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a13514678f0b",
+      "path": "/api/v1/conversations/redacted:a13514678f0b",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a13514678f0b",
+      "path": "/v1/conversations/redacted:a13514678f0b",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:3e0444f523f8",
+      "path": "/api/v1/conversations/redacted:a13514678f0b/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:3e0444f523f8",
+      "path": "/v1/conversations/redacted:a13514678f0b/messages",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:033e17169910",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:033e17169910",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:033e17169910/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:033e17169910/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
@@ -6285,37 +6327,61 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:3e0444f523f8",
+      "path": "/api/v1/conversations/redacted:3e0444f523f8",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:3e0444f523f8",
+      "path": "/v1/conversations/redacted:3e0444f523f8",
       "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:3e0444f523f8/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:3e0444f523f8/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ea246c9373ea",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ea246c9373ea",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ea246c9373ea/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ea246c9373ea/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
       "source": "urllib"
     },
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:d82ad6538740",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:d82ad6538740",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:d82ad6538740",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:d82ad6538740",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -6448,12 +6514,6 @@
     {
       "method": "GET",
       "path": "/v1/tickets/redacted:f039ade5d2f2",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:f039ade5d2f2",
       "service": "richpanel",
       "source": "urllib"
     },

@@ -23,13 +23,13 @@ gh workflow run shadow_live_readonly_eval.yml --ref b63/shadow-validator-drift-t
   -f shopify-token-source=api `
   -f shop-domain=<redacted>.myshopify.com
 
-gh run download 21462527530 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval_b63_final
+gh run download 21463001053 -n live-readonly-shadow-eval -D C:\RichPanel_GIT\_tmp_shadow_eval_b63_followup
 ```
 
 ## Drift-watch summary (before vs after)
 - **Before (B62/C RUN_20260128_1811Z):** schema_new_ratio_pct=52.94; api_error_rate_pct=0.0; has_alerts=true (schema_drift)
 - **Before (main RUN_20260129_0126Z):** schema_new_ratio_pct=23.16; api_error_rate_pct=12.84; has_alerts=true (api_error_rate, schema_drift)
-- **After (B63/C RUN_20260129_0150Z):** schema_new_ratio_pct=13.54; api_error_rate_pct=0.0; has_alerts=false
+- **After (B63/C RUN_20260129_0213Z):** schema_new_ratio_pct=15.22; api_error_rate_pct=0.0; ticket_fetch_failure_rate_pct=15.6; has_alerts=false
 
 ## Read-only confirmation
 - `env_flags` in `REHYDRATION_PACK/RUNS/B63/C/PROOF/live_shadow_report.json`:
