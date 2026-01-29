@@ -41,4 +41,4 @@ python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name Richpa
 
 ## Email delivery observation
 - Operator reply visible in Richpanel UI for the ticket (see post snapshot excerpt).
-- Sandbox inbox delivery observed for the created ticket’s from address (redacted hash `571abc2d0add`); verify in the mailbox tied to `MW_SMOKE_TICKET_FROM_EMAIL` if needed.
+- Sandbox inbox delivery verification pending: need access to the mailbox tied to `MW_SMOKE_TICKET_FROM_EMAIL` to confirm delivery for run `20260129085518`.
