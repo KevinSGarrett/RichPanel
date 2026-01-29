@@ -1,7 +1,7 @@
 {
   "meta": {
-    "run_id": "20260129085518",
-    "timestamp": "2026-01-29T14:55:43.788316+00:00",
+    "run_id": "20260129105728",
+    "timestamp": "2026-01-29T16:57:53.548506+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status_tracking",
@@ -9,7 +9,7 @@
   },
   "inputs": {
     "ticket_ref": null,
-    "ticket_ref_fingerprint": "f35e3a9a8fa4",
+    "ticket_ref_fingerprint": "0f90947a4c6c",
     "apply_test_tag": false,
     "test_tag_value": null,
     "command": "python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario order_status_tracking --create-ticket --create-ticket-proof-path REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/created_ticket_order_status.json --proof-path REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/order_status_outbound_operator_reply_proof.json --require-operator-reply --require-send-message-used --require-send-message --wait-seconds 120"
@@ -17,9 +17,9 @@
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id_fingerprint": "90fd191e8b3e",
+    "event_id_fingerprint": "0d41f81b166a",
     "conversation_id": null,
-    "conversation_id_fingerprint": "f35e3a9a8fa4",
+    "conversation_id_fingerprint": "0f90947a4c6c",
     "accepted": true
   },
   "dynamo": {
@@ -47,12 +47,12 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.94)",
+        "reason": "llm_routing (confidence=0.92)",
         "intent": "order_status_tracking",
         "department": "Email Support Team"
       },
       "action_count": 2,
-      "updated_at": "2026-01-29T14:55:30.285366+00:00"
+      "updated_at": "2026-01-29T16:57:39.695346+00:00"
     },
     "audit_record": {
       "routing": {
@@ -62,20 +62,20 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.94)",
+        "reason": "llm_routing (confidence=0.92)",
         "intent": "order_status_tracking",
         "department": "Email Support Team"
       },
-      "recorded_at": "2026-01-29T14:55:30.285366+00:00",
-      "ts_action_fingerprint": "2026-01-29T14:55:30.285366+00:00#fingerprint:90fd191e8b3e"
+      "recorded_at": "2026-01-29T16:57:39.695346+00:00",
+      "ts_action_fingerprint": "2026-01-29T16:57:39.695346+00:00#fingerprint:0d41f81b166a"
     }
   },
   "openai": {
     "routing": {
       "llm_called": true,
       "model": "gpt-5.2-chat-latest",
-      "confidence": 0.94,
-      "response_id": "chatcmpl-D3NiaHqGfuPy9dUDIbo3LDorVAcnJ",
+      "confidence": 0.92,
+      "response_id": "chatcmpl-D3Pcnx08TFkx9F0CpU2oXPUQRPZDQ",
       "response_id_unavailable_reason": null,
       "final_intent": "order_status_tracking",
       "primary_source": "llm",
@@ -86,13 +86,13 @@
       "rewrite_attempted": true,
       "rewrite_applied": false,
       "model": "gpt-5.2-chat-latest",
-      "response_id": "chatcmpl-D3NieAnpU9CMQRBxhZjIoCKg9Hc6a",
+      "response_id": "chatcmpl-D3PcrFYG5ZJFjZAbGsEaEdgZd4uxG",
       "response_id_unavailable_reason": null,
       "fallback_used": true,
-      "reason": "low_confidence",
-      "error_class": "OpenAILowConfidence",
-      "original_hash": "fc63c009d5ad",
-      "rewritten_hash": "fc63c009d5ad",
+      "reason": "risk_flagged",
+      "error_class": "OpenAIRiskFlagged",
+      "original_hash": "837e4c0ba982",
+      "rewritten_hash": "837e4c0ba982",
       "rewritten_changed": false
     }
   },
@@ -105,17 +105,17 @@
     "openai": {
       "called": true,
       "model": "gpt-5.2-chat-latest",
-      "request_id": "chatcmpl-D3NiaHqGfuPy9dUDIbo3LDorVAcnJ",
+      "request_id": "chatcmpl-D3Pcnx08TFkx9F0CpU2oXPUQRPZDQ",
       "response_id_unavailable_reason": null,
-      "confidence": 0.94
+      "confidence": 0.92
     }
   },
   "rewriter_metadata": {
     "used": false,
     "model": "gpt-5.2-chat-latest",
-    "request_id": "chatcmpl-D3NieAnpU9CMQRBxhZjIoCKg9Hc6a",
-    "original_hash": "fc63c009d5ad",
-    "rewritten_hash": "fc63c009d5ad",
+    "request_id": "chatcmpl-D3PcrFYG5ZJFjZAbGsEaEdgZd4uxG",
+    "original_hash": "837e4c0ba982",
+    "rewritten_hash": "837e4c0ba982",
     "changed": false
   },
   "order_status": {
@@ -143,7 +143,7 @@
       "tags": [
         "mw-smoke-autoticket"
       ],
-      "updated_at": "2026-01-29T14:55:23.384Z",
+      "updated_at": "2026-01-29T16:57:32.885Z",
       "message_count": 1,
       "last_message_source": "unknown",
       "operator_reply_present": false,
@@ -152,7 +152,7 @@
       "ticket_channel": "email",
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "f35e3a9a8fa4",
+      "ticket_id_fingerprint": "0f90947a4c6c",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
@@ -166,11 +166,11 @@
         "mw-routing-applied",
         "mw-auto-replied",
         "mw-order-status-answered",
-        "mw-order-status-answered:20260129085518",
+        "mw-order-status-answered:20260129105728",
         "mw-outbound-path-send-message",
         "mw-reply-sent"
       ],
-      "updated_at": "2026-01-29T14:55:39.066Z",
+      "updated_at": "2026-01-29T16:57:49.215Z",
       "message_count": 2,
       "last_message_source": "operator",
       "operator_reply_present": true,
@@ -179,7 +179,7 @@
       "ticket_channel": "email",
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "f35e3a9a8fa4",
+      "ticket_id_fingerprint": "0f90947a4c6c",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>"
     },
@@ -188,14 +188,14 @@
       "mw-intent-order_status_tracking",
       "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:20260129085518",
+      "mw-order-status-answered:20260129105728",
       "mw-outbound-path-send-message",
       "mw-reply-sent",
       "mw-routing-applied"
     ],
     "tags_removed": [],
     "skip_tags_added": [],
-    "updated_at_delta_seconds": 15.682,
+    "updated_at_delta_seconds": 16.33,
     "status_before": "open",
     "status_after": "closed",
     "status_changed": true,
@@ -209,7 +209,7 @@
       "mw-intent-order_status_tracking",
       "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:20260129085518",
+      "mw-order-status-answered:20260129105728",
       "mw-outbound-path-send-message",
       "mw-reply-sent",
       "mw-routing-applied"

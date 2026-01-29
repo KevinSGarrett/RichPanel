@@ -8,12 +8,17 @@
 ## Proof command
 ```powershell
 cd C:\RichPanel_GIT
+$env:MW_SMOKE_TICKET_FROM_EMAIL="<redacted>"
 python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --profile rp-admin-kevin --scenario order_status_tracking --create-ticket --create-ticket-proof-path REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/created_ticket_order_status.json --proof-path REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/order_status_outbound_operator_reply_proof.json --require-operator-reply --require-send-message-used --require-send-message --wait-seconds 120
 ```
 
+```powershell
+python scripts/gmail_delivery_verify.py --query newer_than:2d in:anywhere subject:Sandbox subject:autoticket --expected-to <redacted> --max-results 50 --out REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/gmail_delivery_proof.json
+```
+
 ## Ticket reference (PII-safe)
-- Ticket number: redacted:d40535ac09aa (fingerprint from `created_ticket_order_status.json`)
-- Conversation id fingerprint: f35e3a9a8fa4
+- Ticket number: redacted:ca153fc499ff (fingerprint from `created_ticket_order_status.json`)
+- Conversation id fingerprint: 0f90947a4c6c
 
 ## /send-message evidence (2xx)
 ```json
@@ -41,4 +46,4 @@ python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name Richpa
 
 ## Email delivery observation
 - Operator reply visible in Richpanel UI for the ticket (see post snapshot excerpt).
-- Sandbox inbox delivery verification pending: need access to the mailbox tied to `MW_SMOKE_TICKET_FROM_EMAIL` to confirm delivery for run `20260129085518`.
+- Gmail delivery confirmed via `gmail_delivery_proof.json` (status=found, expected_to_match_count=1; message timestamp 2026-01-29T16:57:51Z).

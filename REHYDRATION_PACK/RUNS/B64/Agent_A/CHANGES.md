@@ -5,11 +5,13 @@
 - Support `RICHPANEL_BOT_AGENT_ID` with fallback to `RICHPANEL_BOT_AUTHOR_ID`.
 - Persist sanitized outbound reply evidence to DDB records for proofing.
 - Extend `dev_e2e_smoke.py` with send-message used/status proof fields and CLI flag.
+- Add `scripts/gmail_delivery_verify.py` for PII-safe Gmail delivery evidence.
 
 ## Tests
 - Added/updated outbound email tests for channel preference, bot env var, and send-message failures.
 - Updated smoke proof encoding tests for new proof fields and criteria.
 - Added worker evidence persistence tests for outbound results.
+- Added unit tests for Gmail delivery proof helper.
 
 ## Docs/Config
 - Documented bot agent env var and channel precedence in reply-path docs.
@@ -19,5 +21,6 @@
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/order_status_outbound_operator_reply_proof.json`
 - `REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/created_ticket_order_status.json`
+- `REHYDRATION_PACK/RUNS/B64/Agent_A/PROOF/gmail_delivery_proof.json`
 - `REHYDRATION_PACK/RUNS/B64/Agent_A/EVIDENCE.md`
 - `REHYDRATION_PACK/RUNS/B64/Agent_A/RUN_REPORT.md`

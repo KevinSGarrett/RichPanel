@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "timestamp": "2026-01-29T16:59:55.953681+00:00",
+    "gmail_user": "me",
+    "query_redacted": "newer_than:2d in:anywhere subject:Sandbox subject:autoticket",
+    "query_fingerprint": "78a856da56f7",
+    "max_results": 50,
+    "expected_to_fingerprint": "6c90f00c515c",
+    "profile_email_hash": "1e641eb74547"
+  },
+  "result": {
+    "status": "found",
+    "message_count": 1,
+    "most_recent_internal_date": "2026-01-29T16:57:51+00:00",
+    "expected_to_match_count": 1
+  },
+  "messages": [
+    {
+      "id_fingerprint": "b426d1cc977e",
+      "thread_id_fingerprint": "b426d1cc977e",
+      "internal_date": "2026-01-29T16:57:51+00:00",
+      "label_ids": [
+        "IMPORTANT",
+        "CATEGORY_PERSONAL",
+        "INBOX"
+      ],
+      "subject_hash": "0d26f88afe93",
+      "from_hash": "0ff0d9ef9c82",
+      "to_hash": "6c90f00c515c",
+      "delivered_to_hash": "6c90f00c515c",
+      "original_to_hash": null,
+      "date": "Thu, 29 Jan 2026 16:57:51 +0000",
+      "matches_expected_to": true
+    }
+  ]
+}
