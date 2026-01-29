@@ -83,6 +83,61 @@ DEFAULT_SAMPLE_SIZE = 10
 DRIFT_WARNING_THRESHOLD = 0.2
 SUMMARY_TOP_FAILURE_REASONS = 5
 SCHEMA_KEY_DEPTH_LIMIT = 5
+SCHEMA_KEY_STATS_LIMIT = 25
+SCHEMA_IGNORE_KEYS = {
+    "etag",
+    "checksum",
+    "signature",
+    "token",
+    "hash",
+    "cursor",
+    "page",
+    "page_info",
+    "pageinfo",
+    "per_page",
+    "perpage",
+    "page_size",
+    "pagesize",
+    "limit",
+    "offset",
+    "total",
+    "count",
+    "next_page",
+    "prev_page",
+    "previous_page",
+    "nextpage",
+    "prevpage",
+    "previouspage",
+    "url",
+    "href",
+    "link",
+    "links",
+}
+SCHEMA_SKIP_DESCENT_KEYS = {
+    "custom_fields",
+    "customfields",
+    "comments",
+    "comment",
+    "messages",
+    "conversation_messages",
+    "conversationmessages",
+    "events",
+    "history",
+    "audit",
+    "timeline",
+    "notes",
+    "note",
+    "tags",
+    "labels",
+    "metadata",
+    "meta",
+    "attributes",
+    "fields",
+    "attachments",
+    "attachment",
+    "links",
+    "link",
+}
 CUSTOM_REPORT_FILENAME = "live_shadow_report.json"
 CUSTOM_SUMMARY_JSON_FILENAME = "live_shadow_summary.json"
 CUSTOM_SUMMARY_MD_FILENAME = "live_shadow_summary.md"
@@ -205,15 +260,81 @@ def _classify_channel(channel: str) -> str:
     return "unknown"
 
 
+def _is_schema_id_key(key: str) -> bool:
+    if key in {"id", "_id", "ID"}:
+        return True
+    if key.endswith(("_id", "_Id", "_ID", "Id", "ID")) and len(key) > 2:
+        return True
+    return key.lower() in {"uuid", "guid", "gid"}
+
+
+def _is_schema_timestamp_key(key: str) -> bool:
+    lower = key.strip().lower()
+    if "timestamp" in lower:
+        return True
+    if lower.endswith(("_at", "_date", "_time")):
+        return True
+    if lower in {
+        "createdat",
+        "updatedat",
+        "deletedat",
+        "processedat",
+        "resolvedat",
+        "closedat",
+        "openedat",
+        "modifiedat",
+        "createddate",
+        "updateddate",
+        "deleteddate",
+        "processeddate",
+        "resolveddate",
+        "closeddate",
+        "openeddate",
+        "modifieddate",
+        "createdtime",
+        "updatedtime",
+        "deletedtime",
+        "processedtime",
+        "resolvedtime",
+        "closedtime",
+        "openedtime",
+        "modifiedtime",
+    }:
+        return True
+    return False
+
+
+def _should_ignore_schema_key(key: str) -> bool:
+    normalized = key.strip()
+    if not normalized or normalized.isdigit():
+        return True
+    lower = normalized.lower()
+    if lower in SCHEMA_IGNORE_KEYS:
+        return True
+    if _is_schema_id_key(normalized):
+        return True
+    if _is_schema_timestamp_key(normalized):
+        return True
+    return False
+
+
+def _should_skip_schema_descent(key: str) -> bool:
+    return key.strip().lower() in SCHEMA_SKIP_DESCENT_KEYS
+
+
 def _collect_schema_key_paths(
     payload: Any,
     *,
     keys: set[str],
+    ignored_keys: Optional[set[str]] = None,
+    collect_only_ignored: bool = False,
     prefix: str = "",
     depth: int = 0,
     max_depth: int = SCHEMA_KEY_DEPTH_LIMIT,
 ) -> None:
     if depth > max_depth:
+        return
+    if collect_only_ignored and ignored_keys is None:
         return
     if isinstance(payload, dict):
         for raw_key, value in payload.items():
@@ -221,31 +342,122 @@ def _collect_schema_key_paths(
             if not key or key.startswith("__"):
                 continue
             path = f"{prefix}.{key}" if prefix else key
+            if collect_only_ignored:
+                ignored_keys.add(path)
+                if isinstance(value, list):
+                    ignored_keys.add(f"{path}[]")
+                _collect_schema_key_paths(
+                    value,
+                    keys=keys,
+                    ignored_keys=ignored_keys,
+                    collect_only_ignored=True,
+                    prefix=path,
+                    depth=depth + 1,
+                    max_depth=max_depth,
+                )
+                continue
+            if _should_ignore_schema_key(key):
+                if ignored_keys is not None:
+                    ignored_keys.add(path)
+                    if isinstance(value, list):
+                        ignored_keys.add(f"{path}[]")
+                continue
             keys.add(path)
+            if _should_skip_schema_descent(key):
+                if isinstance(value, list):
+                    keys.add(f"{path}[]")
+                if ignored_keys is not None:
+                    _collect_schema_key_paths(
+                        value,
+                        keys=keys,
+                        ignored_keys=ignored_keys,
+                        collect_only_ignored=True,
+                        prefix=path,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                    )
+                continue
             _collect_schema_key_paths(
-                value, keys=keys, prefix=path, depth=depth + 1, max_depth=max_depth
+                value,
+                keys=keys,
+                ignored_keys=ignored_keys,
+                collect_only_ignored=collect_only_ignored,
+                prefix=path,
+                depth=depth + 1,
+                max_depth=max_depth,
             )
         return
     if isinstance(payload, list):
         list_prefix = f"{prefix}[]" if prefix else "[]"
-        keys.add(list_prefix)
+        if collect_only_ignored:
+            ignored_keys.add(list_prefix)
+        else:
+            keys.add(list_prefix)
         for item in payload:
             _collect_schema_key_paths(
                 item,
                 keys=keys,
+                ignored_keys=ignored_keys,
+                collect_only_ignored=collect_only_ignored,
                 prefix=list_prefix,
                 depth=depth + 1,
                 max_depth=max_depth,
             )
 
 
-def _schema_fingerprint(payload: Any) -> Optional[str]:
+def _schema_fingerprint(
+    payload: Any,
+    *,
+    key_counter: Optional[Counter[str]] = None,
+    ignored_counter: Optional[Counter[str]] = None,
+) -> Optional[str]:
     if not isinstance(payload, (dict, list)):
         return None
     keys: set[str] = set()
-    _collect_schema_key_paths(payload, keys=keys)
+    ignored: set[str] = set()
+    _collect_schema_key_paths(payload, keys=keys, ignored_keys=ignored)
+    if key_counter is not None:
+        for key in keys:
+            key_counter[key] += 1
+    if ignored_counter is not None:
+        for key in ignored:
+            ignored_counter[key] += 1
     canonical = "|".join(sorted(keys))
     return _fingerprint(canonical)
+
+
+def _summarize_schema_key_stats(counter: Counter[str]) -> List[Dict[str, Any]]:
+    return [
+        {"path": path, "count": count}
+        for path, count in counter.most_common(SCHEMA_KEY_STATS_LIMIT)
+    ]
+
+
+def _build_schema_key_stats(
+    *,
+    ticket_keys: Counter[str],
+    ticket_ignored: Counter[str],
+    shopify_keys: Counter[str],
+    shopify_ignored: Counter[str],
+) -> Dict[str, Any]:
+    def _build_entry(
+        keys_counter: Counter[str], ignored_counter: Counter[str]
+    ) -> Dict[str, Any]:
+        return {
+            "filtered_total_unique": len(keys_counter),
+            "ignored_total_unique": len(ignored_counter),
+            "filtered_top_paths": _summarize_schema_key_stats(keys_counter),
+            "ignored_top_paths": _summarize_schema_key_stats(ignored_counter),
+        }
+
+    return {
+        "note": (
+            "Key paths include field names only; schema drift excludes ids, timestamps, "
+            "pagination, and volatile subtrees (ignored paths include nested keys)."
+        ),
+        "ticket": _build_entry(ticket_keys, ticket_ignored),
+        "shopify": _build_entry(shopify_keys, shopify_ignored),
+    }
 
 
 def _percentile(values: List[float], pct: float) -> float:
@@ -490,6 +702,7 @@ def _build_drift_watch(
     api_error_rate: float,
     order_number_share: float,
     schema_new_ratio: float,
+    ticket_fetch_failure_rate: float = 0.0,
 ) -> Dict[str, Any]:
     """
     B61/C: Build drift watch section comparing current values to thresholds.
@@ -502,6 +715,7 @@ def _build_drift_watch(
     api_error_rate_pct = api_error_rate * 100
     order_number_share_pct = order_number_share * 100
     schema_new_ratio_pct = schema_new_ratio * 100
+    ticket_fetch_failure_rate_pct = ticket_fetch_failure_rate * 100
     
     alerts = []
     
@@ -533,10 +747,14 @@ def _build_drift_watch(
             "api_error_rate_pct": round(api_error_rate_pct, 2),
             "order_number_share_pct": round(order_number_share_pct, 2),
             "schema_new_ratio_pct": round(schema_new_ratio_pct, 2),
+            "ticket_fetch_failure_rate_pct": round(ticket_fetch_failure_rate_pct, 2),
         },
         "alerts": alerts,
         "has_alerts": len(alerts) > 0,
-        "note": "Historical comparison not yet implemented; showing absolute thresholds only"
+        "note": (
+            "Historical comparison not yet implemented; schema drift uses filtered key paths "
+            "(ids, timestamps, pagination, and volatile subtrees ignored)."
+        ),
     }
 
 
@@ -590,6 +808,7 @@ def _compute_drift_watch(
         1
         for result in ticket_results
         if result.get("failure_source") in ("richpanel_fetch", "shopify_fetch")
+        and result.get("failure_reason") != "ticket_fetch_failed"
     )
     api_error_rate = api_errors / tickets_evaluated if tickets_evaluated else 0.0
     order_number_matches = sum(
@@ -597,6 +816,14 @@ def _compute_drift_watch(
     )
     order_number_share = (
         order_number_matches / tickets_evaluated if tickets_evaluated else 0.0
+    )
+    ticket_fetch_failures = sum(
+        1
+        for result in ticket_results
+        if result.get("failure_reason") == "ticket_fetch_failed"
+    )
+    ticket_fetch_failure_rate = (
+        ticket_fetch_failures / tickets_evaluated if tickets_evaluated else 0.0
     )
     schema_new_ratio = max(
         ticket_schema_new / ticket_schema_total if ticket_schema_total else 0.0,
@@ -607,6 +834,7 @@ def _compute_drift_watch(
         api_error_rate=api_error_rate,
         order_number_share=order_number_share,
         schema_new_ratio=schema_new_ratio,
+        ticket_fetch_failure_rate=ticket_fetch_failure_rate,
     )
 
 
@@ -617,6 +845,7 @@ def _build_summary_payload(
     ticket_results: List[Dict[str, Any]],
     timing: Dict[str, Any],
     drift: Dict[str, Any],
+    schema_key_stats: Optional[Dict[str, Any]] = None,
     run_warnings: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     tickets_evaluated = len(ticket_results)
@@ -705,7 +934,7 @@ def _build_summary_payload(
             match_failure_payload[bucket] = count
     
     warnings = sorted({str(item) for item in (run_warnings or []) if item})
-    return {
+    payload = {
         "run_id": run_id,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_size_requested": tickets_requested,
@@ -739,6 +968,9 @@ def _build_summary_payload(
         "run_warnings": warnings,
         "status": "warning" if drift.get("warning") else "ok",
     }
+    if schema_key_stats:
+        payload["schema_key_stats"] = schema_key_stats
+    return payload
 
 
 def _resolve_env_name() -> str:
@@ -1593,6 +1825,7 @@ def _build_markdown_report(
         "## Drift Watch (B61/C)",
         f"- Match Rate: {drift_watch.get('current_values', {}).get('match_rate_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['match_rate_drop_pct']}%)",
         f"- API Error Rate: {drift_watch.get('current_values', {}).get('api_error_rate_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['api_error_rate_pct']}%)",
+        f"- Ticket Fetch Failure Rate: {drift_watch.get('current_values', {}).get('ticket_fetch_failure_rate_pct', 0):.1f}% (warning-only)",
         f"- Order Number Share: {drift_watch.get('current_values', {}).get('order_number_share_pct', 0):.1f}% (threshold: drop > {DRIFT_THRESHOLDS['order_number_share_drop_pct']}%)",
         f"- Schema Drift: {drift_watch.get('current_values', {}).get('schema_new_ratio_pct', 0):.1f}% (threshold: > {DRIFT_THRESHOLDS['schema_drift_new_ratio'] * 100}%)",
         f"- **Alerts: {len(drift_watch.get('alerts', []))}**",
@@ -1783,6 +2016,10 @@ def main() -> int:
     ticket_schema_new = 0
     shopify_schema_total = 0
     shopify_schema_new = 0
+    ticket_schema_key_counts: Counter[str] = Counter()
+    ticket_schema_ignored_counts: Counter[str] = Counter()
+    shopify_schema_key_counts: Counter[str] = Counter()
+    shopify_schema_ignored_counts: Counter[str] = Counter()
 
     trace = _HttpTrace().capture()
     had_errors = False
@@ -1879,7 +2116,11 @@ def main() -> int:
                 )
                 result["channel"] = _classify_channel(channel_value)
 
-                ticket_schema = _schema_fingerprint(ticket_payload)
+                ticket_schema = _schema_fingerprint(
+                    ticket_payload,
+                    key_counter=ticket_schema_key_counts,
+                    ignored_counter=ticket_schema_ignored_counts,
+                )
                 if ticket_schema:
                     result["ticket_schema_fingerprint"] = ticket_schema
                     ticket_schema_total += 1
@@ -1930,7 +2171,11 @@ def main() -> int:
                         if eta_result:
                             result["computed_eta"] = eta_result
 
-                        shopify_schema = _schema_fingerprint(probe_summary)
+                        shopify_schema = _schema_fingerprint(
+                            probe_summary,
+                            key_counter=shopify_schema_key_counts,
+                            ignored_counter=shopify_schema_ignored_counts,
+                        )
                         result["shopify_schema_fingerprint"] = shopify_schema
                         shopify_schema_total += 1
                         if shopify_schema not in shopify_schema_seen:
@@ -2116,6 +2361,20 @@ def main() -> int:
         "errors": sum(1 for item in ticket_results if item.get("error")),
     }
 
+    schema_key_stats: Optional[Dict[str, Any]] = None
+    if (
+        ticket_schema_key_counts
+        or ticket_schema_ignored_counts
+        or shopify_schema_key_counts
+        or shopify_schema_ignored_counts
+    ):
+        schema_key_stats = _build_schema_key_stats(
+            ticket_keys=ticket_schema_key_counts,
+            ticket_ignored=ticket_schema_ignored_counts,
+            shopify_keys=shopify_schema_key_counts,
+            shopify_ignored=shopify_schema_ignored_counts,
+        )
+
     drift_summary = _build_drift_summary(
         ticket_total=ticket_schema_total,
         ticket_new=ticket_schema_new,
@@ -2144,6 +2403,7 @@ def main() -> int:
         ticket_results=ticket_results,
         timing=timing_summary,
         drift=drift_summary,
+        schema_key_stats=schema_key_stats,
         run_warnings=run_warnings,
     )
     # Add drift watch to summary

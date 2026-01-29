@@ -13539,6 +13539,12 @@
       "anchor": "match-method-telemetry"
     }
   ],
+  "schema key stats (pii-safe)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "schema-key-stats-pii-safe"
+    }
+  ],
   "failure buckets (pii-safe)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",

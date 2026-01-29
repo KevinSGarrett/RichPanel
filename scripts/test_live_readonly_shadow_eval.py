@@ -6,6 +6,7 @@ import sys
 import importlib
 import unittest
 import types
+from collections import Counter
 from pathlib import Path
 from unittest import mock
 from types import SimpleNamespace
@@ -338,6 +339,102 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
         )
         self.assertTrue(drift_watch["has_alerts"])
         self.assertEqual(len(drift_watch["alerts"]), 2)
+
+    def test_drift_watch_ignores_noisy_schema_keys(self) -> None:
+        payloads = []
+        for idx in range(6):
+            payloads.append(
+                {
+                    "id": f"t-{idx}",
+                    "created_at": f"2025-01-{idx + 1:02d}T00:00:00Z",
+                    "updated_at": f"2025-01-{idx + 1:02d}T01:00:00Z",
+                    "status": "open",
+                    "customer": {
+                        "email": f"user{idx}@example.com",
+                        "name": "Test User",
+                    },
+                    "custom_fields": {"Order Number": str(1000 + idx)},
+                    "comments": [
+                        {
+                            "body": f"Message {idx}",
+                            "created_at": f"2025-01-{idx + 1:02d}T00:00:00Z",
+                        }
+                    ],
+                    "tags": ["tag", str(idx)],
+                    "metadata": {"page": idx, "cursor": f"c{idx}"},
+                }
+            )
+        fingerprints = [
+            fp for fp in (shadow_eval._schema_fingerprint(p) for p in payloads) if fp
+        ]
+        schema_new_ratio = len(set(fingerprints)) / len(fingerprints)
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=1.0,
+            api_error_rate=0.0,
+            order_number_share=1.0,
+            schema_new_ratio=schema_new_ratio,
+        )
+        self.assertFalse(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 0)
+
+    def test_drift_watch_catches_real_schema_drift(self) -> None:
+        payloads = [
+            {"status": "open", "customer": {"email": "a@example.com"}},
+            {"status": "open", "customer": {"email": "b@example.com"}},
+            {"status": "open", "customer": {"email": "c@example.com"}},
+            {"status": "open", "customer": {"email": "d@example.com"}},
+            {"state": "open", "customer": {"email": "e@example.com"}},
+        ]
+        fingerprints = [
+            fp for fp in (shadow_eval._schema_fingerprint(p) for p in payloads) if fp
+        ]
+        schema_new_ratio = len(set(fingerprints)) / len(fingerprints)
+        drift_watch = shadow_eval._build_drift_watch(
+            match_rate=1.0,
+            api_error_rate=0.0,
+            order_number_share=1.0,
+            schema_new_ratio=schema_new_ratio,
+        )
+        self.assertTrue(drift_watch["has_alerts"])
+        self.assertEqual(len(drift_watch["alerts"]), 1)
+        self.assertEqual(drift_watch["alerts"][0]["metric"], "schema_drift")
+
+    def test_drift_watch_excludes_ticket_fetch_failed_from_api_errors(self) -> None:
+        ticket_results = [
+            {"failure_source": "richpanel_fetch", "failure_reason": "ticket_fetch_failed"},
+            {"failure_source": "richpanel_fetch", "failure_reason": "richpanel_403"},
+            {"failure_source": "shopify_fetch", "failure_reason": "shopify_401"},
+            {"order_matched": True},
+        ]
+        drift_watch = shadow_eval._compute_drift_watch(
+            ticket_results=ticket_results,
+            ticket_schema_total=1,
+            ticket_schema_new=0,
+            shopify_schema_total=1,
+            shopify_schema_new=0,
+        )
+        self.assertEqual(drift_watch["current_values"]["api_error_rate_pct"], 50.0)
+        self.assertEqual(
+            drift_watch["current_values"]["ticket_fetch_failure_rate_pct"], 25.0
+        )
+
+    def test_schema_skip_descent_keys_log_nested_paths(self) -> None:
+        payload = {
+            "comments": [
+                {"body": "hello", "metadata": {"sentiment": "neutral"}},
+                {"body": "bye", "metadata": {"sentiment": "positive"}},
+            ],
+            "status": "open",
+        }
+        key_counts = Counter()
+        ignored_counts = Counter()
+        shadow_eval._schema_fingerprint(
+            payload, key_counter=key_counts, ignored_counter=ignored_counts
+        )
+        self.assertIn("comments", key_counts)
+        self.assertIn("comments[]", key_counts)
+        self.assertIn("comments[].body", ignored_counts)
+        self.assertIn("comments[].metadata", ignored_counts)
 
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
