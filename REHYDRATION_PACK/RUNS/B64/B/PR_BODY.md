@@ -5,7 +5,7 @@
 **Labels:** `risk:R3`, `gate:claude`  
 **Risk:** `risk:R3`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01UCStxUYGXZNtZkRUJY2ziM`  
+**Anthropic response id:** `msg_01WAcXyA1DWogkLx9WYf32n3`  
 
 ### 1) Summary
 - Add an OpenAI intent contract for order-status routing with safe parsing and gating.
@@ -74,9 +74,9 @@
 - `python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status_tracking --require-openai-routing --require-openai-rewrite --ticket-id <redacted> --proof-path REHYDRATION_PACK/RUNS/B64/B/PROOF/openai_intent_rewrite_proof.json --run-id b64-20260129-b11 --wait-seconds 120 --profile rp-admin-kevin`
 
 ### 7) Results & evidence
-**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21496738529/job/61933379636  
+**CI:** https://github.com/KevinSGarrett/RichPanel/actions/runs/21497666101/job/61936508560  
 **Codecov:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/207  
-**Bugbot:** skipping — https://cursor.com  
+**Bugbot:** pass — https://cursor.com  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B64/B/RUN_REPORT.md`
