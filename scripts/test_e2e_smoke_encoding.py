@@ -40,6 +40,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _extract_latest_comment_body,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
+    _extract_order_status_intent_evidence,
     _evaluate_outbound_evidence,
     _evaluate_outbound_attempted,
     _classify_outbound_failure,
@@ -1162,6 +1163,10 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("order_match_by_number", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
         self.assertIn("operator_reply_reason", payload["proof_fields"])
+        self.assertIn("openai_routing_response_id", payload["proof_fields"])
+        self.assertIn("openai_rewrite_response_id", payload["proof_fields"])
+        self.assertIn("final_route", payload["proof_fields"])
+        self.assertIn("routing_ticket_excerpt_redacted", payload["proof_fields"])
 
 
 class AllowlistConfigTests(unittest.TestCase):
@@ -2866,6 +2871,31 @@ class OpenAIEvidenceTests(unittest.TestCase):
         self.assertEqual(evidence["reason"], "disabled")
         self.assertIsNone(evidence["original_hash"])
         self.assertIsNone(evidence["rewritten_hash"])
+
+    def test_openai_intent_evidence_maps_response_id(self) -> None:
+        state_item = {
+            "order_status_intent": {
+                "llm_called": True,
+                "model": "gpt-5.2-chat-latest",
+                "response_id": "resp_intent",
+                "confidence_threshold": 0.85,
+                "accepted": True,
+                "ticket_excerpt_redacted": "<redacted>",
+                "result": {
+                    "is_order_status": True,
+                    "confidence": 0.9,
+                    "extracted_order_number": "12345",
+                    "language": "en",
+                },
+            }
+        }
+        evidence = _extract_order_status_intent_evidence(state_item, {})
+        self.assertTrue(evidence["llm_called"])
+        self.assertEqual(evidence["response_id"], "resp_intent")
+        self.assertEqual(evidence["confidence"], 0.9)
+        self.assertEqual(evidence["is_order_status"], True)
+        self.assertEqual(evidence["language"], "en")
+        self.assertTrue(str(evidence["extracted_order_number_redacted"]).startswith("redacted:"))
 
     def test_openai_requirements_fail_when_missing(self) -> None:
         routing = {"llm_called": False}

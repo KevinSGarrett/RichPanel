@@ -13,6 +13,10 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation import pipeline  # noqa: E402
+from richpanel_middleware.automation.order_status_intent import (  # noqa: E402
+    OrderStatusIntentArtifact,
+    OrderStatusIntentResult,
+)
 from richpanel_middleware.automation.router import RoutingDecision  # noqa: E402
 from richpanel_middleware.ingest.envelope import EventEnvelope  # noqa: E402
 
@@ -23,6 +27,24 @@ class _RoutingArtifact:
 
     def to_dict(self) -> dict:
         return {"primary_source": self.primary_source}
+
+
+def _accepted_intent_artifact() -> OrderStatusIntentArtifact:
+    return OrderStatusIntentArtifact(
+        result=OrderStatusIntentResult(
+            is_order_status=True,
+            confidence=0.95,
+            reason="stubbed",
+            extracted_order_number=None,
+            language="en",
+        ),
+        llm_called=False,
+        model="gpt-test",
+        response_id=None,
+        response_id_unavailable_reason="stubbed",
+        confidence_threshold=0.85,
+        accepted=True,
+    )
 
 
 class ReadOnlyShadowModeTests(unittest.TestCase):
@@ -59,7 +81,11 @@ class ReadOnlyShadowModeTests(unittest.TestCase):
                 "created_at": "2024-01-01T00:00:00Z",
                 "shipping_method": "2 business days",
             },
-        ) as lookup_mock:
+        ) as lookup_mock, mock.patch.object(
+            pipeline,
+            "classify_order_status_intent",
+            return_value=_accepted_intent_artifact(),
+        ):
             plan = pipeline.plan_actions(
                 envelope,
                 safe_mode=False,

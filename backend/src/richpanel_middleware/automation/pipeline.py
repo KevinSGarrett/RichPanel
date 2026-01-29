@@ -29,6 +29,14 @@ from richpanel_middleware.automation.llm_reply_rewriter import (
     ReplyRewriteResult,
     rewrite_reply,
 )
+from richpanel_middleware.automation.order_status_intent import (
+    OrderStatusIntentArtifact,
+    classify_order_status_intent,
+)
+from richpanel_middleware.automation.order_status_prompts import (
+    OrderStatusReplyContext,
+    build_order_status_reply_prompt,
+)
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary
 from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
@@ -309,6 +317,18 @@ def _missing_context_reason_tag(missing_fields: List[str]) -> Optional[str]:
     return None
 
 
+def _order_status_intent_rejection_reason(intent: OrderStatusIntentArtifact) -> str:
+    if intent.gated_reason:
+        return f"order_status_intent_gated:{intent.gated_reason}"
+    if intent.parse_error:
+        return f"order_status_intent_parse_failed:{intent.parse_error}"
+    if intent.result and not intent.result.is_order_status:
+        return "order_status_intent_not_order_status"
+    if intent.result and intent.result.confidence < intent.confidence_threshold:
+        return "order_status_intent_low_confidence"
+    return "order_status_intent_rejected"
+
+
 @dataclass
 class ActionPlan:
     """Structured representation of what the worker intends to do."""
@@ -321,6 +341,7 @@ class ActionPlan:
     reasons: List[str] = field(default_factory=list)
     routing: RoutingDecision | None = None
     routing_artifact: RoutingArtifact | None = None
+    order_status_intent: OrderStatusIntentArtifact | None = None
 
 
 @dataclass
@@ -745,6 +766,22 @@ def plan_actions(
         force_primary=force_openai_primary,
     )
 
+    customer_message = extract_customer_message(payload, default="")
+    intent_metadata: Dict[str, str] = {}
+    ticket_channel = _extract_ticket_channel_from_payload(payload)
+    if ticket_channel:
+        intent_metadata["ticket_channel"] = ticket_channel
+    order_status_intent = classify_order_status_intent(
+        customer_message,
+        conversation_id=envelope.conversation_id,
+        event_id=envelope.event_id,
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        allow_network=allow_network,
+        outbound_enabled=outbound_enabled,
+        metadata=intent_metadata or None,
+    )
+
     effective_automation = automation_enabled and not safe_mode
     mode = "automation_candidate" if effective_automation else "route_only"
 
@@ -779,6 +816,27 @@ def plan_actions(
         )
 
         if routing.intent in {"order_status_tracking", "shipping_delay_not_shipped"}:
+            if not order_status_intent.accepted:
+                reasons.append(_order_status_intent_rejection_reason(order_status_intent))
+                if routing:
+                    extra_tags = [
+                        EMAIL_SUPPORT_ROUTE_TAG,
+                        ORDER_STATUS_SUPPRESSED_TAG,
+                    ]
+                    routing.tags = sorted(dedupe_tags((routing.tags or []) + extra_tags))
+                    if actions:
+                        actions[0]["routing"] = asdict(routing)
+                return ActionPlan(
+                    event_id=envelope.event_id,
+                    mode=mode,
+                    safe_mode=safe_mode,
+                    automation_enabled=automation_enabled,
+                    actions=actions,
+                    reasons=reasons,
+                    routing=routing,
+                    routing_artifact=routing_artifact,
+                    order_status_intent=order_status_intent,
+                )
             order_summary = lookup_order_summary(
                 envelope,
                 safe_mode=safe_mode,
@@ -825,6 +883,7 @@ def plan_actions(
                     reasons=reasons,
                     routing=routing,
                     routing_artifact=routing_artifact,
+                    order_status_intent=order_status_intent,
                 )
             ticket_created_at = (
                 payload.get("ticket_created_at")
@@ -896,6 +955,7 @@ def plan_actions(
         reasons=reasons,
         routing=routing,
         routing_artifact=routing_artifact,
+        order_status_intent=order_status_intent,
     )
 
 
@@ -951,6 +1011,11 @@ def execute_plan(
         state_record["routing_primary_source"] = plan.routing_artifact.primary_source
         audit_record["routing_primary_source"] = plan.routing_artifact.primary_source
 
+    if plan.order_status_intent:
+        intent_dict = plan.order_status_intent.to_dict()
+        state_record["order_status_intent"] = intent_dict
+        audit_record["order_status_intent"] = intent_dict
+
     if state_writer:
         state_writer(state_record)
     if audit_writer:
@@ -996,6 +1061,11 @@ _REWRITE_REASON_ERROR_CLASS = {
     "missing_required_urls": "OpenAIInvariantViolation",
     "missing_required_tracking": "OpenAIInvariantViolation",
     "missing_required_eta": "OpenAIInvariantViolation",
+    "unexpected_tokens": "OpenAIInvariantViolation",
+    "unexpected_urls": "OpenAIInvariantViolation",
+    "unexpected_tracking": "OpenAIInvariantViolation",
+    "unexpected_eta": "OpenAIInvariantViolation",
+    "contains_internal_tags": "OpenAIInvariantViolation",
 }
 
 
@@ -1273,6 +1343,36 @@ def execute_order_status_reply(
             )
             return {"sent": False, "reason": "missing_draft_reply"}
 
+        order_summary = parameters.get("order_summary") or {}
+        delivery_estimate = parameters.get("delivery_estimate") or order_summary.get(
+            "delivery_estimate"
+        )
+        if not isinstance(delivery_estimate, dict):
+            delivery_estimate = {}
+        eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
+        shipping_method = (
+            delivery_estimate.get("normalized_method")
+            or order_summary.get("shipping_method_name")
+            or order_summary.get("shipping_method")
+        )
+        reply_context = OrderStatusReplyContext(
+            tracking_number=draft_reply.get("tracking_number"),
+            tracking_url=draft_reply.get("tracking_url"),
+            eta_window=eta_window,
+            shipping_method=shipping_method,
+            carrier=draft_reply.get("carrier"),
+        )
+        intent_language = None
+        if isinstance(plan.order_status_intent, OrderStatusIntentArtifact):
+            intent_result = plan.order_status_intent.result
+            if intent_result and intent_result.language:
+                intent_language = intent_result.language
+        prompt_messages = build_order_status_reply_prompt(
+            context=reply_context,
+            draft_reply=reply_body,
+            language=intent_language,
+        )
+
         original_hash = _fingerprint_reply_body(reply_body)
         rewrite_result: ReplyRewriteResult | None = None
         openai_rewrite = {}
@@ -1285,6 +1385,7 @@ def execute_order_status_reply(
                 automation_enabled=automation_enabled,
                 allow_network=allow_network,
                 outbound_enabled=outbound_enabled,
+                prompt_messages=prompt_messages,
             )
             if rewrite_result.rewritten and rewrite_result.body:
                 reply_body = rewrite_result.body
