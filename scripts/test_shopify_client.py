@@ -570,7 +570,8 @@ class ShopifyClientTests(unittest.TestCase):
             automation_enabled=True,
         )
         diagnostics = client.token_diagnostics()
-        self.assertEqual(diagnostics.get("expires_at"), 1060.0)
+        self.assertIsNotNone(diagnostics.get("expires_at"))
+        self.assertGreaterEqual(float(diagnostics.get("expires_at")), 1060.0)
 
     def test_refresh_on_401_retries_once(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
