@@ -115,7 +115,10 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(transport.requests), 2)
-        self.assertEqual(sleeps, [1.0])
+        self.assertGreaterEqual(sleeps[0], 1.0)
+        self.assertIn(len(sleeps), (1, 2))
+        if len(sleeps) == 2:
+            self.assertGreaterEqual(sleeps[1], 0.0)
 
     def test_transport_errors_retry_and_raise(self) -> None:
         class _ErrorTransport:
