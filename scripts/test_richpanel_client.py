@@ -155,6 +155,11 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(len(keys), 2)
         self.assertTrue(set(keys).issubset({"key-1", "key-2"}))
 
+    def test_cooldown_multiplier_invalid_defaults(self) -> None:
+        os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "abc"
+        client = RichpanelClient(api_key="test-key")
+        self.assertEqual(client._cooldown_multiplier, 1.0)
+
     def test_transport_errors_retry_and_raise(self) -> None:
         class _ErrorTransport:
             def __init__(self):

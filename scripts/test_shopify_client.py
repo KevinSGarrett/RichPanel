@@ -388,6 +388,12 @@ class ShopifyClientTests(unittest.TestCase):
         )
         self.assertFalse(transport.called)
 
+    def test_token_diagnostics_for_override(self) -> None:
+        client = ShopifyClient(access_token="shpat_override")
+        diagnostics = client.token_diagnostics()
+        self.assertEqual(diagnostics.get("token_type"), "offline")
+        self.assertEqual(diagnostics.get("raw_format"), "override")
+
     def test_json_secret_parses_refresh_token(self) -> None:
         secret_id = "rp-mw/local/shopify/admin_api_token"
         secrets = _StubSecretsClient(
@@ -419,6 +425,41 @@ class ShopifyClientTests(unittest.TestCase):
         diagnostics = client.token_diagnostics()
         self.assertEqual(diagnostics.get("token_type"), "online")
         self.assertTrue(diagnostics.get("has_refresh_token"))
+
+    def test_refresh_access_token_returns_false_without_refresh_token(self) -> None:
+        client = ShopifyClient(access_token="shpat_token")
+        self.assertFalse(client.refresh_access_token())
+
+    def test_parse_expires_at_iso_timestamp(self) -> None:
+        secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _StubSecretsClient(
+            {
+                "SecretString": json.dumps(
+                    {
+                        "access_token": "shpua-token",
+                        "refresh_token": "refresh",
+                        "expires_at": "2026-01-30T00:00:00Z",
+                    }
+                )
+            }
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b"{}")]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=secret_id,
+        )
+        client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+        diagnostics = client.token_diagnostics()
+        self.assertIsNotNone(diagnostics.get("expires_at"))
 
     def test_refresh_on_401_retries_once(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"

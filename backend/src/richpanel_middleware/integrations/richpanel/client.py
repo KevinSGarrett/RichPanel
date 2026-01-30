@@ -10,13 +10,13 @@ import threading
 import urllib.error
 import urllib.parse
 import urllib.request
-from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    compute_retry_backoff,
     log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
@@ -431,8 +431,8 @@ class RichpanelClient:
         self._rng = rng or random.random
         self._cooldown_until = 0.0
         self._cooldown_lock = threading.Lock()
-        self._cooldown_multiplier = float(
-            os.environ.get("RICHPANEL_429_COOLDOWN_MULTIPLIER", 1.0)
+        self._cooldown_multiplier = self._parse_cooldown_multiplier(
+            os.environ.get("RICHPANEL_429_COOLDOWN_MULTIPLIER")
         )
         self._token_pool_enabled = _to_bool(
             os.environ.get("RICHPANEL_TOKEN_POOL_ENABLED"), default=False
@@ -655,29 +655,14 @@ class RichpanelClient:
         return False, 0.0
 
     def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
-        base = min(
-            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        return compute_retry_backoff(
+            attempt=attempt,
+            retry_after=retry_after,
+            backoff_seconds=self.backoff_seconds,
+            backoff_max_seconds=self.backoff_max_seconds,
+            rng=self._rng,
+            retry_after_jitter_ratio=0.1,
         )
-        jitter = base * 0.25 * self._rng()
-        candidate = base + jitter
-
-        retry_after_value: Optional[float] = None
-        if retry_after:
-            try:
-                parsed = float(retry_after)
-                if parsed > 0:
-                    retry_after_value = parsed
-                    candidate = max(candidate, parsed + (parsed * 0.1 * self._rng()))
-            except (TypeError, ValueError):
-                retry_after_value = None
-
-        if self.backoff_max_seconds > 0:
-            if (
-                retry_after_value is None
-                or retry_after_value <= self.backoff_max_seconds
-            ):
-                candidate = min(candidate, self.backoff_max_seconds)
-        return candidate
 
     def _sleep(self, delay: float) -> None:
         try:
@@ -786,8 +771,9 @@ class RichpanelClient:
         with self._token_pool_lock:
             if not pool:
                 raise SecretLoadError("Richpanel token pool is empty")
+            selected = pool[self._token_pool_index]
             self._token_pool_index = (self._token_pool_index + 1) % len(pool)
-            return pool[self._token_pool_index]
+            return selected
 
     def _load_secret_value(self, secret_id: str) -> Optional[str]:
         try:
@@ -802,6 +788,25 @@ class RichpanelClient:
         if not secret_value:
             return None
         return str(secret_value)
+
+    def _parse_cooldown_multiplier(self, value: Optional[str]) -> float:
+        if value is None:
+            return 1.0
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            self._logger.warning(
+                "richpanel.cooldown_multiplier_invalid",
+                extra={"value": value},
+            )
+            return 1.0
+        if parsed <= 0:
+            self._logger.warning(
+                "richpanel.cooldown_multiplier_invalid",
+                extra={"value": value},
+            )
+            return 1.0
+        return parsed
 
     def _secrets_client(self):
         if self._secrets_client_obj is None:

@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    compute_retry_backoff,
     log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
@@ -586,29 +587,14 @@ class ShopifyClient:
         return False, 0.0
 
     def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
-        base = min(
-            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        return compute_retry_backoff(
+            attempt=attempt,
+            retry_after=retry_after,
+            backoff_seconds=self.backoff_seconds,
+            backoff_max_seconds=self.backoff_max_seconds,
+            rng=self._rng,
+            retry_after_jitter_ratio=0.0,
         )
-        jitter = base * 0.25 * self._rng()
-        candidate = base + jitter
-
-        retry_after_value: Optional[float] = None
-        if retry_after:
-            try:
-                parsed = float(retry_after)
-                if parsed > 0:
-                    retry_after_value = parsed
-                    candidate = max(candidate, parsed)
-            except (TypeError, ValueError):
-                retry_after_value = None
-
-        if self.backoff_max_seconds > 0:
-            if (
-                retry_after_value is None
-                or retry_after_value <= self.backoff_max_seconds
-            ):
-                candidate = min(candidate, self.backoff_max_seconds)
-        return candidate
 
     def _sleep(self, delay: float) -> None:
         try:
