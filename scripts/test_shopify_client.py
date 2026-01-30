@@ -438,7 +438,7 @@ class ShopifyClientTests(unittest.TestCase):
                     {
                         "access_token": "shpua-token",
                         "refresh_token": "refresh",
-                        "expires_at": "2026-01-30T00:00:00Z",
+                        "expires_at": "3026-01-30T00:00:00Z",
                     }
                 )
             }
