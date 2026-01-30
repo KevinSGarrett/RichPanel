@@ -153,7 +153,8 @@ class RichpanelClientTests(unittest.TestCase):
 
         keys = [req.headers.get("x-richpanel-key") for req in transport.requests]
         self.assertEqual(len(keys), 2)
-        self.assertTrue(set(keys).issubset({"key-1", "key-2"}))
+        self.assertEqual(keys[0], "key-1")
+        self.assertEqual(keys[1], "key-2")
 
     def test_cooldown_multiplier_invalid_defaults(self) -> None:
         os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "abc"
