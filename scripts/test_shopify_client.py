@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import unittest
@@ -57,6 +58,7 @@ class _SelectiveStubSecretsClient:
     def __init__(self, responses):
         self.responses = responses
         self.calls = []
+        self.put_calls = []
 
     def get_secret_value(self, SecretId):
         self.calls.append(SecretId)
@@ -64,6 +66,10 @@ class _SelectiveStubSecretsClient:
         if isinstance(response, Exception):
             raise response
         return response
+
+    def put_secret_value(self, SecretId, SecretString):
+        self.put_calls.append(SecretId)
+        self.responses[SecretId] = {"SecretString": SecretString}
 
 
 class ShopifyClientTests(unittest.TestCase):
@@ -381,6 +387,95 @@ class ShopifyClientTests(unittest.TestCase):
             {"missing_access_token", "secret_lookup_failed", "boto3_unavailable"},
         )
         self.assertFalse(transport.called)
+
+    def test_json_secret_parses_refresh_token(self) -> None:
+        secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _StubSecretsClient(
+            {
+                "SecretString": json.dumps(
+                    {"access_token": "shpua-token", "refresh_token": "refresh"}
+                )
+            }
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b"{}")]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=secret_id,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(transport.requests[0].headers["x-shopify-access-token"], "shpua-token")
+        diagnostics = client.token_diagnostics()
+        self.assertEqual(diagnostics.get("token_type"), "online")
+        self.assertTrue(diagnostics.get("has_refresh_token"))
+
+    def test_refresh_on_401_retries_once(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret_id = "rp-mw/local/shopify/client_id"
+        client_secret_secret_id = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret_id: {
+                    "SecretString": json.dumps(
+                        {"access_token": "expired", "refresh_token": "refresh-token"}
+                    )
+                },
+                client_id_secret_id: {"SecretString": "client-id"},
+                client_secret_secret_id: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=401, headers={}, body=b""),
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=b'{"access_token":"new-token","refresh_token":"new-refresh","expires_in":3600}',
+                ),
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
+            },
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+            )
+
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 3)
+        self.assertEqual(
+            transport.requests[1].url,
+            "https://example.myshopify.com/admin/oauth/access_token",
+        )
+        self.assertIn(token_secret_id, secrets.put_calls)
 
 
 def main() -> int:

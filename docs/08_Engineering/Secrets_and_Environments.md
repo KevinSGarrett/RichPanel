@@ -72,6 +72,8 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 | **prod**    | Richpanel   | API key                | `rp-mw/prod/richpanel/api_key`            | **Read-only enforced by middleware code**  |
 | **prod**    | Richpanel   | Webhook token          | `rp-mw/prod/richpanel/webhook_token`      | Ingress Lambda auth                        |
 | **prod**    | Shopify     | Admin API token        | `rp-mw/prod/shopify/admin_api_token`      | **Must be read-only Admin API token**      |
+| **prod**    | Shopify     | Client id              | `rp-mw/prod/shopify/client_id`            | OAuth refresh token support                |
+| **prod**    | Shopify     | Client secret          | `rp-mw/prod/shopify/client_secret`        | OAuth refresh token support                |
 | **prod**    | OpenAI      | API key                | `rp-mw/prod/openai/api_key`               | Chat completion endpoint                   |
 
 ### Staging Secrets
@@ -81,6 +83,8 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 | **staging** | Richpanel   | API key                | `rp-mw/staging/richpanel/api_key`         | Staging Richpanel sandbox                  |
 | **staging** | Richpanel   | Webhook token          | `rp-mw/staging/richpanel/webhook_token`   | Ingress Lambda auth                        |
 | **staging** | Shopify     | Admin API token        | `rp-mw/staging/shopify/admin_api_token`   | Staging Shopify dev store                  |
+| **staging** | Shopify     | Client id              | `rp-mw/staging/shopify/client_id`         | OAuth refresh token support                |
+| **staging** | Shopify     | Client secret          | `rp-mw/staging/shopify/client_secret`     | OAuth refresh token support                |
 | **staging** | OpenAI      | API key                | `rp-mw/staging/openai/api_key`            | Chat completion endpoint                   |
 
 ### Development Secrets
@@ -90,6 +94,8 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 | **dev**     | Richpanel   | API key                | `rp-mw/dev/richpanel/api_key`             | Dev sandbox (writes allowed)               |
 | **dev**     | Richpanel   | Webhook token          | `rp-mw/dev/richpanel/webhook_token`       | Ingress Lambda auth                        |
 | **dev**     | Shopify     | Admin API token        | `rp-mw/dev/shopify/admin_api_token`       | Dev Shopify test store                     |
+| **dev**     | Shopify     | Client id              | `rp-mw/dev/shopify/client_id`             | OAuth refresh token support                |
+| **dev**     | Shopify     | Client secret          | `rp-mw/dev/shopify/client_secret`         | OAuth refresh token support                |
 | **dev**     | OpenAI      | API key                | `rp-mw/dev/openai/api_key`                | Chat completion endpoint                   |
 
 ### Shopify Legacy Path (Compatibility)
@@ -99,6 +105,16 @@ The Shopify client includes a **fallback** for a legacy secret path:
 - **Legacy (fallback):** `rp-mw/<env>/shopify/access_token`
 
 The client tries the canonical path first, then falls back to the legacy path if not found.
+
+The admin API token secret can be either a plain token string or a JSON payload:
+
+```json
+{
+  "access_token": "<token>",
+  "refresh_token": "<refresh>",
+  "expires_at": 1735689600
+}
+```
 
 **Code reference:** `backend/src/integrations/shopify/client.py` L178-L189
 
@@ -150,6 +166,10 @@ All integration clients support **environment variable overrides** for local dev
 | `MW_OUTBOUND_ALLOWLIST_DOMAINS`      | Allowlist customer email domains             | Empty (no allowlist by default)         |
 | `RICHPANEL_WRITE_DISABLED`           | Hard block all non-GET/HEAD requests         | `false` (write block off by default)    |
 | `RICHPANEL_READ_ONLY`                | Force GET/HEAD-only requests                 | `false` (read-only off by default)      |
+| `RICHPANEL_HTTP_MAX_ATTEMPTS`        | Max retry attempts for Richpanel HTTP calls  | `3`                                     |
+| `RICHPANEL_429_COOLDOWN_MULTIPLIER`  | Extra cooldown applied after 429 retries     | `1.0`                                   |
+| `RICHPANEL_TOKEN_POOL_ENABLED`       | Enable optional token pool rotation          | `false`                                 |
+| `RICHPANEL_TOKEN_POOL_SECRET_IDS`    | Comma-delimited secret ids for token pool    | empty                                  |
 
 **Code reference (secret path resolution):** `backend/src/richpanel_middleware/integrations/richpanel/client.py` L217-L221
 
@@ -161,6 +181,10 @@ All integration clients support **environment variable overrides** for local dev
 |--------------------------------------|----------------------------------------------|-----------------------------------------|
 | `SHOPIFY_ACCESS_TOKEN_OVERRIDE`      | Override access token (skip Secrets Manager) | Uses AWS Secrets Manager if not set     |
 | `SHOPIFY_ACCESS_TOKEN_SECRET_ID`     | Custom secret path                           | `rp-mw/<env>/shopify/admin_api_token`   |
+| `SHOPIFY_CLIENT_ID_OVERRIDE`         | Override Shopify client id                   | Uses AWS Secrets Manager if not set     |
+| `SHOPIFY_CLIENT_SECRET_OVERRIDE`     | Override Shopify client secret               | Uses AWS Secrets Manager if not set     |
+| `SHOPIFY_CLIENT_ID_SECRET_ID`        | Custom client id secret path                 | `rp-mw/<env>/shopify/client_id`         |
+| `SHOPIFY_CLIENT_SECRET_SECRET_ID`    | Custom client secret path                    | `rp-mw/<env>/shopify/client_secret`     |
 | `SHOPIFY_OUTBOUND_ENABLED`           | Enable network calls (default: offline)      | `false` (offline by default)            |
 | `SHOPIFY_SHOP_DOMAIN`                | Shopify shop domain                          | `example.myshopify.com`                 |
 
