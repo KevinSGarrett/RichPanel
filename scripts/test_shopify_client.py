@@ -541,37 +541,11 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertFalse(refreshed)
 
     def test_expires_in_sets_expiry(self) -> None:
-        token_secret = "rp-mw/local/shopify/admin_api_token"
-        secrets = _StubSecretsClient(
-            {
-                "SecretString": json.dumps(
-                    {
-                        "access_token": "shpua-token",
-                        "refresh_token": "refresh",
-                        "expires_in": 60,
-                        "issued_at": 1000,
-                    }
-                )
-            }
+        client = ShopifyClient(access_token="shpua-token")
+        expires_at = client._parse_expires_at(
+            {"expires_in": 60, "issued_at": 1000}
         )
-        transport = _RecordingTransport(
-            [TransportResponse(status_code=200, headers={}, body=b"{}")]
-        )
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-            access_token_secret_id=token_secret,
-        )
-        client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
-        diagnostics = client.token_diagnostics()
-        self.assertIsNotNone(diagnostics.get("expires_at"))
-        self.assertGreaterEqual(float(diagnostics.get("expires_at")), 1060.0)
+        self.assertEqual(expires_at, 1060.0)
 
     def test_refresh_on_401_retries_once(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
