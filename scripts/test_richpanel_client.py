@@ -46,6 +46,19 @@ class _FailingTransport:
         raise AssertionError("transport should not be used in dry-run")
 
 
+class _StubSecretsClient:
+    def __init__(self, secrets):
+        self.secrets = dict(secrets)
+        self.calls = []
+
+    def get_secret_value(self, SecretId):
+        self.calls.append(SecretId)
+        value = self.secrets.get(SecretId)
+        if value is None:
+            return {}
+        return {"SecretString": value}
+
+
 class RichpanelClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # Ensure defaults do not inherit host environment flags.
@@ -54,6 +67,8 @@ class RichpanelClientTests(unittest.TestCase):
         os.environ.pop("RICHPANEL_ENV", None)
         os.environ.pop("RICH_PANEL_ENV", None)
         os.environ.pop("RICHPANEL_WRITE_DISABLED", None)
+        os.environ.pop("RICHPANEL_TOKEN_POOL_ENABLED", None)
+        os.environ.pop("RICHPANEL_TOKEN_POOL_SECRET_IDS", None)
         os.environ.pop("MW_ENV", None)
         os.environ.pop("ENV", None)
         os.environ.pop("ENVIRONMENT", None)
@@ -119,6 +134,26 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertIn(len(sleeps), (1, 2))
         if len(sleeps) == 2:
             self.assertGreaterEqual(sleeps[1], 0.0)
+
+    def test_token_pool_rotates_keys(self) -> None:
+        os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "true"
+        os.environ["RICHPANEL_TOKEN_POOL_ENABLED"] = "true"
+        os.environ["RICHPANEL_TOKEN_POOL_SECRET_IDS"] = "id-1,id-2"
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
+                TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
+            ]
+        )
+        client = RichpanelClient(api_key=None, transport=transport, dry_run=False)
+        client._secrets_client_obj = _StubSecretsClient({"id-1": "key-1", "id-2": "key-2"})
+
+        client.request("GET", "/v1/ping", dry_run=False)
+        client.request("GET", "/v1/ping", dry_run=False)
+
+        keys = [req.headers.get("x-richpanel-key") for req in transport.requests]
+        self.assertEqual(len(keys), 2)
+        self.assertTrue(set(keys).issubset({"key-1", "key-2"}))
 
     def test_transport_errors_retry_and_raise(self) -> None:
         class _ErrorTransport:
