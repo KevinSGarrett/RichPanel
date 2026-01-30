@@ -763,7 +763,7 @@ class RichpanelClient:
     def _load_token_pool(self) -> List[str]:
         if self._token_pool:
             return list(self._token_pool)
-        if boto3 is None:
+        if self._secrets_client_obj is None and boto3 is None:
             raise SecretLoadError(
                 "boto3 is required to load the Richpanel token pool."
             )
