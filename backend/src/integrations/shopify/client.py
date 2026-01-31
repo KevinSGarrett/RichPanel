@@ -741,8 +741,6 @@ class ShopifyClient:
         return str(secret_value)
 
     def _refresh_access_token(self, token_info: ShopifyTokenInfo) -> bool:
-        if not token_info.refresh_token:
-            return False
         client_id, client_secret = self._load_client_credentials()
         if not client_id or not client_secret:
             self._logger.warning(
@@ -753,18 +751,32 @@ class ShopifyClient:
                 },
             )
             return False
+
         url = f"https://{self.shop_domain}/admin/oauth/access_token"
-        payload = {
-            "grant_type": "refresh_token",
-            "refresh_token": token_info.refresh_token,
-            "client_id": client_id,
-            "client_secret": client_secret,
-        }
-        body = json.dumps(payload).encode("utf-8")
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-        }
+        if token_info.refresh_token:
+            payload = {
+                "grant_type": "refresh_token",
+                "refresh_token": token_info.refresh_token,
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
+            body = json.dumps(payload).encode("utf-8")
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+            }
+        else:
+            payload = {
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
+            body = urllib.parse.urlencode(payload).encode("utf-8")
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/x-www-form-urlencoded",
+            }
+
         try:
             response = self.transport.send(
                 TransportRequest(

@@ -487,6 +487,7 @@ class ShopifyClientTests(unittest.TestCase):
 
     def test_refresh_access_token_returns_false_without_refresh_token(self) -> None:
         client = ShopifyClient(access_token="shpat_token")
+        client._secrets_client_obj = _StubSecretsClient({})
         self.assertFalse(client.refresh_access_token())
 
     def test_parse_expires_at_iso_timestamp(self) -> None:
@@ -705,6 +706,37 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(access_token, "expired")
         self.assertIsNotNone(client._token_info)
         self.assertFalse(client._refresh_access_token(client._token_info))
+
+    def test_refresh_access_token_client_credentials(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {"SecretString": "old-token"},
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=b'{"access_token":"new-token","expires_in":3600}',
+                )
+            ]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+        client._load_access_token()
+        self.assertIsNotNone(client._token_info)
+        self.assertTrue(client._refresh_access_token(client._token_info))
+        self.assertEqual(client._access_token, "new-token")
 
     def test_parse_timestamp_invalid(self) -> None:
         client = ShopifyClient(access_token="test-token")
