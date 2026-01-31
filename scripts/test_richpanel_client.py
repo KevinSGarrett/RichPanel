@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -225,6 +226,21 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 202)
         self.assertEqual(len(transport.requests), 1)
+
+    def test_cooldown_multiplier_invalid_defaults(self) -> None:
+        os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "nope"
+        client = RichpanelClient(api_key="test-key")
+        self.assertEqual(client._cooldown_multiplier, 1.0)
+
+    def test_sleep_for_cooldown_waits(self) -> None:
+        sleeps = []
+        client = RichpanelClient(
+            api_key="test-key",
+            sleeper=lambda seconds: sleeps.append(seconds),
+        )
+        client._cooldown_until = time.monotonic() + 0.01
+        client._sleep_for_cooldown()
+        self.assertEqual(len(sleeps), 1)
 
     def test_writes_blocked_when_write_disabled_env_set(self) -> None:
         os.environ["RICHPANEL_WRITE_DISABLED"] = "true"

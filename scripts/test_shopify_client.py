@@ -426,6 +426,19 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(diagnostics.get("token_type"), "online")
         self.assertTrue(diagnostics.get("has_refresh_token"))
 
+    def test_token_diagnostics_detects_prefixes(self) -> None:
+        client = ShopifyClient(access_token="shpat_offline")
+        self.assertEqual(client.token_diagnostics().get("token_type"), "offline")
+        client = ShopifyClient(access_token="shpua_online")
+        self.assertEqual(client.token_diagnostics().get("token_type"), "online")
+
+    def test_parse_expires_at_and_expires_in(self) -> None:
+        client = ShopifyClient(access_token="test-token")
+        expires_at = client._parse_expires_at({"expires_at": "2026-01-30T00:00:00Z"})
+        self.assertIsNotNone(expires_at)
+        expires_in = client._parse_expires_at({"expires_in": 3600, "issued_at": 1000})
+        self.assertEqual(expires_in, 4600)
+
     def test_refresh_access_token_returns_false_without_refresh_token(self) -> None:
         client = ShopifyClient(access_token="shpat_token")
         self.assertFalse(client.refresh_access_token())
