@@ -617,6 +617,62 @@ class ShopifyClientTests(unittest.TestCase):
         )
         self.assertIn(token_secret_id, secrets.put_calls)
 
+    def test_refresh_skips_without_refresh_token(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _StubSecretsClient(
+            {"SecretString": json.dumps({"access_token": "expired"})}
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=401, headers={}, body=b"")]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret_id,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_refresh_fails_without_client_credentials(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _StubSecretsClient(
+            {
+                "SecretString": json.dumps(
+                    {"access_token": "expired", "refresh_token": "refresh"}
+                )
+            }
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=401, headers={}, body=b"")]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret_id,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_parse_timestamp_invalid(self) -> None:
+        client = ShopifyClient(access_token="test-token")
+        self.assertIsNone(client._parse_timestamp("not-a-date"))
+
 
 def main() -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShopifyClientTests)

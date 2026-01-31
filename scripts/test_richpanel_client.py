@@ -157,11 +157,6 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(keys[0], "key-1")
         self.assertEqual(keys[1], "key-2")
 
-    def test_cooldown_multiplier_invalid_defaults(self) -> None:
-        os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "abc"
-        client = RichpanelClient(api_key="test-key")
-        self.assertEqual(client._cooldown_multiplier, 1.0)
-
     def test_transport_errors_retry_and_raise(self) -> None:
         class _ErrorTransport:
             def __init__(self):
@@ -227,11 +222,6 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(response.status_code, 202)
         self.assertEqual(len(transport.requests), 1)
 
-    def test_cooldown_multiplier_invalid_defaults(self) -> None:
-        os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "nope"
-        client = RichpanelClient(api_key="test-key")
-        self.assertEqual(client._cooldown_multiplier, 1.0)
-
     def test_sleep_for_cooldown_waits(self) -> None:
         sleeps = []
         client = RichpanelClient(
@@ -241,6 +231,18 @@ class RichpanelClientTests(unittest.TestCase):
         client._cooldown_until = time.monotonic() + 0.01
         client._sleep_for_cooldown()
         self.assertEqual(len(sleeps), 1)
+        self.assertGreater(sleeps[0], 0.0)
+
+    def test_cooldown_multiplier_invalid_defaults(self) -> None:
+        os.environ["RICHPANEL_429_COOLDOWN_MULTIPLIER"] = "nope"
+        client = RichpanelClient(api_key="test-key")
+        self.assertEqual(client._cooldown_multiplier, 1.0)
+
+    def test_register_cooldown_extends_window(self) -> None:
+        client = RichpanelClient(api_key="test-key")
+        start = time.monotonic()
+        client._register_cooldown(0.5)
+        self.assertGreaterEqual(client._cooldown_until, start)
 
     def test_writes_blocked_when_write_disabled_env_set(self) -> None:
         os.environ["RICHPANEL_WRITE_DISABLED"] = "true"
