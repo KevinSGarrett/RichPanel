@@ -977,7 +977,7 @@ def _redact_url_path(url: str) -> str:
     except Exception:
         path = url or "/"
     segments = [segment for segment in path.split("/") if segment]
-    redacted_segments: list[str] = []
+    redacted_segments: List[str] = []
     for segment in segments:
         lowered = segment.lower()
         if lowered in TRACE_SAFE_SEGMENTS or (segment.startswith("v") and segment[1:].isdigit()):
