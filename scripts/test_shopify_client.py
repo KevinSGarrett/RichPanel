@@ -715,14 +715,10 @@ class ShopifyClientTests(unittest.TestCase):
             secrets_client=secrets,
             access_token_secret_id=token_secret,
         )
-
-        client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
-        self.assertFalse(client.refresh_access_token())
+        access_token, _ = client._load_access_token()
+        self.assertEqual(access_token, "old-token")
+        self.assertIsNotNone(client._token_info)
+        self.assertFalse(client._refresh_access_token(client._token_info))
 
 
 def main() -> int:
