@@ -412,8 +412,9 @@ class ShopifyClient:
                         request_headers = self._build_headers(
                             headers, access_token, has_body=body_bytes is not None
                         )
-                        attempt += 1
-                        continue
+                        if attempt < self.max_attempts:
+                            attempt += 1
+                            continue
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
@@ -776,22 +777,17 @@ class ShopifyClient:
                 "client_id": client_id,
                 "client_secret": client_secret,
             }
-            body = urllib.parse.urlencode(payload).encode("utf-8")
-            headers = {
-                "accept": "application/json",
-                "content-type": "application/x-www-form-urlencoded",
-            }
         else:
             payload = {
                 "grant_type": "client_credentials",
                 "client_id": client_id,
                 "client_secret": client_secret,
             }
-            body = urllib.parse.urlencode(payload).encode("utf-8")
-            headers = {
-                "accept": "application/json",
-                "content-type": "application/x-www-form-urlencoded",
-            }
+        body = urllib.parse.urlencode(payload).encode("utf-8")
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/x-www-form-urlencoded",
+        }
 
         try:
             response = self.transport.send(

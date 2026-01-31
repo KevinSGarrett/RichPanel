@@ -104,8 +104,7 @@ def compute_retry_backoff(
             retry_after_value = None
 
     if backoff_max_seconds > 0:
-        if retry_after_value is None or retry_after_value <= backoff_max_seconds:
-            candidate = min(candidate, backoff_max_seconds)
+        candidate = min(candidate, backoff_max_seconds)
     return candidate
 
 
