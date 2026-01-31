@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from typing import Optional
 from pathlib import Path
@@ -9,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+
+os.environ.setdefault("MW_OPENAI_INTENT_ENABLED", "true")
 
 from richpanel_middleware.automation.order_status_intent import (  # noqa: E402
     extract_order_number_from_text,
@@ -99,13 +102,17 @@ def test_extract_order_number_from_text() -> None:
 def test_redact_ticket_text_removes_pii() -> None:
     text = (
         "Hi, my name is Alice Smith. Email alice@example.com. "
-        "Order #12345. Tracking: https://tracking.example.com/track/12345"
+        "Phone (415) 555-1212. Order #12345. Address 123 Main St. "
+        "Tracking: https://tracking.example.com/track/12345 <b>Thanks</b>"
     )
     redacted = redact_ticket_text(text)
     assert redacted is not None
-    assert "@" not in redacted
-    assert "http" not in redacted
-    assert "12345" not in redacted
+    assert "alice@example.com" not in redacted
+    assert "555-1212" not in redacted
+    assert "Main St" not in redacted
+    assert "https://tracking.example.com/track/12345" not in redacted
+    assert "12345" in redacted
+    assert "<" not in redacted and ">" not in redacted
     assert "<redacted>" in redacted
 
 
