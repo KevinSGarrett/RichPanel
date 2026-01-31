@@ -1,0 +1,2553 @@
+{
+  "run_id": "RUN_20260130_2045Z",
+  "timestamp": "2026-01-30T20:54:51.937576+00:00",
+  "environment": "prod",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false",
+    "MW_OPENAI_ROUTING_ENABLED": "true",
+    "MW_OPENAI_INTENT_ENABLED": "true",
+    "MW_OPENAI_SHADOW_ENABLED": "true",
+    "SHOPIFY_OUTBOUND_ENABLED": "true",
+    "SHOPIFY_WRITE_DISABLED": "true"
+  },
+  "sample_mode": "explicit",
+  "conversation_mode": "skipped",
+  "ticket_count": 58,
+  "classification_source": "openai_intent",
+  "classification_source_counts": {
+    "openai_intent": 58
+  },
+  "order_status_rate": 0.207,
+  "stats": {
+    "tickets_scanned": 58,
+    "classified_order_status_false": 46,
+    "no_match": 47,
+    "openai_routing_called": 58,
+    "openai_intent_called": 58,
+    "classified_order_status_true": 12,
+    "matched_by_order_number": 7,
+    "eta_available": 3,
+    "matched_by_email": 4,
+    "tracking_present": 8,
+    "tickets_requested": 58,
+    "ticket_count": 58,
+    "missing_order_number": 22,
+    "missing_email": 0,
+    "shopify_error": 0,
+    "error": 0,
+    "errors": 0,
+    "shopify_lookup_forced": 0
+  },
+  "failure_modes": [
+    {
+      "mode": "no_shopify_match",
+      "count": 25
+    },
+    {
+      "mode": "missing_order_number",
+      "count": 22
+    }
+  ],
+  "run_warnings": [
+    "richpanel_retries_observed"
+  ],
+  "tickets": [
+    {
+      "ticket_id_redacted": "redacted:72742326ada7",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:72742326ada7",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:ddc637caf559",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "And the app not working on my phone",
+      "classified_order_status": false,
+      "routing_intent": "technical_support",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3peqLJGsszKBSkln8PE6JVZz8lUF",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3petQVL3jJOaAeHsDRuhi2pvktbu",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.937,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:cec68b290ae6",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:cec68b290ae6",
+      "ticket_created_at_redacted": "2025-12-XX",
+      "customer_email_redacted": "redacted:1cf4c4793767",
+      "customer_name_redacted": "redacted:41354de3fc2c",
+      "order_number_redacted": "redacted:674f753c2be8",
+      "message_excerpt_redacted": "My wife love it. She uses it all day every day. We tried the big one originally but it was way to powerful for our 2800 sq foot house. This one works good but it really doesn't cover our entire house. It would be great if you all developed a 3000 or 3500 sq foot model in between...",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pewk1AAmjFH5BuhFYxdhrLqvJSp",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.71,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pf0dLvzYXMFMpKHmohGoSNpjCt3",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.12,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.625,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:ccc99df2863e",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:ccc99df2863e",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e6d50fc4afe5",
+      "customer_name_redacted": "redacted:79738dba978f",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "As I stated previously, the pump isn’t working. See the attached video! Thank you <redacted> Yahoo Mail for iPhone",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pf5bjvDLmRM89NNLLauX5Zd4wDp",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfA8pIR66N67g386UckSXeudLfG",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.047,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:0dc93fd47acf",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:0dc93fd47acf",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:203b53a4125b",
+      "customer_name_redacted": "redacted:d727e76392cb",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Sent from Yahoo Mail for iPhone",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfdDWTtTW1bR8wtcOpZQEiG919x",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.24,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfgCB2sHRs9InrleHi59Z1Fq2M6",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 32.938,
+      "richpanel_request_count": 5,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 5
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:7d45d0e25db3",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:7d45d0e25db3",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:61f47acf6235",
+      "customer_name_redacted": "redacted:2b0684a6abfa",
+      "order_number_redacted": "redacted:195d64a85f72",
+      "message_excerpt_redacted": "I don’t want this order, I don’t remember having a subscription. Please cancel this order.",
+      "classified_order_status": false,
+      "routing_intent": "cancel_subscription",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pflKKDoU3MwKggdgA5VajwVPQ3F",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfoKMLrSjDs1kgcvSXM4fd4VIJY",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.031,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:6ddc0cdd3be6",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:6ddc0cdd3be6",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3ee50f0012c4",
+      "customer_name_redacted": "redacted:c167f59f01bb",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "created",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfsm4QPW11WrG20h8sGrcLsKOSY",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.18,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfvxVtnBthqv6ABwqsUm9BTqUdX",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 5.688,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:71e53ac866c1",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:71e53ac866c1",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:cd8928cedfae",
+      "customer_name_redacted": "redacted:22bc1afe6008",
+      "order_number_redacted": "redacted:d1056fe49272",
+      "message_excerpt_redacted": "No thank you, I will return the scent that was delivered. I dont want to pay for shipping again when I received an item that I did not order. Yahoo Mail: Search, Organize, Conquer",
+      "classified_order_status": false,
+      "routing_intent": "return_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pfzbwmPkHzZUy5Qwm8bYVhRqFyh",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pg2roahdkW5h81yo799z74G5sgf",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.062,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:4ee21f8ba5fb",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:4ee21f8ba5fb",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:5581808b6f7c",
+      "customer_name_redacted": "redacted:2e1eb54e6ec9",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Please reduce my delivery to only one per month",
+      "classified_order_status": false,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pg7uWwrALrT8ZNg6gmmQmzYlG3b",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.76,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgBeSezKgCQ2SF5UErWYopRUaSz",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.0,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:bca6aa8ca9fe",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:bca6aa8ca9fe",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:b69054537508",
+      "customer_name_redacted": "redacted:798be8f66c82",
+      "order_number_redacted": "redacted:7d1f07fc9bbb",
+      "message_excerpt_redacted": "Hello! I reached out last week because I would like to start a return on this product. This was to be a Christmas gift (a late one, since it wasn't shipping until January) for someone, however they now have a larger essential oil air diffuser that they are enjoying. What do I nee...",
+      "classified_order_status": false,
+      "routing_intent": "refund_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgEv9a1v43q5YWbPgnSmrtoqqFw",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.92,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgH5GhzsI8gbbY7quCfRwI7hzXx",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.547,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:ccefc5c93d87",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:ccefc5c93d87",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:a9d0067fa4ff",
+      "customer_name_redacted": "redacted:5e31efab0cd8",
+      "order_number_redacted": "redacted:738836beae55",
+      "message_excerpt_redacted": "I attempted to go through the link provided for the return and there are 2 issues. 1. I am <redacted> return shipping on a used item that your company sent me 2. It will not let me complete the return because it is outside of the return window which is not my issue, it is due to...",
+      "classified_order_status": false,
+      "routing_intent": "refund_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgL43OOqzdkBunzyyi1uqjzDEfE",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.0,
+        "gated_reason": "dry_run",
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgRVVhn2lbDL6jjudBxSEOwUC4h",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.812,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:2d37a6b46918",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:2d37a6b46918",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:82d0803cbd41",
+      "customer_name_redacted": "redacted:67738e04da0b",
+      "order_number_redacted": "redacted:1013c6464093",
+      "message_excerpt_redacted": "Hi there! Thanks for getting back to me. I did include the packing slip it shows I should have the mini 2LE White diffuser (it’s circled like everything) but it’s not in the box. I sent over a picture yesterday that included the box, everything that was in it and the packing slip...",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgV770qbScseTK29y3VrYQvBY3X",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.93,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgZ3nIrSlgyPbnBTgSi64nsc3cj",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.18,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.391,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:9a52421b93f9",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:9a52421b93f9",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:f8d8db9d7b65",
+      "customer_name_redacted": "redacted:2a377e03b3f6",
+      "order_number_redacted": "redacted:c7a762d4be13",
+      "message_excerpt_redacted": "#1195564",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgdZm0iHwsDuQUAWoj21A5cbLj7",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.33,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pggNgOQecXNX7dwwi8mCKEFmV1F",
+        "response_id_unavailable_reason": null,
+        "confidence": null,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.719,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:c563554e74b5",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:c563554e74b5",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:60297489ed5f",
+      "customer_name_redacted": "redacted:35923b7a0da3",
+      "order_number_redacted": "redacted:afa132cb4354",
+      "message_excerpt_redacted": "Good morning My order# 1212404 if you can let me know when you think this will be delivered that would be greatly appreciated. Thank you Kevin Gallagher",
+      "classified_order_status": true,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgm5id8HBnucI6Ki7oXhYWFAKb8",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.95,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgppMcVzHkIR7YECu8GkBHrbFFa",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.92,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": false,
+      "eta_window": "0-3 business days",
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 8.797,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:41201d02e97b",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:41201d02e97b",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:0a36b2b5c9e4",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "This is <redacted> 3rd time receiving same Message but order is it shipped yet. What’s the problem Alexander",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgvl3ywsUZ3uHY4EsStChhd1BgW",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pgytE36aDOowmlztgswowC4Bwch",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": {
+        "resolvedBy": "no_match",
+        "confidence": "low",
+        "reason": "shopify_no_match"
+      },
+      "elapsed_seconds": 12.078,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:773ddcb4c579",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:773ddcb4c579",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:1ac8acb96bbd",
+      "customer_name_redacted": "redacted:3393f45bb670",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "When will my order be delivered",
+      "classified_order_status": true,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3ph76xjnt4mlu1U7naenQTccdndL",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.92,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phAfnHISPjp78YBRL24js1ltv8g",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_email",
+      "tracking_present": false,
+      "eta_window": "should arrive any day now",
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "shopify_email_name",
+        "confidence": "high",
+        "reason": "email_name_match"
+      },
+      "elapsed_seconds": 7.562,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:6120168f6601",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:6120168f6601",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:c9c9e9e5ef38",
+      "customer_name_redacted": "redacted:0ecf7b366076",
+      "order_number_redacted": "redacted:b058a7f4448c",
+      "message_excerpt_redacted": "The device was charged for 4 hours. I turned it on and set to maximum level. There are no puffs of fragrance.",
+      "classified_order_status": false,
+      "routing_intent": "billing_issue",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phGnzDW2Zxig1gGk1L79qk5Bair",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phLBmtqlrNL69qhQqD1slduo8Tl",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 11.235,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:f641aa33ac64",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:f641aa33ac64",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e2d4765c29c6",
+      "customer_name_redacted": "redacted:fe671fb428f7",
+      "order_number_redacted": "redacted:121650e112b8",
+      "message_excerpt_redacted": "Please cancel this subscription. I dont wven have the difusers yet!",
+      "classified_order_status": false,
+      "routing_intent": "cancel_subscription",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phPaWKtj1Tapq2x9y6TpxxjooD2",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.94,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phThMKwkPEZn6tsDSs64Z3g37gN",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.547,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:65742de31676",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:65742de31676",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:63c72ff4ca08",
+      "customer_name_redacted": "redacted:feac405f204a",
+      "order_number_redacted": "redacted:62e3e1db1bd7",
+      "message_excerpt_redacted": "Now this is <redacted> I paid 2day shipping due to my employment moving, item not in stock updated order, I’m here now the package hasn’t been sent yet but label created, the 21st just refund me my $ please Kixx",
+      "classified_order_status": true,
+      "routing_intent": "refund_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phXzx9FIJuk9eAFyBuBUxP6aPAr",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phad2jf7cz18JOmYGSyBbxn6c62",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 7.171,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:e6b12f392909",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:e6b12f392909",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:85490af3a0c9",
+      "customer_name_redacted": "redacted:84ff85b2dcd5",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Belay my last. It came today. Thank you. Best <redacted>, Gerald Hart CAPT, USN (Ret.) The two most important days in your life are the day you are born... and the day you find out why.\" - Mark Twain",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phqrMw16LdPwcbaTg3G9zGGKih3",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.55,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phuIw0mrQEsJsgr5aQsWjheG6kU",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 19.141,
+      "richpanel_request_count": 4,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 4
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:4afe1a6f7b0b",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:4afe1a6f7b0b",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3f981e2c1b48",
+      "customer_name_redacted": "redacted:46a72c3ec6e7",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Terrible service I never received the item Very truly yours, Joseph S. Caruso Attorney at Law <redacted>, Suite 2305 Fort Lauderdale, FL 33301 <redacted> office <redacted> fax <redacted> cell It is always easier to reach me on the cell.",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3phyIaQBg65a7zeXgFnN5lWj0pgn",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.85,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pi3TEr9qifRkMFyv43aj1Sa6aRW",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.7,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_email",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "shopify_email_name",
+        "confidence": "high",
+        "reason": "email_name_match"
+      },
+      "elapsed_seconds": 10.906,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:f6e5e6315780",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:f6e5e6315780",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:5782d36a5fed",
+      "customer_name_redacted": "redacted:f3d0f1d5bcab",
+      "order_number_redacted": "redacted:6ac876fbd71b",
+      "message_excerpt_redacted": "Thank you <redacted> resolution. I truly appreciate it!",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pi8kz3lVyiLHYF0CkErjQ2jn7do",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.4,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piBf1bzsHNmWwR3LmHEaGKRvY1q",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.235,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:ae4816f80677",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:ae4816f80677",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:453b7bf77149",
+      "customer_name_redacted": "redacted:861cbca007f1",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "I'd like to check the status of this order please. It was ordered on January 5th",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piGkhyBszUHF733IRLY8HUDIIDH",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.92,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piJuvAYQg9p8xuY5bG0zpHeUMIc",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_email",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "shopify_email_name",
+        "confidence": "high",
+        "reason": "email_name_match"
+      },
+      "elapsed_seconds": 6.875,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:20bf27811c44",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:20bf27811c44",
+      "ticket_created_at_redacted": "2025-11-XX",
+      "customer_email_redacted": "redacted:ab80a12cf631",
+      "customer_name_redacted": null,
+      "order_number_redacted": "redacted:81cdab35c9e8",
+      "message_excerpt_redacted": "Please cancel my subscription for automatic refills of the Day dream 500 ML refill. I have sent multiple emails about replacement parts that I need for my air 1 device and it is not operable with out the replacement parts so no new refills are needed at this time. They have charg...",
+      "classified_order_status": false,
+      "routing_intent": "cancel_subscription",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piNLPR1DZblmI51UvfPaiMVjOo9",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piQXzrR8ehLD1SndkeaeNnHmWMv",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.3,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.14,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:5a86fec68037",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:5a86fec68037",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:4d373cb34e12",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "I ordered my my sentiment, I believe early Dec, I noticed, I had received and call the company. NO one called to tell me that it was on back order. I received my order a month later, and for my inconvenience, you all sent 1 fragrance that I will probably never use. Instead lookin...",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piUdqkMKZBa0tA8UPE3cScxx3A8",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.74,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piYDYYsf9a9uHllmsPeKIkLks27",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.29,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.61,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:77e8a80f3c94",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:77e8a80f3c94",
+      "ticket_created_at_redacted": "2025-12-XX",
+      "customer_email_redacted": "redacted:f4f5451c5e63",
+      "customer_name_redacted": "redacted:28f589515928",
+      "order_number_redacted": "redacted:8cd0b5d5c20d",
+      "message_excerpt_redacted": "Hi Gilbert, I don’t want to complicate the order. I have limited experience in the scents. Pick one for me. Ben Sent from my iPhone",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pibjjEayMTWssVzz8DfJzWrt84y",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pie1VouTOCTRIER9AyTwh6sugjp",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.453,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:22ee4dd306ff",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:22ee4dd306ff",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e8204f235118",
+      "customer_name_redacted": "redacted:a5bfdee6ab26",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "STOP",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pijYDhPe37OqUTylO46KNDRTeOv",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.35,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pimCG4UNBkP2HKo1AG9h058m2Jg",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.859,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:76044435bdf4",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:76044435bdf4",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:fcb62ccf1d28",
+      "customer_name_redacted": "redacted:26f77f4045ef",
+      "order_number_redacted": "redacted:283270c777f8",
+      "message_excerpt_redacted": "The portal never gave me a return label! Sincerely <redacted>",
+      "classified_order_status": false,
+      "routing_intent": "return_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piqqd8SUPMUSw0ibs4Tsx2W6jFi",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3piteJEtzUFVrFWa5cNhp2ausufK",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.266,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:2650b4bc83ab",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:2650b4bc83ab",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:71b7b94456a7",
+      "customer_name_redacted": "redacted:23f981040760",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "STOP",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pj4ahbasGHJLeaMLq7MGSx2HBoy",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.35,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pj7xqyoJXjxQgY3BkC4DVR4Cy8W",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 14.219,
+      "richpanel_request_count": 3,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 3
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:9e03d14c8b5c",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:9e03d14c8b5c",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:6c699f6fede2",
+      "customer_name_redacted": "redacted:d1c1996a267f",
+      "order_number_redacted": "redacted:186b5888db25",
+      "message_excerpt_redacted": "Can you please tell when order #1206065 will be shipped? Sincerely <redacted>",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjDiXT3MoCf4SfElMl49A3Qn1qV",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.92,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjHs6qszAcMcPb6gQhvOPfYEPY8",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.95,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 15.515,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:92229f768b7c",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:92229f768b7c",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:8a893cca2833",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Stop",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjSMS80nFtg8Oim0LqwYLpnmIFk",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.32,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjViaizjEvVNtBHsx6GjcSWDQcf",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.11,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:8457272c3cb0",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:8457272c3cb0",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:5d004c077936",
+      "customer_name_redacted": "redacted:22f70a6dda51",
+      "order_number_redacted": "redacted:c65ad8c7a0d5",
+      "message_excerpt_redacted": "I received the shipment today, however the cherry smoke leaked out. I'm <redacted> you usually compensate for this but I would appreciate your help in this small matter.",
+      "classified_order_status": false,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pja0084lRHGfpfCzdiky1Swt4vu",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjdUgq0rLrDUDnzsLncjiZuQFwR",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.12,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.828,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:17e5c122a305",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:17e5c122a305",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:a8e43429d889",
+      "customer_name_redacted": "redacted:aedc5c15d4b6",
+      "order_number_redacted": "redacted:6d3d08f0d56b",
+      "message_excerpt_redacted": "package delivered to wrong residence by fedex Sent from AOL on Android",
+      "classified_order_status": true,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjgmVCv49Bfm5iTsdYcMLUWgJJW",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjkNnZb5ELLtozX71dGEXOrWukg",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 7.093,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:daf031367e74",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:daf031367e74",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:60d075b74eef",
+      "customer_name_redacted": "redacted:8154e985988b",
+      "order_number_redacted": "redacted:67be467091d2",
+      "message_excerpt_redacted": "I want to cancel this order, I want a refund because I did not order this. Thank you. Sent from my iPhone",
+      "classified_order_status": false,
+      "routing_intent": "refund_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjoGbRNnUKprzAzR0cxyhFgUP8O",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjsxi5X9ImYPIJG26qLSZCzdyPe",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.15,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.782,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:f4cf378600d7",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:f4cf378600d7",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e65a1db783ce",
+      "customer_name_redacted": "redacted:164ce9dc10d2",
+      "order_number_redacted": "redacted:b90558aad652",
+      "message_excerpt_redacted": "I still have nor received my Mini 2 diffuser. I already paid for it I need to know when I will be receiving it. Thank You!",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjvSHrGHidD5v4bozS9Z36vrmWd",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.87,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pjzEwig7uwEQ8DV4mz585QT7EWv",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 7.937,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:bed6aa520068",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:bed6aa520068",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3c1f302f2ef8",
+      "customer_name_redacted": "redacted:ac63d43c30c3",
+      "order_number_redacted": "redacted:4ed5ce6b0ac1",
+      "message_excerpt_redacted": "hi I did not order this.. they keep getting ordered and delivered? I did not authorize these?! Please let me know asap So I dont have to turn into fraud. Thanks <redacted> -- ERICA ERVIN REALTOR® Owner/Broker Coldwell Banker * Mt. Pleasant Realty 304 E. Broadway Mt. Pleasant MI h...",
+      "classified_order_status": false,
+      "routing_intent": "fraud_suspected",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pk5QEBTMiN20cKvdTxdgbg2KfQ2",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.93,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pk8u7MvLVuHnp5IWRGkT8mZFBlI",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.094,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:ca4f949b07bd",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:ca4f949b07bd",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e25d34587130",
+      "customer_name_redacted": "redacted:75afe2ca1870",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "As requested",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkBiP5vfnZEnxfueuQbOSxzLYHC",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkEZXTb8GoKd2lByP6OjTdKC9ZG",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.203,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:aecd3f24cfac",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:aecd3f24cfac",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:930e895e4f70",
+      "customer_name_redacted": "redacted:39981cdc0e98",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Okay",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkIUemnfdhWH2xhV7OCP1QLSCEY",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.21,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkLDjdOTmr6jTI6nsULbIFBoXXu",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.266,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:2f0f8b217ebe",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:2f0f8b217ebe",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:476f783daa11",
+      "customer_name_redacted": "redacted:577899a178bb",
+      "order_number_redacted": "redacted:89cb93521f3f",
+      "message_excerpt_redacted": "Still waiting on reply. Send another message with order number. Sent from Yahoo Mail for iPhone",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkPHPBk3DBO7yCwGA0Nsza0IqSN",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.43,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkTPiN3gHLL2Lp8pcvara077yis",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.3,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.062,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:b59932f40df0",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:b59932f40df0",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:fcd438896e0d",
+      "customer_name_redacted": "redacted:bbfe8391e574",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "created",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkX07yUT6IIgCvty4uItJehDrQY",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.24,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkZjSNZGOzKDlxyoqybCXlxPdzj",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.594,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:a4afd6ab19ac",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:a4afd6ab19ac",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:726ae6e3cfa9",
+      "customer_name_redacted": "redacted:028067206d10",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Itwas an oil I already had",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkeW1FPBQzEpj6fd1nQ4kUguJmR",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.73,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkionqYyFk8IPwax05hQk5Mf2V2",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.328,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:cf71338c3f7b",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:cf71338c3f7b",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:7117aff507a3",
+      "customer_name_redacted": "redacted:dacd39853e81",
+      "order_number_redacted": "redacted:86e7403b3a10",
+      "message_excerpt_redacted": "Both 120ml bottles were affected. Please send pink citrus one and a bergamot one since my favorite apple one has been discontinued. Thank you so kindly, Crystal",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkmsbj5ql9z43Or2rZwGggG4zCn",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkqsEEDuCcEUg7Ds8TTrqg6L5oi",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.15,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.0,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:4a276071e9f6",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:4a276071e9f6",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e1cbc2bfe8cd",
+      "customer_name_redacted": "redacted:4b78a69dccf4",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Its been over 10 days and my reorder hasnt shown up ! Lora Antle <redacted> Platte city mo 64079 Sent from Yahoo Mail for iPhone",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkuafdmKw2fS0o1bJTaiuoS09a3",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pkyIq7q121JS5KIrkFDlYMVc1yV",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_email",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "shopify_email_name",
+        "confidence": "high",
+        "reason": "email_name_match"
+      },
+      "elapsed_seconds": 9.25,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:8710745f5c11",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:8710745f5c11",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3ad4d4bd05cf",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Bad",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3plBiWT32RjNEup7STUOmjgtVKaE",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.35,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3plEBuhGkhhF1l0KSavduken6XlJ",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 14.938,
+      "richpanel_request_count": 3,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 3
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:a1522cf17d36",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:a1522cf17d36",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:62a9a30f1f7a",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Well my first order with the Scentiment Diffuser Air2... the Discovery kit o bought should have been a bigger size instead of me having to place the oil into the big bottle it came with! Then the machine started flashing yellow because there was not enough oil in it, and the app...",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pljsfQRgkW40qj5jeL4TyZngOI7",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.72,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3plnrFfiIQ5sF5DYTNFCN57m32Wb",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 35.25,
+      "richpanel_request_count": 5,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 5
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:acaa4783503d",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:acaa4783503d",
+      "ticket_created_at_redacted": "2025-12-XX",
+      "customer_email_redacted": "redacted:192fe77440ad",
+      "customer_name_redacted": "redacted:98fad94f102c",
+      "order_number_redacted": "redacted:b2b2f104d32c",
+      "message_excerpt_redacted": "Yes, they are correct. The original #620715 and the first replacement #728809 for Lot #2025S01. The mini original #686418 and the first replacement #954570 for Lot #2025S05.",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3plsfZPqFOxmuE3jjyUrbDqlr6aj",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.46,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3plwMNkqwXEYgdjL6UrRMZnLcOVm",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 10.187,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:6934c913ba36",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:6934c913ba36",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:ef6550c7dbb4",
+      "customer_name_redacted": "redacted:951b3d4c20e7",
+      "order_number_redacted": "redacted:cf988df3745e",
+      "message_excerpt_redacted": "Big Drew <redacted> facebook.com/drewlewis <redacted>",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pm2vuMNKGLjv1QhtQJeLGEaINho",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pm6iNBtqTf8WGTkDW6cMJNMlFFJ",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 9.203,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:a13514678f0b",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:a13514678f0b",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:c28e2ff9c8f4",
+      "customer_name_redacted": "redacted:bc742bac6863",
+      "order_number_redacted": "redacted:3897ec4ccefe",
+      "message_excerpt_redacted": "Order number is691657 6/11/25. My question is do I need to order a new cable from you all? I tried another one and it still does not work. Makes me wonder if the plug in on the diffuser is bad and I need a new one?",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmBRYZuCtSpvn1PzAVHlgAdXli3",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmFKq6MGtpCQ21YEk6jAp3WMJDw",
+        "response_id_unavailable_reason": null,
+        "confidence": null,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 10.235,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:3e0444f523f8",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:3e0444f523f8",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:e6a30208a746",
+      "customer_name_redacted": "redacted:53f7fb1423a0",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "The issue has been resolved. I reached out to you and let you know that I had been billed for product I never received. I gave my order number and apparently you found the discrepancy and rectified the situation. I thank you for reaching out.",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmL3z1TYe548LD33EfxHs1IpL3I",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.64,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmPledLDVRsV4ZYzR9Q4KETG4W8",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.15,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.921,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:d82ad6538740",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:d82ad6538740",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:9fbdbb5aac0b",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "I ordered 2 car diffusers which will not mist and 2 of the air 2's. One will not mist, but if I switch the tops on them then they both mist. But since they are different colors it makes it really ugly.",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmUKZ0cASo5FAsOW4QdRjWVoszg",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.87,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmXJAa002hm82GCKT1tn5l45TQ4",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.344,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:c8f17e522d4b",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:c8f17e522d4b",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:81218e5c2f90",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "I having the same issue. The unit will not stay connected to the wifi",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmaY3gA4yAqV3jAMxNZ5QURKlAN",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmd8gksDJGemVvIOLLR34D4HkJq",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.15,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 6.188,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:f039ade5d2f2",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:f039ade5d2f2",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:5df840ac4d69",
+      "customer_name_redacted": "redacted:cb52ab3225b4",
+      "order_number_redacted": "redacted:9ecfea8a6f98",
+      "message_excerpt_redacted": "When is the eta for item",
+      "classified_order_status": true,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmgq2HcJR8SaPUN4V1X84ratziy",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.67,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pmj0KCWSEYkBh7VfuSsQ2szQ5UB",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.86,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": true,
+      "eta_window": null,
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 7.39,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:a01515f53aed",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:a01515f53aed",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3648283ba304",
+      "customer_name_redacted": null,
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Can you send me the manual for my mini?",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pn0WYlb4uEFARIvmWNRNA0cfF7p",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.63,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pn3eByh350eNHUG4WlWPyqkqzWJ",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.2,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 19.25,
+      "richpanel_request_count": 4,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 4
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:7ec8c636e853",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:7ec8c636e853",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:3713040e511f",
+      "customer_name_redacted": null,
+      "order_number_redacted": "redacted:10e47a05ccd1",
+      "message_excerpt_redacted": "I DO NOT want to be on a subscription, my last email thread with customer care stated this, can you please confirm that I am <redacted> a subscription and can you also verify that I will not be receiving any more orders",
+      "classified_order_status": false,
+      "routing_intent": "cancel_subscription",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pn7OBEbO4P4SWq3wuxvhitDHWi9",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pn9lKT66V7j7ofIKhFZpJFJRDDY",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.25,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.485,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:107a6ca2b3c3",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:107a6ca2b3c3",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:78c3d64190b1",
+      "customer_name_redacted": "redacted:0787e5c292c3",
+      "order_number_redacted": "redacted:0d9e4b3b14e4",
+      "message_excerpt_redacted": "Hello Kristine, I still do not understand what is going on. There is date to when the product is going to ship. The item was on the site, then it does not exist. The email stated that the item could be a special order, now you will forward and set the order as priority. Please pr...",
+      "classified_order_status": true,
+      "routing_intent": "return_request",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnGrbAEv0xsuy879X73wOIrjOVT",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.87,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnK3ASogWvvLi5Gal55AG4QRs7Z",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.9,
+        "gated_reason": null,
+        "accepted": true
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "matched_by_order_number",
+      "tracking_present": false,
+      "eta_window": "should arrive any day now",
+      "would_auto_reply": true,
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "elapsed_seconds": 9.078,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:b31985d32d44",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:b31985d32d44",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:16b920339733",
+      "customer_name_redacted": "redacted:8810ffc131dd",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Screen video attached. Let me know what you can figure out from different from the screen shots I sent. No I never got it to connect. Same WiFi. Passwords good. Bluetooth add. Allowed access. Doesn’t work.",
+      "classified_order_status": false,
+      "routing_intent": "technical_support",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnQfJ2kRKciBqJ8GSogMk46c7hz",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.88,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnTBikorK0kMju3dw2k94NClRuJ",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 10.453,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:bde0b2b02b34",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:bde0b2b02b34",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:a3184991a59c",
+      "customer_name_redacted": "redacted:caa6efe544a9",
+      "order_number_redacted": "redacted:616bf2dd7480",
+      "message_excerpt_redacted": "Diffuser stopped working. I went through your troubleshoot video and there's no air, no noise, nothing. Please help",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pna7hMC2n0aoYgZ7pIIi7AjAsgT",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.91,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pncVyS9sH3dZKbxwQc6OVBUrkvy",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.344,
+      "richpanel_request_count": 2,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:b9342129b5bb",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:b9342129b5bb",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:5fa0b5ed6c31",
+      "customer_name_redacted": "redacted:d79a587c6269",
+      "order_number_redacted": "redacted:34ba6c5d8929",
+      "message_excerpt_redacted": "Good afternoon, Unfortunately, I do not have a photo as the bottle was not broken. I noticed the silver foil was actually stuck in the top of the lid. As I mentioned, there was oil everywhere. Fortunately it stayed inside the bag and only leaked onto the other bottles. Due to the...",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pniMLbzGtMKSE9BWT3zd8wL02Up",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.87,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnlPUXT7bi8iotC96TGbmQskhX7",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.14,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 8.515,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:c422a60ff6c0",
+      "classification_source": "openai_intent",
+      "channel": "email",
+      "ticket_number_redacted": "redacted:c422a60ff6c0",
+      "ticket_created_at_redacted": "2026-01-XX",
+      "customer_email_redacted": "redacted:58f63400cc8a",
+      "customer_name_redacted": "redacted:4d9c2d370cbb",
+      "order_number_redacted": "redacted:503e82f50927",
+      "message_excerpt_redacted": "Hi Janine, Thank you <redacted> on the tracking . Have a great day! Elizabeth",
+      "classified_order_status": false,
+      "routing_intent": "order_status_tracking",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pnpK7lXpKICmjQk1NTIHxaoBFCf",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.3,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D3pns8EWqmVXS79QSSpYopmcz8qkN",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.15,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 7.188,
+      "richpanel_request_count": 1,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/number/redacted": 1
+      }
+    }
+  ],
+  "richpanel_retry_diagnostics": {
+    "total_retries": 24,
+    "status_counts": {
+      "429": 24
+    },
+    "status_family_counts": {
+      "429": 24
+    },
+    "attempt_counts": {
+      "1": 12,
+      "2": 6,
+      "3": 4,
+      "4": 2
+    },
+    "retry_delay_seconds": {
+      "min_seconds": 0.504,
+      "max_seconds": 4.0,
+      "avg_seconds": 1.263
+    },
+    "top_retry_endpoints": [
+      {
+        "path_redacted": "/v1/tickets/number/redacted",
+        "retry_count": 24,
+        "status_counts": {
+          "429": 24
+        }
+      }
+    ]
+  },
+  "richpanel_request_burst": {
+    "window_seconds": 30,
+    "max_requests_overall": 7,
+    "max_requests_by_endpoint": [
+      {
+        "path": "/v1/tickets/number/redacted",
+        "max_requests": 7,
+        "total_requests": 82
+      }
+    ]
+  },
+  "richpanel_retry_after_validation": {
+    "checked": 0,
+    "violations": 0
+  },
+  "richpanel_identity": {
+    "richpanel_base_url": "https://api.richpanel.com",
+    "mw_env": "prod",
+    "richpanel_env": "prod",
+    "resolved_env": "prod",
+    "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
+    "api_key_hash": "7ab000f0",
+    "api_key_error": null,
+    "run_started_at": "2026-01-30T20:45:25.020201+00:00",
+    "run_duration_seconds": 566.922
+  },
+  "notes": [
+    "Ticket identifiers, names, emails, and order numbers are hashed in structured fields.",
+    "Message excerpts are sanitized (HTML stripped; emails/phones/addresses redacted; order numbers may remain).",
+    "No outbound messages are sent; would_auto_reply is theoretical only."
+  ],
+  "run_duration_seconds": 566.922
+}

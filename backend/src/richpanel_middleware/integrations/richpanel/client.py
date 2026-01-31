@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import time
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,6 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    compute_retry_backoff,
     log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
@@ -45,6 +47,23 @@ def _truncate(text: str, limit: int = 512) -> str:
 
 
 READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
+TRACE_SAFE_SEGMENTS = {
+    "api",
+    "v1",
+    "v2",
+    "v3",
+    "tickets",
+    "ticket",
+    "conversations",
+    "conversation",
+    "orders",
+    "order",
+    "number",
+    "shipments",
+    "shipment",
+    "users",
+    "user",
+}
 
 
 @dataclass
@@ -180,12 +199,180 @@ class HttpTransport:
             raise TransportError(str(exc)) from exc
 
 
+class TokenBucketRateLimiter:
+    """
+    Thread-safe token bucket rate limiter for Richpanel API calls.
+
+    Enforces a maximum request rate to stay under Richpanel's 50/30s quota.
+    This is a GLOBAL limiter - all requests through any RichpanelClient
+    instance share the same bucket when using the module-level instance.
+
+    Default: 1.0 requests/second = 30 requests/30s = 40% headroom under limit
+    """
+
+    def __init__(
+        self,
+        rate: float = 1.0,
+        capacity: float = 5.0,
+        *,
+        clock: Optional[Callable[[], float]] = None,
+        sleeper: Optional[Callable[[float], None]] = None,
+    ) -> None:
+        """
+        Args:
+            rate: Tokens (requests) added per second. 1.0 = safe, 1.5 = aggressive.
+            capacity: Maximum tokens to accumulate (burst allowance).
+            clock: Time function (default: time.monotonic)
+            sleeper: Sleep function (default: time.sleep)
+        """
+        self._rate = rate
+        self._capacity = capacity
+        self._tokens = capacity
+        self._clock = clock or time.monotonic
+        self._last_refill = self._clock()
+        self._lock = threading.Lock()
+        self._sleeper = sleeper or time.sleep
+        self._logger = logging.getLogger(__name__)
+        if self._rate <= 0:
+            self._logger.warning(
+                "richpanel.rate_limiter_invalid_rate",
+                extra={"rate": self._rate},
+            )
+
+        # Statistics for diagnostics
+        self._total_requests = 0
+        self._total_wait_seconds = 0.0
+        self._waits_over_1s = 0
+
+    def acquire(self, timeout: float = 60.0) -> bool:
+        """
+        Acquire a token (permission to make one request).
+
+        Blocks until a token is available or timeout is reached.
+        Returns True if token acquired, False if timeout.
+        """
+        start = self._clock()
+        if self._rate <= 0:
+            self._logger.warning(
+                "richpanel.rate_limiter_invalid_rate",
+                extra={"rate": self._rate},
+            )
+            return False
+        while True:
+            with self._lock:
+                now = self._clock()
+                elapsed = now - self._last_refill
+
+                # Refill tokens based on elapsed time
+                self._tokens = min(self._capacity, self._tokens + elapsed * self._rate)
+                self._last_refill = now
+
+                if self._tokens >= 1.0:
+                    self._tokens -= 1.0
+                    wait_time = now - start
+                    self._total_requests += 1
+                    self._total_wait_seconds += wait_time
+                    if wait_time > 1.0:
+                        self._waits_over_1s += 1
+                    return True
+
+                # Calculate wait time for next token
+                tokens_needed = 1.0 - self._tokens
+                wait_for_token = tokens_needed / self._rate
+
+            # Check timeout before sleeping
+            elapsed_total = self._clock() - start
+            if elapsed_total + wait_for_token > timeout:
+                self._logger.warning(
+                    "richpanel.rate_limiter.timeout",
+                    extra={
+                        "timeout": timeout,
+                        "elapsed": elapsed_total,
+                        "tokens": self._tokens,
+                    },
+                )
+                return False
+
+            # Sleep outside the lock to allow other threads to proceed
+            sleep_time = min(wait_for_token, 0.1)
+            self._sleeper(sleep_time)
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Return rate limiter statistics for diagnostics."""
+        with self._lock:
+            return {
+                "rate_rps": self._rate,
+                "capacity": self._capacity,
+                "current_tokens": round(self._tokens, 2),
+                "total_requests": self._total_requests,
+                "total_wait_seconds": round(self._total_wait_seconds, 2),
+                "waits_over_1s": self._waits_over_1s,
+                "avg_wait_ms": (
+                    round((self._total_wait_seconds / self._total_requests) * 1000, 2)
+                    if self._total_requests > 0
+                    else 0.0
+                ),
+            }
+
+
+# Module-level rate limiter instance (shared across all RichpanelClient instances)
+_GLOBAL_RATE_LIMITER: Optional[TokenBucketRateLimiter] = None
+_RATE_LIMITER_LOCK = threading.Lock()
+
+
+def _get_global_rate_limiter() -> Optional[TokenBucketRateLimiter]:
+    """
+    Get or create the global rate limiter based on environment config.
+
+    Configure via: RICHPANEL_RATE_LIMIT_RPS (default: 0 = disabled)
+
+    Recommended values:
+    - 1.0: Safe, 60% headroom (30/30s out of 50/30s limit)
+    - 0.8: Conservative, 52% headroom (24/30s)
+    - 1.5: Aggressive, only 10% headroom (45/30s) - NOT recommended
+
+    IMPORTANT: This rate applies PER PROCESS. For Lambda with concurrency > 1,
+    you must divide by concurrency:
+    - Concurrency 1: RPS = 1.0
+    - Concurrency 2: RPS = 0.5
+    - Concurrency 3: RPS = 0.33
+    """
+    global _GLOBAL_RATE_LIMITER
+
+    with _RATE_LIMITER_LOCK:
+        if _GLOBAL_RATE_LIMITER is not None:
+            return _GLOBAL_RATE_LIMITER
+
+        rps_str = os.environ.get("RICHPANEL_RATE_LIMIT_RPS", "0")
+        try:
+            rps = float(rps_str)
+        except (TypeError, ValueError):
+            rps = 0.0
+
+        if rps <= 0:
+            return None
+
+        _GLOBAL_RATE_LIMITER = TokenBucketRateLimiter(rate=rps, capacity=5.0)
+        logging.getLogger(__name__).info(
+            "richpanel.rate_limiter.initialized",
+            extra={"rate_rps": rps, "capacity": 5.0},
+        )
+        return _GLOBAL_RATE_LIMITER
+
+
+def get_rate_limiter_stats() -> Optional[Dict[str, Any]]:
+    """Get current rate limiter statistics (for diagnostics/logging)."""
+    limiter = _get_global_rate_limiter()
+    return limiter.get_stats() if limiter else None
+
+
 class RichpanelClient:
     """
     Minimal Richpanel API client with safe defaults.
 
     - API key is sourced from AWS Secrets Manager (rp-mw/<env>/richpanel/api_key).
     - Retries + backoff for 429/5xx and transport errors.
+    - Optional client-side rate limiter via RICHPANEL_RATE_LIMIT_RPS.
     - Dry-run by default to avoid side effects until explicitly enabled.
     - Structured logging with redaction of secrets and large bodies.
     """
@@ -246,9 +433,31 @@ class RichpanelClient:
             or os.environ.get("RICHPANEL_API_KEY_OVERRIDE")
             or os.environ.get("RP_KEY")
         )
+        self._trace_enabled = _to_bool(
+            os.environ.get("RICHPANEL_TRACE_ENABLED"), default=False
+        )
+        self._request_trace: List[Dict[str, Any]] = []
         self._secrets_client_obj = None
         self._sleeper = sleeper or time.sleep
         self._rng = rng or random.random
+        self._cooldown_until = 0.0
+        self._cooldown_lock = threading.Lock()
+        self._cooldown_multiplier = self._parse_cooldown_multiplier(
+            os.environ.get("RICHPANEL_429_COOLDOWN_MULTIPLIER")
+        )
+        self._token_pool_enabled = _to_bool(
+            os.environ.get("RICHPANEL_TOKEN_POOL_ENABLED"), default=False
+        )
+        self._token_pool_secret_ids = [
+            secret_id.strip()
+            for secret_id in (
+                os.environ.get("RICHPANEL_TOKEN_POOL_SECRET_IDS", "") or ""
+            ).split(",")
+            if secret_id.strip()
+        ]
+        self._token_pool: List[str] = []
+        self._token_pool_index = 0
+        self._token_pool_lock = threading.Lock()
 
     def request(
         self,
@@ -303,10 +512,17 @@ class RichpanelClient:
         request_headers = self._merge_headers(
             headers, api_key, has_body=body_bytes is not None
         )
+        rate_limiter = _get_global_rate_limiter()
+        if rate_limiter is not None:
+            if not rate_limiter.acquire(timeout=60.0):
+                raise RichpanelRequestError(
+                    "Rate limiter timeout: unable to acquire token within 60s"
+                )
         attempt = 1
         last_response: Optional[RichpanelResponse] = None
 
         while attempt <= self.max_attempts:
+            self._sleep_for_cooldown()
             start = time.monotonic()
             try:
                 transport_response = self.transport.send(
@@ -323,12 +539,21 @@ class RichpanelClient:
                     "richpanel.transport_error",
                     extra={"method": method.upper(), "url": url, "attempt": attempt},
                 )
+                delay = self._compute_backoff(attempt, retry_after=None)
+                if self._trace_enabled:
+                    self._record_trace(
+                        method=method.upper(),
+                        url=url,
+                        status=0,
+                        attempt=attempt,
+                        retry_after=None,
+                        retry_delay=delay,
+                    )
                 if attempt >= self.max_attempts:
                     raise RichpanelRequestError(
                         f"Richpanel transport failed after {attempt} attempts"
                     ) from exc
 
-                delay = self._compute_backoff(attempt, retry_after=None)
                 self._sleep(delay)
                 attempt += 1
                 continue
@@ -338,6 +563,17 @@ class RichpanelClient:
             last_response = response
 
             should_retry, delay = self._should_retry(response, attempt)
+            if should_retry and response.status_code == 429:
+                self._register_cooldown(delay)
+            if self._trace_enabled:
+                self._record_trace(
+                    method=method.upper(),
+                    url=url,
+                    status=response.status_code,
+                    attempt=attempt,
+                    retry_after=response.headers.get("Retry-After"),
+                    retry_delay=delay if should_retry else None,
+                )
             self._log_response(
                 method.upper(),
                 response,
@@ -430,19 +666,14 @@ class RichpanelClient:
         return False, 0.0
 
     def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
-        if retry_after:
-            try:
-                parsed = float(retry_after)
-                if parsed > 0:
-                    return min(parsed, self.backoff_max_seconds)
-            except (TypeError, ValueError):
-                pass
-
-        base = min(
-            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        return compute_retry_backoff(
+            attempt=attempt,
+            retry_after=retry_after,
+            backoff_seconds=self.backoff_seconds,
+            backoff_max_seconds=self.backoff_max_seconds,
+            rng=self._rng,
+            retry_after_jitter_ratio=0.1,
         )
-        jitter = base * 0.25 * self._rng()
-        return min(base + jitter, self.backoff_max_seconds)
 
     def _sleep(self, delay: float) -> None:
         try:
@@ -451,34 +682,142 @@ class RichpanelClient:
             # Sleeper is best-effort; failures should not crash the worker.
             self._logger.warning("richpanel.sleep_failed", extra={"delay": delay})
 
+    def _sleep_for_cooldown(self) -> None:
+        try:
+            with self._cooldown_lock:
+                now = time.monotonic()
+                if now >= self._cooldown_until:
+                    return
+                delay = self._cooldown_until - now
+            if delay > 0:
+                self._sleep(delay)
+        except Exception:
+            self._logger.warning("richpanel.cooldown_failed")
+
+    def _register_cooldown(self, delay: float) -> None:
+        if delay <= 0:
+            return
+        try:
+            cooldown = delay * self._cooldown_multiplier
+            with self._cooldown_lock:
+                target = time.monotonic() + cooldown
+                if target > self._cooldown_until:
+                    self._cooldown_until = target
+        except Exception:
+            self._logger.warning("richpanel.cooldown_register_failed")
+
+    def _record_trace(
+        self,
+        *,
+        method: str,
+        url: str,
+        status: int,
+        attempt: int,
+        retry_after: Optional[str],
+        retry_delay: Optional[float],
+    ) -> None:
+        try:
+            timestamp = time.time()
+        except Exception:
+            timestamp = 0.0
+        self._request_trace.append(
+            {
+                "timestamp": timestamp,
+                "method": method,
+                "path": _redact_url_path(url),
+                "status": status,
+                "attempt": attempt,
+                "retry_after": retry_after,
+                "retry_delay_seconds": retry_delay,
+            }
+        )
+
+    def get_request_trace(self) -> List[Dict[str, Any]]:
+        return list(self._request_trace)
+
+    def clear_request_trace(self) -> None:
+        self._request_trace = []
+
     def _load_api_key(self) -> str:
         if self._api_key:
             return self._api_key
+        if self._token_pool_enabled and self._token_pool_secret_ids:
+            pool = self._load_token_pool()
+            if not pool:
+                raise SecretLoadError("Richpanel token pool is empty")
+            return self._select_pool_key(pool)
         if boto3 is None:
             raise SecretLoadError(
                 "boto3 is required to load the Richpanel API key; provide api_key or RICHPANEL_API_KEY_OVERRIDE for local runs."
             )
+        secret_value = self._load_secret_value(self.api_key_secret_id)
+        if not secret_value:
+            raise SecretLoadError("Richpanel API key secret is empty")
+        self._api_key = secret_value
+        return str(self._api_key)
 
-        try:
-            response = self._secrets_client().get_secret_value(
-                SecretId=self.api_key_secret_id
+    def _load_token_pool(self) -> List[str]:
+        if self._token_pool:
+            return list(self._token_pool)
+        if self._secrets_client_obj is None and boto3 is None:
+            raise SecretLoadError(
+                "boto3 is required to load the Richpanel token pool."
             )
+        secrets: List[str] = []
+        for secret_id in self._token_pool_secret_ids:
+            value = self._load_secret_value(secret_id)
+            if value:
+                secrets.append(value)
+            else:
+                self._logger.warning(
+                    "richpanel.token_pool_missing_secret",
+                    extra={"secret_id": secret_id},
+                )
+        with self._token_pool_lock:
+            if not self._token_pool:
+                self._token_pool = secrets
+        return list(self._token_pool)
+
+    def _select_pool_key(self, pool: List[str]) -> str:
+        with self._token_pool_lock:
+            if not pool:
+                raise SecretLoadError("Richpanel token pool is empty")
+            selected = pool[self._token_pool_index]
+            self._token_pool_index = (self._token_pool_index + 1) % len(pool)
+            return selected
+
+    def _load_secret_value(self, secret_id: str) -> Optional[str]:
+        try:
+            response = self._secrets_client().get_secret_value(SecretId=secret_id)
         except (BotoCoreError, ClientError) as exc:
             raise SecretLoadError(
                 "Unable to load Richpanel API key from Secrets Manager"
             ) from exc
-
         secret_value = response.get("SecretString")
         if secret_value is None and response.get("SecretBinary") is not None:
             secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
-
         if not secret_value:
-            raise SecretLoadError("Richpanel API key secret is empty")
-        assert isinstance(secret_value, str)
+            return None
+        return str(secret_value)
 
-        self._api_key = secret_value
-        assert self._api_key is not None
-        return str(self._api_key)
+    def _parse_cooldown_multiplier(self, value: Optional[str]) -> float:
+        if value is None:
+            return 1.0
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            self._logger.warning(
+                "richpanel.cooldown_multiplier_invalid",
+                extra={"value": value},
+            )
+            return 1.0
+        if parsed <= 0:
+            self._logger.warning(
+                "richpanel.cooldown_multiplier_invalid",
+                extra={"value": value},
+            )
+            return 1.0
+        return parsed
 
     def _secrets_client(self):
         if self._secrets_client_obj is None:
@@ -643,6 +982,25 @@ class RichpanelExecutor:
         return _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), default=False)
 
 
+def _redact_url_path(url: str) -> str:
+    try:
+        path = urllib.parse.urlparse(url).path or "/"
+    except Exception:
+        path = url or "/"
+    segments = [segment for segment in path.split("/") if segment]
+    redacted_segments: List[str] = []
+    for segment in segments:
+        lowered = segment.lower()
+        if lowered in TRACE_SAFE_SEGMENTS or (segment.startswith("v") and segment[1:].isdigit()):
+            redacted_segments.append(segment)
+            continue
+        if segment.isalpha() and len(segment) <= 32:
+            redacted_segments.append(segment)
+            continue
+        redacted_segments.append("redacted")
+    return "/" + "/".join(redacted_segments)
+
+
 __all__ = [
     "RichpanelClient",
     "RichpanelExecutor",
@@ -656,4 +1014,6 @@ __all__ = [
     "RichpanelRequestError",
     "RichpanelWriteDisabledError",
     "HttpTransport",
+    "TokenBucketRateLimiter",
+    "get_rate_limiter_stats",
 ]

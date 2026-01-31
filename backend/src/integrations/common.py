@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 PRODUCTION_ENVIRONMENTS = {"prod", "production"}
 PROD_WRITE_ACK_ENV = "MW_PROD_WRITES_ACK"
@@ -79,11 +79,39 @@ def log_env_resolution_warning(
         )
 
 
+def compute_retry_backoff(
+    *,
+    attempt: int,
+    retry_after: Optional[str],
+    backoff_seconds: float,
+    backoff_max_seconds: float,
+    rng: Callable[[], float],
+    retry_after_jitter_ratio: float = 0.0,
+) -> float:
+    base = min(backoff_seconds * (2 ** (attempt - 1)), backoff_max_seconds)
+    jitter = base * 0.25 * rng()
+    candidate = base + jitter
+
+    if retry_after:
+        try:
+            parsed = float(retry_after)
+            if parsed > 0:
+                extra = parsed * retry_after_jitter_ratio * rng()
+                candidate = max(candidate, parsed + extra)
+        except (TypeError, ValueError):
+            pass
+
+    if backoff_max_seconds > 0:
+        candidate = min(candidate, backoff_max_seconds)
+    return candidate
+
+
 __all__ = [
     "ENV_RESOLUTION_ORDER",
     "PRODUCTION_ENVIRONMENTS",
     "PROD_WRITE_ACK_ENV",
     "PROD_WRITE_ACK_PHRASE",
+    "compute_retry_backoff",
     "log_env_resolution_warning",
     "prod_write_acknowledged",
     "prod_write_ack_matches",

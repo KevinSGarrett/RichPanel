@@ -12,7 +12,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
-from integrations.common import resolve_env_name
+from integrations.common import compute_retry_backoff, resolve_env_name
 
 try:
     import boto3  # type: ignore
@@ -427,18 +427,14 @@ class OpenAIClient:
         return False, 0.0
 
     def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
-        if retry_after:
-            try:
-                parsed = float(retry_after)
-                if parsed > 0:
-                    return min(parsed, self.backoff_max_seconds)
-            except (TypeError, ValueError):
-                pass
-        base = min(
-            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        return compute_retry_backoff(
+            attempt=attempt,
+            retry_after=retry_after,
+            backoff_seconds=self.backoff_seconds,
+            backoff_max_seconds=self.backoff_max_seconds,
+            rng=self._rng,
+            retry_after_jitter_ratio=0.0,
         )
-        jitter = base * 0.25 * self._rng()
-        return min(base + jitter, self.backoff_max_seconds)
 
     def _sleep(self, delay: float) -> None:
         try:

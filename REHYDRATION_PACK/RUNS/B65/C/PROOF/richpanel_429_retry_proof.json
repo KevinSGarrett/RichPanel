@@ -1,0 +1,51 @@
+{
+  "run_id": "RUN_20260130_2045Z",
+  "timestamp": "2026-01-30T20:54:51.942089+00:00",
+  "environment": "prod",
+  "richpanel_http_max_attempts": "6",
+  "retry_diagnostics": {
+    "total_retries": 24,
+    "status_counts": {
+      "429": 24
+    },
+    "status_family_counts": {
+      "429": 24
+    },
+    "attempt_counts": {
+      "1": 12,
+      "2": 6,
+      "3": 4,
+      "4": 2
+    },
+    "retry_delay_seconds": {
+      "min_seconds": 0.504,
+      "max_seconds": 4.0,
+      "avg_seconds": 1.263
+    },
+    "top_retry_endpoints": [
+      {
+        "path_redacted": "/v1/tickets/number/redacted",
+        "retry_count": 24,
+        "status_counts": {
+          "429": 24
+        }
+      }
+    ]
+  },
+  "retry_after_validation": {
+    "checked": 0,
+    "violations": 0
+  },
+  "request_burst": {
+    "window_seconds": 30,
+    "max_requests_overall": 7,
+    "max_requests_by_endpoint": [
+      {
+        "path": "/v1/tickets/number/redacted",
+        "max_requests": 7,
+        "total_requests": 82
+      }
+    ]
+  },
+  "trace_entry_count": 82
+}

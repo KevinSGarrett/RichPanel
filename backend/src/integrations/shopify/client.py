@@ -10,11 +10,13 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
 from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
+    compute_retry_backoff,
     log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
@@ -81,6 +83,20 @@ class ShopifyResponse:
             return json.loads(payload)
         except Exception:
             return None
+
+
+@dataclass
+class ShopifyTokenInfo:
+    access_token: str
+    refresh_token: Optional[str] = None
+    expires_at: Optional[float] = None
+    raw_format: str = "plain"
+    source_secret_id: Optional[str] = None
+
+    def is_expired(self, *, skew_seconds: float = 60.0) -> bool:
+        if self.expires_at is None:
+            return False
+        return time.time() >= (self.expires_at - skew_seconds)
 
 
 class Transport(Protocol):
@@ -221,6 +237,25 @@ class ShopifyClient:
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
             or os.environ.get("SHOPIFY_TOKEN")
         )
+        self.client_id_secret_id = (
+            os.environ.get("SHOPIFY_CLIENT_ID_SECRET_ID")
+            or f"rp-mw/{self.environment}/shopify/client_id"
+        )
+        self.client_secret_secret_id = (
+            os.environ.get("SHOPIFY_CLIENT_SECRET_SECRET_ID")
+            or f"rp-mw/{self.environment}/shopify/client_secret"
+        )
+        self._client_id = os.environ.get("SHOPIFY_CLIENT_ID_OVERRIDE")
+        self._client_secret = os.environ.get("SHOPIFY_CLIENT_SECRET_OVERRIDE")
+        self._token_info: Optional[ShopifyTokenInfo] = None
+        if self._access_token:
+            self._token_info = ShopifyTokenInfo(
+                access_token=str(self._access_token).strip(),
+                refresh_token=None,
+                expires_at=None,
+                raw_format="override",
+                source_secret_id=None,
+            )
         self._secrets_client_obj = secrets_client
         self._sleeper = sleeper or time.sleep
         self._rng = rng or random.random
@@ -292,11 +327,43 @@ class ShopifyClient:
                 reason=reason,
             )
 
+        attempt = 1
+        last_response: Optional[ShopifyResponse] = None
+        refresh_attempted = False
+
+        if (
+            self._token_info
+            and self._token_info.is_expired()
+            and self._token_info.refresh_token
+        ):
+            refresh_attempted = True
+            if self._refresh_access_token(self._token_info):
+                access_token, _ = self._load_access_token(force_reload=True)
+                if not access_token:
+                    self._logger.warning(
+                        "shopify.refresh_failed_pre_request",
+                        extra={"secret_id": self.access_token_secret_id},
+                    )
+                    return ShopifyResponse(
+                        status_code=0,
+                        headers={
+                            "x-dry-run": "1",
+                            "x-dry-run-reason": "missing_access_token",
+                        },
+                        body=b"",
+                        url=url,
+                        dry_run=True,
+                        reason="missing_access_token",
+                    )
+            else:
+                self._logger.warning(
+                    "shopify.refresh_failed_pre_request",
+                    extra={"secret_id": self.access_token_secret_id},
+                )
+
         request_headers = self._build_headers(
             headers, access_token, has_body=body_bytes is not None
         )
-        attempt = 1
-        last_response: Optional[ShopifyResponse] = None
 
         while attempt <= self.max_attempts:
             start = time.monotonic()
@@ -328,6 +395,26 @@ class ShopifyClient:
             latency_ms = int((time.monotonic() - start) * 1000)
             response = self._to_response(transport_response, url)
             last_response = response
+
+            if (
+                response.status_code == 401
+                and not refresh_attempted
+                and self._token_info
+                and self._token_info.refresh_token
+            ):
+                refreshed = self._refresh_access_token(self._token_info)
+                refresh_attempted = True
+                if refreshed:
+                    access_token, _ = self._load_access_token(
+                        force_reload=True
+                    )
+                    if access_token:
+                        request_headers = self._build_headers(
+                            headers, access_token, has_body=body_bytes is not None
+                        )
+                        if attempt < self.max_attempts:
+                            attempt += 1
+                            continue
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
@@ -382,6 +469,30 @@ class ShopifyClient:
             safe_mode=safe_mode,
             automation_enabled=automation_enabled,
         )
+
+    def get_shop(
+        self,
+        *,
+        dry_run: Optional[bool] = None,
+        safe_mode: bool = False,
+        automation_enabled: bool = True,
+    ) -> ShopifyResponse:
+        """
+        Fetch shop metadata (read-only).
+        """
+        return self.request(
+            "GET",
+            "shop.json",
+            dry_run=dry_run,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+
+    def refresh_access_token(self) -> bool:
+        access_token, _ = self._load_access_token()
+        if not access_token or not self._token_info:
+            return False
+        return self._refresh_access_token(self._token_info)
 
     def find_orders_by_name(
         self,
@@ -493,19 +604,14 @@ class ShopifyClient:
         return False, 0.0
 
     def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
-        if retry_after:
-            try:
-                parsed = float(retry_after)
-                if parsed > 0:
-                    return min(parsed, self.backoff_max_seconds)
-            except (TypeError, ValueError):
-                pass
-
-        base = min(
-            self.backoff_seconds * (2 ** (attempt - 1)), self.backoff_max_seconds
+        return compute_retry_backoff(
+            attempt=attempt,
+            retry_after=retry_after,
+            backoff_seconds=self.backoff_seconds,
+            backoff_max_seconds=self.backoff_max_seconds,
+            rng=self._rng,
+            retry_after_jitter_ratio=0.0,
         )
-        jitter = base * 0.25 * self._rng()
-        return min(base + jitter, self.backoff_max_seconds)
 
     def _sleep(self, delay: float) -> None:
         try:
@@ -514,8 +620,10 @@ class ShopifyClient:
             # Sleeper is best-effort; failures should not crash the worker.
             self._logger.warning("shopify.sleep_failed", extra={"delay": delay})
 
-    def _load_access_token(self) -> Tuple[Optional[str], Optional[str]]:
-        if self._access_token:
+    def _load_access_token(
+        self, *, force_reload: bool = False
+    ) -> Tuple[Optional[str], Optional[str]]:
+        if self._access_token and not force_reload:
             return self._access_token, None
         client = self._secrets_client_obj
         if client is None and boto3 is None:
@@ -542,11 +650,248 @@ class ShopifyClient:
                 last_reason = "missing_access_token"
                 continue
 
-            self._access_token = secret_value
+            token_info = self._parse_token_secret(
+                secret_value, source_secret_id=secret_id
+            )
+            self._token_info = token_info
+            self._access_token = token_info.access_token
             self.access_token_secret_id = secret_id
             return self._access_token, None
 
         return None, last_reason or "missing_access_token"
+
+    def _parse_token_secret(
+        self, secret_value: str, *, source_secret_id: str
+    ) -> ShopifyTokenInfo:
+        try:
+            parsed = json.loads(secret_value)
+        except Exception:
+            parsed = None
+
+        if isinstance(parsed, dict) and parsed.get("access_token"):
+            access_token = str(parsed.get("access_token"))
+            refresh_token = parsed.get("refresh_token")
+            refresh_token = str(refresh_token) if refresh_token else None
+            expires_at = self._parse_expires_at(parsed)
+            return ShopifyTokenInfo(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                expires_at=expires_at,
+                raw_format="json",
+                source_secret_id=source_secret_id,
+            )
+
+        return ShopifyTokenInfo(
+            access_token=str(secret_value).strip(),
+            refresh_token=None,
+            expires_at=None,
+            raw_format="plain",
+            source_secret_id=source_secret_id,
+        )
+
+    def _parse_expires_at(self, payload: Dict[str, Any]) -> Optional[float]:
+        expires_at = payload.get("expires_at")
+        if expires_at:
+            parsed = self._parse_timestamp(expires_at)
+            if parsed is not None:
+                return parsed
+        expires_in = payload.get("expires_in")
+        if expires_in is None:
+            return None
+        try:
+            expires_in_value = float(expires_in)
+        except (TypeError, ValueError):
+            return None
+        issued_at = (
+            payload.get("issued_at")
+            or payload.get("obtained_at")
+            or payload.get("created_at")
+        )
+        issued_at_value = self._parse_timestamp(issued_at) or time.time()
+        return issued_at_value + expires_in_value
+
+    def _parse_timestamp(self, value: Any) -> Optional[float]:
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            return float(text)
+        except (TypeError, ValueError):
+            pass
+        try:
+            normalized = text.replace("Z", "+00:00")
+            return datetime.fromisoformat(normalized).timestamp()
+        except (TypeError, ValueError):
+            return None
+
+    def _load_client_credentials(self) -> Tuple[Optional[str], Optional[str]]:
+        if self._client_id and self._client_secret:
+            return self._client_id, self._client_secret
+        client = self._secrets_client_obj
+        if client is None and boto3 is None:
+            return None, None
+        if client is None:
+            client = self._secrets_client()
+
+        if not self._client_id:
+            self._client_id = self._load_secret_value(client, self.client_id_secret_id)
+        if not self._client_secret:
+            self._client_secret = self._load_secret_value(
+                client, self.client_secret_secret_id
+            )
+        return self._client_id, self._client_secret
+
+    def _load_secret_value(self, client: Any, secret_id: str) -> Optional[str]:
+        try:
+            response = client.get_secret_value(SecretId=secret_id)  # type: ignore[attr-defined]
+        except (BotoCoreError, ClientError, Exception):
+            return None
+        secret_value = response.get("SecretString")
+        if secret_value is None and response.get("SecretBinary") is not None:
+            secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+        if not secret_value:
+            return None
+        return str(secret_value)
+
+    def _refresh_access_token(self, token_info: ShopifyTokenInfo) -> bool:
+        client_id, client_secret = self._load_client_credentials()
+        if not client_id or not client_secret:
+            self._logger.warning(
+                "shopify.refresh_missing_client_credentials",
+                extra={
+                    "client_id_secret_id": self.client_id_secret_id,
+                    "client_secret_secret_id": self.client_secret_secret_id,
+                },
+            )
+            return False
+
+        url = f"https://{self.shop_domain}/admin/oauth/access_token"
+        if token_info.refresh_token:
+            payload = {
+                "grant_type": "refresh_token",
+                "refresh_token": token_info.refresh_token,
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
+        else:
+            payload = {
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
+        body = urllib.parse.urlencode(payload).encode("utf-8")
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/x-www-form-urlencoded",
+        }
+
+        try:
+            response = self.transport.send(
+                TransportRequest(
+                    method="POST",
+                    url=url,
+                    headers=headers,
+                    body=body,
+                    timeout=float(self.timeout_seconds),
+                )
+            )
+        except TransportError:
+            self._logger.warning(
+                "shopify.refresh_transport_error",
+                extra={"url": url},
+            )
+            return False
+        if response.status_code < 200 or response.status_code >= 300:
+            self._logger.warning(
+                "shopify.refresh_failed",
+                extra={"status": response.status_code},
+            )
+            return False
+        refresh_payload = ShopifyResponse(
+            status_code=response.status_code,
+            headers=response.headers,
+            body=response.body,
+            url=url,
+            dry_run=False,
+        ).json()
+        if not isinstance(refresh_payload, dict):
+            self._logger.warning("shopify.refresh_invalid_payload")
+            return False
+        new_access_token = refresh_payload.get("access_token")
+        new_refresh_token = refresh_payload.get("refresh_token") or token_info.refresh_token
+        expires_in = refresh_payload.get("expires_in")
+        if not new_access_token:
+            self._logger.warning("shopify.refresh_missing_access_token")
+            return False
+        expires_at = None
+        if expires_in is not None:
+            try:
+                expires_at = time.time() + float(expires_in)
+            except (TypeError, ValueError):
+                expires_at = None
+        updated_info = ShopifyTokenInfo(
+            access_token=str(new_access_token),
+            refresh_token=str(new_refresh_token) if new_refresh_token else None,
+            expires_at=expires_at,
+            raw_format="json",
+            source_secret_id=token_info.source_secret_id,
+        )
+        self._persist_token_info(updated_info)
+        self._token_info = updated_info
+        self._access_token = updated_info.access_token
+        return True
+
+    def _persist_token_info(self, token_info: ShopifyTokenInfo) -> None:
+        client = self._secrets_client_obj
+        if client is None and boto3 is None:
+            self._logger.warning("shopify.refresh_no_secrets_client")
+            return
+        if client is None:
+            client = self._secrets_client()
+        secret_id = token_info.source_secret_id or self.access_token_secret_id
+        if not secret_id:
+            self._logger.warning("shopify.refresh_missing_secret_id")
+            return
+        payload: Dict[str, Any] = {
+            "access_token": token_info.access_token,
+            "refresh_token": token_info.refresh_token,
+            "expires_at": token_info.expires_at,
+            "refreshed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            client.put_secret_value(  # type: ignore[attr-defined]
+                SecretId=secret_id, SecretString=json.dumps(payload)
+            )
+        except (BotoCoreError, ClientError, Exception):
+            self._logger.warning(
+                "shopify.refresh_secret_write_failed",
+                extra={"secret_id": secret_id},
+            )
+
+    def token_diagnostics(self) -> Dict[str, Any]:
+        token_info = self._token_info
+        if token_info is None:
+            return {"status": "unknown"}
+        token_type = "unknown"
+        if token_info.access_token.startswith("shpat_"):
+            token_type = "offline"
+        elif token_info.access_token.startswith("shpua_"):
+            token_type = "online"
+        elif token_info.refresh_token:
+            token_type = "online"
+        return {
+            "status": "loaded",
+            "token_type": token_type,
+            "raw_format": token_info.raw_format,
+            "has_refresh_token": bool(token_info.refresh_token),
+            "expires_at": token_info.expires_at,
+            "expired": token_info.is_expired() if token_info.expires_at else None,
+            "source_secret_id": token_info.source_secret_id,
+        }
 
     def _secrets_client(self):
         if self._secrets_client_obj is None:

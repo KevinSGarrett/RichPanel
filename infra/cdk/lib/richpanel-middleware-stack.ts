@@ -10,6 +10,8 @@ import {
 } from "aws-cdk-lib";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -33,6 +35,9 @@ export interface SecretReferences {
   readonly richpanelApiKey: ISecret;
   readonly richpanelWebhookToken: ISecret;
   readonly openaiApiKey: ISecret;
+  readonly shopifyAdminApiToken: ISecret;
+  readonly shopifyClientId: ISecret;
+  readonly shopifyClientSecret: ISecret;
 }
 
 interface EventPipelineResources {
@@ -116,6 +121,21 @@ export class RichpanelMiddlewareStack extends Stack {
         this,
         "OpenAiApiKeySecret",
         this.naming.secretPath("openai", "api_key")
+      ),
+      shopifyAdminApiToken: Secret.fromSecretNameV2(
+        this,
+        "ShopifyAdminApiTokenSecret",
+        this.naming.secretPath("shopify", "admin_api_token")
+      ),
+      shopifyClientId: Secret.fromSecretNameV2(
+        this,
+        "ShopifyClientIdSecret",
+        this.naming.secretPath("shopify", "client_id")
+      ),
+      shopifyClientSecret: Secret.fromSecretNameV2(
+        this,
+        "ShopifyClientSecretSecret",
+        this.naming.secretPath("shopify", "client_secret")
       ),
     };
   }
@@ -257,6 +277,7 @@ export class RichpanelMiddlewareStack extends Stack {
         "SQS worker that logs events, enforces kill switches, and writes idempotency records.",
       timeout: Duration.seconds(30),
       memorySize: 512,
+      reservedConcurrentExecutions: 1,
       environment: {
         IDEMPOTENCY_TABLE_NAME: idempotencyTable.tableName,
         CONVERSATION_STATE_TABLE_NAME: conversationStateTable.tableName,
@@ -267,6 +288,7 @@ export class RichpanelMiddlewareStack extends Stack {
         MW_ENV: this.environmentConfig.name,
         MW_ALLOW_ENV_FLAG_OVERRIDE: this.environmentConfig.name === "dev" ? "true" : "false",
         RICHPANEL_API_KEY_SECRET_ARN: this.secrets.richpanelApiKey.secretArn,
+        RICHPANEL_RATE_LIMIT_RPS: "0.5",
         MW_OUTBOUND_ALLOWLIST_EMAILS:
           this.environmentConfig.outboundAllowlistEmails ?? "",
         MW_OUTBOUND_ALLOWLIST_DOMAINS:
@@ -296,6 +318,58 @@ export class RichpanelMiddlewareStack extends Stack {
         reportBatchItemFailures: true,
       })
     );
+
+    if (this.environmentConfig.name === "prod") {
+      const shopifyRefreshFunction = new lambda.Function(
+        this,
+        "ShopifyTokenRefreshLambda",
+        {
+          functionName: this.naming.lambdaFunctionName("shopify-token-refresh"),
+          runtime: lambda.Runtime.PYTHON_3_11,
+          handler:
+            "lambda_handlers.shopify_token_refresh.handler.lambda_handler",
+          description:
+            "Refresh Shopify admin API access token every 4 hours (read-only ops).",
+          timeout: Duration.seconds(30),
+          memorySize: 256,
+          environment: {
+            MW_ENV: this.environmentConfig.name,
+            SHOPIFY_SHOP_DOMAIN: "scentimen-t.myshopify.com",
+            SHOPIFY_ACCESS_TOKEN_SECRET_ID: this.naming.secretPath(
+              "shopify",
+              "admin_api_token"
+            ),
+            SHOPIFY_CLIENT_ID_SECRET_ID: this.naming.secretPath(
+              "shopify",
+              "client_id"
+            ),
+            SHOPIFY_CLIENT_SECRET_SECRET_ID: this.naming.secretPath(
+              "shopify",
+              "client_secret"
+            ),
+          },
+          code: lambda.Code.fromAsset(lambdaSourceRoot),
+        }
+      );
+
+      this.secrets.shopifyAdminApiToken.grantRead(
+        shopifyRefreshFunction
+      );
+      this.secrets.shopifyAdminApiToken.grantWrite(
+        shopifyRefreshFunction
+      );
+      this.secrets.shopifyClientId.grantRead(shopifyRefreshFunction);
+      this.secrets.shopifyClientSecret.grantRead(shopifyRefreshFunction);
+
+      const scheduleRule = new events.Rule(
+        this,
+        "ShopifyTokenRefreshSchedule",
+        {
+          schedule: events.Schedule.rate(Duration.hours(4)),
+        }
+      );
+      scheduleRule.addTarget(new targets.LambdaFunction(shopifyRefreshFunction));
+    }
 
     const httpApi = this.createHttpApi(ingressFunction);
 
