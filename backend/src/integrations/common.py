@@ -92,16 +92,14 @@ def compute_retry_backoff(
     jitter = base * 0.25 * rng()
     candidate = base + jitter
 
-    retry_after_value: Optional[float] = None
     if retry_after:
         try:
             parsed = float(retry_after)
             if parsed > 0:
-                retry_after_value = parsed
                 extra = parsed * retry_after_jitter_ratio * rng()
                 candidate = max(candidate, parsed + extra)
         except (TypeError, ValueError):
-            retry_after_value = None
+            pass
 
     if backoff_max_seconds > 0:
         candidate = min(candidate, backoff_max_seconds)
