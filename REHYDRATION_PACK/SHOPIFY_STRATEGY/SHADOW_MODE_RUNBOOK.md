@@ -17,8 +17,10 @@ Set these **before** running the script:
 ## Optional Environment Variables
 Use these only if you need LLM evidence or non-default secrets:
 
-- `RICHPANEL_OUTBOUND_ENABLED=true` (only if you need OpenAI routing/rewrites)
-- `OPENAI_REPLY_REWRITE_ENABLED=true`
+- `MW_OPENAI_ROUTING_ENABLED=true`
+- `MW_OPENAI_INTENT_ENABLED=true`
+- `MW_OPENAI_REWRITE_ENABLED=true`
+- `MW_OPENAI_SHADOW_ENABLED=true` (allows OpenAI in read-only shadow)
 - `OPENAI_ALLOW_NETWORK=true`
 - `OPENAI_API_KEY_SECRET_ID=rp-mw/<env>/openai/api_key` (if non-default)
 - `SHOPIFY_SHOP_DOMAIN=<your-shop>.myshopify.com`
@@ -49,4 +51,6 @@ python scripts/shadow_order_status.py \
 - **DO NOT RUN WITHOUT READ-ONLY GUARDS.**
 - **Do not run in CI** (live keys are prohibited in CI).
 - Never add or expose raw ticket payloads in logs or output.
-- OpenAI calls only occur when both `RICHPANEL_OUTBOUND_ENABLED=true` and `OPENAI_ALLOW_NETWORK=true`.
+- OpenAI calls only occur when `MW_OPENAI_*_ENABLED=true`, `OPENAI_ALLOW_NETWORK=true`,
+  and read-only guards are set. Enable `MW_OPENAI_SHADOW_ENABLED=true` to explicitly
+  allow OpenAI in read-only shadow runs when outbound is disabled.

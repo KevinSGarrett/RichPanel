@@ -15,6 +15,7 @@ os.environ.setdefault("SAFE_MODE_PARAM", "/rp-mw/local/safe_mode")
 os.environ.setdefault("AUTOMATION_ENABLED_PARAM", "/rp-mw/local/automation_enabled")
 os.environ.setdefault("CONVERSATION_STATE_TABLE_NAME", "local-conversation-state")
 os.environ.setdefault("AUDIT_TRAIL_TABLE_NAME", "local-audit-trail")
+os.environ["MW_OPENAI_ROUTING_ENABLED"] = "true"
 
 from richpanel_middleware.automation.llm_routing import (  # noqa: E402
     DEFAULT_CONFIDENCE_THRESHOLD,

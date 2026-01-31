@@ -55,6 +55,7 @@ def _fake_client(
 class ReplyRewriteTests(unittest.TestCase):
     def setUp(self) -> None:
         os.environ.pop("OPENAI_REPLY_REWRITE_ENABLED", None)
+        os.environ.pop("MW_OPENAI_REWRITE_ENABLED", None)
 
     def test_gates_block_when_disabled(self) -> None:
         response = ChatCompletionResponse(
@@ -134,6 +135,7 @@ class ReplyRewriteTests(unittest.TestCase):
 
     def test_gates_block_outbound(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "false"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
             message='{"body": "rewritten response", "confidence": 0.95}',
@@ -154,7 +156,7 @@ class ReplyRewriteTests(unittest.TestCase):
         )
 
         self.assertFalse(result.rewritten)
-        self.assertEqual(result.reason, "outbound_disabled")
+        self.assertEqual(result.reason, "shadow_disabled")
         self.assertEqual(result.body, "deterministic reply")
         self.assertEqual(client.calls, 0)
 
