@@ -25,6 +25,10 @@ _NAME_PATTERNS = [
         r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b"
     ),
     re.compile(
+        r"(?i)\b(hi|hello|dear)\s+"
+        r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b"
+    ),
+    re.compile(
         r"(?im)^(thanks|thank you|cheers|regards|sincerely|best)[, ]+\s*"
         r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b"
     ),

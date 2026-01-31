@@ -101,7 +101,7 @@ def test_extract_order_number_from_text() -> None:
 
 def test_redact_ticket_text_removes_pii() -> None:
     text = (
-        "Hi, my name is Alice Smith. Email alice@example.com. "
+        "Hi Alice, my name is Alice Smith. Email alice@example.com. "
         "Phone (415) 555-1212. Order #12345. Address 123 Main St. "
         "Tracking: https://tracking.example.com/track/12345 <b>Thanks</b>"
     )
