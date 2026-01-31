@@ -26,7 +26,10 @@ from richpanel_middleware.automation.llm_routing import (  # noqa: E402
     get_openai_routing_primary,
     suggest_llm_routing,
 )
-from integrations.openai.client import ChatCompletionResponse  # noqa: E402
+from integrations.openai.client import (  # noqa: E402
+    ChatCompletionResponse,
+    OpenAIRequestError,
+)
 
 
 class MockOpenAIClient:
@@ -147,6 +150,28 @@ class GatingTests(unittest.TestCase):
         self.assertEqual(suggestion.gated_reason, "shadow_disabled")
         os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
 
+    def test_gating_allows_shadow_when_outbound_disabled(self):
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
+        client = MockOpenAIClient(
+            response_json={
+                "intent": "order_status_tracking",
+                "department": "Email Support Team",
+                "confidence": 0.9,
+            }
+        )
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertIsNone(suggestion.gated_reason)
+
 
 class ParseTests(unittest.TestCase):
     def test_parse_invalid_json_returns_error(self):
@@ -209,6 +234,40 @@ class ParseTests(unittest.TestCase):
         )
         self.assertEqual(client.call_count, 1)
         self.assertEqual(suggestion.gated_reason, "not_a_dict")
+        self.assertTrue(suggestion.llm_called)
+
+    def test_request_failed_sets_gated_reason(self):
+        class ErrorClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                raise OpenAIRequestError(
+                    "boom",
+                    response=ChatCompletionResponse(
+                        model=request.model,
+                        message=None,
+                        status_code=500,
+                        url="test",
+                        raw={"id": "resp-err"},
+                        dry_run=False,
+                    ),
+                )
+
+        client = ErrorClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.gated_reason, "request_failed")
         self.assertTrue(suggestion.llm_called)
 
 

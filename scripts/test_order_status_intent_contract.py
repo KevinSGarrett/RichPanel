@@ -21,6 +21,7 @@ from richpanel_middleware.automation import (  # noqa: E402
 )
 from richpanel_middleware.integrations.openai import (  # noqa: E402
     ChatCompletionResponse,
+    OpenAIRequestError,
 )
 
 
@@ -181,6 +182,21 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertEqual(artifact.gated_reason, "network_disabled")
         self.assertIsNone(artifact.ticket_excerpt_redacted)
 
+    def test_classify_intent_shadow_disabled(self) -> None:
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "false"
+        artifact = intent.classify_order_status_intent(
+            "Where is my order?",
+            conversation_id="c-1",
+            event_id="e-1",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+        )
+        self.assertFalse(artifact.accepted)
+        self.assertEqual(artifact.gated_reason, "shadow_disabled")
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
+
     def test_classify_intent_accepts_and_rejects(self) -> None:
         payload = json.dumps(
             {
@@ -209,6 +225,40 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertTrue(artifact.accepted)
         self.assertEqual(artifact.response_id, "resp-test")
         self.assertEqual(client.calls, 1)
+
+    def test_classify_intent_request_failed(self) -> None:
+        class _ErrorClient:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def chat_completion(self, request, safe_mode: bool, automation_enabled: bool):  # type: ignore[no-untyped-def]
+                self.calls += 1
+                raise OpenAIRequestError(
+                    "boom",
+                    response=ChatCompletionResponse(
+                        model=request.model,
+                        message=None,
+                        status_code=500,
+                        url="https://example.com",
+                        raw={"id": "resp-err"},
+                        dry_run=False,
+                    ),
+                )
+
+        client = _ErrorClient()
+        artifact = intent.classify_order_status_intent(
+            "Where is my order?",
+            conversation_id="c-4",
+            event_id="e-4",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.calls, 1)
+        self.assertEqual(artifact.parse_error, "request_failed")
+        self.assertTrue(artifact.llm_called)
 
         bad_client = _StubClient("not-json", raw={"id": "resp-bad"})
         with mock.patch(
