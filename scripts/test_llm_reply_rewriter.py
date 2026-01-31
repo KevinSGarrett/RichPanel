@@ -55,6 +55,7 @@ def _fake_client(
 class ReplyRewriteTests(unittest.TestCase):
     def setUp(self) -> None:
         os.environ.pop("OPENAI_REPLY_REWRITE_ENABLED", None)
+        os.environ.pop("MW_OPENAI_REWRITE_ENABLED", None)
 
     def test_gates_block_when_disabled(self) -> None:
         response = ChatCompletionResponse(
@@ -134,6 +135,7 @@ class ReplyRewriteTests(unittest.TestCase):
 
     def test_gates_block_outbound(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "false"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
             message='{"body": "rewritten response", "confidence": 0.95}',
@@ -154,7 +156,7 @@ class ReplyRewriteTests(unittest.TestCase):
         )
 
         self.assertFalse(result.rewritten)
-        self.assertEqual(result.reason, "outbound_disabled")
+        self.assertEqual(result.reason, "shadow_disabled")
         self.assertEqual(result.body, "deterministic reply")
         self.assertEqual(client.calls, 0)
 
@@ -207,6 +209,69 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertFalse(result.rewritten)
         self.assertEqual(result.body, "original body")
         self.assertEqual(result.reason, "empty_body")
+
+    def test_no_response_returns_fallback(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        client = _fake_client(response=None)
+        result = rewrite_reply(
+            "original body",
+            conversation_id="t-none",
+            event_id="evt-none",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, "original body")
+        self.assertEqual(result.reason, "no_response")
+
+    def test_response_id_missing_when_raw_empty(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten response", "confidence": 0.95, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+            raw={},
+        )
+        client = _fake_client(response=response)
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-raw",
+            event_id="evt-raw",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertEqual(result.response_id, None)
+        self.assertEqual(result.response_id_unavailable_reason, "response_id_missing")
+
+    def test_response_id_raw_missing(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "rewritten response", "confidence": 0.95, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+            raw=None,
+        )
+        client = _fake_client(response=response)
+        result = rewrite_reply(
+            "deterministic reply",
+            conversation_id="t-raw-none",
+            event_id="evt-raw-none",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertIsNone(result.response_id)
+        self.assertEqual(result.response_id_unavailable_reason, "raw_missing")
 
     def test_parse_response_extracts_embedded_json(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"

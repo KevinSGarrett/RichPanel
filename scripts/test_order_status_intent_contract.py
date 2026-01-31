@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -12,12 +13,15 @@ SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+os.environ["MW_OPENAI_INTENT_ENABLED"] = "true"
+
 import backend.tests.test_order_status_intent as backend_intent_tests  # noqa: E402
 from richpanel_middleware.automation import (  # noqa: E402
     order_status_intent as intent,
 )
 from richpanel_middleware.integrations.openai import (  # noqa: E402
     ChatCompletionResponse,
+    OpenAIRequestError,
 )
 
 
@@ -108,12 +112,14 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertIsNone(intent._normalize_order_number("null"))
 
         redacted = intent.redact_ticket_text(
-            "Hi, I'm John Doe. Email john@example.com. Order #123456. https://x.io"
+            "Hi, I'm John Doe. Email john@example.com. Order #123456. 123 Main St. https://x.io"
         )
         self.assertIsNotNone(redacted)
         assert redacted is not None
         self.assertNotIn("john@example.com", redacted)
-        self.assertNotIn("123456", redacted)
+        self.assertNotIn("Main St", redacted)
+        self.assertNotIn("https://x.io", redacted)
+        self.assertIn("123456", redacted)
         self.assertIn("<redacted>", redacted)
 
     def test_redaction_truncates_long_text(self) -> None:
@@ -162,6 +168,19 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertIsNone(response_id)
         self.assertEqual(reason, "no_response")
 
+        response = ChatCompletionResponse(
+            model="gpt-test",
+            message=None,
+            status_code=0,
+            url="https://example.com",
+            raw={},
+            dry_run=True,
+            reason="dry_run",
+        )
+        response_id, reason = intent._response_id_info(response)
+        self.assertIsNone(response_id)
+        self.assertEqual(reason, "dry_run")
+
     def test_classify_intent_gated(self) -> None:
         artifact = intent.classify_order_status_intent(
             "Where is my order?",
@@ -175,6 +194,21 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertFalse(artifact.accepted)
         self.assertEqual(artifact.gated_reason, "network_disabled")
         self.assertIsNone(artifact.ticket_excerpt_redacted)
+
+    def test_classify_intent_shadow_disabled(self) -> None:
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "false"
+        artifact = intent.classify_order_status_intent(
+            "Where is my order?",
+            conversation_id="c-1",
+            event_id="e-1",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+        )
+        self.assertFalse(artifact.accepted)
+        self.assertEqual(artifact.gated_reason, "shadow_disabled")
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
 
     def test_classify_intent_accepts_and_rejects(self) -> None:
         payload = json.dumps(
@@ -204,6 +238,40 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertTrue(artifact.accepted)
         self.assertEqual(artifact.response_id, "resp-test")
         self.assertEqual(client.calls, 1)
+
+    def test_classify_intent_request_failed(self) -> None:
+        class _ErrorClient:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def chat_completion(self, request, safe_mode: bool, automation_enabled: bool):  # type: ignore[no-untyped-def]
+                self.calls += 1
+                raise OpenAIRequestError(
+                    "boom",
+                    response=ChatCompletionResponse(
+                        model=request.model,
+                        message=None,
+                        status_code=500,
+                        url="https://example.com",
+                        raw={"id": "resp-err"},
+                        dry_run=False,
+                    ),
+                )
+
+        client = _ErrorClient()
+        artifact = intent.classify_order_status_intent(
+            "Where is my order?",
+            conversation_id="c-4",
+            event_id="e-4",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.calls, 1)
+        self.assertEqual(artifact.parse_error, "request_failed")
+        self.assertTrue(artifact.llm_called)
 
         bad_client = _StubClient("not-json", raw={"id": "resp-bad"})
         with mock.patch(

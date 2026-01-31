@@ -15,6 +15,7 @@ os.environ.setdefault("SAFE_MODE_PARAM", "/rp-mw/local/safe_mode")
 os.environ.setdefault("AUTOMATION_ENABLED_PARAM", "/rp-mw/local/automation_enabled")
 os.environ.setdefault("CONVERSATION_STATE_TABLE_NAME", "local-conversation-state")
 os.environ.setdefault("AUDIT_TRAIL_TABLE_NAME", "local-audit-trail")
+os.environ["MW_OPENAI_ROUTING_ENABLED"] = "true"
 
 from richpanel_middleware.automation.llm_routing import (  # noqa: E402
     DEFAULT_CONFIDENCE_THRESHOLD,
@@ -25,7 +26,11 @@ from richpanel_middleware.automation.llm_routing import (  # noqa: E402
     get_openai_routing_primary,
     suggest_llm_routing,
 )
-from integrations.openai.client import ChatCompletionResponse  # noqa: E402
+import richpanel_middleware.automation.llm_routing as routing  # noqa: E402
+from integrations.openai.client import (  # noqa: E402
+    ChatCompletionResponse,
+    OpenAIRequestError,
+)
 
 
 class MockOpenAIClient:
@@ -122,6 +127,317 @@ class GatingTests(unittest.TestCase):
         )
         self.assertEqual(client.call_count, 1)
         self.assertIsNone(suggestion.gated_reason)
+
+    def test_gating_blocks_shadow_disabled(self):
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "false"
+        client = MockOpenAIClient(
+            response_json={
+                "intent": "order_status_tracking",
+                "department": "Email Support Team",
+                "confidence": 0.9,
+            }
+        )
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 0)
+        self.assertEqual(suggestion.gated_reason, "shadow_disabled")
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
+
+    def test_gating_allows_shadow_when_outbound_disabled(self):
+        os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
+        client = MockOpenAIClient(
+            response_json={
+                "intent": "order_status_tracking",
+                "department": "Email Support Team",
+                "confidence": 0.9,
+            }
+        )
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=False,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertIsNone(suggestion.gated_reason)
+
+
+class ParseTests(unittest.TestCase):
+    def test_parse_invalid_json_returns_error(self):
+        class BadClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message="not-json",
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = BadClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.gated_reason, "invalid_json")
+        self.assertTrue(suggestion.llm_called)
+
+    def test_parse_non_dict_returns_error(self):
+        class ListClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message='["a"]',
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = ListClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.gated_reason, "not_a_dict")
+        self.assertTrue(suggestion.llm_called)
+
+    def test_request_failed_sets_gated_reason(self):
+        class ErrorClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                raise OpenAIRequestError(
+                    "boom",
+                    response=ChatCompletionResponse(
+                        model=request.model,
+                        message=None,
+                        status_code=500,
+                        url="test",
+                        raw={"id": "resp-err"},
+                        dry_run=False,
+                    ),
+                )
+
+        client = ErrorClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.gated_reason, "request_failed")
+        self.assertTrue(suggestion.llm_called)
+
+    def test_parse_handles_invalid_fields(self):
+        class InvalidClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=json.dumps(
+                        {
+                            "intent": "not_real",
+                            "department": "Not A Dept",
+                            "confidence": 2,
+                            "reasoning": "x",
+                        }
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = InvalidClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.intent, "unknown_other")
+        self.assertEqual(suggestion.department, "Email Support Team")
+        self.assertEqual(suggestion.confidence, 0.0)
+        self.assertFalse(suggestion.passes_threshold(0.5))
+
+    def test_parse_markdown_json(self):
+        class MarkdownClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=(
+                        "```json\n"
+                        "{"
+                        "\"intent\": \"order_status_tracking\","
+                        "\"department\": \"Email Support Team\","
+                        "\"confidence\": 0.9"
+                        "}\n```"
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = MarkdownClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.intent, "order_status_tracking")
+        self.assertEqual(suggestion.department, "Email Support Team")
+        self.assertEqual(suggestion.confidence, 0.9)
+
+    def test_response_id_reason_when_raw_missing(self):
+        class RawMissingClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=json.dumps(
+                        {
+                            "intent": "order_status_tracking",
+                            "department": "Email Support Team",
+                            "confidence": 0.9,
+                        }
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={},
+                    dry_run=False,
+                )
+
+        client = RawMissingClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertIsNone(suggestion.response_id)
+        self.assertEqual(suggestion.response_id_unavailable_reason, "response_id_missing")
+
+    def test_extract_json_object_nested(self):
+        payload = 'prefix {"a": {"b": 1}} suffix'
+        extracted = routing._extract_json_object(payload)
+        self.assertEqual(extracted, '{"a": {"b": 1}}')
+
+    def test_parse_llm_response_defaults_missing_fields(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message="{}",
+            status_code=200,
+            url="test",
+            raw={"id": "resp-test"},
+            dry_run=False,
+        )
+        parsed, error = routing._parse_llm_response(response)
+        self.assertIsNone(error)
+        self.assertEqual(parsed.get("intent"), "unknown_other")
+        self.assertEqual(parsed.get("department"), "Email Support Team")
+        self.assertEqual(parsed.get("confidence"), 0.0)
+
+    def test_parse_llm_response_invalid_department(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps(
+                {
+                    "intent": "order_status_tracking",
+                    "department": "Not A Dept",
+                    "confidence": 0.7,
+                }
+            ),
+            status_code=200,
+            url="test",
+            raw={"id": "resp-test"},
+            dry_run=False,
+        )
+        parsed, error = routing._parse_llm_response(response)
+        self.assertIsNone(error)
+        self.assertEqual(parsed.get("department"), "Email Support Team")
+
+    def test_response_id_info_raw_missing(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message="{}",
+            status_code=200,
+            url="test",
+            raw=None,
+            dry_run=False,
+        )
+        response_id, reason = routing._response_id_info(response)
+        self.assertIsNone(response_id)
+        self.assertEqual(reason, "raw_missing")
 
 
 class ArtifactTests(unittest.TestCase):
