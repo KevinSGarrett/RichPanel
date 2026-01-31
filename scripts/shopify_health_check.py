@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,6 +35,10 @@ def _write_markdown(path: Path, payload: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Read-only Shopify health check.")
+    parser.add_argument(
+        "--env",
+        help="Environment name override (sets ENVIRONMENT for Secrets Manager paths).",
+    )
     parser.add_argument("--shop-domain", help="Shopify shop domain override.")
     parser.add_argument(
         "--shopify-secret-id",
@@ -48,13 +53,26 @@ def main() -> int:
         action="store_true",
         help="Force refresh the access token before the health check.",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Emit diagnostic details to stdout.",
+    )
     args = parser.parse_args()
+
+    if args.env:
+        os.environ["ENVIRONMENT"] = args.env
 
     client = ShopifyClient(
         allow_network=True,
         shop_domain=args.shop_domain,
         access_token_secret_id=args.shopify_secret_id,
     )
+
+    if args.verbose:
+        print("env", client.environment)
+        print("shop_domain", client.shop_domain)
+        print("secret_ids", ",".join(client._secret_id_candidates))
 
     if args.refresh:
         refreshed = client.refresh_access_token()
@@ -77,6 +95,12 @@ def main() -> int:
 
     if response.dry_run:
         print("dry_run", response.reason or "unknown")
+        if args.verbose and response.reason in {
+            "secret_lookup_failed",
+            "missing_access_token",
+            "boto3_unavailable",
+        }:
+            print("hint", "Ensure AWS credentials/role allow Secrets Manager access.")
         return 2
     if 200 <= response.status_code < 300:
         print("ok", response.status_code)
