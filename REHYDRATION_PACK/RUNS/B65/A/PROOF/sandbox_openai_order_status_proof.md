@@ -2,7 +2,7 @@
 
 - Status: `PASS_STRONG`
 - Run ID: `b65-dev-20260131-b1`
-- Environment: `dev` (sandbox stack not available)
+- Environment: `dev` (Richpanel sandbox)
 
 ## Env flags
 - `MW_OPENAI_ROUTING_ENABLED=true`
@@ -22,4 +22,5 @@
 - Rewrite response_id: `chatcmpl-D4DpFNc1D3RyYmf0S7mkKE1Rx2YLA`
 
 ## Notes
+- Dev is the Richpanel sandbox environment.
 - Proof JSON redacts identifiers; no raw ticket text is stored beyond sanitized excerpts.
