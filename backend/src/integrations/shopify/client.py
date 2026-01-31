@@ -389,7 +389,7 @@ class ShopifyClient:
                 refreshed = self._refresh_access_token(self._token_info)
                 refresh_attempted = True
                 if refreshed:
-                    access_token, token_reason = self._load_access_token(
+                    access_token, _ = self._load_access_token(
                         force_reload=True
                     )
                     if access_token:
