@@ -349,7 +349,6 @@ def classify_order_status_intent(
         temperature=DEFAULT_TEMPERATURE,
         max_tokens=DEFAULT_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
-        response_format={"type": "json_object"},
     )
     openai_client = client or OpenAIClient(allow_network=allow_network)
 

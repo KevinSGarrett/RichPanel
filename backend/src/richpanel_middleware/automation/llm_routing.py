@@ -462,7 +462,6 @@ def suggest_llm_routing(
         temperature=DEFAULT_ROUTING_TEMPERATURE,
         max_tokens=DEFAULT_ROUTING_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
-        response_format={"type": "json_object"},
     )
 
     try:
