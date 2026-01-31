@@ -655,7 +655,6 @@ class ShopifyClientTests(unittest.TestCase):
             secrets_client=secrets,
             access_token_secret_id=token_secret_id,
         )
-        client._secrets_client_obj = _StubSecretsClient({})
         access_token, _ = client._load_access_token()
         self.assertEqual(access_token, "expired")
         self.assertIsNotNone(client._token_info)
