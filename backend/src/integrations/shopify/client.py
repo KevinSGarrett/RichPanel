@@ -776,10 +776,10 @@ class ShopifyClient:
                 "client_id": client_id,
                 "client_secret": client_secret,
             }
-            body = json.dumps(payload).encode("utf-8")
+            body = urllib.parse.urlencode(payload).encode("utf-8")
             headers = {
                 "accept": "application/json",
-                "content-type": "application/json",
+                "content-type": "application/x-www-form-urlencoded",
             }
         else:
             payload = {
