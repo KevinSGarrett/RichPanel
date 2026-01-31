@@ -79,10 +79,10 @@
 **Bugbot:** pending — https://cursor.com (trigger via `@cursor review`)  
 
 **Artifacts / proof:**
-- `REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.json`
-- `REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.md`
-- `REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.json`
-- `REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.md`
+- [`REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.json`](REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.json)
+- [`REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.md`](REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.md)
+- [`REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.json`](REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.json)
+- [`REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.md`](REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.md)
 
 **Proof snippet(s) (PII-safe):**
 ```text
