@@ -115,6 +115,8 @@ def _gating_reason(
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
+    if not outbound_enabled and not shadow_enabled:
+        return "shadow_disabled"
     if not reply_body:
         return "empty_body"
     return None

@@ -257,6 +257,8 @@ def _intent_gating_check(
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
+    if not outbound_enabled and not get_openai_shadow_enabled():
+        return "shadow_disabled"
     return None
 
 
