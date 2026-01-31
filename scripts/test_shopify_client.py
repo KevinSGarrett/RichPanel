@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import sys
@@ -15,6 +16,7 @@ if str(SRC) not in sys.path:
 from richpanel_middleware.integrations.shopify import (  # noqa: E402
     ShopifyClient,
     ShopifyWriteDisabledError,
+    TransportError,
     TransportRequest,
     TransportResponse,
 )
@@ -52,6 +54,14 @@ class _StubSecretsClient:
     def get_secret_value(self, SecretId):
         self.calls += 1
         return self.response
+
+
+class _BinarySecretsClient:
+    def __init__(self, payload: bytes):
+        self.payload = payload
+
+    def get_secret_value(self, SecretId):
+        return {"SecretBinary": self.payload}
 
 
 class _SelectiveStubSecretsClient:
@@ -663,6 +673,56 @@ class ShopifyClientTests(unittest.TestCase):
     def test_parse_timestamp_invalid(self) -> None:
         client = ShopifyClient(access_token="test-token")
         self.assertIsNone(client._parse_timestamp("not-a-date"))
+
+    def test_parse_timestamp_numeric(self) -> None:
+        client = ShopifyClient(access_token="test-token")
+        self.assertEqual(client._parse_timestamp(12345), 12345.0)
+        self.assertEqual(client._parse_timestamp("123"), 123.0)
+
+    def test_token_diagnostics_unknown_when_missing(self) -> None:
+        client = ShopifyClient()
+        diagnostics = client.token_diagnostics()
+        self.assertEqual(diagnostics.get("status"), "unknown")
+
+    def test_load_secret_value_binary(self) -> None:
+        client = ShopifyClient()
+        client._secrets_client_obj = _BinarySecretsClient(base64.b64encode(b"token"))
+        self.assertEqual(client._load_secret_value(client._secrets_client_obj, "id"), "token")
+
+    def test_refresh_access_token_transport_error(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {"access_token": "old-token", "refresh_token": "refresh"}
+                    )
+                },
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+
+        class _ErrorTransport:
+            def send(self, request):
+                raise TransportError("boom")
+
+        client = ShopifyClient(
+            allow_network=True,
+            transport=_ErrorTransport(),
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+
+        client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+        self.assertFalse(client.refresh_access_token())
 
 
 def main() -> int:

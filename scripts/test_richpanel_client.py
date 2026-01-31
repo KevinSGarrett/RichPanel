@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import os
 import sys
 import time
@@ -58,6 +59,14 @@ class _StubSecretsClient:
         if value is None:
             return {}
         return {"SecretString": value}
+
+
+class _BinarySecretsClient:
+    def __init__(self, payload: bytes):
+        self.payload = payload
+
+    def get_secret_value(self, SecretId):
+        return {"SecretBinary": self.payload}
 
 
 class RichpanelClientTests(unittest.TestCase):
@@ -243,6 +252,39 @@ class RichpanelClientTests(unittest.TestCase):
         start = time.monotonic()
         client._register_cooldown(0.5)
         self.assertGreaterEqual(client._cooldown_until, start)
+
+    def test_sleep_for_cooldown_no_wait(self) -> None:
+        sleeps = []
+        client = RichpanelClient(
+            api_key="test-key",
+            sleeper=lambda seconds: sleeps.append(seconds),
+        )
+        client._cooldown_until = time.monotonic() - 1.0
+        client._sleep_for_cooldown()
+        self.assertEqual(sleeps, [])
+
+    def test_register_cooldown_ignores_non_positive(self) -> None:
+        client = RichpanelClient(api_key="test-key")
+        start = client._cooldown_until
+        client._register_cooldown(0.0)
+        self.assertEqual(client._cooldown_until, start)
+
+    def test_parse_cooldown_multiplier_default(self) -> None:
+        client = RichpanelClient(api_key="test-key")
+        self.assertEqual(client._parse_cooldown_multiplier(None), 1.0)
+
+    def test_load_secret_value_binary(self) -> None:
+        client = RichpanelClient(api_key="test-key")
+        client._secrets_client_obj = _BinarySecretsClient(base64.b64encode(b"key"))
+        self.assertEqual(client._load_secret_value("secret"), "key")
+
+    def test_load_token_pool_missing_secret(self) -> None:
+        os.environ["RICHPANEL_TOKEN_POOL_ENABLED"] = "true"
+        client = RichpanelClient(api_key=None)
+        client._token_pool_secret_ids = ["missing"]
+        client._secrets_client_obj = _StubSecretsClient({})
+        pool = client._load_token_pool()
+        self.assertEqual(pool, [])
 
     def test_writes_blocked_when_write_disabled_env_set(self) -> None:
         os.environ["RICHPANEL_WRITE_DISABLED"] = "true"
