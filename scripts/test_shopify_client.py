@@ -20,6 +20,7 @@ from richpanel_middleware.integrations.shopify import (  # noqa: E402
     TransportRequest,
     TransportResponse,
 )
+from integrations.shopify.client import ShopifyTokenInfo  # noqa: E402
 
 
 class _RecordingTransport:
@@ -62,6 +63,17 @@ class _BinarySecretsClient:
 
     def get_secret_value(self, SecretId):
         return {"SecretBinary": self.payload}
+
+
+class _FailingPutSecretsClient:
+    def __init__(self, secret_value):
+        self.secret_value = secret_value
+
+    def get_secret_value(self, SecretId):
+        return {"SecretString": self.secret_value}
+
+    def put_secret_value(self, SecretId, SecretString):
+        raise RuntimeError("write_failed")
 
 
 class _SelectiveStubSecretsClient:
@@ -719,6 +731,129 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(access_token, "old-token")
         self.assertIsNotNone(client._token_info)
         self.assertFalse(client._refresh_access_token(client._token_info))
+
+    def test_refresh_access_token_missing_access_token(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {"access_token": "old-token", "refresh_token": "refresh"}
+                    )
+                },
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=200, headers={}, body=b'{"refresh_token":"new-refresh"}'
+                )
+            ]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+        access_token, _ = client._load_access_token()
+        self.assertEqual(access_token, "old-token")
+        self.assertIsNotNone(client._token_info)
+        self.assertFalse(client._refresh_access_token(client._token_info))
+
+    def test_refresh_access_token_invalid_payload(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {"access_token": "old-token", "refresh_token": "refresh"}
+                    )
+                },
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=200, headers={}, body=b'["not","dict"]')]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+        access_token, _ = client._load_access_token()
+        self.assertEqual(access_token, "old-token")
+        self.assertIsNotNone(client._token_info)
+        self.assertFalse(client._refresh_access_token(client._token_info))
+
+    def test_refresh_pre_request_uses_expired_token(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {
+                            "access_token": "old-token",
+                            "refresh_token": "refresh",
+                            "expires_at": 0,
+                        }
+                    )
+                },
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=b'{"access_token":"new-token","refresh_token":"new-refresh","expires_in":3600}',
+                ),
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(len(transport.requests), 2)
+        self.assertTrue(
+            transport.requests[0].url.endswith("/admin/oauth/access_token")
+        )
+
+    def test_persist_token_info_write_failure(self) -> None:
+        client = ShopifyClient(access_token="token")
+        client._secrets_client_obj = _FailingPutSecretsClient("token")
+        token_info = ShopifyTokenInfo(
+            access_token="token",
+            refresh_token="refresh",
+            expires_at=123,
+            raw_format="json",
+            source_secret_id="rp-mw/local/shopify/admin_api_token",
+        )
+        client._persist_token_info(token_info)
 
 
 def main() -> int:

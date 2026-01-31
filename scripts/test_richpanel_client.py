@@ -17,6 +17,9 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
     RichpanelRequestError,
     RichpanelWriteDisabledError,
+    TokenBucketRateLimiter,
+    get_rate_limiter_stats,
+    _redact_url_path,
     TransportError,
     TransportRequest,
     TransportResponse,
@@ -83,6 +86,8 @@ class RichpanelClientTests(unittest.TestCase):
         os.environ.pop("ENV", None)
         os.environ.pop("ENVIRONMENT", None)
         os.environ.pop("MW_PROD_WRITES_ACK", None)
+        os.environ.pop("RICHPANEL_RATE_LIMIT_RPS", None)
+        os.environ.pop("RICHPANEL_429_COOLDOWN_MULTIPLIER", None)
 
     def test_dry_run_default_skips_transport(self) -> None:
         transport = _FailingTransport()
@@ -285,6 +290,61 @@ class RichpanelClientTests(unittest.TestCase):
         client._secrets_client_obj = _StubSecretsClient({})
         pool = client._load_token_pool()
         self.assertEqual(pool, [])
+
+    def test_rate_limiter_acquire_and_stats(self) -> None:
+        clock = {"value": 0.0}
+        sleeps = []
+
+        def _clock():
+            return clock["value"]
+
+        def _sleep(seconds):
+            sleeps.append(seconds)
+            clock["value"] += seconds
+
+        limiter = TokenBucketRateLimiter(
+            rate=1.0, capacity=1.0, clock=_clock, sleeper=_sleep
+        )
+        self.assertTrue(limiter.acquire(timeout=1.0))
+        self.assertTrue(limiter.acquire(timeout=1.0))
+        stats = limiter.get_stats()
+        self.assertEqual(stats["total_requests"], 2)
+        self.assertGreaterEqual(stats["total_wait_seconds"], 0.0)
+        self.assertTrue(sleeps)
+
+    def test_rate_limiter_timeout(self) -> None:
+        clock = {"value": 0.0}
+
+        def _clock():
+            return clock["value"]
+
+        limiter = TokenBucketRateLimiter(
+            rate=0.1, capacity=0.0, clock=_clock, sleeper=lambda _: None
+        )
+        self.assertFalse(limiter.acquire(timeout=0.5))
+
+    def test_global_rate_limiter_disabled(self) -> None:
+        os.environ["RICHPANEL_RATE_LIMIT_RPS"] = "0"
+        self.assertIsNone(get_rate_limiter_stats())
+
+    def test_request_trace_record_and_clear(self) -> None:
+        client = RichpanelClient(api_key="test-key")
+        client._record_trace(
+            method="GET",
+            url="https://api.richpanel.com/v1/tickets/123",
+            status=200,
+            attempt=1,
+            retry_after=None,
+            retry_delay=None,
+        )
+        trace = client.get_request_trace()
+        self.assertEqual(len(trace), 1)
+        self.assertEqual(trace[0]["path"], "/v1/tickets/redacted")
+        client.clear_request_trace()
+        self.assertEqual(client.get_request_trace(), [])
+
+    def test_redact_url_path_handles_bad_url(self) -> None:
+        self.assertEqual(_redact_url_path("not a url"), "/redacted")
 
     def test_writes_blocked_when_write_disabled_env_set(self) -> None:
         os.environ["RICHPANEL_WRITE_DISABLED"] = "true"
