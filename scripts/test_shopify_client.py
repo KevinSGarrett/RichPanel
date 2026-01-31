@@ -650,24 +650,16 @@ class ShopifyClientTests(unittest.TestCase):
                 )
             }
         )
-        transport = _RecordingTransport(
-            [TransportResponse(status_code=401, headers={}, body=b"")]
-        )
         client = ShopifyClient(
             allow_network=True,
-            transport=transport,
             secrets_client=secrets,
             access_token_secret_id=token_secret_id,
         )
-
-        response = client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
-
-        self.assertEqual(response.status_code, 401)
+        client._secrets_client_obj = _StubSecretsClient({})
+        access_token, _ = client._load_access_token()
+        self.assertEqual(access_token, "expired")
+        self.assertIsNotNone(client._token_info)
+        self.assertFalse(client._refresh_access_token(client._token_info))
 
     def test_parse_timestamp_invalid(self) -> None:
         client = ShopifyClient(access_token="test-token")
