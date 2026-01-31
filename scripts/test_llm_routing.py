@@ -308,7 +308,7 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(suggestion.intent, "unknown_other")
         self.assertEqual(suggestion.department, "Email Support Team")
         self.assertEqual(suggestion.confidence, 0.0)
-        self.assertFalse(suggestion.is_valid())
+        self.assertFalse(suggestion.passes_threshold(0.5))
 
     def test_parse_markdown_json(self):
         class MarkdownClient:
