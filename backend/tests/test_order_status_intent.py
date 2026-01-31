@@ -112,7 +112,7 @@ def test_redact_ticket_text_removes_pii() -> None:
     assert "Main St" not in redacted
     assert "https://tracking.example.com/track/12345" not in redacted
     assert "12345" in redacted
-    assert "<" not in redacted and ">" not in redacted
+    assert "<b>" not in redacted and "</b>" not in redacted
     assert "<redacted>" in redacted
 
 
