@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional, Tuple
 
 from richpanel_middleware.automation.llm_routing import get_confidence_threshold
+from richpanel_middleware.automation.pii_sanitizer import sanitize_for_openai
 from richpanel_middleware.automation.order_status_prompts import (
     build_order_status_intent_prompt,
 )
@@ -29,27 +30,32 @@ DEFAULT_TEMPERATURE = 0.0
 DEFAULT_MAX_TOKENS = 256
 MAX_REASON_CHARS = 200
 
-_EMAIL_REGEX = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-_URL_REGEX = re.compile(r"https?://[^\s<>\"']+")
-_ORDER_NUMBER_REGEX = re.compile(
-    r"(?i)\b(order\s*(?:number|no\.?|#)\s*[:#]?\s*\d{3,20})\b"
-)
-_HASH_NUMBER_REGEX = re.compile(r"(?<!\d)#(\d{3,20})(?!\d)")
-_DIGIT_RUN_REGEX = re.compile(r"\b\d{3,}\b")
-_PERCENT_ENCODED_REGEX = re.compile(r"%[0-9A-Fa-f]{2}")
-_NAME_PATTERNS = [
-    re.compile(
-        r"(?i)\b(my name is|this is|i am|i'm)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b"
-    ),
-    re.compile(
-        r"(?im)^(thanks|thank you|cheers|regards|sincerely)[, ]+\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b"
-    ),
-]
+OPENAI_INTENT_ENABLED_DEFAULT = False
+OPENAI_SHADOW_ENABLED_DEFAULT = False
 
 
 def _fingerprint(value: str, *, length: int = 12) -> str:
     digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
     return digest[:length]
+
+
+def _env_flag(name: str, *, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def get_openai_intent_enabled() -> bool:
+    return _env_flag(
+        "MW_OPENAI_INTENT_ENABLED", default=OPENAI_INTENT_ENABLED_DEFAULT
+    )
+
+
+def get_openai_shadow_enabled() -> bool:
+    return _env_flag(
+        "MW_OPENAI_SHADOW_ENABLED", default=OPENAI_SHADOW_ENABLED_DEFAULT
+    )
 
 
 def _extract_json_object(content: str) -> Optional[str]:
@@ -144,23 +150,7 @@ def extract_order_number_from_text(text: str) -> Optional[str]:
 def redact_ticket_text(text: str, *, max_chars: int = 280) -> Optional[str]:
     if not text:
         return None
-    redacted = text
-    redacted = _EMAIL_REGEX.sub("<redacted>", redacted)
-    redacted = _URL_REGEX.sub("<redacted>", redacted)
-    for pattern in _NAME_PATTERNS:
-        redacted = pattern.sub(lambda match: match.group(1) + " <redacted>", redacted)
-    redacted = _ORDER_NUMBER_REGEX.sub("order <redacted>", redacted)
-    redacted = _HASH_NUMBER_REGEX.sub("#<redacted>", redacted)
-    redacted = _DIGIT_RUN_REGEX.sub("<redacted>", redacted)
-    redacted = _PERCENT_ENCODED_REGEX.sub("<redacted>", redacted)
-    redacted = redacted.replace("@", "<redacted>")
-    redacted = redacted.replace("<redacted>", "__REDACTED__")
-    redacted = redacted.replace("<", "")
-    redacted = redacted.replace(">", "")
-    redacted = redacted.replace("__REDACTED__", "<redacted>")
-    redacted = re.sub(r"\s+", " ", redacted).strip()
-    if len(redacted) > max_chars:
-        redacted = redacted[:max_chars].rstrip() + "..."
+    redacted = sanitize_for_openai(text, max_chars=max_chars)
     return redacted or None
 
 
@@ -259,14 +249,14 @@ def _intent_gating_check(
     allow_network: bool,
     outbound_enabled: bool,
 ) -> Optional[str]:
+    if not get_openai_intent_enabled():
+        return "openai_intent_disabled"
     if safe_mode:
         return "safe_mode"
     if not automation_enabled:
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
-    if not outbound_enabled:
-        return "outbound_disabled"
     return None
 
 
@@ -321,6 +311,18 @@ def classify_order_status_intent(
         outbound_enabled=outbound_enabled,
     )
     if gated_reason:
+        LOGGER.info(
+            "order_status_intent.gated",
+            extra={
+                "event_id": event_id,
+                "conversation_id": conversation_id,
+                "reason": gated_reason,
+                "openai_intent_enabled": get_openai_intent_enabled(),
+                "openai_shadow_enabled": get_openai_shadow_enabled(),
+                "allow_network": allow_network,
+                "outbound_enabled": outbound_enabled,
+            },
+        )
         return OrderStatusIntentArtifact(
             result=None,
             llm_called=False,
@@ -345,6 +347,7 @@ def classify_order_status_intent(
         temperature=DEFAULT_TEMPERATURE,
         max_tokens=DEFAULT_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
+        response_format={"type": "json_object"},
     )
     openai_client = client or OpenAIClient(allow_network=allow_network)
 

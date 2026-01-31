@@ -25,6 +25,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+from richpanel_middleware.automation.pii_sanitizer import sanitize_for_openai
 from richpanel_middleware.automation.router import (
     DEPARTMENTS,
     INTENT_TO_DEPARTMENT,
@@ -53,6 +54,8 @@ DEFAULT_CONFIDENCE_THRESHOLD = 0.85
 # Roadmap flag: when True, use LLM routing as primary (if confidence passes)
 # OFF by default -- enable only for evaluation/dev environments
 OPENAI_ROUTING_PRIMARY_DEFAULT = False
+OPENAI_ROUTING_ENABLED_DEFAULT = False
+OPENAI_SHADOW_ENABLED_DEFAULT = False
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -66,6 +69,22 @@ def get_openai_routing_primary() -> bool:
     return _to_bool(
         os.environ.get("OPENAI_ROUTING_PRIMARY"),
         default=OPENAI_ROUTING_PRIMARY_DEFAULT,
+    )
+
+
+def get_openai_routing_enabled() -> bool:
+    """Check if LLM routing calls are enabled."""
+    return _to_bool(
+        os.environ.get("MW_OPENAI_ROUTING_ENABLED"),
+        default=OPENAI_ROUTING_ENABLED_DEFAULT,
+    )
+
+
+def get_openai_shadow_enabled() -> bool:
+    """Allow LLM calls in read-only shadow mode when outbound is disabled."""
+    return _to_bool(
+        os.environ.get("MW_OPENAI_SHADOW_ENABLED"),
+        default=OPENAI_SHADOW_ENABLED_DEFAULT,
     )
 
 
@@ -184,12 +203,12 @@ def _build_routing_prompt(customer_message: str) -> List[ChatMessage]:
         departments=departments_str,
     )
 
-    # Truncate customer message to prevent prompt injection and reduce tokens
-    truncated_message = customer_message[:2000] if len(customer_message) > 2000 else customer_message
+    # Sanitize and truncate customer message to reduce PII exposure and tokens
+    sanitized_message = sanitize_for_openai(customer_message, max_chars=2000)
 
     return [
         ChatMessage(role="system", content=system_content),
-        ChatMessage(role="user", content=truncated_message),
+        ChatMessage(role="user", content=sanitized_message),
     ]
 
 
@@ -222,6 +241,37 @@ def _response_id_info(
     return None, "response_id_missing" if has_raw else "raw_missing"
 
 
+def _extract_json_object(content: str) -> Optional[str]:
+    start = content.find("{")
+    if start == -1:
+        return None
+    depth = 0
+    in_string = False
+    escape = False
+    for idx in range(start, len(content)):
+        char = content[idx]
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if char == "\\":
+                escape = True
+                continue
+            if char == "\"":
+                in_string = False
+            continue
+        if char == "\"":
+            in_string = True
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return content[start : idx + 1]
+    return None
+
+
 # ============================================================================
 # Gating Logic
 # ============================================================================
@@ -239,14 +289,14 @@ def _llm_routing_gating_check(
 
     Fail-closed: all gates must pass for network call to proceed.
     """
+    if not get_openai_routing_enabled():
+        return "openai_routing_disabled"
     if safe_mode:
         return "safe_mode"
     if not automation_enabled:
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
-    if not outbound_enabled:
-        return "outbound_disabled"
     return None
 
 
@@ -274,41 +324,56 @@ def _parse_llm_response(response: ChatCompletionResponse) -> Tuple[Dict[str, Any
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError:
-        return {}, "invalid_json"
+        extracted = _extract_json_object(content)
+        if not extracted:
+            return {}, "invalid_json"
+        try:
+            parsed = json.loads(extracted)
+        except json.JSONDecodeError:
+            return {}, "invalid_json"
 
     if not isinstance(parsed, dict):
         return {}, "not_a_dict"
 
-    # Validate required fields
+    # Validate required fields, with tolerant defaults to avoid parse failures.
     intent = parsed.get("intent")
+    if not isinstance(intent, str) or not intent.strip():
+        parsed["_validation_note"] = "missing_intent"
+        intent = "unknown_other"
+        parsed["intent"] = intent
+
     department = parsed.get("department")
+    if not isinstance(department, str) or not department.strip():
+        parsed["_validation_note"] = parsed.get("_validation_note", "") + ";missing_department"
+        department = INTENT_TO_DEPARTMENT.get(intent, "Email Support Team")
+        parsed["department"] = department
+
     confidence = parsed.get("confidence")
-
-    if not intent or not isinstance(intent, str):
-        return {}, "missing_intent"
-    if not department or not isinstance(department, str):
-        return {}, "missing_department"
-    if confidence is None:
-        return {}, "missing_confidence"
-
     try:
         confidence = float(confidence)
         if not (0.0 <= confidence <= 1.0):
-            return {}, "confidence_out_of_range"
+            raise ValueError("confidence_out_of_range")
     except (TypeError, ValueError):
-        return {}, "invalid_confidence"
+        parsed["_validation_note"] = parsed.get("_validation_note", "") + ";invalid_confidence"
+        confidence = 0.0
+        parsed["confidence"] = confidence
 
     # Validate against allowlists
     if intent not in VALID_INTENTS:
         parsed["_original_intent"] = intent
         parsed["intent"] = "unknown_other"
-        parsed["_validation_note"] = f"intent '{intent}' not in allowlist"
+        parsed["_validation_note"] = (
+            parsed.get("_validation_note", "") + f";intent '{intent}' not in allowlist"
+        )
 
     if department not in DEPARTMENTS:
         parsed["_original_department"] = department
         # Map intent to department if possible
         parsed["department"] = INTENT_TO_DEPARTMENT.get(parsed["intent"], "Email Support Team")
-        parsed["_validation_note"] = parsed.get("_validation_note", "") + f"; department '{department}' not in allowlist"
+        parsed["_validation_note"] = (
+            parsed.get("_validation_note", "")
+            + f"; department '{department}' not in allowlist"
+        )
 
     return parsed, None
 
@@ -366,6 +431,10 @@ def suggest_llm_routing(
                 "reason": gated_reason,
                 "fingerprint": fingerprint,
                 "message_length": len(customer_message),
+                "openai_routing_enabled": get_openai_routing_enabled(),
+                "openai_shadow_enabled": get_openai_shadow_enabled(),
+                "allow_network": allow_network,
+                "outbound_enabled": outbound_enabled,
             },
         )
         return LLMRoutingSuggestion(
@@ -391,6 +460,7 @@ def suggest_llm_routing(
         temperature=DEFAULT_ROUTING_TEMPERATURE,
         max_tokens=DEFAULT_ROUTING_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
+        response_format={"type": "json_object"},
     )
 
     try:
@@ -592,6 +662,8 @@ def compute_dual_routing(
         "automation_enabled": automation_enabled,
         "allow_network": allow_network,
         "outbound_enabled": outbound_enabled,
+        "openai_routing_enabled": get_openai_routing_enabled(),
+        "openai_shadow_enabled": get_openai_shadow_enabled(),
         "openai_routing_primary": get_openai_routing_primary(),
         "force_openai_routing_primary": force_primary,
         "confidence_threshold": get_confidence_threshold(),
@@ -630,6 +702,8 @@ __all__ = [
     "RoutingArtifact",
     "compute_dual_routing",
     "get_confidence_threshold",
+    "get_openai_routing_enabled",
     "get_openai_routing_primary",
+    "get_openai_shadow_enabled",
     "suggest_llm_routing",
 ]

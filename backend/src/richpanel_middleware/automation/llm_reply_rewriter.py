@@ -9,6 +9,7 @@ from urllib.parse import parse_qs, urlparse
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
+from richpanel_middleware.automation.pii_sanitizer import sanitize_for_openai
 from richpanel_middleware.integrations.openai import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -57,6 +58,20 @@ def _to_bool(value: Optional[str], default: bool = False) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _openai_shadow_enabled() -> bool:
+    return _to_bool(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), default=False)
+
+
+def _resolve_rewrite_enabled(explicit: Optional[bool]) -> bool:
+    if explicit is not None:
+        return explicit
+    if _to_bool(os.environ.get("MW_OPENAI_REWRITE_ENABLED"), default=False):
+        return True
+    return _to_bool(
+        os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
+    )
+
+
 def _fingerprint(text: str, *, length: int = 12) -> str:
     try:
         serialized = json.dumps(text, ensure_ascii=False, sort_keys=True)
@@ -85,6 +100,7 @@ def _response_id_info(
 def _gating_reason(
     *,
     rewrite_enabled: bool,
+    shadow_enabled: bool,
     safe_mode: bool,
     automation_enabled: bool,
     allow_network: bool,
@@ -99,15 +115,15 @@ def _gating_reason(
         return "automation_disabled"
     if not allow_network:
         return "network_disabled"
-    if not outbound_enabled:
-        return "outbound_disabled"
     if not reply_body:
         return "empty_body"
     return None
 
 
 def _build_prompt(reply_body: str) -> List[ChatMessage]:
-    trimmed = reply_body[: DEFAULT_MAX_CHARS * 2]  # bound input size defensively
+    trimmed = sanitize_for_openai(
+        reply_body or "", max_chars=DEFAULT_MAX_CHARS * 2
+    )
     system = (
         "You rewrite Richpanel customer replies. Preserve facts and promises, "
         "avoid new commitments, keep it concise and professional. "
@@ -412,16 +428,11 @@ def rewrite_reply(
     Fail-closed: if any gate fails or the model output is low-confidence/unsafe,
     the original reply is returned untouched.
     """
-    enabled = (
-        rewrite_enabled
-        if rewrite_enabled is not None
-        else _to_bool(
-            os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
-        )
-    )
+    enabled = _resolve_rewrite_enabled(rewrite_enabled)
     fingerprint = _fingerprint(reply_body or "")
     gating_reason = _gating_reason(
         rewrite_enabled=enabled,
+        shadow_enabled=_openai_shadow_enabled(),
         safe_mode=safe_mode,
         automation_enabled=automation_enabled,
         allow_network=allow_network,
@@ -438,6 +449,7 @@ def rewrite_reply(
                 "fingerprint": fingerprint,
                 "allow_network": allow_network,
                 "outbound_enabled": outbound_enabled,
+                "openai_shadow_enabled": _openai_shadow_enabled(),
             },
         )
         return ReplyRewriteResult(
@@ -462,6 +474,7 @@ def rewrite_reply(
         temperature=DEFAULT_TEMPERATURE,
         max_tokens=DEFAULT_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
+        response_format={"type": "json_object"},
     )
     openai_client = client or OpenAIClient(allow_network=allow_network)
 
