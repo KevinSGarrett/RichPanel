@@ -26,6 +26,7 @@ from richpanel_middleware.automation.llm_routing import (  # noqa: E402
     get_openai_routing_primary,
     suggest_llm_routing,
 )
+import richpanel_middleware.automation.llm_routing as routing  # noqa: E402
 from integrations.openai.client import (  # noqa: E402
     ChatCompletionResponse,
     OpenAIRequestError,
@@ -385,6 +386,58 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(client.call_count, 1)
         self.assertIsNone(suggestion.response_id)
         self.assertEqual(suggestion.response_id_unavailable_reason, "response_id_missing")
+
+    def test_extract_json_object_nested(self):
+        payload = 'prefix {"a": {"b": 1}} suffix'
+        extracted = routing._extract_json_object(payload)
+        self.assertEqual(extracted, '{"a": {"b": 1}}')
+
+    def test_parse_llm_response_defaults_missing_fields(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message="{}",
+            status_code=200,
+            url="test",
+            raw={"id": "resp-test"},
+            dry_run=False,
+        )
+        parsed, error = routing._parse_llm_response(response)
+        self.assertIsNone(error)
+        self.assertEqual(parsed.get("intent"), "unknown_other")
+        self.assertEqual(parsed.get("department"), "Email Support Team")
+        self.assertEqual(parsed.get("confidence"), 0.0)
+
+    def test_parse_llm_response_invalid_department(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message=json.dumps(
+                {
+                    "intent": "order_status_tracking",
+                    "department": "Not A Dept",
+                    "confidence": 0.7,
+                }
+            ),
+            status_code=200,
+            url="test",
+            raw={"id": "resp-test"},
+            dry_run=False,
+        )
+        parsed, error = routing._parse_llm_response(response)
+        self.assertIsNone(error)
+        self.assertEqual(parsed.get("department"), "Email Support Team")
+
+    def test_response_id_info_raw_missing(self):
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message="{}",
+            status_code=200,
+            url="test",
+            raw=None,
+            dry_run=False,
+        )
+        response_id, reason = routing._response_id_info(response)
+        self.assertIsNone(response_id)
+        self.assertEqual(reason, "raw_missing")
 
 
 class ArtifactTests(unittest.TestCase):
