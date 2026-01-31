@@ -339,6 +339,22 @@ class ShopifyClient:
             refresh_attempted = True
             if self._refresh_access_token(self._token_info):
                 access_token, _ = self._load_access_token(force_reload=True)
+                if not access_token:
+                    self._logger.warning(
+                        "shopify.refresh_failed_pre_request",
+                        extra={"secret_id": self.access_token_secret_id},
+                    )
+                    return ShopifyResponse(
+                        status_code=0,
+                        headers={
+                            "x-dry-run": "1",
+                            "x-dry-run-reason": "missing_access_token",
+                        },
+                        body=b"",
+                        url=url,
+                        dry_run=True,
+                        reason="missing_access_token",
+                    )
             else:
                 self._logger.warning(
                     "shopify.refresh_failed_pre_request",

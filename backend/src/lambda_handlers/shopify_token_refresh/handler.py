@@ -16,6 +16,16 @@ def lambda_handler(event, context):
         error = str(exc)
 
     diagnostics = client.token_diagnostics()
+    health = None
+    try:
+        response = client.get_shop(safe_mode=False, automation_enabled=True)
+        health = {
+            "status_code": response.status_code,
+            "dry_run": response.dry_run,
+            "reason": response.reason,
+        }
+    except Exception as exc:  # pragma: no cover - defensive logging
+        health = {"error": str(exc)}
     result = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": client.environment,
@@ -23,6 +33,7 @@ def lambda_handler(event, context):
         "refresh_attempted": True,
         "refresh_succeeded": refreshed,
         "token_diagnostics": diagnostics,
+        "health_check": health,
         "error": error,
     }
 
