@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -11,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+
+os.environ["MW_OPENAI_INTENT_ENABLED"] = "true"
 
 import backend.tests.test_order_status_intent as backend_intent_tests  # noqa: E402
 from richpanel_middleware.automation import (  # noqa: E402
@@ -108,12 +111,14 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertIsNone(intent._normalize_order_number("null"))
 
         redacted = intent.redact_ticket_text(
-            "Hi, I'm John Doe. Email john@example.com. Order #123456. https://x.io"
+            "Hi, I'm John Doe. Email john@example.com. Order #123456. 123 Main St. https://x.io"
         )
         self.assertIsNotNone(redacted)
         assert redacted is not None
         self.assertNotIn("john@example.com", redacted)
-        self.assertNotIn("123456", redacted)
+        self.assertNotIn("Main St", redacted)
+        self.assertNotIn("https://x.io", redacted)
+        self.assertIn("123456", redacted)
         self.assertIn("<redacted>", redacted)
 
     def test_redaction_truncates_long_text(self) -> None:

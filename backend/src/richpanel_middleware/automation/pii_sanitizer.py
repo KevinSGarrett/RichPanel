@@ -9,6 +9,7 @@ _EMAIL_REGEX = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 _PHONE_REGEX = re.compile(
     r"\b(?:\+?\d{1,3}[\s\-.]?)?(?:\(?\d{2,4}\)?[\s\-.]?)\d{3}[\s\-.]?\d{4}\b"
 )
+_URL_REGEX = re.compile(r"https?://\S+")
 _ADDRESS_REGEX = re.compile(
     r"\b\d{1,6}\s+[A-Za-z0-9.'\- ]{2,40}\s+"
     r"(?:st|street|ave|avenue|rd|road|blvd|boulevard|ln|lane|dr|drive|ct|court|"
@@ -61,6 +62,7 @@ def sanitize_for_openai(text: str, *, max_chars: Optional[int] = 2000) -> str:
     sanitized = _HTML_TAG_REGEX.sub(" ", sanitized)
     sanitized = sanitized.replace("<", " ").replace(">", " ")
     sanitized, order_tokens = _mask_order_numbers(sanitized)
+    sanitized = _URL_REGEX.sub("<redacted>", sanitized)
     sanitized = _EMAIL_REGEX.sub("<redacted>", sanitized)
     sanitized = _PHONE_REGEX.sub("<redacted>", sanitized)
     sanitized = _ADDRESS_REGEX.sub("<redacted>", sanitized)
