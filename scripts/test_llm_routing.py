@@ -270,6 +270,122 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(suggestion.gated_reason, "request_failed")
         self.assertTrue(suggestion.llm_called)
 
+    def test_parse_handles_invalid_fields(self):
+        class InvalidClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=json.dumps(
+                        {
+                            "intent": "not_real",
+                            "department": "Not A Dept",
+                            "confidence": 2,
+                            "reasoning": "x",
+                        }
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = InvalidClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.intent, "unknown_other")
+        self.assertEqual(suggestion.department, "Email Support Team")
+        self.assertEqual(suggestion.confidence, 0.0)
+        self.assertFalse(suggestion.is_valid())
+
+    def test_parse_markdown_json(self):
+        class MarkdownClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=(
+                        "```json\n"
+                        "{"
+                        "\"intent\": \"order_status_tracking\","
+                        "\"department\": \"Email Support Team\","
+                        "\"confidence\": 0.9"
+                        "}\n```"
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={"id": "resp-test"},
+                    dry_run=False,
+                )
+
+        client = MarkdownClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertEqual(suggestion.intent, "order_status_tracking")
+        self.assertEqual(suggestion.department, "Email Support Team")
+        self.assertEqual(suggestion.confidence, 0.9)
+
+    def test_response_id_reason_when_raw_missing(self):
+        class RawMissingClient:
+            def __init__(self):
+                self.call_count = 0
+
+            def chat_completion(self, request, *, safe_mode, automation_enabled):
+                self.call_count += 1
+                return ChatCompletionResponse(
+                    model=request.model,
+                    message=json.dumps(
+                        {
+                            "intent": "order_status_tracking",
+                            "department": "Email Support Team",
+                            "confidence": 0.9,
+                        }
+                    ),
+                    status_code=200,
+                    url="test",
+                    raw={},
+                    dry_run=False,
+                )
+
+        client = RawMissingClient()
+        suggestion = suggest_llm_routing(
+            customer_message="test",
+            conversation_id="c",
+            event_id="e",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertEqual(client.call_count, 1)
+        self.assertIsNone(suggestion.response_id)
+        self.assertEqual(suggestion.response_id_unavailable_reason, "response_id_missing")
+
 
 class ArtifactTests(unittest.TestCase):
     def test_artifact_contains_deterministic(self):

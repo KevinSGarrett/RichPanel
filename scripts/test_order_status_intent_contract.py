@@ -168,6 +168,19 @@ class OrderStatusIntentContractTests(unittest.TestCase):
         self.assertIsNone(response_id)
         self.assertEqual(reason, "no_response")
 
+        response = ChatCompletionResponse(
+            model="gpt-test",
+            message=None,
+            status_code=0,
+            url="https://example.com",
+            raw={},
+            dry_run=True,
+            reason="dry_run",
+        )
+        response_id, reason = intent._response_id_info(response)
+        self.assertIsNone(response_id)
+        self.assertEqual(reason, "dry_run")
+
     def test_classify_intent_gated(self) -> None:
         artifact = intent.classify_order_status_intent(
             "Where is my order?",
