@@ -233,6 +233,11 @@ class TokenBucketRateLimiter:
         self._lock = threading.Lock()
         self._sleeper = sleeper or time.sleep
         self._logger = logging.getLogger(__name__)
+        if self._rate <= 0:
+            self._logger.warning(
+                "richpanel.rate_limiter_invalid_rate",
+                extra={"rate": self._rate},
+            )
 
         # Statistics for diagnostics
         self._total_requests = 0
@@ -247,6 +252,12 @@ class TokenBucketRateLimiter:
         Returns True if token acquired, False if timeout.
         """
         start = self._clock()
+        if self._rate <= 0:
+            self._logger.warning(
+                "richpanel.rate_limiter_invalid_rate",
+                extra={"rate": self._rate},
+            )
+            return False
         while True:
             with self._lock:
                 now = self._clock()

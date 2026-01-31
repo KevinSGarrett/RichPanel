@@ -359,6 +359,10 @@ class RichpanelClientTests(unittest.TestCase):
         )
         self.assertFalse(limiter.acquire(timeout=0.5))
 
+    def test_rate_limiter_zero_rate(self) -> None:
+        limiter = TokenBucketRateLimiter(rate=0.0, capacity=1.0)
+        self.assertFalse(limiter.acquire(timeout=0.1))
+
     def test_global_rate_limiter_disabled(self) -> None:
         os.environ["RICHPANEL_RATE_LIMIT_RPS"] = "0"
         self.assertIsNone(get_rate_limiter_stats())
