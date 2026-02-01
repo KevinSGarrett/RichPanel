@@ -2297,7 +2297,6 @@ def main() -> int:
                     result["failure_reason"] = "richpanel_ticket_fetch_failed"
                     result["failure_source"] = "richpanel_ticket_fetch"
                     result["error"] = _safe_error(exc)
-                    ticket_results.append(result)
                     LOGGER.warning(
                         "Ticket fetch failed; continuing",
                         extra={"ticket_id_redacted": redacted},
