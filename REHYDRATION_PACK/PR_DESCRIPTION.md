@@ -37,6 +37,7 @@
 - Updated prod-shadow report to include OpenAI usage counts, classification sources, and intent evidence.
 - Tightened order-number parsing (HTML stripping, hash matcher bounds, deterministic candidate selection).
 - Added order-status precedence when shipping language + order number are present.
+- Narrowed order-status candidate keywords to avoid cancel/shipping-delay collisions.
 - Corrected ticket processing path in live readonly shadow eval (normal flow executes, errors only on fetch failure).
 
 **Design decisions (why this way):**
@@ -62,6 +63,7 @@
 - `scripts/test_llm_reply_rewriter.py`
 - `backend/tests/test_order_lookup_order_id_resolution.py`
 - `backend/tests/test_router_order_status_precedence.py`
+- `scripts/test_live_readonly_shadow_eval.py`
 
 **CI / workflows:**
 - (None)
