@@ -84,9 +84,9 @@
 - `MW_OPENAI_ROUTING_ENABLED=true MW_OPENAI_INTENT_ENABLED=true MW_OPENAI_REWRITE_ENABLED=true MW_OPENAI_SHADOW_ENABLED=true OPENAI_ALLOW_NETWORK=true RICHPANEL_OUTBOUND_ENABLED=true RICHPANEL_WRITE_DISABLED=false RICHPANEL_READ_ONLY=false MW_ALLOW_NETWORK_READS=true RICHPANEL_ENV=dev MW_ENV=dev ENVIRONMENT=dev RICH_PANEL_ENV=dev python scripts/dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status_tracking --require-openai-routing --require-openai-rewrite --create-ticket --proof-path REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.json --run-id b65-dev-20260131-b1 --wait-seconds 120 --profile rp-admin-kevin # sandbox stack not available`
 
 ### 7) Results & evidence
-**CI:** pending — https://github.com/KevinSGarrett/RichPanel/actions  
-**Codecov:** pending — https://app.codecov.io/gh/KevinSGarrett/RichPanel  
-**Bugbot:** pending — https://cursor.com (trigger via `@cursor review`)  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions  
+**Codecov:** pass (patch) — https://app.codecov.io/gh/KevinSGarrett/RichPanel  
+**Bugbot:** pass — https://cursor.com  
 
 **Artifacts / proof:**
 - [`REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.json`](REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.json)
