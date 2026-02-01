@@ -64,14 +64,21 @@ ORDER_STATUS_KEYWORDS = (
     "package",
     "fulfillment",
 )
-ORDER_STATUS_CANDIDATE_KEYWORDS = ORDER_STATUS_KEYWORDS + (
+ORDER_STATUS_CANDIDATE_KEYWORDS = (
+    "where is my order",
+    "order status",
+    "tracking",
+    "track",
+    "delivery",
+    "arrive",
+    "package",
+    "fulfillment",
     "tracking number",
     "tracking #",
     "in transit",
     "out for delivery",
     "shipping status",
     "delivery status",
-    "shipped",
     "unfulfilled",
 )
 SHIPPING_DELAY_KEYWORDS = (

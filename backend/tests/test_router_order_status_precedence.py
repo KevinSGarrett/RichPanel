@@ -24,3 +24,13 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
         decision = classify_routing(payload)
         self.assertEqual(decision.intent, "return_request")
 
+    def test_cancel_order_not_overridden_by_shipment_phrase(self) -> None:
+        payload = {"message": "Stop shipment for order #1180306."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "cancel_order")
+
+    def test_shipping_delay_not_shipped_still_matches(self) -> None:
+        payload = {"message": "Order #1180306 not shipped yet."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "shipping_delay_not_shipped")
+
