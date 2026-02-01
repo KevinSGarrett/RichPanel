@@ -410,8 +410,8 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual((number, label), ("", ""))
         number, label = _extract_order_number_from_payload({"order_number": "123"})
         self.assertEqual((number, label), ("123", "order_number_field"))
-        number, label = _extract_order_number_from_payload({"order": {"name": "#456"}})
-        self.assertEqual((number, label), ("456", "hash_number"))
+        number, label = _extract_order_number_from_payload({"order": {"name": "#123456"}})
+        self.assertEqual((number, label), ("123456", "hash_number"))
         number, label = _extract_order_number_from_payload(
             {"custom_fields": {"order_ref": "789"}}
         )
@@ -457,6 +457,20 @@ class OrderIdResolutionTests(unittest.TestCase):
 
     def test_match_order_number_from_text_empty(self) -> None:
         self.assertEqual(_match_order_number_from_text(""), ("", ""))
+
+    def test_match_order_number_from_text_prefers_order_keyword(self) -> None:
+        text = "Order # 1180306 ref #9999999"
+        number, label = _match_order_number_from_text(text)
+        self.assertEqual(number, "1180306")
+        self.assertEqual(label, "order_number")
+
+    def test_extract_order_number_from_text_html_anchor_ignored(self) -> None:
+        text = '<a href="#m_12345">Click</a>'
+        self.assertEqual(_extract_order_number_from_text(text), "")
+
+    def test_extract_order_number_from_text_hash_and_order(self) -> None:
+        self.assertEqual(_extract_order_number_from_text("Order # 1180306"), "1180306")
+        self.assertEqual(_extract_order_number_from_text("#1180306"), "1180306")
 
     def test_extract_shopify_fields_and_shipstation_fields(self) -> None:
         self.assertEqual(_extract_shopify_fields("bad"), {})

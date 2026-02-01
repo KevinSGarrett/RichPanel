@@ -1,7 +1,7 @@
 <!-- PR_QUALITY: title_score=98/100; body_score=98/100; rubric_title=07; rubric_body=03; risk=risk:R3; p0_ok=true; timestamp=2026-01-31 -->
 
 **Run ID:** `RUN_20260131_1923Z`  
-**Agents:** A  
+**Agents:** A, B  
 **Labels:** `risk:R3`, `gate:claude`  
 **Risk:** `risk:R3`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
@@ -11,6 +11,8 @@
 - Enable OpenAI routing/intent/rewrites in read-only shadow via explicit MW flags and shadow overrides.
 - Sanitize all OpenAI prompt inputs for order-status flows (HTML stripped; emails/phones/addresses redacted; order numbers preserved).
 - Expand prod-shadow reporting to capture OpenAI usage, classification source counts, and new proof artifacts.
+- Harden order-number extraction and deterministic routing for order-status signals when OpenAI is gated/off.
+- Fix live readonly shadow eval ticket processing flow to restore expected artifacts and CI tests.
 
 ### 2) Why
 - **Problem / risk:** outbound-enabled gating blocked OpenAI routing/intent in read-only shadow, producing deterministic-only metrics.
@@ -33,6 +35,9 @@
 - Added a shared PII sanitizer and wired it into routing, intent, rewrite, and order-status prompt builders.
 - Added MW OpenAI enable flags + shadow override in routing, intent, and rewrite gating.
 - Updated prod-shadow report to include OpenAI usage counts, classification sources, and intent evidence.
+- Tightened order-number parsing (HTML stripping, hash matcher bounds, deterministic candidate selection).
+- Added order-status precedence when shipping language + order number are present.
+- Corrected ticket processing path in live readonly shadow eval (normal flow executes, errors only on fetch failure).
 
 **Design decisions (why this way):**
 - Keep write gating intact while allowing safe read-only OpenAI calls for evaluation.
@@ -55,6 +60,8 @@
 - `scripts/test_order_status_intent_contract.py`
 - `scripts/test_llm_routing.py`
 - `scripts/test_llm_reply_rewriter.py`
+- `backend/tests/test_order_lookup_order_id_resolution.py`
+- `backend/tests/test_router_order_status_precedence.py`
 
 **CI / workflows:**
 - (None)
@@ -64,6 +71,9 @@
 - `REHYDRATION_PACK/RUNS/B65/A/PROOF/prod_shadow_report_openai_enabled.md`
 - `REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.json`
 - `REHYDRATION_PACK/RUNS/B65/A/PROOF/sandbox_openai_order_status_proof.md`
+- `REHYDRATION_PACK/RUNS/B65/B/PROOF/order_number_extraction_tests.md`
+- `REHYDRATION_PACK/RUNS/B65/B/PROOF/router_precedence_tests.md`
+- `REHYDRATION_PACK/RUNS/B65/B/PROOF/run_ci_checks_summary.md`
 
 ### 6) Test plan
 **Local / CI-equivalent:**

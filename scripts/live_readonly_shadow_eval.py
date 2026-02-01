@@ -71,6 +71,118 @@ logging.getLogger("integrations").setLevel(logging.WARNING)
 
 PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
 
+
+def _env_truthy(value: Optional[str]) -> bool:
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _hash_api_key(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return digest[:8]
+
+
+def _build_identity_block(
+    *,
+    client: RichpanelClient,
+    env_name: str,
+    started_at: datetime,
+    duration_seconds: float,
+) -> Dict[str, Any]:
+    api_key_hash = None
+    api_key_error = None
+    try:
+        api_key_hash = _hash_api_key(client._load_api_key())  # type: ignore[attr-defined]
+    except Exception as exc:
+        api_key_error = exc.__class__.__name__
+    return {
+        "richpanel_base_url": getattr(client, "base_url", None),
+        "mw_env": os.environ.get("MW_ENV") or os.environ.get("ENVIRONMENT"),
+        "richpanel_env": os.environ.get("RICHPANEL_ENV"),
+        "resolved_env": env_name,
+        "api_key_secret_id": getattr(client, "api_key_secret_id", None),
+        "api_key_hash": api_key_hash,
+        "api_key_error": api_key_error,
+        "run_started_at": started_at.isoformat(),
+        "run_duration_seconds": round(duration_seconds, 3),
+    }
+
+
+def _max_requests_in_window(timestamps: List[float], window_seconds: int) -> int:
+    if not timestamps:
+        return 0
+    timestamps = sorted(timestamps)
+    max_count = 0
+    start_idx = 0
+    for end_idx, end_ts in enumerate(timestamps):
+        while end_ts - timestamps[start_idx] > window_seconds:
+            start_idx += 1
+        max_count = max(max_count, end_idx - start_idx + 1)
+    return max_count
+
+
+def _summarize_request_burst(
+    entries: List[Dict[str, Any]],
+    *,
+    window_seconds: int = 30,
+    max_endpoints: int = 10,
+) -> Dict[str, Any]:
+    if not entries:
+        return {}
+    timestamps = [entry["timestamp"] for entry in entries if entry.get("timestamp")]
+    max_overall = _max_requests_in_window(timestamps, window_seconds)
+    by_endpoint: Dict[str, List[float]] = {}
+    for entry in entries:
+        path = entry.get("path")
+        ts = entry.get("timestamp")
+        if not path or not ts:
+            continue
+        by_endpoint.setdefault(path, []).append(ts)
+    endpoint_bursts: list[Dict[str, Any]] = []
+    for path, times in by_endpoint.items():
+        endpoint_bursts.append(
+            {
+                "path": path,
+                "max_requests": _max_requests_in_window(times, window_seconds),
+                "total_requests": len(times),
+            }
+        )
+    endpoint_bursts.sort(key=lambda item: item["max_requests"], reverse=True)
+    return {
+        "window_seconds": window_seconds,
+        "max_requests_overall": max_overall,
+        "max_requests_by_endpoint": endpoint_bursts[:max_endpoints],
+    }
+
+
+def _summarize_retry_after(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+    violations = 0
+    comparisons: list[float] = []
+    for entry in entries:
+        retry_after = entry.get("retry_after")
+        retry_delay = entry.get("retry_delay_seconds")
+        if retry_after is None or retry_delay is None:
+            continue
+        try:
+            retry_after_val = float(retry_after)
+            retry_delay_val = float(retry_delay)
+        except (TypeError, ValueError):
+            continue
+        comparisons.append(retry_delay_val - retry_after_val)
+        if retry_delay_val + 0.001 < retry_after_val:
+            violations += 1
+    if not comparisons:
+        return {"checked": 0, "violations": 0}
+    return {
+        "checked": len(comparisons),
+        "violations": violations,
+        "min_delta_seconds": round(min(comparisons), 3),
+        "max_delta_seconds": round(max(comparisons), 3),
+    }
+
 REQUIRED_FLAGS = {
     "MW_ALLOW_NETWORK_READS": "true",
     "RICHPANEL_WRITE_DISABLED": "true",
@@ -207,6 +319,16 @@ def _to_bool(value: Optional[str], default: bool = False) -> bool:
     if normalized in {"0", "false", "no", "n", "off"}:
         return False
     return default
+
+
+def _openai_shadow_enabled() -> bool:
+    return _to_bool(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), False)
+
+
+def _openai_any_enabled() -> bool:
+    return _to_bool(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), False) or _to_bool(
+        os.environ.get("MW_OPENAI_INTENT_ENABLED"), False
+    ) or _to_bool(os.environ.get("MW_OPENAI_REWRITE_ENABLED"), False)
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
@@ -1847,6 +1969,46 @@ def _build_markdown_report(
             f"- Allowed methods only: {trace_summary.get('allowed_methods_only', False)}",
             f"- Trace path: `{trace_path}`",
             "",
+        ]
+    )
+    request_burst = report.get("richpanel_request_burst") or {}
+    if request_burst:
+        md_lines.extend(
+            [
+                "## Richpanel Burst Summary (30s)",
+                (
+                    f"- Max requests in any 30s window: "
+                    f"{request_burst.get('max_requests_overall', 0)}"
+                ),
+                "",
+            ]
+        )
+    retry_after_validation = report.get("richpanel_retry_after_validation") or {}
+    if retry_after_validation:
+        md_lines.extend(
+            [
+                "## Retry-After Validation",
+                (
+                    f"- Checked: {retry_after_validation.get('checked', 0)}; "
+                    f"violations: {retry_after_validation.get('violations', 0)}"
+                ),
+                "",
+            ]
+        )
+    identity = report.get("richpanel_identity") or {}
+    if identity:
+        md_lines.extend(
+            [
+                "## Richpanel Identity",
+                f"- base_url: {identity.get('richpanel_base_url')}",
+                f"- resolved_env: {identity.get('resolved_env')}",
+                f"- api_key_hash: {identity.get('api_key_hash')}",
+                f"- api_key_secret_id: {identity.get('api_key_secret_id')}",
+                "",
+            ]
+        )
+    md_lines.extend(
+        [
             "## Notes",
             "- Ticket identifiers are hashed in the JSON report.",
             "- Shopify shop domains are hashed in the JSON report.",
@@ -1934,6 +2096,19 @@ def main() -> int:
         action="store_true",
         help="Probe Shopify with a read-only GET to verify access",
     )
+    parser.add_argument(
+        "--request-trace",
+        action="store_true",
+        help="Capture Richpanel request trace to compute burst metrics.",
+    )
+    parser.add_argument(
+        "--skip-conversations",
+        action="store_true",
+        help=(
+            "Skip fetching conversations/messages to reduce Richpanel request volume. "
+            "Reduces requests from 3/ticket to 1/ticket."
+        ),
+    )
     args = parser.parse_args()
 
     if args.env_name:
@@ -1982,6 +2157,9 @@ def main() -> int:
     if args.shop_domain:
         os.environ["SHOPIFY_SHOP_DOMAIN"] = args.shop_domain
 
+    if args.request_trace:
+        os.environ["RICHPANEL_TRACE_ENABLED"] = "true"
+
     shopify_secrets_client = _resolve_shopify_secrets_client()
     shopify_client = _build_shopify_client(
         allow_network=None,
@@ -2007,6 +2185,7 @@ def main() -> int:
         summary_md_out=args.summary_md_out,
     )
 
+    started_at = datetime.now(timezone.utc)
     run_started = time.monotonic()
     run_warnings: List[str] = []
     ticket_durations: List[float] = []
@@ -2028,11 +2207,15 @@ def main() -> int:
     sample_mode = "explicit"
     tickets_requested = 0
     shopify_probe: Dict[str, Any] = {"enabled": bool(args.shopify_probe)}
+    trace_entries: List[Dict[str, Any]] = []
+    trace_enabled = _env_truthy(os.environ.get("RICHPANEL_TRACE_ENABLED"))
     try:
         rp_client = _build_richpanel_client(
             richpanel_secret=args.richpanel_secret_id,
             base_url=richpanel_base_url,
         )
+        LOGGER.info("Waiting for rate limit quota to clear...")
+        time.sleep(5)
 
         if args.shopify_probe:
             try:
@@ -2102,15 +2285,35 @@ def main() -> int:
             redacted = _redact_identifier(ticket_ref) or "redacted"
             result: Dict[str, Any] = {"ticket_id_redacted": redacted}
             shopify_lookup_ok = True
+            if trace_enabled:
+                rp_client.clear_request_trace()
             try:
-                ticket_payload = _fetch_ticket(rp_client, ticket_ref)
+                try:
+                    ticket_payload = _fetch_ticket(rp_client, ticket_ref)
+                except Exception as exc:
+                    if not args.allow_ticket_fetch_failures:
+                        raise
+                    had_errors = True
+                    result["failure_reason"] = "richpanel_ticket_fetch_failed"
+                    result["failure_source"] = "richpanel_ticket_fetch"
+                    result["error"] = _safe_error(exc)
+                    ticket_results.append(result)
+                    LOGGER.warning(
+                        "Ticket fetch failed; continuing",
+                        extra={"ticket_id_redacted": redacted},
+                    )
+                    continue
+
                 ticket_id = str(ticket_payload.get("id") or ticket_ref).strip()
-                convo_payload = _fetch_conversation(
-                    rp_client,
-                    ticket_id,
-                    conversation_id=ticket_payload.get("conversation_id"),
-                    conversation_no=ticket_payload.get("conversation_no"),
-                )
+                if args.skip_conversations:
+                    convo_payload = {}
+                else:
+                    convo_payload = _fetch_conversation(
+                        rp_client,
+                        ticket_id,
+                        conversation_id=ticket_payload.get("conversation_id"),
+                        conversation_no=ticket_payload.get("conversation_no"),
+                    )
                 channel_value = _extract_channel(ticket_payload) or _extract_channel(
                     convo_payload
                 )
@@ -2329,16 +2532,31 @@ def main() -> int:
                 result["elapsed_seconds"] = round(elapsed, 3)
                 ticket_durations.append(elapsed)
                 ticket_results.append(result)
+                if trace_enabled:
+                    ticket_trace = rp_client.get_request_trace()
+                    trace_entries.extend(ticket_trace)
+                    result["richpanel_request_count"] = len(ticket_trace)
+                    endpoint_counts: Counter[str] = Counter()
+                    for entry in ticket_trace:
+                        path = entry.get("path")
+                        if path:
+                            endpoint_counts[path] += 1
+                    result["richpanel_request_counts_by_endpoint"] = dict(
+                        endpoint_counts
+                    )
 
     finally:
         trace.stop()
         with trace_path.open("w", encoding="utf-8") as fh:
             json.dump(trace.to_dict(), fh, ensure_ascii=False, indent=2)
-        openai_allow_network = _to_bool(
-            os.environ.get("OPENAI_ALLOW_NETWORK"), False
-        )
-        allow_openai = openai_allow_network and _to_bool(
-            os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False
+        openai_allow_network = _to_bool(os.environ.get("OPENAI_ALLOW_NETWORK"), False)
+        allow_openai = (
+            openai_allow_network
+            and _openai_any_enabled()
+            and (
+                _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False)
+                or _openai_shadow_enabled()
+            )
         )
         trace.assert_read_only(allow_openai=allow_openai, trace_path=trace_path)
 
@@ -2360,6 +2578,8 @@ def main() -> int:
         ),
         "errors": sum(1 for item in ticket_results if item.get("error")),
     }
+    request_burst = _summarize_request_burst(trace_entries)
+    retry_after_validation = _summarize_retry_after(trace_entries)
 
     schema_key_stats: Optional[Dict[str, Any]] = None
     if (
@@ -2423,6 +2643,7 @@ def main() -> int:
         },
         "prod_target": is_prod_target,
         "sample_mode": sample_mode,
+        "conversation_mode": "skipped" if args.skip_conversations else "full",
         "ticket_count": summary_payload.get("ticket_count", counts["tickets_scanned"]),
         "match_success_rate": summary_payload.get("match_success_rate", 0.0),
         "match_failure_buckets": summary_payload.get("match_failure_buckets", {}),
@@ -2438,6 +2659,14 @@ def main() -> int:
         "run_warnings": list(run_warnings),
         "http_trace_path": str(trace_path),
         "http_trace_summary": trace_summary,
+        "richpanel_request_burst": request_burst or None,
+        "richpanel_retry_after_validation": retry_after_validation or None,
+        "richpanel_identity": _build_identity_block(
+            client=rp_client,
+            env_name=env_name,
+            started_at=started_at,
+            duration_seconds=time.monotonic() - run_started,
+        ),
         "notes": [
             "Ticket identifiers are hashed.",
             "Shopify shop domains are hashed.",

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import datetime
+import html
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -39,12 +40,23 @@ SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER = SHOPIFY_ORDER_FIELDS + [
 MAX_EMAIL_ORDER_RESULTS = 50
 
 ORDER_NUMBER_PATTERNS = (
-    ("orderNumber_field", re.compile(r"(?mi)\borderNumber\s*:\s*(\d{3,20})\b")),
-    ("order_number_text", re.compile(r"(?mi)\border\s*number\s*:\s*(\d{3,20})\b")),
-    ("order_no_text", re.compile(r"(?mi)\border\s*no\.?\s*[:#]?\s*(\d{3,20})\b")),
-    ("order_number", re.compile(r"(?mi)\border\s*#?\s*(\d{3,20})\b")),
-    ("hash_number", re.compile(r"(?<!\d)#(\d{3,10})(?!\d)")),
+    (
+        "orderNumber_field",
+        re.compile(r"(?mi)\borderNumber\s*:\s*(\d{3,20})\b"),
+        True,
+    ),
+    (
+        "order_number_text",
+        re.compile(r"(?mi)\border\s*number\s*:\s*(\d{3,20})\b"),
+        True,
+    ),
+    ("order_no_text", re.compile(r"(?mi)\border\s*no\.?\s*[:#]?\s*(\d{3,20})\b"), True),
+    ("order_number", re.compile(r"(?mi)\border\s*#?\s*(\d{3,20})\b"), True),
+    ("hash_number", re.compile(r"(?<!\d)#(\d{6,10})(?!\d)"), False),
 )
+
+_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 EMAIL_PATTERN = re.compile(
     r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
@@ -908,15 +920,55 @@ def _extract_order_id(payload: Dict[str, Any]) -> str:
     return "unknown"
 
 
-def _match_order_number_from_text(text: str) -> Tuple[str, str]:
+def _sanitize_text_for_order_matching(text: str) -> str:
     if not text:
+        return ""
+    normalized = html.unescape(str(text))
+    normalized = _HTML_TAG_PATTERN.sub(" ", normalized)
+    normalized = normalized.replace("\u00a0", " ")
+    normalized = _WHITESPACE_PATTERN.sub(" ", normalized).strip()
+    return normalized
+
+
+def _find_order_number_candidates(text: str) -> List[Tuple[str, str, bool]]:
+    if not text:
+        return []
+    normalized = _sanitize_text_for_order_matching(text)
+    if not normalized:
+        return []
+    normalized = normalized.replace(",", "")
+    candidates: List[Tuple[str, str, bool]] = []
+    for label, pattern, has_order_word in ORDER_NUMBER_PATTERNS:
+        for match in pattern.finditer(normalized):
+            value = match.group(1)
+            if value:
+                candidates.append((value, label, has_order_word))
+    return candidates
+
+
+def _select_best_order_number(
+    candidates: List[Tuple[str, str, bool]]
+) -> Tuple[str, str]:
+    if not candidates:
         return "", ""
-    normalized = text.replace(",", "")
-    for label, pattern in ORDER_NUMBER_PATTERNS:
-        match = pattern.search(normalized)
-        if match:
-            return match.group(1), label
-    return "", ""
+
+    best_score: Tuple[int, int, int] | None = None
+    best_value = ""
+    best_label = ""
+    for sequence, (value, label, has_order_word) in enumerate(candidates):
+        numeric_len = len(re.sub(r"\D", "", value))
+        score = (1 if has_order_word else 0, numeric_len, -sequence)
+        if best_score is None or score > best_score:
+            best_score = score
+            best_value = value
+            best_label = label
+
+    return best_value, best_label
+
+
+def _match_order_number_from_text(text: str) -> Tuple[str, str]:
+    candidates = _find_order_number_candidates(text)
+    return _select_best_order_number(candidates)
 
 
 def _extract_order_number_from_text(text: str) -> str:
@@ -953,34 +1005,34 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
     if not isinstance(payload, dict):
         return "", ""
 
+    candidates: List[Tuple[str, str, bool]] = []
+
+    def _push_candidate(value: Any, label: str, *, has_order_word: bool = True) -> None:
+        coerced = _coerce_str(value)
+        if not coerced:
+            return
+        normalized = coerced.strip().lstrip("#")
+        if normalized:
+            candidates.append((normalized, label, has_order_word))
+
     for key in ("order_number", "orderNumber", "order_no", "orderNo"):
-        value = _coerce_str(payload.get(key))
-        if value:
-            return value.lstrip("#"), "order_number_field"
+        _push_candidate(payload.get(key), "order_number_field")
 
     order = payload.get("order")
     if isinstance(order, dict):
         for key in ("number", "order_number", "orderNumber", "order_no", "orderNo"):
-            value = _coerce_str(order.get(key))
-            if value:
-                return value.lstrip("#"), "order_number_field"
+            _push_candidate(order.get(key), "order_number_field")
         name_value = order.get("name")
         if name_value:
-            order_number, label = _match_order_number_from_text(str(name_value))
-            if order_number:
-                return order_number, label
+            candidates.extend(_find_order_number_candidates(str(name_value)))
 
     custom_fields = payload.get("custom_fields")
     if isinstance(custom_fields, dict):
         for key, value in custom_fields.items():
             if "order" not in str(key).lower():
                 continue
-            order_number = _coerce_str(value)
-            if order_number:
-                return order_number.lstrip("#"), "order_number_field"
-            order_number, label = _match_order_number_from_text(str(value))
-            if order_number:
-                return order_number, label
+            _push_candidate(value, "order_number_field")
+            candidates.extend(_find_order_number_candidates(str(value)))
 
     text_sources = [
         payload.get("subject"),
@@ -992,21 +1044,14 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
     for source in text_sources:
         if not source:
             continue
-        order_number, label = _match_order_number_from_text(str(source))
-        if order_number:
-            return order_number, label
+        candidates.extend(_find_order_number_candidates(str(source)))
 
     comment_texts = _iter_comment_texts(payload)
-    if comment_texts:
-        for label, pattern in ORDER_NUMBER_PATTERNS:
-            for text in comment_texts:
-                match = pattern.search(text.replace(",", ""))
-                if match:
-                    return match.group(1), label
+    for text in comment_texts:
+        candidates.extend(_find_order_number_candidates(text))
 
     messages = payload.get("messages") or payload.get("conversation_messages") or []
     if isinstance(messages, list):
-        message_texts: List[str] = []
         for message in messages:
             if not isinstance(message, dict):
                 continue
@@ -1014,15 +1059,9 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
                 value = message.get(key)
                 if value is None:
                     continue
-                message_texts.append(str(value))
-        if message_texts:
-            for label, pattern in ORDER_NUMBER_PATTERNS:
-                for text in message_texts:
-                    match = pattern.search(text.replace(",", ""))
-                    if match:
-                        return match.group(1), label
+                candidates.extend(_find_order_number_candidates(str(value)))
 
-    return "", ""
+    return _select_best_order_number(candidates)
 
 
 def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:

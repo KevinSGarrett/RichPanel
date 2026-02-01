@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Sequence
 
+from richpanel_middleware.commerce.order_lookup import _extract_order_number_from_payload
+
 DEPARTMENTS = {
     "Sales Team",
     "Backend Team",
@@ -61,6 +63,16 @@ ORDER_STATUS_KEYWORDS = (
     "arrive",
     "package",
     "fulfillment",
+)
+ORDER_STATUS_CANDIDATE_KEYWORDS = ORDER_STATUS_KEYWORDS + (
+    "tracking number",
+    "tracking #",
+    "in transit",
+    "out for delivery",
+    "shipping status",
+    "delivery status",
+    "shipped",
+    "unfulfilled",
 )
 SHIPPING_DELAY_KEYWORDS = (
     "label created",
@@ -157,6 +169,11 @@ def _contains_any(text: str, keywords: Sequence[str]) -> bool:
     return any(keyword in text for keyword in keywords)
 
 
+def _has_order_number(payload: Dict[str, Any]) -> bool:
+    order_number, _ = _extract_order_number_from_payload(payload)
+    return bool(order_number)
+
+
 def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
     text = extract_customer_message(payload, default="").strip()
     if not text:
@@ -202,6 +219,15 @@ def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
             "billing_issue",
             category="billing",
             reason="matched billing keyword",
+        )
+
+    if _has_order_number(payload) and _contains_any(
+        lowered, ORDER_STATUS_CANDIDATE_KEYWORDS
+    ):
+        return _build_decision(
+            "order_status_tracking",
+            category="order_status",
+            reason="order number present with shipping or tracking language",
         )
 
     if _contains_any(lowered, EXCHANGE_KEYWORDS):
