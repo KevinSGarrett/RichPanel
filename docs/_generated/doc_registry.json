@@ -2250,16 +2250,6 @@
     "last_updated": "2025-12-22"
   },
   {
-    "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
-    "title": "Order Status Sandbox E2E Suite (B67)",
-    "section": "08_Testing_Quality",
-    "status": "supplemental",
-    "in_index": false,
-    "word_count": 140,
-    "approx_tokens": 182,
-    "last_updated": ""
-  },
-  {
     "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
     "title": "Smoke Test Pack (v1)",
     "section": "08_Testing_Quality",
@@ -3928,46 +3918,6 @@
     "word_count": 213,
     "approx_tokens": 276,
     "last_updated": "2025-12-22"
-  },
-  {
-    "path": "CODEMAP.md",
-    "title": "CODEMAP (Project Navigation)",
-    "section": "Root",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 379,
-    "approx_tokens": 492,
-    "last_updated": ""
-  },
-  {
-    "path": "INDEX.md",
-    "title": "Docs Index",
-    "section": "Root",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 1214,
-    "approx_tokens": 1578,
-    "last_updated": "2025-12-29"
-  },
-  {
-    "path": "REGISTRY.md",
-    "title": "Docs Registry (Complete Listing)",
-    "section": "Root",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 10803,
-    "approx_tokens": 14043,
-    "last_updated": ""
-  },
-  {
-    "path": "ROADMAP.md",
-    "title": "Roadmap (High-Level)",
-    "section": "Root",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 171,
-    "approx_tokens": 222,
-    "last_updated": ""
   },
   {
     "path": "SHOPIFY_STRATEGY/README.md",

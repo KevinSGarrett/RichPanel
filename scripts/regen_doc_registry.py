@@ -22,6 +22,7 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import re
+import subprocess
 import sys
 from typing import Dict, List
 
@@ -79,6 +80,36 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _discover_docs(docs_root: Path) -> List[Path]:
+    """
+    Prefer tracked files to avoid OS-specific untracked drift (Windows vs CI).
+    """
+    repo_root = docs_root.parent
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "ls-files", "--", "docs/**/*.md"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except Exception:
+        proc = None
+    paths: List[Path] = []
+    if proc and proc.returncode == 0:
+        for line in proc.stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            path = repo_root / line
+            if path.is_file():
+                paths.append(path)
+    if not paths:
+        paths = [p for p in docs_root.rglob("*.md") if p.is_file()]
+    return sorted(
+        paths, key=lambda p: p.relative_to(docs_root).as_posix()
+    )
 
 
 def extract_title(md_text: str, fallback: str) -> str:
@@ -164,10 +195,7 @@ def main() -> int:
     index_text = read_text(INDEX_FILE)
     index_links = set([p for p in parse_index_links(index_text) if p.endswith(".md")])
 
-    md_files = sorted(
-        [p for p in DOCS_ROOT.rglob("*.md") if p.is_file()],
-        key=lambda p: p.relative_to(DOCS_ROOT).as_posix(),
-    )
+    md_files = _discover_docs(DOCS_ROOT)
 
     # Build registry records
     records: List[Dict[str, object]] = []
