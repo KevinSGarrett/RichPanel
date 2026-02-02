@@ -6,6 +6,8 @@ import sys
 import importlib
 import unittest
 import types
+import hashlib
+from datetime import datetime, timezone
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -512,6 +514,99 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertTrue(shadow_eval._to_bool("YES", default=False))
         self.assertFalse(shadow_eval._to_bool("no", default=True))
 
+    def test_env_truthy_and_openai_flags(self) -> None:
+        self.assertFalse(shadow_eval._env_truthy(None))
+        self.assertTrue(shadow_eval._env_truthy("true"))
+        self.assertTrue(shadow_eval._env_truthy("  YES "))
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_OPENAI_SHADOW_ENABLED": "true",
+                "MW_OPENAI_ROUTING_ENABLED": "true",
+            },
+            clear=True,
+        ):
+            self.assertTrue(shadow_eval._openai_shadow_enabled())
+            self.assertTrue(shadow_eval._openai_any_enabled())
+
+    def test_identity_block_hashes_api_key(self) -> None:
+        class _StubClient:
+            base_url = "https://api.richpanel.com"
+            api_key_secret_id = "rp-mw/dev/richpanel/api_key"
+
+            def _load_api_key(self) -> str:
+                return "test-key"
+
+        started_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        identity = shadow_eval._build_identity_block(
+            client=_StubClient(),
+            env_name="dev",
+            started_at=started_at,
+            duration_seconds=1.234,
+        )
+        expected_hash = hashlib.sha256(b"test-key").hexdigest()[:8]
+        self.assertEqual(identity.get("api_key_hash"), expected_hash)
+        self.assertIsNone(identity.get("api_key_error"))
+
+    def test_identity_block_handles_api_key_error(self) -> None:
+        class _StubClient:
+            base_url = "https://api.richpanel.com"
+            api_key_secret_id = "rp-mw/dev/richpanel/api_key"
+
+            def _load_api_key(self) -> str:
+                raise RuntimeError("boom")
+
+        started_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        identity = shadow_eval._build_identity_block(
+            client=_StubClient(),
+            env_name="dev",
+            started_at=started_at,
+            duration_seconds=0.1,
+        )
+        self.assertIsNone(identity.get("api_key_hash"))
+        self.assertEqual(identity.get("api_key_error"), "RuntimeError")
+
+    def test_request_burst_and_retry_after_helpers(self) -> None:
+        timestamps = [1.0, 2.0, 3.0, 40.0]
+        self.assertEqual(shadow_eval._max_requests_in_window(timestamps, 30), 3)
+        burst = shadow_eval._summarize_request_burst(
+            [
+                {"timestamp": 1.0, "path": "/v1/tickets"},
+                {"timestamp": 2.0, "path": "/v1/tickets"},
+                {"timestamp": 3.0, "path": "/v1/tickets"},
+                {"timestamp": 40.0, "path": "/v1/other"},
+            ],
+            window_seconds=30,
+        )
+        self.assertEqual(burst.get("max_requests_overall"), 3)
+        self.assertEqual(burst.get("max_requests_by_endpoint")[0]["path"], "/v1/tickets")
+        retry = shadow_eval._summarize_retry_after(
+            [
+                {"retry_after": 3, "retry_delay_seconds": 4},
+                {"retry_after": 5, "retry_delay_seconds": 4},
+            ]
+        )
+        self.assertEqual(retry.get("checked"), 2)
+        self.assertEqual(retry.get("violations"), 1)
+
+    def test_markdown_report_includes_trace_sections(self) -> None:
+        report = {
+            "http_trace_summary": {},
+            "richpanel_request_burst": {"max_requests_overall": 5},
+            "richpanel_retry_after_validation": {"checked": 2, "violations": 0},
+            "richpanel_identity": {
+                "richpanel_base_url": "https://api.richpanel.com",
+                "resolved_env": "dev",
+                "api_key_hash": "abc12345",
+                "api_key_secret_id": "rp-mw/dev/richpanel/api_key",
+            },
+        }
+        markdown_lines = shadow_eval._build_markdown_report(report, summary_payload={})
+        markdown = "\n".join(markdown_lines)
+        self.assertIn("Richpanel Burst Summary", markdown)
+        self.assertIn("Retry-After Validation", markdown)
+        self.assertIn("Richpanel Identity", markdown)
+
     def test_redact_identifier_none(self) -> None:
         self.assertIsNone(shadow_eval._redact_identifier(None))
 
@@ -649,6 +744,18 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
                 }
             ),
             "no_order_candidates",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure(
+                {
+                    "order_matched": False,
+                    "order_resolution": {
+                        "resolvedBy": "no_match",
+                        "shopify_diagnostics": {"category": "auth_fail"},
+                    },
+                }
+            ),
+            "shopify_auth_fail",
         )
         self.assertEqual(
             shadow_eval._classify_order_match_failure(
@@ -2591,6 +2698,129 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             payload = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(result, 1)
             self.assertEqual(payload["counts"]["errors"], 1)
+
+    def test_allow_ticket_fetch_failures_appends_once(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-1",
+                "--allow-non-prod",
+                "--allow-ticket-fetch-failures",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", side_effect=RuntimeError("boom")
+            ):
+                result = shadow_eval.main()
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(result, 1)
+            self.assertEqual(len(payload["tickets"]), 1)
+            self.assertEqual(
+                payload["tickets"][0]["failure_reason"],
+                "richpanel_ticket_fetch_failed",
+            )
+
+    def test_request_trace_and_skip_conversations(self) -> None:
+        class _TraceClient:
+            base_url = "https://api.richpanel.com"
+            api_key_secret_id = "rp-mw/dev/richpanel/api_key"
+
+            def _load_api_key(self) -> str:
+                return "trace-key"
+
+            def clear_request_trace(self) -> None:
+                return None
+
+            def get_request_trace(self) -> list[dict]:
+                return [
+                    {
+                        "timestamp": 1.0,
+                        "path": "/v1/tickets",
+                        "retry_after": 1,
+                        "retry_delay_seconds": 2,
+                    }
+                ]
+
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        plan = SimpleNamespace(
+            actions=[],
+            routing=SimpleNamespace(
+                intent="unknown_other",
+                department="Email Support Team",
+                reason="stubbed",
+            ),
+            mode="none",
+            reasons=["stubbed"],
+        )
+        ticket_payload = {
+            "id": "t-123",
+            "conversation_id": "conv-123",
+            "created_at": "2026-01-01T00:00:00Z",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, env, clear=True
+        ):
+            trace_path = Path(tmpdir) / "trace.json"
+            report_path = Path(tmpdir) / "report.json"
+            report_md_path = Path(tmpdir) / "report.md"
+            summary_path = Path(tmpdir) / "summary.json"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--ticket-id",
+                "t-123",
+                "--allow-non-prod",
+                "--request-trace",
+                "--skip-conversations",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_TraceClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_resolve_output_paths",
+                return_value=(report_path, summary_path, report_md_path, trace_path),
+            ), mock.patch.object(
+                shadow_eval, "_fetch_ticket", return_value=ticket_payload
+            ), mock.patch.object(
+                shadow_eval, "normalize_event", return_value=SimpleNamespace()
+            ), mock.patch.object(
+                shadow_eval, "plan_actions", return_value=plan
+            ), mock.patch.object(
+                shadow_eval, "lookup_order_summary", return_value={}
+            ):
+                result = shadow_eval.main()
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(result, 0)
+            self.assertEqual(payload["conversation_mode"], "skipped")
+            self.assertTrue(payload.get("richpanel_request_burst"))
+            self.assertEqual(
+                payload.get("richpanel_retry_after_validation", {}).get("checked"), 1
+            )
+            self.assertTrue(payload.get("richpanel_identity"))
 
     def test_main_reraises_system_exit_in_ticket_loop(self) -> None:
         env = {

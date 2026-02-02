@@ -2,11 +2,18 @@ from __future__ import annotations
 
 import logging
 import datetime
+import html
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from richpanel_middleware.ingest.envelope import EventEnvelope
-from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
+from richpanel_middleware.integrations import (
+    ShopifyClient,
+    ShopifyRequestError,
+    ShopifyResponse,
+    ShipStationClient,
+)
+from integrations.common import get_header_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,13 +45,30 @@ SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER = SHOPIFY_ORDER_FIELDS + [
 
 MAX_EMAIL_ORDER_RESULTS = 50
 
-ORDER_NUMBER_PATTERNS = (
-    ("orderNumber_field", re.compile(r"(?mi)\borderNumber\s*:\s*(\d{3,20})\b")),
-    ("order_number_text", re.compile(r"(?mi)\border\s*number\s*:\s*(\d{3,20})\b")),
-    ("order_no_text", re.compile(r"(?mi)\border\s*no\.?\s*[:#]?\s*(\d{3,20})\b")),
-    ("order_number", re.compile(r"(?mi)\border\s*#?\s*(\d{3,20})\b")),
-    ("hash_number", re.compile(r"(?<!\d)#(\d{3,10})(?!\d)")),
+SHOPIFY_REQUEST_ID_HEADERS = (
+    "x-request-id",
+    "x-shopify-request-id",
+    "x-requestid",
 )
+
+ORDER_NUMBER_PATTERNS = (
+    (
+        "orderNumber_field",
+        re.compile(r"(?mi)\borderNumber\s*:\s*(\d{3,20})\b"),
+        True,
+    ),
+    (
+        "order_number_text",
+        re.compile(r"(?mi)\border\s*number\s*:\s*(\d{3,20})\b"),
+        True,
+    ),
+    ("order_no_text", re.compile(r"(?mi)\border\s*no\.?\s*[:#]?\s*(\d{3,20})\b"), True),
+    ("order_number", re.compile(r"(?mi)\border\s*#?\s*(\d{3,20})\b"), True),
+    ("hash_number", re.compile(r"(?<!\d)#(\d{6,10})(?!\d)"), False),
+)
+
+_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 EMAIL_PATTERN = re.compile(
     r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
@@ -96,6 +120,88 @@ def _order_summary_from_payload(payload: Dict[str, Any]) -> Optional[OrderSummar
     return None
 
 
+def _extract_shopify_request_id(headers: Optional[Dict[str, str]]) -> Optional[str]:
+    if not headers:
+        return None
+    return get_header_value(headers, SHOPIFY_REQUEST_ID_HEADERS)
+
+
+def _classify_shopify_status(status_code: Optional[int]) -> Optional[str]:
+    if status_code is None:
+        return "http_error"
+    if status_code in (401, 403):
+        return "auth_fail"
+    if status_code == 429:
+        return "rate_limited"
+    if status_code >= 500:
+        return "http_error"
+    if status_code >= 400:
+        return "http_error"
+    return None
+
+
+def _shopify_diagnostics(
+    *,
+    category: str,
+    status_code: Optional[int],
+    request_id: Optional[str],
+) -> Dict[str, Any]:
+    return {
+        "category": category,
+        "status_code": status_code,
+        "request_id": request_id,
+    }
+
+
+def _diagnostics_from_shopify_response(
+    response: ShopifyResponse,
+) -> Optional[Dict[str, Any]]:
+    if response.dry_run and response.reason == "missing_access_token":
+        return _shopify_diagnostics(
+            category="auth_fail",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+    category = _classify_shopify_status(response.status_code)
+    if category:
+        return _shopify_diagnostics(
+            category=category,
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+    return None
+
+
+def _diagnostics_from_shopify_exception(
+    exc: Exception,
+) -> Dict[str, Any]:
+    status_code: Optional[int] = None
+    request_id: Optional[str] = None
+    if isinstance(exc, ShopifyRequestError) and exc.response:
+        status_code = exc.response.status_code
+        request_id = _extract_shopify_request_id(exc.response.headers)
+    category = _classify_shopify_status(status_code)
+    if not category:
+        category = "http_error"
+    return _shopify_diagnostics(
+        category=category, status_code=status_code, request_id=request_id
+    )
+
+
+def _log_shopify_diagnostics(
+    lookup_type: str, diagnostics: Optional[Dict[str, Any]]
+) -> None:
+    if not diagnostics:
+        return
+    category = diagnostics.get("category")
+    extra = dict(diagnostics)
+    extra["lookup_type"] = lookup_type
+    if category == "no_match":
+        LOGGER.info("shopify.match_diagnostics", extra=extra)
+    else:
+        LOGGER.warning("shopify.match_diagnostics", extra=extra)
+
+
 def lookup_order_summary(
     envelope: EventEnvelope,
     *,
@@ -132,7 +238,7 @@ def lookup_order_summary(
     order_number, order_number_source = _extract_order_number_from_payload(payload_dict)
     if order_number and allow_network and not safe_mode and automation_enabled:
         client = shopify_client or ShopifyClient(allow_network=allow_network)
-        payload = _lookup_shopify_by_name(
+        payload, name_diagnostics = _lookup_shopify_by_name(
             order_name=order_number,
             allow_network=allow_network,
             safe_mode=safe_mode,
@@ -153,6 +259,8 @@ def lookup_order_summary(
                 "reason": "shopify_name_match",
                 "order_number_source": order_number_source,
             }
+        elif name_diagnostics:
+            resolution = _shopify_resolution_for_no_match(name_diagnostics)
 
     order_number_name_failed = bool(order_number) and not shopify_lookup_done
     if order_id == "unknown" or order_number_name_failed:
@@ -166,7 +274,7 @@ def lookup_order_summary(
                     "reason": "no_email_available",
                 }
             else:
-                orders = _list_shopify_orders_by_email(
+                orders, diagnostics = _list_shopify_orders_by_email(
                     email=email,
                     allow_network=allow_network,
                     safe_mode=safe_mode,
@@ -174,7 +282,7 @@ def lookup_order_summary(
                     client=client,
                 )
                 payload, identity_resolution = _resolve_orders_by_identity(
-                    orders, email=email, name=name
+                    orders, email=email, name=name, diagnostics=diagnostics
                 )
                 if payload:
                     shopify_lookup_done = True
@@ -302,9 +410,9 @@ def _lookup_shopify_by_name(
     safe_mode: bool,
     automation_enabled: bool,
     client: ShopifyClient,
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
     if not order_name:
-        return {}
+        return {}, None
 
     normalized = f"#{str(order_name).strip().lstrip('#')}"
     candidates = [normalized]
@@ -320,22 +428,34 @@ def _lookup_shopify_by_name(
                 automation_enabled=automation_enabled,
                 dry_run=not allow_network,
             )
-        except Exception:
-            LOGGER.warning(
-                "Shopify name lookup failed",
-                extra={"order_name": candidate},
-            )
-            continue
+        except ShopifyRequestError as exc:
+            diagnostics = _diagnostics_from_shopify_exception(exc)
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
+        except Exception as exc:
+            diagnostics = _diagnostics_from_shopify_exception(exc)
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
+        diagnostics = _diagnostics_from_shopify_response(response)
         if response.dry_run:
-            continue
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
         if response.status_code >= 400:
-            continue
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
         payload = _select_order_from_name_search(
             candidate, response.json() or {}
         )
         if payload:
-            return payload
-    return {}
+            return payload, None
+        diagnostics = _shopify_diagnostics(
+            category="no_match",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("name", diagnostics)
+        return {}, diagnostics
+    return {}, None
 
 
 def _lookup_shopify_by_email_name(
@@ -347,7 +467,7 @@ def _lookup_shopify_by_email_name(
     automation_enabled: bool,
     client: ShopifyClient,
 ) -> Dict[str, Any]:
-    orders = _list_shopify_orders_by_email(
+    orders, _ = _list_shopify_orders_by_email(
         email=email,
         allow_network=allow_network,
         safe_mode=safe_mode,
@@ -366,7 +486,7 @@ def _lookup_shopify_by_email(
     automation_enabled: bool,
     client: ShopifyClient,
 ) -> Dict[str, Any]:
-    orders = _list_shopify_orders_by_email(
+    orders, _ = _list_shopify_orders_by_email(
         email=email,
         allow_network=allow_network,
         safe_mode=safe_mode,
@@ -377,15 +497,31 @@ def _lookup_shopify_by_email(
     return payload
 
 
+def _shopify_resolution_for_no_match(
+    diagnostics: Optional[Dict[str, Any]]
+) -> Dict[str, Any]:
+    resolution: Dict[str, Any] = {
+        "resolvedBy": "no_match",
+        "confidence": "low",
+        "reason": "shopify_no_match",
+    }
+    if diagnostics:
+        category = diagnostics.get("category")
+        if category and category != "no_match":
+            resolution["reason"] = f"shopify_{category}"
+        resolution["shopify_diagnostics"] = diagnostics
+    return resolution
+
+
 def _resolve_orders_by_identity(
-    orders: List[Dict[str, Any]], *, email: str, name: str
-) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    orders: List[Dict[str, Any]],
+    *,
+    email: str,
+    name: str,
+    diagnostics: Optional[Dict[str, Any]] = None,
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if not orders:
-        return {}, {
-            "resolvedBy": "no_match",
-            "confidence": "low",
-            "reason": "shopify_no_match",
-        }
+        return {}, _shopify_resolution_for_no_match(diagnostics)
     if name:
         matches = [
             order
@@ -418,9 +554,9 @@ def _list_shopify_orders_by_email(
     safe_mode: bool,
     automation_enabled: bool,
     client: ShopifyClient,
-) -> List[Dict[str, Any]]:
+) -> Tuple[List[Dict[str, Any]], Optional[Dict[str, Any]]]:
     if not allow_network:
-        return []
+        return [], None
     try:
         response = client.list_orders_by_email(
             email,
@@ -431,16 +567,41 @@ def _list_shopify_orders_by_email(
             automation_enabled=automation_enabled,
             dry_run=not allow_network,
         )
-    except Exception:
-        LOGGER.warning("Shopify email lookup failed")
-        return []
-    if response.dry_run or response.status_code >= 400:
-        return []
+    except ShopifyRequestError as exc:
+        diagnostics = _diagnostics_from_shopify_exception(exc)
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    except Exception as exc:
+        diagnostics = _diagnostics_from_shopify_exception(exc)
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    diagnostics = _diagnostics_from_shopify_response(response)
+    if response.dry_run:
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    if response.status_code >= 400:
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
     payload = response.json() or {}
     orders = payload.get("orders") if isinstance(payload, dict) else None
     if not isinstance(orders, list):
-        return []
-    return [order for order in orders if isinstance(order, dict)]
+        diagnostics = _shopify_diagnostics(
+            category="http_error",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    normalized_orders = [order for order in orders if isinstance(order, dict)]
+    if not normalized_orders:
+        diagnostics = _shopify_diagnostics(
+            category="no_match",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    return normalized_orders, None
 
 
 def _lookup_shopify(
@@ -464,7 +625,7 @@ def _lookup_shopify(
     )
     payload: Dict[str, Any] = {}
     if response.status_code == 404:
-        payload = _lookup_shopify_by_name(
+        payload, _ = _lookup_shopify_by_name(
             order_name=str(order_id).strip(),
             allow_network=allow_network,
             safe_mode=safe_mode,
@@ -908,15 +1069,55 @@ def _extract_order_id(payload: Dict[str, Any]) -> str:
     return "unknown"
 
 
-def _match_order_number_from_text(text: str) -> Tuple[str, str]:
+def _sanitize_text_for_order_matching(text: str) -> str:
     if not text:
+        return ""
+    normalized = html.unescape(str(text))
+    normalized = _HTML_TAG_PATTERN.sub(" ", normalized)
+    normalized = normalized.replace("\u00a0", " ")
+    normalized = _WHITESPACE_PATTERN.sub(" ", normalized).strip()
+    return normalized
+
+
+def _find_order_number_candidates(text: str) -> List[Tuple[str, str, bool]]:
+    if not text:
+        return []
+    normalized = _sanitize_text_for_order_matching(text)
+    if not normalized:
+        return []
+    normalized = normalized.replace(",", "")
+    candidates: List[Tuple[str, str, bool]] = []
+    for label, pattern, has_order_word in ORDER_NUMBER_PATTERNS:
+        for match in pattern.finditer(normalized):
+            value = match.group(1)
+            if value:
+                candidates.append((value, label, has_order_word))
+    return candidates
+
+
+def _select_best_order_number(
+    candidates: List[Tuple[str, str, bool]]
+) -> Tuple[str, str]:
+    if not candidates:
         return "", ""
-    normalized = text.replace(",", "")
-    for label, pattern in ORDER_NUMBER_PATTERNS:
-        match = pattern.search(normalized)
-        if match:
-            return match.group(1), label
-    return "", ""
+
+    best_score: Tuple[int, int, int] | None = None
+    best_value = ""
+    best_label = ""
+    for sequence, (value, label, has_order_word) in enumerate(candidates):
+        numeric_len = len(re.sub(r"\D", "", value))
+        score = (1 if has_order_word else 0, numeric_len, -sequence)
+        if best_score is None or score > best_score:
+            best_score = score
+            best_value = value
+            best_label = label
+
+    return best_value, best_label
+
+
+def _match_order_number_from_text(text: str) -> Tuple[str, str]:
+    candidates = _find_order_number_candidates(text)
+    return _select_best_order_number(candidates)
 
 
 def _extract_order_number_from_text(text: str) -> str:
@@ -953,34 +1154,34 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
     if not isinstance(payload, dict):
         return "", ""
 
+    candidates: List[Tuple[str, str, bool]] = []
+
+    def _push_candidate(value: Any, label: str, *, has_order_word: bool = True) -> None:
+        coerced = _coerce_str(value)
+        if not coerced:
+            return
+        normalized = coerced.strip().lstrip("#")
+        if normalized:
+            candidates.append((normalized, label, has_order_word))
+
     for key in ("order_number", "orderNumber", "order_no", "orderNo"):
-        value = _coerce_str(payload.get(key))
-        if value:
-            return value.lstrip("#"), "order_number_field"
+        _push_candidate(payload.get(key), "order_number_field")
 
     order = payload.get("order")
     if isinstance(order, dict):
         for key in ("number", "order_number", "orderNumber", "order_no", "orderNo"):
-            value = _coerce_str(order.get(key))
-            if value:
-                return value.lstrip("#"), "order_number_field"
+            _push_candidate(order.get(key), "order_number_field")
         name_value = order.get("name")
         if name_value:
-            order_number, label = _match_order_number_from_text(str(name_value))
-            if order_number:
-                return order_number, label
+            candidates.extend(_find_order_number_candidates(str(name_value)))
 
     custom_fields = payload.get("custom_fields")
     if isinstance(custom_fields, dict):
         for key, value in custom_fields.items():
             if "order" not in str(key).lower():
                 continue
-            order_number = _coerce_str(value)
-            if order_number:
-                return order_number.lstrip("#"), "order_number_field"
-            order_number, label = _match_order_number_from_text(str(value))
-            if order_number:
-                return order_number, label
+            _push_candidate(value, "order_number_field")
+            candidates.extend(_find_order_number_candidates(str(value)))
 
     text_sources = [
         payload.get("subject"),
@@ -992,21 +1193,14 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
     for source in text_sources:
         if not source:
             continue
-        order_number, label = _match_order_number_from_text(str(source))
-        if order_number:
-            return order_number, label
+        candidates.extend(_find_order_number_candidates(str(source)))
 
     comment_texts = _iter_comment_texts(payload)
-    if comment_texts:
-        for label, pattern in ORDER_NUMBER_PATTERNS:
-            for text in comment_texts:
-                match = pattern.search(text.replace(",", ""))
-                if match:
-                    return match.group(1), label
+    for text in comment_texts:
+        candidates.extend(_find_order_number_candidates(text))
 
     messages = payload.get("messages") or payload.get("conversation_messages") or []
     if isinstance(messages, list):
-        message_texts: List[str] = []
         for message in messages:
             if not isinstance(message, dict):
                 continue
@@ -1014,15 +1208,9 @@ def _extract_order_number_from_payload(payload: Dict[str, Any]) -> Tuple[str, st
                 value = message.get(key)
                 if value is None:
                     continue
-                message_texts.append(str(value))
-        if message_texts:
-            for label, pattern in ORDER_NUMBER_PATTERNS:
-                for text in message_texts:
-                    match = pattern.search(text.replace(",", ""))
-                    if match:
-                        return match.group(1), label
+                candidates.extend(_find_order_number_candidates(str(value)))
 
-    return "", ""
+    return _select_best_order_number(candidates)
 
 
 def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:

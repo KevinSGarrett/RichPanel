@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Dict
 
 PRODUCTION_ENVIRONMENTS = {"prod", "production"}
 PROD_WRITE_ACK_ENV = "MW_PROD_WRITES_ACK"
@@ -106,12 +106,29 @@ def compute_retry_backoff(
     return candidate
 
 
+def get_header_value(
+    headers: Dict[str, str], keys: Tuple[str, ...]
+) -> Optional[str]:
+    if not headers:
+        return None
+    lowered = {str(key).lower(): value for key, value in headers.items()}
+    for key in keys:
+        value = lowered.get(key)
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return None
+
+
 __all__ = [
     "ENV_RESOLUTION_ORDER",
     "PRODUCTION_ENVIRONMENTS",
     "PROD_WRITE_ACK_ENV",
     "PROD_WRITE_ACK_PHRASE",
     "compute_retry_backoff",
+    "get_header_value",
     "log_env_resolution_warning",
     "prod_write_acknowledged",
     "prod_write_ack_matches",

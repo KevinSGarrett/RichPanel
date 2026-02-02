@@ -44,6 +44,9 @@ Owners: Security & Platform (Agent 2) / Eng Lead
    - Documented in [Secrets and Key Management §1–§4](../06_Security_Privacy_Compliance/Secrets_and_Key_Management.md).
    - Naming convention in Secrets Manager: `rp-mw/<env>/richpanel/api_key`.
    - Non-prod fallback: if only a single Richpanel workspace exists, stage can reuse a limited-scope key but must only act on tagged test tickets (see [Env strategy §Richpanel](../09_Deployment_Operations/Environments.md#richpanel-environment-strategy)).
+   - Optional token pool (rate-limit smoothing):
+     - Enable with `RICHPANEL_TOKEN_POOL_ENABLED=true`.
+     - Provide comma-separated secret IDs via `RICHPANEL_TOKEN_POOL_SECRET_IDS` (each should be a Richpanel API key secret).
 2. **Webhook endpoint + token:**
    - Endpoint: `POST /richpanel/inbound` per [Webhooks doc §6.1](../03_Richpanel_Integration/Webhooks_and_Event_Handling.md#6-middleware-ingress-contract).
    - Shared-secret header: `X-Middleware-Token` per §4.1 of the same doc.
@@ -85,6 +88,12 @@ Owners: Security & Platform (Agent 2) / Eng Lead
 - Notes:
   - Keep scope minimal (read-only where possible).
   - Prefer creating a dedicated non-prod token for `dev`/`staging` if the store supports it.
+  - Shopify OAuth client credentials live in Secrets Manager:
+    - `rp-mw/<env>/shopify/client_id`
+    - `rp-mw/<env>/shopify/client_secret`
+  - Expected token secret JSON shape for refreshable tokens:
+    - `{"access_token":"...","refresh_token":"...","expires_at":1700000000}`
+    - `expires_at` is a Unix epoch timestamp (seconds).
 
 ---
 

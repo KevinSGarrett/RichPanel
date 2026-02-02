@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from typing import Optional
 from pathlib import Path
 from unittest import mock
 
@@ -174,7 +175,7 @@ class OrderIdResolutionTests(unittest.TestCase):
             def find_orders_by_name(self, *args, **kwargs):
                 raise AssertionError("should not be called")
 
-        payload = _lookup_shopify_by_name(
+        payload, _ = _lookup_shopify_by_name(
             order_name="",
             allow_network=True,
             safe_mode=False,
@@ -188,7 +189,7 @@ class OrderIdResolutionTests(unittest.TestCase):
             def find_orders_by_name(self, *args, **kwargs):
                 raise RuntimeError("boom")
 
-        payload = _lookup_shopify_by_name(
+        payload, _ = _lookup_shopify_by_name(
             order_name="123",
             allow_network=True,
             safe_mode=False,
@@ -197,6 +198,74 @@ class OrderIdResolutionTests(unittest.TestCase):
         )
         self.assertEqual(payload, {})
 
+    def test_lookup_shopify_by_name_diagnostics(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, payload: dict, headers: dict):
+                self.status_code = status_code
+                self.dry_run = False
+                self._payload = payload
+                self.headers = headers
+                self.reason = None
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, response):
+                self.response = response
+
+            def find_orders_by_name(self, *args, **kwargs):
+                return self.response
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=401,
+                    payload={"orders": []},
+                    headers={"x-shopify-request-id": "req-401"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "auth_fail")
+        self.assertEqual(diagnostics.get("request_id"), "req-401")
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=429,
+                    payload={"orders": []},
+                    headers={"x-request-id": "req-429"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "rate_limited")
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=200,
+                    payload={"orders": []},
+                    headers={"x-request-id": "req-200"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "no_match")
+
     def test_resolve_orders_by_identity_no_orders(self) -> None:
         payload, resolution = _resolve_orders_by_identity([], email="x", name="y")
         self.assertEqual(payload, {})
@@ -204,10 +273,20 @@ class OrderIdResolutionTests(unittest.TestCase):
 
     def test_list_shopify_orders_by_email_handles_failures(self) -> None:
         class _StubResponse:
-            def __init__(self, *, status_code: int, dry_run: bool, payload: dict):
+            def __init__(
+                self,
+                *,
+                status_code: int,
+                dry_run: bool,
+                payload: dict,
+                headers: Optional[dict] = None,
+                reason: Optional[str] = None,
+            ):
                 self.status_code = status_code
                 self.dry_run = dry_run
                 self._payload = payload
+                self.headers = headers or {}
+                self.reason = reason
 
             def json(self):
                 return self._payload
@@ -219,51 +298,114 @@ class OrderIdResolutionTests(unittest.TestCase):
             def list_orders_by_email(self, *args, **kwargs):
                 return self.response
 
-        self.assertEqual(
-            _list_shopify_orders_by_email(
-                email="x",
-                allow_network=False,
-                safe_mode=False,
-                automation_enabled=True,
-                client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={})),
-            ),
-            [],
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=False,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={})),
         )
-        self.assertEqual(
-            _list_shopify_orders_by_email(
-                email="x",
-                allow_network=True,
-                safe_mode=False,
-                automation_enabled=True,
-                client=_StubClient(_StubResponse(status_code=500, dry_run=False, payload={})),
-            ),
-            [],
+        self.assertEqual(orders, [])
+        self.assertIsNone(diagnostics)
+
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(_StubResponse(status_code=500, dry_run=False, payload={})),
         )
-        self.assertEqual(
-            _list_shopify_orders_by_email(
-                email="x",
-                allow_network=True,
-                safe_mode=False,
-                automation_enabled=True,
-                client=_StubClient(_StubResponse(status_code=200, dry_run=False, payload={"orders": "nope"})),
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "http_error")
+
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(status_code=200, dry_run=False, payload={"orders": "nope"})
             ),
-            [],
         )
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "http_error")
 
         class _BoomClient:
             def list_orders_by_email(self, *args, **kwargs):
                 raise RuntimeError("boom")
 
-        self.assertEqual(
-            _list_shopify_orders_by_email(
-                email="x",
-                allow_network=True,
-                safe_mode=False,
-                automation_enabled=True,
-                client=_BoomClient(),
-            ),
-            [],
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_BoomClient(),
         )
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "http_error")
+
+    def test_shopify_match_diagnostics_classification(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, payload: dict, headers: dict):
+                self.status_code = status_code
+                self.dry_run = False
+                self._payload = payload
+                self.headers = headers
+                self.reason = None
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, response):
+                self.response = response
+
+            def list_orders_by_email(self, *args, **kwargs):
+                return self.response
+
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=401, payload={"orders": []}, headers={"x-request-id": "req-1"}
+                )
+            ),
+        )
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "auth_fail")
+        self.assertEqual(diagnostics.get("status_code"), 401)
+        self.assertEqual(diagnostics.get("request_id"), "req-1")
+
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=429, payload={"orders": []}, headers={"x-request-id": "req-2"}
+                )
+            ),
+        )
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "rate_limited")
+
+        orders, diagnostics = _list_shopify_orders_by_email(
+            email="x",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=200, payload={"orders": []}, headers={"x-request-id": "req-3"}
+                )
+            ),
+        )
+        self.assertEqual(orders, [])
+        self.assertEqual(diagnostics.get("category"), "no_match")
 
     def test_lookup_shopify_handles_404_fallback(self) -> None:
         class _StubResponse:
@@ -360,6 +502,8 @@ class OrderIdResolutionTests(unittest.TestCase):
         class _StubResponse:
             status_code = 200
             dry_run = False
+            headers = {}
+            reason = None
 
             def json(self):
                 return {"orders": []}
@@ -410,8 +554,8 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual((number, label), ("", ""))
         number, label = _extract_order_number_from_payload({"order_number": "123"})
         self.assertEqual((number, label), ("123", "order_number_field"))
-        number, label = _extract_order_number_from_payload({"order": {"name": "#456"}})
-        self.assertEqual((number, label), ("456", "hash_number"))
+        number, label = _extract_order_number_from_payload({"order": {"name": "#123456"}})
+        self.assertEqual((number, label), ("123456", "hash_number"))
         number, label = _extract_order_number_from_payload(
             {"custom_fields": {"order_ref": "789"}}
         )
@@ -457,6 +601,20 @@ class OrderIdResolutionTests(unittest.TestCase):
 
     def test_match_order_number_from_text_empty(self) -> None:
         self.assertEqual(_match_order_number_from_text(""), ("", ""))
+
+    def test_match_order_number_from_text_prefers_order_keyword(self) -> None:
+        text = "Order # 1180306 ref #9999999"
+        number, label = _match_order_number_from_text(text)
+        self.assertEqual(number, "1180306")
+        self.assertEqual(label, "order_number")
+
+    def test_extract_order_number_from_text_html_anchor_ignored(self) -> None:
+        text = '<a href="#m_12345">Click</a>'
+        self.assertEqual(_extract_order_number_from_text(text), "")
+
+    def test_extract_order_number_from_text_hash_and_order(self) -> None:
+        self.assertEqual(_extract_order_number_from_text("Order # 1180306"), "1180306")
+        self.assertEqual(_extract_order_number_from_text("#1180306"), "1180306")
 
     def test_extract_shopify_fields_and_shipstation_fields(self) -> None:
         self.assertEqual(_extract_shopify_fields("bad"), {})
@@ -791,6 +949,8 @@ class OrderIdResolutionTests(unittest.TestCase):
                 self.status_code = status_code
                 self.dry_run = dry_run
                 self._payload = payload
+                self.headers = {}
+                self.reason = None
 
             def json(self):
                 return self._payload
@@ -802,7 +962,7 @@ class OrderIdResolutionTests(unittest.TestCase):
             def find_orders_by_name(self, *args, **kwargs):
                 return self.responses.pop(0)
 
-        payload = order_lookup._lookup_shopify_by_name(
+        payload, _ = order_lookup._lookup_shopify_by_name(
             order_name="#1057300",
             allow_network=True,
             safe_mode=False,
@@ -811,7 +971,7 @@ class OrderIdResolutionTests(unittest.TestCase):
         )
         self.assertEqual(payload, {})
 
-        payload = order_lookup._lookup_shopify_by_name(
+        payload, _ = order_lookup._lookup_shopify_by_name(
             order_name="#1057300",
             allow_network=True,
             safe_mode=False,
@@ -820,7 +980,7 @@ class OrderIdResolutionTests(unittest.TestCase):
         )
         self.assertEqual(payload, {})
 
-        payload = order_lookup._lookup_shopify_by_name(
+        payload, _ = order_lookup._lookup_shopify_by_name(
             order_name="#1057300",
             allow_network=True,
             safe_mode=False,
@@ -843,6 +1003,8 @@ class OrderIdResolutionTests(unittest.TestCase):
                 self.status_code = status_code
                 self.dry_run = dry_run
                 self._payload = payload
+                self.headers = {}
+                self.reason = None
 
             def json(self):
                 return self._payload
@@ -854,7 +1016,7 @@ class OrderIdResolutionTests(unittest.TestCase):
             def find_orders_by_name(self, *args, **kwargs):
                 return self.responses.pop(0)
 
-        payload = order_lookup._lookup_shopify_by_name(
+        payload, _ = order_lookup._lookup_shopify_by_name(
             order_name="#1057300",
             allow_network=True,
             safe_mode=False,
