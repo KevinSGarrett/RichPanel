@@ -32,6 +32,7 @@
 - Added production cutover runbook with Phase 0–2 + rollback steps.
 - Added CloudWatch alarms + dashboard with explicit alarm names for retrieval.
 - Expanded preflight to include Secrets Manager, Shopify GraphQL, and refresh “last success”.
+- Regenerated docs registry outputs after adding new docs (required by validate check).
 
 **Design decisions (why this way):**
 - Metric filters rely on explicit log markers for 429s and OpenAI intent failures.
@@ -59,6 +60,11 @@
 - `PM_REHYDRATION_PACK/DEADLINE_SCHEDULE/08_PRODUCTION_CUTOVER_PLAN.md`
 - `docs/09_Deployment/Order_Status_Preflight.md`
 - `docs/09_Deployment/Order_Status_Monitoring.md`
+- `docs/REGISTRY.md`
+- `docs/_generated/doc_outline.json`
+- `docs/_generated/doc_registry.compact.json`
+- `docs/_generated/doc_registry.json`
+- `docs/_generated/heading_index.json`
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_alarms.json`
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_dashboards.json`
@@ -110,4 +116,5 @@ shopify_token_refresh_last_success PASS last_success_age_hours=0.07
 
 **Please ignore:**
 - Rehydration pack artifacts except referenced proof files.
+- Generated registries unless CI flags an issue.
 - Line-number shifts outside touched files.
