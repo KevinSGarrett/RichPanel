@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "timestamp": "2026-02-02T05:11:38.099438+00:00",
+    "gmail_user": "me",
+    "query_redacted": "subject:B66 Followup Thread newer_than:2d to:<redacted>",
+    "query_fingerprint": "73f9639efc19",
+    "max_results": 50,
+    "expected_to_fingerprint": "d851b0565756",
+    "profile_email_hash": "d851b0565756"
+  },
+  "result": {
+    "status": "found",
+    "message_count": 1,
+    "most_recent_internal_date": "2026-02-02T05:11:17+00:00",
+    "expected_to_match_count": 1
+  },
+  "messages": [
+    {
+      "id_fingerprint": "c860cd8e29af",
+      "thread_id_fingerprint": "c860cd8e29af",
+      "internal_date": "2026-02-02T05:11:17+00:00",
+      "label_ids": [
+        "UNREAD",
+        "IMPORTANT",
+        "CATEGORY_PERSONAL",
+        "INBOX"
+      ],
+      "subject_hash": "d288667baf78",
+      "from_hash": "0ff0d9ef9c82",
+      "to_hash": "d851b0565756",
+      "delivered_to_hash": "d851b0565756",
+      "original_to_hash": null,
+      "date": "Mon, 2 Feb 2026 05:11:17 +0000",
+      "matches_expected_to": true
+    }
+  ]
+}
