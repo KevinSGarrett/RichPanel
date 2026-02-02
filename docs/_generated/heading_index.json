@@ -22811,6 +22811,12 @@
       "anchor": "08testingquality"
     }
   ],
+  "09_deployment": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09deployment"
+    }
+  ],
   "09_deployment_operations": [
     {
       "path": "REGISTRY.md",
