@@ -245,22 +245,32 @@ def main() -> int:
             st = str(rec["status"])
             title = str(rec["title"])
             lines.append(f"- {marker(st)} [{title}]({rel})  (`{rel}`)")
-    (DOCS_ROOT / "REGISTRY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (DOCS_ROOT / "REGISTRY.md").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8", newline="\n"
+    )
 
     # Machine outputs
     GENERATED_DIR.mkdir(exist_ok=True)
 
     (GENERATED_DIR / "doc_registry.json").write_text(
-        json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(records, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     (GENERATED_DIR / "doc_registry.compact.json").write_text(
-        json.dumps(records, separators=(",", ":"), ensure_ascii=False), encoding="utf-8"
+        json.dumps(records, separators=(",", ":"), ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     (GENERATED_DIR / "doc_outline.json").write_text(
-        json.dumps(outlines, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(outlines, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     (GENERATED_DIR / "heading_index.json").write_text(
-        json.dumps(heading_index, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(heading_index, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
     print(f"OK: regenerated registry for {len(records)} docs.")
