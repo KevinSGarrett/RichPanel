@@ -43,6 +43,16 @@ class DiscoverDocsTests(unittest.TestCase):
             self.assertIn("09_Deployment/Order_Status.md", rels)
             self.assertEqual(rels, sorted(rels))
 
+    def test_discover_docs_falls_back_without_git(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            docs_root = root / "docs"
+            docs_root.mkdir()
+            (docs_root / "INDEX.md").write_text("# Index\n", encoding="utf-8")
+            discovered = registry._discover_docs(docs_root)
+            rels = [p.relative_to(docs_root).as_posix() for p in discovered]
+            self.assertIn("INDEX.md", rels)
+
 
 class WriteIfChangedTests(unittest.TestCase):
     def test_write_if_changed_skips_noop_write(self) -> None:
@@ -62,6 +72,13 @@ class WriteIfChangedTests(unittest.TestCase):
             registry.write_if_changed(path, "hello world\n")
             self.assertEqual(path.read_text(encoding="utf-8"), "hello world\n")
 
+    def test_read_text_handles_decode_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "bad.txt"
+            path.write_bytes(b"\xff\xfe\xff")
+            text = registry.read_text(path)
+            self.assertTrue(text)
+
 
 class MainGenerationTests(unittest.TestCase):
     def test_main_generates_registry_outputs(self) -> None:
@@ -71,6 +88,7 @@ class MainGenerationTests(unittest.TestCase):
             docs_root.mkdir()
             (docs_root / "INDEX.md").write_text("- [A](A.md)\n", encoding="utf-8")
             (docs_root / "A.md").write_text("# A\n", encoding="utf-8")
+            (docs_root / "REGISTRY.md").write_text("# Registry\n", encoding="utf-8")
 
             subprocess.run(
                 ["git", "init"],
@@ -80,7 +98,7 @@ class MainGenerationTests(unittest.TestCase):
                 stderr=subprocess.DEVNULL,
             )
             subprocess.run(
-                ["git", "add", "docs/INDEX.md", "docs/A.md"],
+                ["git", "add", "docs/INDEX.md", "docs/A.md", "docs/REGISTRY.md"],
                 cwd=str(root),
                 check=True,
                 stdout=subprocess.DEVNULL,
@@ -106,6 +124,58 @@ class MainGenerationTests(unittest.TestCase):
                 registry.DOCS_ROOT = orig_docs_root
                 registry.GENERATED_DIR = orig_generated
                 registry.INDEX_FILE = orig_index
+
+    def test_main_missing_docs_root(self) -> None:
+        orig_docs_root = registry.DOCS_ROOT
+        orig_index = registry.INDEX_FILE
+        try:
+            missing_root = Path(tempfile.mkdtemp()) / "docs"
+            registry.DOCS_ROOT = missing_root
+            registry.INDEX_FILE = missing_root / "INDEX.md"
+            rc = registry.main()
+            self.assertEqual(rc, 1)
+        finally:
+            registry.DOCS_ROOT = orig_docs_root
+            registry.INDEX_FILE = orig_index
+
+
+class ParsingHelpersTests(unittest.TestCase):
+    def test_parse_index_links_filters_external(self) -> None:
+        text = "\n".join(
+            [
+                "- [A](A.md)",
+                "- [B](https://example.com)",
+                "- [C](mailto:test@example.com)",
+                "- [D](B.md#section)",
+            ]
+        )
+        links = registry.parse_index_links(text)
+        self.assertEqual(links, ["A.md", "B.md"])
+
+    def test_status_for_sections(self) -> None:
+        self.assertEqual(registry.status_for("_generated/file.md", False), "generated")
+        self.assertEqual(
+            registry.status_for("06_Data_Privacy_Observability/file.md", False),
+            "legacy",
+        )
+        self.assertEqual(registry.status_for("other/file.md", True), "canonical")
+        self.assertEqual(registry.status_for("other/file.md", False), "supplemental")
+
+    def test_extract_outline_skips_code_fences(self) -> None:
+        text = "\n".join(
+            [
+                "# Title",
+                "```",
+                "## Hidden",
+                "```",
+                "## Visible",
+            ]
+        )
+        outline = registry.extract_outline(text)
+        headings = [entry["text"] for entry in outline]
+        self.assertIn("Title", headings)
+        self.assertIn("Visible", headings)
+        self.assertNotIn("Hidden", headings)
 
 
 if __name__ == "__main__":
