@@ -9,11 +9,13 @@ import {
   Tags,
 } from "aws-cdk-lib";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IStringParameter, StringParameter } from "aws-cdk-lib/aws-ssm";
 import * as sqs from "aws-cdk-lib/aws-sqs";
@@ -47,6 +49,8 @@ interface EventPipelineResources {
   readonly idempotencyTable: dynamodb.Table;
   readonly conversationStateTable: dynamodb.Table;
   readonly auditTrailTable: dynamodb.Table;
+  readonly workerFunction: lambda.Function;
+  readonly shopifyRefreshFunction?: lambda.Function;
 }
 
 /**
@@ -82,6 +86,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
     this.applyStandardTags(this.environmentConfig);
     const pipeline = this.buildEventPipeline();
+    this.addMonitoring(pipeline);
     this.exposeNamingOutputs();
     this.exposePipelineOutputs(pipeline);
   }
@@ -319,8 +324,9 @@ export class RichpanelMiddlewareStack extends Stack {
       })
     );
 
+    let shopifyRefreshFunction: lambda.Function | undefined;
     if (this.environmentConfig.name === "prod") {
-      const shopifyRefreshFunction = new lambda.Function(
+      shopifyRefreshFunction = new lambda.Function(
         this,
         "ShopifyTokenRefreshLambda",
         {
@@ -352,12 +358,8 @@ export class RichpanelMiddlewareStack extends Stack {
         }
       );
 
-      this.secrets.shopifyAdminApiToken.grantRead(
-        shopifyRefreshFunction
-      );
-      this.secrets.shopifyAdminApiToken.grantWrite(
-        shopifyRefreshFunction
-      );
+      this.secrets.shopifyAdminApiToken.grantRead(shopifyRefreshFunction);
+      this.secrets.shopifyAdminApiToken.grantWrite(shopifyRefreshFunction);
       this.secrets.shopifyClientId.grantRead(shopifyRefreshFunction);
       this.secrets.shopifyClientSecret.grantRead(shopifyRefreshFunction);
 
@@ -368,7 +370,9 @@ export class RichpanelMiddlewareStack extends Stack {
           schedule: events.Schedule.rate(Duration.hours(4)),
         }
       );
-      scheduleRule.addTarget(new targets.LambdaFunction(shopifyRefreshFunction));
+      scheduleRule.addTarget(
+        new targets.LambdaFunction(shopifyRefreshFunction)
+      );
     }
 
     const httpApi = this.createHttpApi(ingressFunction);
@@ -379,7 +383,173 @@ export class RichpanelMiddlewareStack extends Stack {
       idempotencyTable,
       conversationStateTable,
       auditTrailTable,
+      workerFunction,
+      shopifyRefreshFunction,
     };
+  }
+
+  private addMonitoring(pipeline: EventPipelineResources): void {
+    const workerLogGroup = new logs.LogGroup(this, "WorkerLogGroup", {
+      logGroupName: `/aws/lambda/${pipeline.workerFunction.functionName}`,
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+    const metricNamespace = this.naming.metricNamespace();
+
+    const workerErrors = pipeline.workerFunction.metricErrors({
+      period: Duration.minutes(5),
+    });
+    const workerInvocations = pipeline.workerFunction.metricInvocations({
+      period: Duration.minutes(5),
+    });
+    const workerErrorRate = new cloudwatch.MathExpression({
+      expression: "IF(invocations>0, errors/invocations, 0)",
+      usingMetrics: {
+        errors: workerErrors,
+        invocations: workerInvocations,
+      },
+      period: Duration.minutes(5),
+    });
+
+    new cloudwatch.Alarm(this, "WorkerErrorRateAlarm", {
+      alarmName: `${this.naming.resourcePrefix()}-worker-error-rate`,
+      alarmDescription:
+        "Worker Lambda error rate above baseline (5xx or unhandled errors).",
+      metric: workerErrorRate,
+      threshold: 0.05,
+      evaluationPeriods: 3,
+      datapointsToAlarm: 3,
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+
+    const richpanel429Metric = new cloudwatch.Metric({
+      namespace: metricNamespace,
+      metricName: "Richpanel429Count",
+      statistic: "sum",
+      period: Duration.minutes(5),
+    });
+    new logs.MetricFilter(this, "Richpanel429MetricFilter", {
+      logGroup: workerLogGroup,
+      metricNamespace,
+      metricName: "Richpanel429Count",
+      filterPattern: logs.FilterPattern.allTerms(
+        "richpanel.rate_limited",
+        "status=429"
+      ),
+      metricValue: "1",
+    });
+    new cloudwatch.Alarm(this, "Richpanel429SpikeAlarm", {
+      alarmName: `${this.naming.resourcePrefix()}-richpanel-429-spike`,
+      alarmDescription: "Richpanel 429 rate-limit spikes.",
+      metric: richpanel429Metric,
+      threshold: 5,
+      evaluationPeriods: 3,
+      datapointsToAlarm: 2,
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+
+    const shopify429Metric = new cloudwatch.Metric({
+      namespace: metricNamespace,
+      metricName: "Shopify429Count",
+      statistic: "sum",
+      period: Duration.minutes(5),
+    });
+    new logs.MetricFilter(this, "Shopify429MetricFilter", {
+      logGroup: workerLogGroup,
+      metricNamespace,
+      metricName: "Shopify429Count",
+      filterPattern: logs.FilterPattern.allTerms(
+        "shopify.rate_limited",
+        "status=429"
+      ),
+      metricValue: "1",
+    });
+    new cloudwatch.Alarm(this, "Shopify429SpikeAlarm", {
+      alarmName: `${this.naming.resourcePrefix()}-shopify-429-spike`,
+      alarmDescription: "Shopify 429 rate-limit spikes.",
+      metric: shopify429Metric,
+      threshold: 5,
+      evaluationPeriods: 3,
+      datapointsToAlarm: 2,
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+
+    const openaiFailureMetric = new cloudwatch.Metric({
+      namespace: metricNamespace,
+      metricName: "OpenAIOrderStatusIntentFailures",
+      statistic: "sum",
+      period: Duration.minutes(5),
+    });
+    new logs.MetricFilter(this, "OpenAIIntentFailureMetricFilter", {
+      logGroup: workerLogGroup,
+      metricNamespace,
+      metricName: "OpenAIOrderStatusIntentFailures",
+      filterPattern: logs.FilterPattern.allTerms(
+        "order_status_intent.request_failed"
+      ),
+      metricValue: "1",
+    });
+    new cloudwatch.Alarm(this, "OpenAIIntentFailureAlarm", {
+      alarmName: `${this.naming.resourcePrefix()}-openai-intent-failures`,
+      alarmDescription: "OpenAI order status intent failures detected.",
+      metric: openaiFailureMetric,
+      threshold: 0,
+      evaluationPeriods: 1,
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+
+    if (pipeline.shopifyRefreshFunction) {
+      const refreshErrors = pipeline.shopifyRefreshFunction.metricErrors({
+        period: Duration.hours(1),
+      });
+      new cloudwatch.Alarm(this, "ShopifyRefreshErrorsAlarm", {
+        alarmName: `${this.naming.resourcePrefix()}-shopify-refresh-errors`,
+        alarmDescription:
+          "Shopify token refresh Lambda errors > 0 in the last hour.",
+        metric: refreshErrors,
+        threshold: 0,
+        evaluationPeriods: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      });
+    }
+
+    const dashboard = new cloudwatch.Dashboard(
+      this,
+      "OrderStatusMonitoringDashboard",
+      {
+        dashboardName: `${this.naming.resourcePrefix()}-order-status`,
+      }
+    );
+    dashboard.addWidgets(
+      new cloudwatch.GraphWidget({
+        title: "Worker Error Rate",
+        left: [workerErrorRate],
+      }),
+      new cloudwatch.GraphWidget({
+        title: "429 Rate Limits",
+        left: [richpanel429Metric, shopify429Metric],
+      }),
+      new cloudwatch.GraphWidget({
+        title: "OpenAI Order Status Failures",
+        left: [openaiFailureMetric],
+      }),
+      new cloudwatch.TextWidget({
+        markdown:
+          "TODO: Wire order_status_true_rate metric once shadow job is scheduled.",
+        height: 2,
+        width: 24,
+      })
+    );
   }
 
   private createHttpApi(ingressFunction: lambda.Function): apigwv2.CfnApi {

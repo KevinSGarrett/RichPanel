@@ -240,8 +240,22 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         argv = [
             "order_status_preflight_check.py",
             "--skip-refresh-lambda-check",
+            "--skip-secrets-check",
         ]
-        with mock.patch.object(sys, "argv", argv):
+        with mock.patch.object(preflight, "_check_shopify_graphql", return_value={"status": "PASS", "details": "ok"}), mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "dev",
+                "MW_ALLOW_NETWORK_READS": "true",
+                "RICHPANEL_READ_ONLY": "true",
+                "RICHPANEL_WRITE_DISABLED": "true",
+                "RICHPANEL_OUTBOUND_ENABLED": "false",
+                "SHOPIFY_OUTBOUND_ENABLED": "true",
+                "SHOPIFY_WRITE_DISABLED": "true",
+                "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+            },
+            clear=False,
+        ), mock.patch.object(sys, "argv", argv):
             self.assertEqual(preflight.main(), 0)
 
     def test_main_env_and_output_paths(self) -> None:
@@ -258,12 +272,30 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
                     "order_status_preflight_check.py",
                     "--env",
                     "dev",
+                    "--skip-refresh-lambda-check",
+                    "--skip-secrets-check",
                     "--out-md",
                     str(out_md),
                 ]
                 old_env = os.environ.get("ENVIRONMENT")
                 try:
-                    with mock.patch.object(sys, "argv", argv):
+                    with mock.patch.object(
+                        preflight,
+                        "_check_shopify_graphql",
+                        return_value={"status": "PASS", "details": "ok"},
+                    ), mock.patch.dict(
+                        os.environ,
+                        {
+                            "MW_ALLOW_NETWORK_READS": "true",
+                            "RICHPANEL_READ_ONLY": "true",
+                            "RICHPANEL_WRITE_DISABLED": "true",
+                            "RICHPANEL_OUTBOUND_ENABLED": "false",
+                            "SHOPIFY_OUTBOUND_ENABLED": "true",
+                            "SHOPIFY_WRITE_DISABLED": "true",
+                            "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+                        },
+                        clear=False,
+                    ), mock.patch.object(sys, "argv", argv):
                         self.assertEqual(preflight.main(), 2)
                 finally:
                     if old_env is None:

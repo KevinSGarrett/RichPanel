@@ -1,0 +1,123 @@
+﻿{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-2:878145708918:stack/RichpanelMiddleware-prod/825a01e0-fec3-11f0-8031-06844b0d650b",
+            "StackName": "RichpanelMiddleware-prod",
+            "ChangeSetId": "arn:aws:cloudformation:us-east-2:878145708918:changeSet/cdk-deploy-change-set/91ae5085-9962-46b5-a7de-3fd5327357db",
+            "Description": "Richpanel middleware scaffold (prod)",
+            "Parameters": [
+                {
+                    "ParameterKey": "SafeModeFlagParameterParameter",
+                    "ParameterValue": "/rp-mw/prod/safe_mode",
+                    "ResolvedValue": "true"
+                },
+                {
+                    "ParameterKey": "AutomationEnabledFlagParameterParameter",
+                    "ParameterValue": "/rp-mw/prod/automation_enabled",
+                    "ResolvedValue": "false"
+                },
+                {
+                    "ParameterKey": "BootstrapVersion",
+                    "ParameterValue": "/cdk-bootstrap/hnb659fds/version",
+                    "ResolvedValue": "30"
+                }
+            ],
+            "CreationTime": "2026-01-31T16:40:11.074000+00:00",
+            "LastUpdatedTime": "2026-02-02T15:28:25.187000+00:00",
+            "RollbackConfiguration": {},
+            "StackStatus": "UPDATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_IAM",
+                "CAPABILITY_NAMED_IAM",
+                "CAPABILITY_AUTO_EXPAND"
+            ],
+            "Outputs": [
+                {
+                    "OutputKey": "AuditTrailTableName",
+                    "OutputValue": "rp_mw_prod_audit_trail",
+                    "Description": "DynamoDB table name for audit trail records."
+                },
+                {
+                    "OutputKey": "EventsQueueName",
+                    "OutputValue": "rp-mw-prod-events.fifo",
+                    "Description": "Primary FIFO queue that decouples ingress and worker lambdas."
+                },
+                {
+                    "OutputKey": "AutomationEnabledParamPath",
+                    "OutputValue": "/rp-mw/prod/automation_enabled",
+                    "Description": "SSM parameter path for the automation_enabled feature flag."
+                },
+                {
+                    "OutputKey": "IdempotencyTableName",
+                    "OutputValue": "rp_mw_prod_idempotency",
+                    "Description": "DynamoDB table name for idempotency records."
+                },
+                {
+                    "OutputKey": "SafeModeParamPath",
+                    "OutputValue": "/rp-mw/prod/safe_mode",
+                    "Description": "SSM parameter path for the safe_mode feature flag."
+                },
+                {
+                    "OutputKey": "IngressEndpointUrl",
+                    "OutputValue": "https://0rg6x71jw0.execute-api.us-east-2.amazonaws.com",
+                    "Description": "Public HTTP API endpoint for webhook ingress."
+                },
+                {
+                    "OutputKey": "EventsQueueUrl",
+                    "OutputValue": "https://sqs.us-east-2.amazonaws.com/878145708918/rp-mw-prod-events.fifo",
+                    "Description": "Queue URL for diagnostics and smoke tests."
+                },
+                {
+                    "OutputKey": "SecretsNamespace",
+                    "OutputValue": "rp-mw/prod",
+                    "Description": "Secrets Manager prefix rp-mw/<env>/..."
+                },
+                {
+                    "OutputKey": "NamespacePrefix",
+                    "OutputValue": "/rp-mw/prod",
+                    "Description": "Base /rp-mw/<env> prefix for parameters and shared config."
+                },
+                {
+                    "OutputKey": "ConversationStateTableName",
+                    "OutputValue": "rp_mw_prod_conversation_state",
+                    "Description": "DynamoDB table name for conversation state snapshots."
+                }
+            ],
+            "RoleARN": "arn:aws:iam::878145708918:role/cdk-hnb659fds-cfn-exec-role-878145708918-us-east-2",
+            "Tags": [
+                {
+                    "Key": "owner",
+                    "Value": "middleware"
+                },
+                {
+                    "Key": "tier",
+                    "Value": "prod"
+                },
+                {
+                    "Key": "service",
+                    "Value": "richpanel-middleware"
+                },
+                {
+                    "Key": "env",
+                    "Value": "prod"
+                },
+                {
+                    "Key": "cost-center",
+                    "Value": "eng-prod"
+                }
+            ],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            },
+            "LastOperations": [
+                {
+                    "OperationType": "UPDATE_STACK",
+                    "OperationId": "d71eae56-edf2-4f68-b762-7acee5776f15"
+                }
+            ]
+        }
+    ]
+}

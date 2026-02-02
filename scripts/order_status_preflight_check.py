@@ -4,19 +4,21 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from integrations.common import resolve_env_name  # noqa: E402
 from integrations.shopify.client import (  # noqa: E402
     ShopifyClient,
     ShopifyRequestError,
     TransportError as ShopifyTransportError,
+    TransportRequest as ShopifyTransportRequest,
 )
 from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelClient,
@@ -24,6 +26,39 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     SecretLoadError,
     TransportError,
 )
+
+try:  # pragma: no cover - exercised in integration runs
+    import boto3  # type: ignore
+    from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
+except ImportError:  # pragma: no cover - offline/test mode
+    boto3 = None  # type: ignore
+
+    class _FallbackBotoError(Exception):
+        """Placeholder to allow tests without boto3/botocore."""
+
+    BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
+
+
+REQUIRED_FLAG_VALUES: Dict[str, str] = {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false",
+    "SHOPIFY_OUTBOUND_ENABLED": "true",
+    "SHOPIFY_WRITE_DISABLED": "true",
+}
+
+REQUIRED_ENV_VARS = [
+    "SHOPIFY_SHOP_DOMAIN",
+]
+
+REQUIRED_SECRET_SUFFIXES = [
+    ("richpanel", "api_key"),
+    ("shopify", "admin_api_token"),
+    ("shopify", "client_id"),
+    ("shopify", "client_secret"),
+    ("openai", "api_key"),
+]
 
 
 def _write_markdown(path: Path, payload: Dict[str, Any]) -> None:
@@ -55,6 +90,223 @@ def _write_markdown(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+
+def _canonical_env(env_name: str) -> str:
+    normalized = (env_name or "").strip().lower()
+    if normalized == "production":
+        return "prod"
+    return normalized or "local"
+
+
+def _check_required_env() -> Dict[str, str]:
+    env_name, env_source = resolve_env_name()
+    missing: List[str] = []
+    mismatched: List[str] = []
+    for key in REQUIRED_ENV_VARS:
+        if not os.environ.get(key):
+            missing.append(key)
+    for key, expected in REQUIRED_FLAG_VALUES.items():
+        value = os.environ.get(key)
+        if value is None:
+            missing.append(key)
+            continue
+        if str(value).strip().lower() != expected:
+            mismatched.append(f"{key}={value}")
+    if env_name == "local":
+        mismatched.append("environment=local")
+    if missing or mismatched:
+        details = []
+        if missing:
+            details.append(f"missing={','.join(sorted(set(missing)))}")
+        if mismatched:
+            details.append(f"mismatched={','.join(sorted(set(mismatched)))}")
+        return {
+            "status": "FAIL",
+            "details": "; ".join(details),
+            "next_action": "Set required env vars and safety flags for read-only preflight.",
+        }
+    return {
+        "status": "PASS",
+        "details": f"env={env_name} source={env_source or 'unset'}",
+    }
+
+
+def _build_secret_ids(env_name: str) -> List[str]:
+    canonical_env = _canonical_env(env_name)
+    base = f"rp-mw/{canonical_env}"
+    return [f"{base}/{group}/{name}" for group, name in REQUIRED_SECRET_SUFFIXES]
+
+
+def _check_secrets(*, env_name: str) -> Dict[str, str]:
+    if boto3 is None:
+        return {
+            "status": "FAIL",
+            "details": "boto3_unavailable",
+            "next_action": "Install boto3 or run in CI with AWS creds to verify secrets.",
+        }
+    secrets_client = boto3.client("secretsmanager")
+    secret_ids = _build_secret_ids(env_name)
+    failures: List[str] = []
+    for secret_id in secret_ids:
+        try:
+            secrets_client.get_secret_value(SecretId=secret_id)
+        except (BotoCoreError, ClientError, Exception) as exc:
+            failures.append(f"{secret_id}({exc.__class__.__name__})")
+    if failures:
+        return {
+            "status": "FAIL",
+            "details": f"missing_or_undecodable={','.join(failures)}",
+            "next_action": "Ensure required Secrets Manager entries exist and decrypt.",
+        }
+    return {"status": "PASS", "details": f"checked={len(secret_ids)}"}
+
+
+def _check_shopify_graphql(
+    *,
+    shop_domain: Optional[str],
+    access_token_secret_id: Optional[str],
+) -> Dict[str, str]:
+    client = ShopifyClient(
+        allow_network=True,
+        shop_domain=shop_domain,
+        access_token_secret_id=access_token_secret_id,
+    )
+    token, reason = client._load_access_token()  # type: ignore[attr-defined]
+    if not token:
+        return {
+            "status": "FAIL",
+            "details": f"missing_token ({reason or 'unknown'})",
+            "next_action": "Check Shopify token secret + AWS access.",
+        }
+    url = client._build_url("graphql.json", None)  # type: ignore[attr-defined]
+    body = json.dumps({"query": "query { shop { name } }"}).encode("utf-8")
+    headers = {
+        "content-type": "application/json",
+        "x-shopify-access-token": token,
+    }
+    try:
+        response = client.transport.send(
+            ShopifyTransportRequest(
+                method="POST",
+                url=url,
+                headers=headers,
+                body=body,
+                timeout=client.timeout_seconds,
+            )
+        )
+    except Exception as exc:
+        return {
+            "status": "FAIL",
+            "details": f"request_failed ({exc.__class__.__name__})",
+            "next_action": "Verify Shopify connectivity + allow network reads.",
+        }
+    if response.status_code == 200:
+        try:
+            payload = json.loads(response.body.decode("utf-8"))
+        except Exception:
+            payload = None
+        if isinstance(payload, dict) and payload.get("errors"):
+            return {
+                "status": "FAIL",
+                "details": "graphql_errors",
+                "next_action": "Review Shopify GraphQL permissions + token scopes.",
+            }
+        return {"status": "PASS", "details": "ok (200)"}
+    if response.status_code in {401, 403}:
+        return {
+            "status": "FAIL",
+            "details": f"auth_fail ({response.status_code})",
+            "next_action": "Check Shopify token secret; ensure read-only scopes.",
+        }
+    if response.status_code == 429:
+        return {
+            "status": "FAIL",
+            "details": "rate_limited (429)",
+            "next_action": "Retry after cooldown or lower request rate.",
+        }
+    return {
+        "status": "FAIL",
+        "details": f"http_error ({response.status_code})",
+        "next_action": "Check Shopify API availability + token validity.",
+    }
+
+
+def _check_refresh_lambda_last_success(
+    *, env_name: str, window_hours: int = 8
+) -> Dict[str, str]:
+    if boto3 is None:
+        return {
+            "status": "WARN",
+            "details": "boto3_unavailable",
+            "next_action": "Install boto3 or run in CI with AWS creds to verify refresh job.",
+        }
+    log_group_override = os.environ.get("SHOPIFY_REFRESH_LOG_GROUP")
+    lambda_name_override = os.environ.get("SHOPIFY_REFRESH_LAMBDA_NAME")
+    canonical_env = _canonical_env(env_name)
+    lambda_name = (
+        lambda_name_override
+        or f"rp-mw-{canonical_env}-shopify-token-refresh"
+    )
+    log_group = log_group_override or f"/aws/lambda/{lambda_name}"
+    client = boto3.client("logs")
+    now = datetime.now(timezone.utc)
+    try:
+        streams = client.describe_log_streams(
+            logGroupName=log_group,
+            orderBy="LastEventTime",
+            descending=True,
+            limit=5,
+        ).get("logStreams", [])
+    except (BotoCoreError, ClientError, Exception) as exc:
+        return {
+            "status": "FAIL",
+            "details": f"log_query_failed ({exc.__class__.__name__})",
+            "next_action": "Verify CloudWatch Logs permissions and log group name.",
+        }
+    latest_ts: Optional[int] = None
+    for stream in streams:
+        stream_name = stream.get("logStreamName")
+        if not stream_name:
+            continue
+        try:
+            response = client.get_log_events(
+                logGroupName=log_group,
+                logStreamName=stream_name,
+                limit=50,
+                startFromHead=False,
+            )
+        except (BotoCoreError, ClientError, Exception):
+            continue
+        for event in response.get("events") or []:
+            message = event.get("message") or ""
+            if "refresh_succeeded" not in message:
+                continue
+            try:
+                payload = json.loads(message)
+            except Exception:
+                payload = None
+            if isinstance(payload, dict) and payload.get("refresh_succeeded") is True:
+                ts = event.get("timestamp")
+                if isinstance(ts, int):
+                    latest_ts = ts if latest_ts is None else max(latest_ts, ts)
+    if latest_ts is None:
+        return {
+            "status": "FAIL",
+            "details": "no_success_event_found",
+            "next_action": "Confirm refresh Lambda is deployed and running.",
+        }
+    last_ts = datetime.fromtimestamp(latest_ts / 1000, tz=timezone.utc)
+    age_hours = (now - last_ts).total_seconds() / 3600.0
+    if age_hours > window_hours:
+        return {
+            "status": "FAIL",
+            "details": f"last_success_age_hours={age_hours:.2f}",
+            "next_action": "Investigate refresh Lambda failures or scheduling.",
+        }
+    return {
+        "status": "PASS",
+        "details": f"last_success_age_hours={age_hours:.2f}",
+    }
 
 def _check_richpanel(
     *,
@@ -210,12 +462,29 @@ def main() -> int:
         action="store_true",
         help="Skip the optional Shopify token refresh Lambda config check.",
     )
+    parser.add_argument(
+        "--skip-secrets-check",
+        action="store_true",
+        help="Skip Secrets Manager existence/decrypt checks.",
+    )
+    parser.add_argument(
+        "--refresh-lambda-window-hours",
+        type=int,
+        default=8,
+        help="Alert window for Shopify refresh Lambda last success.",
+    )
     args = parser.parse_args()
 
     if args.env:
         os.environ["ENVIRONMENT"] = args.env
 
     checks: List[Dict[str, Any]] = []
+    env_name, _ = resolve_env_name()
+    checks.append({"name": "required_env", **_check_required_env()})
+    if not args.skip_secrets_check:
+        checks.append(
+            {"name": "required_secrets", **_check_secrets(env_name=env_name)}
+        )
     richpanel_result = _check_richpanel(
         base_url=args.richpanel_base_url,
         api_key_secret_id=args.richpanel_secret_id,
@@ -227,14 +496,32 @@ def main() -> int:
         access_token_secret_id=args.shopify_secret_id,
     )
     checks.append({"name": "shopify_token", **shopify_result})
+    checks.append(
+        {
+            "name": "shopify_graphql",
+            **_check_shopify_graphql(
+                shop_domain=args.shop_domain,
+                access_token_secret_id=args.shopify_secret_id,
+            ),
+        }
+    )
 
     if not args.skip_refresh_lambda_check:
         lambda_result = _check_refresh_lambda_config()
         checks.append({"name": "shopify_token_refresh_lambda", **lambda_result})
+        checks.append(
+            {
+                "name": "shopify_token_refresh_last_success",
+                **_check_refresh_lambda_last_success(
+                    env_name=env_name,
+                    window_hours=args.refresh_lambda_window_hours,
+                ),
+            }
+        )
 
     overall_status = (
         "PASS"
-        if all(entry.get("status") == "PASS" for entry in checks)
+        if all(entry.get("status") != "FAIL" for entry in checks)
         else "FAIL"
     )
     token_diagnostics = shopify_result.get("token_diagnostics")
