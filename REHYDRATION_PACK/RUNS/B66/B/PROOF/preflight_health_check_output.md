@@ -1,12 +1,11 @@
 # Order status preflight health check
 
-- timestamp_utc: 2026-02-02T03:19:18.358828+00:00
-- overall_status: FAIL
+- timestamp_utc: 2026-02-02T03:24:59.494454+00:00
+- overall_status: PASS
 
 ## Checks
 - richpanel_api: PASS — ok (200)
-- shopify_token: FAIL — auth_fail (401)
-  - next_action: Token expired: run refresh job or update secret.
+- shopify_token: PASS — ok (200)
 - shopify_token_refresh_lambda: PASS — lambda_config_present
 
 ## Shopify token diagnostics
