@@ -68,7 +68,8 @@ def _check_richpanel(
         read_only=True,
     )
     try:
-        response = client.request("GET", "/v1/ping", log_body_excerpt=False)
+        preflight_path = os.environ.get("RICHPANEL_PREFLIGHT_PATH") or "/v1/users"
+        response = client.request("GET", preflight_path, log_body_excerpt=False)
     except (RichpanelRequestError, TransportError, SecretLoadError) as exc:
         return {
             "status": "FAIL",
