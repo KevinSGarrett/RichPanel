@@ -65,6 +65,7 @@ from richpanel_middleware.automation.order_status_intent import (  # type: ignor
 )
 from richpanel_middleware.commerce.order_lookup import (  # type: ignore  # noqa: E402
     lookup_order_summary,
+    _extract_customer_identity,
 )
 from richpanel_middleware.ingest.envelope import (  # type: ignore  # noqa: E402
     build_event_envelope,
@@ -153,6 +154,7 @@ _ORDER_STATUS_SCENARIOS = {
     "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5",
     "order_status_no_match",
+    "order_status_fallback_email_match",
     "allowlist_blocked",
 }
 
@@ -163,6 +165,7 @@ _ORDER_STATUS_VARIANTS = {
     "order_status_no_tracking": "order_status_no_tracking",
     "order_status_no_tracking_short_window": "order_status_no_tracking_short_window",
     "order_status_no_tracking_standard_shipping_3_5": "order_status_no_tracking_standard_shipping_3_5",
+    "order_status_fallback_email_match": "order_status_fallback_email",
     "allowlist_blocked": "order_status_tracking",
 }
 
@@ -660,6 +663,13 @@ def _sanitize_ticket_snapshot(
         sanitized["endpoint_variant"] = _extract_endpoint_variant(raw_path)
         sanitized["path_redacted"] = _redact_path(raw_path)
 
+    customer_email = sanitized.pop("customer_email", None)
+    if customer_email:
+        sanitized["customer_email_fingerprint"] = _fingerprint(customer_email)
+    customer_name = sanitized.pop("customer_name", None)
+    if customer_name:
+        sanitized["customer_name_fingerprint"] = _fingerprint(customer_name)
+
     return sanitized
 
 
@@ -766,6 +776,26 @@ def _order_status_no_match_payload(
         "ticket_created_at": ticket_created_at,
         "order_number": order_number,
         # Intentionally omit created_at/shipping/tracking to force lookup failure.
+    }
+
+
+def _order_status_fallback_email_payload(
+    run_id: str, *, conversation_id: Optional[str]
+) -> Dict[str, Any]:
+    """
+    Order-status payload without order number to force email/name lookup.
+    """
+    _ = run_id, conversation_id
+    ticket_created_at = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    return {
+        "scenario": "order_status_fallback_email_match",
+        "intent": "order_status_tracking",
+        "customer_message": "Hi, can you check the status of my order? Thanks!",
+        "ticket_created_at": ticket_created_at,
+        "customer_profile": {
+            "firstName": "Sandbox",
+            "lastName": "Tester",
+        },
     }
 
 
@@ -1222,6 +1252,7 @@ def _build_skip_proof_payload(
             "routed_to_support": None,
             "order_match_success": None,
             "order_match_failure_reason": None,
+            "order_match_method": None,
             "order_match_by_number": None,
             "reply_contains_tracking_url": None,
             "reply_contains_tracking_number_like": None,
@@ -1622,6 +1653,7 @@ def _fetch_ticket_snapshot(
                     explicit_source = "middleware"
                 last_message_source = explicit_source or "unknown"
 
+            customer_email, customer_name = _extract_customer_identity(payload)
             return {
                 "ticket_id": str(payload.get("id") or ticket_ref),
                 "status": status.strip() if isinstance(status, str) else status,
@@ -1637,6 +1669,8 @@ def _fetch_ticket_snapshot(
                 "status_code": response.status_code,
                 "dry_run": response.dry_run,
                 "path": path,
+                "customer_email": customer_email or None,
+                "customer_name": customer_name or None,
             }
 
         if saw_rate_limit and attempt < retry_attempts - 1:
@@ -2144,6 +2178,7 @@ def parse_args() -> argparse.Namespace:
             "order_status_no_tracking_short_window",
             "order_status_no_tracking_standard_shipping_3_5",
             "order_status_no_match",
+            "order_status_fallback_email_match",
             "not_order_status",
             "allowlist_blocked",
         ],
@@ -3259,6 +3294,88 @@ def _order_resolution_is_order_number(
     return "order_number" in normalized
 
 
+def _extract_order_resolution_from_actions(
+    actions: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    for action in actions or []:
+        if not isinstance(action, dict):
+            continue
+        if action.get("type") != "order_status_draft_reply":
+            continue
+        params = action.get("parameters")
+        if not isinstance(params, dict):
+            continue
+        order_summary = params.get("order_summary")
+        if not isinstance(order_summary, dict):
+            continue
+        resolution = order_summary.get("order_resolution")
+        if isinstance(resolution, dict):
+            return resolution
+    return None
+
+
+def _normalize_optional_text(value: Any) -> str:
+    try:
+        return str(value).strip()
+    except Exception:
+        return ""
+
+
+def _extract_order_match_method(
+    *, order_match_success: Optional[bool], order_resolution: Optional[Dict[str, Any]]
+) -> Optional[str]:
+    if order_match_success is False:
+        return "none"
+    if not isinstance(order_resolution, dict):
+        return None
+    resolved_by = _normalize_optional_text(order_resolution.get("resolvedBy")).lower()
+    if "order_number" in resolved_by:
+        return "order_number"
+    if "email_name" in resolved_by:
+        return "name_email"
+    if "email_only" in resolved_by:
+        return "email_only"
+    if resolved_by == "no_match":
+        return "none"
+    return None
+
+
+def _probe_order_resolution_from_ticket(
+    *,
+    ticket_payload: Optional[Dict[str, Any]],
+    allow_network: bool,
+    safe_mode: Optional[bool],
+    automation_enabled: Optional[bool],
+) -> Optional[Dict[str, Any]]:
+    if not allow_network or not isinstance(ticket_payload, dict):
+        return None
+    email, name = _extract_customer_identity(ticket_payload)
+    if not email:
+        return None
+    payload: Dict[str, Any] = {
+        "customer_profile": {
+            "email": email,
+            "name": name or None,
+        }
+    }
+    envelope = build_event_envelope(payload)
+    try:
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=bool(safe_mode),
+            automation_enabled=bool(automation_enabled)
+            if automation_enabled is not None
+            else True,
+            allow_network=allow_network,
+        )
+    except Exception:
+        return None
+    if not isinstance(summary, dict):
+        return None
+    resolution = summary.get("order_resolution")
+    return resolution if isinstance(resolution, dict) else None
+
+
 def _detect_order_match_by_number(
     *,
     payload: Dict[str, Any],
@@ -3681,6 +3798,10 @@ def build_payload(
             )
         elif scenario_variant == "order_status_no_tracking_standard_shipping_3_5":
             scenario_payload = _order_status_no_tracking_standard_shipping_3_5_payload(
+                run_id or "smoke", conversation_id=conversation_id
+            )
+        elif scenario_variant == "order_status_fallback_email":
+            scenario_payload = _order_status_fallback_email_payload(
                 run_id or "smoke", conversation_id=conversation_id
             )
         else:
@@ -4367,6 +4488,33 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         draft_action_present=draft_action_present,
         routing_intent=routing_intent,
     )
+    order_resolution = _extract_order_resolution_from_actions(combined_actions)
+    order_match_method = _extract_order_match_method(
+        order_match_success=order_match_evidence.get("order_match_success"),
+        order_resolution=order_resolution,
+    )
+    if order_match_method is None and isinstance(order_resolution, dict):
+        order_match_method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution=order_resolution,
+        )
+    if (
+        order_match_method is None
+        and order_status_mode
+        and pre_ticket
+        and allow_network
+    ):
+        probed_resolution = _probe_order_resolution_from_ticket(
+            ticket_payload=pre_ticket,
+            allow_network=allow_network,
+            safe_mode=item.get("safe_mode"),
+            automation_enabled=item.get("automation_enabled"),
+        )
+        if isinstance(probed_resolution, dict):
+            order_match_method = _extract_order_match_method(
+                order_match_success=True,
+                order_resolution=probed_resolution,
+            )
     order_match_by_number = None
     if order_status_mode and not negative_scenario and require_order_match_by_number:
         order_match_by_number = _detect_order_match_by_number(
@@ -5964,6 +6112,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "order_match_failure_reason": order_match_evidence.get(
             "order_match_failure_reason"
         ),
+        "order_match_method": order_match_method,
         "order_match_by_number": order_match_by_number,
         "reply_contains_tracking_url": reply_contains_tracking_url,
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,

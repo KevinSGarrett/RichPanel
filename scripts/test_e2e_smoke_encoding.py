@@ -51,6 +51,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_support_routing,
     _evaluate_order_match_evidence,
     _order_resolution_is_order_number,
+    _extract_order_match_method,
     _detect_order_match_by_number,
     _should_skip_allowlist_blocked,
     _unexpected_outbound_blocked,
@@ -958,6 +959,23 @@ class OrderMatchResolutionTests(unittest.TestCase):
         self.assertIsNone(_order_resolution_is_order_number(None))
         self.assertIsNone(_order_resolution_is_order_number({}))
 
+    def test_extract_order_match_method_from_resolution(self) -> None:
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "shopify_email_name"},
+        )
+        self.assertEqual(method, "name_email")
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "shopify_email_only"},
+        )
+        self.assertEqual(method, "email_only")
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "richpanel_order_number"},
+        )
+        self.assertEqual(method, "order_number")
+
     def test_detect_order_match_by_number_success(self) -> None:
         payload = {"order_number": "12345", "tracking_number": "TRACK-123"}
         with patch(
@@ -1162,6 +1180,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
+        self.assertIn("order_match_method", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
         self.assertIn("operator_reply_reason", payload["proof_fields"])
@@ -1306,6 +1325,18 @@ class PayloadBuilderTests(unittest.TestCase):
         )
         self.assertEqual(payload["scenario_name"], "order_status_no_match")
         self.assertTrue(payload["order_number"].startswith("FAKE-"))
+
+    def test_build_payload_order_status_fallback_email_match(self) -> None:
+        payload = build_payload(
+            "evt-457",
+            conversation_id="conv-3",
+            run_id="RUN",
+            scenario="order_status_fallback_email_match",
+        )
+        self.assertEqual(
+            payload["scenario_name"], "order_status_fallback_email_match"
+        )
+        self.assertNotIn("order_number", payload)
 
     def test_build_payload_baseline_has_no_scenario(self) -> None:
         payload = build_payload(
