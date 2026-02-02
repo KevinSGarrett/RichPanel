@@ -194,6 +194,29 @@ What it does:
 - Note: local runs without `--out` continue to write `live_readonly_shadow_eval_report_<RUN_ID>.json` and related legacy filenames.
 - Drift threshold: **warning** when >20% of samples have a new schema fingerprint (ticket snapshot or Shopify summary)
 
+### Prod shadow order status report (scaled)
+
+- Script: `scripts/prod_shadow_order_status_report.py`
+- Required env flags (fail-closed if missing):
+  - `RICHPANEL_ENV=prod` (or `ENVIRONMENT=prod`)
+  - `MW_ALLOW_NETWORK_READS=true`
+  - `RICHPANEL_READ_ONLY=true`
+  - `RICHPANEL_WRITE_DISABLED=true`
+  - `RICHPANEL_OUTBOUND_ENABLED=false`
+  - `SHOPIFY_OUTBOUND_ENABLED=true`
+  - `SHOPIFY_WRITE_DISABLED=true`
+  - `MW_OPENAI_ROUTING_ENABLED=true`
+  - `MW_OPENAI_INTENT_ENABLED=true`
+  - `MW_OPENAI_SHADOW_ENABLED=true`
+- Sample size: use `--sample-size <N>` or `--max-tickets <N>` (not both). For scaled runs, target 250–500 and enable throttling:
+  - `--batch-size <N>` + `--batch-delay-seconds <N>` to reduce bursts
+  - `--throttle-seconds <N>` between ticket fetches
+  - Optional: `RICHPANEL_RATE_LIMIT_RPS=<N>` for client-side rate limiting
+- Diagnostics for 429/retry: add `--retry-diagnostics --request-trace` (optional `--retry-proof-path <path>`).
+- Required artifacts to commit:
+  - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_order_status_report.json`
+  - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_order_status_report.md`
+
 #### B61/C: Enhanced Diagnostic Metrics
 
 The shadow eval report now includes **diagnostic and actionable metrics** to help identify drift and performance issues:

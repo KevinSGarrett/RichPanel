@@ -36,6 +36,16 @@ class _StubRichpanelClient:
         return self._response
 
 
+class _CaptureRichpanelClient:
+    def __init__(self, *, response: _StubResponse | None = None):
+        self._response = response or _StubResponse(status_code=200, dry_run=False)
+        self.requested_path: str | None = None
+
+    def request(self, _method: str, path: str, **_kwargs):
+        self.requested_path = path
+        return self._response
+
+
 class _StubShopifyClient:
     def __init__(self, *, response: _StubResponse | None = None, diagnostics: dict | None = None, exc: Exception | None = None):
         self._response = response
@@ -66,6 +76,14 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         )
         result = preflight._check_richpanel(base_url=None, api_key_secret_id=None)
         self.assertEqual(result.get("status"), "PASS")
+
+    def test_check_richpanel_honors_preflight_path_env(self) -> None:
+        capture = _CaptureRichpanelClient()
+        preflight.RichpanelClient = lambda **kwargs: capture  # type: ignore[assignment]
+        with mock.patch.dict(os.environ, {"RICHPANEL_PREFLIGHT_PATH": "/v1/users"}, clear=True):
+            result = preflight._check_richpanel(base_url=None, api_key_secret_id=None)
+        self.assertEqual(result.get("status"), "PASS")
+        self.assertEqual(capture.requested_path, "/v1/users")
 
     def test_check_richpanel_dry_run_fails(self) -> None:
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
