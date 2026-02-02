@@ -31,6 +31,7 @@ from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     _normalize_tag_list,
     _to_bool,
     _truncate,
+    _parse_reset_after,
     TransportError,
     TransportRequest,
     TransportResponse,
@@ -196,6 +197,17 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(transport.requests), 2)
         self.assertGreaterEqual(sleeps[0], 5.0)
+
+    def test_parse_reset_after_epoch_vs_relative(self) -> None:
+        with mock.patch(
+            "richpanel_middleware.integrations.richpanel.client.time.time",
+            return_value=1_700_000_000.0,
+        ):
+            self.assertEqual(_parse_reset_after("30"), 30.0)
+            self.assertAlmostEqual(
+                _parse_reset_after("1700000030"), 30.0, places=3
+            )
+            self.assertIsNone(_parse_reset_after("1699999990"))
 
     def test_token_pool_rotates_keys(self) -> None:
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "true"

@@ -13,6 +13,7 @@ from richpanel_middleware.integrations import (
     ShopifyResponse,
     ShipStationClient,
 )
+from integrations.common import get_header_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -122,15 +123,7 @@ def _order_summary_from_payload(payload: Dict[str, Any]) -> Optional[OrderSummar
 def _extract_shopify_request_id(headers: Optional[Dict[str, str]]) -> Optional[str]:
     if not headers:
         return None
-    lowered = {str(key).lower(): value for key, value in headers.items()}
-    for key in SHOPIFY_REQUEST_ID_HEADERS:
-        value = lowered.get(key)
-        if value is None:
-            continue
-        text = str(value).strip()
-        if text:
-            return text
-    return None
+    return get_header_value(headers, SHOPIFY_REQUEST_ID_HEADERS)
 
 
 def _classify_shopify_status(status_code: Optional[int]) -> Optional[str]:

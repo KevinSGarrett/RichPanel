@@ -18,6 +18,7 @@ from integrations.common import (
     PROD_WRITE_ACK_ENV,
     PRODUCTION_ENVIRONMENTS,
     compute_retry_backoff,
+    get_header_value,
     log_env_resolution_warning,
     prod_write_acknowledged,
     resolve_env_name,
@@ -143,20 +144,6 @@ def _normalize_tag_list(value: Any) -> List[str]:
     return tags
 
 
-def _get_header_value(headers: Dict[str, str], keys: Tuple[str, ...]) -> Optional[str]:
-    if not headers:
-        return None
-    lowered = {str(key).lower(): value for key, value in headers.items()}
-    for key in keys:
-        value = lowered.get(key)
-        if value is None:
-            continue
-        text = str(value).strip()
-        if text:
-            return text
-    return None
-
-
 def _parse_retry_after(value: Optional[str]) -> Optional[float]:
     if not value:
         return None
@@ -186,8 +173,9 @@ def _parse_reset_after(value: Optional[str]) -> Optional[float]:
     if parsed <= 0:
         return None
     now = time.time()
-    if parsed > now + 60:
-        return parsed - now
+    if parsed > 10_000_000:
+        delta = parsed - now
+        return delta if delta > 0 else None
     return parsed
 
 
@@ -625,9 +613,9 @@ class RichpanelClient:
             should_retry, delay = self._should_retry(response, attempt)
             if should_retry and response.status_code == 429:
                 self._register_cooldown(delay)
-            retry_after_header = _get_header_value(
+            retry_after_header = get_header_value(
                 response.headers, RICHPANEL_RETRY_AFTER_HEADERS
-            ) or _get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
+            ) or get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
             if self._trace_enabled:
                 self._record_trace(
                     method=method.upper(),
@@ -725,11 +713,11 @@ class RichpanelClient:
     ) -> Tuple[bool, float]:
         if response.status_code == 429 or 500 <= response.status_code < 600:
             retry_after = _parse_retry_after(
-                _get_header_value(response.headers, RICHPANEL_RETRY_AFTER_HEADERS)
+                get_header_value(response.headers, RICHPANEL_RETRY_AFTER_HEADERS)
             )
             if retry_after is None:
                 retry_after = _parse_reset_after(
-                    _get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
+                    get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
                 )
             delay = self._compute_backoff(attempt, retry_after)
             return True, delay
