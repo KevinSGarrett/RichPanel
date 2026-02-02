@@ -1,0 +1,19 @@
+{
+  "ticket_number_fingerprint": "cfa62b7344af",
+  "tags": [
+    "mw-smoke-autoticket",
+    "mw-intent-order_status_tracking",
+    "mw-llm-routed",
+    "mw-routing-applied",
+    "mw-auto-replied",
+    "mw-order-status-answered",
+    "mw-order-status-answered:B66-SANDBOX-20260201-0006",
+    "mw-outbound-path-send-message",
+    "mw-reply-sent",
+    "mw-intent-unknown_other",
+    "mw-skip-followup-after-auto-reply",
+    "route-email-support-team"
+  ],
+  "skip_followup_tag_present": true,
+  "route_support_tag_present": true
+}
