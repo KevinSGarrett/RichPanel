@@ -1,0 +1,11 @@
+{
+  "ticket_number_fingerprint": "cfa62b7344af",
+  "comment_count": 3,
+  "operator_reply_count": 1,
+  "latest_comment_is_operator": false,
+  "latest_operator_comment": {
+    "comment_id_fingerprint": "0586e3065e90",
+    "author_id_fingerprint": "847bae851598",
+    "is_operator": true
+  }
+}
