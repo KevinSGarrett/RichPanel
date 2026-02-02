@@ -68,7 +68,7 @@ def _check_richpanel(
         read_only=True,
     )
     try:
-        response = client.request("GET", "/v1/ping", log_body_excerpt=False)
+        response = client.request("GET", "/v1/users", log_body_excerpt=False)
     except (RichpanelRequestError, TransportError, SecretLoadError) as exc:
         return {
             "status": "FAIL",
