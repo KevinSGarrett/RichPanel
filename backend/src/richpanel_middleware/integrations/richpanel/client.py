@@ -728,7 +728,7 @@ class RichpanelClient:
     ) -> float:
         backoff_max = self.backoff_max_seconds
         if retry_after is not None:
-            backoff_max = max(backoff_max, retry_after)
+            backoff_max = max(backoff_max, retry_after * 1.1)
         return compute_retry_backoff(
             attempt=attempt,
             retry_after=str(retry_after) if retry_after is not None else None,

@@ -209,6 +209,18 @@ class RichpanelClientTests(unittest.TestCase):
             )
             self.assertIsNone(_parse_reset_after("1699999990"))
 
+    def test_compute_backoff_preserves_retry_after_jitter(self) -> None:
+        client = RichpanelClient(
+            api_key="test-key",
+            dry_run=False,
+            backoff_seconds=0.1,
+            backoff_max_seconds=1.0,
+            rng=lambda: 1.0,
+            sleeper=lambda _: None,
+        )
+        delay = client._compute_backoff(attempt=1, retry_after=10.0)
+        self.assertGreaterEqual(delay, 11.0)
+
     def test_token_pool_rotates_keys(self) -> None:
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "true"
         os.environ["RICHPANEL_TOKEN_POOL_ENABLED"] = "true"
