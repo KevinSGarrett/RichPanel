@@ -82,6 +82,18 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8", errors="replace")
 
 
+def write_if_changed(path: Path, content: str) -> None:
+    existing = None
+    if path.exists():
+        try:
+            existing = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            existing = path.read_text(encoding="utf-8", errors="replace")
+    if existing == content:
+        return
+    path.write_text(content, encoding="utf-8", newline="\n")
+
+
 def _discover_docs(docs_root: Path) -> List[Path]:
     """
     Prefer tracked files to avoid OS-specific untracked drift (Windows vs CI).
@@ -282,9 +294,7 @@ def main() -> int:
             title = str(rec["title"])
             lines.append(f"- {marker(st)} [{title}]({rel})  (`{rel}`)")
     registry_body = "\n".join(lines) + "\n"
-    (DOCS_ROOT / "REGISTRY.md").write_text(
-        registry_body, encoding="utf-8", newline="\n"
-    )
+    write_if_changed(DOCS_ROOT / "REGISTRY.md", registry_body)
 
     # Refresh REGISTRY.md record + outline now that content is finalized.
     registry_record = next(
@@ -314,25 +324,21 @@ def main() -> int:
     # Machine outputs
     GENERATED_DIR.mkdir(exist_ok=True)
 
-    (GENERATED_DIR / "doc_registry.json").write_text(
+    write_if_changed(
+        GENERATED_DIR / "doc_registry.json",
         json.dumps(records, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
     )
-    (GENERATED_DIR / "doc_registry.compact.json").write_text(
+    write_if_changed(
+        GENERATED_DIR / "doc_registry.compact.json",
         json.dumps(records, separators=(",", ":"), ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
     )
-    (GENERATED_DIR / "doc_outline.json").write_text(
+    write_if_changed(
+        GENERATED_DIR / "doc_outline.json",
         json.dumps(outlines, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
     )
-    (GENERATED_DIR / "heading_index.json").write_text(
+    write_if_changed(
+        GENERATED_DIR / "heading_index.json",
         json.dumps(heading_index, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-        newline="\n",
     )
 
     print(f"OK: regenerated registry for {len(records)} docs.")
