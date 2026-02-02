@@ -54,6 +54,7 @@
 
 **Tests:**
 - `scripts/test_order_status_preflight_check.py`
+- `scripts/test_regen_doc_registry.py`
 
 **CI / workflows:**
 - (None)
