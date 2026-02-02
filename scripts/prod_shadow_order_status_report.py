@@ -584,8 +584,14 @@ def _match_result(
         return "error"
     resolution = order_summary.get("order_resolution")
     resolved_by = ""
+    diagnostics_category = None
     if isinstance(resolution, dict):
         resolved_by = str(resolution.get("resolvedBy") or "")
+        diagnostics = resolution.get("shopify_diagnostics")
+        if isinstance(diagnostics, dict):
+            diagnostics_category = str(diagnostics.get("category") or "").strip().lower()
+    if diagnostics_category in {"auth_fail", "rate_limited", "http_error"}:
+        return "error"
     if resolved_by:
         resolved_by_lower = resolved_by.lower()
         if "order_number" in resolved_by_lower:
@@ -608,10 +614,17 @@ def _failure_mode(
     order_number_present: bool,
     email_present: bool,
     error: Optional[Dict[str, str]],
+    order_resolution: Optional[Dict[str, Any]] = None,
 ) -> Optional[str]:
     if match_result == "error":
         if error:
             return error.get("type") or "error"
+        if isinstance(order_resolution, dict):
+            diagnostics = order_resolution.get("shopify_diagnostics")
+            if isinstance(diagnostics, dict):
+                category = str(diagnostics.get("category") or "").strip().lower()
+                if category in {"auth_fail", "rate_limited", "http_error"}:
+                    return f"shopify_{category}"
         return "error"
     if match_result != "no_match":
         return None
@@ -1271,6 +1284,11 @@ def main() -> int:
                     order_number_present=bool(result.get("order_number_redacted")),
                     email_present=bool(result.get("customer_email_redacted")),
                     error=result.get("error"),
+                    order_resolution=(
+                        result.get("order_resolution")
+                        if isinstance(result.get("order_resolution"), dict)
+                        else None
+                    ),
                 )
                 if failure_mode:
                     failure_modes[failure_mode] += 1

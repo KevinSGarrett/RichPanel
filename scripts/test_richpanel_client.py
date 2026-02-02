@@ -169,6 +169,34 @@ class RichpanelClientTests(unittest.TestCase):
         if len(sleeps) == 2:
             self.assertGreaterEqual(sleeps[1], 0.0)
 
+    def test_retries_on_429_honors_reset_header(self) -> None:
+        sleeps = []
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=429,
+                    headers={"X-RateLimit-Reset": "5"},
+                    body=b"",
+                ),
+                TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
+            ]
+        )
+        client = RichpanelClient(
+            api_key="test-key",
+            dry_run=False,
+            transport=transport,
+            sleeper=lambda seconds: sleeps.append(seconds),
+            rng=lambda: 0.0,
+            backoff_max_seconds=1.0,
+        )
+
+        response = client.request("GET", "/v1/tickets/abc")
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 2)
+        self.assertGreaterEqual(sleeps[0], 5.0)
+
     def test_token_pool_rotates_keys(self) -> None:
         os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "true"
         os.environ["RICHPANEL_TOKEN_POOL_ENABLED"] = "true"

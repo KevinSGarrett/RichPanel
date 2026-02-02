@@ -684,11 +684,25 @@ def _map_order_resolution_reason(reason: str) -> Optional[str]:
     return mapping.get(reason)
 
 
+def _extract_shopify_diagnostics_category(
+    resolution: Dict[str, Any]
+) -> Optional[str]:
+    diagnostics = resolution.get("shopify_diagnostics")
+    if not isinstance(diagnostics, dict):
+        return None
+    return _normalize_optional_text(diagnostics.get("category")) or None
+
+
 def _classify_order_match_failure(result: Dict[str, Any]) -> Optional[str]:
     if result.get("order_matched"):
         return None
     resolution = result.get("order_resolution")
     if isinstance(resolution, dict):
+        category = _extract_shopify_diagnostics_category(resolution)
+        if category in {"auth_fail", "rate_limited", "http_error"}:
+            return f"shopify_{category}"
+        if category == "no_match":
+            return "no_order_candidates"
         reason = _normalize_optional_text(resolution.get("reason"))
         mapped = _map_order_resolution_reason(reason)
         if mapped:
@@ -2491,6 +2505,8 @@ def main() -> int:
                 order_resolved = (
                     isinstance(order_resolution, dict)
                     and order_resolution.get("resolvedBy") not in (None, "no_match")
+                    and _extract_shopify_diagnostics_category(order_resolution)
+                    not in {"auth_fail", "rate_limited", "http_error"}
                 )
 
                 result.update(

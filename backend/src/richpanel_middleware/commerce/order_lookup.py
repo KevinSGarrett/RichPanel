@@ -7,7 +7,12 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from richpanel_middleware.ingest.envelope import EventEnvelope
-from richpanel_middleware.integrations import ShopifyClient, ShipStationClient
+from richpanel_middleware.integrations import (
+    ShopifyClient,
+    ShopifyRequestError,
+    ShopifyResponse,
+    ShipStationClient,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,6 +43,12 @@ SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER = SHOPIFY_ORDER_FIELDS + [
 ]
 
 MAX_EMAIL_ORDER_RESULTS = 50
+
+SHOPIFY_REQUEST_ID_HEADERS = (
+    "x-request-id",
+    "x-shopify-request-id",
+    "x-requestid",
+)
 
 ORDER_NUMBER_PATTERNS = (
     (
@@ -108,6 +119,96 @@ def _order_summary_from_payload(payload: Dict[str, Any]) -> Optional[OrderSummar
     return None
 
 
+def _extract_shopify_request_id(headers: Optional[Dict[str, str]]) -> Optional[str]:
+    if not headers:
+        return None
+    lowered = {str(key).lower(): value for key, value in headers.items()}
+    for key in SHOPIFY_REQUEST_ID_HEADERS:
+        value = lowered.get(key)
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return None
+
+
+def _classify_shopify_status(status_code: Optional[int]) -> Optional[str]:
+    if status_code is None:
+        return "http_error"
+    if status_code in (401, 403):
+        return "auth_fail"
+    if status_code == 429:
+        return "rate_limited"
+    if status_code >= 500:
+        return "http_error"
+    if status_code >= 400:
+        return "http_error"
+    return None
+
+
+def _shopify_diagnostics(
+    *,
+    category: str,
+    status_code: Optional[int],
+    request_id: Optional[str],
+) -> Dict[str, Any]:
+    return {
+        "category": category,
+        "status_code": status_code,
+        "request_id": request_id,
+    }
+
+
+def _diagnostics_from_shopify_response(
+    response: ShopifyResponse,
+) -> Optional[Dict[str, Any]]:
+    if response.dry_run and response.reason == "missing_access_token":
+        return _shopify_diagnostics(
+            category="auth_fail",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+    category = _classify_shopify_status(response.status_code)
+    if category:
+        return _shopify_diagnostics(
+            category=category,
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+    return None
+
+
+def _diagnostics_from_shopify_exception(
+    exc: Exception,
+) -> Dict[str, Any]:
+    status_code: Optional[int] = None
+    request_id: Optional[str] = None
+    if isinstance(exc, ShopifyRequestError) and exc.response:
+        status_code = exc.response.status_code
+        request_id = _extract_shopify_request_id(exc.response.headers)
+    category = _classify_shopify_status(status_code)
+    if not category:
+        category = "http_error"
+    return _shopify_diagnostics(
+        category=category, status_code=status_code, request_id=request_id
+    )
+
+
+def _log_shopify_diagnostics(
+    lookup_type: str, diagnostics: Optional[Dict[str, Any]]
+) -> None:
+    if not diagnostics:
+        return
+    category = diagnostics.get("category")
+    extra = dict(diagnostics)
+    extra["lookup_type"] = lookup_type
+    if category == "no_match":
+        LOGGER.info("shopify.match_diagnostics", extra=extra)
+    else:
+        LOGGER.warning("shopify.match_diagnostics", extra=extra)
+
+
 def lookup_order_summary(
     envelope: EventEnvelope,
     *,
@@ -144,7 +245,7 @@ def lookup_order_summary(
     order_number, order_number_source = _extract_order_number_from_payload(payload_dict)
     if order_number and allow_network and not safe_mode and automation_enabled:
         client = shopify_client or ShopifyClient(allow_network=allow_network)
-        payload = _lookup_shopify_by_name(
+        payload, name_diagnostics = _lookup_shopify_by_name(
             order_name=order_number,
             allow_network=allow_network,
             safe_mode=safe_mode,
@@ -165,6 +266,8 @@ def lookup_order_summary(
                 "reason": "shopify_name_match",
                 "order_number_source": order_number_source,
             }
+        elif name_diagnostics:
+            resolution = _shopify_resolution_for_no_match(name_diagnostics)
 
     order_number_name_failed = bool(order_number) and not shopify_lookup_done
     if order_id == "unknown" or order_number_name_failed:
@@ -178,7 +281,7 @@ def lookup_order_summary(
                     "reason": "no_email_available",
                 }
             else:
-                orders = _list_shopify_orders_by_email(
+                orders, diagnostics = _list_shopify_orders_by_email(
                     email=email,
                     allow_network=allow_network,
                     safe_mode=safe_mode,
@@ -186,7 +289,7 @@ def lookup_order_summary(
                     client=client,
                 )
                 payload, identity_resolution = _resolve_orders_by_identity(
-                    orders, email=email, name=name
+                    orders, email=email, name=name, diagnostics=diagnostics
                 )
                 if payload:
                     shopify_lookup_done = True
@@ -314,9 +417,9 @@ def _lookup_shopify_by_name(
     safe_mode: bool,
     automation_enabled: bool,
     client: ShopifyClient,
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
     if not order_name:
-        return {}
+        return {}, None
 
     normalized = f"#{str(order_name).strip().lstrip('#')}"
     candidates = [normalized]
@@ -332,22 +435,34 @@ def _lookup_shopify_by_name(
                 automation_enabled=automation_enabled,
                 dry_run=not allow_network,
             )
-        except Exception:
-            LOGGER.warning(
-                "Shopify name lookup failed",
-                extra={"order_name": candidate},
-            )
-            continue
+        except ShopifyRequestError as exc:
+            diagnostics = _diagnostics_from_shopify_exception(exc)
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
+        except Exception as exc:
+            diagnostics = _diagnostics_from_shopify_exception(exc)
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
+        diagnostics = _diagnostics_from_shopify_response(response)
         if response.dry_run:
-            continue
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
         if response.status_code >= 400:
-            continue
+            _log_shopify_diagnostics("name", diagnostics)
+            return {}, diagnostics
         payload = _select_order_from_name_search(
             candidate, response.json() or {}
         )
         if payload:
-            return payload
-    return {}
+            return payload, None
+        diagnostics = _shopify_diagnostics(
+            category="no_match",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("name", diagnostics)
+        return {}, diagnostics
+    return {}, None
 
 
 def _lookup_shopify_by_email_name(
@@ -359,7 +474,7 @@ def _lookup_shopify_by_email_name(
     automation_enabled: bool,
     client: ShopifyClient,
 ) -> Dict[str, Any]:
-    orders = _list_shopify_orders_by_email(
+    orders, _ = _list_shopify_orders_by_email(
         email=email,
         allow_network=allow_network,
         safe_mode=safe_mode,
@@ -378,7 +493,7 @@ def _lookup_shopify_by_email(
     automation_enabled: bool,
     client: ShopifyClient,
 ) -> Dict[str, Any]:
-    orders = _list_shopify_orders_by_email(
+    orders, _ = _list_shopify_orders_by_email(
         email=email,
         allow_network=allow_network,
         safe_mode=safe_mode,
@@ -389,15 +504,31 @@ def _lookup_shopify_by_email(
     return payload
 
 
+def _shopify_resolution_for_no_match(
+    diagnostics: Optional[Dict[str, Any]]
+) -> Dict[str, Any]:
+    resolution: Dict[str, Any] = {
+        "resolvedBy": "no_match",
+        "confidence": "low",
+        "reason": "shopify_no_match",
+    }
+    if diagnostics:
+        category = diagnostics.get("category")
+        if category and category != "no_match":
+            resolution["reason"] = f"shopify_{category}"
+        resolution["shopify_diagnostics"] = diagnostics
+    return resolution
+
+
 def _resolve_orders_by_identity(
-    orders: List[Dict[str, Any]], *, email: str, name: str
-) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    orders: List[Dict[str, Any]],
+    *,
+    email: str,
+    name: str,
+    diagnostics: Optional[Dict[str, Any]] = None,
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if not orders:
-        return {}, {
-            "resolvedBy": "no_match",
-            "confidence": "low",
-            "reason": "shopify_no_match",
-        }
+        return {}, _shopify_resolution_for_no_match(diagnostics)
     if name:
         matches = [
             order
@@ -430,9 +561,9 @@ def _list_shopify_orders_by_email(
     safe_mode: bool,
     automation_enabled: bool,
     client: ShopifyClient,
-) -> List[Dict[str, Any]]:
+) -> Tuple[List[Dict[str, Any]], Optional[Dict[str, Any]]]:
     if not allow_network:
-        return []
+        return [], None
     try:
         response = client.list_orders_by_email(
             email,
@@ -443,16 +574,41 @@ def _list_shopify_orders_by_email(
             automation_enabled=automation_enabled,
             dry_run=not allow_network,
         )
-    except Exception:
-        LOGGER.warning("Shopify email lookup failed")
-        return []
-    if response.dry_run or response.status_code >= 400:
-        return []
+    except ShopifyRequestError as exc:
+        diagnostics = _diagnostics_from_shopify_exception(exc)
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    except Exception as exc:
+        diagnostics = _diagnostics_from_shopify_exception(exc)
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    diagnostics = _diagnostics_from_shopify_response(response)
+    if response.dry_run:
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    if response.status_code >= 400:
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
     payload = response.json() or {}
     orders = payload.get("orders") if isinstance(payload, dict) else None
     if not isinstance(orders, list):
-        return []
-    return [order for order in orders if isinstance(order, dict)]
+        diagnostics = _shopify_diagnostics(
+            category="http_error",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    normalized_orders = [order for order in orders if isinstance(order, dict)]
+    if not normalized_orders:
+        diagnostics = _shopify_diagnostics(
+            category="no_match",
+            status_code=response.status_code,
+            request_id=_extract_shopify_request_id(response.headers),
+        )
+        _log_shopify_diagnostics("email", diagnostics)
+        return [], diagnostics
+    return normalized_orders, None
 
 
 def _lookup_shopify(
@@ -476,7 +632,7 @@ def _lookup_shopify(
     )
     payload: Dict[str, Any] = {}
     if response.status_code == 404:
-        payload = _lookup_shopify_by_name(
+        payload, _ = _lookup_shopify_by_name(
             order_name=str(order_id).strip(),
             allow_network=allow_network,
             safe_mode=safe_mode,

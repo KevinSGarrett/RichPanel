@@ -747,6 +747,18 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         )
         self.assertEqual(
             shadow_eval._classify_order_match_failure(
+                {
+                    "order_matched": False,
+                    "order_resolution": {
+                        "resolvedBy": "no_match",
+                        "shopify_diagnostics": {"category": "auth_fail"},
+                    },
+                }
+            ),
+            "shopify_auth_fail",
+        )
+        self.assertEqual(
+            shadow_eval._classify_order_match_failure(
                 {"order_matched": False, "order_status_candidate": False}
             ),
             "no_order_status_candidate",

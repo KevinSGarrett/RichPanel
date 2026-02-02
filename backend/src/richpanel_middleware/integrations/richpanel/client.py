@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import time
+import email.utils
 import threading
 import urllib.error
 import urllib.parse
@@ -64,6 +65,17 @@ TRACE_SAFE_SEGMENTS = {
     "users",
     "user",
 }
+
+RICHPANEL_RETRY_AFTER_HEADERS = ("retry-after",)
+RICHPANEL_RESET_HEADERS = (
+    "x-ratelimit-reset",
+    "x-rate-limit-reset",
+    "ratelimit-reset",
+    "rate-limit-reset",
+    "x-richpanel-rate-limit-reset",
+    "x-richpanel-reset",
+    "x-rp-rate-limit-reset",
+)
 
 
 @dataclass
@@ -129,6 +141,54 @@ def _normalize_tag_list(value: Any) -> List[str]:
         tags.append(tag)
         seen.add(tag)
     return tags
+
+
+def _get_header_value(headers: Dict[str, str], keys: Tuple[str, ...]) -> Optional[str]:
+    if not headers:
+        return None
+    lowered = {str(key).lower(): value for key, value in headers.items()}
+    for key in keys:
+        value = lowered.get(key)
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    return None
+
+
+def _parse_retry_after(value: Optional[str]) -> Optional[float]:
+    if not value:
+        return None
+    try:
+        seconds = float(value)
+        if seconds > 0:
+            return seconds
+    except (TypeError, ValueError):
+        pass
+    try:
+        parsed = email.utils.parsedate_to_datetime(value)
+        if parsed is None:
+            return None
+        seconds = parsed.timestamp() - time.time()
+        return seconds if seconds > 0 else None
+    except Exception:
+        return None
+
+
+def _parse_reset_after(value: Optional[str]) -> Optional[float]:
+    if not value:
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    if parsed <= 0:
+        return None
+    now = time.time()
+    if parsed > now + 60:
+        return parsed - now
+    return parsed
 
 
 @dataclass
@@ -565,13 +625,16 @@ class RichpanelClient:
             should_retry, delay = self._should_retry(response, attempt)
             if should_retry and response.status_code == 429:
                 self._register_cooldown(delay)
+            retry_after_header = _get_header_value(
+                response.headers, RICHPANEL_RETRY_AFTER_HEADERS
+            ) or _get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
             if self._trace_enabled:
                 self._record_trace(
                     method=method.upper(),
                     url=url,
                     status=response.status_code,
                     attempt=attempt,
-                    retry_after=response.headers.get("Retry-After"),
+                    retry_after=retry_after_header,
                     retry_delay=delay if should_retry else None,
                 )
             self._log_response(
@@ -661,16 +724,28 @@ class RichpanelClient:
         self, response: RichpanelResponse, attempt: int
     ) -> Tuple[bool, float]:
         if response.status_code == 429 or 500 <= response.status_code < 600:
-            delay = self._compute_backoff(attempt, response.headers.get("Retry-After"))
+            retry_after = _parse_retry_after(
+                _get_header_value(response.headers, RICHPANEL_RETRY_AFTER_HEADERS)
+            )
+            if retry_after is None:
+                retry_after = _parse_reset_after(
+                    _get_header_value(response.headers, RICHPANEL_RESET_HEADERS)
+                )
+            delay = self._compute_backoff(attempt, retry_after)
             return True, delay
         return False, 0.0
 
-    def _compute_backoff(self, attempt: int, retry_after: Optional[str]) -> float:
+    def _compute_backoff(
+        self, attempt: int, retry_after: Optional[float]
+    ) -> float:
+        backoff_max = self.backoff_max_seconds
+        if retry_after is not None:
+            backoff_max = max(backoff_max, retry_after)
         return compute_retry_backoff(
             attempt=attempt,
-            retry_after=retry_after,
+            retry_after=str(retry_after) if retry_after is not None else None,
             backoff_seconds=self.backoff_seconds,
-            backoff_max_seconds=self.backoff_max_seconds,
+            backoff_max_seconds=backoff_max,
             rng=self._rng,
             retry_after_jitter_ratio=0.1,
         )
