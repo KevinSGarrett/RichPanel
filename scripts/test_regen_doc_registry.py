@@ -63,5 +63,50 @@ class WriteIfChangedTests(unittest.TestCase):
             self.assertEqual(path.read_text(encoding="utf-8"), "hello world\n")
 
 
+class MainGenerationTests(unittest.TestCase):
+    def test_main_generates_registry_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            docs_root = root / "docs"
+            docs_root.mkdir()
+            (docs_root / "INDEX.md").write_text("- [A](A.md)\n", encoding="utf-8")
+            (docs_root / "A.md").write_text("# A\n", encoding="utf-8")
+
+            subprocess.run(
+                ["git", "init"],
+                cwd=str(root),
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            subprocess.run(
+                ["git", "add", "docs/INDEX.md", "docs/A.md"],
+                cwd=str(root),
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+            orig_docs_root = registry.DOCS_ROOT
+            orig_generated = registry.GENERATED_DIR
+            orig_index = registry.INDEX_FILE
+            try:
+                registry.DOCS_ROOT = docs_root
+                registry.GENERATED_DIR = docs_root / "_generated"
+                registry.INDEX_FILE = docs_root / "INDEX.md"
+                rc = registry.main()
+                self.assertEqual(rc, 0)
+                registry_path = docs_root / "REGISTRY.md"
+                self.assertTrue(registry_path.exists())
+                self.assertIn("A.md", registry_path.read_text(encoding="utf-8"))
+                self.assertTrue(
+                    (docs_root / "_generated" / "doc_registry.json").exists()
+                )
+            finally:
+                registry.DOCS_ROOT = orig_docs_root
+                registry.GENERATED_DIR = orig_generated
+                registry.INDEX_FILE = orig_index
+
+
 if __name__ == "__main__":
     unittest.main()
