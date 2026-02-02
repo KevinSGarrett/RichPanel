@@ -22687,6 +22687,12 @@
       "anchor": "docs-registry-complete-listing"
     }
   ],
+  "root": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "root"
+    }
+  ],
   "00_project_admin": [
     {
       "path": "REGISTRY.md",

@@ -281,9 +281,35 @@ def main() -> int:
             st = str(rec["status"])
             title = str(rec["title"])
             lines.append(f"- {marker(st)} [{title}]({rel})  (`{rel}`)")
+    registry_body = "\n".join(lines) + "\n"
     (DOCS_ROOT / "REGISTRY.md").write_text(
-        "\n".join(lines) + "\n", encoding="utf-8", newline="\n"
+        registry_body, encoding="utf-8", newline="\n"
     )
+
+    # Refresh REGISTRY.md record + outline now that content is finalized.
+    registry_record = next(
+        (rec for rec in records if rec["path"] == "REGISTRY.md"), None
+    )
+    if registry_record is not None:
+        wc = len(re.findall(r"\b\w+\b", registry_body))
+        registry_record["word_count"] = wc
+        registry_record["approx_tokens"] = int(wc * 1.3)
+    registry_outline = extract_outline(registry_body)
+    for outline_entry in outlines:
+        if outline_entry["path"] == "REGISTRY.md":
+            outline_entry["outline"] = registry_outline
+            break
+    # Rebuild heading index to keep REGISTRY headings in sync.
+    heading_index = {}
+    for outline_entry in outlines:
+        rel = str(outline_entry["path"])
+        for h in outline_entry["outline"]:
+            key = str(h["text"]).strip().lower()
+            if not key:
+                continue
+            heading_index.setdefault(key, []).append(
+                {"path": rel, "anchor": str(h["anchor"])}
+            )
 
     # Machine outputs
     GENERATED_DIR.mkdir(exist_ok=True)
