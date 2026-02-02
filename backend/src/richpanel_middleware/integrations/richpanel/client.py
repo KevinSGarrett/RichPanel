@@ -933,6 +933,8 @@ class RichpanelClient:
         *,
         log_body_excerpt: bool,
     ) -> None:
+        if response.status_code == 429:
+            self._logger.warning("richpanel.rate_limited status=429")
         extra = {
             "method": method,
             "url": response.url,

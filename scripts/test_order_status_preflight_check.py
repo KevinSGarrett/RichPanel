@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+from datetime import timedelta
 from unittest import mock
 import unittest
 from pathlib import Path
@@ -36,6 +37,16 @@ class _StubRichpanelClient:
         return self._response
 
 
+class _CaptureRichpanelClient:
+    def __init__(self, *, response: _StubResponse | None = None):
+        self._response = response or _StubResponse(status_code=200, dry_run=False)
+        self.requested_path: str | None = None
+
+    def request(self, _method: str, path: str, **_kwargs):
+        self.requested_path = path
+        return self._response
+
+
 class _StubShopifyClient:
     def __init__(self, *, response: _StubResponse | None = None, diagnostics: dict | None = None, exc: Exception | None = None):
         self._response = response
@@ -51,14 +62,79 @@ class _StubShopifyClient:
         return self._diagnostics
 
 
+class _StubTransport:
+    def __init__(self, *, response=None, exc: Exception | None = None):
+        self._response = response
+        self._exc = exc
+
+    def send(self, _request):
+        if self._exc is not None:
+            raise self._exc
+        return self._response
+
+
+class _StubShopifyGraphqlClient:
+    def __init__(
+        self,
+        *,
+        token: str | None,
+        response=None,
+        exc: Exception | None = None,
+    ):
+        self._token = token
+        self.transport = _StubTransport(response=response, exc=exc)
+        self.timeout_seconds = 5
+
+    def _load_access_token(self):
+        return self._token, "stub_reason"
+
+    def _build_url(self, path: str, _version: str | None):
+        return f"https://example.myshopify.com/{path}"
+
+
+class _StubSecretsClient:
+    def __init__(self, *, fail_ids=None):
+        self._fail_ids = set(fail_ids or [])
+
+    def get_secret_value(self, *, SecretId: str):
+        if SecretId in self._fail_ids:
+            raise RuntimeError("missing")
+        return {"SecretString": "ok"}
+
+
+class _StubLogsClient:
+    def __init__(self, *, streams=None, events_by_stream=None, raise_describe=False):
+        self._streams = streams or []
+        self._events_by_stream = events_by_stream or {}
+        self._raise_describe = raise_describe
+
+    def describe_log_streams(self, **_kwargs):
+        if self._raise_describe:
+            raise RuntimeError("boom")
+        return {"logStreams": self._streams}
+
+    def get_log_events(self, *, logStreamName: str, **_kwargs):
+        return {"events": self._events_by_stream.get(logStreamName, [])}
+
+
+class _StubBoto3:
+    def __init__(self, client):
+        self._client = client
+
+    def client(self, _name: str):
+        return self._client
+
+
 class OrderStatusPreflightCheckTests(unittest.TestCase):
     def setUp(self) -> None:
         self._orig_rp = preflight.RichpanelClient
         self._orig_shopify = preflight.ShopifyClient
+        self._orig_boto3 = preflight.boto3
 
     def tearDown(self) -> None:
         preflight.RichpanelClient = self._orig_rp
         preflight.ShopifyClient = self._orig_shopify
+        preflight.boto3 = self._orig_boto3
 
     def test_check_richpanel_pass(self) -> None:
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
@@ -66,6 +142,14 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         )
         result = preflight._check_richpanel(base_url=None, api_key_secret_id=None)
         self.assertEqual(result.get("status"), "PASS")
+
+    def test_check_richpanel_honors_preflight_path_env(self) -> None:
+        capture = _CaptureRichpanelClient()
+        preflight.RichpanelClient = lambda **kwargs: capture  # type: ignore[assignment]
+        with mock.patch.dict(os.environ, {"RICHPANEL_PREFLIGHT_PATH": "/v1/users"}, clear=True):
+            result = preflight._check_richpanel(base_url=None, api_key_secret_id=None)
+        self.assertEqual(result.get("status"), "PASS")
+        self.assertEqual(capture.requested_path, "/v1/users")
 
     def test_check_richpanel_dry_run_fails(self) -> None:
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
@@ -159,6 +243,141 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertEqual(result.get("status"), "FAIL")
         self.assertIn("request_failed", result.get("details", ""))
 
+    def test_check_shopify_graphql_missing_token(self) -> None:
+        preflight.ShopifyClient = (  # type: ignore[assignment]
+            lambda **_kwargs: _StubShopifyGraphqlClient(token=None)
+        )
+        result = preflight._check_shopify_graphql(
+            shop_domain="example.myshopify.com",
+            access_token_secret_id="secret",
+        )
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("missing_token", result.get("details", ""))
+
+    def test_check_shopify_graphql_pass(self) -> None:
+        response = _StubResponse(status_code=200)
+        response.body = b"{\"data\": {\"shop\": {\"name\": \"Demo\"}}}"  # type: ignore[attr-defined]
+        preflight.ShopifyClient = (  # type: ignore[assignment]
+            lambda **_kwargs: _StubShopifyGraphqlClient(
+                token="token", response=response
+            )
+        )
+        result = preflight._check_shopify_graphql(
+            shop_domain="example.myshopify.com",
+            access_token_secret_id="secret",
+        )
+        self.assertEqual(result.get("status"), "PASS")
+
+    def test_check_shopify_graphql_errors(self) -> None:
+        response = _StubResponse(status_code=200)
+        response.body = b"{\"errors\": [{\"message\": \"bad\"}]}"  # type: ignore[attr-defined]
+        preflight.ShopifyClient = (  # type: ignore[assignment]
+            lambda **_kwargs: _StubShopifyGraphqlClient(
+                token="token", response=response
+            )
+        )
+        result = preflight._check_shopify_graphql(
+            shop_domain="example.myshopify.com",
+            access_token_secret_id="secret",
+        )
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("graphql_errors", result.get("details", ""))
+
+    def test_check_shopify_graphql_auth_fail(self) -> None:
+        response = _StubResponse(status_code=401)
+        response.body = b"{}"  # type: ignore[attr-defined]
+        preflight.ShopifyClient = (  # type: ignore[assignment]
+            lambda **_kwargs: _StubShopifyGraphqlClient(
+                token="token", response=response
+            )
+        )
+        result = preflight._check_shopify_graphql(
+            shop_domain="example.myshopify.com",
+            access_token_secret_id="secret",
+        )
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("auth_fail", result.get("details", ""))
+
+    def test_check_shopify_graphql_exception(self) -> None:
+        preflight.ShopifyClient = (  # type: ignore[assignment]
+            lambda **_kwargs: _StubShopifyGraphqlClient(
+                token="token", exc=RuntimeError("boom")
+            )
+        )
+        result = preflight._check_shopify_graphql(
+            shop_domain="example.myshopify.com",
+            access_token_secret_id="secret",
+        )
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("request_failed", result.get("details", ""))
+
+    def test_check_required_env_fail_and_pass(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            result = preflight._check_required_env()
+            self.assertEqual(result.get("status"), "FAIL")
+            self.assertIn("missing", result.get("details", ""))
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "prod",
+                "MW_ALLOW_NETWORK_READS": "true",
+                "RICHPANEL_READ_ONLY": "true",
+                "RICHPANEL_WRITE_DISABLED": "true",
+                "RICHPANEL_OUTBOUND_ENABLED": "false",
+                "SHOPIFY_OUTBOUND_ENABLED": "true",
+                "SHOPIFY_WRITE_DISABLED": "true",
+                "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+            },
+            clear=True,
+        ):
+            result = preflight._check_required_env()
+            self.assertEqual(result.get("status"), "PASS")
+
+    def test_check_secrets_paths(self) -> None:
+        preflight.boto3 = _StubBoto3(_StubSecretsClient())
+        result = preflight._check_secrets(env_name="prod")
+        self.assertEqual(result.get("status"), "PASS")
+        preflight.boto3 = _StubBoto3(
+            _StubSecretsClient(fail_ids={"rp-mw/prod/richpanel/api_key"})
+        )
+        result = preflight._check_secrets(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+
+    def test_check_secrets_boto3_missing(self) -> None:
+        preflight.boto3 = None
+        result = preflight._check_secrets(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("boto3_unavailable", result.get("details", ""))
+
+    def test_refresh_lambda_last_success(self) -> None:
+        now = preflight.datetime.now(preflight.timezone.utc)
+        ts_ms = int((now - timedelta(hours=1)).timestamp() * 1000)
+        logs_client = _StubLogsClient(
+            streams=[{"logStreamName": "stream-1"}],
+            events_by_stream={
+                "stream-1": [
+                    {"timestamp": ts_ms, "message": "{\"refresh_succeeded\": true}"}
+                ]
+            },
+        )
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="prod")
+        self.assertEqual(result.get("status"), "PASS")
+
+    def test_refresh_lambda_last_success_missing(self) -> None:
+        logs_client = _StubLogsClient(streams=[{"logStreamName": "stream-1"}])
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("no_success_event_found", result.get("details", ""))
+
+    def test_refresh_lambda_last_success_logs_error(self) -> None:
+        logs_client = _StubLogsClient(raise_describe=True)
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("log_query_failed", result.get("details", ""))
+
         preflight.ShopifyClient = lambda **kwargs: _StubShopifyClient(  # type: ignore[assignment]
             exc=RuntimeError("boom")
         )
@@ -222,8 +441,22 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         argv = [
             "order_status_preflight_check.py",
             "--skip-refresh-lambda-check",
+            "--skip-secrets-check",
         ]
-        with mock.patch.object(sys, "argv", argv):
+        with mock.patch.object(preflight, "_check_shopify_graphql", return_value={"status": "PASS", "details": "ok"}), mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "dev",
+                "MW_ALLOW_NETWORK_READS": "true",
+                "RICHPANEL_READ_ONLY": "true",
+                "RICHPANEL_WRITE_DISABLED": "true",
+                "RICHPANEL_OUTBOUND_ENABLED": "false",
+                "SHOPIFY_OUTBOUND_ENABLED": "true",
+                "SHOPIFY_WRITE_DISABLED": "true",
+                "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+            },
+            clear=False,
+        ), mock.patch.object(sys, "argv", argv):
             self.assertEqual(preflight.main(), 0)
 
     def test_main_env_and_output_paths(self) -> None:
@@ -240,12 +473,30 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
                     "order_status_preflight_check.py",
                     "--env",
                     "dev",
+                    "--skip-refresh-lambda-check",
+                    "--skip-secrets-check",
                     "--out-md",
                     str(out_md),
                 ]
                 old_env = os.environ.get("ENVIRONMENT")
                 try:
-                    with mock.patch.object(sys, "argv", argv):
+                    with mock.patch.object(
+                        preflight,
+                        "_check_shopify_graphql",
+                        return_value={"status": "PASS", "details": "ok"},
+                    ), mock.patch.dict(
+                        os.environ,
+                        {
+                            "MW_ALLOW_NETWORK_READS": "true",
+                            "RICHPANEL_READ_ONLY": "true",
+                            "RICHPANEL_WRITE_DISABLED": "true",
+                            "RICHPANEL_OUTBOUND_ENABLED": "false",
+                            "SHOPIFY_OUTBOUND_ENABLED": "true",
+                            "SHOPIFY_WRITE_DISABLED": "true",
+                            "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+                        },
+                        clear=False,
+                    ), mock.patch.object(sys, "argv", argv):
                         self.assertEqual(preflight.main(), 2)
                 finally:
                     if old_env is None:

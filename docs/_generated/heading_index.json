@@ -4015,6 +4015,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "12_Cursor_Agent_Work_Packages/02_Epics/EP00_Preflight_access_tenant_verification.md",
       "anchor": "purpose"
     },
@@ -13509,6 +13513,12 @@
       "anchor": "daily-live-read-only-shadow-eval-ci"
     }
   ],
+  "prod shadow order status report (scaled)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "prod-shadow-order-status-report-scaled"
+    }
+  ],
   "deployment gate criteria (recommended)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
@@ -15905,6 +15915,108 @@
     {
       "path": "08_Testing_Quality/Wave09_Definition_of_Done_Checklist.md",
       "anchor": "admin-tracking"
+    }
+  ],
+  "order status monitoring (mvp)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "order-status-monitoring-mvp"
+    }
+  ],
+  "dashboard": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "dashboard"
+    }
+  ],
+  "alarms (minimum)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "alarms-minimum"
+    }
+  ],
+  "1) worker lambda error rate": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "1-worker-lambda-error-rate"
+    }
+  ],
+  "2) shopify token refresh lambda errors": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "2-shopify-token-refresh-lambda-errors"
+    }
+  ],
+  "3) richpanel 429 spikes": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "3-richpanel-429-spikes"
+    }
+  ],
+  "4) shopify 429 spikes": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "4-shopify-429-spikes"
+    }
+  ],
+  "5) openai intent failures": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "5-openai-intent-failures"
+    }
+  ],
+  "order-status anomaly (placeholder)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "order-status-anomaly-placeholder"
+    }
+  ],
+  "where to find alarms": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "where-to-find-alarms"
+    }
+  ],
+  "order status preflight (prod)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "order-status-preflight-prod"
+    }
+  ],
+  "prereqs": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "prereqs"
+    }
+  ],
+  "required env flags (safe read-only)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "required-env-flags-safe-read-only"
+    }
+  ],
+  "command": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "command"
+    }
+  ],
+  "output": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "output"
+    }
+  ],
+  "common failures": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "common-failures"
+    }
+  ],
+  "optional skips (diagnostic only)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "optional-skips-diagnostic-only"
     }
   ],
   "ci/cd plan": [
@@ -22703,6 +22815,12 @@
     {
       "path": "REGISTRY.md",
       "anchor": "08testingquality"
+    }
+  ],
+  "09_deployment": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09deployment"
     }
   ],
   "09_deployment_operations": [

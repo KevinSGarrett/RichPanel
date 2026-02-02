@@ -1,0 +1,10 @@
+﻿{
+    "DashboardEntries": [
+        {
+            "DashboardName": "rp-mw-prod-order-status",
+            "DashboardArn": "arn:aws:cloudwatch::878145708918:dashboard/rp-mw-prod-order-status",
+            "LastModified": "2026-02-02T09:26:45-06:00",
+            "Size": 1184
+        }
+    ]
+}

@@ -2025,8 +2025,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 4373,
-    "approx_tokens": 5684,
+    "word_count": 4490,
+    "approx_tokens": 5837,
     "last_updated": "2026-01-17"
   },
   {
@@ -2308,6 +2308,26 @@
     "word_count": 161,
     "approx_tokens": 209,
     "last_updated": "2025-12-22"
+  },
+  {
+    "path": "09_Deployment/Order_Status_Monitoring.md",
+    "title": "Order Status Monitoring (MVP)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 247,
+    "approx_tokens": 321,
+    "last_updated": ""
+  },
+  {
+    "path": "09_Deployment/Order_Status_Preflight.md",
+    "title": "Order Status Preflight (Prod)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 212,
+    "approx_tokens": 275,
+    "last_updated": ""
   },
   {
     "path": "09_Deployment_Operations/CICD_Plan.md",
@@ -3935,8 +3955,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10782,
-    "approx_tokens": 14016,
+    "word_count": 10803,
+    "approx_tokens": 14043,
     "last_updated": ""
   },
   {

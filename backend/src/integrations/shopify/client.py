@@ -945,6 +945,8 @@ class ShopifyClient:
         attempt: int,
         retry_in: Optional[float],
     ) -> None:
+        if response.status_code == 429:
+            self._logger.warning("shopify.rate_limited status=429")
         extra = {
             "method": method,
             "url": response.url,

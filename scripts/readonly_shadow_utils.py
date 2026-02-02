@@ -1,18 +1,127 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import re
+import urllib.parse
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.richpanel.client import (  # type: ignore
+    RichpanelClient,
     RichpanelRequestError,
     SecretLoadError,
     TransportError as RichpanelTransportError,
 )
 from richpanel_middleware.integrations.shopify import (  # type: ignore
+    ShopifyClient,
     ShopifyRequestError,
     TransportError as ShopifyTransportError,
 )
+
+
+def _fingerprint(text: str, *, length: int = 12) -> str:
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return digest[:length]
+
+
+def _redact_identifier(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    return f"redacted:{_fingerprint(text)}"
+
+
+def _redact_path(path: str) -> str:
+    if not path:
+        return "/"
+    segments = [segment for segment in path.split("/") if segment]
+    safe_segments = {
+        "api",
+        "v1",
+        "v2",
+        "v3",
+        "tickets",
+        "ticket",
+        "conversations",
+        "conversation",
+        "orders",
+        "order",
+        "number",
+        "shipments",
+        "shipment",
+    }
+    redacted_segments: list[str] = []
+    for segment in segments:
+        lowered = segment.lower()
+        if lowered in safe_segments or (segment.startswith("v") and segment[1:].isdigit()):
+            redacted_segments.append(segment)
+            continue
+        if segment.isalpha() and len(segment) <= 32:
+            redacted_segments.append(segment)
+            continue
+        redacted_segments.append(_redact_identifier(segment) or "redacted")
+    return "/" + "/".join(redacted_segments)
+
+
+class ReadOnlyGuardError(RuntimeError):
+    pass
+
+
+class ReadOnlyHttpGuard:
+    def __init__(
+        self,
+        *,
+        env_name: str,
+        richpanel_secret_id: Optional[str] = None,
+        shopify_secret_id: Optional[str] = None,
+    ) -> None:
+        self.env_name = env_name
+        self.richpanel_secret_id = richpanel_secret_id
+        self.shopify_secret_id = shopify_secret_id
+        self.violations: List[Dict[str, Any]] = []
+        self._allowed_methods = {"GET", "HEAD"}
+
+    def _redact_request_path(self, url_or_path: Optional[str]) -> str:
+        if not url_or_path:
+            return "/"
+        if "://" in url_or_path:
+            parsed = urllib.parse.urlparse(url_or_path)
+            return _redact_path(parsed.path)
+        return _redact_path(url_or_path)
+
+    def check(self, *, method: str, service: str, url_or_path: Optional[str]) -> None:
+        method_upper = method.upper()
+        if method_upper in self._allowed_methods:
+            return
+        path = self._redact_request_path(url_or_path)
+        self.violations.append(
+            {"method": method_upper, "service": service, "path": path}
+        )
+        raise ReadOnlyGuardError(
+            f"Blocked non-read-only {service} request: {method_upper} {path}"
+        )
+
+
+class GuardedRichpanelClient(RichpanelClient):
+    def __init__(self, *args: Any, guard: ReadOnlyHttpGuard, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._guard = guard
+
+    def request(self, method: str, path: str, *args: Any, **kwargs: Any):  # type: ignore[override]
+        self._guard.check(method=method, service="richpanel", url_or_path=path)
+        return super().request(method, path, *args, **kwargs)
+
+
+class GuardedShopifyClient(ShopifyClient):
+    def __init__(self, *args: Any, guard: ReadOnlyHttpGuard, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._guard = guard
+
+    def request(self, method: str, path: str, *args: Any, **kwargs: Any):  # type: ignore[override]
+        self._guard.check(method=method, service="shopify", url_or_path=path)
+        return super().request(method, path, *args, **kwargs)
 
 
 def extract_ticket_list(payload: Any) -> List[Dict[str, Any]]:

@@ -1,0 +1,167 @@
+﻿{
+    "MetricAlarms": [
+        {
+            "AlarmName": "rp-mw-prod-openai-intent-failures",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-2:878145708918:alarm:rp-mw-prod-openai-intent-failures",
+            "AlarmDescription": "OpenAI order status intent failures detected.",
+            "AlarmConfigurationUpdatedTimestamp": "2026-02-02T09:28:31.788000-06:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [],
+            "InsufficientDataActions": [],
+            "StateValue": "INSUFFICIENT_DATA",
+            "StateReason": "Unchecked: Initial alarm creation",
+            "StateUpdatedTimestamp": "2026-02-02T09:28:31.788000-06:00",
+            "MetricName": "OpenAIOrderStatusIntentFailures",
+            "Namespace": "rp-mw/prod",
+            "Statistic": "Sum",
+            "Dimensions": [],
+            "Period": 300,
+            "EvaluationPeriods": 1,
+            "Threshold": 0.0,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-02-02T09:28:31.788000-06:00"
+        },
+        {
+            "AlarmName": "rp-mw-prod-richpanel-429-spike",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-2:878145708918:alarm:rp-mw-prod-richpanel-429-spike",
+            "AlarmDescription": "Richpanel 429 rate-limit spikes.",
+            "AlarmConfigurationUpdatedTimestamp": "2026-02-02T09:28:32.065000-06:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [],
+            "InsufficientDataActions": [],
+            "StateValue": "INSUFFICIENT_DATA",
+            "StateReason": "Unchecked: Initial alarm creation",
+            "StateUpdatedTimestamp": "2026-02-02T09:28:32.065000-06:00",
+            "MetricName": "Richpanel429Count",
+            "Namespace": "rp-mw/prod",
+            "Statistic": "Sum",
+            "Dimensions": [],
+            "Period": 300,
+            "EvaluationPeriods": 3,
+            "DatapointsToAlarm": 2,
+            "Threshold": 5.0,
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-02-02T09:28:32.065000-06:00"
+        },
+        {
+            "AlarmName": "rp-mw-prod-shopify-429-spike",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-2:878145708918:alarm:rp-mw-prod-shopify-429-spike",
+            "AlarmDescription": "Shopify 429 rate-limit spikes.",
+            "AlarmConfigurationUpdatedTimestamp": "2026-02-02T09:28:31.931000-06:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [],
+            "InsufficientDataActions": [],
+            "StateValue": "INSUFFICIENT_DATA",
+            "StateReason": "Unchecked: Initial alarm creation",
+            "StateUpdatedTimestamp": "2026-02-02T09:28:31.931000-06:00",
+            "MetricName": "Shopify429Count",
+            "Namespace": "rp-mw/prod",
+            "Statistic": "Sum",
+            "Dimensions": [],
+            "Period": 300,
+            "EvaluationPeriods": 3,
+            "DatapointsToAlarm": 2,
+            "Threshold": 5.0,
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-02-02T09:28:31.931000-06:00"
+        },
+        {
+            "AlarmName": "rp-mw-prod-shopify-refresh-errors",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-2:878145708918:alarm:rp-mw-prod-shopify-refresh-errors",
+            "AlarmDescription": "Shopify token refresh Lambda errors > 0 in the last hour.",
+            "AlarmConfigurationUpdatedTimestamp": "2026-02-02T09:28:32.015000-06:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [],
+            "InsufficientDataActions": [],
+            "StateValue": "INSUFFICIENT_DATA",
+            "StateReason": "Unchecked: Initial alarm creation",
+            "StateUpdatedTimestamp": "2026-02-02T09:28:32.015000-06:00",
+            "MetricName": "Errors",
+            "Namespace": "AWS/Lambda",
+            "Statistic": "Sum",
+            "Dimensions": [
+                {
+                    "Name": "FunctionName",
+                    "Value": "rp-mw-prod-shopify-token-refresh"
+                }
+            ],
+            "Period": 3600,
+            "EvaluationPeriods": 1,
+            "Threshold": 0.0,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-02-02T09:28:32.015000-06:00"
+        },
+        {
+            "AlarmName": "rp-mw-prod-worker-error-rate",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-2:878145708918:alarm:rp-mw-prod-worker-error-rate",
+            "AlarmDescription": "Worker Lambda error rate above baseline (5xx or unhandled errors).",
+            "AlarmConfigurationUpdatedTimestamp": "2026-02-02T09:28:31.923000-06:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [],
+            "InsufficientDataActions": [],
+            "StateValue": "INSUFFICIENT_DATA",
+            "StateReason": "Unchecked: Initial alarm creation",
+            "StateUpdatedTimestamp": "2026-02-02T09:28:31.923000-06:00",
+            "Dimensions": [],
+            "EvaluationPeriods": 3,
+            "DatapointsToAlarm": 3,
+            "Threshold": 0.05,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "TreatMissingData": "notBreaching",
+            "Metrics": [
+                {
+                    "Id": "expr_1",
+                    "Expression": "IF(invocations>0, errors/invocations, 0)",
+                    "ReturnData": true
+                },
+                {
+                    "Id": "errors",
+                    "MetricStat": {
+                        "Metric": {
+                            "Namespace": "AWS/Lambda",
+                            "MetricName": "Errors",
+                            "Dimensions": [
+                                {
+                                    "Name": "FunctionName",
+                                    "Value": "rp-mw-prod-worker"
+                                }
+                            ]
+                        },
+                        "Period": 300,
+                        "Stat": "Sum"
+                    },
+                    "ReturnData": false
+                },
+                {
+                    "Id": "invocations",
+                    "MetricStat": {
+                        "Metric": {
+                            "Namespace": "AWS/Lambda",
+                            "MetricName": "Invocations",
+                            "Dimensions": [
+                                {
+                                    "Name": "FunctionName",
+                                    "Value": "rp-mw-prod-worker"
+                                }
+                            ]
+                        },
+                        "Period": 300,
+                        "Stat": "Sum"
+                    },
+                    "ReturnData": false
+                }
+            ],
+            "StateTransitionedTimestamp": "2026-02-02T09:28:31.923000-06:00"
+        }
+    ],
+    "CompositeAlarms": []
+}
