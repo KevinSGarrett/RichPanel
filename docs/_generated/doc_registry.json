@@ -3920,6 +3920,46 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "CODEMAP.md",
+    "title": "CODEMAP (Project Navigation)",
+    "section": "Root",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 379,
+    "approx_tokens": 492,
+    "last_updated": ""
+  },
+  {
+    "path": "INDEX.md",
+    "title": "Docs Index",
+    "section": "Root",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 1214,
+    "approx_tokens": 1578,
+    "last_updated": "2025-12-29"
+  },
+  {
+    "path": "REGISTRY.md",
+    "title": "Docs Registry (Complete Listing)",
+    "section": "Root",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 10762,
+    "approx_tokens": 13990,
+    "last_updated": ""
+  },
+  {
+    "path": "ROADMAP.md",
+    "title": "Roadmap (High-Level)",
+    "section": "Root",
+    "status": "canonical",
+    "in_index": true,
+    "word_count": 171,
+    "approx_tokens": 222,
+    "last_updated": ""
+  },
+  {
     "path": "SHOPIFY_STRATEGY/README.md",
     "title": "Shopify Strategy Notes (reference)",
     "section": "SHOPIFY_STRATEGY",

@@ -22525,6 +22525,354 @@
       "anchor": "openai-official"
     }
   ],
+  "codemap (project navigation)": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "codemap-project-navigation"
+    }
+  ],
+  "what this repository contains": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "what-this-repository-contains"
+    }
+  ],
+  "primary “start here” entrypoints": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "primary-start-here-entrypoints"
+    }
+  ],
+  "docs sections (canonical plan)": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "docs-sections-canonical-plan"
+    }
+  ],
+  "legacy / redirect folders": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "legacy-redirect-folders"
+    }
+  ],
+  "machine registries (generated)": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "machine-registries-generated"
+    }
+  ],
+  "“always-update” living docs": [
+    {
+      "path": "CODEMAP.md",
+      "anchor": "always-update-living-docs"
+    }
+  ],
+  "docs index": [
+    {
+      "path": "INDEX.md",
+      "anchor": "docs-index"
+    }
+  ],
+  "core living docs (always kept up to date)": [
+    {
+      "path": "INDEX.md",
+      "anchor": "core-living-docs-always-kept-up-to-date"
+    }
+  ],
+  "00 — project administration": [
+    {
+      "path": "INDEX.md",
+      "anchor": "00-project-administration"
+    }
+  ],
+  "01 — product scope and requirements": [
+    {
+      "path": "INDEX.md",
+      "anchor": "01-product-scope-and-requirements"
+    }
+  ],
+  "02 — system architecture": [
+    {
+      "path": "INDEX.md",
+      "anchor": "02-system-architecture"
+    }
+  ],
+  "03 — richpanel integration": [
+    {
+      "path": "INDEX.md",
+      "anchor": "03-richpanel-integration"
+    }
+  ],
+  "04 — llm routing design and evaluation": [
+    {
+      "path": "INDEX.md",
+      "anchor": "04-llm-routing-design-and-evaluation"
+    }
+  ],
+  "05 — faq automation": [
+    {
+      "path": "INDEX.md",
+      "anchor": "05-faq-automation"
+    }
+  ],
+  "06 — security, privacy, and compliance": [
+    {
+      "path": "INDEX.md",
+      "anchor": "06-security-privacy-and-compliance"
+    }
+  ],
+  "07 — reliability and scaling": [
+    {
+      "path": "INDEX.md",
+      "anchor": "07-reliability-and-scaling"
+    }
+  ],
+  "08 — observability, analytics, and eval ops": [
+    {
+      "path": "INDEX.md",
+      "anchor": "08-observability-analytics-and-eval-ops"
+    }
+  ],
+  "08.5 — engineering and repo workflow": [
+    {
+      "path": "INDEX.md",
+      "anchor": "085-engineering-and-repo-workflow"
+    }
+  ],
+  "08 — testing and quality": [
+    {
+      "path": "INDEX.md",
+      "anchor": "08-testing-and-quality"
+    }
+  ],
+  "09 — deployment and operations": [
+    {
+      "path": "INDEX.md",
+      "anchor": "09-deployment-and-operations"
+    }
+  ],
+  "10 — operations, runbooks, training": [
+    {
+      "path": "INDEX.md",
+      "anchor": "10-operations-runbooks-training"
+    }
+  ],
+  "11 — governance": [
+    {
+      "path": "INDEX.md",
+      "anchor": "11-governance"
+    }
+  ],
+  "12 — execution packs": [
+    {
+      "path": "INDEX.md",
+      "anchor": "12-execution-packs"
+    }
+  ],
+  "risks, common issues, and waves": [
+    {
+      "path": "INDEX.md",
+      "anchor": "risks-common-issues-and-waves"
+    }
+  ],
+  "98 — agent ops (ai workflow, policies, templates)": [
+    {
+      "path": "INDEX.md",
+      "anchor": "98-agent-ops-ai-workflow-policies-templates"
+    }
+  ],
+  "docs registry (complete listing)": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "docs-registry-complete-listing"
+    }
+  ],
+  "00_project_admin": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "00projectadmin"
+    }
+  ],
+  "01_product_scope_requirements": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "01productscoperequirements"
+    }
+  ],
+  "02_system_architecture": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "02systemarchitecture"
+    }
+  ],
+  "03_richpanel_integration": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "03richpanelintegration"
+    }
+  ],
+  "04_api_contracts": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "04apicontracts"
+    }
+  ],
+  "04_llm_design_evaluation": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "04llmdesignevaluation"
+    }
+  ],
+  "05_faq_automation": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "05faqautomation"
+    }
+  ],
+  "06_data_privacy_observability": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "06dataprivacyobservability"
+    }
+  ],
+  "06_security_privacy_compliance": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "06securityprivacycompliance"
+    }
+  ],
+  "06_security_secrets": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "06securitysecrets"
+    }
+  ],
+  "07_reliability_scaling": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "07reliabilityscaling"
+    }
+  ],
+  "07_user_documentation": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "07userdocumentation"
+    }
+  ],
+  "08_engineering": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "08engineering"
+    }
+  ],
+  "08_observability_analytics": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "08observabilityanalytics"
+    }
+  ],
+  "08_testing_quality": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "08testingquality"
+    }
+  ],
+  "09_deployment": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09deployment"
+    }
+  ],
+  "09_deployment_operations": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09deploymentoperations"
+    }
+  ],
+  "10_governance_continuous_improvement": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "10governancecontinuousimprovement"
+    }
+  ],
+  "10_operations_runbooks_training": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "10operationsrunbookstraining"
+    }
+  ],
+  "11_cursor_agent_work_packages": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "11cursoragentworkpackages"
+    }
+  ],
+  "11_governance_continuous_improvement": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "11governancecontinuousimprovement"
+    }
+  ],
+  "12_cursor_agent_work_packages": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "12cursoragentworkpackages"
+    }
+  ],
+  "90_risks_common_issues": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "90riskscommonissues"
+    }
+  ],
+  "98_agent_ops": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "98agentops"
+    }
+  ],
+  "99_appendices": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "99appendices"
+    }
+  ],
+  "shopify_strategy": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "shopifystrategy"
+    }
+  ],
+  "waves": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "waves"
+    }
+  ],
+  "roadmap (high-level)": [
+    {
+      "path": "ROADMAP.md",
+      "anchor": "roadmap-high-level"
+    }
+  ],
+  "phase f — foundation (mode: foundation)": [
+    {
+      "path": "ROADMAP.md",
+      "anchor": "phase-f-foundation-mode-foundation"
+    }
+  ],
+  "phase b — build (mode: build)": [
+    {
+      "path": "ROADMAP.md",
+      "anchor": "phase-b-build-mode-build"
+    }
+  ],
+  "next step (switch to build mode)": [
+    {
+      "path": "ROADMAP.md",
+      "anchor": "next-step-switch-to-build-mode"
+    }
+  ],
   "shopify strategy notes (reference)": [
     {
       "path": "SHOPIFY_STRATEGY/README.md",

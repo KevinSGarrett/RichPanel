@@ -89,7 +89,15 @@ def _discover_docs(docs_root: Path) -> List[Path]:
     repo_root = docs_root.parent
     try:
         proc = subprocess.run(
-            ["git", "-C", str(repo_root), "ls-files", "--", "docs/**/*.md"],
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "ls-files",
+                "--",
+                "docs/*.md",
+                "docs/**/*.md",
+            ],
             capture_output=True,
             text=True,
             check=False,

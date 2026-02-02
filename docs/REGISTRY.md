@@ -15,6 +15,13 @@ Legend:
 - 🛠️ generated (machine output under `_generated/`)
 
 
+## Root
+
+- ✅ [CODEMAP (Project Navigation)](CODEMAP.md)  (`CODEMAP.md`)
+- ✅ [Docs Index](INDEX.md)  (`INDEX.md`)
+- ✅ [Docs Registry (Complete Listing)](REGISTRY.md)  (`REGISTRY.md`)
+- ✅ [Roadmap (High-Level)](ROADMAP.md)  (`ROADMAP.md`)
+
 ## 00_Project_Admin
 
 - ✅ [Assumptions & Constraints](00_Project_Admin/Assumptions_Constraints.md)  (`00_Project_Admin/Assumptions_Constraints.md`)
