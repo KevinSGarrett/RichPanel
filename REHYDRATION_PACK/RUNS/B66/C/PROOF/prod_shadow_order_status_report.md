@@ -88,7 +88,7 @@
 
 ## Notes
 - Ticket identifiers, emails, names, and order numbers are hashed in structured fields.
-- Message excerpts are sanitized (HTML stripped; emails/phones/addresses redacted; order numbers may remain).
+- Message excerpts are fully redacted in this run.
 - No outbound messages are sent; would_auto_reply is theoretical only.
 
 ## Richpanel Burst Summary (30s)
