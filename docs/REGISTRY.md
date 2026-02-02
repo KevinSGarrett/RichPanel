@@ -297,6 +297,11 @@ Legend:
 - ✅ [Test Strategy and Matrix](08_Testing_Quality/Test_Strategy_and_Matrix.md)  (`08_Testing_Quality/Test_Strategy_and_Matrix.md`)
 - ✅ [Wave 09 Definition of Done Checklist](08_Testing_Quality/Wave09_Definition_of_Done_Checklist.md)  (`08_Testing_Quality/Wave09_Definition_of_Done_Checklist.md`)
 
+## 09_Deployment
+
+- 📎 [Order Status Monitoring (MVP)](09_Deployment/Order_Status_Monitoring.md)  (`09_Deployment/Order_Status_Monitoring.md`)
+- 📎 [Order Status Preflight (Prod)](09_Deployment/Order_Status_Preflight.md)  (`09_Deployment/Order_Status_Preflight.md`)
+
 ## 09_Deployment_Operations
 
 - ✅ [CI/CD Plan](09_Deployment_Operations/CICD_Plan.md)  (`09_Deployment_Operations/CICD_Plan.md`)

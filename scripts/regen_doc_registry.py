@@ -22,6 +22,7 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import re
+import subprocess
 import sys
 from typing import Dict, List
 
@@ -79,6 +80,56 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return path.read_text(encoding="utf-8", errors="replace")
+
+
+def write_if_changed(path: Path, content: str) -> None:
+    existing = None
+    if path.exists():
+        try:
+            existing = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            existing = path.read_text(encoding="utf-8", errors="replace")
+    if existing == content:
+        return
+    path.write_text(content, encoding="utf-8", newline="\n")
+
+
+def _discover_docs(docs_root: Path) -> List[Path]:
+    """
+    Prefer tracked files to avoid OS-specific untracked drift (Windows vs CI).
+    """
+    repo_root = docs_root.parent
+    try:
+        proc = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "ls-files",
+                "--",
+                "docs/*.md",
+                "docs/**/*.md",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except Exception:
+        proc = None
+    paths: List[Path] = []
+    if proc and proc.returncode == 0:
+        for line in proc.stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            path = repo_root / line
+            if path.is_file():
+                paths.append(path)
+    if not paths:
+        paths = [p for p in docs_root.rglob("*.md") if p.is_file()]
+    return sorted(
+        paths, key=lambda p: p.relative_to(docs_root).as_posix()
+    )
 
 
 def extract_title(md_text: str, fallback: str) -> str:
@@ -164,10 +215,7 @@ def main() -> int:
     index_text = read_text(INDEX_FILE)
     index_links = set([p for p in parse_index_links(index_text) if p.endswith(".md")])
 
-    md_files = sorted(
-        [p for p in DOCS_ROOT.rglob("*.md") if p.is_file()],
-        key=lambda p: p.relative_to(DOCS_ROOT).as_posix(),
-    )
+    md_files = _discover_docs(DOCS_ROOT)
 
     # Build registry records
     records: List[Dict[str, object]] = []
@@ -245,22 +293,52 @@ def main() -> int:
             st = str(rec["status"])
             title = str(rec["title"])
             lines.append(f"- {marker(st)} [{title}]({rel})  (`{rel}`)")
-    (DOCS_ROOT / "REGISTRY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    registry_body = "\n".join(lines) + "\n"
+    write_if_changed(DOCS_ROOT / "REGISTRY.md", registry_body)
+
+    # Refresh REGISTRY.md record + outline now that content is finalized.
+    registry_record = next(
+        (rec for rec in records if rec["path"] == "REGISTRY.md"), None
+    )
+    if registry_record is not None:
+        wc = len(re.findall(r"\b\w+\b", registry_body))
+        registry_record["word_count"] = wc
+        registry_record["approx_tokens"] = int(wc * 1.3)
+    registry_outline = extract_outline(registry_body)
+    for outline_entry in outlines:
+        if outline_entry["path"] == "REGISTRY.md":
+            outline_entry["outline"] = registry_outline
+            break
+    # Rebuild heading index to keep REGISTRY headings in sync.
+    heading_index = {}
+    for outline_entry in outlines:
+        rel = str(outline_entry["path"])
+        for h in outline_entry["outline"]:
+            key = str(h["text"]).strip().lower()
+            if not key:
+                continue
+            heading_index.setdefault(key, []).append(
+                {"path": rel, "anchor": str(h["anchor"])}
+            )
 
     # Machine outputs
     GENERATED_DIR.mkdir(exist_ok=True)
 
-    (GENERATED_DIR / "doc_registry.json").write_text(
-        json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8"
+    write_if_changed(
+        GENERATED_DIR / "doc_registry.json",
+        json.dumps(records, indent=2, ensure_ascii=False) + "\n",
     )
-    (GENERATED_DIR / "doc_registry.compact.json").write_text(
-        json.dumps(records, separators=(",", ":"), ensure_ascii=False), encoding="utf-8"
+    write_if_changed(
+        GENERATED_DIR / "doc_registry.compact.json",
+        json.dumps(records, separators=(",", ":"), ensure_ascii=False) + "\n",
     )
-    (GENERATED_DIR / "doc_outline.json").write_text(
-        json.dumps(outlines, indent=2, ensure_ascii=False), encoding="utf-8"
+    write_if_changed(
+        GENERATED_DIR / "doc_outline.json",
+        json.dumps(outlines, indent=2, ensure_ascii=False) + "\n",
     )
-    (GENERATED_DIR / "heading_index.json").write_text(
-        json.dumps(heading_index, indent=2, ensure_ascii=False), encoding="utf-8"
+    write_if_changed(
+        GENERATED_DIR / "heading_index.json",
+        json.dumps(heading_index, indent=2, ensure_ascii=False) + "\n",
     )
 
     print(f"OK: regenerated registry for {len(records)} docs.")

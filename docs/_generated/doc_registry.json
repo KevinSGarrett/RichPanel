@@ -2300,6 +2300,26 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "09_Deployment/Order_Status_Monitoring.md",
+    "title": "Order Status Monitoring (MVP)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 247,
+    "approx_tokens": 321,
+    "last_updated": ""
+  },
+  {
+    "path": "09_Deployment/Order_Status_Preflight.md",
+    "title": "Order Status Preflight (Prod)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 212,
+    "approx_tokens": 275,
+    "last_updated": ""
+  },
+  {
     "path": "09_Deployment_Operations/CICD_Plan.md",
     "title": "CI/CD Plan",
     "section": "09_Deployment_Operations",
@@ -3925,8 +3945,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10770,
-    "approx_tokens": 14001,
+    "word_count": 10791,
+    "approx_tokens": 14028,
     "last_updated": ""
   },
   {

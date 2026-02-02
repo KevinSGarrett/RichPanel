@@ -14320,6 +14320,106 @@
     ]
   },
   {
+    "path": "09_Deployment/Order_Status_Monitoring.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status Monitoring (MVP)",
+        "anchor": "order-status-monitoring-mvp"
+      },
+      {
+        "level": 2,
+        "text": "Dashboard",
+        "anchor": "dashboard"
+      },
+      {
+        "level": 2,
+        "text": "Alarms (minimum)",
+        "anchor": "alarms-minimum"
+      },
+      {
+        "level": 3,
+        "text": "1) Worker Lambda error rate",
+        "anchor": "1-worker-lambda-error-rate"
+      },
+      {
+        "level": 3,
+        "text": "2) Shopify token refresh Lambda errors",
+        "anchor": "2-shopify-token-refresh-lambda-errors"
+      },
+      {
+        "level": 3,
+        "text": "3) Richpanel 429 spikes",
+        "anchor": "3-richpanel-429-spikes"
+      },
+      {
+        "level": 3,
+        "text": "4) Shopify 429 spikes",
+        "anchor": "4-shopify-429-spikes"
+      },
+      {
+        "level": 3,
+        "text": "5) OpenAI intent failures",
+        "anchor": "5-openai-intent-failures"
+      },
+      {
+        "level": 2,
+        "text": "Order-status anomaly (placeholder)",
+        "anchor": "order-status-anomaly-placeholder"
+      },
+      {
+        "level": 2,
+        "text": "Where to find alarms",
+        "anchor": "where-to-find-alarms"
+      }
+    ]
+  },
+  {
+    "path": "09_Deployment/Order_Status_Preflight.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status Preflight (Prod)",
+        "anchor": "order-status-preflight-prod"
+      },
+      {
+        "level": 2,
+        "text": "Purpose",
+        "anchor": "purpose"
+      },
+      {
+        "level": 2,
+        "text": "Prereqs",
+        "anchor": "prereqs"
+      },
+      {
+        "level": 2,
+        "text": "Required env flags (safe read-only)",
+        "anchor": "required-env-flags-safe-read-only"
+      },
+      {
+        "level": 2,
+        "text": "Command",
+        "anchor": "command"
+      },
+      {
+        "level": 2,
+        "text": "Output",
+        "anchor": "output"
+      },
+      {
+        "level": 2,
+        "text": "Common failures",
+        "anchor": "common-failures"
+      },
+      {
+        "level": 2,
+        "text": "Optional skips (diagnostic only)",
+        "anchor": "optional-skips-diagnostic-only"
+      }
+    ]
+  },
+  {
     "path": "09_Deployment_Operations/CICD_Plan.md",
     "outline": [
       {
@@ -22251,6 +22351,11 @@
         "level": 2,
         "text": "08_Testing_Quality",
         "anchor": "08testingquality"
+      },
+      {
+        "level": 2,
+        "text": "09_Deployment",
+        "anchor": "09deployment"
       },
       {
         "level": 2,

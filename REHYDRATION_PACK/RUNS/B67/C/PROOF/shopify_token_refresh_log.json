@@ -1,0 +1,34 @@
+﻿{
+    "events": [
+        {
+            "logStreamName": "2026/02/01/[$LATEST]c9b263ca3bd24d0f9a4f28950349c860",
+            "timestamp": 1769964080071,
+            "message": "{\"environment\": \"prod\", \"error\": null, \"refresh_attempted\": true, \"refresh_succeeded\": true, \"shop_domain\": \"scentimen-t.myshopify.com\", \"timestamp_utc\": \"2026-02-01T16:41:20.071135+00:00\", \"token_diagnostics\": {\"expired\": false, \"expires_at\": 1770050479.0102558, \"has_refresh_token\": false, \"raw_format\": \"json\", \"source_secret_id\": \"rp-mw/prod/shopify/admin_api_token\", \"status\": \"loaded\", \"token_type\": \"offline\"}}\n",
+            "ingestionTime": 1769964083461,
+            "eventId": "39471517960215024651770406902923349484548907357883662338"
+        },
+        {
+            "logStreamName": "2026/02/01/[$LATEST]555eb901ec884e23b34d7492e901b54b",
+            "timestamp": 1769978480039,
+            "message": "{\"environment\": \"prod\", \"error\": null, \"refresh_attempted\": true, \"refresh_succeeded\": true, \"shop_domain\": \"scentimen-t.myshopify.com\", \"timestamp_utc\": \"2026-02-01T20:41:20.039520+00:00\", \"token_diagnostics\": {\"expired\": false, \"expires_at\": 1770064878.9704266, \"has_refresh_token\": false, \"raw_format\": \"json\", \"source_secret_id\": \"rp-mw/prod/shopify/admin_api_token\", \"status\": \"loaded\", \"token_type\": \"offline\"}}\n",
+            "ingestionTime": 1769978482763,
+            "eventId": "39471839090232259646390682484425118035672417999643344898"
+        },
+        {
+            "logStreamName": "2026/02/02/[$LATEST]0d3959eb0fdd4a9894a4edbfd769b61f",
+            "timestamp": 1769992879964,
+            "message": "{\"environment\": \"prod\", \"error\": null, \"refresh_attempted\": true, \"refresh_succeeded\": true, \"shop_domain\": \"scentimen-t.myshopify.com\", \"timestamp_utc\": \"2026-02-02T00:41:19.962665+00:00\", \"token_diagnostics\": {\"expired\": false, \"expires_at\": 1770079278.9207575, \"has_refresh_token\": false, \"raw_format\": \"json\", \"source_secret_id\": \"rp-mw/prod/shopify/admin_api_token\", \"status\": \"loaded\", \"token_type\": \"offline\"}}\n",
+            "ingestionTime": 1769992883897,
+            "eventId": "39472160219290562597474141273055836007454456354920595458"
+        },
+        {
+            "logStreamName": "2026/02/02/[$LATEST]98929295ab8b40368309654c05d8220a",
+            "timestamp": 1770007279951,
+            "message": "{\"environment\": \"prod\", \"error\": null, \"refresh_attempted\": true, \"refresh_succeeded\": true, \"shop_domain\": \"scentimen-t.myshopify.com\", \"timestamp_utc\": \"2026-02-02T04:41:19.951618+00:00\", \"token_diagnostics\": {\"expired\": false, \"expires_at\": 1770093678.9274936, \"has_refresh_token\": false, \"raw_format\": \"json\", \"source_secret_id\": \"rp-mw/prod/shopify/admin_api_token\", \"status\": \"loaded\", \"token_type\": \"offline\"}}\n",
+            "ingestionTime": 1770007286173,
+            "eventId": "39472481349731511750866498697842048737494072440030035970"
+        }
+    ],
+    "searchedLogStreams": [],
+    "nextToken": "Bxkq6kVGFtq2y_MoigeqscPOdhXVbhiVtLoAmXb5jCqPO4DCljgsHLL7ZIRC2k7GYTxQZZXf8Dj9kntFyjPp1Yaq2IUiOQCQrJhix634jd3sObiXbkoA3JCo4-EpSnXkdUlK9l_sV7aBAgNVimWtzGP89d3FxmrloYfDldYLxynskaWsleRl_ZSAA2XjD_HqJ7Dekx0b74jAkJcHsn0f0rSN0K8kjYKTSxyu_QIvrBf8LNh0nvBAGnOq2YRz8H9fiu0sgb9DK9bv9AnLKzw7mGFzbp7oT9IMHXzPqoRo9nWyy-s6aON07r2xE87ZzdB7TLXnDxd2uBXofusjyi8LB9YCdxNnL8WTU4j4P2cbXg8"
+}
