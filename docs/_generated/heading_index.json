@@ -13509,6 +13509,12 @@
       "anchor": "daily-live-read-only-shadow-eval-ci"
     }
   ],
+  "prod shadow order status report (scaled)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "prod-shadow-order-status-report-scaled"
+    }
+  ],
   "deployment gate criteria (recommended)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
