@@ -4015,6 +4015,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "12_Cursor_Agent_Work_Packages/02_Epics/EP00_Preflight_access_tenant_verification.md",
       "anchor": "purpose"
     },
@@ -15557,6 +15561,10 @@
       "anchor": "preconditions"
     },
     {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "preconditions"
+    },
+    {
       "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
       "anchor": "preconditions"
     }
@@ -15661,6 +15669,30 @@
     {
       "path": "08_Testing_Quality/Manual_QA_Checklists.md",
       "anchor": "passfail"
+    }
+  ],
+  "order status sandbox e2e suite (b67)": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "order-status-sandbox-e2e-suite-b67"
+    }
+  ],
+  "harness": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "harness"
+    }
+  ],
+  "scenarios": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "scenarios"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "artifacts"
     }
   ],
   "smoke test pack (v1)": [
@@ -15877,6 +15909,108 @@
     {
       "path": "08_Testing_Quality/Wave09_Definition_of_Done_Checklist.md",
       "anchor": "admin-tracking"
+    }
+  ],
+  "order status monitoring (mvp)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "order-status-monitoring-mvp"
+    }
+  ],
+  "dashboard": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "dashboard"
+    }
+  ],
+  "alarms (minimum)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "alarms-minimum"
+    }
+  ],
+  "1) worker lambda error rate": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "1-worker-lambda-error-rate"
+    }
+  ],
+  "2) shopify token refresh lambda errors": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "2-shopify-token-refresh-lambda-errors"
+    }
+  ],
+  "3) richpanel 429 spikes": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "3-richpanel-429-spikes"
+    }
+  ],
+  "4) shopify 429 spikes": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "4-shopify-429-spikes"
+    }
+  ],
+  "5) openai intent failures": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "5-openai-intent-failures"
+    }
+  ],
+  "order-status anomaly (placeholder)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "order-status-anomaly-placeholder"
+    }
+  ],
+  "where to find alarms": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "where-to-find-alarms"
+    }
+  ],
+  "order status preflight (prod)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "order-status-preflight-prod"
+    }
+  ],
+  "prereqs": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "prereqs"
+    }
+  ],
+  "required env flags (safe read-only)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "required-env-flags-safe-read-only"
+    }
+  ],
+  "command": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "command"
+    }
+  ],
+  "output": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "output"
+    }
+  ],
+  "common failures": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "common-failures"
+    }
+  ],
+  "optional skips (diagnostic only)": [
+    {
+      "path": "09_Deployment/Order_Status_Preflight.md",
+      "anchor": "optional-skips-diagnostic-only"
     }
   ],
   "ci/cd plan": [

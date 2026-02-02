@@ -2250,6 +2250,16 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+    "title": "Order Status Sandbox E2E Suite (B67)",
+    "section": "08_Testing_Quality",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 140,
+    "approx_tokens": 182,
+    "last_updated": ""
+  },
+  {
     "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
     "title": "Smoke Test Pack (v1)",
     "section": "08_Testing_Quality",
@@ -2298,6 +2308,26 @@
     "word_count": 161,
     "approx_tokens": 209,
     "last_updated": "2025-12-22"
+  },
+  {
+    "path": "09_Deployment/Order_Status_Monitoring.md",
+    "title": "Order Status Monitoring (MVP)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 247,
+    "approx_tokens": 321,
+    "last_updated": ""
+  },
+  {
+    "path": "09_Deployment/Order_Status_Preflight.md",
+    "title": "Order Status Preflight (Prod)",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 212,
+    "approx_tokens": 275,
+    "last_updated": ""
   },
   {
     "path": "09_Deployment_Operations/CICD_Plan.md",
