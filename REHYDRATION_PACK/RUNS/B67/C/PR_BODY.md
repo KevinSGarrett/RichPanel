@@ -4,8 +4,8 @@
 **Agents:** B  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** `pending — gate not run`  
-**Anthropic response id:** `pending — gate not run`
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01JjcNCJm4491nU2eQKF33ss`
 
 ### 1) Summary
 - Production cutover runbook now defines prerequisites, phased enablement, and rollback for Order Status.
@@ -84,9 +84,9 @@
 - (None)
 
 ### 7) Results & evidence
-**CI:** pending — PR not created yet  
-**Codecov:** pending — PR not created yet  
-**Bugbot:** pending — PR not created yet (trigger via `@cursor review`)  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21603017514/job/62253632433`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/215`  
+**Bugbot:** pass — `https://cursor.com`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
