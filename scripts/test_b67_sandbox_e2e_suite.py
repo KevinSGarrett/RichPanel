@@ -1,5 +1,7 @@
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from b67_sandbox_e2e_suite import (
     ScenarioSpec,
@@ -36,6 +38,22 @@ class TestB67SandboxSuite(unittest.TestCase):
         self.assertEqual(scenario.scenario_key, "order_status_fallback_email_match")
         self.assertIsNone(scenario.order_number)
         self.assertFalse(scenario.require_order_match_by_number)
+
+    def test_build_scenario_spec_golden_normalizes_order_number(self) -> None:
+        args = _Args()
+        args.scenario = "order_status_golden"
+        args.order_number = "#1002"
+        scenario = _build_scenario_spec(args, run_id="RUN")
+        self.assertEqual(scenario.order_number, "1002")
+        self.assertTrue(scenario.require_order_match_by_number)
+        self.assertIsNotNone(scenario.order_number_fingerprint)
+
+    def test_build_scenario_spec_negative_case(self) -> None:
+        args = _Args()
+        args.scenario = "not_order_status_negative_case"
+        scenario = _build_scenario_spec(args, run_id="RUN")
+        self.assertEqual(scenario.scenario_key, "not_order_status_negative_case")
+        self.assertFalse(scenario.require_send_message)
 
     def test_append_scenario_assertions_fallback_passes(self) -> None:
         proof = {
@@ -153,6 +171,63 @@ class TestB67SandboxSuite(unittest.TestCase):
             artifacts_dir=Path("."),
         )
         self.assertEqual(result.status, "ERROR")
+
+    def test_run_scenario_handles_successful_flow(self) -> None:
+        args = _Args()
+        scenario = ScenarioSpec(
+            scenario_key="order_status_golden",
+            smoke_scenario="order_status",
+            ticket_subject="",
+            ticket_body="",
+            proof_filename="proof.json",
+            require_outbound=True,
+            require_send_message=True,
+            require_operator_reply=True,
+        )
+        proof = {
+            "proof_fields": {
+                "intent_after": "order_status_tracking",
+                "outbound_attempted": True,
+                "send_message_path_confirmed": True,
+                "operator_reply_confirmed": True,
+            },
+            "richpanel": {"status_after": "CLOSED"},
+        }
+        create_stdout = "TICKET_REF_JSON:{\"ticket_number\":\"555\"}"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifacts = Path(tmpdir)
+            (artifacts / "PROOF").mkdir(parents=True, exist_ok=True)
+            with mock.patch(
+                "b67_sandbox_e2e_suite._run_command"
+            ) as run_cmd, mock.patch(
+                "b67_sandbox_e2e_suite._read_proof", return_value=proof
+            ):
+                run_cmd.side_effect = [
+                    mock.Mock(returncode=0, stdout=create_stdout),
+                    mock.Mock(returncode=0, stdout=""),
+                ]
+                result = _run_scenario(
+                    args, scenario=scenario, run_id="RUN", artifacts_dir=artifacts
+                )
+        self.assertEqual(result.status, "PASS")
+
+    def test_run_scenario_fails_without_ticket_ref(self) -> None:
+        args = _Args()
+        scenario = ScenarioSpec(
+            scenario_key="order_status_golden",
+            smoke_scenario="order_status",
+            ticket_subject="",
+            ticket_body="",
+            proof_filename="proof.json",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifacts = Path(tmpdir)
+            with mock.patch("b67_sandbox_e2e_suite._run_command") as run_cmd:
+                run_cmd.return_value = mock.Mock(returncode=1, stdout="")
+                result = _run_scenario(
+                    args, scenario=scenario, run_id="RUN", artifacts_dir=artifacts
+                )
+        self.assertEqual(result.status, "FAIL")
 
 
 if __name__ == "__main__":
