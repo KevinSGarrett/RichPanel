@@ -1,18 +1,24 @@
 # Order status preflight health check
 
-- timestamp_utc: 2026-02-02T01:44:49.975377+00:00
+- timestamp_utc: 2026-02-02T03:00:21.647912+00:00
 - overall_status: FAIL
 
 ## Checks
-- richpanel_api: FAIL — request_failed (SecretLoadError)
-  - next_action: Verify Richpanel API key secret + AWS region/credentials.
-- shopify_token: FAIL — dry_run (secret_lookup_failed)
-  - next_action: Confirm Shopify token secret + AWS access.
+- richpanel_api: FAIL — auth_fail (403)
+  - next_action: Check Richpanel API key secret; rotate if expired.
+- shopify_token: FAIL — auth_fail (401)
+  - next_action: Token expired: run refresh job or update secret.
 - shopify_token_refresh_lambda: PASS — lambda_config_present
 
 ## Shopify token diagnostics
 ```
 {
-  "status": "unknown"
+  "expired": null,
+  "expires_at": null,
+  "has_refresh_token": false,
+  "raw_format": "json",
+  "source_secret_id": "rp-mw/prod/shopify/admin_api_token",
+  "status": "loaded",
+  "token_type": "offline"
 }
 ```
