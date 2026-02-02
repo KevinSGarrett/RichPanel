@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+from datetime import timedelta
 from unittest import mock
 import unittest
 from pathlib import Path
@@ -350,7 +351,7 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
 
     def test_refresh_lambda_last_success(self) -> None:
         now = preflight.datetime.now(preflight.timezone.utc)
-        ts_ms = int((now - preflight.timedelta(hours=1)).timestamp() * 1000)
+        ts_ms = int((now - timedelta(hours=1)).timestamp() * 1000)
         logs_client = _StubLogsClient(
             streams=[{"logStreamName": "stream-1"}],
             events_by_stream={
