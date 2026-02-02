@@ -198,6 +198,74 @@ class OrderIdResolutionTests(unittest.TestCase):
         )
         self.assertEqual(payload, {})
 
+    def test_lookup_shopify_by_name_diagnostics(self) -> None:
+        class _StubResponse:
+            def __init__(self, *, status_code: int, payload: dict, headers: dict):
+                self.status_code = status_code
+                self.dry_run = False
+                self._payload = payload
+                self.headers = headers
+                self.reason = None
+
+            def json(self):
+                return self._payload
+
+        class _StubClient:
+            def __init__(self, response):
+                self.response = response
+
+            def find_orders_by_name(self, *args, **kwargs):
+                return self.response
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=401,
+                    payload={"orders": []},
+                    headers={"x-shopify-request-id": "req-401"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "auth_fail")
+        self.assertEqual(diagnostics.get("request_id"), "req-401")
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=429,
+                    payload={"orders": []},
+                    headers={"x-request-id": "req-429"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "rate_limited")
+
+        payload, diagnostics = _lookup_shopify_by_name(
+            order_name="123",
+            allow_network=True,
+            safe_mode=False,
+            automation_enabled=True,
+            client=_StubClient(
+                _StubResponse(
+                    status_code=200,
+                    payload={"orders": []},
+                    headers={"x-request-id": "req-200"},
+                )
+            ),
+        )
+        self.assertEqual(payload, {})
+        self.assertEqual(diagnostics.get("category"), "no_match")
+
     def test_resolve_orders_by_identity_no_orders(self) -> None:
         payload, resolution = _resolve_orders_by_identity([], email="x", name="y")
         self.assertEqual(payload, {})
