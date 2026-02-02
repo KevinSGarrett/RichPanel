@@ -14080,6 +14080,41 @@
     ]
   },
   {
+    "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status Sandbox E2E Suite (B67)",
+        "anchor": "order-status-sandbox-e2e-suite-b67"
+      },
+      {
+        "level": 2,
+        "text": "Preconditions",
+        "anchor": "preconditions"
+      },
+      {
+        "level": 2,
+        "text": "Harness",
+        "anchor": "harness"
+      },
+      {
+        "level": 2,
+        "text": "Scenarios",
+        "anchor": "scenarios"
+      },
+      {
+        "level": 2,
+        "text": "Artifacts",
+        "anchor": "artifacts"
+      },
+      {
+        "level": 2,
+        "text": "Split Evidence (when no sandbox Shopify orders exist)",
+        "anchor": "split-evidence-when-no-sandbox-shopify-orders-exist"
+      }
+    ]
+  },
+  {
     "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
     "outline": [
       {
