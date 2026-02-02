@@ -33,6 +33,7 @@
 - Added CloudWatch alarms + dashboard with explicit alarm names for retrieval.
 - Expanded preflight to include Secrets Manager, Shopify GraphQL, and refresh “last success”.
 - Regenerated docs registry outputs after adding new docs (required by validate check).
+- Made docs registry regen use tracked docs only to avoid untracked drift in CI.
 
 **Design decisions (why this way):**
 - Metric filters rely on explicit log markers for 429s and OpenAI intent failures.
