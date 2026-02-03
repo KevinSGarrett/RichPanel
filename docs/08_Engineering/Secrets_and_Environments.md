@@ -24,7 +24,7 @@ This document defines the **single source of truth** for secrets, environment co
 
 **Philosophy:**
 - **AWS Secrets Manager is the canonical source** for all runtime secrets in deployed environments (dev, staging, prod)
-- **GitHub Actions Secrets** are used **only** for CI/PR smoke tests against sandbox/dev environments
+- **GitHub Actions Secrets** are used **only** for CI/PR smoke tests in dev (no Shopify sandbox exists)
 - **Production secrets NEVER live in GitHub Actions Secrets**
 - **Local development** uses environment variable overrides or local AWS profiles
 
@@ -41,9 +41,9 @@ Example: `rp-mw/dev/richpanel/api_key`
 
 | Environment | AWS Account    | Region     | Purpose                           |
 |-------------|----------------|------------|-----------------------------------|
-| `dev`       | 151124909266   | us-east-2  | Development + sandbox testing     |
-| `staging`   | 260475105304   | us-east-2  | Pre-production validation         |
-| `prod`      | 878145708918   | us-east-2  | Live production (read-only mode)  |
+| `dev`       | 151124909266   | us-east-2  | Development + read-only validation |
+| `staging`   | 260475105304   | us-east-2  | Pre-production read-only checks    |
+| `prod`      | 878145708918   | us-east-2  | Live production (read-only mode)   |
 
 **Environment resolution:**
 The middleware resolves the active environment name from these variables (in order):
@@ -74,6 +74,7 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 | **prod**    | Shopify     | Admin API token        | `rp-mw/prod/shopify/admin_api_token`      | **Must be read-only Admin API token**      |
 | **prod**    | Shopify     | Client id              | `rp-mw/prod/shopify/client_id`            | OAuth refresh token support                |
 | **prod**    | Shopify     | Client secret          | `rp-mw/prod/shopify/client_secret`        | OAuth refresh token support                |
+| **prod**    | Shopify     | Refresh token          | `rp-mw/prod/shopify/refresh_token`        | Optional; required for rotating tokens     |
 | **prod**    | OpenAI      | API key                | `rp-mw/prod/openai/api_key`               | Chat completion endpoint                   |
 
 ### Staging Secrets
@@ -82,9 +83,10 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 |-------------|-------------|------------------------|-------------------------------------------|--------------------------------------------|
 | **staging** | Richpanel   | API key                | `rp-mw/staging/richpanel/api_key`         | Staging Richpanel sandbox                  |
 | **staging** | Richpanel   | Webhook token          | `rp-mw/staging/richpanel/webhook_token`   | Ingress Lambda auth                        |
-| **staging** | Shopify     | Admin API token        | `rp-mw/staging/shopify/admin_api_token`   | Staging Shopify dev store                  |
+| **staging** | Shopify     | Admin API token        | `rp-mw/staging/shopify/admin_api_token`   | Live store (read-only token)               |
 | **staging** | Shopify     | Client id              | `rp-mw/staging/shopify/client_id`         | OAuth refresh token support                |
 | **staging** | Shopify     | Client secret          | `rp-mw/staging/shopify/client_secret`     | OAuth refresh token support                |
+| **staging** | Shopify     | Refresh token          | `rp-mw/staging/shopify/refresh_token`     | Optional; required for rotating tokens     |
 | **staging** | OpenAI      | API key                | `rp-mw/staging/openai/api_key`            | Chat completion endpoint                   |
 
 ### Development Secrets
@@ -93,9 +95,10 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 |-------------|-------------|------------------------|-------------------------------------------|--------------------------------------------|
 | **dev**     | Richpanel   | API key                | `rp-mw/dev/richpanel/api_key`             | Dev sandbox (writes allowed)               |
 | **dev**     | Richpanel   | Webhook token          | `rp-mw/dev/richpanel/webhook_token`       | Ingress Lambda auth                        |
-| **dev**     | Shopify     | Admin API token        | `rp-mw/dev/shopify/admin_api_token`       | Dev Shopify test store                     |
+| **dev**     | Shopify     | Admin API token        | `rp-mw/dev/shopify/admin_api_token`       | Live store (read-only token)               |
 | **dev**     | Shopify     | Client id              | `rp-mw/dev/shopify/client_id`             | OAuth refresh token support                |
 | **dev**     | Shopify     | Client secret          | `rp-mw/dev/shopify/client_secret`         | OAuth refresh token support                |
+| **dev**     | Shopify     | Refresh token          | `rp-mw/dev/shopify/refresh_token`         | Optional; required for rotating tokens     |
 | **dev**     | OpenAI      | API key                | `rp-mw/dev/openai/api_key`                | Chat completion endpoint                   |
 
 ### Shopify Legacy Path (Compatibility)
@@ -105,6 +108,9 @@ The Shopify client includes a **fallback** for a legacy secret path:
 - **Legacy (fallback):** `rp-mw/<env>/shopify/access_token`
 
 The client tries the canonical path first, then falls back to the legacy path if not found.
+
+**Important:** There is **no Shopify sandbox**. All environments use the **same live store**
+with **read-only** tokens, so avoid writing or testing write scopes.
 
 The admin API token secret can be either a plain token string or a JSON payload:
 
@@ -116,13 +122,18 @@ The admin API token secret can be either a plain token string or a JSON payload:
 }
 ```
 
+For rotating tokens, the refresh Lambda uses the Shopify OAuth
+`grant_type=client_credentials` flow with the client id/secret to mint a fresh
+access token on a schedule. A refresh token is optional; if present, it will be
+used, but it is not required for the client-credentials flow.
+
 **Code reference:** `backend/src/integrations/shopify/client.py` L178-L189
 
 ---
 
 ## GitHub Actions Secrets
 
-GitHub Actions Secrets are used **exclusively** for CI/PR smoke tests against sandbox/dev environments. They are **NOT** used for staging or production deployments.
+GitHub Actions Secrets are used **exclusively** for CI/PR smoke tests in dev. They are **NOT** used for staging or production deployments, and Shopify credentials remain in AWS Secrets Manager only (live read-only store).
 
 ### Current GitHub Secrets (Repository Settings → Secrets and Variables → Actions)
 
@@ -185,6 +196,8 @@ All integration clients support **environment variable overrides** for local dev
 | `SHOPIFY_CLIENT_SECRET_OVERRIDE`     | Override Shopify client secret               | Uses AWS Secrets Manager if not set     |
 | `SHOPIFY_CLIENT_ID_SECRET_ID`        | Custom client id secret path                 | `rp-mw/<env>/shopify/client_id`         |
 | `SHOPIFY_CLIENT_SECRET_SECRET_ID`    | Custom client secret path                    | `rp-mw/<env>/shopify/client_secret`     |
+| `SHOPIFY_REFRESH_TOKEN_SECRET_ID`    | Custom refresh token path                    | `rp-mw/<env>/shopify/refresh_token`     |
+| `SHOPIFY_REFRESH_TOKEN_OVERRIDE`     | Override refresh token (skip Secrets Manager) | Uses AWS Secrets Manager if not set    |
 | `SHOPIFY_OUTBOUND_ENABLED`           | Enable network calls (default: offline)      | `false` (offline by default)            |
 | `SHOPIFY_SHOP_DOMAIN`                | Shopify shop domain                          | `example.myshopify.com`                 |
 

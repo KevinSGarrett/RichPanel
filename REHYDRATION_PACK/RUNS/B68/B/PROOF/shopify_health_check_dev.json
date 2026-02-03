@@ -1,0 +1,36 @@
+{
+  "can_refresh": true,
+  "environment": "dev",
+  "error": null,
+  "expired": null,
+  "expires_at": null,
+  "health_check": {
+    "dry_run": false,
+    "reason": null,
+    "status_code": 401
+  },
+  "refresh_attempted": true,
+  "refresh_dry_run": false,
+  "refresh_error": "status=400 error=application_cannot_be_found description=Could not find Shopify API application with api_key {\"***\":\"\"}",
+  "refresh_mode": "client_credentials",
+  "refresh_succeeded": false,
+  "secret_id_candidates": [
+    "rp-mw/dev/shopify/admin_api_token",
+    "rp-mw/dev/shopify/access_token"
+  ],
+  "shop_domain": "scentimen-t.myshopify.com",
+  "status": "FAIL",
+  "timestamp_utc": "2026-02-03T16:32:44.841355+00:00",
+  "token_diagnostics": {
+    "expired": null,
+    "expires_at": null,
+    "has_refresh_token": false,
+    "raw_format": "plain",
+    "refresh_token_source": null,
+    "source_secret_id": "rp-mw/dev/shopify/admin_api_token",
+    "status": "loaded",
+    "token_type": "offline"
+  },
+  "token_format": "raw",
+  "token_type": "offline"
+}
