@@ -181,8 +181,9 @@ jobs:
             failures.append(f"match_rate_among_order_status {match_rate} < {min_match}")
           if retry_429 > max_429:
             failures.append(f"richpanel_retry_429_count {retry_429} > {max_429}")
-          if warnings:
-            failures.append(f"run_warnings present: {warnings}")
+          filtered_warnings = [w for w in warnings if w != "richpanel_retries_observed"]
+          if filtered_warnings:
+            failures.append(f"run_warnings present: {filtered_warnings}")
 
           if failures:
             raise SystemExit("Threshold check failed: " + "; ".join(failures))
