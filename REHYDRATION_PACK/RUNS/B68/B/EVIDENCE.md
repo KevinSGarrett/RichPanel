@@ -163,6 +163,14 @@ python .\_tmp_shopify_secret_keys.py
 Result summary:
 - keys: `access_token, expires_at, refresh_token, refreshed_at`
 
+### 2026-02-03 17:32 UTC — Shopify client unit tests (regression fix)
+Command:
+```
+python -m pytest scripts\test_shopify_client.py -k "falls_back_to_legacy_secret_when_canonical_missing or refresh_skips_without_refresh_token"
+```
+Result summary:
+- 2 passed
+
 ### 2026-02-03 15:40 UTC — Shopify health check (dev FAIL)
 Command:
 ```

@@ -797,6 +797,7 @@ class ShopifyClient:
                 value = parsed.get(key)
                 if value:
                     return str(value)
+            return None
         return secret_value
 
     def _load_secret_value(self, client: Any, secret_id: str) -> Optional[str]:

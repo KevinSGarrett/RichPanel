@@ -391,7 +391,10 @@ class ShopifyClientTests(unittest.TestCase):
 
             self.assertFalse(response.dry_run)
             self.assertEqual(client.access_token_secret_id, legacy)
-            self.assertEqual(secrets.calls, [canonical, legacy])
+            self.assertEqual(
+                secrets.calls,
+                [canonical, legacy, "rp-mw/local/shopify/refresh_token"],
+            )
             self.assertEqual(
                 transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
             )

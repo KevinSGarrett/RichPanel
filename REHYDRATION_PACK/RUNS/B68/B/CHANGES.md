@@ -5,4 +5,5 @@
 - CDK updates for Shopify refresh in dev and secret access grants: `infra/cdk/lib/richpanel-middleware-stack.ts`.
 - Added Shopify refresh token secret support (optional) for rotating tokens: `backend/src/integrations/shopify/client.py`.
 - Added JSON parsing for Shopify client id/secret and redacted refresh error logging.
+- Fixed Shopify client tests for refresh-token lookup behavior.
 - Docs clarified for single live Shopify store (read-only): `docs/08_Engineering/Secrets_and_Environments.md`.
