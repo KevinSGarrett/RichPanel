@@ -171,6 +171,14 @@ python -m pytest scripts\test_shopify_client.py -k "falls_back_to_legacy_secret_
 Result summary:
 - 2 passed
 
+### 2026-02-03 17:45 UTC — Shopify client unit tests (coverage)
+Command:
+```
+python -m pytest scripts\test_shopify_client.py -k "extract_secret_field_returns_none_when_key_missing or refresh_error_includes_error_code"
+```
+Result summary:
+- 2 passed
+
 ### 2026-02-03 15:40 UTC — Shopify health check (dev FAIL)
 Command:
 ```

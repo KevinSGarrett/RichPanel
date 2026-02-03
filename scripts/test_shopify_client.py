@@ -741,6 +741,41 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertTrue(client._refresh_access_token(client._token_info))
         self.assertEqual(client._access_token, "new-token")
 
+    def test_extract_secret_field_returns_none_when_key_missing(self) -> None:
+        client = ShopifyClient(access_token="test-token")
+        value = json.dumps({"unexpected": "value"})
+        self.assertIsNone(client._extract_secret_field(value, ("client_id",)))
+
+    def test_refresh_error_includes_error_code(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {"SecretString": "old-token"},
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=400,
+                    headers={},
+                    body=b'{"error":"application_cannot_be_found","error_description":"boom"}',
+                )
+            ]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+        self.assertFalse(client.refresh_access_token())
+        self.assertIn("status=400", client.refresh_error() or "")
+        self.assertIn("error=application_cannot_be_found", client.refresh_error() or "")
+
     def test_parse_timestamp_invalid(self) -> None:
         client = ShopifyClient(access_token="test-token")
         self.assertIsNone(client._parse_timestamp("not-a-date"))
