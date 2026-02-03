@@ -63,6 +63,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _build_operator_send_message_richpanel_fields,
     _build_operator_send_message_criteria,
     _append_operator_send_message_criteria_details,
+    _resolve_outbound_endpoint_used,
     _fetch_ticket_snapshot,
     _fetch_latest_reply_body,
     _fetch_latest_reply_hash,
@@ -1244,14 +1245,18 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertEqual(payload["result"]["status"], "SKIP")
         self.assertEqual(payload["result"]["classification"], "SKIP")
         self.assertIn("proof_fields", payload)
+        self.assertIn("ticket_channel", payload["proof_fields"])
         self.assertIn("intent_after", payload["proof_fields"])
         self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
+        self.assertIn("outbound_endpoint_used", payload["proof_fields"])
         self.assertIn("send_message_used", payload["proof_fields"])
         self.assertIn("send_message_status_code", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
+        self.assertIn("latest_comment_is_operator", payload["proof_fields"])
+        self.assertIn("latest_comment_source", payload["proof_fields"])
         self.assertIn("order_match_method", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
@@ -1483,6 +1488,20 @@ class ParseArgsTests(unittest.TestCase):
         ):
             args = parse_args()
         self.assertTrue(args.require_send_message_used)
+
+    def test_parse_args_accepts_require_email_channel(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--require-email-channel",
+            ],
+        ):
+            args = parse_args()
+        self.assertTrue(args.require_email_channel)
 
 
 class RoutingValidationTests(unittest.TestCase):
@@ -1741,6 +1760,13 @@ class OutboundResultHelperTests(unittest.TestCase):
             201,
         )
 
+    def test_resolve_outbound_endpoint_used(self) -> None:
+        self.assertIsNone(_resolve_outbound_endpoint_used(send_message_used=None))
+        self.assertIsNone(_resolve_outbound_endpoint_used(send_message_used=False))
+        self.assertEqual(
+            _resolve_outbound_endpoint_used(send_message_used=True), "/send-message"
+        )
+
     def test_resolve_operator_reply_reason_variants(self) -> None:
         self.assertEqual(
             _resolve_operator_reply_reason(
@@ -1858,7 +1884,7 @@ class TicketSnapshotTests(unittest.TestCase):
                 "tags": ["mw-outbound-path-send-message"],
                 "comments": [
                     {"type": "text", "is_operator": False},
-                    {"type": "text", "isOperator": True},
+                    {"type": "text", "isOperator": True, "source": "Agent"},
                 ],
             }
         }
@@ -1882,6 +1908,7 @@ class TicketSnapshotTests(unittest.TestCase):
         self.assertEqual(result.get("last_message_source"), "operator")
         self.assertTrue(result.get("operator_reply_present"))
         self.assertTrue(result.get("latest_comment_is_operator"))
+        self.assertEqual(result.get("latest_comment_source"), "agent")
         self.assertEqual(result.get("operator_reply_count"), 1)
 
     def test_fetch_ticket_snapshot_missing_operator_flag(self) -> None:

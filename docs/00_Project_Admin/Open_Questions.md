@@ -133,8 +133,8 @@ Items marked **(Deferred verification)** are *not blocking* planning because the
 2) 🟡 Who is the **release approver** for production automation enablement?
    - Recommended: Engineering (technical go/no-go) + Support Ops (copy/experience go/no-go).
 
-3) 🟡 Do we have a Shopify sandbox/dev store for staging tests?
-   - If not, we will use stubs in staging and validate deterministic-match behavior in prod gradually.
+3) 🟡 Shopify sandbox/dev store availability
+   - **No Shopify sandbox/dev store exists.** Use stubs in staging and validate deterministic-match behavior in prod gradually (read-only).
 
 These items are not blockers for completing the documentation plan, but they are required before enabling automation broadly.
 

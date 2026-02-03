@@ -654,6 +654,13 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertTrue(result["sent"])
+        responses = result.get("responses") or []
+        send_response = next(
+            (entry for entry in responses if entry.get("action") == "send_message"),
+            None,
+        )
+        self.assertIsNotNone(send_response)
+        self.assertEqual(send_response.get("status"), 200)
         send_calls = [
             call
             for call in executor.calls

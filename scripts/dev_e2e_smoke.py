@@ -1243,10 +1243,12 @@ def _build_skip_proof_payload(
         },
         "allowlist": allowlist_config or {},
         "proof_fields": {
+            "ticket_channel": None,
             "intent_after": None,
             "outbound_attempted": None,
             "outbound_failure_classification": None,
             "outbound_send_message_status": None,
+            "outbound_endpoint_used": None,
             "send_message_used": None,
             "send_message_status_code": None,
             "routed_to_support": None,
@@ -1257,6 +1259,8 @@ def _build_skip_proof_payload(
             "reply_contains_tracking_url": None,
             "reply_contains_tracking_number_like": None,
             "reply_contains_eta_date_like": None,
+            "latest_comment_is_operator": None,
+            "latest_comment_source": None,
             "operator_reply_confirmed": None,
             "operator_reply_reason": None,
             "openai_routing_response_id": None,
@@ -1665,6 +1669,7 @@ def _fetch_ticket_snapshot(
                 "operator_reply_present": operator_reply_present,
                 "operator_reply_count": operator_reply_count,
                 "latest_comment_is_operator": latest_comment_is_operator,
+                "latest_comment_source": latest_comment_source,
                 "ticket_channel": ticket_channel,
                 "status_code": response.status_code,
                 "dry_run": response.dry_run,
@@ -2239,6 +2244,19 @@ def parse_args() -> argparse.Namespace:
         help="Disable outbound reply evidence requirement.",
     )
     parser.set_defaults(require_outbound=None)
+    parser.add_argument(
+        "--require-email-channel",
+        dest="require_email_channel",
+        action="store_true",
+        help="Require ticket channel to be email.",
+    )
+    parser.add_argument(
+        "--no-require-email-channel",
+        dest="require_email_channel",
+        action="store_false",
+        help="Disable email channel requirement.",
+    )
+    parser.set_defaults(require_email_channel=None)
     parser.add_argument(
         "--require-operator-reply",
         dest="require_operator_reply",
@@ -3029,6 +3047,14 @@ def _resolve_send_message_status_code(
 ) -> Optional[int]:
     status = _send_message_status_from_outbound_result(outbound_result)
     return status if status is not None else outbound_send_message_status
+
+
+def _resolve_outbound_endpoint_used(
+    *, send_message_used: Optional[bool]
+) -> Optional[str]:
+    if send_message_used is True:
+        return "/send-message"
+    return None
 
 
 def _resolve_operator_reply_reason(
@@ -4027,6 +4053,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         if args.require_outbound is not None
         else (order_status_mode and not negative_scenario)
     )
+    require_email_channel = (
+        args.require_email_channel
+        if args.require_email_channel is not None
+        else False
+    )
     require_operator_reply = (
         args.require_operator_reply
         if args.require_operator_reply is not None
@@ -4045,6 +4076,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     )
     if not order_status_mode:
         require_outbound = False
+        require_email_channel = False
         require_operator_reply = False
         require_send_message = False
         require_send_message_used = False
@@ -4052,6 +4084,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         require_order_match_by_number = False
     if require_allowlist_blocked:
         require_outbound = False
+        require_email_channel = False
         require_operator_reply = False
         require_send_message = False
         require_send_message_used = False
@@ -4800,6 +4833,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     operator_reply_count_delta = None
     operator_reply_present = None
     latest_comment_is_operator = None
+    latest_comment_source = None
     send_message_tag_present = None
     send_message_tag_added = None
     ticket_channel = None
@@ -5032,6 +5066,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         operator_reply_count_delta = operator_metrics["operator_reply_count_delta"]
         ticket_channel = post_ticket_data.get("ticket_channel") or pre_ticket_data.get(
             "ticket_channel"
+        )
+        latest_comment_source = (
+            post_ticket_data.get("latest_comment_source")
+            if isinstance(post_ticket_data.get("latest_comment_source"), str)
+            else None
         )
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
@@ -5569,12 +5608,32 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         outbound_result=outbound_result,
         outbound_send_message_status=outbound_send_message_status,
     )
+    outbound_endpoint_used = _resolve_outbound_endpoint_used(
+        send_message_used=send_message_used
+    )
     operator_reply_reason = _resolve_operator_reply_reason(
         operator_reply_confirmed=operator_reply_confirmed,
         require_operator_reply=require_operator_reply,
         outbound_reason=outbound_reason if isinstance(outbound_reason, str) else None,
         send_message_used=send_message_used,
         latest_comment_is_operator=latest_comment_is_operator,
+    )
+    email_channel_is_email = (
+        ticket_channel == "email" if isinstance(ticket_channel, str) else None
+    )
+    email_channel_requires_outbound = bool(
+        order_status_mode and email_channel_is_email and not require_allowlist_blocked
+    )
+    email_channel_send_message_used_ok = (
+        send_message_used is True if email_channel_requires_outbound else None
+    )
+    email_channel_operator_reply_ok = (
+        latest_comment_is_operator is True if email_channel_requires_outbound else None
+    )
+    email_channel_outbound_endpoint_ok = (
+        outbound_endpoint_used == "/send-message"
+        if email_channel_requires_outbound
+        else None
     )
 
     reply_body_candidates = _collect_reply_body_candidates(
@@ -5605,6 +5664,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "no_skip_tags": skip_tags_present_ok,
         "test_tag_verified": test_tag_verified,
         "reply_evidence": reply_evidence,
+        "ticket_channel_is_email": (
+            email_channel_is_email
+            if (require_email_channel or email_channel_requires_outbound)
+            else None
+        ),
+        "email_channel_send_message_used": email_channel_send_message_used_ok,
+        "email_channel_operator_reply": email_channel_operator_reply_ok,
+        "email_channel_outbound_endpoint_used": email_channel_outbound_endpoint_ok,
         "outbound_message_count_delta_ge_1": outbound_message_count_ok,
         "outbound_last_message_source_middleware": outbound_last_message_source_ok,
         "outbound_attempted": outbound_attempted,
@@ -5935,6 +6002,46 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         send_message_tag_added_ok=send_message_tag_added_ok,
         send_message_used_ok=send_message_used_ok,
     )
+    if require_email_channel:
+        required_checks.append(bool(email_channel_is_email))
+        criteria_details.append(
+            {
+                "name": "ticket_channel_is_email",
+                "description": "Ticket channel resolved to email",
+                "required": True,
+                "value": email_channel_is_email,
+            }
+        )
+    if email_channel_requires_outbound:
+        required_checks.extend(
+            [
+                bool(email_channel_send_message_used_ok),
+                bool(email_channel_outbound_endpoint_ok),
+                bool(email_channel_operator_reply_ok),
+            ]
+        )
+        criteria_details.extend(
+            [
+                {
+                    "name": "email_channel_send_message_used",
+                    "description": "Email-channel outbound used /send-message",
+                    "required": True,
+                    "value": email_channel_send_message_used_ok,
+                },
+                {
+                    "name": "email_channel_outbound_endpoint_used",
+                    "description": "Outbound endpoint resolved to /send-message",
+                    "required": True,
+                    "value": email_channel_outbound_endpoint_ok,
+                },
+                {
+                    "name": "email_channel_operator_reply",
+                    "description": "Latest comment marked is_operator=true",
+                    "required": True,
+                    "value": email_channel_operator_reply_ok,
+                },
+            ]
+        )
 
     if require_openai_routing:
         required_checks.append(bool(openai_requirements.get("openai_routing_called")))
@@ -6105,6 +6212,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "outbound_attempted": outbound_attempted,
         "outbound_failure_classification": outbound_failure_classification,
         "outbound_send_message_status": outbound_send_message_status,
+        "outbound_endpoint_used": outbound_endpoint_used,
         "routed_to_support": support_routing.get("routed_to_support"),
         "support_tag_present": support_routing.get("support_tag_present"),
         "support_department": support_routing.get("support_department"),
@@ -6117,6 +6225,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_contains_tracking_url": reply_contains_tracking_url,
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
         "reply_contains_eta_date_like": reply_contains_eta_date_like,
+        "latest_comment_source": latest_comment_source,
         "routing_ticket_excerpt_redacted": (
             order_status_intent.get("ticket_excerpt_redacted")
             or fallback_ticket_excerpt_redacted
