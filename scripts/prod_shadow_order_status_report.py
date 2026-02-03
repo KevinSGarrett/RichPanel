@@ -653,7 +653,10 @@ def _build_run_id() -> str:
 
 def _build_markdown_report(report: Dict[str, Any]) -> str:
     stats = report.get("stats", {})
+    stats_global = report.get("stats_global", {}) or {}
+    stats_order_status = report.get("stats_order_status", {}) or {}
     failure_modes = report.get("failure_modes", [])
+    order_status_failure_modes = report.get("order_status_failure_modes", [])
     run_id = report.get("run_id", "RUN_UNKNOWN")
     timestamp = report.get("timestamp", "")
     env_name = report.get("environment", "unknown")
@@ -674,6 +677,24 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
     order_status_rate_pct = (
         f"{order_status_rate * 100:.1f}%" if isinstance(order_status_rate, float) else "n/a"
     )
+    order_status_count = stats_order_status.get(
+        "order_status_count", stats.get("classified_order_status_true", 0)
+    )
+    match_rate_pct = (
+        f"{stats_order_status.get('match_rate_among_order_status', 0) * 100:.1f}%"
+        if isinstance(stats_order_status.get("match_rate_among_order_status"), float)
+        else "n/a"
+    )
+    tracking_rate_pct = (
+        f"{stats_order_status.get('tracking_rate', 0) * 100:.1f}%"
+        if isinstance(stats_order_status.get("tracking_rate"), float)
+        else "n/a"
+    )
+    eta_rate_pct = (
+        f"{stats_order_status.get('eta_rate_when_no_tracking', 0) * 100:.1f}%"
+        if isinstance(stats_order_status.get("eta_rate_when_no_tracking"), float)
+        else "n/a"
+    )
     env_flag_lines = [f"- `{key}={value}`" for key, value in sorted(env_flags.items())]
     summary_lines = [
         "# Prod Shadow Order Status Report",
@@ -686,19 +707,25 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
         f"- Tickets scanned: {ticket_count}",
         f"- Conversation mode: `{conversation_mode}`",
         "",
+        "## How to Read This Report",
+        "- Global stats use all tickets scanned as the denominator.",
+        "- Order-status subset stats use only tickets classified as order-status.",
+        "",
         "## Env flags",
         *env_flag_lines,
         "",
         "## Executive Summary",
         (
-            f"- {stats.get('classified_order_status_true', 0)} tickets classified as "
-            f"order-status; {stats.get('matched_by_order_number', 0)} matched by "
-            f"order number and {stats.get('matched_by_email', 0)} matched by email."
+            f"- Order-status subset: {order_status_count} tickets; "
+            f"{stats_order_status.get('matched_by_order_number', 0)} matched by "
+            f"order number and {stats_order_status.get('matched_by_email', 0)} matched by email."
         ),
-        f"- Order-status rate: {order_status_rate_pct}",
+        f"- Global order-status rate: {order_status_rate_pct}",
+        f"- Match rate among order-status: {match_rate_pct}",
         (
-            f"- Tracking present for {stats.get('tracking_present', 0)} tickets; "
-            f"ETA available for {stats.get('eta_available', 0)} tickets."
+            f"- Tracking present for {stats_order_status.get('tracking_present_count', 0)} "
+            f"order-status tickets; ETA available for "
+            f"{stats_order_status.get('eta_available_count', 0)} when no tracking."
         ),
         (
             f"- OpenAI routing calls: {stats.get('openai_routing_called', 0)}; "
@@ -706,27 +733,38 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
         ),
         f"- Errors: {stats.get('errors', 0)}",
         "",
-        "## Stats",
+        "## Stats (Global: all tickets scanned)",
         "| Metric | Count |",
         "| --- | --- |",
-        f"| Tickets scanned | {stats.get('tickets_scanned', 0)} |",
-        f"| Classified order status | {stats.get('classified_order_status_true', 0)} |",
+        f"| Tickets scanned | {stats_global.get('tickets_scanned', 0)} |",
+        f"| Classified order status (true) | {stats_global.get('classified_order_status_true', 0)} |",
+        f"| Classified order status (false) | {stats_global.get('classified_order_status_false', 0)} |",
         f"| Order-status rate | {order_status_rate_pct} |",
-        f"| OpenAI routing called | {stats.get('openai_routing_called', 0)} |",
-        f"| OpenAI intent called | {stats.get('openai_intent_called', 0)} |",
-        f"| Shopify lookup forced | {stats.get('shopify_lookup_forced', 0)} |",
-        f"| Matched by order number | {stats.get('matched_by_order_number', 0)} |",
-        f"| Matched by email | {stats.get('matched_by_email', 0)} |",
-        f"| No match | {stats.get('no_match', 0)} |",
-        f"| Errors | {stats.get('errors', 0)} |",
-        f"| Tracking present | {stats.get('tracking_present', 0)} |",
-        f"| ETA available | {stats.get('eta_available', 0)} |",
+        f"| OpenAI routing called | {stats_global.get('openai_routing_called', 0)} |",
+        f"| OpenAI intent called | {stats_global.get('openai_intent_called', 0)} |",
+        f"| Shopify lookup forced | {stats_global.get('shopify_lookup_forced', 0)} |",
+        f"| Richpanel retries (total) | {stats_global.get('richpanel_retry_total', 0)} |",
+        f"| Richpanel 429 retries | {stats_global.get('richpanel_retry_429_count', 0)} |",
+        f"| Errors | {stats_global.get('errors', 0)} |",
         "",
-        "## Top Failure Modes",
+        "## Stats (Order-status subset only)",
+        "| Metric | Count |",
+        "| --- | --- |",
+        f"| Order-status count | {stats_order_status.get('order_status_count', 0)} |",
+        f"| Match attempted | {stats_order_status.get('match_attempted_count', 0)} |",
+        f"| Matched by order number | {stats_order_status.get('matched_by_order_number', 0)} |",
+        f"| Matched by email | {stats_order_status.get('matched_by_email', 0)} |",
+        f"| Match rate among order-status | {match_rate_pct} |",
+        f"| Tracking present | {stats_order_status.get('tracking_present_count', 0)} |",
+        f"| Tracking rate | {tracking_rate_pct} |",
+        f"| ETA available when no tracking | {stats_order_status.get('eta_available_count', 0)} |",
+        f"| ETA rate when no tracking | {eta_rate_pct} |",
+        "",
+        "## Top Failure Modes (Order-status subset)",
     ]
 
-    if failure_modes:
-        for entry in failure_modes:
+    if order_status_failure_modes:
+        for entry in order_status_failure_modes:
             summary_lines.append(f"- {entry['mode']}: {entry['count']}")
     else:
         summary_lines.append("- None observed in this sample.")
@@ -1009,6 +1047,7 @@ def main() -> int:
     start_time = time.monotonic()
     ticket_results: List[Dict[str, Any]] = []
     failure_modes: Counter[str] = Counter()
+    order_status_failure_modes: Counter[str] = Counter()
     stats = Counter()
     trace_entries: List[Dict[str, Any]] = []
 
@@ -1033,6 +1072,7 @@ def main() -> int:
             }
             shopify_calls_before = shopify_client.request_count
             error: Optional[Dict[str, str]] = None
+            match_attempted = False
             if _env_truthy(os.environ.get("RICHPANEL_TRACE_ENABLED")):
                 rp_client.clear_request_trace()
             try:
@@ -1153,6 +1193,7 @@ def main() -> int:
                     force_lookup and not classified_order_status
                 )
                 if classified_order_status or force_lookup:
+                    match_attempted = True
                     try:
                         order_summary = lookup_order_summary(
                             envelope,
@@ -1195,6 +1236,7 @@ def main() -> int:
                         "match_result": match_result,
                         "tracking_present": tracking_present,
                         "eta_window": eta_window,
+                        "match_attempted": match_attempted,
                         "would_auto_reply": bool(
                             classified_order_status
                             and match_result
@@ -1210,6 +1252,7 @@ def main() -> int:
                     result["match_result"] = "error"
                     result["tracking_present"] = False
                     result["eta_window"] = None
+                    result["match_attempted"] = match_attempted
                     result["would_auto_reply"] = False
                     result["failure_reason"] = "ticket_fetch_failed"
                     run_warnings.append("ticket_fetch_failed")
@@ -1220,12 +1263,15 @@ def main() -> int:
                 result["match_result"] = "error"
                 result["tracking_present"] = False
                 result["eta_window"] = None
+                result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
             except ReadOnlyGuardError as exc:
                 error = {"type": "read_only_guard"}
                 result["match_result"] = "error"
                 result["tracking_present"] = False
                 result["eta_window"] = None
+                result["match_attempted"] = match_attempted
+                result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
                 LOGGER.error("Read-only guard blocked request: %s", exc)
             except Exception as exc:
@@ -1233,6 +1279,7 @@ def main() -> int:
                 result["match_result"] = "error"
                 result["tracking_present"] = False
                 result["eta_window"] = None
+                result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
             finally:
                 if error:
@@ -1292,6 +1339,8 @@ def main() -> int:
                 )
                 if failure_mode:
                     failure_modes[failure_mode] += 1
+                    if result.get("classified_order_status"):
+                        order_status_failure_modes[failure_mode] += 1
                 if args.throttle_seconds:
                     time.sleep(args.throttle_seconds)
 
@@ -1339,9 +1388,57 @@ def main() -> int:
             3,
         )
 
+    order_status_results = [
+        item for item in ticket_results if item.get("classified_order_status")
+    ]
+    order_status_count = len(order_status_results)
+    match_attempted_count = sum(
+        1 for item in order_status_results if item.get("match_attempted")
+    )
+    matched_by_order_number = sum(
+        1
+        for item in order_status_results
+        if item.get("match_result") == "matched_by_order_number"
+    )
+    matched_by_email = sum(
+        1
+        for item in order_status_results
+        if item.get("match_result") == "matched_by_email"
+    )
+    tracking_present_count = sum(
+        1 for item in order_status_results if item.get("tracking_present")
+    )
+    eta_available_count = sum(
+        1 for item in order_status_results if item.get("eta_window")
+    )
+    match_rate_among_order_status = (
+        round(
+            (matched_by_order_number + matched_by_email)
+            / max(order_status_count, 1),
+            3,
+        )
+        if order_status_count
+        else None
+    )
+    tracking_rate = (
+        round(tracking_present_count / max(order_status_count, 1), 3)
+        if order_status_count
+        else None
+    )
+    no_tracking_count = order_status_count - tracking_present_count
+    eta_rate_when_no_tracking = (
+        round(eta_available_count / max(no_tracking_count, 1), 3)
+        if no_tracking_count > 0
+        else None
+    )
+
     failure_mode_list = [
         {"mode": mode, "count": count}
         for mode, count in failure_modes.most_common(5)
+    ]
+    order_status_failure_mode_list = [
+        {"mode": mode, "count": count}
+        for mode, count in order_status_failure_modes.most_common(5)
     ]
     request_burst = _summarize_request_burst(trace_entries)
     retry_after_validation = _summarize_retry_after(trace_entries)
@@ -1354,6 +1451,41 @@ def main() -> int:
             "richpanel_middleware.integrations.richpanel.client"
         ).removeHandler(retry_handler)
 
+    retry_status_counts = {}
+    if retry_diagnostics:
+        retry_status_counts = retry_diagnostics.get("status_counts") or {}
+    retry_429_count = (
+        retry_status_counts.get(429)
+        or retry_status_counts.get("429")
+        or retry_status_counts.get(429.0)
+        or 0
+    )
+
+    stats_global = {
+        "tickets_scanned": stats.get("tickets_scanned", 0),
+        "classified_order_status_true": stats.get("classified_order_status_true", 0),
+        "classified_order_status_false": stats.get("classified_order_status_false", 0),
+        "openai_routing_called": stats.get("openai_routing_called", 0),
+        "openai_intent_called": stats.get("openai_intent_called", 0),
+        "shopify_lookup_forced": stats.get("shopify_lookup_forced", 0),
+        "errors": stats.get("errors", 0),
+        "richpanel_retry_total": retry_diagnostics.get("total_retries", 0)
+        if retry_diagnostics
+        else 0,
+        "richpanel_retry_429_count": retry_429_count,
+    }
+    stats_order_status = {
+        "order_status_count": order_status_count,
+        "match_attempted_count": match_attempted_count,
+        "matched_by_order_number": matched_by_order_number,
+        "matched_by_email": matched_by_email,
+        "match_rate_among_order_status": match_rate_among_order_status,
+        "tracking_present_count": tracking_present_count,
+        "tracking_rate": tracking_rate,
+        "eta_available_count": eta_available_count,
+        "eta_rate_when_no_tracking": eta_rate_when_no_tracking,
+    }
+
     report = {
         "run_id": run_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1365,8 +1497,11 @@ def main() -> int:
         "classification_source": classification_source,
         "classification_source_counts": dict(classification_counts),
         "order_status_rate": order_status_rate,
+        "stats_global": stats_global,
+        "stats_order_status": stats_order_status,
         "stats": dict(stats),
         "failure_modes": failure_mode_list,
+        "order_status_failure_modes": order_status_failure_mode_list,
         "run_warnings": run_warnings,
         "tickets": ticket_results,
         "richpanel_retry_diagnostics": retry_diagnostics or None,

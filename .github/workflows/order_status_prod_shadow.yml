@@ -1,0 +1,201 @@
+name: Order Status Prod Shadow
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      sample-size:
+        description: "Number of recent tickets to sample (ignored if ticket-ids provided)"
+        required: false
+        default: "250"
+        type: string
+      ticket-ids:
+        description: "Optional comma-separated Richpanel ticket numbers or IDs"
+        required: false
+        type: string
+      shop-domain:
+        description: "Shopify shop domain (e.g. shop.myshopify.com)"
+        required: true
+        type: string
+      shopify-token-source:
+        description: "Which repo secret to use for Shopify (admin|api)."
+        required: false
+        default: "admin"
+        type: string
+      rate-limit-rps:
+        description: "Richpanel client-side rate limit RPS"
+        required: false
+        default: "2"
+        type: string
+      batch-size:
+        description: "Batch size for ticket processing"
+        required: false
+        default: "25"
+        type: string
+      batch-delay-seconds:
+        description: "Delay between batches (seconds)"
+        required: false
+        default: "1"
+        type: string
+      throttle-seconds:
+        description: "Sleep between ticket fetches (seconds)"
+        required: false
+        default: "0.3"
+        type: string
+      min-order-status-rate:
+        description: "Lower bound for order_status_rate"
+        required: false
+        default: "0.2"
+        type: string
+      max-order-status-rate:
+        description: "Upper bound for order_status_rate"
+        required: false
+        default: "0.5"
+        type: string
+      min-match-rate:
+        description: "Lower bound for match_rate_among_order_status"
+        required: false
+        default: "0.85"
+        type: string
+      max-429-retries:
+        description: "Maximum allowed Richpanel 429 retries"
+        required: false
+        default: "5"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prod-shadow-order-status:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-2' }}
+      ENVIRONMENT: prod
+      RICHPANEL_ENV: prod
+      MW_ENV: prod
+      MW_ALLOW_NETWORK_READS: "true"
+      RICHPANEL_OUTBOUND_ENABLED: "false"
+      RICHPANEL_WRITE_DISABLED: "true"
+      RICHPANEL_READ_ONLY: "true"
+      SHOPIFY_OUTBOUND_ENABLED: "true"
+      SHOPIFY_WRITE_DISABLED: "true"
+      MW_OPENAI_ROUTING_ENABLED: "true"
+      MW_OPENAI_INTENT_ENABLED: "true"
+      MW_OPENAI_SHADOW_ENABLED: "true"
+      OPENAI_API_KEY: ${{ secrets.PROD_OPENAI_API_KEY }}
+      RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
+      SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
+      RICHPANEL_RATE_LIMIT_RPS: ${{ inputs.rate-limit-rps || '2' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run prod shadow order status report
+        shell: bash
+        env:
+          INPUT_SAMPLE_SIZE: ${{ inputs.sample-size || '250' }}
+          INPUT_TICKET_IDS: ${{ inputs.ticket-ids || '' }}
+          INPUT_BATCH_SIZE: ${{ inputs.batch-size || '25' }}
+          INPUT_BATCH_DELAY: ${{ inputs.batch-delay-seconds || '1' }}
+          INPUT_THROTTLE: ${{ inputs.throttle-seconds || '0.3' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
+            echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
+            exit 2
+          fi
+
+          TICKET_ARGS=()
+          if [ -n "${INPUT_TICKET_IDS:-}" ]; then
+            IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"
+            for id in "${IDS[@]}"; do
+              trimmed="$(echo "$id" | xargs)"
+              if [ -n "$trimmed" ]; then
+                TICKET_ARGS+=(--ticket-id "$trimmed")
+              fi
+            done
+          fi
+
+          SAMPLE_ARGS=()
+          if [ ${#TICKET_ARGS[@]} -eq 0 ]; then
+            if [[ ! "${INPUT_SAMPLE_SIZE:-}" =~ ^[0-9]+$ ]]; then
+              echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"
+              exit 2
+            fi
+            SAMPLE_ARGS=(--sample-size "${INPUT_SAMPLE_SIZE}")
+          fi
+
+          python scripts/prod_shadow_order_status_report.py \
+            --env prod \
+            --allow-ticket-fetch-failures \
+            --retry-diagnostics \
+            --request-trace \
+            --batch-size "${INPUT_BATCH_SIZE}" \
+            --batch-delay-seconds "${INPUT_BATCH_DELAY}" \
+            --throttle-seconds "${INPUT_THROTTLE}" \
+            "${SAMPLE_ARGS[@]}" \
+            "${TICKET_ARGS[@]}" \
+            --out-json artifacts/prod_shadow/prod_shadow_order_status_report.json \
+            --out-md artifacts/prod_shadow/prod_shadow_order_status_report.md
+
+      - name: Enforce health thresholds
+        shell: bash
+        env:
+          INPUT_MIN_RATE: ${{ inputs.min-order-status-rate || '0.2' }}
+          INPUT_MAX_RATE: ${{ inputs.max-order-status-rate || '0.5' }}
+          INPUT_MIN_MATCH: ${{ inputs.min-match-rate || '0.85' }}
+          INPUT_MAX_429: ${{ inputs.max-429-retries || '5' }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path("artifacts/prod_shadow/prod_shadow_order_status_report.json")
+          data = json.loads(report_path.read_text(encoding="utf-8"))
+          stats_global = data.get("stats_global", {})
+          stats_order = data.get("stats_order_status", {})
+          order_status_rate = data.get("order_status_rate") or 0.0
+          match_rate = stats_order.get("match_rate_among_order_status") or 0.0
+          retry_429 = stats_global.get("richpanel_retry_429_count") or 0
+          warnings = data.get("run_warnings") or []
+
+          min_rate = float(os.environ.get("INPUT_MIN_RATE", "0.2"))
+          max_rate = float(os.environ.get("INPUT_MAX_RATE", "0.5"))
+          min_match = float(os.environ.get("INPUT_MIN_MATCH", "0.85"))
+          max_429 = int(float(os.environ.get("INPUT_MAX_429", "5")))
+
+          failures = []
+          if not (min_rate <= order_status_rate <= max_rate):
+            failures.append(f"order_status_rate {order_status_rate} outside [{min_rate}, {max_rate}]")
+          if match_rate < min_match:
+            failures.append(f"match_rate_among_order_status {match_rate} < {min_match}")
+          if retry_429 > max_429:
+            failures.append(f"richpanel_retry_429_count {retry_429} > {max_429}")
+          filtered_warnings = [w for w in warnings if w != "richpanel_retries_observed"]
+          if filtered_warnings:
+            failures.append(f"run_warnings present: {filtered_warnings}")
+
+          if failures:
+            raise SystemExit("Threshold check failed: " + "; ".join(failures))
+          print("Threshold check passed.")
+          PY
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-shadow-order-status
+          path: |
+            artifacts/prod_shadow/*.json
+            artifacts/prod_shadow/*.md
+          if-no-files-found: error

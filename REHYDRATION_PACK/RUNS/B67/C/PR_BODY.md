@@ -1,123 +1,104 @@
-<!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-02 -->
+<!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-03 -->
 
-**Run ID:** `RUN_20260202_1522Z`  
-**Agents:** B  
+**Run ID:** `RUN_20260203_0404Z`  
+**Agents:** C  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01JjcNCJm4491nU2eQKF33ss`
+**Anthropic response id:** `msg_01QBPjrxUDzme7t93VS5DJ94`  
 
 ### 1) Summary
-- Production cutover runbook now defines prerequisites, phased enablement, and rollback for Order Status.
-- Minimum monitoring (alarms + dashboard) is deployed for 429s, worker error rate, OpenAI failures, and token refresh errors.
-- Preflight now validates env flags, Secrets Manager, Richpanel GET, Shopify REST + GraphQL, and refresh success within 8h.
+- Prod shadow order-status report now separates global vs order-status metrics with explicit denominators.
+- Three prod read-only shadow runs (250 tickets each) show stable order-status rate and healthy match rate.
+- Nightly workflow added to repeat the prod shadow run with OpenAI credentials and enforce metric bands.
 
 ### 2) Why
-- **Problem / risk:** prod canary enablement lacked a single cutover runbook, minimal alarms, and a robust preflight.
-- **Pre-change failure mode:** no single-step enable/rollback guide; missing alarms for 429s/refresh/OpenAI; preflight did not check GraphQL or refresh freshness.
-- **Why this approach:** targeted infra + docs + script updates minimize refactor risk while adding operational safety gates.
+- **Problem / risk:** prior reports were misread because global counts were treated as match failures within order-status tickets.
+- **Pre-change failure mode:** `no_match` was interpreted as broken Shopify matching without noting the global denominator.
+- **Why this approach:** explicit global + conditional stats plus a scheduled run provides repeatable, PII-safe confidence signals.
 
 ### 3) Expected behavior & invariants
 **Must hold (invariants):**
-- Preflight fails closed if required env flags or secrets are missing.
-- PII-safe evidence only (no ticket bodies or emails in artifacts).
-- Read-only guard remains enforced for shadow validation runs.
+- No writes to prod; read-only guard blocks non-GET operations.
+- All artifacts remain PII-safe (hashed identifiers and redacted excerpts).
+- Shadow reports fail closed if read-only flags are missing.
 
 **Non-goals (explicitly not changed):**
-- No changes to routing logic or order-status classification thresholds.
-- No change to customer-facing messaging content or templates.
+- No changes to routing/classification logic or Shopify matching rules.
+- No changes to customer-facing messaging/templates.
 
 ### 4) What changed
 **Core changes:**
-- Added production cutover runbook with Phase 0–2 + rollback steps.
-- Added CloudWatch alarms + dashboard with explicit alarm names for retrieval.
-- Expanded preflight to include Secrets Manager, Shopify GraphQL, and refresh “last success”.
-- Regenerated docs registry outputs after adding new docs (required by validate check).
-- Made docs registry regen use tracked docs only to avoid untracked drift in CI.
-- Avoided no-op registry rewrites so CI sees clean status after regen.
+- Added global + order-status subset stats (and denominators) to the prod shadow report.
+- Captured failure modes for both global and order-status subsets.
+- Added nightly workflow to run prod shadow validation with OpenAI credentials and enforce metric bands.
 
 **Design decisions (why this way):**
-- Metric filters rely on explicit log markers for 429s and OpenAI intent failures.
-- Preflight uses log stream inspection to avoid filter-pattern edge cases.
-
-**How to use this:**
-- Run preflight: `python scripts/preflight_order_status_prod.py --env prod --out-md REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
-- Find alarms: CloudWatch → Alarms → `rp-mw-prod-*` (see `rp-mw-prod-*-` alarm names in monitoring doc)
+- Keep shadow runs read-only with explicit env flags and no outbound.
+- Metrics gating relies on report JSON fields to avoid manual interpretation.
 
 ### 5) Scope / files touched
 **Runtime code:**
-- `backend/src/richpanel_middleware/integrations/richpanel/client.py`
-- `backend/src/integrations/shopify/client.py`
-- `infra/cdk/lib/richpanel-middleware-stack.ts`
-- `scripts/order_status_preflight_check.py`
-- `scripts/preflight_order_status_prod.py`
+- `scripts/prod_shadow_order_status_report.py`
 
 **Tests:**
-- `scripts/test_order_status_preflight_check.py`
-- `scripts/test_regen_doc_registry.py`
-
-**CI / workflows:**
 - (None)
 
+**CI / workflows:**
+- `.github/workflows/order_status_prod_shadow.yml`
+
 **Docs / artifacts:**
-- `PM_REHYDRATION_PACK/DEADLINE_SCHEDULE/08_PRODUCTION_CUTOVER_PLAN.md`
-- `docs/09_Deployment/Order_Status_Preflight.md`
-- `docs/09_Deployment/Order_Status_Monitoring.md`
-- `docs/REGISTRY.md`
-- `docs/_generated/doc_outline.json`
-- `docs/_generated/doc_registry.compact.json`
-- `docs/_generated/doc_registry.json`
-- `docs/_generated/heading_index.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_alarms.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_dashboards.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudformation_stack_status.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/shopify_token_refresh_log.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/shopify_token_refresh_invoke.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.md`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run2.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run2.md`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run3.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run3.md`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/summary.md`
+- `REHYDRATION_PACK/RUNS/B67/C/EVIDENCE.md`
 
 ### 6) Test plan
 **Local / CI-equivalent:**
-- `AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 ENVIRONMENT=prod RICHPANEL_ENV=prod MW_ENV=prod MW_ALLOW_NETWORK_READS=true RICHPANEL_READ_ONLY=true RICHPANEL_WRITE_DISABLED=true RICHPANEL_OUTBOUND_ENABLED=false SHOPIFY_OUTBOUND_ENABLED=true SHOPIFY_WRITE_DISABLED=true SHOPIFY_SHOP_DOMAIN=scentimen-t.myshopify.com python scripts/preflight_order_status_prod.py --env prod --out-md REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
-- `npx cdk deploy RichpanelMiddleware-prod --require-approval never --profile rp-admin-prod`
+- (Not run) `python scripts/run_ci_checks.py --ci`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
-- (None)
+- `AWS_PROFILE=rp-admin-kevin AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 MW_ALLOW_NETWORK_READS=true RICHPANEL_READ_ONLY=true RICHPANEL_WRITE_DISABLED=true RICHPANEL_OUTBOUND_ENABLED=false SHOPIFY_OUTBOUND_ENABLED=true SHOPIFY_WRITE_DISABLED=true SHOPIFY_SHOP_DOMAIN=scentimen-t.myshopify.com MW_OPENAI_ROUTING_ENABLED=true MW_OPENAI_INTENT_ENABLED=true MW_OPENAI_SHADOW_ENABLED=true RICHPANEL_ENV=prod MW_ENV=prod ENVIRONMENT=prod RICH_PANEL_ENV=prod RICHPANEL_RATE_LIMIT_RPS=2 python scripts/prod_shadow_order_status_report.py --allow-ticket-fetch-failures --retry-diagnostics --request-trace --batch-size 25 --batch-delay-seconds 0 --throttle-seconds 0 --env prod --richpanel-secret-id rp-mw/prod/richpanel/api_key --shopify-secret-id rp-mw/prod/shopify/admin_api_token --out-json REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.json --out-md REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.md --ticket-number <redacted...>`
+- (Same command + `--out-json`/`--out-md` for run2 + run3; see `REHYDRATION_PACK/RUNS/B67/C/EVIDENCE.md`)
 
 ### 7) Results & evidence
-**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21603017514/job/62253632433`  
-**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/215`  
-**Bugbot:** pass — `https://cursor.com`  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21618481863/job/62302313438`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/217`  
+**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/217`  
 
 **Artifacts / proof:**
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/preflight.md`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_alarms.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudwatch_dashboards.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/cloudformation_stack_status.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/shopify_token_refresh_log.json`
-- `REHYDRATION_PACK/RUNS/B67/C/PROOF/shopify_token_refresh_invoke.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run2.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run3.json`
+- `REHYDRATION_PACK/RUNS/B67/C/PROOF/summary.md`
+- `REHYDRATION_PACK/RUNS/B67/C/EVIDENCE.md`
 
 **Proof snippet(s) (PII-safe):**
 ```text
-overall_status PASS
-shopify_token_refresh_last_success PASS last_success_age_hours=0.07
+run1: order_status_rate=28.4%, match_rate_among_order_status=93.0%
+run2: order_status_rate=30.4%, match_rate_among_order_status=93.4%
+run3: order_status_rate=29.2%, match_rate_among_order_status=93.2%
 ```
 
 ### 8) Risk & rollback
-**Risk rationale:** `risk:R2` — infra + docs + scripts change prod monitoring/preflight paths.  
+**Risk rationale:** `risk:R2` — prod read-only reporting + workflow change; no writes or outbound.
 
-**Failure impact:** missing alarms or preflight false negatives could allow unsafe canary.  
+**Failure impact:** metrics could be misread if denominators drift or workflow thresholds are wrong.
 
 **Rollback plan:**
 - Revert PR
-- `npx cdk deploy RichpanelMiddleware-prod --require-approval never --profile rp-admin-prod`
-- Re-run preflight to confirm PASS and alarms still present
+- Re-run prod shadow report with prior script to confirm baseline metrics
 
 ### 9) Reviewer + tool focus
 **Please double-check:**
-- Alarm thresholds + names match monitoring doc.
-- Preflight refresh-success detection logic is robust.
+- Denominator explanation and conditional metrics in `prod_shadow_order_status_report.py`.
+- Workflow threshold gates in `.github/workflows/order_status_prod_shadow.yml`.
+- PII-safe artifacts in `REHYDRATION_PACK/RUNS/B67/C/PROOF`.
 
 **Please ignore:**
 - Rehydration pack artifacts except referenced proof files.
-- Generated registries unless CI flags an issue.
-- Line-number shifts outside touched files.
+- Log/JSON noise in proof artifacts.
