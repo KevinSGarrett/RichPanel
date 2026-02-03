@@ -51,6 +51,10 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_support_routing,
     _evaluate_order_match_evidence,
     _order_resolution_is_order_number,
+    _extract_order_match_method,
+    _extract_order_resolution_from_actions,
+    _normalize_optional_text,
+    _probe_order_resolution_from_ticket,
     _detect_order_match_by_number,
     _should_skip_allowlist_blocked,
     _unexpected_outbound_blocked,
@@ -69,6 +73,10 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_reply_content_flags,
     append_summary,
     _redact_command,
+    _redact_path,
+    _extract_endpoint_variant,
+    _sanitize_ticket_snapshot,
+    _sanitize_tag_result,
     _iso_business_days_before,
     _order_status_no_tracking_payload,
     _order_status_no_tracking_short_window_payload,
@@ -76,6 +84,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_status_tracking_standard_shipping_payload,
     _not_order_status_payload,
     _order_status_no_match_payload,
+    _order_status_fallback_email_payload,
+    _seed_order_id,
     _seed_order_number,
     _build_skip_proof_payload,
     _write_proof_payload,
@@ -341,6 +351,17 @@ class ScenarioPayloadTests(unittest.TestCase):
         self.assertNotIn("order_id", payload)
         serialized = json.dumps(payload)
         self.assertNotIn("@", serialized)
+
+    def test_order_status_fallback_email_payload_shape(self) -> None:
+        payload = _order_status_fallback_email_payload(
+            "RUN_FALLBACK", conversation_id="conv-fallback"
+        )
+        self.assertEqual(payload["scenario"], "order_status_fallback_email_match")
+        self.assertEqual(payload["intent"], "order_status_tracking")
+        self.assertIn("customer_message", payload)
+        self.assertIn("ticket_created_at", payload)
+        self.assertIn("customer_profile", payload)
+        self.assertNotIn("order_number", payload)
 
     def test_order_status_no_match_payload_shape(self) -> None:
         payload = _order_status_no_match_payload(
@@ -958,6 +979,75 @@ class OrderMatchResolutionTests(unittest.TestCase):
         self.assertIsNone(_order_resolution_is_order_number(None))
         self.assertIsNone(_order_resolution_is_order_number({}))
 
+    def test_extract_order_match_method_from_resolution(self) -> None:
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "shopify_email_name"},
+        )
+        self.assertEqual(method, "name_email")
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "shopify_email_only"},
+        )
+        self.assertEqual(method, "email_only")
+        method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution={"resolvedBy": "richpanel_order_number"},
+        )
+        self.assertEqual(method, "order_number")
+
+    def test_extract_order_match_method_handles_failure(self) -> None:
+        method = _extract_order_match_method(
+            order_match_success=False, order_resolution={"resolvedBy": "no_match"}
+        )
+        self.assertEqual(method, "none")
+
+    def test_extract_order_resolution_from_actions(self) -> None:
+        actions = [
+            {"type": "noop"},
+            {
+                "type": "order_status_draft_reply",
+                "parameters": {"order_summary": {"order_resolution": {"resolvedBy": "x"}}},
+            },
+        ]
+        resolution = _extract_order_resolution_from_actions(actions)
+        self.assertEqual(resolution, {"resolvedBy": "x"})
+
+    def test_extract_order_resolution_from_actions_handles_missing(self) -> None:
+        resolution = _extract_order_resolution_from_actions([{"type": "noop"}])
+        self.assertIsNone(resolution)
+
+    def test_normalize_optional_text(self) -> None:
+        self.assertEqual(_normalize_optional_text("  hello "), "hello")
+        self.assertEqual(_normalize_optional_text(123), "123")
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+        self.assertEqual(_normalize_optional_text(_BadStr()), "")
+
+    def test_probe_order_resolution_from_ticket(self) -> None:
+        payload = {"customer_profile": {"email": "person@example.com", "name": "Test"}}
+        with patch(
+            "dev_e2e_smoke.lookup_order_summary",
+            return_value={"order_resolution": {"resolvedBy": "shopify_email_only"}},
+        ):
+            resolution = _probe_order_resolution_from_ticket(
+                ticket_payload=payload,
+                allow_network=True,
+                safe_mode=True,
+                automation_enabled=False,
+            )
+        self.assertEqual(resolution, {"resolvedBy": "shopify_email_only"})
+
+    def test_probe_order_resolution_from_ticket_requires_email(self) -> None:
+        resolution = _probe_order_resolution_from_ticket(
+            ticket_payload={"customer_profile": {"name": "No Email"}},
+            allow_network=True,
+            safe_mode=True,
+            automation_enabled=True,
+        )
+        self.assertIsNone(resolution)
+
     def test_detect_order_match_by_number_success(self) -> None:
         payload = {"order_number": "12345", "tracking_number": "TRACK-123"}
         with patch(
@@ -1162,6 +1252,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
+        self.assertIn("order_match_method", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
         self.assertIn("operator_reply_reason", payload["proof_fields"])
@@ -1306,6 +1397,18 @@ class PayloadBuilderTests(unittest.TestCase):
         )
         self.assertEqual(payload["scenario_name"], "order_status_no_match")
         self.assertTrue(payload["order_number"].startswith("FAKE-"))
+
+    def test_build_payload_order_status_fallback_email_match(self) -> None:
+        payload = build_payload(
+            "evt-457",
+            conversation_id="conv-3",
+            run_id="RUN",
+            scenario="order_status_fallback_email_match",
+        )
+        self.assertEqual(
+            payload["scenario_name"], "order_status_fallback_email_match"
+        )
+        self.assertNotIn("order_number", payload)
 
     def test_build_payload_baseline_has_no_scenario(self) -> None:
         payload = build_payload(
@@ -1811,7 +1914,39 @@ class TicketSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(result.get("last_message_source"), "unknown")
         self.assertIsNone(result.get("operator_reply_present"))
-        self.assertIsNone(result.get("latest_comment_is_operator"))
+
+    def test_fetch_ticket_snapshot_includes_customer_identity(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-4",
+                "status": "OPEN",
+                "customer_profile": {
+                    "email": "Person@Example.com",
+                    "name": "Jane Doe",
+                },
+                "comments": [{"type": "text", "is_operator": False}],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-4",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("customer_email"), "person@example.com")
+        self.assertEqual(result.get("customer_name"), "jane doe")
+        self.assertFalse(result.get("latest_comment_is_operator"))
 
     def test_fetch_ticket_snapshot_retries_on_rate_limit(self) -> None:
         payload = {
@@ -2818,6 +2953,56 @@ class FollowupProofTests(unittest.TestCase):
         self.assertIsNone(proof["reply_sent"])
 
 
+class RedactionHelpersTests(unittest.TestCase):
+    def test_redact_path_number_endpoint(self) -> None:
+        path = "/v1/tickets/number/12345"
+        self.assertEqual(_redact_path(path), "/v1/tickets/number/<redacted>")
+        self.assertEqual(_extract_endpoint_variant(path), "number")
+
+    def test_redact_path_id_with_suffix(self) -> None:
+        path = "/v1/tickets/abc123/add-tags"
+        self.assertEqual(_redact_path(path), "/v1/tickets/<redacted>/add-tags")
+        self.assertEqual(_extract_endpoint_variant(path), "id")
+
+    def test_redact_path_unknown(self) -> None:
+        self.assertEqual(_redact_path("/v2/other"), "<redacted>")
+        self.assertEqual(_extract_endpoint_variant("/v2/other"), "unknown")
+
+    def test_sanitize_ticket_snapshot_fingerprints(self) -> None:
+        snapshot = {
+            "ticket_id": "TICKET-123",
+            "path": "/v1/tickets/abc123",
+            "customer_email": "person@example.com",
+            "customer_name": "Jane Doe",
+        }
+        sanitized = _sanitize_ticket_snapshot(snapshot)
+        self.assertIsNotNone(sanitized)
+        self.assertNotIn("ticket_id", sanitized)
+        self.assertIn("ticket_id_fingerprint", sanitized)
+        self.assertEqual(sanitized.get("endpoint_variant"), "id")
+        self.assertEqual(sanitized.get("path_redacted"), "/v1/tickets/<redacted>")
+        self.assertIn("customer_email_fingerprint", sanitized)
+        self.assertIn("customer_name_fingerprint", sanitized)
+
+    def test_sanitize_tag_result_redacts_path(self) -> None:
+        tag_result = {"path": "/v1/tickets/abc123/add-tags", "status": "ok"}
+        sanitized = _sanitize_tag_result(tag_result)
+        self.assertEqual(
+            sanitized.get("path_redacted"), "/v1/tickets/<redacted>/add-tags"
+        )
+
+
+class SeedOrderIdTests(unittest.TestCase):
+    def test_seed_order_id_uses_conversation_id(self) -> None:
+        seeded = _seed_order_id("RUN1", "conv-123")
+        self.assertTrue(seeded.startswith("ORDER-"))
+        self.assertNotIn("conv-123", seeded)
+
+    def test_seed_order_id_falls_back_to_run_id(self) -> None:
+        seeded = _seed_order_id("RUN2", None)
+        self.assertTrue(seeded.startswith("DEV-ORDER-"))
+
+
 class SummaryAppendTests(unittest.TestCase):
     def test_append_summary_writes_expected_sections(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -3440,6 +3625,8 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(ChatTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(FollowupProofTests))
+    suite.addTests(loader.loadTestsFromTestCase(RedactionHelpersTests))
+    suite.addTests(loader.loadTestsFromTestCase(SeedOrderIdTests))
     suite.addTests(loader.loadTestsFromTestCase(SummaryAppendTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(WaitForTicketReadyTests))

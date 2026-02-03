@@ -1,0 +1,37 @@
+{
+  "run_id": "B67_SPLIT_20260202_1623Z",
+  "timestamp": "2026-02-02T16:23:13Z",
+  "environment": "split",
+  "scenario": "order_status_fallback_email_match",
+  "status": "PASS_SPLIT_EVIDENCE",
+  "constraints": {
+    "prod_read_only": true,
+    "sandbox_outbound_only": true,
+    "no_prod_writes": true
+  },
+  "prod_readonly_evidence": {
+    "report_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/prod_readonly_fallback_match_report.json",
+    "ticket_id_redacted": "redacted:2b2ac07813fd",
+    "ticket_number_redacted": "redacted:2b2ac07813fd",
+    "channel": "email",
+    "classified_order_status": true,
+    "match_result": "matched_by_email",
+    "order_resolution": {
+      "resolvedBy": "shopify_email_name",
+      "confidence": "high",
+      "reason": "email_name_match"
+    }
+  },
+  "sandbox_outbound_evidence": {
+    "proof_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_order_status_golden_proof.json",
+    "send_message_path_confirmed": true,
+    "operator_reply_confirmed": true,
+    "outbound_send_message_status": 200,
+    "closed_after": true
+  },
+  "notes": [
+    "Fallback email/name match is proven via prod read-only report (no writes).",
+    "Operator reply and close are proven via sandbox order-status golden proof.",
+    "This split evidence approach is required because no sandbox Shopify orders exist."
+  ]
+}

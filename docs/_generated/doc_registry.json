@@ -2250,6 +2250,16 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+    "title": "Order Status Sandbox E2E Suite (B67)",
+    "section": "08_Testing_Quality",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 264,
+    "approx_tokens": 343,
+    "last_updated": ""
+  },
+  {
     "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
     "title": "Smoke Test Pack (v1)",
     "section": "08_Testing_Quality",
@@ -3945,8 +3955,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10791,
-    "approx_tokens": 14028,
+    "word_count": 10803,
+    "approx_tokens": 14043,
     "last_updated": ""
   },
   {

@@ -291,6 +291,7 @@ Legend:
 - ✅ [LLM regression gates checklist (v1)](08_Testing_Quality/LLM_Regression_Gates_Checklist.md)  (`08_Testing_Quality/LLM_Regression_Gates_Checklist.md`)
 - ✅ [Load and Soak Testing](08_Testing_Quality/Load_and_Soak_Testing.md)  (`08_Testing_Quality/Load_and_Soak_Testing.md`)
 - ✅ [Manual QA Checklists (Staging / Pre-Prod)](08_Testing_Quality/Manual_QA_Checklists.md)  (`08_Testing_Quality/Manual_QA_Checklists.md`)
+- 📎 [Order Status Sandbox E2E Suite (B67)](08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md)  (`08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md`)
 - ✅ [Smoke Test Pack (v1)](08_Testing_Quality/Smoke_Test_Pack_v1.md)  (`08_Testing_Quality/Smoke_Test_Pack_v1.md`)
 - ✅ [Test Data and Fixtures](08_Testing_Quality/Test_Data_and_Fixtures.md)  (`08_Testing_Quality/Test_Data_and_Fixtures.md`)
 - ✅ [Test Evidence Log](08_Testing_Quality/Test_Evidence_Log.md)  (`08_Testing_Quality/Test_Evidence_Log.md`)

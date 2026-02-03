@@ -1,0 +1,39 @@
+{
+  "run_id": "B67_SPLIT_20260202_1623Z",
+  "timestamp": "2026-02-02T16:23:13Z",
+  "environment": "split",
+  "env_flags": {
+    "RICHPANEL_OUTBOUND_ENABLED": null,
+    "RICHPANEL_BOT_AGENT_ID": null,
+    "MW_OPENAI_INTENT_ENABLED": null,
+    "MW_OPENAI_ROUTING_ENABLED": null
+  },
+  "scenarios": [
+    {
+      "scenario": "order_status_golden",
+      "status": "PASS",
+      "error": null,
+      "proof_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_order_status_golden_proof.json"
+    },
+    {
+      "scenario": "order_status_fallback_email_match",
+      "status": "PASS_SPLIT_EVIDENCE",
+      "error": null,
+      "proof_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_fallback_email_match_proof.json",
+      "prod_readonly_report": "REHYDRATION_PACK/RUNS/B67/A/PROOF/prod_readonly_fallback_match_report.json",
+      "sandbox_outbound_proof": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_order_status_golden_proof.json"
+    },
+    {
+      "scenario": "not_order_status_negative_case",
+      "status": "PASS",
+      "error": null,
+      "proof_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_negative_case_proof.json"
+    },
+    {
+      "scenario": "followup_after_autoclose",
+      "status": "PASS",
+      "error": null,
+      "proof_path": "REHYDRATION_PACK/RUNS/B67/A/PROOF/sandbox_followup_suppression_proof.json"
+    }
+  ]
+}

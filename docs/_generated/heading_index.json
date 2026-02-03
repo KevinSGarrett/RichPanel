@@ -15561,6 +15561,10 @@
       "anchor": "preconditions"
     },
     {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "preconditions"
+    },
+    {
       "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
       "anchor": "preconditions"
     }
@@ -15665,6 +15669,36 @@
     {
       "path": "08_Testing_Quality/Manual_QA_Checklists.md",
       "anchor": "passfail"
+    }
+  ],
+  "order status sandbox e2e suite (b67)": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "order-status-sandbox-e2e-suite-b67"
+    }
+  ],
+  "harness": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "harness"
+    }
+  ],
+  "scenarios": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "scenarios"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "artifacts"
+    }
+  ],
+  "split evidence (when no sandbox shopify orders exist)": [
+    {
+      "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "split-evidence-when-no-sandbox-shopify-orders-exist"
     }
   ],
   "smoke test pack (v1)": [
