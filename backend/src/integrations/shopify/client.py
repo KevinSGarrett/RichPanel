@@ -250,6 +250,7 @@ class ShopifyClient:
             or f"rp-mw/{self.environment}/shopify/refresh_token"
         )
         self._refresh_token_override = os.environ.get("SHOPIFY_REFRESH_TOKEN_OVERRIDE")
+        self._refresh_token_source: Optional[str] = None
         self.client_id_secret_id = (
             os.environ.get("SHOPIFY_CLIENT_ID_SECRET_ID")
             or f"rp-mw/{self.environment}/shopify/client_id"
@@ -505,6 +506,7 @@ class ShopifyClient:
     def refresh_access_token(self) -> bool:
         access_token, _ = self._load_access_token()
         if not access_token or not self._token_info:
+            self._last_refresh_error = "missing_access_token"
             return False
         return self._refresh_access_token(self._token_info)
 
@@ -694,6 +696,8 @@ class ShopifyClient:
             refresh_token = parsed.get("refresh_token")
             refresh_token = str(refresh_token) if refresh_token else None
             expires_at = self._parse_expires_at(parsed)
+            if refresh_token:
+                self._refresh_token_source = "admin_api_token"
             return ShopifyTokenInfo(
                 access_token=access_token,
                 refresh_token=refresh_token,
@@ -776,11 +780,17 @@ class ShopifyClient:
 
     def _load_refresh_token(self, client: Any) -> Optional[str]:
         if self._refresh_token_override:
+            self._refresh_token_source = "override"
             return str(self._refresh_token_override).strip() or None
         if not self.refresh_token_secret_id:
             return None
         refresh_value = self._load_secret_value(client, self.refresh_token_secret_id)
-        return self._extract_secret_field(refresh_value, ("refresh_token", "token"))
+        refresh_token = self._extract_secret_field(
+            refresh_value, ("refresh_token", "token")
+        )
+        if refresh_token:
+            self._refresh_token_source = "secret"
+        return refresh_token
 
     @staticmethod
     def _extract_secret_field(
@@ -798,7 +808,7 @@ class ShopifyClient:
                 if value:
                     return str(value)
             return None
-        return secret_value
+        return str(parsed)
 
     def _load_secret_value(self, client: Any, secret_id: str) -> Optional[str]:
         try:
@@ -977,11 +987,7 @@ class ShopifyClient:
             "token_type": token_type,
             "raw_format": token_info.raw_format,
             "has_refresh_token": bool(token_info.refresh_token),
-            "refresh_token_source": (
-                "secret"
-                if token_info.refresh_token and self.refresh_token_secret_id
-                else None
-            ),
+            "refresh_token_source": self._refresh_token_source,
             "expires_at": token_info.expires_at,
             "expired": token_info.is_expired() if token_info.expires_at else None,
             "source_secret_id": token_info.source_secret_id,

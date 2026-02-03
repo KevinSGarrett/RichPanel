@@ -746,6 +746,11 @@ class ShopifyClientTests(unittest.TestCase):
         value = json.dumps({"unexpected": "value"})
         self.assertIsNone(client._extract_secret_field(value, ("client_id",)))
 
+    def test_extract_secret_field_json_string(self) -> None:
+        client = ShopifyClient(access_token="test-token")
+        value = json.dumps("client-id")
+        self.assertEqual(client._extract_secret_field(value, ("client_id",)), "client-id")
+
     def test_refresh_error_includes_error_code(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
         client_id_secret = "rp-mw/local/shopify/client_id"
@@ -775,6 +780,31 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertFalse(client.refresh_access_token())
         self.assertIn("status=400", client.refresh_error() or "")
         self.assertIn("error=application_cannot_be_found", client.refresh_error() or "")
+
+    def test_refresh_error_missing_access_token(self) -> None:
+        client = ShopifyClient()
+        self.assertFalse(client.refresh_access_token())
+        self.assertEqual(client.refresh_error(), "missing_access_token")
+
+    def test_refresh_token_source_from_admin_api_token(self) -> None:
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {"access_token": "token", "refresh_token": "refresh"}
+                    )
+                }
+            }
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret,
+        )
+        client._load_access_token()
+        diagnostics = client.token_diagnostics()
+        self.assertEqual(diagnostics.get("refresh_token_source"), "admin_api_token")
 
     def test_parse_timestamp_invalid(self) -> None:
         client = ShopifyClient(access_token="test-token")
