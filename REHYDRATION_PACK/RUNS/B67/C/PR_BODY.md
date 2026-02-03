@@ -66,9 +66,9 @@
 - (Same command + `--out-json`/`--out-md` for run2 + run3; see `REHYDRATION_PACK/RUNS/B67/C/EVIDENCE.md`)
 
 ### 7) Results & evidence
-**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21617603459/job/62299704471`  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21618481863/job/62302313438`  
 **Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/217`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/217` (cursor bot comment pending)  
+**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/217`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.json`

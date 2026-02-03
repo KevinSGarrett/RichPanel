@@ -17,6 +17,7 @@ Interpretation:
 - All three runs are within the expected band for `order_status_rate` (20%–50%).
 - `match_rate_among_order_status` is healthy and stable (>= 85% in all runs).
 - No Richpanel 429 retries were observed.
+- No token issues were observed (errors = 0 in all runs).
 
 ## Top Failure Modes (Order-Status Subset)
 Counts are from tickets classified as order-status only:
