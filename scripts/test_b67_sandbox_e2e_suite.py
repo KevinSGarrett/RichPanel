@@ -14,6 +14,7 @@ from b67_sandbox_e2e_suite import (
     _run_scenario,
     _suite_summary_md,
     _suite_results_json,
+    main,
 )
 
 
@@ -321,6 +322,94 @@ class TestB67SandboxSuite(unittest.TestCase):
         )
         summary = _suite_summary_md([result], run_id="RUN")
         self.assertIn("--ticket-number <redacted>", summary)
+
+    def test_main_writes_suite_results_and_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifacts = Path(tmpdir)
+            results_path = artifacts / "proof" / "suite_results.json"
+            summary_path = artifacts / "proof" / "suite_summary.md"
+            args = type(
+                "Args",
+                (),
+                {
+                    "scenario": None,
+                    "suite": True,
+                    "order_number": None,
+                    "env": "dev",
+                    "region": "us-east-2",
+                    "stack_name": "stack",
+                    "profile": None,
+                    "allowlist_email": None,
+                    "followup_message": "ok",
+                    "wait_seconds": None,
+                    "ticket_number": None,
+                    "ticket_id": None,
+                    "run_id": "RUN",
+                    "artifacts_dir": str(artifacts),
+                    "suite_results_path": str(results_path),
+                    "suite_summary_path": str(summary_path),
+                },
+            )()
+            result = ScenarioRunResult(
+                scenario_key="order_status_golden",
+                proof_path=artifacts / "proof.json",
+                status="PASS",
+                error=None,
+                proof=None,
+                commands=[],
+            )
+            with mock.patch("b67_sandbox_e2e_suite.parse_args", return_value=args), mock.patch(
+                "b67_sandbox_e2e_suite._run_scenario", return_value=result
+            ), mock.patch(
+                "b67_sandbox_e2e_suite._capture_env_flags", return_value={}
+            ):
+                exit_code = main()
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(results_path.exists())
+            self.assertTrue(summary_path.exists())
+
+    def test_main_returns_nonzero_on_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifacts = Path(tmpdir)
+            results_path = artifacts / "proof" / "suite_results.json"
+            summary_path = artifacts / "proof" / "suite_summary.md"
+            args = type(
+                "Args",
+                (),
+                {
+                    "scenario": "order_status_golden",
+                    "suite": False,
+                    "order_number": None,
+                    "env": "dev",
+                    "region": "us-east-2",
+                    "stack_name": "stack",
+                    "profile": None,
+                    "allowlist_email": None,
+                    "followup_message": "ok",
+                    "wait_seconds": None,
+                    "ticket_number": None,
+                    "ticket_id": None,
+                    "run_id": "RUN",
+                    "artifacts_dir": str(artifacts),
+                    "suite_results_path": str(results_path),
+                    "suite_summary_path": str(summary_path),
+                },
+            )()
+            result = ScenarioRunResult(
+                scenario_key="order_status_golden",
+                proof_path=artifacts / "proof.json",
+                status="FAIL",
+                error="boom",
+                proof=None,
+                commands=[],
+            )
+            with mock.patch("b67_sandbox_e2e_suite.parse_args", return_value=args), mock.patch(
+                "b67_sandbox_e2e_suite._run_scenario", return_value=result
+            ), mock.patch(
+                "b67_sandbox_e2e_suite._capture_env_flags", return_value={}
+            ):
+                exit_code = main()
+        self.assertEqual(exit_code, 1)
 
 
 if __name__ == "__main__":
