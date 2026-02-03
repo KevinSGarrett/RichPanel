@@ -1,3 +1,4 @@
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,7 @@ from b67_sandbox_e2e_suite import (
     _suite_summary_md,
     _suite_results_json,
     main,
+    parse_args,
 )
 
 
@@ -144,6 +146,34 @@ class TestB67SandboxSuite(unittest.TestCase):
         self.assertEqual(payload["run_id"], "RUN123")
         self.assertEqual(payload["environment"], "sandbox")
         self.assertEqual(payload["env_flags"]["X"], "Y")
+
+    def test_parse_args_accepts_scenario(self) -> None:
+        with mock.patch.object(
+            sys, "argv", ["prog", "--scenario", "order_status_golden", "--region", "us-east-2"]
+        ):
+            args = parse_args()
+        self.assertEqual(args.scenario, "order_status_golden")
+        self.assertFalse(args.suite)
+
+    def test_parse_args_accepts_suite(self) -> None:
+        with mock.patch.object(sys, "argv", ["prog", "--suite", "--region", "us-east-2"]):
+            args = parse_args()
+        self.assertTrue(args.suite)
+        self.assertIsNone(args.scenario)
+
+    def test_parse_args_requires_scenario_or_suite(self) -> None:
+        with mock.patch.object(sys, "argv", ["prog", "--region", "us-east-2"]):
+            with self.assertRaises(SystemExit):
+                parse_args()
+
+    def test_parse_args_rejects_suite_and_scenario(self) -> None:
+        with mock.patch.object(
+            sys,
+            "argv",
+            ["prog", "--suite", "--scenario", "order_status_golden", "--region", "us-east-2"],
+        ):
+            with self.assertRaises(SystemExit):
+                parse_args()
 
     def test_redact_command_masks_sensitive_flags(self) -> None:
         cmd = [
