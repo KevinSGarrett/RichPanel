@@ -14114,8 +14114,8 @@
       },
       {
         "level": 2,
-        "text": "Split Evidence (when no sandbox Shopify orders exist)",
-        "anchor": "split-evidence-when-no-sandbox-shopify-orders-exist"
+        "text": "Split Evidence (Shopify is live read-only)",
+        "anchor": "split-evidence-shopify-is-live-read-only"
       }
     ]
   },

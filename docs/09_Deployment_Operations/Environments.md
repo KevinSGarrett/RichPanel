@@ -63,8 +63,8 @@ We support 3 options (best → fallback):
 ---
 
 ## Shopify environment strategy
-- Prefer a Shopify dev store or sandbox when possible.
-- If not available, use stubs in dev/staging.
+- There is **no Shopify sandbox/dev store**; all environments read from the **live store** only.
+- Use stubs in dev/staging when Shopify reads are not required.
 - In prod, only disclose tracking/status when deterministic match exists (Tier 2).
 
 ---

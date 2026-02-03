@@ -275,8 +275,8 @@
     "section": "00_Project_Admin",
     "status": "canonical",
     "in_index": true,
-    "word_count": 1158,
-    "approx_tokens": 1505,
+    "word_count": 1156,
+    "approx_tokens": 1502,
     "last_updated": "2025-12-22"
   },
   {
@@ -2065,8 +2065,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2415,
-    "approx_tokens": 3139,
+    "word_count": 2438,
+    "approx_tokens": 3169,
     "last_updated": "2026-01-27"
   },
   {
@@ -2255,8 +2255,8 @@
     "section": "08_Testing_Quality",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 264,
-    "approx_tokens": 343,
+    "word_count": 265,
+    "approx_tokens": 344,
     "last_updated": ""
   },
   {
@@ -2355,8 +2355,8 @@
     "section": "09_Deployment_Operations",
     "status": "canonical",
     "in_index": true,
-    "word_count": 355,
-    "approx_tokens": 461,
+    "word_count": 364,
+    "approx_tokens": 473,
     "last_updated": "2025-12-22"
   },
   {

@@ -15695,10 +15695,10 @@
       "anchor": "artifacts"
     }
   ],
-  "split evidence (when no sandbox shopify orders exist)": [
+  "split evidence (shopify is live read-only)": [
     {
       "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
-      "anchor": "split-evidence-when-no-sandbox-shopify-orders-exist"
+      "anchor": "split-evidence-shopify-is-live-read-only"
     }
   ],
   "smoke test pack (v1)": [

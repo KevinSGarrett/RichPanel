@@ -33,8 +33,8 @@ Artifacts are written to `REHYDRATION_PACK/RUNS/B67/A/PROOF/`:
 
 All artifacts must remain PII-safe (redacted/hashes only).
 
-## Split Evidence (when no sandbox Shopify orders exist)
-If sandbox Shopify data is unavailable, use a split-evidence approach:
+## Split Evidence (Shopify is live read-only)
+There is **no Shopify sandbox/dev store**, so use a split-evidence approach:
 - Prod read-only report to prove match method + Shopify fetch.
 - Sandbox run to prove `/send-message` + operator reply + close.
 

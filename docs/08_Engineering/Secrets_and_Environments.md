@@ -24,9 +24,10 @@ This document defines the **single source of truth** for secrets, environment co
 
 **Philosophy:**
 - **AWS Secrets Manager is the canonical source** for all runtime secrets in deployed environments (dev, staging, prod)
-- **GitHub Actions Secrets** are used **only** for CI/PR smoke tests in dev (no Shopify sandbox exists)
+- **GitHub Actions Secrets** are used **only** for CI/PR smoke tests in dev (no Shopify sandbox/dev store exists)
 - **Production secrets NEVER live in GitHub Actions Secrets**
 - **Local development** uses environment variable overrides or local AWS profiles
+  - **Shopify is live read-only in every environment**; do not create test orders.
 
 **Naming convention:**
 All secrets follow the pattern: `rp-mw/<env>/<integration>/<secret_type>`
@@ -109,8 +110,8 @@ The Shopify client includes a **fallback** for a legacy secret path:
 
 The client tries the canonical path first, then falls back to the legacy path if not found.
 
-**Important:** There is **no Shopify sandbox**. All environments use the **same live store**
-with **read-only** tokens, so avoid writing or testing write scopes.
+**Important:** There is **no Shopify sandbox/dev store**. All environments use the **same live store**
+with **read-only** tokens, so avoid writing or testing write scopes and **do not create test orders**.
 
 The admin API token secret can be either a plain token string or a JSON payload:
 
