@@ -5,7 +5,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01TaLJiMPXVNMUUbd9wAw4kr`  
+**Anthropic response id:** `msg_01QBPjrxUDzme7t93VS5DJ94`  
 
 ### 1) Summary
 - Prod shadow order-status report now separates global vs order-status metrics with explicit denominators.
