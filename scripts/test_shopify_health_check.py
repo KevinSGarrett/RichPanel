@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 from pathlib import Path
 import unittest
@@ -33,6 +34,15 @@ class ShopifyHealthCheckTests(unittest.TestCase):
         self.assertFalse(has_id)
         self.assertFalse(has_secret)
 
+    def test_load_client_credentials_exception(self) -> None:
+        class _ErrorClient:
+            def _load_client_credentials(self):
+                raise RuntimeError("boom")
+
+        has_id, has_secret = health_check._load_client_credentials(_ErrorClient())
+        self.assertFalse(has_id)
+        self.assertFalse(has_secret)
+
     def test_write_json(self) -> None:
         payload = {"b": 2, "a": 1}
         with tempfile.TemporaryDirectory() as tmp:
@@ -63,7 +73,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
                     "status": "loaded",
                     "token_type": "offline",
                     "raw_format": "json",
-                    "has_refresh_token": False,
+                    "has_refresh_token": True,
                     "expires_at": 123,
                     "expired": False,
                 }
@@ -82,7 +92,17 @@ class ShopifyHealthCheckTests(unittest.TestCase):
                 with mock.patch.object(
                     health_check.sys,
                     "argv",
-                    ["shopify_health_check.py", "--out-json", out_path, "--refresh"],
+                    [
+                        "shopify_health_check.py",
+                        "--out-json",
+                        out_path,
+                        "--refresh",
+                        "--env",
+                        "prod",
+                        "--aws-region",
+                        "us-east-2",
+                        "--verbose",
+                    ],
                 ):
                     exit_code = health_check.main()
             self.assertEqual(exit_code, 0)
@@ -113,15 +133,16 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             def refresh_error(self):
                 return None
 
-        with mock.patch.object(
-            health_check, "ShopifyClient", return_value=_StubClient()
-        ):
+        with mock.patch.dict(os.environ, {}, clear=True):
             with mock.patch.object(
-                health_check.sys,
-                "argv",
-                ["shopify_health_check.py", "--refresh-dry-run"],
+                health_check, "ShopifyClient", return_value=_StubClient()
             ):
-                exit_code = health_check.main()
+                with mock.patch.object(
+                    health_check.sys,
+                    "argv",
+                    ["shopify_health_check.py", "--refresh-dry-run"],
+                ):
+                    exit_code = health_check.main()
         self.assertNotEqual(exit_code, 0)
 
 
