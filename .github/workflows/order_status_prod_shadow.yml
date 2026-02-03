@@ -84,6 +84,7 @@ jobs:
       MW_OPENAI_ROUTING_ENABLED: "true"
       MW_OPENAI_INTENT_ENABLED: "true"
       MW_OPENAI_SHADOW_ENABLED: "true"
+      OPENAI_API_KEY: ${{ secrets.PROD_OPENAI_API_KEY }}
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
       SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
       SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
@@ -96,10 +97,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
 
       - name: Run prod shadow order status report
         shell: bash

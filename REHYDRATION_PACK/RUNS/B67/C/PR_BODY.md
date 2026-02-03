@@ -4,13 +4,13 @@
 **Agents:** C  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** pending — `<link>`  
-**Anthropic response id:** pending — `<link>`  
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01S1LB2uEjfYqZzj3wf8DShE`  
 
 ### 1) Summary
 - Prod shadow order-status report now separates global vs order-status metrics with explicit denominators.
 - Three prod read-only shadow runs (250 tickets each) show stable order-status rate and healthy match rate.
-- Nightly workflow added to repeat the prod shadow run and enforce metric bands.
+- Nightly workflow added to repeat the prod shadow run with OpenAI credentials and enforce metric bands.
 
 ### 2) Why
 - **Problem / risk:** prior reports were misread because global counts were treated as match failures within order-status tickets.
@@ -31,7 +31,7 @@
 **Core changes:**
 - Added global + order-status subset stats (and denominators) to the prod shadow report.
 - Captured failure modes for both global and order-status subsets.
-- Added nightly workflow to run prod shadow validation and enforce metric bands.
+- Added nightly workflow to run prod shadow validation with OpenAI credentials and enforce metric bands.
 
 **Design decisions (why this way):**
 - Keep shadow runs read-only with explicit env flags and no outbound.
@@ -66,9 +66,9 @@
 - (Same command + `--out-json`/`--out-md` for run2 + run3; see `REHYDRATION_PACK/RUNS/B67/C/EVIDENCE.md`)
 
 ### 7) Results & evidence
-**CI:** pending — `<link>`  
-**Codecov:** pending — `<direct Codecov PR link>`  
-**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21617603459/job/62299704471`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/217`  
+**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/217` (cursor bot comment pending)  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B67/C/PROOF/prod_shadow_order_status_report_run1.json`
