@@ -7,4 +7,5 @@
 - Added JSON parsing for Shopify client id/secret and redacted refresh error logging.
 - Fixed Shopify client tests for refresh-token lookup behavior.
 - Added Shopify client tests for refresh error parsing and secret field extraction.
+- Added unit tests for Shopify health check helpers.
 - Docs clarified for single live Shopify store (read-only): `docs/08_Engineering/Secrets_and_Environments.md`.

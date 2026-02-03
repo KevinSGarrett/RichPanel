@@ -179,6 +179,14 @@ python -m pytest scripts\test_shopify_client.py -k "extract_secret_field_returns
 Result summary:
 - 2 passed
 
+### 2026-02-03 17:52 UTC — Shopify health check unit tests
+Command:
+```
+python -m pytest scripts\test_shopify_health_check.py
+```
+Result summary:
+- 3 passed
+
 ### 2026-02-03 15:40 UTC — Shopify health check (dev FAIL)
 Command:
 ```
