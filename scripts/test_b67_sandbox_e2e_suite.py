@@ -5,12 +5,14 @@ from unittest import mock
 
 from b67_sandbox_e2e_suite import (
     ScenarioSpec,
+    ScenarioRunResult,
     _append_scenario_assertions,
     _build_scenario_spec,
     _build_smoke_cmd,
     _extract_ticket_ref,
     _redact_command,
     _run_scenario,
+    _suite_summary_md,
     _suite_results_json,
 )
 
@@ -79,6 +81,57 @@ class TestB67SandboxSuite(unittest.TestCase):
             require_send_message=True,
             require_operator_reply=True,
             followup=False,
+        )
+        status, failure = _append_scenario_assertions(proof, scenario=scenario)
+        self.assertEqual(status, "PASS")
+        self.assertIsNone(failure)
+
+    def test_append_scenario_assertions_negative_case_passes(self) -> None:
+        proof = {
+            "proof_fields": {
+                "intent_after": "returns",
+                "outbound_attempted": False,
+                "routed_to_support": True,
+            },
+            "richpanel": {"status_after": "OPEN"},
+        }
+        scenario = ScenarioSpec(
+            scenario_key="not_order_status_negative_case",
+            smoke_scenario="not_order_status",
+            ticket_subject="",
+            ticket_body="",
+            proof_filename="x.json",
+            require_openai_routing=True,
+            require_openai_rewrite=False,
+        )
+        status, failure = _append_scenario_assertions(proof, scenario=scenario)
+        self.assertEqual(status, "PASS")
+        self.assertIsNone(failure)
+
+    def test_append_scenario_assertions_followup_passes(self) -> None:
+        proof = {
+            "proof_fields": {
+                "intent_after": "order_status_tracking",
+                "outbound_attempted": True,
+                "send_message_path_confirmed": True,
+                "operator_reply_confirmed": True,
+                "followup_reply_sent": False,
+                "followup_routed_support": True,
+            },
+            "richpanel": {"status_after": "CLOSED"},
+        }
+        scenario = ScenarioSpec(
+            scenario_key="followup_after_autoclose",
+            smoke_scenario="order_status",
+            ticket_subject="",
+            ticket_body="",
+            proof_filename="x.json",
+            require_openai_routing=True,
+            require_openai_rewrite=True,
+            require_outbound=True,
+            require_send_message=True,
+            require_operator_reply=True,
+            followup=True,
         )
         status, failure = _append_scenario_assertions(proof, scenario=scenario)
         self.assertEqual(status, "PASS")
@@ -228,6 +281,46 @@ class TestB67SandboxSuite(unittest.TestCase):
                     args, scenario=scenario, run_id="RUN", artifacts_dir=artifacts
                 )
         self.assertEqual(result.status, "FAIL")
+
+    def test_run_scenario_smoke_failure_sets_error(self) -> None:
+        args = _Args()
+        scenario = ScenarioSpec(
+            scenario_key="order_status_golden",
+            smoke_scenario="order_status",
+            ticket_subject="",
+            ticket_body="",
+            proof_filename="proof.json",
+        )
+        create_stdout = "TICKET_REF_JSON:{\"ticket_number\":\"555\"}"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifacts = Path(tmpdir)
+            (artifacts / "PROOF").mkdir(parents=True, exist_ok=True)
+            with mock.patch(
+                "b67_sandbox_e2e_suite._run_command"
+            ) as run_cmd, mock.patch(
+                "b67_sandbox_e2e_suite._read_proof", return_value=None
+            ):
+                run_cmd.side_effect = [
+                    mock.Mock(returncode=0, stdout=create_stdout),
+                    mock.Mock(returncode=2, stdout=""),
+                ]
+                result = _run_scenario(
+                    args, scenario=scenario, run_id="RUN", artifacts_dir=artifacts
+                )
+        self.assertEqual(result.status, "FAIL")
+        self.assertIsNotNone(result.error)
+
+    def test_suite_summary_md_redacts_commands(self) -> None:
+        result = ScenarioRunResult(
+            scenario_key="order_status_golden",
+            proof_path=Path("proof.json"),
+            status="PASS",
+            error=None,
+            proof=None,
+            commands=[["python", "x.py", "--ticket-number", "123"]],
+        )
+        summary = _suite_summary_md([result], run_id="RUN")
+        self.assertIn("--ticket-number <redacted>", summary)
 
 
 if __name__ == "__main__":
