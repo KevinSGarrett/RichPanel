@@ -10,6 +10,7 @@ python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name Richpa
 python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\RUNS\B68\A\PROOF\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0003 --profile rp-admin-kevin
 python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\RUNS\B68\A\PROOF\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0004 --profile rp-admin-kevin
 python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\RUNS\B68\A\PROOF\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0005 --profile rp-admin-kevin
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\RUNS\B68\A\PROOF\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0006 --profile rp-admin-kevin
 ```
 
 ### Notes
@@ -28,10 +29,10 @@ From `REHYDRATION_PACK/RUNS/B68/A/PROOF/sandbox_email_outbound_proof.json`:
   "proof_fields": {
     "ticket_channel": "email",
     "outbound_endpoint_used": "/send-message",
-    "send_message_status_code": null,
+    "send_message_status_code": 200,
     "latest_comment_is_operator": true,
     "latest_comment_source": null,
-    "outbound_failure_classification": "blocked_by_allowlist"
+    "outbound_failure_classification": null
   },
   "result": {
     "status": "PASS"

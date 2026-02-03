@@ -31,6 +31,12 @@ python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name Richpa
 ```
 Result: `classification=PASS_STRONG; status=PASS`
 
+Final proof run (ticket redacted) captured `send_message_status_code=200`:
+```powershell
+python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\RUNS\B68\A\PROOF\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0006 --profile rp-admin-kevin
+```
+Result: `classification=PASS_STRONG; status=PASS`
+
 ### Next step (manual)
 Optional: run PR checks once PR is open.
 
