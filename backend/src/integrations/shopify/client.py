@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import random
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -44,6 +45,13 @@ def _truncate(text: str, limit: int = 512) -> str:
     if len(text) <= limit:
         return text
     return f"{text[:limit]}..."
+
+
+def _redact_refresh_body(text: str) -> str:
+    if not text:
+        return text
+    redacted = re.sub(r"[A-Fa-f0-9]{12,}", "***", text)
+    return redacted
 
 
 
@@ -237,6 +245,11 @@ class ShopifyClient:
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE")
             or os.environ.get("SHOPIFY_TOKEN")
         )
+        self.refresh_token_secret_id = (
+            os.environ.get("SHOPIFY_REFRESH_TOKEN_SECRET_ID")
+            or f"rp-mw/{self.environment}/shopify/refresh_token"
+        )
+        self._refresh_token_override = os.environ.get("SHOPIFY_REFRESH_TOKEN_OVERRIDE")
         self.client_id_secret_id = (
             os.environ.get("SHOPIFY_CLIENT_ID_SECRET_ID")
             or f"rp-mw/{self.environment}/shopify/client_id"
@@ -248,6 +261,7 @@ class ShopifyClient:
         self._client_id = os.environ.get("SHOPIFY_CLIENT_ID_OVERRIDE")
         self._client_secret = os.environ.get("SHOPIFY_CLIENT_SECRET_OVERRIDE")
         self._token_info: Optional[ShopifyTokenInfo] = None
+        self._last_refresh_error: Optional[str] = None
         if self._access_token:
             self._token_info = ShopifyTokenInfo(
                 access_token=str(self._access_token).strip(),
@@ -494,6 +508,9 @@ class ShopifyClient:
             return False
         return self._refresh_access_token(self._token_info)
 
+    def refresh_error(self) -> Optional[str]:
+        return self._last_refresh_error
+
     def find_orders_by_name(
         self,
         order_name: str,
@@ -653,6 +670,10 @@ class ShopifyClient:
             token_info = self._parse_token_secret(
                 secret_value, source_secret_id=secret_id
             )
+            if not token_info.refresh_token:
+                refresh_token = self._load_refresh_token(client)
+                if refresh_token:
+                    token_info.refresh_token = refresh_token
             self._token_info = token_info
             self._access_token = token_info.access_token
             self.access_token_secret_id = secret_id
@@ -738,12 +759,45 @@ class ShopifyClient:
             client = self._secrets_client()
 
         if not self._client_id:
-            self._client_id = self._load_secret_value(client, self.client_id_secret_id)
+            client_id_value = self._load_secret_value(
+                client, self.client_id_secret_id
+            )
+            self._client_id = self._extract_secret_field(
+                client_id_value, ("client_id", "api_key", "key")
+            )
         if not self._client_secret:
-            self._client_secret = self._load_secret_value(
+            client_secret_value = self._load_secret_value(
                 client, self.client_secret_secret_id
             )
+            self._client_secret = self._extract_secret_field(
+                client_secret_value, ("client_secret", "secret", "value")
+            )
         return self._client_id, self._client_secret
+
+    def _load_refresh_token(self, client: Any) -> Optional[str]:
+        if self._refresh_token_override:
+            return str(self._refresh_token_override).strip() or None
+        if not self.refresh_token_secret_id:
+            return None
+        refresh_value = self._load_secret_value(client, self.refresh_token_secret_id)
+        return self._extract_secret_field(refresh_value, ("refresh_token", "token"))
+
+    @staticmethod
+    def _extract_secret_field(
+        secret_value: Optional[str], keys: Tuple[str, ...]
+    ) -> Optional[str]:
+        if not secret_value:
+            return None
+        try:
+            parsed = json.loads(secret_value)
+        except Exception:
+            return secret_value
+        if isinstance(parsed, dict):
+            for key in keys:
+                value = parsed.get(key)
+                if value:
+                    return str(value)
+        return secret_value
 
     def _load_secret_value(self, client: Any, secret_id: str) -> Optional[str]:
         try:
@@ -767,6 +821,7 @@ class ShopifyClient:
                     "client_secret_secret_id": self.client_secret_secret_id,
                 },
             )
+            self._last_refresh_error = "missing_client_credentials"
             return False
 
         url = f"https://{self.shop_domain}/admin/oauth/access_token"
@@ -804,12 +859,42 @@ class ShopifyClient:
                 "shopify.refresh_transport_error",
                 extra={"url": url},
             )
+            self._last_refresh_error = "transport_error"
             return False
         if response.status_code < 200 or response.status_code >= 300:
+            body_excerpt = ""
+            try:
+                body_excerpt = _truncate(response.body.decode("utf-8"))
+            except Exception:
+                body_excerpt = ""
+            body_excerpt = _redact_refresh_body(body_excerpt)
             self._logger.warning(
                 "shopify.refresh_failed",
-                extra={"status": response.status_code},
+                extra={"status": response.status_code, "body_excerpt": body_excerpt},
             )
+            error_code = None
+            error_description = None
+            try:
+                error_payload = json.loads(response.body.decode("utf-8"))
+                if isinstance(error_payload, dict):
+                    error_code = error_payload.get("error")
+                    error_description = error_payload.get("error_description")
+            except Exception:
+                error_payload = None
+            if error_description:
+                error_description = _redact_refresh_body(_truncate(str(error_description)))
+            if error_code or error_description:
+                self._last_refresh_error = (
+                    f"status={response.status_code}"
+                    + (f" error={error_code}" if error_code else "")
+                    + (
+                        f" description={error_description}"
+                        if error_description
+                        else ""
+                    )
+                )
+            else:
+                self._last_refresh_error = f"status={response.status_code}"
             return False
         refresh_payload = ShopifyResponse(
             status_code=response.status_code,
@@ -820,12 +905,14 @@ class ShopifyClient:
         ).json()
         if not isinstance(refresh_payload, dict):
             self._logger.warning("shopify.refresh_invalid_payload")
+            self._last_refresh_error = "invalid_payload"
             return False
         new_access_token = refresh_payload.get("access_token")
         new_refresh_token = refresh_payload.get("refresh_token") or token_info.refresh_token
         expires_in = refresh_payload.get("expires_in")
         if not new_access_token:
             self._logger.warning("shopify.refresh_missing_access_token")
+            self._last_refresh_error = "missing_access_token"
             return False
         expires_at = None
         if expires_in is not None:
@@ -843,6 +930,7 @@ class ShopifyClient:
         self._persist_token_info(updated_info)
         self._token_info = updated_info
         self._access_token = updated_info.access_token
+        self._last_refresh_error = None
         return True
 
     def _persist_token_info(self, token_info: ShopifyTokenInfo) -> None:
@@ -888,6 +976,11 @@ class ShopifyClient:
             "token_type": token_type,
             "raw_format": token_info.raw_format,
             "has_refresh_token": bool(token_info.refresh_token),
+            "refresh_token_source": (
+                "secret"
+                if token_info.refresh_token and self.refresh_token_secret_id
+                else None
+            ),
             "expires_at": token_info.expires_at,
             "expired": token_info.is_expired() if token_info.expires_at else None,
             "source_secret_id": token_info.source_secret_id,

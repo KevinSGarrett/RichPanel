@@ -40,6 +40,7 @@ export interface SecretReferences {
   readonly shopifyAdminApiToken: ISecret;
   readonly shopifyClientId: ISecret;
   readonly shopifyClientSecret: ISecret;
+  readonly shopifyRefreshToken: ISecret;
 }
 
 interface EventPipelineResources {
@@ -141,6 +142,11 @@ export class RichpanelMiddlewareStack extends Stack {
         this,
         "ShopifyClientSecretSecret",
         this.naming.secretPath("shopify", "client_secret")
+      ),
+      shopifyRefreshToken: Secret.fromSecretNameV2(
+        this,
+        "ShopifyRefreshTokenSecret",
+        this.naming.secretPath("shopify", "refresh_token")
       ),
     };
   }
@@ -316,6 +322,10 @@ export class RichpanelMiddlewareStack extends Stack {
     this.runtimeFlags.automationEnabled.grantRead(workerFunction);
     this.secrets.richpanelApiKey.grantRead(workerFunction);
     this.secrets.openaiApiKey.grantRead(workerFunction);
+    this.secrets.shopifyAdminApiToken.grantRead(workerFunction);
+    this.secrets.shopifyClientId.grantRead(workerFunction);
+    this.secrets.shopifyClientSecret.grantRead(workerFunction);
+    this.secrets.shopifyRefreshToken.grantRead(workerFunction);
 
     workerFunction.addEventSource(
       new SqsEventSource(eventsQueue, {
@@ -325,7 +335,7 @@ export class RichpanelMiddlewareStack extends Stack {
     );
 
     let shopifyRefreshFunction: lambda.Function | undefined;
-    if (this.environmentConfig.name === "prod") {
+    if (["prod", "dev"].includes(this.environmentConfig.name)) {
       shopifyRefreshFunction = new lambda.Function(
         this,
         "ShopifyTokenRefreshLambda",
@@ -353,6 +363,10 @@ export class RichpanelMiddlewareStack extends Stack {
               "shopify",
               "client_secret"
             ),
+            SHOPIFY_REFRESH_TOKEN_SECRET_ID: this.naming.secretPath(
+              "shopify",
+              "refresh_token"
+            ),
           },
           code: lambda.Code.fromAsset(lambdaSourceRoot),
         }
@@ -362,6 +376,7 @@ export class RichpanelMiddlewareStack extends Stack {
       this.secrets.shopifyAdminApiToken.grantWrite(shopifyRefreshFunction);
       this.secrets.shopifyClientId.grantRead(shopifyRefreshFunction);
       this.secrets.shopifyClientSecret.grantRead(shopifyRefreshFunction);
+      this.secrets.shopifyRefreshToken.grantRead(shopifyRefreshFunction);
 
       const scheduleRule = new events.Rule(
         this,

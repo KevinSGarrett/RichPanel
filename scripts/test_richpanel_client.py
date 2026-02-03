@@ -147,7 +147,7 @@ class RichpanelClientTests(unittest.TestCase):
         transport = _RecordingTransport(
             [
                 TransportResponse(
-                    status_code=429, headers={"Retry-After": "1"}, body=b""
+                    status_code=429, headers={"Retry-After": "7"}, body=b""
                 ),
                 TransportResponse(status_code=200, headers={}, body=b'{"ok": true}'),
             ]
@@ -165,7 +165,7 @@ class RichpanelClientTests(unittest.TestCase):
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(transport.requests), 2)
-        self.assertGreaterEqual(sleeps[0], 1.0)
+        self.assertGreaterEqual(sleeps[0], 7.0)
         self.assertIn(len(sleeps), (1, 2))
         if len(sleeps) == 2:
             self.assertGreaterEqual(sleeps[1], 0.0)
