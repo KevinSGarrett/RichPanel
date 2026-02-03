@@ -70,6 +70,10 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_reply_content_flags,
     append_summary,
     _redact_command,
+    _redact_path,
+    _extract_endpoint_variant,
+    _sanitize_ticket_snapshot,
+    _sanitize_tag_result,
     _iso_business_days_before,
     _order_status_no_tracking_payload,
     _order_status_no_tracking_short_window_payload,
@@ -77,6 +81,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_status_tracking_standard_shipping_payload,
     _not_order_status_payload,
     _order_status_no_match_payload,
+    _seed_order_id,
     _seed_order_number,
     _build_skip_proof_payload,
     _write_proof_payload,
@@ -2849,6 +2854,56 @@ class FollowupProofTests(unittest.TestCase):
         self.assertIsNone(proof["reply_sent"])
 
 
+class RedactionHelpersTests(unittest.TestCase):
+    def test_redact_path_number_endpoint(self) -> None:
+        path = "/v1/tickets/number/12345"
+        self.assertEqual(_redact_path(path), "/v1/tickets/number/<redacted>")
+        self.assertEqual(_extract_endpoint_variant(path), "number")
+
+    def test_redact_path_id_with_suffix(self) -> None:
+        path = "/v1/tickets/abc123/add-tags"
+        self.assertEqual(_redact_path(path), "/v1/tickets/<redacted>/add-tags")
+        self.assertEqual(_extract_endpoint_variant(path), "id")
+
+    def test_redact_path_unknown(self) -> None:
+        self.assertEqual(_redact_path("/v2/other"), "<redacted>")
+        self.assertEqual(_extract_endpoint_variant("/v2/other"), "unknown")
+
+    def test_sanitize_ticket_snapshot_fingerprints(self) -> None:
+        snapshot = {
+            "ticket_id": "TICKET-123",
+            "path": "/v1/tickets/abc123",
+            "customer_email": "person@example.com",
+            "customer_name": "Jane Doe",
+        }
+        sanitized = _sanitize_ticket_snapshot(snapshot)
+        self.assertIsNotNone(sanitized)
+        self.assertNotIn("ticket_id", sanitized)
+        self.assertIn("ticket_id_fingerprint", sanitized)
+        self.assertEqual(sanitized.get("endpoint_variant"), "id")
+        self.assertEqual(sanitized.get("path_redacted"), "/v1/tickets/<redacted>")
+        self.assertIn("customer_email_fingerprint", sanitized)
+        self.assertIn("customer_name_fingerprint", sanitized)
+
+    def test_sanitize_tag_result_redacts_path(self) -> None:
+        tag_result = {"path": "/v1/tickets/abc123/add-tags", "status": "ok"}
+        sanitized = _sanitize_tag_result(tag_result)
+        self.assertEqual(
+            sanitized.get("path_redacted"), "/v1/tickets/<redacted>/add-tags"
+        )
+
+
+class SeedOrderIdTests(unittest.TestCase):
+    def test_seed_order_id_uses_conversation_id(self) -> None:
+        seeded = _seed_order_id("RUN1", "conv-123")
+        self.assertTrue(seeded.startswith("ORDER-"))
+        self.assertNotIn("conv-123", seeded)
+
+    def test_seed_order_id_falls_back_to_run_id(self) -> None:
+        seeded = _seed_order_id("RUN2", None)
+        self.assertTrue(seeded.startswith("DEV-ORDER-"))
+
+
 class SummaryAppendTests(unittest.TestCase):
     def test_append_summary_writes_expected_sections(self) -> None:
         with TemporaryDirectory() as tmpdir:
@@ -3471,6 +3526,8 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AutoTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(ChatTicketHelpersTests))
     suite.addTests(loader.loadTestsFromTestCase(FollowupProofTests))
+    suite.addTests(loader.loadTestsFromTestCase(RedactionHelpersTests))
+    suite.addTests(loader.loadTestsFromTestCase(SeedOrderIdTests))
     suite.addTests(loader.loadTestsFromTestCase(SummaryAppendTests))
     suite.addTests(loader.loadTestsFromTestCase(OpenAIEvidenceTests))
     suite.addTests(loader.loadTestsFromTestCase(WaitForTicketReadyTests))
