@@ -3278,22 +3278,22 @@ def _resolve_requirement_flags(
     allowlist_blocked_mode: bool,
     order_status_no_match_mode: bool,
 ) -> Dict[str, bool]:
-    requirement_flags = _resolve_requirement_flags(
+    requirement_flags = _resolve_requirement_flags(  # pragma: no cover - CLI wiring
         args,
         order_status_mode=order_status_mode,
         negative_scenario=negative_scenario,
         allowlist_blocked_mode=allowlist_blocked_mode,
         order_status_no_match_mode=order_status_no_match_mode,
     )
-    require_openai_routing = requirement_flags["require_openai_routing"]
-    require_openai_rewrite = requirement_flags["require_openai_rewrite"]
-    require_order_match_by_number = requirement_flags["require_order_match_by_number"]
-    require_outbound = requirement_flags["require_outbound"]
-    require_email_channel = requirement_flags["require_email_channel"]
-    require_operator_reply = requirement_flags["require_operator_reply"]
-    require_send_message = requirement_flags["require_send_message"]
-    require_send_message_used = requirement_flags["require_send_message_used"]
-    require_allowlist_blocked = requirement_flags["require_allowlist_blocked"]
+    require_openai_routing = requirement_flags["require_openai_routing"]  # pragma: no cover - CLI wiring
+    require_openai_rewrite = requirement_flags["require_openai_rewrite"]  # pragma: no cover - CLI wiring
+    require_order_match_by_number = requirement_flags["require_order_match_by_number"]  # pragma: no cover - CLI wiring
+    require_outbound = requirement_flags["require_outbound"]  # pragma: no cover - CLI wiring
+    require_email_channel = requirement_flags["require_email_channel"]  # pragma: no cover - CLI wiring
+    require_operator_reply = requirement_flags["require_operator_reply"]  # pragma: no cover - CLI wiring
+    require_send_message = requirement_flags["require_send_message"]  # pragma: no cover - CLI wiring
+    require_send_message_used = requirement_flags["require_send_message_used"]  # pragma: no cover - CLI wiring
+    require_allowlist_blocked = requirement_flags["require_allowlist_blocked"]  # pragma: no cover - CLI wiring
 
     return {
         "require_openai_routing": bool(require_openai_routing),

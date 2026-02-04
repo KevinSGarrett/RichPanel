@@ -1506,7 +1506,7 @@ class ParseArgsTests(unittest.TestCase):
         self.assertTrue(args.require_email_channel)
 
 
-class RequirementFlagResolutionTests(unittest.TestCase):
+class TestRequirementFlagResolution(unittest.TestCase):
     def test_non_order_status_allows_explicit_email_requirements(self) -> None:
         args = SimpleNamespace(
             require_openai_routing=None,
