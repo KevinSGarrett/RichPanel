@@ -148,5 +148,5 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
         )
 
 
-if __name__ == "__main__":
-    raise SystemExit(unittest.main())
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
+    raise SystemExit(unittest.main())  # pragma: no cover - CLI entrypoint

@@ -1612,6 +1612,27 @@ class TestRequirementFlagResolution(unittest.TestCase):
         )
         self.assertFalse(flags["require_order_match_by_number"])
 
+    def test_no_match_mode_disables_order_match_requirement(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=True,
+            require_openai_rewrite=True,
+            require_order_match_by_number=True,
+            require_outbound=True,
+            require_email_channel=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            require_allowlist_blocked=False,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=True,
+            negative_scenario=False,
+            allowlist_blocked_mode=False,
+            order_status_no_match_mode=True,
+        )
+        self.assertFalse(flags["require_order_match_by_number"])
+
 
 class RoutingValidationTests(unittest.TestCase):
     def test_validate_routing_includes_optional_fields(self) -> None:
@@ -3731,6 +3752,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(PayloadBuilderTests))
     suite.addTests(loader.loadTestsFromTestCase(ParseArgsTests))
+    suite.addTests(loader.loadTestsFromTestCase(TestRequirementFlagResolution))
     suite.addTests(loader.loadTestsFromTestCase(RoutingValidationTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
     suite.addTests(loader.loadTestsFromTestCase(DraftReplyHelperTests))
