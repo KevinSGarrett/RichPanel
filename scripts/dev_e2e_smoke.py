@@ -3604,12 +3604,15 @@ def _resolve_order_match_method_details(
     ] = None,
 ) -> Tuple[Optional[str], Optional[str]]:
     order_match_method_source = None
-    order_match_method = _extract_order_match_method(
-        order_match_success=order_match_evidence.get("order_match_success"),
-        order_resolution=order_resolution,
-    )
-    if order_match_method is not None:
-        order_match_method_source = "action_order_resolution"
+    order_match_method = None
+    order_match_success = order_match_evidence.get("order_match_success")
+    if order_match_success is not None:
+        order_match_method = _extract_order_match_method(
+            order_match_success=order_match_success,
+            order_resolution=order_resolution,
+        )
+        if order_match_method is not None:
+            order_match_method_source = "action_order_resolution"
     if order_match_method is None and isinstance(order_resolution, dict):
         order_match_method = _extract_order_match_method(
             order_match_success=True,

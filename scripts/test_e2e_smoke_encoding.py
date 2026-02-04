@@ -1854,6 +1854,29 @@ class BotAgentIdLoaderTests(unittest.TestCase):
                 "env-bot",
             )
 
+    def test_load_bot_agent_id_requires_session(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(
+                _load_bot_agent_id(
+                    env_name="dev", region="us-east-2", session=None
+                )
+            )
+
+    def test_load_bot_agent_id_empty_secret_returns_none(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "   "}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertIsNone(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            )
+        )
+
     def test_load_bot_agent_id_from_secret_json(self) -> None:
         class _SecretsClient:
             def get_secret_value(self, SecretId: str) -> dict:
@@ -1884,6 +1907,22 @@ class BotAgentIdLoaderTests(unittest.TestCase):
                 env_name="dev", region="us-east-2", session=_Session()
             ),
             "plain-bot",
+        )
+
+    def test_load_bot_agent_id_unrecognized_json_returns_raw(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"foo\":\"bar\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "{\"foo\":\"bar\"}",
         )
 
     def test_load_bot_agent_id_failure_returns_none(self) -> None:
@@ -1975,6 +2014,19 @@ class OrderMatchMethodResolverTests(unittest.TestCase):
             automation_enabled=None,
         )
         self.assertEqual(method, "order_number")
+        self.assertEqual(source, "action_order_resolution")
+
+    def test_resolve_order_match_method_from_action_when_missing_success(self) -> None:
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": None},
+            order_resolution={"resolvedBy": "shopify_email_only"},
+            order_status_mode=True,
+            pre_ticket=None,
+            allow_network=False,
+            safe_mode=None,
+            automation_enabled=None,
+        )
+        self.assertEqual(method, "email_only")
         self.assertEqual(source, "action_order_resolution")
 
     def test_resolve_order_match_method_from_probe(self) -> None:
@@ -4000,6 +4052,11 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))
     suite.addTests(loader.loadTestsFromTestCase(ProofPayloadWriteTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(CommentAuthorIdTests))
+    suite.addTests(loader.loadTestsFromTestCase(BotAgentIdLoaderTests))
+    suite.addTests(loader.loadTestsFromTestCase(AuthorMatchResolverTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodFinalizerTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodResolverTests))
     suite.addTests(loader.loadTestsFromTestCase(OutboundResultHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))
