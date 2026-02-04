@@ -56,15 +56,18 @@ def main() -> int:
     parser.add_argument("--env", required=True, help="Target environment (dev|staging|prod).")
     parser.add_argument("--region", help="AWS region override (default: us-east-2).")
     args = parser.parse_args()
+    return main_with_args(env=args.env, region=args.region)
 
+
+def main_with_args(*, env: str, region: Optional[str] = None) -> int:
     if boto3 is None:
         raise SystemExit("boto3 is required to sync bot agent secrets.")
 
-    env_name = _normalize_env(args.env)
-    region = _resolve_region(args.region)
-    session = boto3.session.Session(region_name=region)
-    lambda_client = session.client("lambda", region_name=region)
-    secrets_client = session.client("secretsmanager", region_name=region)
+    env_name = _normalize_env(env)
+    resolved_region = _resolve_region(region)
+    session = boto3.session.Session(region_name=resolved_region)
+    lambda_client = session.client("lambda", region_name=resolved_region)
+    secrets_client = session.client("secretsmanager", region_name=resolved_region)
     secret_id = f"rp-mw/{env_name}/richpanel/bot_agent_id"
 
     if _secret_exists(secrets_client, secret_id=secret_id):
