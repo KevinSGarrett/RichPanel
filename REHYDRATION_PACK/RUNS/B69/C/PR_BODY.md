@@ -4,8 +4,9 @@
 **Agents:** C  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** `claude-sonnet-4-5-20251101`  
-**Anthropic response id:** `pending — will run after PR is opened`
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01SmW5tbtr59eVHY8NQk8v8M`  
+**Anthropic request id:** `req_011CXnJcr5EycBbnkP743JNc`
 
 ### 1) Summary
 - Restored deterministic order-status coverage via expanded routing rules, delivery-issue detection, and nested message extraction.
@@ -74,9 +75,10 @@
 - `OPENAI_API_KEY=<redacted> MW_ALLOW_NETWORK_READS=true RICHPANEL_READ_ONLY=true RICHPANEL_WRITE_DISABLED=true RICHPANEL_OUTBOUND_ENABLED=false MW_OPENAI_ROUTING_ENABLED=true MW_OPENAI_INTENT_ENABLED=true MW_OPENAI_SHADOW_ENABLED=true SHOPIFY_OUTBOUND_ENABLED=true SHOPIFY_WRITE_DISABLED=true SHOPIFY_SHOP_DOMAIN=scentimen-t.myshopify.com python scripts/prod_shadow_order_status_report.py --env prod --allow-ticket-fetch-failures --ticket-number <redacted>...` (8 x 25-ticket batches, deterministic + OpenAI)
 
 ### 7) Results & evidence
-**CI:** pending — will update after PR is opened  
-**Codecov:** pending — will update after PR is opened  
-**Bugbot:** pending — will update after PR is opened (trigger via `@cursor review`)  
+**CI:** `validate` ✅  
+**Codecov:** `codecov/patch` ✅ (>= 93.79% threshold)  
+**Bugbot:** ✅  
+**Claude gate:** ✅  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B69/C/PROOF/intent_eval_results.json`
