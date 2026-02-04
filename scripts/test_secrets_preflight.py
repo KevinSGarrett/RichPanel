@@ -454,7 +454,7 @@ class SyncBotAgentSecretTests(unittest.TestCase):
 
     def test_sync_bot_agent_secret_helpers(self) -> None:
         self.assertEqual(aws_account_preflight.normalize_env("production"), "prod")
-        self.assertEqual(sync_bot_agent_secret._resolve_region(None), "us-east-2")
+        self.assertEqual(aws_account_preflight.resolve_region(None), "us-east-2")
 
     def test_sync_bot_agent_secret_main(self) -> None:
         with patch.object(sync_bot_agent_secret, "main_with_args", return_value=0):
