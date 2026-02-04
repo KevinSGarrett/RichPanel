@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -33,7 +33,11 @@ from richpanel_middleware.integrations.richpanel.tickets import (  # noqa: E402
 
 class FakeResponse:
     def __init__(
-        self, *, status_code: int = 200, dry_run: bool = False, payload: Dict[str, Any] | None = None
+        self,
+        *,
+        status_code: int = 200,
+        dry_run: bool = False,
+        payload: Dict[str, Any] | None = None,
     ) -> None:
         self.status_code = status_code
         self.dry_run = dry_run

@@ -50,9 +50,9 @@ Result: `[OK] CI-equivalent checks passed.` (doc hygiene warnings are non-blocki
 
 ### Unit regression test (local)
 ```powershell
-python -m pytest backend\tests\test_order_status_send_message.py
+python scripts\test_order_status_send_message.py
 ```
-Result: `1 passed`.
+Result: `OK`.
 
 ### E2E smoke encoding tests (local)
 ```powershell
