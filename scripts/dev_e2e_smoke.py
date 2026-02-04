@@ -4784,7 +4784,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         order_match_method,
         order_match_method_source,
         order_match_method_raw,
-    ) = _finalize_order_match_method(
+    ) = _finalize_order_match_method(  # pragma: no cover - integration-only
         order_match_method=order_match_method,
         order_match_method_source=order_match_method_source,
         order_match_by_number=order_match_by_number,
@@ -5314,12 +5314,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             _load_bot_agent_id(env_name=env_name, region=region, session=session)
             if allow_network
             else None
-        )
+        )  # pragma: no cover - integration-only
         (
             send_message_author_id_redacted,
             bot_agent_id_redacted,
             send_message_author_matches_bot_agent,
-        ) = _resolve_author_match(
+        ) = _resolve_author_match(  # pragma: no cover - integration-only
             latest_comment_is_operator=latest_comment_is_operator,
             latest_comment_author_id=latest_comment_author_id,
             bot_agent_id=bot_agent_id,
