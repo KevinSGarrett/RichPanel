@@ -40,7 +40,7 @@ python -m pytest scripts\test_shopify_health_check.py
 ```
 Result:
 ```
-7 passed in 0.25s
+8 passed in 0.34s
 ```
 
 ### 2026-02-04 — Shopify refresh behavior unit tests (targeted)
