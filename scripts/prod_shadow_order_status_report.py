@@ -71,6 +71,7 @@ from readonly_shadow_utils import (
     fetch_recent_ticket_refs,
     safe_error,
 )
+from secrets_preflight import run_secrets_preflight
 
 LOGGER = logging.getLogger("prod_shadow_order_status")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -938,6 +939,23 @@ def main() -> int:
         action="store_true",
         help="Allow non-prod runs for local tests.",
     )
+    parser.add_argument(
+        "--region",
+        help="AWS region override for account/secrets preflight (default: env/AWS default).",
+    )
+    parser.add_argument(
+        "--preflight-secrets",
+        dest="preflight_secrets",
+        action="store_true",
+        help="Run AWS account + secrets preflight (default).",
+    )
+    parser.add_argument(
+        "--no-preflight-secrets",
+        dest="preflight_secrets",
+        action="store_false",
+        help="Skip AWS account + secrets preflight.",
+    )
+    parser.set_defaults(preflight_secrets=True)
     parser.add_argument("--env", dest="env_name", help="Target environment name.")
     parser.add_argument("--richpanel-secret-id", help="Richpanel secret id override.")
     parser.add_argument("--shopify-secret-id", help="Shopify secret id override.")
@@ -977,6 +995,9 @@ def main() -> int:
         raise SystemExit("--batch-delay-seconds must be >= 0")
 
     env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
+    if args.preflight_secrets:
+        LOGGER.info("Running AWS account + secrets preflight...")
+        run_secrets_preflight(env_name=env_name, region=args.region, fail_on_error=True)
     enforced_env = _require_env_flags("prod shadow order status")
     outbound_enabled = _env_truthy(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"))
     allow_network = outbound_enabled or _env_truthy(

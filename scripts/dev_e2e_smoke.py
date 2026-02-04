@@ -54,6 +54,9 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKEND_SRC = ROOT / "backend" / "src"
 if str(BACKEND_SRC) not in sys.path:
     sys.path.insert(0, str(BACKEND_SRC))
+SCRIPTS_DIR = ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore  # noqa: E402
     build_no_tracking_reply,
@@ -86,6 +89,7 @@ from integrations.common import (  # type: ignore  # noqa: E402
     PRODUCTION_ENVIRONMENTS,
     prod_write_ack_matches,
 )
+from secrets_preflight import run_secrets_preflight  # type: ignore  # noqa: E402
 
 
 class SmokeFailure(RuntimeError):
@@ -2079,6 +2083,19 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="AWS region that hosts the stack (e.g. us-east-2).",
     )
+    parser.add_argument(
+        "--preflight-secrets",
+        dest="preflight_secrets",
+        action="store_true",
+        help="Run AWS account + secrets preflight (default).",
+    )
+    parser.add_argument(
+        "--no-preflight-secrets",
+        dest="preflight_secrets",
+        action="store_false",
+        help="Skip AWS account + secrets preflight.",
+    )
+    parser.set_defaults(preflight_secrets=True)
     parser.add_argument(
         "--stack-name",
         default="RichpanelMiddleware-dev",
@@ -4113,6 +4130,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         os.environ.setdefault("AWS_PROFILE", args.profile)
     os.environ.setdefault("AWS_DEFAULT_REGION", region)
     os.environ.setdefault("AWS_REGION", region)
+    if args.preflight_secrets:
+        print("[INFO] Running AWS account + secrets preflight...")
+        run_secrets_preflight(env_name=env_name, region=region, fail_on_error=True)
     order_status_mode = _is_order_status_scenario(args.scenario)
     negative_scenario = args.scenario in _NEGATIVE_SCENARIOS
     not_order_status_mode = args.scenario == "not_order_status"

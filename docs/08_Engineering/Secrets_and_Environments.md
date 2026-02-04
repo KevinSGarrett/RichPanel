@@ -72,6 +72,7 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 |-------------|-------------|------------------------|-------------------------------------------|--------------------------------------------|
 | **prod**    | Richpanel   | API key                | `rp-mw/prod/richpanel/api_key`            | **Read-only enforced by middleware code**  |
 | **prod**    | Richpanel   | Webhook token          | `rp-mw/prod/richpanel/webhook_token`      | Ingress Lambda auth                        |
+| **prod**    | Richpanel   | Bot agent id           | `rp-mw/prod/richpanel/bot_agent_id`       | Required for outbound identity             |
 | **prod**    | Shopify     | Admin API token        | `rp-mw/prod/shopify/admin_api_token`      | **Must be read-only Admin API token**      |
 | **prod**    | Shopify     | Client id              | `rp-mw/prod/shopify/client_id`            | OAuth refresh token support                |
 | **prod**    | Shopify     | Client secret          | `rp-mw/prod/shopify/client_secret`        | OAuth refresh token support                |
@@ -84,6 +85,7 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 |-------------|-------------|------------------------|-------------------------------------------|--------------------------------------------|
 | **staging** | Richpanel   | API key                | `rp-mw/staging/richpanel/api_key`         | Staging Richpanel sandbox                  |
 | **staging** | Richpanel   | Webhook token          | `rp-mw/staging/richpanel/webhook_token`   | Ingress Lambda auth                        |
+| **staging** | Richpanel   | Bot agent id           | `rp-mw/staging/richpanel/bot_agent_id`    | Required for outbound identity             |
 | **staging** | Shopify     | Admin API token        | `rp-mw/staging/shopify/admin_api_token`   | Live store (read-only token)               |
 | **staging** | Shopify     | Client id              | `rp-mw/staging/shopify/client_id`         | OAuth refresh token support                |
 | **staging** | Shopify     | Client secret          | `rp-mw/staging/shopify/client_secret`     | OAuth refresh token support                |
@@ -96,6 +98,7 @@ All deployed Lambda functions load secrets from AWS Secrets Manager using the pa
 |-------------|-------------|------------------------|-------------------------------------------|--------------------------------------------|
 | **dev**     | Richpanel   | API key                | `rp-mw/dev/richpanel/api_key`             | Dev sandbox (writes allowed)               |
 | **dev**     | Richpanel   | Webhook token          | `rp-mw/dev/richpanel/webhook_token`       | Ingress Lambda auth                        |
+| **dev**     | Richpanel   | Bot agent id           | `rp-mw/dev/richpanel/bot_agent_id`        | Required for outbound identity             |
 | **dev**     | Shopify     | Admin API token        | `rp-mw/dev/shopify/admin_api_token`       | Live store (read-only token)               |
 | **dev**     | Shopify     | Client id              | `rp-mw/dev/shopify/client_id`             | OAuth refresh token support                |
 | **dev**     | Shopify     | Client secret          | `rp-mw/dev/shopify/client_secret`         | OAuth refresh token support                |

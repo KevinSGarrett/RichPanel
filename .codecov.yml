@@ -1,3 +1,5 @@
 # Ignore proof/artifact packs from coverage gating.
 ignore:
   - "REHYDRATION_PACK/**"
+  - "docs/**"
+  - "infra/**"
