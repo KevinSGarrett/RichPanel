@@ -5,8 +5,8 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01K8RrWFuc6QJqhBi9nQM6gV`  
-**Anthropic request id:** `req_011CXnK6HfNdAt3GT3BdVyyt`
+**Anthropic response id:** `msg_01F3VCYFTKpzSADxUnDxiR91`  
+**Anthropic request id:** `req_011CXnKdS9UL7zyDJKRtUnAQ`
 
 ### 1) Summary
 - Restored deterministic order-status coverage via expanded routing rules, delivery-issue detection, and nested message extraction.
