@@ -23,6 +23,7 @@ def lambda_handler(event, context):
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "reason": response.reason,
+            "url": response.url,
         }
     except Exception as exc:  # pragma: no cover - defensive logging
         health = {"error": str(exc)}
@@ -32,6 +33,7 @@ def lambda_handler(event, context):
         "shop_domain": client.shop_domain,
         "refresh_attempted": True,
         "refresh_succeeded": refreshed,
+        "refresh_error": client.refresh_error(),
         "token_diagnostics": diagnostics,
         "health_check": health,
         "error": error,

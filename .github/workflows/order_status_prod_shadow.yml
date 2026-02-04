@@ -23,6 +23,11 @@ on:
         required: false
         default: "admin"
         type: string
+      use-aws-secrets:
+        description: "Resolve Shopify token from AWS Secrets Manager"
+        required: false
+        default: "true"
+        type: string
       rate-limit-rps:
         description: "Richpanel client-side rate limit RPS"
         required: false
@@ -66,6 +71,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   prod-shadow-order-status:
@@ -86,7 +92,7 @@ jobs:
       MW_OPENAI_SHADOW_ENABLED: "true"
       OPENAI_API_KEY: ${{ secrets.PROD_OPENAI_API_KEY }}
       RICHPANEL_API_KEY_OVERRIDE: ${{ secrets.PROD_RICHPANEL_API_KEY }}
-      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN }}
+      SHOPIFY_ACCESS_TOKEN_OVERRIDE: ${{ inputs.use-aws-secrets != 'true' && (inputs.shopify-token-source == 'api' && secrets.PROD_SHOPIFY_API_TOKEN || secrets.PROD_SHOPIFY_ADMIN_API_TOKEN) || '' }}
       SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
       RICHPANEL_RATE_LIMIT_RPS: ${{ inputs.rate-limit-rps || '2' }}
     steps:
@@ -97,6 +103,70 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install dependencies (optional)
+        if: ${{ inputs.use-aws-secrets == 'true' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Select secret source (optional)
+        if: ${{ inputs.use-aws-secrets == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV_NAME="${ENVIRONMENT:-prod}"
+          SECRETS_NAMESPACE="rp-mw/${ENV_NAME}"
+          {
+            echo "SECRETS_NAMESPACE=${SECRETS_NAMESPACE}"
+            echo "SHOPIFY_ACCESS_TOKEN_OVERRIDE=${SECRETS_NAMESPACE}/shopify/admin_api_token"
+          } >> "$GITHUB_ENV"
+
+      - name: Configure AWS credentials (optional)
+        if: ${{ inputs.use-aws-secrets == 'true' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::878145708918:role/rp-ci-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve AWS Secrets Manager IDs (optional)
+        if: ${{ inputs.use-aws-secrets == 'true' }}
+        run: |
+          python - <<'PY'
+          import os
+          import boto3
+
+          def resolve_secret(value: str | None, label: str) -> str | None:
+              if not value:
+                  return None
+              if value.startswith("arn:aws:secretsmanager:") or value.startswith("rp-mw/"):
+                  client = boto3.client(
+                      "secretsmanager",
+                      region_name=os.environ.get("AWS_REGION", "us-east-2"),
+                  )
+                  resp = client.get_secret_value(SecretId=value)
+                  secret_string = resp.get("SecretString")
+                  if not secret_string:
+                      raise SystemExit(
+                          f"{label} missing SecretString for {value}"
+                      )
+                  print(f"::add-mask::{secret_string}")
+                  return secret_string
+              print(f"::add-mask::{value}")
+              return value
+
+          output_lines = []
+          shopify = resolve_secret(
+              os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE"),
+              "SHOPIFY_ACCESS_TOKEN_OVERRIDE",
+          )
+          if shopify:
+              output_lines.append(f"SHOPIFY_ACCESS_TOKEN_OVERRIDE={shopify}")
+
+          if output_lines:
+              with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+                  env_file.write("\n".join(output_lines) + "\n")
+          PY
 
       - name: Run prod shadow order status report
         shell: bash

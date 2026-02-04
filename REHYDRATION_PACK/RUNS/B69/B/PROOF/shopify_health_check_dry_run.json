@@ -1,0 +1,31 @@
+{
+  "action_hint": null,
+  "can_refresh": false,
+  "environment": "local",
+  "error": null,
+  "expired": null,
+  "expires_at": null,
+  "health_check": {
+    "dry_run": true,
+    "reason": "secret_lookup_failed",
+    "status_code": 0,
+    "url": "https://example.myshopify.com/admin/api/2024-01/shop.json"
+  },
+  "refresh_attempted": true,
+  "refresh_dry_run": true,
+  "refresh_error": null,
+  "refresh_mode": "none",
+  "refresh_succeeded": null,
+  "secret_id_candidates": [
+    "rp-mw/local/shopify/admin_api_token",
+    "rp-mw/local/shopify/access_token"
+  ],
+  "shop_domain": "example.myshopify.com",
+  "status": "DRY_RUN",
+  "timestamp_utc": "2026-02-04T00:10:53.991629+00:00",
+  "token_diagnostics": {
+    "status": "unknown"
+  },
+  "token_format": "unknown",
+  "token_type": null
+}

@@ -1,0 +1,39 @@
+{
+  "action_hint": null,
+  "can_refresh": false,
+  "environment": "prod",
+  "error": null,
+  "expired": false,
+  "expires_at": 1770237679.125516,
+  "health_check": {
+    "body_excerpt": null,
+    "dry_run": false,
+    "reason": null,
+    "status_code": 200,
+    "url": "https://scentimen-t.myshopify.com/admin/api/2024-01/shop.json"
+  },
+  "refresh_attempted": false,
+  "refresh_dry_run": false,
+  "refresh_error": null,
+  "refresh_mode": "none",
+  "refresh_succeeded": null,
+  "secret_id_candidates": [
+    "rp-mw/prod/shopify/admin_api_token",
+    "rp-mw/prod/shopify/access_token"
+  ],
+  "shop_domain": "scentimen-t.myshopify.com",
+  "status": "PASS",
+  "timestamp_utc": "2026-02-04T00:26:31.920285+00:00",
+  "token_diagnostics": {
+    "expired": false,
+    "expires_at": 1770237679.125516,
+    "has_refresh_token": false,
+    "raw_format": "json",
+    "refresh_token_source": null,
+    "source_secret_id": "rp-mw/prod/shopify/admin_api_token",
+    "status": "loaded",
+    "token_type": "offline"
+  },
+  "token_format": "json",
+  "token_type": "offline"
+}
