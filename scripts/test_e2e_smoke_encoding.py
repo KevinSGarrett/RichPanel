@@ -39,6 +39,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _build_followup_payload,
     _prepare_followup_proof,
     _extract_latest_comment_body,
+    _comment_author_id,
     _resolve_requirement_flags,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
@@ -54,6 +55,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_order_match_evidence,
     _order_resolution_is_order_number,
     _extract_order_match_method,
+    _finalize_order_match_method,
+    _resolve_order_match_method_details,
     _extract_order_resolution_from_actions,
     _normalize_optional_text,
     _probe_order_resolution_from_ticket,
@@ -116,6 +119,9 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _resolve_send_message_used,
     _resolve_send_message_status_code,
     _resolve_operator_reply_reason,
+    _load_bot_agent_id,
+    _resolve_author_match,
+    _resolve_author_evidence,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1253,6 +1259,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
         self.assertIn("outbound_endpoint_used", payload["proof_fields"])
         self.assertIn("send_message_used", payload["proof_fields"])
+        self.assertIn("send_message_endpoint_used", payload["proof_fields"])
         self.assertIn("send_message_status_code", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
@@ -1260,7 +1267,12 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("latest_comment_is_operator", payload["proof_fields"])
         self.assertIn("latest_comment_source", payload["proof_fields"])
         self.assertIn("order_match_method", payload["proof_fields"])
+        self.assertIn("order_match_method_raw", payload["proof_fields"])
+        self.assertIn("order_match_method_source", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
+        self.assertIn("send_message_author_id_redacted", payload["proof_fields"])
+        self.assertIn("bot_agent_id_redacted", payload["proof_fields"])
+        self.assertIn("send_message_author_matches_bot_agent", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
         self.assertIn("operator_reply_reason", payload["proof_fields"])
         self.assertIn("openai_routing_response_id", payload["proof_fields"])
@@ -1680,6 +1692,9 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             send_message_path_confirmed=True,
             send_message_used=True,
             send_message_status_code=200,
+            send_message_author_id_redacted="redacted:author",
+            bot_agent_id_redacted="redacted:bot",
+            send_message_author_matches_bot_agent=True,
         )
         self.assertEqual(fields["operator_reply_present"], True)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
@@ -1692,7 +1707,11 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         self.assertEqual(fields["send_message_path_required"], True)
         self.assertEqual(fields["send_message_path_confirmed"], True)
         self.assertEqual(fields["send_message_used"], True)
+        self.assertEqual(fields["send_message_endpoint_used"], True)
         self.assertEqual(fields["send_message_status_code"], 200)
+        self.assertEqual(fields["send_message_author_id_redacted"], "redacted:author")
+        self.assertEqual(fields["bot_agent_id_redacted"], "redacted:bot")
+        self.assertEqual(fields["send_message_author_matches_bot_agent"], True)
 
     def test_build_operator_send_message_richpanel_fields(self) -> None:
         fields = _build_operator_send_message_richpanel_fields(
@@ -1804,6 +1823,228 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         )
         self.assertEqual(criteria_details, [])
         self.assertEqual(required_checks, [])
+
+
+class CommentAuthorIdTests(unittest.TestCase):
+    def test_comment_author_id_prefers_direct_fields(self) -> None:
+        self.assertEqual(_comment_author_id({"author_id": "agent-1"}), "agent-1")
+        self.assertEqual(_comment_author_id({"authorId": "agent-2"}), "agent-2")
+
+    def test_comment_author_id_from_nested_author(self) -> None:
+        self.assertEqual(
+            _comment_author_id({"author": {"id": "agent-3"}}), "agent-3"
+        )
+        self.assertEqual(
+            _comment_author_id({"author_profile": {"author_id": "agent-4"}}),
+            "agent-4",
+        )
+
+    def test_comment_author_id_missing(self) -> None:
+        self.assertIsNone(_comment_author_id({"body": "no author"}))
+        self.assertIsNone(_comment_author_id("not-a-dict"))
+
+
+class BotAgentIdLoaderTests(unittest.TestCase):
+    def test_load_bot_agent_id_env_override(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_BOT_AGENT_ID": "env-bot"}):
+            self.assertEqual(
+                _load_bot_agent_id(
+                    env_name="dev", region="us-east-2", session=None
+                ),
+                "env-bot",
+            )
+
+    def test_load_bot_agent_id_requires_session(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(
+                _load_bot_agent_id(
+                    env_name="dev", region="us-east-2", session=None
+                )
+            )
+
+    def test_load_bot_agent_id_empty_secret_returns_none(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "   "}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertIsNone(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            )
+        )
+
+    def test_load_bot_agent_id_from_secret_json(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"bot_agent_id\":\"secret-bot\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "secret-bot",
+        )
+
+    def test_load_bot_agent_id_from_secret_plain(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "plain-bot"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "plain-bot",
+        )
+
+    def test_load_bot_agent_id_unrecognized_json_returns_raw(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"foo\":\"bar\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "{\"foo\":\"bar\"}",
+        )
+
+    def test_load_bot_agent_id_failure_returns_none(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                raise RuntimeError("boom")
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertIsNone(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            )
+        )
+
+
+class AuthorMatchResolverTests(unittest.TestCase):
+    def test_resolve_author_match_happy_path(self) -> None:
+        author_redacted, bot_redacted, matches = _resolve_author_match(
+            latest_comment_is_operator=True,
+            latest_comment_author_id="agent-123",
+            bot_agent_id="agent-123",
+        )
+        self.assertTrue(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
+    def test_resolve_author_match_missing_inputs(self) -> None:
+        author_redacted, bot_redacted, matches = _resolve_author_match(
+            latest_comment_is_operator=False,
+            latest_comment_author_id="agent-123",
+            bot_agent_id="agent-123",
+        )
+        self.assertIsNone(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
+    def test_resolve_author_evidence_with_loader(self) -> None:
+        def _loader(**kwargs: Any) -> str:
+            return "agent-123"
+
+        author_redacted, bot_redacted, matches = _resolve_author_evidence(
+            post_ticket_data={"latest_comment_author_id": "agent-123"},
+            latest_comment_is_operator=True,
+            allow_network=True,
+            env_name="dev",
+            region="us-east-2",
+            session=None,
+            load_bot_agent_id_fn=_loader,
+        )
+        self.assertTrue(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
+
+class OrderMatchMethodFinalizerTests(unittest.TestCase):
+    def test_finalize_order_match_method_probe(self) -> None:
+        method, source, raw = _finalize_order_match_method(
+            order_match_method=None,
+            order_match_method_source=None,
+            order_match_by_number=True,
+        )
+        self.assertEqual(method, "order_number")
+        self.assertEqual(source, "shopify_lookup_probe")
+        self.assertIsNone(raw)
+
+    def test_finalize_order_match_method_passthrough(self) -> None:
+        method, source, raw = _finalize_order_match_method(
+            order_match_method="email_only",
+            order_match_method_source="ticket_probe_resolution",
+            order_match_by_number=False,
+        )
+        self.assertEqual(method, "email_only")
+        self.assertEqual(source, "ticket_probe_resolution")
+        self.assertEqual(raw, "email_only")
+
+
+class OrderMatchMethodResolverTests(unittest.TestCase):
+    def test_resolve_order_match_method_from_action(self) -> None:
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": True},
+            order_resolution={"resolvedBy": "richpanel_order_number"},
+            order_status_mode=True,
+            pre_ticket=None,
+            allow_network=False,
+            safe_mode=None,
+            automation_enabled=None,
+        )
+        self.assertEqual(method, "order_number")
+        self.assertEqual(source, "action_order_resolution")
+
+    def test_resolve_order_match_method_from_action_when_missing_success(self) -> None:
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": None},
+            order_resolution={"resolvedBy": "shopify_email_only"},
+            order_status_mode=True,
+            pre_ticket=None,
+            allow_network=False,
+            safe_mode=None,
+            automation_enabled=None,
+        )
+        self.assertEqual(method, "email_only")
+        self.assertEqual(source, "action_order_resolution")
+
+    def test_resolve_order_match_method_from_probe(self) -> None:
+        def _probe(**kwargs: Any) -> dict:
+            return {"resolvedBy": "shopify_email_only"}
+
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": None},
+            order_resolution=None,
+            order_status_mode=True,
+            pre_ticket={"id": "t1"},
+            allow_network=True,
+            safe_mode=None,
+            automation_enabled=None,
+            probe_fn=_probe,
+        )
+        self.assertEqual(method, "email_only")
+        self.assertEqual(source, "ticket_probe_resolution")
 
 
 class OutboundResultHelperTests(unittest.TestCase):
@@ -2040,6 +2281,38 @@ class TicketSnapshotTests(unittest.TestCase):
         self.assertTrue(result.get("latest_comment_is_operator"))
         self.assertEqual(result.get("latest_comment_source"), "agent")
         self.assertEqual(result.get("operator_reply_count"), 1)
+        self.assertIsNone(result.get("latest_comment_author_id"))
+
+    def test_fetch_ticket_snapshot_captures_comment_author(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-2b",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [
+                    {"type": "text", "is_operator": False},
+                    {"type": "text", "is_operator": True, "author_id": "agent-123"},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-2b",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("latest_comment_author_id"), "agent-123")
 
     def test_fetch_ticket_snapshot_missing_operator_flag(self) -> None:
         payload = {
@@ -3131,6 +3404,7 @@ class RedactionHelpersTests(unittest.TestCase):
             "path": "/v1/tickets/abc123",
             "customer_email": "person@example.com",
             "customer_name": "Jane Doe",
+            "latest_comment_author_id": "agent-123",
         }
         sanitized = _sanitize_ticket_snapshot(snapshot)
         self.assertIsNotNone(sanitized)
@@ -3140,6 +3414,8 @@ class RedactionHelpersTests(unittest.TestCase):
         self.assertEqual(sanitized.get("path_redacted"), "/v1/tickets/<redacted>")
         self.assertIn("customer_email_fingerprint", sanitized)
         self.assertIn("customer_name_fingerprint", sanitized)
+        self.assertNotIn("latest_comment_author_id", sanitized)
+        self.assertIn("latest_comment_author_id_fingerprint", sanitized)
 
     def test_sanitize_tag_result_redacts_path(self) -> None:
         tag_result = {"path": "/v1/tickets/abc123/add-tags", "status": "ok"}
@@ -3776,6 +4052,11 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(AllowlistConfigTests))
     suite.addTests(loader.loadTestsFromTestCase(ProofPayloadWriteTests))
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
+    suite.addTests(loader.loadTestsFromTestCase(CommentAuthorIdTests))
+    suite.addTests(loader.loadTestsFromTestCase(BotAgentIdLoaderTests))
+    suite.addTests(loader.loadTestsFromTestCase(AuthorMatchResolverTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodFinalizerTests))
+    suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodResolverTests))
     suite.addTests(loader.loadTestsFromTestCase(OutboundResultHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(TicketSnapshotTests))
     suite.addTests(loader.loadTestsFromTestCase(ClassificationTests))

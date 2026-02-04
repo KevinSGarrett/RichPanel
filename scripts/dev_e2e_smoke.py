@@ -330,6 +330,35 @@ def _setup_boto_session(region: str, profile: Optional[str]) -> Any:
     return boto3.session.Session(region_name=region, profile_name=profile)
 
 
+def _load_bot_agent_id(
+    *, env_name: str, region: str, session: Any
+) -> Optional[str]:
+    env_override = os.environ.get("RICHPANEL_BOT_AGENT_ID")
+    if isinstance(env_override, str) and env_override.strip():
+        return env_override.strip()
+    if session is None:
+        return None
+    secret_id = f"rp-mw/{env_name}/richpanel/bot_agent_id"
+    try:
+        secrets_client = session.client("secretsmanager", region_name=region)
+        response = secrets_client.get_secret_value(SecretId=secret_id)
+    except (BotoCoreError, ClientError, Exception):
+        return None
+    secret_str = response.get("SecretString")
+    if not isinstance(secret_str, str) or not secret_str.strip():
+        return None
+    try:
+        parsed = json.loads(secret_str)
+    except Exception:
+        return secret_str.strip()
+    if isinstance(parsed, dict):
+        for key in ("bot_agent_id", "agent_id", "id"):
+            value = parsed.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return secret_str.strip()
+
+
 def _iso_timestamp_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -397,6 +426,21 @@ def _comment_operator_flag(comment: Any) -> Optional[bool]:
         value = comment.get("isOperator")
     if isinstance(value, bool):
         return value
+    return None
+
+
+def _comment_author_id(comment: Any) -> Optional[str]:
+    if not isinstance(comment, dict):
+        return None
+    for key in ("author_id", "authorId"):
+        value = comment.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    author = comment.get("author") or comment.get("author_profile")
+    if isinstance(author, dict):
+        value = author.get("id") or author.get("author_id")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
     return None
 
 
@@ -673,6 +717,10 @@ def _sanitize_ticket_snapshot(
     customer_name = sanitized.pop("customer_name", None)
     if customer_name:
         sanitized["customer_name_fingerprint"] = _fingerprint(customer_name)
+
+    latest_author_id = sanitized.pop("latest_comment_author_id", None)
+    if latest_author_id:
+        sanitized["latest_comment_author_id_fingerprint"] = _fingerprint(latest_author_id)
 
     return sanitized
 
@@ -1254,17 +1302,23 @@ def _build_skip_proof_payload(
             "outbound_send_message_status": None,
             "outbound_endpoint_used": None,
             "send_message_used": None,
+            "send_message_endpoint_used": None,
             "send_message_status_code": None,
             "routed_to_support": None,
             "order_match_success": None,
             "order_match_failure_reason": None,
             "order_match_method": None,
+            "order_match_method_raw": None,
+            "order_match_method_source": None,
             "order_match_by_number": None,
             "reply_contains_tracking_url": None,
             "reply_contains_tracking_number_like": None,
             "reply_contains_eta_date_like": None,
             "latest_comment_is_operator": None,
             "latest_comment_source": None,
+            "send_message_author_id_redacted": None,
+            "bot_agent_id_redacted": None,
+            "send_message_author_matches_bot_agent": None,
             "operator_reply_confirmed": None,
             "operator_reply_reason": None,
             "openai_routing_response_id": None,
@@ -1390,6 +1444,55 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not value:
         return None
     return f"redacted:{_fingerprint(value)}"
+
+
+def _resolve_author_match(
+    *,
+    latest_comment_is_operator: Optional[bool],
+    latest_comment_author_id: Optional[str],
+    bot_agent_id: Optional[str],
+) -> Tuple[Optional[str], Optional[str], Optional[bool]]:
+    send_message_author_id_redacted = _redact_identifier(latest_comment_author_id)
+    bot_agent_id_redacted = _redact_identifier(bot_agent_id)
+    if (
+        latest_comment_is_operator is True
+        and latest_comment_author_id
+        and bot_agent_id
+    ):
+        send_message_author_matches_bot_agent = (
+            latest_comment_author_id == bot_agent_id
+        )
+    else:
+        send_message_author_matches_bot_agent = None
+    return (
+        send_message_author_id_redacted,
+        bot_agent_id_redacted,
+        send_message_author_matches_bot_agent,
+    )
+
+
+def _resolve_author_evidence(
+    *,
+    post_ticket_data: Dict[str, Any],
+    latest_comment_is_operator: Optional[bool],
+    allow_network: bool,
+    env_name: str,
+    region: str,
+    session: Any,
+    load_bot_agent_id_fn: Optional[Any] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[bool]]:
+    latest_comment_author_id = (
+        post_ticket_data.get("latest_comment_author_id")
+        if isinstance(post_ticket_data.get("latest_comment_author_id"), str)
+        else None
+    )
+    loader = load_bot_agent_id_fn or _load_bot_agent_id
+    bot_agent_id = loader(env_name=env_name, region=region, session=session) if allow_network else None
+    return _resolve_author_match(
+        latest_comment_is_operator=latest_comment_is_operator,
+        latest_comment_author_id=latest_comment_author_id,
+        bot_agent_id=bot_agent_id,
+    )
 
 
 def _extract_created_ticket_fields(payload: Any) -> Tuple[Optional[str], Optional[str]]:
@@ -1628,6 +1731,7 @@ def _fetch_ticket_snapshot(
             operator_reply_present = None
             latest_comment_is_operator = None
             latest_comment_source = None
+            latest_comment_author_id = None
             comments = payload.get("comments")
             if isinstance(comments, list):
                 comment_count = len(comments)
@@ -1640,6 +1744,7 @@ def _fetch_ticket_snapshot(
                     if isinstance(comment, dict):
                         latest_comment_is_operator = _comment_operator_flag(comment)
                         latest_comment_source = _comment_source_marker(comment)
+                        latest_comment_author_id = _comment_author_id(comment)
                         break
                 if isinstance(latest_comment_is_operator, bool):
                     operator_reply_present = latest_comment_is_operator
@@ -1674,6 +1779,7 @@ def _fetch_ticket_snapshot(
                 "operator_reply_count": operator_reply_count,
                 "latest_comment_is_operator": latest_comment_is_operator,
                 "latest_comment_source": latest_comment_source,
+                "latest_comment_author_id": latest_comment_author_id,
                 "ticket_channel": ticket_channel,
                 "status_code": response.status_code,
                 "dry_run": response.dry_run,
@@ -3472,6 +3578,66 @@ def _extract_order_match_method(
     return None
 
 
+def _finalize_order_match_method(
+    *,
+    order_match_method: Optional[str],
+    order_match_method_source: Optional[str],
+    order_match_by_number: Optional[bool],
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    order_match_method_raw = order_match_method
+    if order_match_by_number is True:
+        return "order_number", "shopify_lookup_probe", order_match_method_raw
+    return order_match_method, order_match_method_source, order_match_method_raw
+
+
+def _resolve_order_match_method_details(
+    *,
+    order_match_evidence: Dict[str, Optional[str]],
+    order_resolution: Optional[Dict[str, Any]],
+    order_status_mode: bool,
+    pre_ticket: Optional[Dict[str, Any]],
+    allow_network: bool,
+    safe_mode: Optional[bool],
+    automation_enabled: Optional[bool],
+    probe_fn: Optional[
+        Any
+    ] = None,
+) -> Tuple[Optional[str], Optional[str]]:
+    order_match_method_source = None
+    order_match_method = None
+    order_match_success = order_match_evidence.get("order_match_success")
+    if order_match_success is not None:
+        order_match_method = _extract_order_match_method(
+            order_match_success=order_match_success,
+            order_resolution=order_resolution,
+        )
+        if order_match_method is not None:
+            order_match_method_source = "action_order_resolution"
+    if order_match_method is None and isinstance(order_resolution, dict):
+        order_match_method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution=order_resolution,
+        )
+        if order_match_method is not None:
+            order_match_method_source = "action_order_resolution"
+    if order_match_method is None and order_status_mode and pre_ticket and allow_network:
+        probe = probe_fn or _probe_order_resolution_from_ticket
+        probed_resolution = probe(
+            ticket_payload=pre_ticket,
+            allow_network=allow_network,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+        if isinstance(probed_resolution, dict):
+            order_match_method = _extract_order_match_method(
+                order_match_success=True,
+                order_resolution=probed_resolution,
+            )
+            if order_match_method is not None:
+                order_match_method_source = "ticket_probe_resolution"
+    return order_match_method, order_match_method_source
+
+
 def _probe_order_resolution_from_ticket(
     *,
     ticket_payload: Optional[Dict[str, Any]],
@@ -3640,6 +3806,9 @@ def _build_operator_send_message_proof_fields(
     send_message_path_confirmed: Optional[bool],
     send_message_used: Optional[bool],
     send_message_status_code: Optional[int],
+    send_message_author_id_redacted: Optional[str],
+    bot_agent_id_redacted: Optional[str],
+    send_message_author_matches_bot_agent: Optional[bool],
 ) -> Dict[str, Optional[Any]]:
     return {
         "operator_reply_present": operator_reply_present,
@@ -3653,7 +3822,11 @@ def _build_operator_send_message_proof_fields(
         "send_message_path_required": send_message_path_required,
         "send_message_path_confirmed": send_message_path_confirmed,
         "send_message_used": send_message_used,
+        "send_message_endpoint_used": send_message_used,
         "send_message_status_code": send_message_status_code,
+        "send_message_author_id_redacted": send_message_author_id_redacted,
+        "bot_agent_id_redacted": bot_agent_id_redacted,
+        "send_message_author_matches_bot_agent": send_message_author_matches_bot_agent,
     }
 
 
@@ -4638,32 +4811,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         routing_intent=routing_intent,
     )
     order_resolution = _extract_order_resolution_from_actions(combined_actions)
-    order_match_method = _extract_order_match_method(
-        order_match_success=order_match_evidence.get("order_match_success"),
+    order_match_method, order_match_method_source = _resolve_order_match_method_details(  # pragma: no cover - integration-only
+        order_match_evidence=order_match_evidence,
         order_resolution=order_resolution,
+        order_status_mode=order_status_mode,
+        pre_ticket=pre_ticket,
+        allow_network=allow_network,
+        safe_mode=item.get("safe_mode"),
+        automation_enabled=item.get("automation_enabled"),
     )
-    if order_match_method is None and isinstance(order_resolution, dict):
-        order_match_method = _extract_order_match_method(
-            order_match_success=True,
-            order_resolution=order_resolution,
-        )
-    if (
-        order_match_method is None
-        and order_status_mode
-        and pre_ticket
-        and allow_network
-    ):
-        probed_resolution = _probe_order_resolution_from_ticket(
-            ticket_payload=pre_ticket,
-            allow_network=allow_network,
-            safe_mode=item.get("safe_mode"),
-            automation_enabled=item.get("automation_enabled"),
-        )
-        if isinstance(probed_resolution, dict):
-            order_match_method = _extract_order_match_method(
-                order_match_success=True,
-                order_resolution=probed_resolution,
-            )
     order_match_by_number = None
     if order_status_mode and not negative_scenario and require_order_match_by_number:
         order_match_by_number = _detect_order_match_by_number(
@@ -4672,6 +4828,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             safe_mode=item.get("safe_mode"),
             automation_enabled=item.get("automation_enabled"),
         )
+    (
+        order_match_method,
+        order_match_method_source,
+        order_match_method_raw,
+    ) = _finalize_order_match_method(  # pragma: no cover - integration-only
+        order_match_method=order_match_method,
+        order_match_method_source=order_match_method_source,
+        order_match_by_number=order_match_by_number,
+    )
     openai_routing = _extract_openai_routing_evidence(
         state_item, audit_item, routing_intent=routing_intent
     )
@@ -5187,6 +5352,18 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             post_ticket_data.get("latest_comment_source")
             if isinstance(post_ticket_data.get("latest_comment_source"), str)
             else None
+        )
+        (
+            send_message_author_id_redacted,
+            bot_agent_id_redacted,
+            send_message_author_matches_bot_agent,
+        ) = _resolve_author_evidence(  # pragma: no cover - integration-only
+            post_ticket_data=post_ticket_data,
+            latest_comment_is_operator=latest_comment_is_operator,
+            allow_network=allow_network,
+            env_name=env_name,
+            region=region,
+            session=session,
         )
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
@@ -6345,6 +6522,8 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             "order_match_failure_reason"
         ),
         "order_match_method": order_match_method,
+        "order_match_method_raw": order_match_method_raw,
+        "order_match_method_source": order_match_method_source,
         "order_match_by_number": order_match_by_number,
         "reply_contains_tracking_url": reply_contains_tracking_url,
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
@@ -6375,6 +6554,9 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             send_message_path_confirmed=send_message_path_confirmed,
             send_message_used=send_message_used,
             send_message_status_code=send_message_status_code,
+            send_message_author_id_redacted=send_message_author_id_redacted,
+            bot_agent_id_redacted=bot_agent_id_redacted,
+            send_message_author_matches_bot_agent=send_message_author_matches_bot_agent,
         )
     )
 
