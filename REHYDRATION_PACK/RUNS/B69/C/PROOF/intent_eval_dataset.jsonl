@@ -1,0 +1,20 @@
+{"id":"os-001","text":"Where is my order #123456?","expected":"order_status"}
+{"id":"os-002","text":"Tracking update for order number: 654321","expected":"order_status"}
+{"id":"os-003","text":"ETA for order #7654321","expected":"order_status"}
+{"id":"os-004","text":"My package hasn't arrived yet, order 778899","expected":"order_status"}
+{"id":"os-005","text":"Shipment status for #1122334","expected":"order_status"}
+{"id":"os-006","text":"My order 445566 is delayed","expected":"order_status"}
+{"id":"os-007","text":"Order ID: 998877 - when will it arrive?","expected":"order_status"}
+{"id":"os-008","text":"Delivered but not received for order #554433","expected":"order_status"}
+{"id":"os-009","text":"Where's my package? tracking info please.","expected":"order_status"}
+{"id":"os-010","text":"Order 1234567 marked delivered but missing.","expected":"order_status"}
+{"id":"non-001","text":"Please cancel my order #123456.","expected":"non_order_status"}
+{"id":"non-002","text":"I want a refund for order #765432.","expected":"non_order_status"}
+{"id":"non-003","text":"Return request for order #112233.","expected":"non_order_status"}
+{"id":"non-004","text":"Exchange size for order #998877.","expected":"non_order_status"}
+{"id":"non-005","text":"Billing issue: charged twice.","expected":"non_order_status"}
+{"id":"non-006","text":"Change shipping address for order #445566.","expected":"non_order_status"}
+{"id":"non-007","text":"Promo code not working on checkout.","expected":"non_order_status"}
+{"id":"non-008","text":"Received wrong item in order #554433.","expected":"non_order_status"}
+{"id":"non-009","text":"Cancel subscription effective immediately.","expected":"non_order_status"}
+{"id":"non-010","text":"Technical issue: site error on checkout.","expected":"non_order_status"}

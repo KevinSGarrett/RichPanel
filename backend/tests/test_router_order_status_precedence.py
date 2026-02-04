@@ -34,3 +34,27 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
         decision = classify_routing(payload)
         self.assertEqual(decision.intent, "shipping_delay_not_shipped")
 
+    def test_order_status_eta_with_number(self) -> None:
+        payload = {"message": "ETA for order #1180306?"}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "order_status_tracking")
+
+    def test_order_status_tracking_without_number(self) -> None:
+        payload = {"message": "Where is my package? Tracking update please."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "order_status_tracking")
+
+    def test_delivery_issue_maps_to_order_status_delivery_issue(self) -> None:
+        payload = {"message": "Order #1180306 marked delivered but not received."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "order_status_delivery_issue")
+
+    def test_refund_request_not_misclassified(self) -> None:
+        payload = {"message": "Refund for order #1180306 please."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "refund_request")
+
+    def test_address_change_not_misclassified(self) -> None:
+        payload = {"message": "Change shipping address for order #1180306."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "address_change_order_edit")

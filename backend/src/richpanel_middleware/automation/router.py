@@ -22,6 +22,7 @@ DEPARTMENTS = {
 INTENT_TO_DEPARTMENT = {
     "order_status_tracking": "Email Support Team",
     "shipping_delay_not_shipped": "Email Support Team",
+    "order_status_delivery_issue": "Returns Admin",
     "delivered_not_received": "Returns Admin",
     "missing_items_in_shipment": "Returns Admin",
     "wrong_item_received": "Returns Admin",
@@ -53,33 +54,67 @@ DEFAULT_TAG = "mw-routing-applied"
 
 ORDER_STATUS_KEYWORDS = (
     "where is my order",
+    "where's my order",
+    "where is my package",
+    "where's my package",
     "order status",
+    "shipping status",
+    "delivery status",
     "tracking",
     "track",
     "shipment",
     "shipping",
+    "shipping update",
     "delivered",
     "delivery",
     "arrive",
+    "arrival",
     "package",
     "fulfillment",
+    "eta",
+    "estimated delivery",
+    "expected delivery",
+    "delivery date",
+    "hasn't arrived",
+    "has not arrived",
+    "not arrived",
+    "never arrived",
+    "late",
+    "delayed",
+    "delay",
 )
 ORDER_STATUS_CANDIDATE_KEYWORDS = (
     "where is my order",
+    "where's my order",
+    "where is my package",
+    "where's my package",
     "order status",
+    "shipping status",
+    "delivery status",
     "tracking",
     "track",
     "delivery",
     "arrive",
+    "arrival",
     "package",
     "fulfillment",
     "tracking number",
     "tracking #",
     "in transit",
     "out for delivery",
-    "shipping status",
-    "delivery status",
+    "shipping update",
     "unfulfilled",
+    "eta",
+    "estimated delivery",
+    "expected delivery",
+    "delivery date",
+    "hasn't arrived",
+    "has not arrived",
+    "not arrived",
+    "never arrived",
+    "late",
+    "delayed",
+    "delay",
 )
 SHIPPING_DELAY_KEYWORDS = (
     "label created",
@@ -87,10 +122,29 @@ SHIPPING_DELAY_KEYWORDS = (
     "no movement",
     "pre-shipment",
 )
+DELIVERY_ISSUE_KEYWORDS = (
+    "delivered but not received",
+    "delivered not received",
+    "marked delivered",
+    "says delivered",
+    "shows delivered",
+    "delivered but missing",
+    "missing package",
+    "lost package",
+    "stolen",
+    "porch pirate",
+)
 RETURN_KEYWORDS = ("return", "returning", "rma")
 EXCHANGE_KEYWORDS = ("exchange", "swap")
 REFUND_KEYWORDS = ("refund", "refund me", "money back")
 CANCEL_ORDER_KEYWORDS = ("cancel my order", "cancel order", "stop shipment")
+ADDRESS_CHANGE_KEYWORDS = (
+    "change address",
+    "update address",
+    "address change",
+    "shipping address",
+    "delivery address",
+)
 SUBSCRIPTION_KEYWORDS = ("subscription", "unsubscribe", "cancel subscription")
 BILLING_KEYWORDS = (
     "charge",
@@ -131,23 +185,74 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
     if not isinstance(payload, dict):
         return default
 
-    for key in (
-        "customer_message",
-        "message",
-        "body",
-        "text",
-        "customer_note",
-        "content",
-    ):
-        value = payload.get(key)
-        if value is None:
-            continue
-        try:
-            text = str(value).strip()
-        except Exception:
-            continue
-        if text:
-            return text
+    def _extract_from_dict(source: Dict[str, Any]) -> str:
+        for key in (
+            "customer_message",
+            "message",
+            "body",
+            "text",
+            "customer_note",
+            "content",
+            "subject",
+            "title",
+        ):
+            value = source.get(key)
+            if value is None:
+                continue
+            try:
+                text = str(value).strip()
+            except Exception:
+                continue
+            if text:
+                return text
+        return ""
+
+    def _iter_message_texts(container: Dict[str, Any]) -> List[str]:
+        messages = container.get("messages") or container.get("conversation_messages") or []
+        if not isinstance(messages, list):
+            return []
+        texts: List[str] = []
+        for message in reversed(messages):
+            if not isinstance(message, dict):
+                continue
+            sender = str(
+                message.get("sender_type")
+                or message.get("author_type")
+                or message.get("from_type")
+                or ""
+            ).lower()
+            if sender and sender not in {"customer", "user", "end_user", "shopper"}:
+                continue
+            candidate = _extract_from_dict(message)
+            if candidate:
+                texts.append(candidate)
+        return texts
+
+    direct = _extract_from_dict(payload)
+    if direct:
+        return direct
+
+    ticket = payload.get("ticket")
+    if isinstance(ticket, dict):
+        direct = _extract_from_dict(ticket)
+        if direct:
+            return direct
+        nested_texts = _iter_message_texts(ticket)
+        if nested_texts:
+            return nested_texts[0]
+
+    nested_texts = _iter_message_texts(payload)
+    if nested_texts:
+        return nested_texts[0]
+
+    comments = payload.get("comments")
+    if isinstance(comments, list):
+        for comment in reversed(comments):
+            if not isinstance(comment, dict):
+                continue
+            candidate = _extract_from_dict(comment)
+            if candidate:
+                return candidate
 
     return default
 
@@ -179,6 +284,22 @@ def _contains_any(text: str, keywords: Sequence[str]) -> bool:
 def _has_order_number(payload: Dict[str, Any]) -> bool:
     order_number, _ = _extract_order_number_from_payload(payload)
     return bool(order_number)
+
+
+def _is_delivery_issue(text: str) -> bool:
+    if "delivered" not in text:
+        return False
+    if _contains_any(text, DELIVERY_ISSUE_KEYWORDS):
+        return True
+    return any(
+        phrase in text
+        for phrase in (
+            "delivered but not",
+            "delivered but never",
+            "delivered and not",
+            "not received",
+        )
+    )
 
 
 def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
@@ -226,6 +347,20 @@ def classify_routing(payload: Dict[str, Any]) -> RoutingDecision:
             "billing_issue",
             category="billing",
             reason="matched billing keyword",
+        )
+
+    if _contains_any(lowered, ADDRESS_CHANGE_KEYWORDS):
+        return _build_decision(
+            "address_change_order_edit",
+            category="order_change",
+            reason="matched address change keyword",
+        )
+
+    if _is_delivery_issue(lowered):
+        return _build_decision(
+            "order_status_delivery_issue",
+            category="order_status",
+            reason="matched delivered-but-not-received language",
         )
 
     if _has_order_number(payload) and _contains_any(

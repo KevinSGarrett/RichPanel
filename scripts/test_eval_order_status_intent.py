@@ -60,7 +60,16 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
             for item in loaded["results"]:
                 self.assertEqual(
                     set(item.keys()),
-                    {"id", "expected", "predicted", "llm_called", "model", "confidence"},
+                    {
+                        "id",
+                        "expected",
+                        "predicted",
+                        "llm_called",
+                        "model",
+                        "confidence",
+                        "text_fingerprint",
+                        "excerpt_redacted",
+                    },
                 )
 
             raw_output = output_path.read_text(encoding="utf-8")
@@ -241,8 +250,10 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
                     richpanel_secret_id=None,
                     base_url="https://example.com",
                     output_path=Path(tmp_dir) / "out.json",
+                output_csv_path=None,
                     use_openai=False,
                     allow_network=False,
+                ticket_ids=None,
                 )
         self.assertEqual(summary["source"]["type"], "richpanel")
         self.assertEqual(summary["source"]["limit"], 1)

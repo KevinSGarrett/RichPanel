@@ -64,7 +64,9 @@ ORDER_NUMBER_PATTERNS = (
     ),
     ("order_no_text", re.compile(r"(?mi)\border\s*no\.?\s*[:#]?\s*(\d{3,20})\b"), True),
     ("order_number", re.compile(r"(?mi)\border\s*#?\s*(\d{3,20})\b"), True),
-    ("hash_number", re.compile(r"(?<!\d)#(\d{6,10})(?!\d)"), False),
+    ("order_id_text", re.compile(r"(?mi)\border\s*id\s*[:#]?\s*(\d{3,20})\b"), True),
+    ("hash_number", re.compile(r"(?<!\d)#(\d{6,10})(?!\d)"), True),
+    ("standalone_digits_6_8", re.compile(r"(?<!\d)(\d{6,8})(?!\d)"), False),
 )
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
@@ -1101,10 +1103,26 @@ def _select_best_order_number(
     if not candidates:
         return "", ""
 
+    def _looks_like_date(value: str) -> bool:
+        digits = re.sub(r"\D", "", value or "")
+        if len(digits) != 8:
+            return False
+        try:
+            year = int(digits[:4])
+            month = int(digits[4:6])
+            day = int(digits[6:8])
+        except ValueError:
+            return False
+        if year < 2000 or year > 2099:
+            return False
+        return 1 <= month <= 12 and 1 <= day <= 31
+
     best_score: Tuple[int, int, int] | None = None
     best_value = ""
     best_label = ""
     for sequence, (value, label, has_order_word) in enumerate(candidates):
+        if not has_order_word and _looks_like_date(value):
+            continue
         numeric_len = len(re.sub(r"\D", "", value))
         score = (1 if has_order_word else 0, numeric_len, -sequence)
         if best_score is None or score > best_score:
