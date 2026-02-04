@@ -371,6 +371,25 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertEqual(result.get("status"), "FAIL")
         self.assertIn("no_success_event_found", result.get("details", ""))
 
+    def test_refresh_lambda_last_success_refresh_disabled(self) -> None:
+        now = preflight.datetime.now(preflight.timezone.utc)
+        ts_ms = int((now - timedelta(hours=2)).timestamp() * 1000)
+        logs_client = _StubLogsClient(
+            streams=[{"logStreamName": "stream-1"}],
+            events_by_stream={
+                "stream-1": [
+                    {
+                        "timestamp": ts_ms,
+                        "message": "{\"refresh_attempted\": false, \"refresh_error\": \"refresh_disabled\"}",
+                    }
+                ]
+            },
+        )
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="prod")
+        self.assertEqual(result.get("status"), "WARN")
+        self.assertIn("refresh_disabled", result.get("details", ""))
+
     def test_refresh_lambda_last_success_logs_error(self) -> None:
         logs_client = _StubLogsClient(raise_describe=True)
         preflight.boto3 = _StubBoto3(logs_client)

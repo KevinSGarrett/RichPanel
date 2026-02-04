@@ -264,6 +264,7 @@ def _check_refresh_lambda_last_success(
             "next_action": "Verify CloudWatch Logs permissions and log group name.",
         }
     latest_ts: Optional[int] = None
+    refresh_disabled_ts: Optional[int] = None
     for stream in streams:
         stream_name = stream.get("logStreamName")
         if not stream_name:
@@ -279,16 +280,40 @@ def _check_refresh_lambda_last_success(
             continue
         for event in response.get("events") or []:
             message = event.get("message") or ""
-            if "refresh_succeeded" not in message:
+            if (
+                "refresh_succeeded" not in message
+                and "refresh_error" not in message
+                and "refresh_attempted" not in message
+            ):
                 continue
             try:
                 payload = json.loads(message)
             except Exception:
                 payload = None
-            if isinstance(payload, dict) and payload.get("refresh_succeeded") is True:
+            if isinstance(payload, dict):
                 ts = event.get("timestamp")
-                if isinstance(ts, int):
+                if payload.get("refresh_succeeded") is True and isinstance(ts, int):
                     latest_ts = ts if latest_ts is None else max(latest_ts, ts)
+                if (
+                    payload.get("refresh_attempted") is False
+                    and payload.get("refresh_error") == "refresh_disabled"
+                    and isinstance(ts, int)
+                ):
+                    refresh_disabled_ts = (
+                        ts
+                        if refresh_disabled_ts is None
+                        else max(refresh_disabled_ts, ts)
+                    )
+    if latest_ts is None and refresh_disabled_ts is not None:
+        last_ts = datetime.fromtimestamp(
+            refresh_disabled_ts / 1000, tz=timezone.utc
+        )
+        age_hours = (now - last_ts).total_seconds() / 3600.0
+        return {
+            "status": "WARN",
+            "details": f"refresh_disabled last_seen_age_hours={age_hours:.2f}",
+            "next_action": "Enable SHOPIFY_REFRESH_ENABLED only if rotation is required.",
+        }
     if latest_ts is None:
         return {
             "status": "FAIL",

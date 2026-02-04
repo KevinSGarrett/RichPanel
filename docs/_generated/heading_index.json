@@ -13967,6 +13967,12 @@
       "anchor": "shopify-legacy-path-compatibility"
     }
   ],
+  "shopify token stability proof (no 48h wait)": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-token-stability-proof-no-48h-wait"
+    }
+  ],
   "github actions secrets": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
@@ -15951,6 +15957,12 @@
     {
       "path": "09_Deployment/Order_Status_Monitoring.md",
       "anchor": "2-shopify-token-refresh-lambda-errors"
+    }
+  ],
+  "2b) shopify token health check (scheduled)": [
+    {
+      "path": "09_Deployment/Order_Status_Monitoring.md",
+      "anchor": "2b-shopify-token-health-check-scheduled"
     }
   ],
   "3) richpanel 429 spikes": [

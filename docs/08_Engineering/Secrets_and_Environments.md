@@ -134,6 +134,17 @@ token intact.
 
 **Code reference:** `backend/src/integrations/shopify/client.py` L178-L189
 
+### Shopify token stability proof (no 48h wait)
+
+Use a deterministic proof instead of waiting:
+
+1) **Token model evidence:** Shopify offline Admin API tokens (custom app Admin API tokens, typically `shpat_`) are non-expiring by design.
+2) **Health check script:** run `python scripts/shopify_health_check.py --env <env> --aws-region <region> --shop-domain <shop>.myshopify.com --out-json <path> --json --include-aws-account-id`
+   and verify `status=PASS` + `health_check.status_code=200` with `aws_account_id` populated.
+3) **Scheduled monitor:** GitHub Action `Shopify Token Health Check` runs on cron and fails on non-200 responses.
+
+This replaces any prior “wait 48 hours” token-stability requirement.
+
 ---
 
 ## GitHub Actions Secrets
@@ -209,6 +220,7 @@ All integration clients support **environment variable overrides** for local dev
 | `SHOPIFY_CLIENT_SECRET_SECRET_ID`    | Custom client secret path                    | `rp-mw/<env>/shopify/client_secret`     |
 | `SHOPIFY_REFRESH_TOKEN_SECRET_ID`    | Custom refresh token path                    | `rp-mw/<env>/shopify/refresh_token`     |
 | `SHOPIFY_REFRESH_TOKEN_OVERRIDE`     | Override refresh token (skip Secrets Manager) | Uses AWS Secrets Manager if not set    |
+| `SHOPIFY_REFRESH_ENABLED`            | Enable refresh-token rotation (gated)        | `false` (no refresh by default)         |
 | `SHOPIFY_OUTBOUND_ENABLED`           | Enable network calls (default: offline)      | `false` (offline by default)            |
 | `SHOPIFY_SHOP_DOMAIN`                | Shopify shop domain                          | `example.myshopify.com`                 |
 

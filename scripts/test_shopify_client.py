@@ -489,10 +489,34 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(expires_in, 4600)
 
     def test_refresh_access_token_returns_false_without_refresh_token(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(access_token="shpat_token")
+            client._secrets_client_obj = _StubSecretsClient({})
+            self.assertFalse(client.refresh_access_token())
+            self.assertEqual(client.refresh_error(), "missing_refresh_token")
+
+    def test_refresh_access_token_disabled_sets_error(self) -> None:
         client = ShopifyClient(access_token="shpat_token")
         client._secrets_client_obj = _StubSecretsClient({})
         self.assertFalse(client.refresh_access_token())
-        self.assertEqual(client.refresh_error(), "missing_refresh_token")
+        self.assertEqual(client.refresh_error(), "refresh_disabled")
+
+    def test_refresh_access_token_private_disabled_sets_error(self) -> None:
+        client = ShopifyClient(access_token="shpat_token")
+        client._secrets_client_obj = _StubSecretsClient({})
+        token_info = ShopifyTokenInfo(
+            access_token="token",
+            refresh_token="refresh",
+            expires_at=1,
+            raw_format="json",
+            source_secret_id="rp-mw/local/shopify/admin_api_token",
+        )
+        self.assertFalse(client._refresh_access_token(token_info))
+        self.assertEqual(client.refresh_error(), "refresh_disabled")
 
     def test_parse_expires_at_iso_timestamp(self) -> None:
         secret_id = "rp-mw/local/shopify/admin_api_token"
@@ -552,6 +576,7 @@ class ShopifyClientTests(unittest.TestCase):
         with mock.patch.dict(
             os.environ,
             {
+                "SHOPIFY_REFRESH_ENABLED": "true",
                 "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret,
                 "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret,
             },
@@ -589,6 +614,7 @@ class ShopifyClientTests(unittest.TestCase):
         with mock.patch.dict(
             os.environ,
             {
+                "SHOPIFY_REFRESH_ENABLED": "true",
                 "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret,
                 "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret,
             },
@@ -640,6 +666,7 @@ class ShopifyClientTests(unittest.TestCase):
         with mock.patch.dict(
             os.environ,
             {
+                "SHOPIFY_REFRESH_ENABLED": "true",
                 "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
                 "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
             },
@@ -733,7 +760,12 @@ class ShopifyClientTests(unittest.TestCase):
         access_token, _ = client._load_access_token()
         self.assertEqual(access_token, "expired")
         self.assertIsNotNone(client._token_info)
-        self.assertFalse(client._refresh_access_token(client._token_info))
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            self.assertFalse(client._refresh_access_token(client._token_info))
 
     def test_refresh_access_token_client_credentials(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
@@ -755,16 +787,21 @@ class ShopifyClientTests(unittest.TestCase):
                 )
             ]
         )
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-            access_token_secret_id=token_secret,
-        )
-        client._load_access_token()
-        self.assertIsNotNone(client._token_info)
-        self.assertFalse(client._refresh_access_token(client._token_info))
-        self.assertEqual(client.refresh_error(), "missing_refresh_token")
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret,
+            )
+            client._load_access_token()
+            self.assertIsNotNone(client._token_info)
+            self.assertFalse(client._refresh_access_token(client._token_info))
+            self.assertEqual(client.refresh_error(), "missing_refresh_token")
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
 
@@ -802,20 +839,32 @@ class ShopifyClientTests(unittest.TestCase):
                 )
             ]
         )
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-            access_token_secret_id=token_secret,
-        )
-        self.assertFalse(client.refresh_access_token())
-        self.assertIn("status=400", client.refresh_error() or "")
-        self.assertIn("error=application_cannot_be_found", client.refresh_error() or "")
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret,
+            )
+            self.assertFalse(client.refresh_access_token())
+            self.assertIn("status=400", client.refresh_error() or "")
+            self.assertIn(
+                "error=application_cannot_be_found", client.refresh_error() or ""
+            )
 
     def test_refresh_error_missing_access_token(self) -> None:
-        client = ShopifyClient()
-        self.assertFalse(client.refresh_access_token())
-        self.assertEqual(client.refresh_error(), "missing_access_token")
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient()
+            self.assertFalse(client.refresh_access_token())
+            self.assertEqual(client.refresh_error(), "missing_access_token")
 
     def test_refresh_token_source_from_admin_api_token(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
@@ -1064,15 +1113,20 @@ class ShopifyClientTests(unittest.TestCase):
                 )
             ]
         )
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-            access_token_secret_id=token_secret,
-        )
-        client._load_access_token()
-        self.assertIsNotNone(client._token_info)
-        self.assertTrue(client._refresh_access_token(client._token_info))
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret,
+            )
+            client._load_access_token()
+            self.assertIsNotNone(client._token_info)
+            self.assertTrue(client._refresh_access_token(client._token_info))
 
     def test_persist_token_info_no_secret_id(self) -> None:
         client = ShopifyClient(access_token="token")
@@ -1236,7 +1290,12 @@ class ShopifyClientTests(unittest.TestCase):
         access_token, _ = client._load_access_token()
         self.assertEqual(access_token, "old-token")
         self.assertIsNotNone(client._token_info)
-        self.assertFalse(client._refresh_access_token(client._token_info))
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            self.assertFalse(client._refresh_access_token(client._token_info))
 
     def test_refresh_access_token_missing_access_token(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
@@ -1269,7 +1328,12 @@ class ShopifyClientTests(unittest.TestCase):
         access_token, _ = client._load_access_token()
         self.assertEqual(access_token, "old-token")
         self.assertIsNotNone(client._token_info)
-        self.assertFalse(client._refresh_access_token(client._token_info))
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            self.assertFalse(client._refresh_access_token(client._token_info))
 
     def test_refresh_access_token_invalid_payload(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
@@ -1298,7 +1362,12 @@ class ShopifyClientTests(unittest.TestCase):
         access_token, _ = client._load_access_token()
         self.assertEqual(access_token, "old-token")
         self.assertIsNotNone(client._token_info)
-        self.assertFalse(client._refresh_access_token(client._token_info))
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            self.assertFalse(client._refresh_access_token(client._token_info))
 
     def test_refresh_pre_request_uses_expired_token(self) -> None:
         token_secret = "rp-mw/local/shopify/admin_api_token"
@@ -1329,19 +1398,23 @@ class ShopifyClientTests(unittest.TestCase):
                 TransportResponse(status_code=200, headers={}, body=b"{}"),
             ]
         )
-        client = ShopifyClient(
-            allow_network=True,
-            transport=transport,
-            secrets_client=secrets,
-            access_token_secret_id=token_secret,
-        )
-
-        response = client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret,
+            )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
 
         self.assertFalse(response.dry_run)
         self.assertEqual(len(transport.requests), 2)

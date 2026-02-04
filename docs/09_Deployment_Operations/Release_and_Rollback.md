@@ -29,7 +29,7 @@ Deploy the new version with:
 - `safe_mode=true` (route-only)
 - `automation_enabled=false`
 
-Validate for 24–48 hours:
+Validate for 2–4 hours, plus scheduled health checks:
 - routing latency + backlog
 - error rates
 - vendor rate-limit behavior

@@ -1,0 +1,82 @@
+name: Shopify Token Health Check
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment name for Secrets Manager paths (dev|staging|prod)"
+        required: false
+        default: "prod"
+        type: string
+      shop-domain:
+        description: "Shopify shop domain (e.g. shop.myshopify.com)"
+        required: false
+        type: string
+      aws-region:
+        description: "AWS region override (default: secrets.AWS_REGION or us-east-2)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  shopify-token-health:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: ${{ inputs['environment'] || 'prod' }}
+      AWS_REGION: ${{ inputs['aws-region'] || secrets.AWS_REGION || 'us-east-2' }}
+      SHOPIFY_SHOP_DOMAIN: ${{ (inputs['environment'] || 'prod') == 'prod' && (inputs['shop-domain'] || secrets.PROD_SHOPIFY_SHOP_DOMAIN) || inputs['shop-domain'] }}
+      SHOPIFY_REFRESH_ENABLED: "false"
+      ROLE_ARN: ${{ inputs['environment'] == 'dev' && 'arn:aws:iam::151124909266:role/rp-ci-deploy' || inputs['environment'] == 'staging' && 'arn:aws:iam::260475105304:role/rp-ci-deploy' || 'arn:aws:iam::878145708918:role/rp-ci-deploy' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run Shopify health check
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
+            if [ "${ENVIRONMENT}" = "prod" ]; then
+              echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
+            else
+              echo "SHOPIFY_SHOP_DOMAIN is required for non-prod runs (set workflow input shop-domain)."
+            fi
+            exit 2
+          fi
+          mkdir -p artifacts/shopify
+          python scripts/shopify_health_check.py \
+            --env "${ENVIRONMENT}" \
+            --aws-region "${AWS_REGION}" \
+            --shop-domain "${SHOPIFY_SHOP_DOMAIN}" \
+            --shopify-secret-id "rp-mw/${ENVIRONMENT}/shopify/admin_api_token" \
+            --out-json "artifacts/shopify/shopify_health_check.json" \
+            --json \
+            --include-aws-account-id
+
+      - name: Upload health check artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopify-token-health-check
+          path: artifacts/shopify/shopify_health_check.json

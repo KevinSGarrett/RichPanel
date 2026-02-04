@@ -220,6 +220,9 @@ class ShopifyClient:
             if allow_network is None
             else bool(allow_network)
         )
+        self.refresh_enabled = _to_bool(
+            os.environ.get("SHOPIFY_REFRESH_ENABLED"), default=False
+        )
         self.timeout_seconds = float(
             timeout_seconds or os.environ.get("SHOPIFY_HTTP_TIMEOUT_SECONDS") or 5.0
         )
@@ -347,7 +350,8 @@ class ShopifyClient:
         refresh_attempted = False
 
         if (
-            self._token_info
+            self.refresh_enabled
+            and self._token_info
             and self._token_info.is_expired()
             and self._token_info.refresh_token
         ):
@@ -413,6 +417,7 @@ class ShopifyClient:
 
             if (
                 response.status_code == 401
+                and self.refresh_enabled
                 and not refresh_attempted
                 and self._token_info
                 and self._token_info.refresh_token
@@ -504,6 +509,16 @@ class ShopifyClient:
         )
 
     def refresh_access_token(self) -> bool:
+        if not self.refresh_enabled:
+            self._logger.info(
+                "shopify.refresh_skipped",
+                extra={
+                    "reason": "refresh_disabled",
+                    "secret_id": self.access_token_secret_id,
+                },
+            )
+            self._last_refresh_error = "refresh_disabled"
+            return False
         access_token, _ = self._load_access_token()
         if not access_token or not self._token_info:
             self._last_refresh_error = "missing_access_token"
@@ -833,6 +848,17 @@ class ShopifyClient:
         return str(secret_value)
 
     def _refresh_access_token(self, token_info: ShopifyTokenInfo) -> bool:
+        if not self.refresh_enabled:
+            self._logger.info(
+                "shopify.refresh_skipped",
+                extra={
+                    "reason": "refresh_disabled",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                },
+            )
+            self._last_refresh_error = "refresh_disabled"
+            return False
         if not token_info.refresh_token:
             self._logger.info(
                 "shopify.refresh_skipped",
@@ -935,7 +961,10 @@ class ShopifyClient:
         new_access_token = refresh_payload.get("access_token")
         new_refresh_token = refresh_payload.get("refresh_token") or token_info.refresh_token
         expires_in = refresh_payload.get("expires_in")
-        if not new_access_token:
+        new_access_token_str = (
+            str(new_access_token).strip() if new_access_token is not None else ""
+        )
+        if not new_access_token_str:
             self._logger.warning("shopify.refresh_missing_access_token")
             self._last_refresh_error = "missing_access_token"
             return False
@@ -946,7 +975,7 @@ class ShopifyClient:
             except (TypeError, ValueError):
                 expires_at = None
         updated_info = ShopifyTokenInfo(
-            access_token=str(new_access_token),
+            access_token=new_access_token_str,
             refresh_token=str(new_refresh_token) if new_refresh_token else None,
             expires_at=expires_at,
             raw_format="json",
@@ -964,6 +993,9 @@ class ShopifyClient:
         return True
 
     def _persist_token_info(self, token_info: ShopifyTokenInfo) -> None:
+        if not token_info.access_token or not str(token_info.access_token).strip():
+            self._logger.warning("shopify.refresh_skip_empty_token")
+            return
         client = self._secrets_client_obj
         if client is None and boto3 is None:
             self._logger.warning("shopify.refresh_no_secrets_client")

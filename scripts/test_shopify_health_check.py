@@ -18,6 +18,31 @@ class _StubClient:
 
 
 class ShopifyHealthCheckTests(unittest.TestCase):
+    def test_load_aws_account_id_missing_boto3(self) -> None:
+        original = health_check.boto3
+        health_check.boto3 = None
+        try:
+            self.assertIsNone(health_check._load_aws_account_id())
+        finally:
+            health_check.boto3 = original
+
+    def test_load_aws_account_id_success(self) -> None:
+        class _StubSts:
+            def get_caller_identity(self):
+                return {"Account": "123456789012"}
+
+        class _StubBoto3:
+            def client(self, service_name):
+                if service_name != "sts":
+                    raise AssertionError(f"unexpected service {service_name}")
+                return _StubSts()
+
+        original = health_check.boto3
+        health_check.boto3 = _StubBoto3()
+        try:
+            self.assertEqual(health_check._load_aws_account_id(), "123456789012")
+        finally:
+            health_check.boto3 = original
     def test_safe_token_format(self) -> None:
         self.assertEqual(health_check._safe_token_format(None), "unknown")
         self.assertEqual(health_check._safe_token_format("json"), "json")
@@ -83,6 +108,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = True
 
             def refresh_access_token(self):
                 return True
@@ -139,6 +165,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = False
 
             def refresh_access_token(self):
                 return False
@@ -179,6 +206,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = False
 
             def refresh_access_token(self):
                 return False
