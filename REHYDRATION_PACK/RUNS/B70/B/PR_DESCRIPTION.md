@@ -72,9 +72,9 @@
 - `python scripts/shopify_health_check.py --env prod --aws-region us-east-2 --shop-domain scentimen-t.myshopify.com --out-json REHYDRATION_PACK/RUNS/B70/B/PROOF/shopify_token_health_check.json --json --include-aws-account-id`
 
 ### 7) Results & evidence
-**CI:** pending — https://github.com/KevinSGarrett/RichPanel/pull/224/checks  
-**Codecov:** pending — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/224  
-**Bugbot:** pending — https://github.com/KevinSGarrett/RichPanel/pull/224 (trigger via `@cursor review`)  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/pull/224/checks  
+**Codecov:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/224  
+**Bugbot:** pass — https://github.com/KevinSGarrett/RichPanel/pull/224  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B70/B/PROOF/shopify_token_health_check.json`
