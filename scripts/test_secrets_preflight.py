@@ -283,6 +283,7 @@ class SecretsPreflightTests(unittest.TestCase):
             )
         self.assertEqual(payload["overall_status"], "FAIL")
         self.assertEqual(payload["error"], "boto3_unavailable")
+        self.assertEqual(secrets_preflight._normalize_env("production"), "prod")
 
     def test_secrets_preflight_missing_ssm(self) -> None:
         ssm_client = _DummySSMClient(missing_names={"/rp-mw/dev/safe_mode"})
@@ -343,6 +344,10 @@ class SecretsPreflightTests(unittest.TestCase):
                 )
         self.assertEqual(payload["secrets"]["rp-mw/dev/openai/api_key"]["readable"], False)
         self.assertEqual(payload["ssm"]["/rp-mw/dev/safe_mode"]["error"], "RuntimeError")
+        result = secrets_preflight._check_secret(
+            _FailingSecretsClient(), "rp-mw/dev/openai/api_key", required=True
+        )
+        self.assertFalse(result.readable)
 
     def test_secrets_preflight_writes_output(self) -> None:
         session = _DummySession()
@@ -442,6 +447,11 @@ class SyncBotAgentSecretTests(unittest.TestCase):
     def test_sync_bot_agent_secret_helpers(self) -> None:
         self.assertEqual(sync_bot_agent_secret._normalize_env("production"), "prod")
         self.assertEqual(sync_bot_agent_secret._resolve_region(None), "us-east-2")
+
+    def test_sync_bot_agent_secret_main(self) -> None:
+        with patch.object(sync_bot_agent_secret, "main_with_args", return_value=0):
+            with patch("sys.argv", ["sync_bot_agent_secret.py", "--env", "dev"]):
+                self.assertEqual(sync_bot_agent_secret.main(), 0)
 
 
 if __name__ == "__main__":
