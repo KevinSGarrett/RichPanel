@@ -4075,13 +4075,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         args.require_allowlist_blocked or allowlist_blocked_mode
     )
     if not order_status_mode:
-        require_outbound = False
-        require_email_channel = False
-        require_operator_reply = False
-        require_send_message = False
-        require_send_message_used = False
-        require_allowlist_blocked = False
-        require_order_match_by_number = False
+        if args.require_outbound is None:
+            require_outbound = False
+        if args.require_email_channel is None:
+            require_email_channel = False
+        if args.require_operator_reply is None:
+            require_operator_reply = False
+        if args.require_send_message is None:
+            require_send_message = False
+        if args.require_send_message_used is None:
+            require_send_message_used = False
+        if args.require_allowlist_blocked is None:
+            require_allowlist_blocked = False
+        if args.require_order_match_by_number is None:
+            require_order_match_by_number = False
     if require_allowlist_blocked:
         require_outbound = False
         require_email_channel = False
@@ -5622,7 +5629,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         ticket_channel == "email" if isinstance(ticket_channel, str) else None
     )
     email_channel_requires_outbound = bool(
-        order_status_mode and email_channel_is_email and not require_allowlist_blocked
+        email_channel_is_email
+        and not require_allowlist_blocked
+        and (
+            order_status_mode
+            or require_email_channel
+            or require_send_message
+            or require_send_message_used
+            or require_operator_reply
+        )
     )
     email_channel_send_message_used_ok = (
         send_message_used is True if email_channel_requires_outbound else None

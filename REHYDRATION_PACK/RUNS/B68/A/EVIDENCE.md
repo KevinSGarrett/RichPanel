@@ -47,3 +47,15 @@ $env:AWS_DEFAULT_REGION='us-east-2'
 python scripts\run_ci_checks.py
 ```
 Result: `[OK] CI-equivalent checks passed.` (doc hygiene warnings are non-blocking).
+
+### Unit regression test (local)
+```powershell
+python -m pytest backend\tests\test_order_status_send_message.py
+```
+Result: `1 passed`.
+
+### Doc grep (Shopify sandbox/dev store)
+```powershell
+rg -n "Shopify sandbox|dev shopify store|shopify dev store" docs
+```
+Result: only explicit “no Shopify sandbox/dev store” guidance remains (see paths listed in command output).

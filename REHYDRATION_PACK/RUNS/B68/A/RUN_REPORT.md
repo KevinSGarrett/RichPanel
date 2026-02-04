@@ -7,7 +7,8 @@ Harden the DEV sandbox proof harness to require email-channel `/send-message` ev
 
 ### Execution
 - Proof run: **PASS** (ticket `<redacted>`).
-- CI/tests: **passed locally** after setting AWS region env vars.
+- Unit regression test: **passed locally** (`backend/tests/test_order_status_send_message.py`).
+- CI/tests: **not re-run** in this session beyond the targeted unit test.
 
 ### Attempt history
 Initial attempt (ticket <redacted>) failed before SSO:
@@ -47,3 +48,9 @@ $env:AWS_DEFAULT_REGION='us-east-2'
 python scripts\run_ci_checks.py
 ```
 Result: `[OK] CI-equivalent checks passed.` (doc hygiene warnings noted but non-blocking).
+
+### Unit test run (local)
+```powershell
+python -m pytest backend\tests\test_order_status_send_message.py
+```
+Result: `1 passed`.

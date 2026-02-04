@@ -27,7 +27,7 @@ This document defines the **single source of truth** for secrets, environment co
 - **GitHub Actions Secrets** are used **only** for CI/PR smoke tests in dev (no Shopify sandbox/dev store exists)
 - **Production secrets NEVER live in GitHub Actions Secrets**
 - **Local development** uses environment variable overrides or local AWS profiles
-  - **Shopify is live read-only in every environment**; do not create test orders.
+  - **Shopify is live read-only in every environment**; do not create test orders (use stubs for test-order scenarios).
 
 **Naming convention:**
 All secrets follow the pattern: `rp-mw/<env>/<integration>/<secret_type>`
