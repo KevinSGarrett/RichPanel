@@ -31,6 +31,13 @@
 - **Purpose:** refresh failures can invalidate Shopify access tokens
 - **Alarm name:** `rp-mw-<env>-shopify-refresh-errors`
 
+### 2b) Shopify token health check (scheduled)
+
+- **Monitor:** GitHub Action `Shopify Token Health Check` (`.github/workflows/shopify_token_health_check.yml`)
+- **Schedule:** cron (daily) + manual `workflow_dispatch`
+- **Purpose:** detect 401/403 on the read-only token without waiting 48 hours
+- **Artifact:** `artifacts/shopify/shopify_health_check.json`
+
 ### 3) Richpanel 429 spikes
 
 - **Metric filter:** `richpanel.rate_limited status=429`

@@ -15,6 +15,11 @@ if str(SRC) not in sys.path:
 
 from integrations.shopify.client import ShopifyClient  # noqa: E402
 
+try:
+    import boto3  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency for local runs
+    boto3 = None  # type: ignore
+
 
 def _safe_token_format(raw_format: Optional[str]) -> str:
     if not raw_format:
@@ -60,6 +65,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _load_aws_account_id() -> Optional[str]:
+    if boto3 is None:
+        return None
+    try:
+        return boto3.client("sts").get_caller_identity().get("Account")
+    except Exception:
+        return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Read-only Shopify health check.")
     parser.add_argument(
@@ -90,6 +104,11 @@ def main() -> int:
         help="Attempt to refresh the access token before the health check.",
     )
     parser.add_argument(
+        "--include-aws-account-id",
+        action="store_true",
+        help="Include AWS account id (sts caller identity) in output.",
+    )
+    parser.add_argument(
         "--refresh-dry-run",
         action="store_true",
         help="Record a refresh attempt without calling Shopify (no secret write).",
@@ -103,6 +122,8 @@ def main() -> int:
 
     if args.env:
         os.environ["ENVIRONMENT"] = args.env
+    if args.refresh or args.refresh_dry_run:
+        os.environ["SHOPIFY_REFRESH_ENABLED"] = "true"
     if args.aws_region:
         os.environ["AWS_REGION"] = args.aws_region
         os.environ["AWS_DEFAULT_REGION"] = args.aws_region
@@ -172,6 +193,8 @@ def main() -> int:
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "environment": client.environment,
         "shop_domain": client.shop_domain,
+        "refresh_enabled": client.refresh_enabled,
+        "aws_account_id": _load_aws_account_id() if args.include_aws_account_id else None,
         "status": status,
         "health_check": health_payload,
         "token_format": token_format,

@@ -83,6 +83,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = True
 
             def refresh_access_token(self):
                 return True
@@ -139,6 +140,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = False
 
             def refresh_access_token(self):
                 return False
@@ -179,6 +181,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             environment = "prod"
             shop_domain = "example.myshopify.com"
             _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = False
 
             def refresh_access_token(self):
                 return False

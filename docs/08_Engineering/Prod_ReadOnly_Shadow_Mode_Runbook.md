@@ -194,6 +194,15 @@ What it does:
 - Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
   (or `live_shadow_http_trace.json` when `--out` is used) and fails if any non-GET calls are observed
 
+#### Token stability proof (no 48h wait)
+
+Use a deterministic proof instead of waiting:
+
+1) **Token model evidence:** Shopify offline Admin API tokens (custom app Admin API tokens, typically `shpat_`) are non-expiring by design.
+2) **Health check script:** run `python scripts/shopify_health_check.py --env <env> --aws-region <region> --shop-domain <shop>.myshopify.com --out-json <path> --json --include-aws-account-id`
+   and verify `status=PASS` + `health_check.status_code=200` with `aws_account_id` populated.
+3) **Scheduled monitor:** GitHub Action `Shopify Token Health Check` runs on cron and fails on non-200 responses.
+
 ### Daily live read-only shadow eval (CI)
 - Workflow: `Shadow Live Read-Only Eval` (`.github/workflows/shadow_live_readonly_eval.yml`)
 - Schedule: daily at **03:00 UTC** (plus manual `workflow_dispatch`)
@@ -735,7 +744,7 @@ When shadow mode is enabled, the following operations **are blocked**:
 
 **Procedure:**
 1. Enable shadow mode in production (with PM approval)
-2. Monitor CloudWatch logs for 24-48 hours
+2. Monitor CloudWatch logs for 2-4 hours and rely on scheduled monitors afterward
 3. Review fetched order payloads (logged at INFO level)
 4. Verify field presence: `order.id`, `order.fulfillment.tracking_number`, etc.
 5. Disable shadow mode
