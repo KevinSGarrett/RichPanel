@@ -27,11 +27,11 @@ jobs:
   shopify-token-health:
     runs-on: ubuntu-latest
     env:
-      ENVIRONMENT: ${{ inputs.environment || 'prod' }}
-      AWS_REGION: ${{ inputs.aws-region || secrets.AWS_REGION || 'us-east-2' }}
-      SHOPIFY_SHOP_DOMAIN: ${{ inputs.shop-domain || secrets.PROD_SHOPIFY_SHOP_DOMAIN }}
+      ENVIRONMENT: ${{ inputs['environment'] || 'prod' }}
+      AWS_REGION: ${{ inputs['aws-region'] || secrets.AWS_REGION || 'us-east-2' }}
+      SHOPIFY_SHOP_DOMAIN: ${{ (inputs['environment'] || 'prod') == 'prod' && (inputs['shop-domain'] || secrets.PROD_SHOPIFY_SHOP_DOMAIN) || inputs['shop-domain'] }}
       SHOPIFY_REFRESH_ENABLED: "false"
-      ROLE_ARN: ${{ inputs.environment == 'dev' && 'arn:aws:iam::151124909266:role/rp-ci-deploy' || inputs.environment == 'staging' && 'arn:aws:iam::260475105304:role/rp-ci-deploy' || 'arn:aws:iam::878145708918:role/rp-ci-deploy' }}
+      ROLE_ARN: ${{ inputs['environment'] == 'dev' && 'arn:aws:iam::151124909266:role/rp-ci-deploy' || inputs['environment'] == 'staging' && 'arn:aws:iam::260475105304:role/rp-ci-deploy' || 'arn:aws:iam::878145708918:role/rp-ci-deploy' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,7 +57,11 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
-            echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
+            if [ "${ENVIRONMENT}" = "prod" ]; then
+              echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
+            else
+              echo "SHOPIFY_SHOP_DOMAIN is required for non-prod runs (set workflow input shop-domain)."
+            fi
             exit 2
           fi
           mkdir -p artifacts/shopify

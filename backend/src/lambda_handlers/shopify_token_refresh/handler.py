@@ -19,6 +19,9 @@ def lambda_handler(event, context):
         error = str(exc)
 
     diagnostics = client.token_diagnostics()
+    refresh_error = client.refresh_error()
+    if not refresh_attempted and not client.refresh_enabled:
+        refresh_error = refresh_error or "refresh_disabled"
     health = None
     try:
         response = client.get_shop(safe_mode=False, automation_enabled=True)
@@ -36,7 +39,7 @@ def lambda_handler(event, context):
         "shop_domain": client.shop_domain,
         "refresh_attempted": refresh_attempted,
         "refresh_succeeded": refreshed,
-        "refresh_error": client.refresh_error(),
+        "refresh_error": refresh_error,
         "token_diagnostics": diagnostics,
         "health_check": health,
         "error": error,
