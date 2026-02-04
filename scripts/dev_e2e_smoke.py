@@ -3270,6 +3270,95 @@ def _evaluate_support_routing(
     }
 
 
+def _resolve_requirement_flags(
+    args: argparse.Namespace,
+    *,
+    order_status_mode: bool,
+    negative_scenario: bool,
+    allowlist_blocked_mode: bool,
+    order_status_no_match_mode: bool,
+) -> Dict[str, bool]:
+    require_openai_routing = (
+        args.require_openai_routing
+        if args.require_openai_routing is not None
+        else (order_status_mode and not negative_scenario)
+    )
+    require_openai_rewrite = (
+        args.require_openai_rewrite
+        if args.require_openai_rewrite is not None
+        else (order_status_mode and not negative_scenario)
+    )
+    require_order_match_by_number = (
+        args.require_order_match_by_number
+        if args.require_order_match_by_number is not None
+        else False
+    )
+    require_outbound = (
+        args.require_outbound
+        if args.require_outbound is not None
+        else (order_status_mode and not negative_scenario)
+    )
+    require_email_channel = (
+        args.require_email_channel
+        if args.require_email_channel is not None
+        else False
+    )
+    require_operator_reply = (
+        args.require_operator_reply
+        if args.require_operator_reply is not None
+        else False
+    )
+    require_send_message = (
+        args.require_send_message if args.require_send_message is not None else False
+    )
+    require_send_message_used = (
+        args.require_send_message_used
+        if args.require_send_message_used is not None
+        else False
+    )
+    require_allowlist_blocked = bool(
+        args.require_allowlist_blocked or allowlist_blocked_mode
+    )
+    if not order_status_mode:
+        if args.require_outbound is None:
+            require_outbound = False
+        if args.require_email_channel is None:
+            require_email_channel = False
+        if args.require_operator_reply is None:
+            require_operator_reply = False
+        if args.require_send_message is None:
+            require_send_message = False
+        if args.require_send_message_used is None:
+            require_send_message_used = False
+        if args.require_allowlist_blocked is None:
+            require_allowlist_blocked = False
+        if args.require_order_match_by_number is None:
+            require_order_match_by_number = False
+    if require_allowlist_blocked:
+        require_outbound = False
+        require_email_channel = False
+        require_operator_reply = False
+        require_send_message = False
+        require_send_message_used = False
+        require_openai_routing = False
+        require_openai_rewrite = False
+        require_order_match_by_number = False
+    if negative_scenario or order_status_no_match_mode:
+        require_order_match_by_number = False
+
+    return {
+        "require_openai_routing": bool(require_openai_routing),
+        "require_openai_rewrite": bool(require_openai_rewrite),
+        "require_order_match_by_number": bool(require_order_match_by_number),
+        "require_outbound": bool(require_outbound),
+        "require_email_channel": bool(require_email_channel),
+        "require_operator_reply": bool(require_operator_reply),
+        "require_send_message": bool(require_send_message),
+        "require_send_message_used": bool(require_send_message_used),
+        "require_allowlist_blocked": bool(require_allowlist_blocked),
+    }
+
+
 def _evaluate_order_match_evidence(
     *,
     routing_tags: List[str],
@@ -4075,13 +4164,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         args.require_allowlist_blocked or allowlist_blocked_mode
     )
     if not order_status_mode:
-        require_outbound = False
-        require_email_channel = False
-        require_operator_reply = False
-        require_send_message = False
-        require_send_message_used = False
-        require_allowlist_blocked = False
-        require_order_match_by_number = False
+        if args.require_outbound is None:
+            require_outbound = False
+        if args.require_email_channel is None:
+            require_email_channel = False
+        if args.require_operator_reply is None:
+            require_operator_reply = False
+        if args.require_send_message is None:
+            require_send_message = False
+        if args.require_send_message_used is None:
+            require_send_message_used = False
+        if args.require_allowlist_blocked is None:
+            require_allowlist_blocked = False
+        if args.require_order_match_by_number is None:
+            require_order_match_by_number = False
     if require_allowlist_blocked:
         require_outbound = False
         require_email_channel = False
@@ -5621,8 +5717,16 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     email_channel_is_email = (
         ticket_channel == "email" if isinstance(ticket_channel, str) else None
     )
-    email_channel_requires_outbound = bool(
-        order_status_mode and email_channel_is_email and not require_allowlist_blocked
+    email_channel_requires_outbound = bool(  # pragma: no cover - CLI flow
+        email_channel_is_email
+        and not require_allowlist_blocked
+        and (
+            order_status_mode
+            or require_email_channel
+            or require_send_message
+            or require_send_message_used
+            or require_operator_reply
+        )
     )
     email_channel_send_message_used_ok = (
         send_message_used is True if email_channel_requires_outbound else None

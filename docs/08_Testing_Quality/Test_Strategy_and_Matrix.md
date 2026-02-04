@@ -58,7 +58,7 @@ We use a layered approach so most failures are caught early (cheap tests) and on
      - observability events (`mw_observability_event_v1`)
    - Richpanel / Shopify API response shape validation against recorded fixtures (sanitized)
 
-4) **Integration tests** (real HTTP calls to stubs or sandbox)
+4) **Integration tests** (real HTTP calls to stubs or read-only services; no Shopify sandbox)
    - “Webhook → queue → worker → simulated Richpanel write”
    - verify retries, idempotency, and no double-sends
    - verify that unsafe LLM outputs are downgraded by policy engine

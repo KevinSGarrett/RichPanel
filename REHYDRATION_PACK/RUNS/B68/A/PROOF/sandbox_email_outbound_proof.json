@@ -1,7 +1,7 @@
 {
   "meta": {
-    "run_id": "B68-A-20260203-0005",
-    "timestamp": "2026-02-03T20:54:50.528208+00:00",
+    "run_id": "B68-A-20260203-0006",
+    "timestamp": "2026-02-03T21:24:11.406172+00:00",
     "env": "dev",
     "region": "us-east-2",
     "scenario": "order_status",
@@ -9,17 +9,17 @@
   },
   "inputs": {
     "ticket_ref": null,
-    "ticket_ref_fingerprint": "aedec0d0ca66",
+    "ticket_ref_fingerprint": "8c244b370747",
     "apply_test_tag": false,
     "test_tag_value": null,
-    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\\RUNS\\B68\\A\\PROOF\\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0005 --profile rp-admin-kevin"
+    "command": "python scripts\\dev_e2e_smoke.py --env dev --region us-east-2 --stack-name RichpanelMiddleware-dev --scenario order_status --require-email-channel --require-send-message --require-send-message-used --require-operator-reply --ticket-number <redacted> --proof-path REHYDRATION_PACK\\RUNS\\B68\\A\\PROOF\\sandbox_email_outbound_proof.json --run-id B68-A-20260203-0006 --profile rp-admin-kevin"
   },
   "webhook": {
     "endpoint": "https://pj41mkbj38.execute-api.us-east-2.amazonaws.com/webhook",
     "queue_url": "https://sqs.us-east-2.amazonaws.com/151124909266/rp-mw-dev-events.fifo",
-    "event_id_fingerprint": "6f11d5664cbe",
+    "event_id_fingerprint": "709da260b93b",
     "conversation_id": null,
-    "conversation_id_fingerprint": "486a073cea5a",
+    "conversation_id_fingerprint": "de232638e111",
     "accepted": true
   },
   "dynamo": {
@@ -47,12 +47,12 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.92)",
+        "reason": "llm_routing (confidence=0.94)",
         "intent": "order_status_tracking",
-        "department": "LiveChat Support"
+        "department": "Email Support Team"
       },
       "action_count": 2,
-      "updated_at": "2026-02-03T20:54:36.619196+00:00"
+      "updated_at": "2026-02-03T21:23:56.379019+00:00"
     },
     "audit_record": {
       "routing": {
@@ -62,20 +62,20 @@
           "mw-intent-order_status_tracking",
           "mw-llm-routed"
         ],
-        "reason": "llm_routing (confidence=0.92)",
+        "reason": "llm_routing (confidence=0.94)",
         "intent": "order_status_tracking",
-        "department": "LiveChat Support"
+        "department": "Email Support Team"
       },
-      "recorded_at": "2026-02-03T20:54:36.619196+00:00",
-      "ts_action_fingerprint": "2026-02-03T20:54:36.619196+00:00#fingerprint:6f11d5664cbe"
+      "recorded_at": "2026-02-03T21:23:56.379019+00:00",
+      "ts_action_fingerprint": "2026-02-03T21:23:56.379019+00:00#fingerprint:709da260b93b"
     }
   },
   "openai": {
     "routing": {
       "llm_called": true,
       "model": "gpt-5.2-chat-latest",
-      "confidence": 0.92,
-      "response_id": "chatcmpl-D5HhqwwI36llleRgvgRppUWbAX1F9",
+      "confidence": 0.94,
+      "response_id": "chatcmpl-D5IAEZ3iMSWHFRzFFC116AU3Iwu5T",
       "response_id_unavailable_reason": null,
       "final_intent": "order_status_tracking",
       "primary_source": "llm",
@@ -86,13 +86,13 @@
       "rewrite_attempted": true,
       "rewrite_applied": true,
       "model": "gpt-5.2-chat-latest",
-      "response_id": "chatcmpl-D5HhuyopDa15YczLugr6wuRuB8Q8v",
+      "response_id": "chatcmpl-D5IAH1gmdGWF7QQYm8Dy2pdlheVJr",
       "response_id_unavailable_reason": null,
       "fallback_used": false,
       "reason": "applied",
       "error_class": null,
-      "original_hash": "dc48dcc2906d",
-      "rewritten_hash": "5bd0213aacd1",
+      "original_hash": "403d4b5e8a86",
+      "rewritten_hash": "8a7ada9088c1",
       "rewritten_changed": true
     },
     "order_status_intent": {
@@ -121,17 +121,17 @@
     "openai": {
       "called": true,
       "model": "gpt-5.2-chat-latest",
-      "request_id": "chatcmpl-D5HhqwwI36llleRgvgRppUWbAX1F9",
+      "request_id": "chatcmpl-D5IAEZ3iMSWHFRzFFC116AU3Iwu5T",
       "response_id_unavailable_reason": null,
-      "confidence": 0.92
+      "confidence": 0.94
     }
   },
   "rewriter_metadata": {
     "used": true,
     "model": "gpt-5.2-chat-latest",
-    "request_id": "chatcmpl-D5HhuyopDa15YczLugr6wuRuB8Q8v",
-    "original_hash": "dc48dcc2906d",
-    "rewritten_hash": "5bd0213aacd1",
+    "request_id": "chatcmpl-D5IAH1gmdGWF7QQYm8Dy2pdlheVJr",
+    "original_hash": "403d4b5e8a86",
+    "rewritten_hash": "8a7ada9088c1",
     "changed": true
   },
   "order_status": {
@@ -162,11 +162,9 @@
         "mw-order-lookup-missing:created_at",
         "mw-order-status-suppressed",
         "mw-routing-applied",
-        "route-email-support-team",
-        "mw-llm-routed",
-        "mw-outbound-blocked-allowlist"
+        "route-email-support-team"
       ],
-      "updated_at": "2026-02-03T20:39:53.133Z",
+      "updated_at": "2026-02-03T21:23:38.554Z",
       "message_count": 1,
       "last_message_source": "unknown",
       "operator_reply_present": false,
@@ -176,7 +174,7 @@
       "ticket_channel": "email",
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "486a073cea5a",
+      "ticket_id_fingerprint": "de232638e111",
       "endpoint_variant": "number",
       "path_redacted": "/v1/tickets/number/<redacted>",
       "customer_email_fingerprint": "25edb07c2a9e",
@@ -193,14 +191,13 @@
         "mw-routing-applied",
         "route-email-support-team",
         "mw-llm-routed",
-        "mw-outbound-blocked-allowlist",
         "mw-auto-replied",
         "mw-order-status-answered",
-        "mw-order-status-answered:B68-A-20260203-0005",
+        "mw-order-status-answered:B68-A-20260203-0006",
         "mw-outbound-path-send-message",
         "mw-reply-sent"
       ],
-      "updated_at": "2026-02-03T20:54:45.707Z",
+      "updated_at": "2026-02-03T21:24:05.922Z",
       "message_count": 2,
       "last_message_source": "operator",
       "operator_reply_present": true,
@@ -210,7 +207,7 @@
       "ticket_channel": "email",
       "status_code": 200,
       "dry_run": false,
-      "ticket_id_fingerprint": "486a073cea5a",
+      "ticket_id_fingerprint": "de232638e111",
       "endpoint_variant": "id",
       "path_redacted": "/v1/tickets/<redacted>",
       "customer_email_fingerprint": "25edb07c2a9e",
@@ -218,14 +215,15 @@
     },
     "tags_added": [
       "mw-auto-replied",
+      "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:B68-A-20260203-0005",
+      "mw-order-status-answered:B68-A-20260203-0006",
       "mw-outbound-path-send-message",
       "mw-reply-sent"
     ],
     "tags_removed": [],
     "skip_tags_added": [],
-    "updated_at_delta_seconds": 892.574,
+    "updated_at_delta_seconds": 27.368,
     "status_before": "open",
     "status_after": "closed",
     "status_changed": true,
@@ -236,8 +234,9 @@
     "last_message_source_after": "operator",
     "middleware_tags_added": [
       "mw-auto-replied",
+      "mw-llm-routed",
       "mw-order-status-answered",
-      "mw-order-status-answered:B68-A-20260203-0005",
+      "mw-order-status-answered:B68-A-20260203-0006",
       "mw-outbound-path-send-message",
       "mw-reply-sent"
     ],
@@ -279,21 +278,21 @@
     "ticket_channel": "email",
     "openai_routing_used": true,
     "openai_rewrite_used": true,
-    "openai_routing_response_id": "chatcmpl-D5HhqwwI36llleRgvgRppUWbAX1F9",
-    "openai_rewrite_response_id": "chatcmpl-D5HhuyopDa15YczLugr6wuRuB8Q8v",
+    "openai_routing_response_id": "chatcmpl-D5IAEZ3iMSWHFRzFFC116AU3Iwu5T",
+    "openai_rewrite_response_id": "chatcmpl-D5IAH1gmdGWF7QQYm8Dy2pdlheVJr",
     "final_route": "route_to_support",
     "closed_after": true,
     "message_count_delta": 1,
     "last_message_source_after": "operator",
     "intent_after": "order_status_tracking",
-    "routing_department": "LiveChat Support",
+    "routing_department": "Email Support Team",
     "outbound_attempted": true,
-    "outbound_failure_classification": "blocked_by_allowlist",
-    "outbound_send_message_status": null,
+    "outbound_failure_classification": null,
+    "outbound_send_message_status": 200,
     "outbound_endpoint_used": "/send-message",
     "routed_to_support": true,
     "support_tag_present": true,
-    "support_department": false,
+    "support_department": true,
     "order_match_success": true,
     "order_match_failure_reason": null,
     "order_match_method": "none",
@@ -303,7 +302,7 @@
     "reply_contains_eta_date_like": false,
     "latest_comment_source": null,
     "routing_ticket_excerpt_redacted": "Where is my order? Please share the tracking update.",
-    "allowlist_blocked_tag_present": true,
+    "allowlist_blocked_tag_present": false,
     "allowlist_blocked_tag_added": false,
     "send_message_tag_absent": false,
     "followup_routed_support": null,
@@ -320,7 +319,7 @@
     "send_message_path_required": true,
     "send_message_path_confirmed": true,
     "send_message_used": true,
-    "send_message_status_code": null
+    "send_message_status_code": 200
   },
   "result": {
     "status": "PASS",
@@ -328,7 +327,7 @@
     "classification_reason": null,
     "reply_evidence": true,
     "reply_evidence_reason": "message_count_delta=1; positive_middleware_tag_added; reply_update_success:mw-auto-replied",
-    "outbound_failure_classification": "blocked_by_allowlist",
+    "outbound_failure_classification": null,
     "fallback_close_used": false,
     "followup_reply_sent": false,
     "followup_reply_reason": "followup_not_performed",
@@ -354,7 +353,7 @@
       "outbound_attempted": true,
       "routed_to_support": true,
       "support_tag_present": true,
-      "support_department": false,
+      "support_department": true,
       "order_match_success": true,
       "order_match_by_number": null,
       "order_match_failure_reason_present": null,
@@ -362,7 +361,7 @@
       "openai_routing_source_openai": true,
       "openai_rewrite_attempted": true,
       "openai_rewrite_applied": true,
-      "allowlist_blocked_tag_present": true,
+      "allowlist_blocked_tag_present": false,
       "allowlist_blocked_tag_added": false,
       "send_message_tag_absent": false,
       "no_unexpected_outbound_block": null,

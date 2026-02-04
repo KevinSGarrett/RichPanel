@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import unittest
+from types import SimpleNamespace
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -38,6 +39,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _build_followup_payload,
     _prepare_followup_proof,
     _extract_latest_comment_body,
+    _resolve_requirement_flags,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
     _extract_order_status_intent_evidence,
@@ -1502,6 +1504,134 @@ class ParseArgsTests(unittest.TestCase):
         ):
             args = parse_args()
         self.assertTrue(args.require_email_channel)
+
+
+class TestRequirementFlagResolution(unittest.TestCase):
+    def test_non_order_status_allows_explicit_email_requirements(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=None,
+            require_openai_rewrite=None,
+            require_order_match_by_number=None,
+            require_outbound=True,
+            require_email_channel=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            require_allowlist_blocked=False,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=False,
+            negative_scenario=False,
+            allowlist_blocked_mode=False,
+            order_status_no_match_mode=False,
+        )
+        self.assertTrue(flags["require_outbound"])
+        self.assertTrue(flags["require_email_channel"])
+        self.assertTrue(flags["require_operator_reply"])
+        self.assertTrue(flags["require_send_message"])
+        self.assertTrue(flags["require_send_message_used"])
+        self.assertFalse(flags["require_openai_routing"])
+        self.assertFalse(flags["require_openai_rewrite"])
+        self.assertFalse(flags["require_order_match_by_number"])
+
+    def test_non_order_status_defaults_disable_email_requirements(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=None,
+            require_openai_rewrite=None,
+            require_order_match_by_number=None,
+            require_outbound=None,
+            require_email_channel=None,
+            require_operator_reply=None,
+            require_send_message=None,
+            require_send_message_used=None,
+            require_allowlist_blocked=None,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=False,
+            negative_scenario=False,
+            allowlist_blocked_mode=False,
+            order_status_no_match_mode=False,
+        )
+        self.assertFalse(flags["require_outbound"])
+        self.assertFalse(flags["require_email_channel"])
+        self.assertFalse(flags["require_operator_reply"])
+        self.assertFalse(flags["require_send_message"])
+        self.assertFalse(flags["require_send_message_used"])
+        self.assertFalse(flags["require_allowlist_blocked"])
+        self.assertFalse(flags["require_order_match_by_number"])
+
+    def test_allowlist_blocked_overrides_requirements(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=True,
+            require_openai_rewrite=True,
+            require_order_match_by_number=True,
+            require_outbound=True,
+            require_email_channel=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            require_allowlist_blocked=None,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=True,
+            negative_scenario=False,
+            allowlist_blocked_mode=True,
+            order_status_no_match_mode=False,
+        )
+        self.assertTrue(flags["require_allowlist_blocked"])
+        self.assertFalse(flags["require_outbound"])
+        self.assertFalse(flags["require_email_channel"])
+        self.assertFalse(flags["require_operator_reply"])
+        self.assertFalse(flags["require_send_message"])
+        self.assertFalse(flags["require_send_message_used"])
+        self.assertFalse(flags["require_openai_routing"])
+        self.assertFalse(flags["require_openai_rewrite"])
+        self.assertFalse(flags["require_order_match_by_number"])
+
+    def test_negative_scenario_disables_order_match_requirement(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=True,
+            require_openai_rewrite=True,
+            require_order_match_by_number=True,
+            require_outbound=True,
+            require_email_channel=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            require_allowlist_blocked=False,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=True,
+            negative_scenario=True,
+            allowlist_blocked_mode=False,
+            order_status_no_match_mode=False,
+        )
+        self.assertFalse(flags["require_order_match_by_number"])
+
+    def test_no_match_mode_disables_order_match_requirement(self) -> None:
+        args = SimpleNamespace(
+            require_openai_routing=True,
+            require_openai_rewrite=True,
+            require_order_match_by_number=True,
+            require_outbound=True,
+            require_email_channel=True,
+            require_operator_reply=True,
+            require_send_message=True,
+            require_send_message_used=True,
+            require_allowlist_blocked=False,
+        )
+        flags = _resolve_requirement_flags(
+            args,
+            order_status_mode=True,
+            negative_scenario=False,
+            allowlist_blocked_mode=False,
+            order_status_no_match_mode=True,
+        )
+        self.assertFalse(flags["require_order_match_by_number"])
 
 
 class RoutingValidationTests(unittest.TestCase):
@@ -3622,6 +3752,7 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(ScenarioPayloadTests))
     suite.addTests(loader.loadTestsFromTestCase(PayloadBuilderTests))
     suite.addTests(loader.loadTestsFromTestCase(ParseArgsTests))
+    suite.addTests(loader.loadTestsFromTestCase(TestRequirementFlagResolution))
     suite.addTests(loader.loadTestsFromTestCase(RoutingValidationTests))
     suite.addTests(loader.loadTestsFromTestCase(URLEncodingTests))
     suite.addTests(loader.loadTestsFromTestCase(DraftReplyHelperTests))

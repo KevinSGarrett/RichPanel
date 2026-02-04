@@ -1,13 +1,10 @@
 ## B68 A — Changes
 
 ### Code
-- Added email-channel enforcement and proof fields in `scripts/dev_e2e_smoke.py` (`--require-email-channel`, outbound endpoint, latest comment source).
-- Added email outbound regression assertion in `scripts/test_pipeline_handlers.py`.
-- Expanded E2E smoke unit tests in `scripts/test_e2e_smoke_encoding.py`.
+- Honored email-channel enforcement even outside order-status defaults in `scripts/dev_e2e_smoke.py` (email outbound checks now apply when email proof flags are set).
+- Added explicit requirement flag resolver tests in `scripts/test_e2e_smoke_encoding.py`.
+- Added unit regression coverage for the email `/send-message` path in `scripts/test_order_status_send_message.py`.
 
 ### Docs
-- Clarified Shopify live read-only usage and removed sandbox/dev store assumptions in:
-  - `docs/08_Engineering/Secrets_and_Environments.md`
-  - `docs/08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md`
-  - `docs/09_Deployment_Operations/Environments.md`
-  - `docs/00_Project_Admin/Open_Questions.md`
+- Clarified Shopify live read-only guidance in `docs/08_Engineering/Secrets_and_Environments.md`.
+- Noted that integration tests use stubs/read-only services (no Shopify sandbox) in `docs/08_Testing_Quality/Test_Strategy_and_Matrix.md`.
