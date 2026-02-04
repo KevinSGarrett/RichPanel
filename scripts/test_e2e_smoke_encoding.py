@@ -56,6 +56,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _order_resolution_is_order_number,
     _extract_order_match_method,
     _finalize_order_match_method,
+    _resolve_order_match_method_details,
     _extract_order_resolution_from_actions,
     _normalize_optional_text,
     _probe_order_resolution_from_ticket,
@@ -120,6 +121,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _resolve_operator_reply_reason,
     _load_bot_agent_id,
     _resolve_author_match,
+    _resolve_author_evidence,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1921,6 +1923,23 @@ class AuthorMatchResolverTests(unittest.TestCase):
         self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
         self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
 
+    def test_resolve_author_evidence_with_loader(self) -> None:
+        def _loader(**kwargs: Any) -> str:
+            return "agent-123"
+
+        author_redacted, bot_redacted, matches = _resolve_author_evidence(
+            post_ticket_data={"latest_comment_author_id": "agent-123"},
+            latest_comment_is_operator=True,
+            allow_network=True,
+            env_name="dev",
+            region="us-east-2",
+            session=None,
+            load_bot_agent_id_fn=_loader,
+        )
+        self.assertTrue(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
 
 class OrderMatchMethodFinalizerTests(unittest.TestCase):
     def test_finalize_order_match_method_probe(self) -> None:
@@ -1942,6 +1961,38 @@ class OrderMatchMethodFinalizerTests(unittest.TestCase):
         self.assertEqual(method, "email_only")
         self.assertEqual(source, "ticket_probe_resolution")
         self.assertEqual(raw, "email_only")
+
+
+class OrderMatchMethodResolverTests(unittest.TestCase):
+    def test_resolve_order_match_method_from_action(self) -> None:
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": True},
+            order_resolution={"resolvedBy": "richpanel_order_number"},
+            order_status_mode=True,
+            pre_ticket=None,
+            allow_network=False,
+            safe_mode=None,
+            automation_enabled=None,
+        )
+        self.assertEqual(method, "order_number")
+        self.assertEqual(source, "action_order_resolution")
+
+    def test_resolve_order_match_method_from_probe(self) -> None:
+        def _probe(**kwargs: Any) -> dict:
+            return {"resolvedBy": "shopify_email_only"}
+
+        method, source = _resolve_order_match_method_details(
+            order_match_evidence={"order_match_success": None},
+            order_resolution=None,
+            order_status_mode=True,
+            pre_ticket={"id": "t1"},
+            allow_network=True,
+            safe_mode=None,
+            automation_enabled=None,
+            probe_fn=_probe,
+        )
+        self.assertEqual(method, "email_only")
+        self.assertEqual(source, "ticket_probe_resolution")
 
 
 class OutboundResultHelperTests(unittest.TestCase):
