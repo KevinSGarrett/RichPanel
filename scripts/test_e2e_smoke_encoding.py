@@ -1253,6 +1253,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
         self.assertIn("outbound_endpoint_used", payload["proof_fields"])
         self.assertIn("send_message_used", payload["proof_fields"])
+        self.assertIn("send_message_endpoint_used", payload["proof_fields"])
         self.assertIn("send_message_status_code", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_url", payload["proof_fields"])
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
@@ -1260,7 +1261,12 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("latest_comment_is_operator", payload["proof_fields"])
         self.assertIn("latest_comment_source", payload["proof_fields"])
         self.assertIn("order_match_method", payload["proof_fields"])
+        self.assertIn("order_match_method_raw", payload["proof_fields"])
+        self.assertIn("order_match_method_source", payload["proof_fields"])
         self.assertIn("order_match_by_number", payload["proof_fields"])
+        self.assertIn("send_message_author_id_redacted", payload["proof_fields"])
+        self.assertIn("bot_agent_id_redacted", payload["proof_fields"])
+        self.assertIn("send_message_author_matches_bot_agent", payload["proof_fields"])
         self.assertIn("operator_reply_confirmed", payload["proof_fields"])
         self.assertIn("operator_reply_reason", payload["proof_fields"])
         self.assertIn("openai_routing_response_id", payload["proof_fields"])
@@ -1680,6 +1686,9 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
             send_message_path_confirmed=True,
             send_message_used=True,
             send_message_status_code=200,
+            send_message_author_id_redacted="redacted:author",
+            bot_agent_id_redacted="redacted:bot",
+            send_message_author_matches_bot_agent=True,
         )
         self.assertEqual(fields["operator_reply_present"], True)
         self.assertEqual(fields["operator_reply_count_delta"], 1)
@@ -1692,7 +1701,11 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         self.assertEqual(fields["send_message_path_required"], True)
         self.assertEqual(fields["send_message_path_confirmed"], True)
         self.assertEqual(fields["send_message_used"], True)
+        self.assertEqual(fields["send_message_endpoint_used"], True)
         self.assertEqual(fields["send_message_status_code"], 200)
+        self.assertEqual(fields["send_message_author_id_redacted"], "redacted:author")
+        self.assertEqual(fields["bot_agent_id_redacted"], "redacted:bot")
+        self.assertEqual(fields["send_message_author_matches_bot_agent"], True)
 
     def test_build_operator_send_message_richpanel_fields(self) -> None:
         fields = _build_operator_send_message_richpanel_fields(
@@ -3131,6 +3144,7 @@ class RedactionHelpersTests(unittest.TestCase):
             "path": "/v1/tickets/abc123",
             "customer_email": "person@example.com",
             "customer_name": "Jane Doe",
+            "latest_comment_author_id": "agent-123",
         }
         sanitized = _sanitize_ticket_snapshot(snapshot)
         self.assertIsNotNone(sanitized)
@@ -3140,6 +3154,8 @@ class RedactionHelpersTests(unittest.TestCase):
         self.assertEqual(sanitized.get("path_redacted"), "/v1/tickets/<redacted>")
         self.assertIn("customer_email_fingerprint", sanitized)
         self.assertIn("customer_name_fingerprint", sanitized)
+        self.assertNotIn("latest_comment_author_id", sanitized)
+        self.assertIn("latest_comment_author_id_fingerprint", sanitized)
 
     def test_sanitize_tag_result_redacts_path(self) -> None:
         tag_result = {"path": "/v1/tickets/abc123/add-tags", "status": "ok"}
