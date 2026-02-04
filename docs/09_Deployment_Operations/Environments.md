@@ -17,6 +17,23 @@ We use **separate AWS accounts** for:
 
 ---
 
+## Multi-account preflight (required)
+Before any secrets-backed run, verify the AWS account/region and required secrets
+match the intended environment. This prevents accidentally drifting into the wrong
+AWS account (dev vs prod) or region.
+
+Run locally (PII-safe):
+```bash
+python scripts/aws_account_preflight.py --env dev --region us-east-2
+python scripts/secrets_preflight.py --env dev --region us-east-2 --out artifacts/preflight_dev.json
+```
+
+Expected behavior:
+- Fails fast if the AWS account id does not match the environment.
+- Fails fast if required secrets or SSM kill-switch parameters are missing or unreadable.
+
+---
+
 ## Environment purposes
 
 ### Dev

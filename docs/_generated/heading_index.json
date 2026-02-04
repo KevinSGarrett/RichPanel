@@ -13495,6 +13495,12 @@
       "anchor": "verification-checklist"
     }
   ],
+  "multi-account + secrets preflight (required)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "multi-account-secrets-preflight-required"
+    }
+  ],
   "live read-only shadow eval script (local)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
@@ -16125,6 +16131,12 @@
     {
       "path": "09_Deployment_Operations/Environments.md",
       "anchor": "recommended-environment-model-v1"
+    }
+  ],
+  "multi-account preflight (required)": [
+    {
+      "path": "09_Deployment_Operations/Environments.md",
+      "anchor": "multi-account-preflight-required"
     }
   ],
   "environment purposes": [

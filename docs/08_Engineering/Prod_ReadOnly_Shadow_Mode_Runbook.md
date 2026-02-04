@@ -112,6 +112,22 @@ Before enabling shadow mode in production:
 - [ ] Review CloudWatch logs to confirm no write operations are attempted
 - [ ] Run the "Prove zero writes" audit (see below)
 
+### Multi-account + secrets preflight (required)
+Run the preflight before any prod shadow run to guarantee you are in the correct
+AWS account and region and can read the required secrets/SSM kill switches:
+
+```bash
+python scripts/secrets_preflight.py --env prod --region us-east-2 --out artifacts/preflight_prod.json
+```
+
+If the preflight fails with `AccessDenied`, update the IAM policy for the role
+used by Cursor/GitHub OIDC (typically `arn:aws:iam::<account_id>:role/rp-ci-deploy`)
+to allow `secretsmanager:DescribeSecret`, `secretsmanager:GetSecretValue`, and
+`ssm:DescribeParameters` on the required paths.
+
+**Important:** The preflight only checks **existence/readability** of secrets and
+SSM parameters. It does **not** validate external API tokens (no HTTP 200 probe).
+
 ### Live read-only shadow eval script (local)
 
 - Script: `scripts/live_readonly_shadow_eval.py`

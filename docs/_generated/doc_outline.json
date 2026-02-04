@@ -12144,6 +12144,11 @@
       },
       {
         "level": 3,
+        "text": "Multi-account + secrets preflight (required)",
+        "anchor": "multi-account-secrets-preflight-required"
+      },
+      {
+        "level": 3,
         "text": "Live read-only shadow eval script (local)",
         "anchor": "live-read-only-shadow-eval-script-local"
       },
@@ -14566,6 +14571,11 @@
         "level": 2,
         "text": "Recommended environment model (v1)",
         "anchor": "recommended-environment-model-v1"
+      },
+      {
+        "level": 2,
+        "text": "Multi-account preflight (required)",
+        "anchor": "multi-account-preflight-required"
       },
       {
         "level": 2,
