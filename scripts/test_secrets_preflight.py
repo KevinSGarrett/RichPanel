@@ -18,6 +18,11 @@ class _DummySTSClient:
         return {"Account": self._account_id}
 
 
+class _FailingSTSClient:
+    def get_caller_identity(self):
+        raise RuntimeError("STS unavailable")
+
+
 class _DummySecretsClient:
     def __init__(self, *, missing_ids=None, unreadable_ids=None) -> None:
         self._missing = set(missing_ids or [])
@@ -69,18 +74,20 @@ class _DummySession:
         self,
         *,
         account_id: str = "151124909266",
+        sts_client=None,
         secrets_client=None,
         ssm_client=None,
         lambda_client=None,
     ) -> None:
         self._account_id = account_id
+        self._sts = sts_client
         self._secrets = secrets_client or _DummySecretsClient()
         self._ssm = ssm_client or _DummySSMClient()
         self._lambda = lambda_client or _DummyLambdaClient(bot_agent_id=None)
 
     def client(self, service_name: str, region_name=None):
         if service_name == "sts":
-            return _DummySTSClient(self._account_id)
+            return self._sts or _DummySTSClient(self._account_id)
         if service_name == "secretsmanager":
             return self._secrets
         if service_name == "ssm":
@@ -126,6 +133,38 @@ class AccountPreflightTests(unittest.TestCase):
             )
         self.assertFalse(result.ok)
         self.assertIn("region_mismatch", result.error or "")
+
+    def test_account_preflight_boto3_unavailable(self) -> None:
+        with patch.object(aws_account_preflight, "boto3", new=None):
+            result = aws_account_preflight.run_account_preflight(
+                env_name="dev",
+                region="us-east-2",
+                session=None,
+                fail_on_error=False,
+            )
+        self.assertEqual(result.error, "boto3_unavailable")
+
+    def test_account_preflight_unknown_env(self) -> None:
+        session = _DummySession(account_id="151124909266")
+        with patch.object(aws_account_preflight, "boto3", new=SimpleNamespace()):
+            result = aws_account_preflight.run_account_preflight(
+                env_name="unknown",
+                region="us-east-2",
+                session=session,
+                fail_on_error=False,
+            )
+        self.assertEqual(result.error, "unknown_env")
+
+    def test_account_preflight_sts_exception(self) -> None:
+        session = _DummySession(sts_client=_FailingSTSClient())
+        with patch.object(aws_account_preflight, "boto3", new=SimpleNamespace()):
+            result = aws_account_preflight.run_account_preflight(
+                env_name="dev",
+                region="us-east-2",
+                session=session,
+                fail_on_error=False,
+            )
+        self.assertEqual(result.error, "RuntimeError")
 
 
 class SecretsPreflightTests(unittest.TestCase):
@@ -185,6 +224,42 @@ class SecretsPreflightTests(unittest.TestCase):
         self.assertEqual(payload["overall_status"], "FAIL")
         self.assertIn("rp-mw/prod/richpanel/api_key", payload["failures"]["required_secrets"])
 
+    def test_secrets_preflight_boto3_unavailable(self) -> None:
+        with patch.object(secrets_preflight, "boto3", new=None):
+            payload = secrets_preflight.run_secrets_preflight(
+                env_name="dev",
+                region="us-east-2",
+                session=None,
+                fail_on_error=False,
+            )
+        self.assertEqual(payload["overall_status"], "FAIL")
+        self.assertEqual(payload["error"], "boto3_unavailable")
+
+    def test_secrets_preflight_missing_ssm(self) -> None:
+        ssm_client = _DummySSMClient(missing_names={"/rp-mw/dev/safe_mode"})
+        session = _DummySession(ssm_client=ssm_client)
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight,
+                "run_account_preflight",
+                return_value=aws_account_preflight.AccountPreflightResult(
+                    env="dev",
+                    region="us-east-2",
+                    aws_account_id="151124909266",
+                    expected_account_id="151124909266",
+                    expected_region="us-east-2",
+                    ok=True,
+                    error=None,
+                ),
+            ):
+                payload = secrets_preflight.run_secrets_preflight(
+                    env_name="dev",
+                    region="us-east-2",
+                    session=session,
+                    fail_on_error=False,
+                )
+        self.assertIn("/rp-mw/dev/safe_mode", payload["failures"]["required_ssm"])
+
 
 class SyncBotAgentSecretTests(unittest.TestCase):
     def test_sync_bot_agent_secret_skips_when_exists(self) -> None:
@@ -204,6 +279,19 @@ class SyncBotAgentSecretTests(unittest.TestCase):
             result = sync_bot_agent_secret.main_with_args(env="prod", region="us-east-2")
         self.assertEqual(result, 0)
         self.assertEqual(secrets_client.created[0][0], "rp-mw/prod/richpanel/bot_agent_id")
+
+    def test_sync_bot_agent_secret_missing_env(self) -> None:
+        secrets_client = _DummySecretsClient(missing_ids={"rp-mw/prod/richpanel/bot_agent_id"})
+        lambda_client = _DummyLambdaClient(bot_agent_id=None)
+        session = _DummySession(secrets_client=secrets_client, lambda_client=lambda_client)
+        with patch.object(sync_bot_agent_secret, "boto3", new=SimpleNamespace(session=SimpleNamespace(Session=lambda region_name=None: session))):
+            with self.assertRaises(SystemExit):
+                sync_bot_agent_secret.main_with_args(env="prod", region="us-east-2")
+
+    def test_sync_bot_agent_secret_boto3_missing(self) -> None:
+        with patch.object(sync_bot_agent_secret, "boto3", new=None):
+            with self.assertRaises(SystemExit):
+                sync_bot_agent_secret.main_with_args(env="prod", region="us-east-2")
 
 
 if __name__ == "__main__":
