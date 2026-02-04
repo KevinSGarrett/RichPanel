@@ -1,0 +1,120 @@
+{
+  "run_id": "B70-C-20260204-0007",
+  "env": "dev",
+  "aws_account_id": "151124909266",
+  "ticket_number_redacted": "redacted:4579e127cc26",
+  "ticket_number_fingerprint": "4579e127cc26",
+  "order_number_redacted": "redacted:2d4fb51852d7",
+  "order_match_method": "order_number",
+  "order_match_method_raw": "none",
+  "order_match_method_source": "shopify_lookup_probe",
+  "order_match_by_number": true,
+  "routing_evidence": {
+    "openai_routing_used": true,
+    "openai_rewrite_used": true,
+    "openai_routing_response_id": "chatcmpl-D5dOkcPulNBBJ9jW45uDLSd0nnMkH",
+    "openai_rewrite_response_id": "chatcmpl-D5dOpsLpuYnodzv5oEOW1Lg6u4S8v",
+    "final_route": "order_status_automation"
+  },
+  "outbound_evidence": {
+    "send_message_endpoint_used": true,
+    "send_message_status_code": 200,
+    "latest_comment_is_operator": true,
+    "send_message_author_id_redacted": "redacted:847bae851598",
+    "bot_agent_id_redacted": "redacted:847bae851598",
+    "send_message_author_matches_bot_agent": true,
+    "outbound_endpoint_used": "/send-message"
+  },
+  "close_evidence": {
+    "closed_after": true,
+    "status_before": "open",
+    "status_after": "closed"
+  },
+  "richpanel_ticket_snapshots": {
+    "before": {
+      "status": "OPEN",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket"
+      ],
+      "updated_at": "2026-02-04T20:04:13.665Z",
+      "message_count": 1,
+      "last_message_source": "unknown",
+      "operator_reply_present": false,
+      "operator_reply_count": 0,
+      "latest_comment_is_operator": false,
+      "latest_comment_source": null,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "be8e269b8da7",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "customer_email_fingerprint": "571abc2d0add",
+      "customer_name_fingerprint": "93ab980e4b52",
+      "latest_comment_author_id_fingerprint": "571abc2d0add"
+    },
+    "after": {
+      "status": "CLOSED",
+      "state": null,
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-unknown_other",
+        "mw-routing-applied",
+        "mw-intent-order_status_tracking",
+        "mw-llm-routed",
+        "mw-auto-replied",
+        "mw-order-status-answered",
+        "mw-order-status-answered:B70-C-20260204-0007",
+        "mw-outbound-path-send-message",
+        "mw-reply-sent"
+      ],
+      "updated_at": "2026-02-04T20:04:32.532Z",
+      "message_count": 2,
+      "last_message_source": "operator",
+      "operator_reply_present": true,
+      "operator_reply_count": 1,
+      "latest_comment_is_operator": true,
+      "latest_comment_source": null,
+      "ticket_channel": "email",
+      "status_code": 200,
+      "dry_run": false,
+      "ticket_id_fingerprint": "be8e269b8da7",
+      "endpoint_variant": "id",
+      "path_redacted": "/v1/tickets/<redacted>",
+      "customer_email_fingerprint": "571abc2d0add",
+      "customer_name_fingerprint": "93ab980e4b52",
+      "latest_comment_author_id_fingerprint": "847bae851598"
+    }
+  },
+  "openai": {
+    "routing": {
+      "llm_called": true,
+      "model": "gpt-5.2-chat-latest",
+      "confidence": 0.93,
+      "response_id": "chatcmpl-D5dOkcPulNBBJ9jW45uDLSd0nnMkH",
+      "response_id_unavailable_reason": null,
+      "final_intent": "order_status_tracking",
+      "primary_source": "llm",
+      "final_source": "openai",
+      "gated_reason": null
+    },
+    "rewrite": {
+      "rewrite_attempted": true,
+      "rewrite_applied": false,
+      "model": "gpt-5.2-chat-latest",
+      "response_id": "chatcmpl-D5dOpsLpuYnodzv5oEOW1Lg6u4S8v",
+      "response_id_unavailable_reason": null,
+      "fallback_used": true,
+      "reason": "low_confidence",
+      "error_class": "OpenAILowConfidence",
+      "original_hash": "86f81eeb1f19",
+      "rewritten_hash": "86f81eeb1f19",
+      "rewritten_changed": false
+    }
+  },
+  "artifacts": {
+    "source_proof": "REHYDRATION_PACK/RUNS/B70/C/PROOF/sandbox_order_status_dev_proof_run7.json",
+    "created_ticket_proof": "REHYDRATION_PACK/RUNS/B70/C/PROOF/sandbox_created_ticket_run7.json"
+  }
+}
