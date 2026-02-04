@@ -5,7 +5,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-sonnet-4.5`  
-**Anthropic response id:** `pending — PR not created yet`
+**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/220`
 
 ### 1) Summary
 - Prevent Shopify refresh from overwriting stable admin API tokens unless a refresh token is present.
@@ -67,9 +67,9 @@
 - `python scripts/shopify_health_check.py --refresh-dry-run --json --out-json REHYDRATION_PACK/RUNS/B69/B/PROOF/shopify_health_check_dry_run.json --verbose`
 
 ### 7) Results & evidence
-**CI:** pending — PR not created yet  
-**Codecov:** pending — PR not created yet  
-**Bugbot:** pending — PR not created yet  
+**CI:** pending — https://github.com/KevinSGarrett/RichPanel/pull/220/checks  
+**Codecov:** pending — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/220  
+**Bugbot:** pending — https://github.com/KevinSGarrett/RichPanel/pull/220  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B69/B/PROOF/shopify_health_check_prod.json`
