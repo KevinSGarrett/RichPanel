@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from aws_account_preflight import run_account_preflight, resolve_region
+from aws_account_preflight import normalize_env, run_account_preflight, resolve_region
 
 try:  # pragma: no cover - exercised in integration runs
     import boto3  # type: ignore
@@ -104,13 +104,6 @@ class CheckResult:
         return payload
 
 
-def _normalize_env(env_name: str) -> str:
-    normalized = (env_name or "").strip().lower()
-    if normalized == "production":
-        return "prod"
-    return normalized or "local"
-
-
 def _check_secret(
     secrets_client: Any,
     secret_id: str,
@@ -196,7 +189,7 @@ def run_secrets_preflight(
     out_path: Optional[str] = None,
     fail_on_error: bool = True,
 ) -> Dict[str, Any]:
-    normalized_env = _normalize_env(env_name)
+    normalized_env = normalize_env(env_name)
     resolved_region = resolve_region(region)
 
     account_result = run_account_preflight(

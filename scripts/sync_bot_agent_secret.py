@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 from typing import Optional
 
+from aws_account_preflight import normalize_env, resolve_region
+
 try:  # pragma: no cover - exercised in integration runs
     import boto3  # type: ignore
     from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
@@ -13,19 +15,6 @@ except ImportError:  # pragma: no cover - offline/test mode
         """Placeholder to allow tests without boto3/botocore."""
 
     BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
-
-
-def _normalize_env(env_name: str) -> str:
-    normalized = (env_name or "").strip().lower()
-    if normalized == "production":
-        return "prod"
-    return normalized or "local"
-
-
-def _resolve_region(region: Optional[str]) -> str:
-    if region:
-        return str(region).strip()
-    return "us-east-2"
 
 
 def _fetch_bot_agent_id(lambda_client, *, env_name: str) -> str:
@@ -63,8 +52,8 @@ def main_with_args(*, env: str, region: Optional[str] = None) -> int:
     if boto3 is None:
         raise SystemExit("boto3 is required to sync bot agent secrets.")
 
-    env_name = _normalize_env(env)
-    resolved_region = _resolve_region(region)
+    env_name = normalize_env(env)
+    resolved_region = resolve_region(region)
     session = boto3.session.Session(region_name=resolved_region)
     lambda_client = session.client("lambda", region_name=resolved_region)
     secrets_client = session.client("secretsmanager", region_name=resolved_region)

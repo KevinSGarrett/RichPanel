@@ -197,7 +197,7 @@ class AccountPreflightTests(unittest.TestCase):
                 )
 
     def test_account_preflight_helpers(self) -> None:
-        self.assertEqual(aws_account_preflight._normalize_env("production"), "prod")
+        self.assertEqual(aws_account_preflight.normalize_env("production"), "prod")
         with patch.dict(os.environ, {"AWS_REGION": "us-west-2"}):
             self.assertEqual(aws_account_preflight.resolve_region(None), "us-west-2")
         with patch.dict(os.environ, {}, clear=True):
@@ -288,7 +288,7 @@ class SecretsPreflightTests(unittest.TestCase):
             )
         self.assertEqual(payload["overall_status"], "FAIL")
         self.assertEqual(payload["error"], "boto3_unavailable")
-        self.assertEqual(secrets_preflight._normalize_env("production"), "prod")
+        self.assertEqual(aws_account_preflight.normalize_env("production"), "prod")
 
     def test_secrets_preflight_missing_ssm(self) -> None:
         ssm_client = _DummySSMClient(missing_names={"/rp-mw/dev/safe_mode"})
@@ -453,7 +453,7 @@ class SyncBotAgentSecretTests(unittest.TestCase):
                 sync_bot_agent_secret.main_with_args(env="prod", region="us-east-2")
 
     def test_sync_bot_agent_secret_helpers(self) -> None:
-        self.assertEqual(sync_bot_agent_secret._normalize_env("production"), "prod")
+        self.assertEqual(aws_account_preflight.normalize_env("production"), "prod")
         self.assertEqual(sync_bot_agent_secret._resolve_region(None), "us-east-2")
 
     def test_sync_bot_agent_secret_main(self) -> None:

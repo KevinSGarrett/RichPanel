@@ -59,6 +59,10 @@ def _normalize_env(env_name: str) -> str:
     return normalized or "local"
 
 
+def normalize_env(env_name: str) -> str:
+    return _normalize_env(env_name)
+
+
 def resolve_region(region: Optional[str]) -> str:
     if region:
         return str(region).strip()
