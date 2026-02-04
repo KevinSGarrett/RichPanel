@@ -57,6 +57,11 @@ class _DummySSMClient:
             return {"Parameters": []}
         return {"Parameters": [{"Name": name}]}
 
+    def get_parameter(self, *, Name: str, WithDecryption: bool = False):
+        if Name in self._missing:
+            raise RuntimeError("ParameterNotFound")
+        return {"Parameter": {"Name": Name}}
+
 
 class _DummyLambdaClient:
     def __init__(self, *, bot_agent_id: str | None) -> None:
@@ -317,6 +322,9 @@ class SecretsPreflightTests(unittest.TestCase):
 
         class _FailingSSMClient(_DummySSMClient):
             def describe_parameters(self, *, ParameterFilters):
+                return {"Parameters": [{"Name": ParameterFilters[0]["Values"][0]}]}
+
+            def get_parameter(self, *, Name: str, WithDecryption: bool = False):
                 raise RuntimeError("SSM down")
 
         secrets_client = _FailingSecretsClient()

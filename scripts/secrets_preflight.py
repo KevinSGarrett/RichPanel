@@ -175,6 +175,16 @@ def _check_ssm_param(
             error="NotFound",
             note=note,
         )
+    try:
+        ssm_client.get_parameter(Name=name, WithDecryption=False)
+    except (BotoCoreError, ClientError, Exception) as exc:
+        return CheckResult(
+            exists=True,
+            readable=False,
+            required=required,
+            error=exc.__class__.__name__,
+            note=note,
+        )
     return CheckResult(exists=True, readable=True, required=required, note=note)
 
 
