@@ -24,6 +24,29 @@ def _safe_token_format(raw_format: Optional[str]) -> str:
     return "raw"
 
 
+def _classify_status(status_code: Optional[int], dry_run: bool) -> Tuple[str, Optional[str]]:
+    if dry_run:
+        return "DRY_RUN", None
+    if status_code == 401:
+        return "FAIL_INVALID_TOKEN", "Invalid access token (401). Check AWS Secrets Manager."
+    if status_code == 403:
+        return "FAIL_FORBIDDEN", "Token lacks required scopes (403). Verify Shopify app scopes."
+    if status_code == 429:
+        return "FAIL_RATE_LIMIT", "Shopify rate limit hit (429). Retry after cooldown."
+    if isinstance(status_code, int) and 200 <= status_code < 300:
+        return "PASS", None
+    return "FAIL", "Unexpected response from Shopify."
+
+
+def _truncate_text(value: Optional[str], limit: int = 200) -> Optional[str]:
+    if not value:
+        return None
+    text = str(value)
+    if len(text) <= limit:
+        return text
+    return text[: limit - 3] + "..."
+
+
 def _load_client_credentials(client: ShopifyClient) -> Tuple[bool, bool]:
     try:
         client_id, client_secret = client._load_client_credentials()  # type: ignore[attr-defined]
@@ -51,6 +74,11 @@ def main() -> int:
     parser.add_argument(
         "--out-json",
         help="Optional JSON output path for proof artifacts.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit compact JSON (single line) for CI consumption.",
     )
     parser.add_argument(
         "--aws-region",
@@ -108,10 +136,18 @@ def main() -> int:
     health_payload: Dict[str, Any] = {}
     try:
         response = client.get_shop(safe_mode=False, automation_enabled=True)
+        body_excerpt = None
+        if response.status_code and response.status_code >= 400:
+            try:
+                body_excerpt = _truncate_text(response.body.decode("utf-8"))
+            except Exception:
+                body_excerpt = None
         health_payload = {
             "status_code": response.status_code,
             "dry_run": response.dry_run,
             "reason": response.reason,
+            "url": response.url,
+            "body_excerpt": body_excerpt,
         }
     except Exception as exc:  # pragma: no cover - defensive logging
         error = str(exc)
@@ -119,19 +155,18 @@ def main() -> int:
 
     token_diagnostics = client.token_diagnostics()
     has_client_id, has_client_secret = _load_client_credentials(client)
-    can_refresh = bool(has_client_id and has_client_secret)
-    refresh_mode = "client_credentials"
-    if token_diagnostics.get("has_refresh_token"):
-        refresh_mode = "refresh_token"
+    has_refresh_token = bool(token_diagnostics.get("has_refresh_token"))
+    can_refresh = bool(has_client_id and has_client_secret and has_refresh_token)
+    refresh_mode = "refresh_token" if has_refresh_token else "none"
 
     token_format = _safe_token_format(token_diagnostics.get("raw_format"))
-    status = "FAIL"
-    if health_payload.get("dry_run"):
-        status = "DRY_RUN"
-    elif isinstance(health_payload.get("status_code"), int) and 200 <= int(
-        health_payload["status_code"]
-    ) < 300:
-        status = "PASS"
+    status_code = (
+        int(health_payload["status_code"])
+        if isinstance(health_payload.get("status_code"), int)
+        else None
+    )
+    dry_run = bool(health_payload.get("dry_run"))
+    status, action_hint = _classify_status(status_code, dry_run)
 
     result = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
@@ -143,6 +178,7 @@ def main() -> int:
         "token_type": token_diagnostics.get("token_type"),
         "expires_at": token_diagnostics.get("expires_at"),
         "expired": token_diagnostics.get("expired"),
+        "action_hint": action_hint,
         "can_refresh": can_refresh,
         "refresh_mode": refresh_mode,
         "refresh_attempted": refresh_attempted,
@@ -157,7 +193,10 @@ def main() -> int:
     if args.out_json:
         _write_json(Path(args.out_json), result)
 
-    print(json.dumps(result, indent=2, sort_keys=True))
+    if args.json:
+        print(json.dumps(result, sort_keys=True))
+    else:
+        print(json.dumps(result, indent=2, sort_keys=True))
 
     return 0 if status == "PASS" else 2
 

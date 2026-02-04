@@ -23,6 +23,27 @@ class ShopifyHealthCheckTests(unittest.TestCase):
         self.assertEqual(health_check._safe_token_format("json"), "json")
         self.assertEqual(health_check._safe_token_format("plain"), "raw")
 
+    def test_classify_status(self) -> None:
+        status, hint = health_check._classify_status(200, False)
+        self.assertEqual(status, "PASS")
+        self.assertIsNone(hint)
+
+        status, hint = health_check._classify_status(401, False)
+        self.assertEqual(status, "FAIL_INVALID_TOKEN")
+        self.assertIsNotNone(hint)
+
+        status, hint = health_check._classify_status(403, False)
+        self.assertEqual(status, "FAIL_FORBIDDEN")
+        self.assertIsNotNone(hint)
+
+        status, hint = health_check._classify_status(429, False)
+        self.assertEqual(status, "FAIL_RATE_LIMIT")
+        self.assertIsNotNone(hint)
+
+        status, hint = health_check._classify_status(None, True)
+        self.assertEqual(status, "DRY_RUN")
+        self.assertIsNone(hint)
+
     def test_load_client_credentials(self) -> None:
         client = _StubClient("id", "secret")
         has_id, has_secret = health_check._load_client_credentials(client)
@@ -56,6 +77,7 @@ class ShopifyHealthCheckTests(unittest.TestCase):
             status_code = 200
             dry_run = False
             reason = None
+            url = "https://example.myshopify.com/admin/api/2024-01/shop.json"
 
         class _StubClient:
             environment = "prod"

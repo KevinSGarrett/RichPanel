@@ -508,6 +508,16 @@ class ShopifyClient:
         if not access_token or not self._token_info:
             self._last_refresh_error = "missing_access_token"
             return False
+        if not self._token_info.refresh_token:
+            self._logger.info(
+                "shopify.refresh_skipped",
+                extra={
+                    "reason": "missing_refresh_token",
+                    "secret_id": self.access_token_secret_id,
+                },
+            )
+            self._last_refresh_error = "missing_refresh_token"
+            return False
         return self._refresh_access_token(self._token_info)
 
     def refresh_error(self) -> Optional[str]:
@@ -823,6 +833,17 @@ class ShopifyClient:
         return str(secret_value)
 
     def _refresh_access_token(self, token_info: ShopifyTokenInfo) -> bool:
+        if not token_info.refresh_token:
+            self._logger.info(
+                "shopify.refresh_skipped",
+                extra={
+                    "reason": "missing_refresh_token",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                },
+            )
+            self._last_refresh_error = "missing_refresh_token"
+            return False
         client_id, client_secret = self._load_client_credentials()
         if not client_id or not client_secret:
             self._logger.warning(
@@ -836,19 +857,12 @@ class ShopifyClient:
             return False
 
         url = f"https://{self.shop_domain}/admin/oauth/access_token"
-        if token_info.refresh_token:
-            payload = {
-                "grant_type": "refresh_token",
-                "refresh_token": token_info.refresh_token,
-                "client_id": client_id,
-                "client_secret": client_secret,
-            }
-        else:
-            payload = {
-                "grant_type": "client_credentials",
-                "client_id": client_id,
-                "client_secret": client_secret,
-            }
+        payload = {
+            "grant_type": "refresh_token",
+            "refresh_token": token_info.refresh_token,
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
         body = urllib.parse.urlencode(payload).encode("utf-8")
         headers = {
             "accept": "application/json",
@@ -939,6 +953,11 @@ class ShopifyClient:
             source_secret_id=token_info.source_secret_id,
         )
         self._persist_token_info(updated_info)
+        secret_id = token_info.source_secret_id or self.access_token_secret_id
+        self._logger.info(
+            "shopify.refresh_succeeded",
+            extra={"secret_id": secret_id, "expires_at": updated_info.expires_at},
+        )
         self._token_info = updated_info
         self._access_token = updated_info.access_token
         self._last_refresh_error = None
@@ -1045,6 +1064,14 @@ class ShopifyClient:
         attempt: int,
         retry_in: Optional[float],
     ) -> None:
+        if response.status_code == 401:
+            self._logger.warning(
+                "shopify.invalid_token", extra={"url": response.url}
+            )
+        elif response.status_code == 403:
+            self._logger.warning(
+                "shopify.forbidden", extra={"url": response.url}
+            )
         if response.status_code == 429:
             self._logger.warning("shopify.rate_limited status=429")
         extra = {

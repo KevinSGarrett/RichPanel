@@ -124,9 +124,10 @@ The admin API token secret can be either a plain token string or a JSON payload:
 ```
 
 For rotating tokens, the refresh Lambda uses the Shopify OAuth
-`grant_type=client_credentials` flow with the client id/secret to mint a fresh
-access token on a schedule. A refresh token is optional; if present, it will be
-used, but it is not required for the client-credentials flow.
+`grant_type=refresh_token` flow with the client id/secret **and a refresh
+token** to mint a fresh access token on a schedule. If no refresh token is
+available, the refresh job **skips** rotation and leaves the stable admin API
+token intact.
 
 **Code reference:** `backend/src/integrations/shopify/client.py` L178-L189
 
@@ -147,6 +148,12 @@ GitHub Actions Secrets are used **exclusively** for CI/PR smoke tests in dev. Th
 | `STAGING_RICHPANEL_WEBHOOK_TOKEN` | Staging webhook token (optional CI tests)      | `rp-mw/staging/richpanel/webhook_token` |
 | `STAGING_OPENAI_API_KEY`        | Staging OpenAI API key (optional CI tests)       | `rp-mw/staging/openai/api_key`       |
 | `CODECOV_TOKEN`                 | Codecov upload token (coverage reporting)        | N/A (Codecov service)                |
+
+**Shopify token strategy for CI:** production workflows fetch
+`rp-mw/prod/shopify/admin_api_token` via GitHub OIDC + AWS Secrets Manager
+(`order_status_prod_shadow.yml`, `shadow_live_readonly_eval.yml`). This keeps
+Shopify tokens in AWS as the single source of truth and avoids rotating tokens
+in GitHub secrets.
 
 ### ⚠️ Production Secret Policy
 

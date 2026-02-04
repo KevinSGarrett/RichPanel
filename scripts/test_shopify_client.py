@@ -492,6 +492,7 @@ class ShopifyClientTests(unittest.TestCase):
         client = ShopifyClient(access_token="shpat_token")
         client._secrets_client_obj = _StubSecretsClient({})
         self.assertFalse(client.refresh_access_token())
+        self.assertEqual(client.refresh_error(), "missing_refresh_token")
 
     def test_parse_expires_at_iso_timestamp(self) -> None:
         secret_id = "rp-mw/local/shopify/admin_api_token"
@@ -738,8 +739,10 @@ class ShopifyClientTests(unittest.TestCase):
         )
         client._load_access_token()
         self.assertIsNotNone(client._token_info)
-        self.assertTrue(client._refresh_access_token(client._token_info))
-        self.assertEqual(client._access_token, "new-token")
+        self.assertFalse(client._refresh_access_token(client._token_info))
+        self.assertEqual(client.refresh_error(), "missing_refresh_token")
+        self.assertEqual(client._access_token, "old-token")
+        self.assertEqual(len(transport.requests), 0)
 
     def test_extract_secret_field_returns_none_when_key_missing(self) -> None:
         client = ShopifyClient(access_token="test-token")
@@ -757,7 +760,11 @@ class ShopifyClientTests(unittest.TestCase):
         client_secret_secret = "rp-mw/local/shopify/client_secret"
         secrets = _SelectiveStubSecretsClient(
             {
-                token_secret: {"SecretString": "old-token"},
+                token_secret: {
+                    "SecretString": json.dumps(
+                        {"access_token": "old-token", "refresh_token": "refresh"}
+                    )
+                },
                 client_id_secret: {"SecretString": "client-id"},
                 client_secret_secret: {"SecretString": "client-secret"},
             }
