@@ -55,6 +55,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _evaluate_order_match_evidence,
     _order_resolution_is_order_number,
     _extract_order_match_method,
+    _finalize_order_match_method,
     _extract_order_resolution_from_actions,
     _normalize_optional_text,
     _probe_order_resolution_from_ticket,
@@ -118,6 +119,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _resolve_send_message_status_code,
     _resolve_operator_reply_reason,
     _load_bot_agent_id,
+    _resolve_author_match,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1896,6 +1898,50 @@ class BotAgentIdLoaderTests(unittest.TestCase):
                 env_name="dev", region="us-east-2", session=_Session()
             )
         )
+
+
+class AuthorMatchResolverTests(unittest.TestCase):
+    def test_resolve_author_match_happy_path(self) -> None:
+        author_redacted, bot_redacted, matches = _resolve_author_match(
+            latest_comment_is_operator=True,
+            latest_comment_author_id="agent-123",
+            bot_agent_id="agent-123",
+        )
+        self.assertTrue(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
+    def test_resolve_author_match_missing_inputs(self) -> None:
+        author_redacted, bot_redacted, matches = _resolve_author_match(
+            latest_comment_is_operator=False,
+            latest_comment_author_id="agent-123",
+            bot_agent_id="agent-123",
+        )
+        self.assertIsNone(matches)
+        self.assertEqual(author_redacted, "redacted:0e9a8c1ba450")
+        self.assertEqual(bot_redacted, "redacted:0e9a8c1ba450")
+
+
+class OrderMatchMethodFinalizerTests(unittest.TestCase):
+    def test_finalize_order_match_method_probe(self) -> None:
+        method, source, raw = _finalize_order_match_method(
+            order_match_method=None,
+            order_match_method_source=None,
+            order_match_by_number=True,
+        )
+        self.assertEqual(method, "order_number")
+        self.assertEqual(source, "shopify_lookup_probe")
+        self.assertIsNone(raw)
+
+    def test_finalize_order_match_method_passthrough(self) -> None:
+        method, source, raw = _finalize_order_match_method(
+            order_match_method="email_only",
+            order_match_method_source="ticket_probe_resolution",
+            order_match_by_number=False,
+        )
+        self.assertEqual(method, "email_only")
+        self.assertEqual(source, "ticket_probe_resolution")
+        self.assertEqual(raw, "email_only")
 
 
 class OutboundResultHelperTests(unittest.TestCase):

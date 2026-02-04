@@ -1446,6 +1446,31 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     return f"redacted:{_fingerprint(value)}"
 
 
+def _resolve_author_match(
+    *,
+    latest_comment_is_operator: Optional[bool],
+    latest_comment_author_id: Optional[str],
+    bot_agent_id: Optional[str],
+) -> Tuple[Optional[str], Optional[str], Optional[bool]]:
+    send_message_author_id_redacted = _redact_identifier(latest_comment_author_id)
+    bot_agent_id_redacted = _redact_identifier(bot_agent_id)
+    if (
+        latest_comment_is_operator is True
+        and latest_comment_author_id
+        and bot_agent_id
+    ):
+        send_message_author_matches_bot_agent = (
+            latest_comment_author_id == bot_agent_id
+        )
+    else:
+        send_message_author_matches_bot_agent = None
+    return (
+        send_message_author_id_redacted,
+        bot_agent_id_redacted,
+        send_message_author_matches_bot_agent,
+    )
+
+
 def _extract_created_ticket_fields(payload: Any) -> Tuple[Optional[str], Optional[str]]:
     ticket_obj: Dict[str, Any] = {}
     if isinstance(payload, dict):
@@ -3529,6 +3554,18 @@ def _extract_order_match_method(
     return None
 
 
+def _finalize_order_match_method(
+    *,
+    order_match_method: Optional[str],
+    order_match_method_source: Optional[str],
+    order_match_by_number: Optional[bool],
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    order_match_method_raw = order_match_method
+    if order_match_by_number is True:
+        return "order_number", "shopify_lookup_probe", order_match_method_raw
+    return order_match_method, order_match_method_source, order_match_method_raw
+
+
 def _probe_order_resolution_from_ticket(
     *,
     ticket_payload: Optional[Dict[str, Any]],
@@ -4743,10 +4780,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             safe_mode=item.get("safe_mode"),
             automation_enabled=item.get("automation_enabled"),
         )
-    order_match_method_raw = order_match_method
-    if order_match_by_number is True:
-        order_match_method = "order_number"
-        order_match_method_source = "shopify_lookup_probe"
+    (
+        order_match_method,
+        order_match_method_source,
+        order_match_method_raw,
+    ) = _finalize_order_match_method(
+        order_match_method=order_match_method,
+        order_match_method_source=order_match_method_source,
+        order_match_by_number=order_match_by_number,
+    )
     openai_routing = _extract_openai_routing_evidence(
         state_item, audit_item, routing_intent=routing_intent
     )
@@ -5273,18 +5315,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             if allow_network
             else None
         )
-        send_message_author_id_redacted = _redact_identifier(latest_comment_author_id)
-        bot_agent_id_redacted = _redact_identifier(bot_agent_id)
-        if (
-            latest_comment_is_operator is True
-            and latest_comment_author_id
-            and bot_agent_id
-        ):
-            send_message_author_matches_bot_agent = (
-                latest_comment_author_id == bot_agent_id
-            )
-        else:
-            send_message_author_matches_bot_agent = None
+        (
+            send_message_author_id_redacted,
+            bot_agent_id_redacted,
+            send_message_author_matches_bot_agent,
+        ) = _resolve_author_match(
+            latest_comment_is_operator=latest_comment_is_operator,
+            latest_comment_author_id=latest_comment_author_id,
+            bot_agent_id=bot_agent_id,
+        )
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
                 tags_added=tags_added,
