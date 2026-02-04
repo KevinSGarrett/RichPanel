@@ -499,6 +499,25 @@ class ShopifyClientTests(unittest.TestCase):
             self.assertFalse(client.refresh_access_token())
             self.assertEqual(client.refresh_error(), "missing_refresh_token")
 
+    def test_refresh_access_token_disabled_sets_error(self) -> None:
+        client = ShopifyClient(access_token="shpat_token")
+        client._secrets_client_obj = _StubSecretsClient({})
+        self.assertFalse(client.refresh_access_token())
+        self.assertEqual(client.refresh_error(), "refresh_disabled")
+
+    def test_refresh_access_token_private_disabled_sets_error(self) -> None:
+        client = ShopifyClient(access_token="shpat_token")
+        client._secrets_client_obj = _StubSecretsClient({})
+        token_info = ShopifyTokenInfo(
+            access_token="token",
+            refresh_token="refresh",
+            expires_at=1,
+            raw_format="json",
+            source_secret_id="rp-mw/local/shopify/admin_api_token",
+        )
+        self.assertFalse(client._refresh_access_token(token_info))
+        self.assertEqual(client.refresh_error(), "refresh_disabled")
+
     def test_parse_expires_at_iso_timestamp(self) -> None:
         secret_id = "rp-mw/local/shopify/admin_api_token"
         secrets = _StubSecretsClient(
