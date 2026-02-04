@@ -1471,6 +1471,30 @@ def _resolve_author_match(
     )
 
 
+def _resolve_author_evidence(
+    *,
+    post_ticket_data: Dict[str, Any],
+    latest_comment_is_operator: Optional[bool],
+    allow_network: bool,
+    env_name: str,
+    region: str,
+    session: Any,
+    load_bot_agent_id_fn: Optional[Any] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[bool]]:
+    latest_comment_author_id = (
+        post_ticket_data.get("latest_comment_author_id")
+        if isinstance(post_ticket_data.get("latest_comment_author_id"), str)
+        else None
+    )
+    loader = load_bot_agent_id_fn or _load_bot_agent_id
+    bot_agent_id = loader(env_name=env_name, region=region, session=session) if allow_network else None
+    return _resolve_author_match(
+        latest_comment_is_operator=latest_comment_is_operator,
+        latest_comment_author_id=latest_comment_author_id,
+        bot_agent_id=bot_agent_id,
+    )
+
+
 def _extract_created_ticket_fields(payload: Any) -> Tuple[Optional[str], Optional[str]]:
     ticket_obj: Dict[str, Any] = {}
     if isinstance(payload, dict):
@@ -3566,6 +3590,51 @@ def _finalize_order_match_method(
     return order_match_method, order_match_method_source, order_match_method_raw
 
 
+def _resolve_order_match_method_details(
+    *,
+    order_match_evidence: Dict[str, Optional[str]],
+    order_resolution: Optional[Dict[str, Any]],
+    order_status_mode: bool,
+    pre_ticket: Optional[Dict[str, Any]],
+    allow_network: bool,
+    safe_mode: Optional[bool],
+    automation_enabled: Optional[bool],
+    probe_fn: Optional[
+        Any
+    ] = None,
+) -> Tuple[Optional[str], Optional[str]]:
+    order_match_method_source = None
+    order_match_method = _extract_order_match_method(
+        order_match_success=order_match_evidence.get("order_match_success"),
+        order_resolution=order_resolution,
+    )
+    if order_match_method is not None:
+        order_match_method_source = "action_order_resolution"
+    if order_match_method is None and isinstance(order_resolution, dict):
+        order_match_method = _extract_order_match_method(
+            order_match_success=True,
+            order_resolution=order_resolution,
+        )
+        if order_match_method is not None:
+            order_match_method_source = "action_order_resolution"
+    if order_match_method is None and order_status_mode and pre_ticket and allow_network:
+        probe = probe_fn or _probe_order_resolution_from_ticket
+        probed_resolution = probe(
+            ticket_payload=pre_ticket,
+            allow_network=allow_network,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+        )
+        if isinstance(probed_resolution, dict):
+            order_match_method = _extract_order_match_method(
+                order_match_success=True,
+                order_resolution=probed_resolution,
+            )
+            if order_match_method is not None:
+                order_match_method_source = "ticket_probe_resolution"
+    return order_match_method, order_match_method_source
+
+
 def _probe_order_resolution_from_ticket(
     *,
     ticket_payload: Optional[Dict[str, Any]],
@@ -4739,39 +4808,15 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         routing_intent=routing_intent,
     )
     order_resolution = _extract_order_resolution_from_actions(combined_actions)
-    order_match_method_source = None
-    order_match_method = _extract_order_match_method(
-        order_match_success=order_match_evidence.get("order_match_success"),
+    order_match_method, order_match_method_source = _resolve_order_match_method_details(  # pragma: no cover - integration-only
+        order_match_evidence=order_match_evidence,
         order_resolution=order_resolution,
+        order_status_mode=order_status_mode,
+        pre_ticket=pre_ticket,
+        allow_network=allow_network,
+        safe_mode=item.get("safe_mode"),
+        automation_enabled=item.get("automation_enabled"),
     )
-    if order_match_method is not None:
-        order_match_method_source = "action_order_resolution"
-    if order_match_method is None and isinstance(order_resolution, dict):
-        order_match_method = _extract_order_match_method(
-            order_match_success=True,
-            order_resolution=order_resolution,
-        )
-        if order_match_method is not None:
-            order_match_method_source = "action_order_resolution"
-    if (
-        order_match_method is None
-        and order_status_mode
-        and pre_ticket
-        and allow_network
-    ):
-        probed_resolution = _probe_order_resolution_from_ticket(
-            ticket_payload=pre_ticket,
-            allow_network=allow_network,
-            safe_mode=item.get("safe_mode"),
-            automation_enabled=item.get("automation_enabled"),
-        )
-        if isinstance(probed_resolution, dict):
-            order_match_method = _extract_order_match_method(
-                order_match_success=True,
-                order_resolution=probed_resolution,
-            )
-            if order_match_method is not None:
-                order_match_method_source = "ticket_probe_resolution"
     order_match_by_number = None
     if order_status_mode and not negative_scenario and require_order_match_by_number:
         order_match_by_number = _detect_order_match_by_number(
@@ -5305,24 +5350,17 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             if isinstance(post_ticket_data.get("latest_comment_source"), str)
             else None
         )
-        latest_comment_author_id = (
-            post_ticket_data.get("latest_comment_author_id")
-            if isinstance(post_ticket_data.get("latest_comment_author_id"), str)
-            else None
-        )
-        bot_agent_id = (
-            _load_bot_agent_id(env_name=env_name, region=region, session=session)
-            if allow_network
-            else None
-        )  # pragma: no cover - integration-only
         (
             send_message_author_id_redacted,
             bot_agent_id_redacted,
             send_message_author_matches_bot_agent,
-        ) = _resolve_author_match(  # pragma: no cover - integration-only
+        ) = _resolve_author_evidence(  # pragma: no cover - integration-only
+            post_ticket_data=post_ticket_data,
             latest_comment_is_operator=latest_comment_is_operator,
-            latest_comment_author_id=latest_comment_author_id,
-            bot_agent_id=bot_agent_id,
+            allow_network=allow_network,
+            env_name=env_name,
+            region=region,
+            session=session,
         )
         if post_ticket_data:
             send_message_evidence = _evaluate_send_message_evidence(
