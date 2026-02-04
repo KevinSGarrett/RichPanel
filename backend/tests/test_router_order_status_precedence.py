@@ -8,7 +8,10 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
 sys.path.insert(0, str(SRC))
 
-from richpanel_middleware.automation.router import classify_routing  # noqa: E402
+from richpanel_middleware.automation.router import (  # noqa: E402
+    classify_routing,
+    extract_customer_message,
+)
 
 
 class RouterOrderStatusPrecedenceTests(unittest.TestCase):
@@ -58,3 +61,26 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
         payload = {"message": "Change shipping address for order #1180306."}
         decision = classify_routing(payload)
         self.assertEqual(decision.intent, "address_change_order_edit")
+
+    def test_delivered_without_issue_stays_order_status_tracking(self) -> None:
+        payload = {"message": "Order #1180306 delivered today."}
+        decision = classify_routing(payload)
+        self.assertEqual(decision.intent, "order_status_tracking")
+
+    def test_extract_customer_message_from_nested_messages(self) -> None:
+        payload = {
+            "messages": [
+                {"sender_type": "agent", "body": "ignore"},
+                {"sender_type": "customer", "body": "Where is my order?"},
+            ]
+        }
+        self.assertEqual(extract_customer_message(payload), "Where is my order?")
+
+    def test_extract_customer_message_from_comments(self) -> None:
+        payload = {
+            "comments": [
+                {"body": "Agent note"},
+                {"body": "Tracking update please"},
+            ]
+        }
+        self.assertEqual(extract_customer_message(payload), "Tracking update please")

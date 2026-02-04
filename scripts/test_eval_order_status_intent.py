@@ -258,6 +258,41 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
         self.assertEqual(summary["source"]["type"], "richpanel")
         self.assertEqual(summary["source"]["limit"], 1)
 
+    def test_load_ticket_ids_from_args_and_file(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            ticket_path = Path(tmp_dir) / "tickets.txt"
+            ticket_path.write_text("a\nb\n\nc\n", encoding="utf-8")
+            result = intent_eval._load_ticket_ids("x,y", str(ticket_path))
+        self.assertEqual(result, ["x", "y", "a", "b", "c"])
+
+    def test_redact_excerpt_masks_text(self) -> None:
+        excerpt = intent_eval._redact_excerpt("Email test@example.com order 123456")
+        self.assertIsNotNone(excerpt)
+        self.assertNotIn("test@example.com", excerpt)
+        self.assertNotIn("123456", excerpt)
+
+    def test_write_csv_outputs_headers(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "out.csv"
+            summary = {
+                "results": [
+                    {
+                        "id": "redacted:1",
+                        "expected": "order_status",
+                        "predicted": "order_status",
+                        "llm_called": False,
+                        "model": "deterministic",
+                        "confidence": None,
+                        "text_fingerprint": "abc",
+                        "excerpt_redacted": "xxx",
+                    }
+                ]
+            }
+            intent_eval.write_csv(output_path, summary)
+            content = output_path.read_text(encoding="utf-8")
+        self.assertIn("text_fingerprint", content)
+        self.assertIn("excerpt_redacted", content)
+
     def test_main_dataset_and_richpanel_paths(self) -> None:
         with TemporaryDirectory() as tmp_dir:
             dataset_path = Path(tmp_dir) / "dataset.jsonl"
