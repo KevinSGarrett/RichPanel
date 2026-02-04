@@ -39,6 +39,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _build_followup_payload,
     _prepare_followup_proof,
     _extract_latest_comment_body,
+    _comment_author_id,
     _resolve_requirement_flags,
     _extract_openai_routing_evidence,
     _extract_openai_rewrite_evidence,
@@ -116,6 +117,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _resolve_send_message_used,
     _resolve_send_message_status_code,
     _resolve_operator_reply_reason,
+    _load_bot_agent_id,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1817,6 +1819,83 @@ class OperatorSendMessageHelperTests(unittest.TestCase):
         )
         self.assertEqual(criteria_details, [])
         self.assertEqual(required_checks, [])
+
+
+class CommentAuthorIdTests(unittest.TestCase):
+    def test_comment_author_id_prefers_direct_fields(self) -> None:
+        self.assertEqual(_comment_author_id({"author_id": "agent-1"}), "agent-1")
+        self.assertEqual(_comment_author_id({"authorId": "agent-2"}), "agent-2")
+
+    def test_comment_author_id_from_nested_author(self) -> None:
+        self.assertEqual(
+            _comment_author_id({"author": {"id": "agent-3"}}), "agent-3"
+        )
+        self.assertEqual(
+            _comment_author_id({"author_profile": {"author_id": "agent-4"}}),
+            "agent-4",
+        )
+
+    def test_comment_author_id_missing(self) -> None:
+        self.assertIsNone(_comment_author_id({"body": "no author"}))
+        self.assertIsNone(_comment_author_id("not-a-dict"))
+
+
+class BotAgentIdLoaderTests(unittest.TestCase):
+    def test_load_bot_agent_id_env_override(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_BOT_AGENT_ID": "env-bot"}):
+            self.assertEqual(
+                _load_bot_agent_id(
+                    env_name="dev", region="us-east-2", session=None
+                ),
+                "env-bot",
+            )
+
+    def test_load_bot_agent_id_from_secret_json(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"bot_agent_id\":\"secret-bot\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "secret-bot",
+        )
+
+    def test_load_bot_agent_id_from_secret_plain(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "plain-bot"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertEqual(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            ),
+            "plain-bot",
+        )
+
+    def test_load_bot_agent_id_failure_returns_none(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                raise RuntimeError("boom")
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        self.assertIsNone(
+            _load_bot_agent_id(
+                env_name="dev", region="us-east-2", session=_Session()
+            )
+        )
 
 
 class OutboundResultHelperTests(unittest.TestCase):
