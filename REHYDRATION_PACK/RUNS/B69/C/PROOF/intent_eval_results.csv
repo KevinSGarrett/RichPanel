@@ -1,0 +1,21 @@
+id,expected,predicted,llm_called,model,confidence,text_fingerprint,excerpt_redacted
+os-001,order_status,order_status,False,deterministic,,0a687028ff34,xxxxx xx xx xxxxx #xxxxxx?
+os-002,order_status,order_status,False,deterministic,,8b7ad54d65db,xxxxxxxx xxxxxx xxx xxxxx xxxxxx: xxxxxx
+os-003,order_status,order_status,False,deterministic,,11ae8be8aa19,xxx xxx xxxxx #xxxxxxx
+os-004,order_status,order_status,False,deterministic,,053aa9589b51,"xx xxxxxxx xxxx'x xxxxxxx xxx, xxxxx xxxxxx"
+os-005,order_status,order_status,False,deterministic,,729bd3b0d205,xxxxxxxx xxxxxx xxx #xxxxxxx
+os-006,order_status,order_status,False,deterministic,,d692af4eb7e2,xx xxxxx xxxxxx xx xxxxxxx
+os-007,order_status,order_status,False,deterministic,,c763627d2db7,xxxxx xx: xxxxxx - xxxx xxxx xx xxxxxx?
+os-008,order_status,order_status,False,deterministic,,473d7b7d02ed,xxxxxxxxx xxx xxx xxxxxxxx xxx xxxxx #xxxxxx
+os-009,order_status,order_status,False,deterministic,,6cfbf0d18e28,xxxxx'x xx xxxxxxx? xxxxxxxx xxxx xxxxxx.
+os-010,order_status,order_status,False,deterministic,,3b0042e4bf72,xxxxx xxxxxxx xxxxxx xxxxxxxxx xxx xxxxxxx.
+non-001,non_order_status,non_order_status,False,deterministic,,117a20c3aeaa,xxxxxx xxxxxx xx xxxxx #xxxxxx.
+non-002,non_order_status,non_order_status,False,deterministic,,ad1586e8baeb,x xxxx x xxxxxx xxx xxxxx #xxxxxx.
+non-003,non_order_status,non_order_status,False,deterministic,,3e0e165d99f2,xxxxxx xxxxxxx xxx xxxxx #xxxxxx.
+non-004,non_order_status,non_order_status,False,deterministic,,bd90a078e55d,xxxxxxxx xxxx xxx xxxxx #xxxxxx.
+non-005,non_order_status,non_order_status,False,deterministic,,16546cea49b4,xxxxxxx xxxxx: xxxxxxx xxxxx.
+non-006,non_order_status,non_order_status,False,deterministic,,fca7f9137bc4,xxxxxx xxxxxxxx xxxxxxx xxx xxxxx #xxxxxx.
+non-007,non_order_status,non_order_status,False,deterministic,,8b199b68cecc,xxxxx xxxx xxx xxxxxxx xx xxxxxxxx.
+non-008,non_order_status,non_order_status,False,deterministic,,a4edecf20d70,xxxxxxxx xxxxx xxxx xx xxxxx #xxxxxx.
+non-009,non_order_status,non_order_status,False,deterministic,,e5b42b2cd1c3,xxxxxx xxxxxxxxxxxx xxxxxxxxx xxxxxxxxxxx.
+non-010,non_order_status,non_order_status,False,deterministic,,8dcf74a86aa6,xxxxxxxxx xxxxx: xxxx xxxxx xx xxxxxxxx.

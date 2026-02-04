@@ -608,6 +608,17 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual(number, "1180306")
         self.assertEqual(label, "order_number")
 
+    def test_match_order_number_from_text_supports_standalone_digits(self) -> None:
+        text = "Hi, my order is 654321 and I need tracking."
+        number, label = _match_order_number_from_text(text)
+        self.assertEqual(number, "654321")
+        self.assertEqual(label, "standalone_digits_6_8")
+
+    def test_match_order_number_from_text_skips_date_like_digits(self) -> None:
+        text = "Order placed on 20240203 and still no update."
+        number, label = _match_order_number_from_text(text)
+        self.assertEqual((number, label), ("", ""))
+
     def test_extract_order_number_from_text_html_anchor_ignored(self) -> None:
         text = '<a href="#m_12345">Click</a>'
         self.assertEqual(_extract_order_number_from_text(text), "")

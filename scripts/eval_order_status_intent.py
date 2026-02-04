@@ -8,10 +8,12 @@ on live Richpanel tickets in read-only mode.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import urllib.parse
 from dataclasses import dataclass
@@ -26,6 +28,9 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.llm_routing import (  # type: ignore
     suggest_llm_routing,
+)
+from richpanel_middleware.automation.pii_sanitizer import (  # type: ignore
+    sanitize_for_openai,
 )
 from richpanel_middleware.automation.router import (  # type: ignore
     classify_routing,
@@ -45,7 +50,11 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
 )
 
-ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
+ORDER_STATUS_INTENTS = {
+    "order_status_tracking",
+    "shipping_delay_not_shipped",
+    "order_status_delivery_issue",
+}
 VALID_LABELS = {"order_status", "non_order_status"}
 PROD_RICHPANEL_BASE_URL = "https://api.richpanel.com"
 
@@ -85,6 +94,30 @@ def _redact_identifier(value: Optional[str]) -> Optional[str]:
     if not text:
         return None
     return f"redacted:{_fingerprint(text)}"
+
+
+def _redact_excerpt(text: str, *, max_chars: int = 200) -> Optional[str]:
+    sanitized = sanitize_for_openai(text, max_chars=max_chars)
+    if not sanitized:
+        return None
+    return re.sub(r"[A-Za-z0-9]", "x", sanitized)
+
+
+def _load_ticket_ids(
+    ticket_ids: Optional[str], ticket_ids_file: Optional[str]
+) -> List[str]:
+    ids: List[str] = []
+    if ticket_ids:
+        ids.extend([value.strip() for value in ticket_ids.split(",") if value.strip()])
+    if ticket_ids_file:
+        path = Path(ticket_ids_file)
+        if not path.exists():
+            raise FileNotFoundError(f"Ticket id file not found: {path}")
+        for line in path.read_text(encoding="utf-8").splitlines():
+            value = line.strip()
+            if value:
+                ids.append(value)
+    return ids
 
 
 def load_jsonl_dataset(path: Path) -> List[EvalExample]:
@@ -237,7 +270,11 @@ def _require_env_flag(key: str, expected: str, *, context: str) -> None:
 
 
 def _load_richpanel_examples(
-    *, limit: int, richpanel_secret_id: Optional[str], base_url: str
+    *,
+    limit: int,
+    richpanel_secret_id: Optional[str],
+    base_url: str,
+    ticket_ids: Optional[Sequence[str]] = None,
 ) -> List[EvalExample]:
     client = RichpanelClient(
         api_key_secret_id=richpanel_secret_id,
@@ -245,9 +282,11 @@ def _load_richpanel_examples(
         dry_run=False,
         read_only=True,
     )
-    ticket_ids = _fetch_recent_ticket_ids(client, limit=limit)
+    resolved_ticket_ids = (
+        list(ticket_ids) if ticket_ids else _fetch_recent_ticket_ids(client, limit=limit)
+    )
     examples: List[EvalExample] = []
-    for ticket_id in ticket_ids:
+    for ticket_id in resolved_ticket_ids:
         ticket = _fetch_ticket_payload(client, ticket_id)
         convo = _fetch_conversation_payload(client, ticket_id)
         message = _extract_message(ticket, convo)
@@ -355,6 +394,8 @@ def _evaluate_examples(
                 "llm_called": llm_called,
                 "model": llm_model,
                 "confidence": llm_confidence,
+                "text_fingerprint": _fingerprint(example.text),
+                "excerpt_redacted": _redact_excerpt(example.text),
             }
         )
 
@@ -380,6 +421,7 @@ def run_dataset_eval(
     dataset_path: Path,
     *,
     output_path: Path,
+    output_csv_path: Optional[Path] = None,
     use_openai: bool,
     allow_network: bool,
 ) -> Dict[str, Any]:
@@ -389,6 +431,8 @@ def run_dataset_eval(
     )
     summary["source"] = {"type": "dataset", "path": str(dataset_path)}
     write_summary(output_path, summary)
+    if output_csv_path:
+        write_csv(output_csv_path, summary)
     return summary
 
 
@@ -398,11 +442,16 @@ def run_richpanel_eval(
     richpanel_secret_id: Optional[str],
     base_url: str,
     output_path: Path,
+    output_csv_path: Optional[Path] = None,
     use_openai: bool,
     allow_network: bool,
+    ticket_ids: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
     examples = _load_richpanel_examples(
-        limit=limit, richpanel_secret_id=richpanel_secret_id, base_url=base_url
+        limit=limit,
+        richpanel_secret_id=richpanel_secret_id,
+        base_url=base_url,
+        ticket_ids=ticket_ids,
     )
     summary = _evaluate_examples(
         examples, use_openai=use_openai, allow_network=allow_network
@@ -411,8 +460,11 @@ def run_richpanel_eval(
         "type": "richpanel",
         "limit": limit,
         "base_url": base_url,
+        "ticket_ids_provided": bool(ticket_ids),
     }
     write_summary(output_path, summary)
+    if output_csv_path:
+        write_csv(output_csv_path, summary)
     return summary
 
 
@@ -420,6 +472,29 @@ def write_summary(path: Path, summary: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(summary, handle, ensure_ascii=True, indent=2)
+
+
+def write_csv(path: Path, summary: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = summary.get("results") or []
+    if not isinstance(rows, list):
+        return
+    fieldnames = [
+        "id",
+        "expected",
+        "predicted",
+        "llm_called",
+        "model",
+        "confidence",
+        "text_fingerprint",
+        "excerpt_redacted",
+    ]
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            if isinstance(row, dict):
+                writer.writerow({key: row.get(key) for key in fieldnames})
 
 
 def _print_metrics(label: str, metrics: Dict[str, Any]) -> None:
@@ -470,13 +545,26 @@ def main() -> int:
         help="Output JSON summary path (default: artifacts/intent_eval_results.json).",
     )
     parser.add_argument(
+        "--output-csv",
+        help="Optional CSV output path (default: none).",
+    )
+    parser.add_argument(
         "--use-openai",
         action="store_true",
         help="Attempt OpenAI routing for intent classification (requires OPENAI_ALLOW_NETWORK=true).",
     )
+    parser.add_argument(
+        "--ticket-ids",
+        help="Comma-separated Richpanel ticket ids to evaluate.",
+    )
+    parser.add_argument(
+        "--ticket-ids-file",
+        help="Path to file containing Richpanel ticket ids (one per line).",
+    )
     args = parser.parse_args()
 
     output_path = Path(args.output or ROOT / "artifacts" / "intent_eval_results.json")
+    output_csv_path = Path(args.output_csv) if args.output_csv else None
     use_openai = bool(args.use_openai)
     allow_network = use_openai and os.environ.get("OPENAI_ALLOW_NETWORK", "").lower() in {
         "1",
@@ -486,6 +574,7 @@ def main() -> int:
     }
 
     if args.from_richpanel:
+        ticket_ids = _load_ticket_ids(args.ticket_ids, args.ticket_ids_file)
         base_url = (
             args.richpanel_base_url
             or os.environ.get("RICHPANEL_API_BASE_URL")
@@ -505,8 +594,10 @@ def main() -> int:
                 richpanel_secret_id=args.richpanel_secret_id,
                 base_url=base_url,
                 output_path=output_path,
+                output_csv_path=output_csv_path,
                 use_openai=use_openai,
                 allow_network=allow_network,
+                ticket_ids=ticket_ids or None,
             )
         except (RichpanelRequestError, RichpanelWriteDisabledError, SecretLoadError, TransportError) as exc:
             raise SystemExit(f"Richpanel evaluation failed: {exc}") from exc
@@ -516,6 +607,7 @@ def main() -> int:
         summary = run_dataset_eval(
             Path(args.dataset),
             output_path=output_path,
+            output_csv_path=output_csv_path,
             use_openai=use_openai,
             allow_network=allow_network,
         )

@@ -60,7 +60,16 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
             for item in loaded["results"]:
                 self.assertEqual(
                     set(item.keys()),
-                    {"id", "expected", "predicted", "llm_called", "model", "confidence"},
+                    {
+                        "id",
+                        "expected",
+                        "predicted",
+                        "llm_called",
+                        "model",
+                        "confidence",
+                        "text_fingerprint",
+                        "excerpt_redacted",
+                    },
                 )
 
             raw_output = output_path.read_text(encoding="utf-8")
@@ -241,11 +250,60 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
                     richpanel_secret_id=None,
                     base_url="https://example.com",
                     output_path=Path(tmp_dir) / "out.json",
+                output_csv_path=None,
                     use_openai=False,
                     allow_network=False,
+                ticket_ids=None,
                 )
         self.assertEqual(summary["source"]["type"], "richpanel")
         self.assertEqual(summary["source"]["limit"], 1)
+
+    def test_load_ticket_ids_from_args_and_file(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            ticket_path = Path(tmp_dir) / "tickets.txt"
+            ticket_path.write_text("a\nb\n\nc\n", encoding="utf-8")
+            result = intent_eval._load_ticket_ids("x,y", str(ticket_path))
+        self.assertEqual(result, ["x", "y", "a", "b", "c"])
+
+    def test_redact_excerpt_masks_text(self) -> None:
+        excerpt = intent_eval._redact_excerpt("Email test@example.com order 123456")
+        self.assertIsNotNone(excerpt)
+        self.assertNotIn("test@example.com", excerpt)
+        self.assertNotIn("123456", excerpt)
+
+    def test_write_csv_outputs_headers(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "out.csv"
+            summary = {
+                "results": [
+                    {
+                        "id": "redacted:1",
+                        "expected": "order_status",
+                        "predicted": "order_status",
+                        "llm_called": False,
+                        "model": "deterministic",
+                        "confidence": None,
+                        "text_fingerprint": "abc",
+                        "excerpt_redacted": "xxx",
+                    }
+                ]
+            }
+            intent_eval.write_csv(output_path, summary)
+            content = output_path.read_text(encoding="utf-8")
+        self.assertIn("text_fingerprint", content)
+        self.assertIn("excerpt_redacted", content)
+
+    def test_load_ticket_ids_missing_file_raises(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            intent_eval._load_ticket_ids(None, "does_not_exist.txt")
+
+    def test_redact_excerpt_empty_returns_none(self) -> None:
+        self.assertIsNone(intent_eval._redact_excerpt(""))
+
+    def test_extract_message_prefers_conversation(self) -> None:
+        ticket = {"message": ""}
+        convo = {"messages": [{"sender_type": "customer", "body": "Need status"}]}
+        self.assertEqual(intent_eval._extract_message(ticket, convo), "Need status")
 
     def test_main_dataset_and_richpanel_paths(self) -> None:
         with TemporaryDirectory() as tmp_dir:

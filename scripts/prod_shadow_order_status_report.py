@@ -77,7 +77,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logging.getLogger("richpanel_middleware").setLevel(logging.WARNING)
 logging.getLogger("integrations").setLevel(logging.WARNING)
 
-ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
+ORDER_STATUS_INTENTS = {
+    "order_status_tracking",
+    "shipping_delay_not_shipped",
+    "order_status_delivery_issue",
+}
 DEFAULT_SAMPLE_SIZE = 25
 PROD_ENV_NAMES = {"prod", "production"}
 
@@ -907,6 +911,11 @@ def main() -> int:
         help="Skip conversation fetches to reduce Richpanel request volume.",
     )
     parser.add_argument(
+        "--skip-openai-intent",
+        action="store_true",
+        help="Skip OpenAI intent calls (deterministic-only baseline).",
+    )
+    parser.add_argument(
         "--batch-size",
         type=int,
         default=0,
@@ -973,6 +982,7 @@ def main() -> int:
     allow_network = outbound_enabled or _env_truthy(
         os.environ.get("MW_ALLOW_NETWORK_READS")
     )
+    llm_allow_network = allow_network and not args.skip_openai_intent
 
     if args.retry_diagnostics or args.request_trace:
         os.environ["RICHPANEL_TRACE_ENABLED"] = "true"
@@ -1128,7 +1138,7 @@ def main() -> int:
                     event_id=envelope.event_id,
                     safe_mode=False,
                     automation_enabled=True,
-                    allow_network=allow_network,
+                    allow_network=llm_allow_network,
                     outbound_enabled=outbound_enabled,
                 )
                 intent_metadata: Dict[str, str] = {}
@@ -1140,7 +1150,7 @@ def main() -> int:
                     event_id=envelope.event_id,
                     safe_mode=False,
                     automation_enabled=True,
-                    allow_network=allow_network,
+                    allow_network=llm_allow_network,
                     outbound_enabled=outbound_enabled,
                     metadata=intent_metadata or None,
                 )
@@ -1148,6 +1158,8 @@ def main() -> int:
                 classified_order_status = bool(
                     intent_result.is_order_status if intent_result else False
                 )
+                if not order_status_intent.llm_called:
+                    classified_order_status = routing.intent in ORDER_STATUS_INTENTS
                 result["classified_order_status"] = classified_order_status
                 result["routing_intent"] = routing.intent
                 result["routing_primary_source"] = (
