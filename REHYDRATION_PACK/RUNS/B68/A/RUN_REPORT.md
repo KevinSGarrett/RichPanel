@@ -7,8 +7,8 @@ Harden the DEV sandbox proof harness to require email-channel `/send-message` ev
 
 ### Execution
 - Proof run: **PASS** (ticket `<redacted>`).
-- Unit regression test: **passed locally** (`backend/tests/test_order_status_send_message.py`).
-- CI/tests: **not re-run** in this session beyond the targeted unit test.
+- Unit regression tests: **passed locally** (`backend/tests/test_order_status_send_message.py`, `scripts/test_e2e_smoke_encoding.py`).
+- CI/tests: **not re-run** in this session beyond the targeted unit tests.
 
 ### Attempt history
 Initial attempt (ticket <redacted>) failed before SSO:
@@ -54,3 +54,9 @@ Result: `[OK] CI-equivalent checks passed.` (doc hygiene warnings noted but non-
 python -m pytest backend\tests\test_order_status_send_message.py
 ```
 Result: `1 passed`.
+
+### E2E smoke encoding tests (local)
+```powershell
+python scripts\test_e2e_smoke_encoding.py
+```
+Result: `OK`.

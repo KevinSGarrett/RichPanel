@@ -2,6 +2,7 @@
 
 ### Code
 - Honored email-channel enforcement even outside order-status defaults in `scripts/dev_e2e_smoke.py` (email outbound checks now apply when email proof flags are set).
+- Added explicit requirement flag resolver tests in `scripts/test_e2e_smoke_encoding.py`.
 - Added unit regression coverage for the email `/send-message` path in `backend/tests/test_order_status_send_message.py`.
 
 ### Docs

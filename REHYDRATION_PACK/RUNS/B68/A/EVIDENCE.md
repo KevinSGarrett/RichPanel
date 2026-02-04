@@ -54,6 +54,12 @@ python -m pytest backend\tests\test_order_status_send_message.py
 ```
 Result: `1 passed`.
 
+### E2E smoke encoding tests (local)
+```powershell
+python scripts\test_e2e_smoke_encoding.py
+```
+Result: `OK`.
+
 ### Doc grep (Shopify sandbox/dev store)
 ```powershell
 rg -n "Shopify sandbox|dev shopify store|shopify dev store" docs
