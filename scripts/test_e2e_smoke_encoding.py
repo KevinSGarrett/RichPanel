@@ -2178,6 +2178,38 @@ class TicketSnapshotTests(unittest.TestCase):
         self.assertTrue(result.get("latest_comment_is_operator"))
         self.assertEqual(result.get("latest_comment_source"), "agent")
         self.assertEqual(result.get("operator_reply_count"), 1)
+        self.assertIsNone(result.get("latest_comment_author_id"))
+
+    def test_fetch_ticket_snapshot_captures_comment_author(self) -> None:
+        payload = {
+            "ticket": {
+                "id": "ticket-2b",
+                "status": "OPEN",
+                "tags": [],
+                "comments": [
+                    {"type": "text", "is_operator": False},
+                    {"type": "text", "is_operator": True, "author_id": "agent-123"},
+                ],
+            }
+        }
+
+        class _Resp:
+            status_code = 200
+            dry_run = False
+
+            def json(self) -> dict:
+                return payload
+
+        class _Exec:
+            def execute(self, *args: Any, **kwargs: Any) -> _Resp:
+                return _Resp()
+
+        result = _fetch_ticket_snapshot(
+            cast(Any, _Exec()),
+            "ticket-2b",
+            allow_network=True,
+        )
+        self.assertEqual(result.get("latest_comment_author_id"), "agent-123")
 
     def test_fetch_ticket_snapshot_missing_operator_flag(self) -> None:
         payload = {
