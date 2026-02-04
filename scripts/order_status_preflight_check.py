@@ -280,7 +280,11 @@ def _check_refresh_lambda_last_success(
             continue
         for event in response.get("events") or []:
             message = event.get("message") or ""
-            if "refresh_succeeded" not in message:
+            if (
+                "refresh_succeeded" not in message
+                and "refresh_error" not in message
+                and "refresh_attempted" not in message
+            ):
                 continue
             try:
                 payload = json.loads(message)
