@@ -52,6 +52,8 @@
 
 **Docs / artifacts:**
 - `docs/08_Engineering/Secrets_and_Environments.md`
+- `docs/_generated/doc_registry.json`
+- `docs/_generated/doc_registry.compact.json`
 - `REHYDRATION_PACK/RUNS/B69/B/RUN_REPORT.md`
 - `REHYDRATION_PACK/RUNS/B69/B/EVIDENCE.md`
 - `REHYDRATION_PACK/RUNS/B69/B/CHANGES.md`
