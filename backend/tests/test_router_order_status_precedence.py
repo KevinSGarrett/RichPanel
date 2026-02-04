@@ -84,3 +84,24 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
             ]
         }
         self.assertEqual(extract_customer_message(payload), "Tracking update please")
+
+    def test_extract_customer_message_from_ticket_messages(self) -> None:
+        payload = {
+            "ticket": {
+                "messages": [
+                    {"sender_type": "customer", "body": "Need tracking"},
+                ]
+            }
+        }
+        self.assertEqual(extract_customer_message(payload), "Need tracking")
+
+    def test_extract_customer_message_from_conversation_messages(self) -> None:
+        payload = {
+            "conversation_messages": [
+                {"sender_type": "customer", "body": "Where is my package?"},
+            ]
+        }
+        self.assertEqual(extract_customer_message(payload), "Where is my package?")
+
+    def test_extract_customer_message_non_dict_returns_default(self) -> None:
+        self.assertEqual(extract_customer_message("nope", default="fallback"), "fallback")

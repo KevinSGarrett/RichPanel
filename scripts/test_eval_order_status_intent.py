@@ -293,6 +293,18 @@ class OrderStatusIntentEvalTests(unittest.TestCase):
         self.assertIn("text_fingerprint", content)
         self.assertIn("excerpt_redacted", content)
 
+    def test_load_ticket_ids_missing_file_raises(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            intent_eval._load_ticket_ids(None, "does_not_exist.txt")
+
+    def test_redact_excerpt_empty_returns_none(self) -> None:
+        self.assertIsNone(intent_eval._redact_excerpt(""))
+
+    def test_extract_message_prefers_conversation(self) -> None:
+        ticket = {"message": ""}
+        convo = {"messages": [{"sender_type": "customer", "body": "Need status"}]}
+        self.assertEqual(intent_eval._extract_message(ticket, convo), "Need status")
+
     def test_main_dataset_and_richpanel_paths(self) -> None:
         with TemporaryDirectory() as tmp_dir:
             dataset_path = Path(tmp_dir) / "dataset.jsonl"
