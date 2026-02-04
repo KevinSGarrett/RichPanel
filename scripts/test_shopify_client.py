@@ -692,6 +692,30 @@ class ShopifyClientTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401)
 
+    def test_request_logs_forbidden_status(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _StubSecretsClient(
+            {"SecretString": json.dumps({"access_token": "expired"})}
+        )
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=403, headers={}, body=b"")]
+        )
+        client = ShopifyClient(
+            allow_network=True,
+            transport=transport,
+            secrets_client=secrets,
+            access_token_secret_id=token_secret_id,
+        )
+
+        response = client.request(
+            "GET",
+            "/admin/api/2024-01/orders.json",
+            safe_mode=False,
+            automation_enabled=True,
+        )
+
+        self.assertEqual(response.status_code, 403)
+
     def test_refresh_fails_without_client_credentials(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
         secrets = _StubSecretsClient(

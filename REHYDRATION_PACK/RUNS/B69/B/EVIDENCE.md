@@ -53,6 +53,16 @@ Result:
 3 passed, 64 deselected in 0.27s
 ```
 
+### 2026-02-04 — Shopify forbidden-status coverage test
+Command:
+```
+python -m pytest scripts\test_shopify_client.py -k "request_logs_forbidden_status"
+```
+Result:
+```
+1 passed, 67 deselected in 0.22s
+```
+
 ## Proof Artifacts
 - `REHYDRATION_PACK/RUNS/B69/B/PROOF/shopify_health_check_prod.json`
 - `REHYDRATION_PACK/RUNS/B69/B/PROOF/shopify_health_check_invalid.json`
