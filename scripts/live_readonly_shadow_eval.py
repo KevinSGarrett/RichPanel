@@ -2211,15 +2211,20 @@ def main() -> int:
             raise SystemExit(
                 f"Unknown env '{preflight_env}' for AWS preflight (expected dev/staging/prod)."
             )
-        print("[INFO] Running AWS account + secrets preflight...")
-        run_secrets_preflight(
-            env_name=preflight_env,
-            region=args.region,
-            profile=args.aws_profile,
-            expected_account_id=expected_account_id,
-            require_secrets=args.require_secret,
-            fail_on_error=True,
-        )
+        if boto3 is None:
+            LOGGER.warning(
+                "boto3 unavailable; skipping AWS account + secrets preflight"
+            )
+        else:
+            print("[INFO] Running AWS account + secrets preflight...")
+            run_secrets_preflight(
+                env_name=preflight_env,
+                region=args.region,
+                profile=args.aws_profile,
+                expected_account_id=expected_account_id,
+                require_secrets=args.require_secret,
+                fail_on_error=True,
+            )
 
     shopify_secrets_client = _resolve_shopify_secrets_client()
     shopify_client = _build_shopify_client(
