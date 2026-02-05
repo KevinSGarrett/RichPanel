@@ -2178,7 +2178,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             report_path = Path(tmpdir) / "report.json"
             summary_md_path = Path(tmpdir) / "summary.md"
@@ -2252,7 +2252,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2314,7 +2314,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2392,7 +2392,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -2468,7 +2468,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2496,7 +2496,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2524,6 +2524,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "1",
             "--max-tickets",
             "2",
+            "--allow-deterministic-only",
         ]
         with mock.patch.object(sys, "argv", argv):
             with self.assertRaises(SystemExit) as ctx:
@@ -2539,7 +2540,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2582,7 +2583,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2619,7 +2620,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2652,7 +2653,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2699,7 +2700,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=[],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2738,7 +2739,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2770,7 +2771,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2845,7 +2846,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "created_at": "2026-01-01T00:00:00Z",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2893,7 +2894,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2922,7 +2923,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -2986,7 +2987,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -3040,7 +3041,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -3089,7 +3090,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
