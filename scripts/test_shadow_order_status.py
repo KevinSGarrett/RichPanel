@@ -17,6 +17,20 @@ if str(SCRIPTS_DIR) not in sys.path:
 import shadow_order_status as shadow  # noqa: E402
 
 
+OPENAI_SHADOW_ENV = {
+    "MW_OPENAI_ROUTING_ENABLED": "true",
+    "MW_OPENAI_INTENT_ENABLED": "true",
+    "MW_OPENAI_SHADOW_ENABLED": "true",
+    "OPENAI_ALLOW_NETWORK": "true",
+}
+
+
+def _with_openai_env(env: dict) -> dict:
+    merged = dict(OPENAI_SHADOW_ENV)
+    merged.update(env)
+    return merged
+
+
 class _StubResponse:
     def __init__(self, payload: dict, status_code: int = 200, dry_run: bool = False):
         self.status_code = status_code
@@ -105,7 +119,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
         super().tearDown()
 
     def test_require_env_flag_missing_and_mismatch(self) -> None:
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             with self.assertRaises(SystemExit):
                 shadow._require_env_flag("RICHPANEL_READ_ONLY", "true", context="test")
         with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "false"}, clear=True):
@@ -117,7 +131,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("RICHPANEL_READ_ONLY", str(ctx.exception))
@@ -129,7 +143,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=False)
         self.assertIn("confirm-live-readonly", str(ctx.exception))
@@ -165,7 +179,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("staging", str(ctx.exception))
@@ -176,7 +190,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("MW_ALLOW_NETWORK_READS", str(ctx.exception))
@@ -187,19 +201,19 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("RICHPANEL_ENV", str(ctx.exception))
 
     def test_resolve_env_name_prefers_richpanel_env(self) -> None:
         env = {"RICHPANEL_ENV": "Staging", "RICH_PANEL_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow._resolve_env_name(), "staging")
 
     def test_resolve_env_name_fallback(self) -> None:
         env = {"RICH_PANEL_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow._resolve_env_name(), "prod")
 
     def test_shopify_secret_override_guard(self) -> None:
@@ -207,20 +221,20 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "SHOPIFY_ACCESS_TOKEN_OVERRIDE": "tok",
             "SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/shopify/admin_api_token",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._resolve_shopify_secret_id("staging")
         self.assertIn("SHOPIFY_ACCESS_TOKEN_OVERRIDE", str(ctx.exception))
 
     def test_shopify_secret_id_validation(self) -> None:
         env = {"SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/shopify/admin_api_token"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(
                 shadow._resolve_shopify_secret_id("staging"),
                 "rp-mw/staging/shopify/admin_api_token",
             )
         env = {"SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/other/token"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit):
                 shadow._resolve_shopify_secret_id("staging")
 
