@@ -156,7 +156,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             argv = [
@@ -916,7 +916,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             },
         ]
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -955,7 +955,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             argv = [
@@ -1009,7 +1009,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         )
         stub_client = _GuardedRichpanelClient(ticket_payload, {})
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -1053,7 +1053,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -1096,7 +1096,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "order_status": {"is_order_status": False},
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
