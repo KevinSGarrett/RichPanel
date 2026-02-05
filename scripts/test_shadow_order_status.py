@@ -91,6 +91,19 @@ class _FallbackListingClient:
 
 
 class ShadowOrderStatusGuardTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
+
     def test_require_env_flag_missing_and_mismatch(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(SystemExit):
@@ -343,6 +356,19 @@ class ShadowOrderStatusTraceTests(unittest.TestCase):
 
 
 class ShadowOrderStatusNoWriteTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
+
     def test_run_ticket_is_read_only(self) -> None:
         ticket = {
             "id": "t-1",
