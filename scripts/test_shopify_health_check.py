@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import tempfile
@@ -193,6 +194,50 @@ class ShopifyHealthCheckTests(unittest.TestCase):
                 ):
                     exit_code = health_check.main()
         self.assertNotEqual(exit_code, 0)
+
+    def test_main_diagnose_includes_aws_account_id(self) -> None:
+        class _StubResponse:
+            status_code = 200
+            dry_run = False
+            reason = None
+            url = "https://example.myshopify.com/admin/api/2024-01/shop.json"
+
+        class _StubClient:
+            environment = "prod"
+            shop_domain = "example.myshopify.com"
+            _secret_id_candidates = ["rp-mw/prod/shopify/admin_api_token"]
+            refresh_enabled = False
+
+            def refresh_access_token(self):
+                return False
+
+            def get_shop(self, safe_mode=False, automation_enabled=True):
+                return _StubResponse()
+
+            def token_diagnostics(self):
+                return {"status": "loaded", "raw_format": "json", "has_refresh_token": False}
+
+            def _load_client_credentials(self):
+                return None, None
+
+            def refresh_error(self):
+                return "missing_refresh_token"
+
+        with mock.patch.object(health_check, "ShopifyClient", return_value=_StubClient()):
+            with mock.patch.object(
+                health_check, "_load_aws_account_id", return_value="123456789012"
+            ):
+                with mock.patch.object(
+                    health_check.sys,
+                    "argv",
+                    ["shopify_health_check.py", "--diagnose", "--json"],
+                ):
+                    with mock.patch("sys.stdout", new_callable=io.StringIO) as handle:
+                        exit_code = health_check.main()
+                        output_lines = handle.getvalue().strip().splitlines()
+        self.assertEqual(exit_code, 0)
+        payload = json.loads(output_lines[-1])
+        self.assertEqual(payload["aws_account_id"], "123456789012")
 
     def test_main_records_body_excerpt_on_failure(self) -> None:
         class _StubResponse:

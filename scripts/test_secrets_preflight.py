@@ -417,6 +417,173 @@ class SecretsPreflightTests(unittest.TestCase):
                         fail_on_error=True,
                     )
 
+    def test_secrets_preflight_account_mismatch_message(self) -> None:
+        session = _DummySession()
+        account_result = aws_account_preflight.AccountPreflightResult(
+            env="dev",
+            region="us-east-2",
+            aws_account_id="111111111111",
+            aws_arn=None,
+            expected_account_id="222222222222",
+            expected_region="us-east-2",
+            ok=False,
+            error="account_mismatch",
+        )
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight, "run_account_preflight", return_value=account_result
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    secrets_preflight.run_secrets_preflight(
+                        env_name="dev",
+                        region="us-east-2",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        message = str(ctx.exception)
+        self.assertIn("wrong account", message)
+        self.assertIn("expected 222222222222", message)
+
+    def test_secrets_preflight_region_mismatch_message(self) -> None:
+        session = _DummySession()
+        account_result = aws_account_preflight.AccountPreflightResult(
+            env="dev",
+            region="us-west-1",
+            aws_account_id="151124909266",
+            aws_arn=None,
+            expected_account_id="151124909266",
+            expected_region="us-east-2",
+            ok=False,
+            error="region_mismatch(expected=us-east-2,actual=us-west-1)",
+        )
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight, "run_account_preflight", return_value=account_result
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    secrets_preflight.run_secrets_preflight(
+                        env_name="dev",
+                        region="us-west-1",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        self.assertIn("wrong region", str(ctx.exception))
+
+    def test_secrets_preflight_unknown_env_message(self) -> None:
+        session = _DummySession()
+        account_result = aws_account_preflight.AccountPreflightResult(
+            env="unknown",
+            region="us-east-2",
+            aws_account_id=None,
+            aws_arn=None,
+            expected_account_id=None,
+            expected_region="us-east-2",
+            ok=False,
+            error="unknown_env",
+        )
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight, "run_account_preflight", return_value=account_result
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    secrets_preflight.run_secrets_preflight(
+                        env_name="unknown",
+                        region="us-east-2",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        self.assertIn("unknown env", str(ctx.exception))
+
+    def test_secrets_preflight_boto3_unavailable_fail_fast(self) -> None:
+        with patch.object(secrets_preflight, "boto3", new=None):
+            with self.assertRaises(SystemExit) as ctx:
+                secrets_preflight.run_secrets_preflight(
+                    env_name="dev",
+                    region="us-east-2",
+                    session=None,
+                    fail_on_error=True,
+                )
+        self.assertIn("boto3 unavailable", str(ctx.exception))
+
+    def test_secrets_preflight_require_secret_marks_required(self) -> None:
+        session = _DummySession()
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight,
+                "run_account_preflight",
+                return_value=aws_account_preflight.AccountPreflightResult(
+                    env="dev",
+                    region="us-east-2",
+                    aws_account_id="151124909266",
+                    aws_arn=None,
+                    expected_account_id="151124909266",
+                    expected_region="us-east-2",
+                    ok=True,
+                    error=None,
+                ),
+            ):
+                payload = secrets_preflight.run_secrets_preflight(
+                    env_name="dev",
+                    region="us-east-2",
+                    session=session,
+                    require_secrets=["rp-mw/dev/shopify/client_id"],
+                    fail_on_error=False,
+                )
+        self.assertTrue(payload["secrets"]["rp-mw/dev/shopify/client_id"]["required"])
+
+    def test_build_secret_fix_suggestion_variants(self) -> None:
+        access_denied = secrets_preflight._build_secret_fix_suggestion(
+            expected_account_id=None,
+            actual_account_id=None,
+            region="us-east-2",
+            error_name="ClientError",
+            error_message="AccessDenied: not allowed",
+        )
+        self.assertIn("secretsmanager:GetSecretValue", access_denied)
+        not_found = secrets_preflight._build_secret_fix_suggestion(
+            expected_account_id=None,
+            actual_account_id=None,
+            region="us-east-2",
+            error_name="ResourceNotFoundException",
+            error_message="NotFound",
+        )
+        self.assertIn("Secrets are account-specific", not_found)
+        account_mismatch = secrets_preflight._build_secret_fix_suggestion(
+            expected_account_id="878145708918",
+            actual_account_id="151124909266",
+            region="us-east-2",
+            error_name=None,
+            error_message=None,
+        )
+        self.assertIn("expected_env=prod", account_mismatch)
+
+    def test_secrets_preflight_missing_ssm_fail_fast(self) -> None:
+        missing_ssm = {"/rp-mw/dev/safe_mode"}
+        session = _DummySession(ssm_client=_DummySSMClient(missing_names=missing_ssm))
+        with patch.object(secrets_preflight, "boto3", new=SimpleNamespace()):
+            with patch.object(
+                secrets_preflight,
+                "run_account_preflight",
+                return_value=aws_account_preflight.AccountPreflightResult(
+                    env="dev",
+                    region="us-east-2",
+                    aws_account_id="151124909266",
+                    aws_arn=None,
+                    expected_account_id="151124909266",
+                    expected_region="us-east-2",
+                    ok=True,
+                    error=None,
+                ),
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    secrets_preflight.run_secrets_preflight(
+                        env_name="dev",
+                        region="us-east-2",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        self.assertIn("ssm_param", str(ctx.exception))
+
     def test_secrets_preflight_main(self) -> None:
         with patch.object(
             secrets_preflight,

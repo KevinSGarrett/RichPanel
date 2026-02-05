@@ -805,6 +805,25 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
 
+    def test_refresh_access_token_skips_when_source_not_admin(self) -> None:
+        token_info = ShopifyTokenInfo(
+            access_token="token",
+            refresh_token="refresh",
+            expires_at=1,
+            raw_format="json",
+            source_secret_id="rp-mw/local/shopify/admin_api_token",
+        )
+        client = ShopifyClient(access_token="shpua_token")
+        client._token_info = token_info
+        client._refresh_token_source = "secret"
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            self.assertFalse(client._refresh_access_token(token_info))
+            self.assertEqual(client.refresh_error(), "admin_token")
+
     def test_extract_secret_field_returns_none_when_key_missing(self) -> None:
         client = ShopifyClient(access_token="test-token")
         value = json.dumps({"unexpected": "value"})

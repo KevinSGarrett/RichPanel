@@ -15,4 +15,9 @@ python scripts\test_shadow_order_status.py
 python scripts\regen_doc_registry.py
 python scripts\regen_reference_registry.py
 python scripts\regen_plan_checklist.py
+python scripts\test_secrets_preflight.py
+python scripts\test_shopify_health_check.py
+python scripts\test_shopify_client.py
+python scripts\test_live_readonly_shadow_eval.py
+python scripts\test_shadow_order_status.py
 ```
