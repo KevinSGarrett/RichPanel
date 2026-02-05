@@ -523,17 +523,29 @@ class ShopifyClient:
         if not access_token or not self._token_info:
             self._last_refresh_error = "missing_access_token"
             return False
-        if self._token_info.raw_format != "json" or self._refresh_token_source != "admin_api_token":
+        if self._token_info.raw_format != "json":
             self._logger.info(
-                "refresh skipped (admin token)",
+                "refresh skipped (non-json token)",
                 extra={
-                    "reason": "admin_token",
+                    "reason": "non_json_token",
                     "secret_id": self.access_token_secret_id,
                     "raw_format": self._token_info.raw_format,
                     "refresh_token_source": self._refresh_token_source,
                 },
             )
-            self._last_refresh_error = "admin_token"
+            self._last_refresh_error = "non_json_token"
+            return False
+        if self._refresh_token_source != "admin_api_token":
+            self._logger.info(
+                "refresh skipped (non-admin token source)",
+                extra={
+                    "reason": "non_admin_token_source",
+                    "secret_id": self.access_token_secret_id,
+                    "raw_format": self._token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_admin_token_source"
             return False
         if not self._token_info.refresh_token:
             self._logger.info(
@@ -871,18 +883,31 @@ class ShopifyClient:
             )
             self._last_refresh_error = "refresh_disabled"
             return False
-        if token_info.raw_format != "json" or self._refresh_token_source != "admin_api_token":
+        if token_info.raw_format != "json":
             self._logger.info(
-                "refresh skipped (admin token)",
+                "refresh skipped (non-json token)",
                 extra={
-                    "reason": "admin_token",
+                    "reason": "non_json_token",
                     "secret_id": token_info.source_secret_id
                     or self.access_token_secret_id,
                     "raw_format": token_info.raw_format,
                     "refresh_token_source": self._refresh_token_source,
                 },
             )
-            self._last_refresh_error = "admin_token"
+            self._last_refresh_error = "non_json_token"
+            return False
+        if self._refresh_token_source != "admin_api_token":
+            self._logger.info(
+                "refresh skipped (non-admin token source)",
+                extra={
+                    "reason": "non_admin_token_source",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                    "raw_format": token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_admin_token_source"
             return False
         if not token_info.refresh_token:
             self._logger.info(
