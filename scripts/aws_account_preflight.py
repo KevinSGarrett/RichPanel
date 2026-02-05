@@ -35,6 +35,7 @@ class AccountPreflightResult:
     env: str
     region: str
     aws_account_id: Optional[str]
+    aws_arn: Optional[str]
     expected_account_id: Optional[str]
     expected_region: Optional[str]
     ok: bool
@@ -45,6 +46,7 @@ class AccountPreflightResult:
             "env": self.env,
             "region": self.region,
             "aws_account_id": self.aws_account_id,
+            "aws_arn": self.aws_arn,
             "expected_account_id": self.expected_account_id,
             "expected_region": self.expected_region,
             "ok": self.ok,
@@ -78,11 +80,13 @@ def run_account_preflight(
     env_name: str,
     region: Optional[str] = None,
     session: Optional["boto3.session.Session"] = None,
+    expected_account_id: Optional[str] = None,
+    profile: Optional[str] = None,
     fail_on_error: bool = True,
 ) -> AccountPreflightResult:
     normalized_env = _normalize_env(env_name)
     resolved_region = resolve_region(region)
-    expected_account = ENV_ACCOUNT_IDS.get(normalized_env)
+    expected_account = expected_account_id or ENV_ACCOUNT_IDS.get(normalized_env)
     expected_region = ENV_REGIONS.get(normalized_env)
 
     if boto3 is None:
@@ -90,6 +94,7 @@ def run_account_preflight(
             env=normalized_env,
             region=resolved_region,
             aws_account_id=None,
+            aws_arn=None,
             expected_account_id=expected_account,
             expected_region=expected_region,
             ok=False,
@@ -99,11 +104,12 @@ def run_account_preflight(
             raise SystemExit("AWS account preflight failed: boto3 unavailable.")
         return result
 
-    if normalized_env not in ENV_ACCOUNT_IDS:
+    if normalized_env not in ENV_ACCOUNT_IDS and not expected_account_id:
         result = AccountPreflightResult(
             env=normalized_env,
             region=resolved_region,
             aws_account_id=None,
+            aws_arn=None,
             expected_account_id=expected_account,
             expected_region=expected_region,
             ok=False,
@@ -120,6 +126,7 @@ def run_account_preflight(
             env=normalized_env,
             region=resolved_region,
             aws_account_id=None,
+            aws_arn=None,
             expected_account_id=expected_account,
             expected_region=expected_region,
             ok=False,
@@ -132,7 +139,9 @@ def run_account_preflight(
             )
         return result
 
-    session = session or boto3.session.Session(region_name=resolved_region)
+    session = session or boto3.session.Session(
+        profile_name=profile, region_name=resolved_region
+    )
     sts_client = session.client("sts", region_name=resolved_region)
     try:
         identity = sts_client.get_caller_identity()
@@ -141,6 +150,7 @@ def run_account_preflight(
             env=normalized_env,
             region=resolved_region,
             aws_account_id=None,
+            aws_arn=None,
             expected_account_id=expected_account,
             expected_region=expected_region,
             ok=False,
@@ -153,11 +163,13 @@ def run_account_preflight(
         return result
 
     actual_account = identity.get("Account")
+    actual_arn = identity.get("Arn")
     ok = actual_account == expected_account
     result = AccountPreflightResult(
         env=normalized_env,
         region=resolved_region,
         aws_account_id=actual_account,
+        aws_arn=actual_arn,
         expected_account_id=expected_account,
         expected_region=expected_region,
         ok=ok,
@@ -179,9 +191,17 @@ def main() -> int:
     )
     parser.add_argument("--env", required=True, help="Target environment (dev|staging|prod).")
     parser.add_argument("--region", help="AWS region override (default: env/AWS default).")
+    parser.add_argument("--expect-account-id", help="Override expected AWS account id.")
+    parser.add_argument("--profile", help="AWS profile name override.")
     args = parser.parse_args()
 
-    result = run_account_preflight(env_name=args.env, region=args.region, fail_on_error=False)
+    result = run_account_preflight(
+        env_name=args.env,
+        region=args.region,
+        expected_account_id=args.expect_account_id,
+        profile=args.profile,
+        fail_on_error=False,
+    )
     print(json.dumps(result.as_dict(), indent=2))
     return 0 if result.ok else 2
 

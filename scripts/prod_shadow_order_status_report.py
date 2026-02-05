@@ -71,6 +71,7 @@ from readonly_shadow_utils import (
     fetch_recent_ticket_refs,
     safe_error,
 )
+from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env
 from secrets_preflight import run_secrets_preflight
 
 LOGGER = logging.getLogger("prod_shadow_order_status")
@@ -944,6 +945,20 @@ def main() -> int:
         help="AWS region override for account/secrets preflight (default: env/AWS default).",
     )
     parser.add_argument(
+        "--aws-profile",
+        help="AWS profile name for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--expect-account-id",
+        help="Expected AWS account id for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--require-secret",
+        action="append",
+        default=[],
+        help="Require a Secrets Manager secret id (repeatable).",
+    )
+    parser.add_argument(
         "--preflight-secrets",
         dest="preflight_secrets",
         action="store_true",
@@ -997,7 +1012,20 @@ def main() -> int:
     env_name = _require_prod_environment(allow_non_prod=args.allow_non_prod)
     if args.preflight_secrets:
         LOGGER.info("Running AWS account + secrets preflight...")
-        run_secrets_preflight(env_name=env_name, region=args.region, fail_on_error=True)
+        preflight_env = normalize_env(env_name)
+        expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(preflight_env)
+        if not expected_account_id:
+            raise SystemExit(
+                f"Unknown env '{preflight_env}' for AWS preflight (expected dev/staging/prod)."
+            )
+        run_secrets_preflight(
+            env_name=preflight_env,
+            region=args.region,
+            profile=args.aws_profile,
+            expected_account_id=expected_account_id,
+            require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
     enforced_env = _require_env_flags("prod shadow order status")
     outbound_enabled = _env_truthy(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"))
     allow_network = outbound_enabled or _env_truthy(

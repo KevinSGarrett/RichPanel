@@ -24,6 +24,9 @@ SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env  # type: ignore
+from secrets_preflight import run_secrets_preflight  # type: ignore
+
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore
     build_no_tracking_reply,
     build_tracking_reply,
@@ -757,11 +760,58 @@ def main() -> int:
         default=10,
         help="Safety limit on number of tickets",
     )
+    parser.add_argument(
+        "--region",
+        help="AWS region override for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--aws-profile",
+        help="AWS profile name for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--expect-account-id",
+        help="Expected AWS account id for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--require-secret",
+        action="append",
+        default=[],
+        help="Require a Secrets Manager secret id (repeatable).",
+    )
+    parser.add_argument(
+        "--preflight-secrets",
+        dest="preflight_secrets",
+        action="store_true",
+        help="Run AWS account + secrets preflight (default).",
+    )
+    parser.add_argument(
+        "--no-preflight-secrets",
+        dest="preflight_secrets",
+        action="store_false",
+        help="Skip AWS account + secrets preflight.",
+    )
+    parser.set_defaults(preflight_secrets=True)
     args = parser.parse_args()
 
     env_name = _require_readonly_guards(
         confirm_live_readonly=args.confirm_live_readonly
     )
+    preflight_env = normalize_env(env_name)
+    expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(preflight_env)
+    if not expected_account_id:
+        raise SystemExit(
+            f"Unknown env '{preflight_env}' for AWS preflight (expected dev/staging/prod)."
+        )
+    if args.preflight_secrets:
+        print("[INFO] Running AWS account + secrets preflight...")
+        run_secrets_preflight(
+            env_name=preflight_env,
+            region=args.region,
+            profile=args.aws_profile,
+            expected_account_id=expected_account_id,
+            require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
     if args.max_tickets < 1:
         raise SystemExit("--max-tickets must be >= 1")
 

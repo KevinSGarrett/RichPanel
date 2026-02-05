@@ -28,6 +28,9 @@ try:
 except ImportError:  # pragma: no cover
     boto3 = None  # type: ignore
 
+from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env  # type: ignore
+from secrets_preflight import run_secrets_preflight  # type: ignore
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
@@ -2082,6 +2085,20 @@ def main() -> int:
         help="AWS region for secrets or HTTP trace metadata.",
     )
     parser.add_argument(
+        "--aws-profile",
+        help="AWS profile name for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--expect-account-id",
+        help="Expected AWS account id for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--require-secret",
+        action="append",
+        default=[],
+        help="Require a Secrets Manager secret id (repeatable).",
+    )
+    parser.add_argument(
         "--stack-name",
         help="Optional stack name (metadata only).",
     )
@@ -2116,6 +2133,18 @@ def main() -> int:
         help="Capture Richpanel request trace to compute burst metrics.",
     )
     parser.add_argument(
+        "--preflight-secrets",
+        dest="preflight_secrets",
+        action="store_true",
+        help="Run AWS account + secrets preflight (default).",
+    )
+    parser.add_argument(
+        "--no-preflight-secrets",
+        dest="preflight_secrets",
+        action="store_false",
+        help="Skip AWS account + secrets preflight.",
+    )
+    parser.add_argument(
         "--skip-conversations",
         action="store_true",
         help=(
@@ -2123,6 +2152,7 @@ def main() -> int:
             "Reduces requests from 3/ticket to 1/ticket."
         ),
     )
+    parser.set_defaults(preflight_secrets=True)
     args = parser.parse_args()
 
     if args.env_name:
@@ -2173,6 +2203,23 @@ def main() -> int:
 
     if args.request_trace:
         os.environ["RICHPANEL_TRACE_ENABLED"] = "true"
+
+    if args.preflight_secrets:
+        preflight_env = normalize_env(env_name)
+        expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(preflight_env)
+        if not expected_account_id:
+            raise SystemExit(
+                f"Unknown env '{preflight_env}' for AWS preflight (expected dev/staging/prod)."
+            )
+        print("[INFO] Running AWS account + secrets preflight...")
+        run_secrets_preflight(
+            env_name=preflight_env,
+            region=args.region,
+            profile=args.aws_profile,
+            expected_account_id=expected_account_id,
+            require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
 
     shopify_secrets_client = _resolve_shopify_secrets_client()
     shopify_client = _build_shopify_client(
