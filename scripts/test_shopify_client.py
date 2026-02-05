@@ -393,7 +393,7 @@ class ShopifyClientTests(unittest.TestCase):
             self.assertEqual(client.access_token_secret_id, legacy)
             self.assertEqual(
                 secrets.calls,
-                [canonical, legacy, "rp-mw/local/shopify/refresh_token"],
+            [canonical, legacy],
             )
             self.assertEqual(
                 transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
@@ -497,7 +497,7 @@ class ShopifyClientTests(unittest.TestCase):
             client = ShopifyClient(access_token="shpat_token")
             client._secrets_client_obj = _StubSecretsClient({})
             self.assertFalse(client.refresh_access_token())
-            self.assertEqual(client.refresh_error(), "missing_refresh_token")
+            self.assertEqual(client.refresh_error(), "admin_token")
 
     def test_refresh_access_token_disabled_sets_error(self) -> None:
         client = ShopifyClient(access_token="shpat_token")
@@ -801,7 +801,7 @@ class ShopifyClientTests(unittest.TestCase):
             client._load_access_token()
             self.assertIsNotNone(client._token_info)
             self.assertFalse(client._refresh_access_token(client._token_info))
-            self.assertEqual(client.refresh_error(), "missing_refresh_token")
+            self.assertEqual(client.refresh_error(), "admin_token")
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
 
@@ -863,6 +863,7 @@ class ShopifyClientTests(unittest.TestCase):
             clear=False,
         ):
             client = ShopifyClient()
+            client._secrets_client_obj = _StubSecretsClient({})
             self.assertFalse(client.refresh_access_token())
             self.assertEqual(client.refresh_error(), "missing_access_token")
 
