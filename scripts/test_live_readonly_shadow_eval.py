@@ -7,6 +7,8 @@ import importlib
 import unittest
 import types
 import hashlib
+import io
+import contextlib
 from datetime import datetime, timezone
 from collections import Counter
 from pathlib import Path
@@ -1751,6 +1753,53 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             with mock.patch.object(shadow_eval, "boto3", None):
                 with self.assertRaises(SystemExit):
                     shadow_eval._resolve_shopify_secrets_client()
+
+
+class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
+    def test_openai_shadow_defaults_set(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            shadow_eval._apply_openai_shadow_eval_defaults()
+            self.assertEqual(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_INTENT_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_ALLOW_NETWORK_READS"), "true")
+            self.assertEqual(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), "false")
+            self.assertEqual(os.environ.get("OPENAI_ALLOW_NETWORK"), "true")
+
+    def test_openai_gating_blockers_empty_when_enabled(self) -> None:
+        env = {
+            "MW_OPENAI_ROUTING_ENABLED": "true",
+            "MW_OPENAI_INTENT_ENABLED": "true",
+            "MW_OPENAI_SHADOW_ENABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "OPENAI_ALLOW_NETWORK": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(shadow_eval._openai_gating_blockers(), [])
+
+    def test_emit_openai_banner_blocks_without_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                with self.assertRaises(SystemExit):
+                    shadow_eval._emit_openai_routing_banner(
+                        allow_deterministic_only=False
+                    )
+            self.assertIn(
+                "Results will undercount order-status",
+                stream.getvalue(),
+            )
+
+    def test_emit_openai_banner_allows_with_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                shadow_eval._emit_openai_routing_banner(
+                    allow_deterministic_only=True
+                )
 
     def test_aws_sdk_trace_capture_noop_when_wrapped(self) -> None:
         trace = shadow_eval._AwsSdkTrace([])
