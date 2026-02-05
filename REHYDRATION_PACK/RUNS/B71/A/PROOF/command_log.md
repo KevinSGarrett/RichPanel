@@ -20,4 +20,5 @@ python scripts\test_shopify_health_check.py
 python scripts\test_shopify_client.py
 python scripts\test_live_readonly_shadow_eval.py
 python scripts\test_shadow_order_status.py
+python scripts\test_shopify_client.py
 ```

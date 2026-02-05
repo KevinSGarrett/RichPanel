@@ -813,14 +813,14 @@ class ShopifyClientTests(unittest.TestCase):
             raw_format="json",
             source_secret_id="rp-mw/local/shopify/admin_api_token",
         )
-        client = ShopifyClient(access_token="shpua_token")
-        client._token_info = token_info
-        client._refresh_token_source = "secret"
         with mock.patch.dict(
             os.environ,
             {"SHOPIFY_REFRESH_ENABLED": "true"},
             clear=False,
         ):
+            client = ShopifyClient(access_token="shpua_token")
+            client._token_info = token_info
+            client._refresh_token_source = "secret"
             self.assertFalse(client._refresh_access_token(token_info))
             self.assertEqual(client.refresh_error(), "admin_token")
 
