@@ -70,9 +70,9 @@
 - `python scripts/prod_shadow_order_status_report.py --env prod --openai-shadow-eval --ticket-number <redacted x25> --out-json ..._batch01.json --out-md ..._batch01.md` (repeated for 9 batches; batch04 had 24 tickets due to one invalid ticket)
 
 ### 7) Results & evidence
-**CI:** pending  
-**Codecov:** pending  
-**Bugbot:** pending  
+**CI:** `validate` ✅  
+**Codecov:** `codecov/patch` ✅ (97.20% >= 93.79%)  
+**Bugbot:** ✅  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B71/C/PROOF/prod_shadow_openai_200_summary.md`
