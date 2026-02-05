@@ -4,6 +4,8 @@ import json
 import os
 import sys
 import unittest
+import io
+import contextlib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -15,6 +17,21 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import shadow_order_status as shadow  # noqa: E402
+import prod_shadow_order_status_report as prod_shadow  # noqa: E402
+
+
+OPENAI_SHADOW_ENV = {
+    "MW_OPENAI_ROUTING_ENABLED": "true",
+    "MW_OPENAI_INTENT_ENABLED": "true",
+    "MW_OPENAI_SHADOW_ENABLED": "true",
+    "OPENAI_ALLOW_NETWORK": "true",
+}
+
+
+def _with_openai_env(env: dict) -> dict:
+    merged = dict(OPENAI_SHADOW_ENV)
+    merged.update(env)
+    return merged
 
 
 class _StubResponse:
@@ -105,7 +122,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
         super().tearDown()
 
     def test_require_env_flag_missing_and_mismatch(self) -> None:
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             with self.assertRaises(SystemExit):
                 shadow._require_env_flag("RICHPANEL_READ_ONLY", "true", context="test")
         with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "false"}, clear=True):
@@ -117,7 +134,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("RICHPANEL_READ_ONLY", str(ctx.exception))
@@ -129,7 +146,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=False)
         self.assertIn("confirm-live-readonly", str(ctx.exception))
@@ -142,7 +159,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             argv = [
@@ -165,7 +182,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("staging", str(ctx.exception))
@@ -176,7 +193,7 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("MW_ALLOW_NETWORK_READS", str(ctx.exception))
@@ -187,19 +204,19 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "RICHPANEL_WRITE_DISABLED": "true",
             "MW_ALLOW_NETWORK_READS": "true",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._require_readonly_guards(confirm_live_readonly=True)
         self.assertIn("RICHPANEL_ENV", str(ctx.exception))
 
     def test_resolve_env_name_prefers_richpanel_env(self) -> None:
         env = {"RICHPANEL_ENV": "Staging", "RICH_PANEL_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow._resolve_env_name(), "staging")
 
     def test_resolve_env_name_fallback(self) -> None:
         env = {"RICH_PANEL_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow._resolve_env_name(), "prod")
 
     def test_shopify_secret_override_guard(self) -> None:
@@ -207,20 +224,20 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
             "SHOPIFY_ACCESS_TOKEN_OVERRIDE": "tok",
             "SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/shopify/admin_api_token",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow._resolve_shopify_secret_id("staging")
         self.assertIn("SHOPIFY_ACCESS_TOKEN_OVERRIDE", str(ctx.exception))
 
     def test_shopify_secret_id_validation(self) -> None:
         env = {"SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/shopify/admin_api_token"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(
                 shadow._resolve_shopify_secret_id("staging"),
                 "rp-mw/staging/shopify/admin_api_token",
             )
         env = {"SHOPIFY_ACCESS_TOKEN_SECRET_ID": "rp-mw/staging/other/token"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit):
                 shadow._resolve_shopify_secret_id("staging")
 
@@ -902,7 +919,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             },
         ]
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -941,7 +958,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             argv = [
@@ -995,7 +1012,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
         )
         stub_client = _GuardedRichpanelClient(ticket_payload, {})
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -1039,7 +1056,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "MW_ALLOW_NETWORK_READS": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -1082,7 +1099,7 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             "order_status": {"is_order_status": False},
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             out_path = Path(tmpdir) / "out.json"
             trace_path = Path(tmpdir) / "trace.json"
@@ -1115,6 +1132,75 @@ class ShadowOrderStatusNoWriteTests(unittest.TestCase):
             )
 
 
+class ShadowOrderStatusOpenAITests(unittest.TestCase):
+    def test_openai_shadow_defaults_set(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            shadow._apply_openai_shadow_eval_defaults()
+            self.assertEqual(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_INTENT_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_ALLOW_NETWORK_READS"), "true")
+            self.assertEqual(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), "false")
+            self.assertEqual(os.environ.get("OPENAI_ALLOW_NETWORK"), "true")
+
+    def test_emit_openai_banner_blocks_without_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                with self.assertRaises(SystemExit):
+                    shadow._emit_openai_routing_banner(
+                        allow_deterministic_only=False
+                    )
+            self.assertIn(
+                "Results will undercount order-status",
+                stream.getvalue(),
+            )
+
+    def test_emit_openai_banner_allows_with_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                shadow._emit_openai_routing_banner(
+                    allow_deterministic_only=True
+                )
+
+
+class ProdShadowOrderStatusOpenAITests(unittest.TestCase):
+    def test_prod_openai_shadow_defaults_set(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            prod_shadow._apply_openai_shadow_eval_defaults()
+            self.assertEqual(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_INTENT_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_ALLOW_NETWORK_READS"), "true")
+            self.assertEqual(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), "false")
+            self.assertEqual(os.environ.get("OPENAI_ALLOW_NETWORK"), "true")
+
+    def test_prod_openai_banner_blocks_without_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                with self.assertRaises(SystemExit):
+                    prod_shadow._emit_openai_routing_banner(
+                        allow_deterministic_only=False
+                    )
+            self.assertIn(
+                "Results will undercount order-status",
+                stream.getvalue(),
+            )
+
+    def test_prod_openai_banner_allows_with_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                prod_shadow._emit_openai_routing_banner(
+                    allow_deterministic_only=True
+                )
+
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
     suite.addTests(
@@ -1133,6 +1219,14 @@ def main() -> int:  # pragma: no cover
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(
             ShadowOrderStatusNoWriteTests
+        )
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusOpenAITests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(
+            ProdShadowOrderStatusOpenAITests
         )
     )
     result = unittest.TextTestRunner(verbosity=2).run(suite)

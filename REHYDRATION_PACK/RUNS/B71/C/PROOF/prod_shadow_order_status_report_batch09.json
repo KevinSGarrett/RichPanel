@@ -1,0 +1,137 @@
+{
+  "run_id": "RUN_20260205_1722Z",
+  "timestamp": "2026-02-05T17:23:04.266465+00:00",
+  "environment": "prod",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false",
+    "MW_OPENAI_ROUTING_ENABLED": "true",
+    "MW_OPENAI_INTENT_ENABLED": "true",
+    "MW_OPENAI_SHADOW_ENABLED": "true",
+    "SHOPIFY_OUTBOUND_ENABLED": "true",
+    "SHOPIFY_WRITE_DISABLED": "true"
+  },
+  "sample_mode": "explicit",
+  "conversation_mode": "full",
+  "ticket_count": 1,
+  "classification_source": "openai_intent",
+  "classification_source_counts": {
+    "openai_intent": 1
+  },
+  "order_status_rate": 0.0,
+  "stats_global": {
+    "tickets_scanned": 1,
+    "classified_order_status_true": 0,
+    "classified_order_status_false": 1,
+    "openai_routing_called": 1,
+    "openai_intent_called": 1,
+    "shopify_lookup_forced": 0,
+    "errors": 0,
+    "richpanel_retry_total": 0,
+    "richpanel_retry_429_count": 0
+  },
+  "stats_order_status": {
+    "order_status_count": 0,
+    "match_attempted_count": 0,
+    "matched_by_order_number": 0,
+    "matched_by_email": 0,
+    "match_rate_among_order_status": null,
+    "tracking_present_count": 0,
+    "tracking_rate": null,
+    "eta_available_count": 0,
+    "eta_rate_when_no_tracking": null
+  },
+  "stats": {
+    "tickets_scanned": 1,
+    "classified_order_status_false": 1,
+    "no_match": 1,
+    "openai_routing_called": 1,
+    "openai_intent_called": 1,
+    "tickets_requested": 1,
+    "ticket_count": 1,
+    "missing_order_number": 1,
+    "missing_email": 0,
+    "shopify_error": 0,
+    "classified_order_status_true": 0,
+    "matched_by_order_number": 0,
+    "matched_by_email": 0,
+    "error": 0,
+    "tracking_present": 0,
+    "eta_available": 0,
+    "errors": 0,
+    "shopify_lookup_forced": 0
+  },
+  "failure_modes": [
+    {
+      "mode": "missing_order_number",
+      "count": 1
+    }
+  ],
+  "order_status_failure_modes": [],
+  "run_warnings": [],
+  "tickets": [
+    {
+      "ticket_id_redacted": "redacted:4b8657c16a52",
+      "classification_source": "openai_intent",
+      "channel": "unknown",
+      "ticket_number_redacted": "redacted:4b8657c16a52",
+      "ticket_created_at_redacted": "2025-12-XX",
+      "customer_email_redacted": "redacted:b1cddd14b49a",
+      "customer_name_redacted": "redacted:fb9724b3d733",
+      "order_number_redacted": null,
+      "message_excerpt_redacted": "Your contact request on Scentiment",
+      "classified_order_status": false,
+      "routing_intent": "unknown_other",
+      "routing_primary_source": "deterministic",
+      "openai_routing": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D5xM8YFuJ0SmpJvBFGpDV1amP9uPu",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.32,
+        "gated_reason": null,
+        "model": "gpt-5.2-chat-latest"
+      },
+      "openai_intent": {
+        "llm_called": true,
+        "response_id": "chatcmpl-D5xMCSmFQUCYKH3IssuPhFZK6Wd09",
+        "response_id_unavailable_reason": null,
+        "confidence": 0.1,
+        "gated_reason": null,
+        "accepted": false
+      },
+      "shopify_lookup_forced": false,
+      "match_result": "no_match",
+      "tracking_present": false,
+      "eta_window": null,
+      "match_attempted": false,
+      "would_auto_reply": false,
+      "order_resolution": null,
+      "elapsed_seconds": 11.969
+    }
+  ],
+  "richpanel_retry_diagnostics": null,
+  "richpanel_request_burst": null,
+  "richpanel_retry_after_validation": {
+    "checked": 0,
+    "violations": 0
+  },
+  "richpanel_identity": {
+    "richpanel_base_url": "https://api.richpanel.com",
+    "mw_env": "prod",
+    "richpanel_env": "prod",
+    "resolved_env": "prod",
+    "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
+    "api_key_hash": "7ab000f0",
+    "api_key_error": null,
+    "run_started_at": "2026-02-05T17:22:52.297134+00:00",
+    "run_duration_seconds": 11.969
+  },
+  "notes": [
+    "Ticket identifiers, names, emails, and order numbers are hashed in structured fields.",
+    "Message excerpts are sanitized (HTML stripped; emails/phones/addresses redacted; order numbers may remain).",
+    "No outbound messages are sent; would_auto_reply is theoretical only."
+  ],
+  "run_duration_seconds": 11.969
+}

@@ -7,6 +7,8 @@ import importlib
 import unittest
 import types
 import hashlib
+import io
+import contextlib
 from datetime import datetime, timezone
 from collections import Counter
 from pathlib import Path
@@ -21,6 +23,20 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 import live_readonly_shadow_eval as shadow_eval  # noqa: E402
 import readonly_shadow_utils as shadow_utils  # noqa: E402
+
+
+OPENAI_SHADOW_ENV = {
+    "MW_OPENAI_ROUTING_ENABLED": "true",
+    "MW_OPENAI_INTENT_ENABLED": "true",
+    "MW_OPENAI_SHADOW_ENABLED": "true",
+    "OPENAI_ALLOW_NETWORK": "true",
+}
+
+
+def _with_openai_env(env: dict) -> dict:
+    merged = dict(OPENAI_SHADOW_ENV)
+    merged.update(env)
+    return merged
 
 
 class _StubResponse:
@@ -93,7 +109,7 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             argv = ["live_readonly_shadow_eval.py", "--ticket-id", "123"]
             with mock.patch.object(sys, "argv", argv):
                 with self.assertRaises(SystemExit) as ctx:
@@ -454,7 +470,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         super().tearDown()
     def test_require_prod_environment_blocks_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit):
                 shadow_eval._require_prod_environment(allow_non_prod=False)
             self.assertEqual(
@@ -462,7 +478,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             )
 
     def test_resolve_env_name_defaults_to_local(self) -> None:
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             self.assertEqual(shadow_eval._resolve_env_name(), "local")
 
     def test_sys_path_inserts_backend_src(self) -> None:
@@ -479,12 +495,12 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_resolve_env_name_prefers_richpanel_env(self) -> None:
         env = {"RICHPANEL_ENV": "Staging", "MW_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow_eval._resolve_env_name(), "staging")
 
     def test_resolve_richpanel_base_url_override(self) -> None:
         env = {"RICHPANEL_API_BASE_URL": "https://api.richpanel.com/"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(
                 shadow_eval._resolve_richpanel_base_url(),
                 "https://api.richpanel.com",
@@ -497,13 +513,13 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             applied = shadow_eval._require_env_flags("test")
         self.assertEqual(applied, shadow_eval.REQUIRED_FLAGS)
 
     def test_require_env_flag_mismatch_raises(self) -> None:
         env = {"RICHPANEL_WRITE_DISABLED": "false"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow_eval._require_env_flag(
                     "RICHPANEL_WRITE_DISABLED", "true", context="test"
@@ -961,7 +977,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_is_prod_target_detects_env(self) -> None:
         env = {"MW_ENV": "prod"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url=shadow_eval.PROD_RICHPANEL_BASE_URL,
                 richpanel_secret_id=None,
@@ -970,7 +986,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_is_prod_target_detects_prod_key_and_base(self) -> None:
         env = {"PROD_RICHPANEL_API_KEY": "token-value"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url=shadow_eval.PROD_RICHPANEL_BASE_URL,
                 richpanel_secret_id=None,
@@ -979,7 +995,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_is_prod_target_detects_secret_hint(self) -> None:
         env = {"MW_ENV": "dev"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url="https://sandbox.richpanel.com",
                 richpanel_secret_id="arn:aws:secretsmanager:us-east-2:123:secret/prod/rp",
@@ -988,7 +1004,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_is_prod_target_false_for_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url="https://sandbox.richpanel.com",
                 richpanel_secret_id=None,
@@ -1087,7 +1103,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(message, "")
 
     def test_require_env_flag_missing_raises(self) -> None:
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             with self.assertRaises(SystemExit) as ctx:
                 shadow_eval._require_env_flag(
                     "RICHPANEL_WRITE_DISABLED", "true", context="test"
@@ -1699,7 +1715,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertIsNone(shadow_eval._extract_aws_operation(req))
 
     def test_resolve_shopify_secrets_client_no_profile(self) -> None:
-        with mock.patch.dict(os.environ, {}, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             self.assertIsNone(shadow_eval._resolve_shopify_secrets_client())
 
     def test_resolve_shopify_secrets_client_with_profile(self) -> None:
@@ -1723,7 +1739,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev",
             "AWS_REGION": "us-east-2",
         }
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with mock.patch.object(shadow_eval, "boto3", _StubBoto3()):
                 client = shadow_eval._resolve_shopify_secrets_client()
         assert client is not None
@@ -1733,10 +1749,57 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
     def test_resolve_shopify_secrets_client_requires_boto3(self) -> None:
         env = {"SHOPIFY_ACCESS_TOKEN_PROFILE": "rp-admin-dev"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             with mock.patch.object(shadow_eval, "boto3", None):
                 with self.assertRaises(SystemExit):
                     shadow_eval._resolve_shopify_secrets_client()
+
+
+class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
+    def test_openai_shadow_defaults_set(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            shadow_eval._apply_openai_shadow_eval_defaults()
+            self.assertEqual(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_INTENT_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_OPENAI_SHADOW_ENABLED"), "true")
+            self.assertEqual(os.environ.get("MW_ALLOW_NETWORK_READS"), "true")
+            self.assertEqual(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), "false")
+            self.assertEqual(os.environ.get("OPENAI_ALLOW_NETWORK"), "true")
+
+    def test_openai_gating_blockers_empty_when_enabled(self) -> None:
+        env = {
+            "MW_OPENAI_ROUTING_ENABLED": "true",
+            "MW_OPENAI_INTENT_ENABLED": "true",
+            "MW_OPENAI_SHADOW_ENABLED": "true",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "OPENAI_ALLOW_NETWORK": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(shadow_eval._openai_gating_blockers(), [])
+
+    def test_emit_openai_banner_blocks_without_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                with self.assertRaises(SystemExit):
+                    shadow_eval._emit_openai_routing_banner(
+                        allow_deterministic_only=False
+                    )
+            self.assertIn(
+                "Results will undercount order-status",
+                stream.getvalue(),
+            )
+
+    def test_emit_openai_banner_allows_with_override(self) -> None:
+        env = {"MW_OPENAI_ROUTING_ENABLED": "false"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                shadow_eval._emit_openai_routing_banner(
+                    allow_deterministic_only=True
+                )
 
     def test_aws_sdk_trace_capture_noop_when_wrapped(self) -> None:
         trace = shadow_eval._AwsSdkTrace([])
@@ -2064,7 +2127,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_READ_ONLY": "true",
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
-        with TemporaryDirectory() as tmpdir, mock.patch.dict(os.environ, env, clear=True):
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             report_path = Path(tmpdir) / "report.json"
             argv = [
                 "live_readonly_shadow_eval.py",
@@ -2164,7 +2227,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             report_path = Path(tmpdir) / "report.json"
             summary_md_path = Path(tmpdir) / "summary.md"
@@ -2238,7 +2301,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2300,7 +2363,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2378,7 +2441,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -2454,7 +2517,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2482,7 +2545,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2510,6 +2573,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "1",
             "--max-tickets",
             "2",
+            "--allow-deterministic-only",
         ]
         with mock.patch.object(sys, "argv", argv):
             with self.assertRaises(SystemExit) as ctx:
@@ -2525,7 +2589,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2568,7 +2632,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2605,7 +2669,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2638,7 +2702,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2685,7 +2749,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=[],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2724,7 +2788,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2756,7 +2820,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2831,7 +2895,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "created_at": "2026-01-01T00:00:00Z",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2879,7 +2943,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "RICHPANEL_OUTBOUND_ENABLED": "false",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             report_path = Path(tmpdir) / "report.json"
@@ -2908,7 +2972,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -2972,7 +3036,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -3026,7 +3090,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             reasons=["stubbed"],
         )
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"
@@ -3075,7 +3139,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             "SHOPIFY_OUTBOUND_ENABLED": "true",
         }
         with TemporaryDirectory() as tmpdir, mock.patch.dict(
-            os.environ, env, clear=True
+            os.environ, _with_openai_env(env), clear=True
         ):
             trace_path = Path(tmpdir) / "trace.json"
             artifact_path = Path(tmpdir) / "artifact.json"

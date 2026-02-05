@@ -334,6 +334,80 @@ def _openai_any_enabled() -> bool:
     ) or _to_bool(os.environ.get("MW_OPENAI_REWRITE_ENABLED"), False)
 
 
+def _resolve_openai_models() -> Dict[str, str]:
+    base_model = os.environ.get("OPENAI_MODEL") or "gpt-5.2-chat-latest"
+    return {
+        "openai_model": base_model,
+        "order_status_intent_model": os.environ.get("OPENAI_ORDER_STATUS_INTENT_MODEL")
+        or base_model,
+        "reply_rewrite_model": os.environ.get("OPENAI_REPLY_REWRITE_MODEL") or base_model,
+    }
+
+
+def _apply_openai_shadow_eval_defaults() -> None:
+    os.environ["MW_OPENAI_ROUTING_ENABLED"] = "true"
+    os.environ["MW_OPENAI_INTENT_ENABLED"] = "true"
+    os.environ["MW_OPENAI_SHADOW_ENABLED"] = "true"
+    os.environ["MW_ALLOW_NETWORK_READS"] = "true"
+    os.environ["RICHPANEL_OUTBOUND_ENABLED"] = "false"
+    os.environ["OPENAI_ALLOW_NETWORK"] = "true"
+
+
+def _openai_gating_blockers() -> List[str]:
+    blockers: List[str] = []
+    if not _to_bool(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), False):
+        blockers.append("MW_OPENAI_ROUTING_ENABLED=false")
+    if not _to_bool(os.environ.get("MW_OPENAI_INTENT_ENABLED"), False):
+        blockers.append("MW_OPENAI_INTENT_ENABLED=false")
+    if not _to_bool(os.environ.get("MW_ALLOW_NETWORK_READS"), False):
+        blockers.append("MW_ALLOW_NETWORK_READS=false")
+    if not _to_bool(os.environ.get("OPENAI_ALLOW_NETWORK"), False):
+        blockers.append("OPENAI_ALLOW_NETWORK=false")
+    if not _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False) and not _openai_shadow_enabled():
+        blockers.append("RICHPANEL_OUTBOUND_ENABLED=false and MW_OPENAI_SHADOW_ENABLED=false")
+    return blockers
+
+
+def _emit_openai_routing_banner(*, allow_deterministic_only: bool) -> None:
+    models = _resolve_openai_models()
+    routing_enabled = _to_bool(os.environ.get("MW_OPENAI_ROUTING_ENABLED"), False)
+    shadow_enabled = _openai_shadow_enabled()
+    intent_enabled = _to_bool(os.environ.get("MW_OPENAI_INTENT_ENABLED"), False)
+    rewrite_enabled = _to_bool(os.environ.get("MW_OPENAI_REWRITE_ENABLED"), False)
+    allow_network_reads = _to_bool(os.environ.get("MW_ALLOW_NETWORK_READS"), False)
+    openai_allow_network = _to_bool(os.environ.get("OPENAI_ALLOW_NETWORK"), False)
+    outbound_enabled = _to_bool(os.environ.get("RICHPANEL_OUTBOUND_ENABLED"), False)
+    blockers = _openai_gating_blockers()
+
+    banner = [
+        "=" * 76,
+        "OPENAI SHADOW EVAL CONFIG",
+        f"MW_OPENAI_ROUTING_ENABLED={routing_enabled}",
+        f"MW_OPENAI_SHADOW_ENABLED={shadow_enabled}",
+        f"MW_OPENAI_INTENT_ENABLED={intent_enabled}",
+        f"MW_OPENAI_REWRITE_ENABLED={rewrite_enabled}",
+        f"OPENAI_MODEL={models['openai_model']}",
+        f"OPENAI_ORDER_STATUS_INTENT_MODEL={models['order_status_intent_model']}",
+        f"OPENAI_REPLY_REWRITE_MODEL={models['reply_rewrite_model']}",
+        f"OPENAI_ALLOW_NETWORK={openai_allow_network}",
+        f"MW_ALLOW_NETWORK_READS={allow_network_reads}",
+        f"RICHPANEL_OUTBOUND_ENABLED={outbound_enabled}",
+        "SAFE_MODE=false (script default)",
+        f"OpenAI gating blockers: {', '.join(blockers) if blockers else 'none'}",
+        "=" * 76,
+    ]
+    print("\n".join(banner))
+    if not routing_enabled:
+        print(
+            "!!! WARNING: Results will undercount order-status; "
+            "not comparable to production intent."
+        )
+        if not allow_deterministic_only:
+            raise SystemExit(
+                "OpenAI routing disabled. Pass --allow-deterministic-only to proceed."
+            )
+
+
 def _fingerprint(text: str, *, length: int = 12) -> str:
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     return digest[:length]
@@ -2076,6 +2150,23 @@ def main() -> int:
         help="Allow non-prod runs for local tests",
     )
     parser.add_argument(
+        "--openai-shadow-eval",
+        action="store_true",
+        help=(
+            "Set env defaults for read-only OpenAI shadow routing "
+            "(MW_OPENAI_ROUTING_ENABLED, MW_OPENAI_SHADOW_ENABLED, "
+            "MW_ALLOW_NETWORK_READS, RICHPANEL_OUTBOUND_ENABLED=false)."
+        ),
+    )
+    parser.add_argument(
+        "--allow-deterministic-only",
+        action="store_true",
+        help=(
+            "Allow runs to proceed when OpenAI routing is disabled "
+            "(results will undercount order-status)."
+        ),
+    )
+    parser.add_argument(
         "--env",
         dest="env_name",
         help="Target environment (prod/staging/dev).",
@@ -2155,6 +2246,9 @@ def main() -> int:
     parser.set_defaults(preflight_secrets=True)
     args = parser.parse_args()
 
+    if args.openai_shadow_eval:
+        _apply_openai_shadow_eval_defaults()
+
     if args.env_name:
         normalized_env = str(args.env_name).strip().lower()
         if normalized_env:
@@ -2169,6 +2263,10 @@ def main() -> int:
 
     if args.stack_name:
         os.environ["MW_STACK_NAME"] = str(args.stack_name).strip()
+
+    _emit_openai_routing_banner(
+        allow_deterministic_only=args.allow_deterministic_only
+    )
 
     if (
         args.sample_size is not None

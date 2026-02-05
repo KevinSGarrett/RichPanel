@@ -1,0 +1,38 @@
+{
+  "ticket_count": 200,
+  "order_status_rate": 0.435,
+  "order_status_count": 87,
+  "match_rate": {
+    "order_number": 0.724,
+    "email": 0.276,
+    "order_status_count": 87,
+    "matched_by_order_number": 63,
+    "matched_by_email": 24
+  },
+  "top_non_order_status_intents": [
+    {
+      "intent": "unknown_other",
+      "count": 85
+    },
+    {
+      "intent": "cancel_order",
+      "count": 10
+    },
+    {
+      "intent": "order_status_tracking",
+      "count": 6
+    },
+    {
+      "intent": "technical_support",
+      "count": 4
+    },
+    {
+      "intent": "cancel_subscription",
+      "count": 3
+    }
+  ],
+  "rate_limit": {
+    "richpanel_retry_total": 0,
+    "richpanel_retry_429_count": 0
+  }
+}
