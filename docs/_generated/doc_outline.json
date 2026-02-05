@@ -14365,6 +14365,26 @@
     ]
   },
   {
+    "path": "09_Deployment/AWS_Account_Split.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "AWS Account Split",
+        "anchor": "aws-account-split"
+      },
+      {
+        "level": 2,
+        "text": "Accounts",
+        "anchor": "accounts"
+      },
+      {
+        "level": 2,
+        "text": "Key rules",
+        "anchor": "key-rules"
+      }
+    ]
+  },
+  {
     "path": "09_Deployment/Order_Status_Monitoring.md",
     "outline": [
       {
@@ -14466,6 +14486,61 @@
         "level": 2,
         "text": "Optional skips (diagnostic only)",
         "anchor": "optional-skips-diagnostic-only"
+      }
+    ]
+  },
+  {
+    "path": "09_Deployment/Shopify_Token_Runbook.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Shopify Token Runbook",
+        "anchor": "shopify-token-runbook"
+      },
+      {
+        "level": 2,
+        "text": "Scope",
+        "anchor": "scope"
+      },
+      {
+        "level": 2,
+        "text": "Where the Shopify secret lives",
+        "anchor": "where-the-shopify-secret-lives"
+      },
+      {
+        "level": 2,
+        "text": "Supported token formats",
+        "anchor": "supported-token-formats"
+      },
+      {
+        "level": 3,
+        "text": "Admin API token (no refresh)",
+        "anchor": "admin-api-token-no-refresh"
+      },
+      {
+        "level": 3,
+        "text": "OAuth token bundle (auto-refresh)",
+        "anchor": "oauth-token-bundle-auto-refresh"
+      },
+      {
+        "level": 2,
+        "text": "Health check + refresh behavior",
+        "anchor": "health-check-refresh-behavior"
+      },
+      {
+        "level": 2,
+        "text": "Fast diagnostics",
+        "anchor": "fast-diagnostics"
+      },
+      {
+        "level": 2,
+        "text": "Handling 401 / 403",
+        "anchor": "handling-401-403"
+      },
+      {
+        "level": 2,
+        "text": "Notes",
+        "anchor": "notes"
       }
     ]
   },
@@ -14586,6 +14661,21 @@
         "level": 2,
         "text": "Multi-account preflight (required)",
         "anchor": "multi-account-preflight-required"
+      },
+      {
+        "level": 2,
+        "text": "AWS account split (authoritative)",
+        "anchor": "aws-account-split-authoritative"
+      },
+      {
+        "level": 3,
+        "text": "DEV account",
+        "anchor": "dev-account"
+      },
+      {
+        "level": 3,
+        "text": "PROD account",
+        "anchor": "prod-account"
       },
       {
         "level": 2,

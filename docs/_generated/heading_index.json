@@ -2189,6 +2189,10 @@
       "anchor": "notes"
     },
     {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "notes"
+    },
+    {
       "path": "11_Governance_Continuous_Improvement/README.md",
       "anchor": "notes"
     },
@@ -4412,6 +4416,10 @@
   "accounts": [
     {
       "path": "02_System_Architecture/AWS_Organizations_Setup_Plan_No_Control_Tower.md",
+      "anchor": "accounts"
+    },
+    {
+      "path": "09_Deployment/AWS_Account_Split.md",
       "anchor": "accounts"
     }
   ],
@@ -15929,6 +15937,18 @@
       "anchor": "admin-tracking"
     }
   ],
+  "aws account split": [
+    {
+      "path": "09_Deployment/AWS_Account_Split.md",
+      "anchor": "aws-account-split"
+    }
+  ],
+  "key rules": [
+    {
+      "path": "09_Deployment/AWS_Account_Split.md",
+      "anchor": "key-rules"
+    }
+  ],
   "order status monitoring (mvp)": [
     {
       "path": "09_Deployment/Order_Status_Monitoring.md",
@@ -16035,6 +16055,76 @@
     {
       "path": "09_Deployment/Order_Status_Preflight.md",
       "anchor": "optional-skips-diagnostic-only"
+    }
+  ],
+  "shopify token runbook": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "shopify-token-runbook"
+    }
+  ],
+  "scope": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "scope"
+    },
+    {
+      "path": "11_Governance_Continuous_Improvement/Change_Management.md",
+      "anchor": "scope"
+    },
+    {
+      "path": "12_Cursor_Agent_Work_Packages/00_Overview/Ticket_Template.md",
+      "anchor": "scope"
+    },
+    {
+      "path": "12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T074_Enforce_never_auto_close_invariant_across_all_automation_paths.md",
+      "anchor": "scope"
+    },
+    {
+      "path": "98_Agent_Ops/README.md",
+      "anchor": "scope"
+    }
+  ],
+  "where the shopify secret lives": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "where-the-shopify-secret-lives"
+    }
+  ],
+  "supported token formats": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "supported-token-formats"
+    }
+  ],
+  "admin api token (no refresh)": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "admin-api-token-no-refresh"
+    }
+  ],
+  "oauth token bundle (auto-refresh)": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "oauth-token-bundle-auto-refresh"
+    }
+  ],
+  "health check + refresh behavior": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "health-check-refresh-behavior"
+    }
+  ],
+  "fast diagnostics": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "fast-diagnostics"
+    }
+  ],
+  "handling 401 / 403": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "handling-401-403"
     }
   ],
   "ci/cd plan": [
@@ -16149,6 +16239,24 @@
     {
       "path": "09_Deployment_Operations/Environments.md",
       "anchor": "multi-account-preflight-required"
+    }
+  ],
+  "aws account split (authoritative)": [
+    {
+      "path": "09_Deployment_Operations/Environments.md",
+      "anchor": "aws-account-split-authoritative"
+    }
+  ],
+  "dev account": [
+    {
+      "path": "09_Deployment_Operations/Environments.md",
+      "anchor": "dev-account"
+    }
+  ],
+  "prod account": [
+    {
+      "path": "09_Deployment_Operations/Environments.md",
+      "anchor": "prod-account"
     }
   ],
   "environment purposes": [
@@ -17697,24 +17805,6 @@
     {
       "path": "11_Governance_Continuous_Improvement/Artifact_Ownership_RACI.md",
       "anchor": "decision-logging-requirements"
-    }
-  ],
-  "scope": [
-    {
-      "path": "11_Governance_Continuous_Improvement/Change_Management.md",
-      "anchor": "scope"
-    },
-    {
-      "path": "12_Cursor_Agent_Work_Packages/00_Overview/Ticket_Template.md",
-      "anchor": "scope"
-    },
-    {
-      "path": "12_Cursor_Agent_Work_Packages/03_Tickets/W12-EP07-T074_Enforce_never_auto_close_invariant_across_all_automation_paths.md",
-      "anchor": "scope"
-    },
-    {
-      "path": "98_Agent_Ops/README.md",
-      "anchor": "scope"
     }
   ],
   "a) llm + policy artifacts (highest risk)": [

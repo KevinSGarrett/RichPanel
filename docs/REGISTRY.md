@@ -300,8 +300,10 @@ Legend:
 
 ## 09_Deployment
 
+- 📎 [AWS Account Split](09_Deployment/AWS_Account_Split.md)  (`09_Deployment/AWS_Account_Split.md`)
 - 📎 [Order Status Monitoring (MVP)](09_Deployment/Order_Status_Monitoring.md)  (`09_Deployment/Order_Status_Monitoring.md`)
 - 📎 [Order Status Preflight (Prod)](09_Deployment/Order_Status_Preflight.md)  (`09_Deployment/Order_Status_Preflight.md`)
+- 📎 [Shopify Token Runbook](09_Deployment/Shopify_Token_Runbook.md)  (`09_Deployment/Shopify_Token_Runbook.md`)
 
 ## 09_Deployment_Operations
 
