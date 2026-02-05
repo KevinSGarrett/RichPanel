@@ -440,6 +440,18 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow_eval,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
     def test_require_prod_environment_blocks_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
         with mock.patch.dict(os.environ, env, clear=True):
