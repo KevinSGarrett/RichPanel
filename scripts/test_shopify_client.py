@@ -393,7 +393,7 @@ class ShopifyClientTests(unittest.TestCase):
             self.assertEqual(client.access_token_secret_id, legacy)
             self.assertEqual(
                 secrets.calls,
-                [canonical, legacy, "rp-mw/local/shopify/refresh_token"],
+            [canonical, legacy],
             )
             self.assertEqual(
                 transport.requests[0].headers["x-shopify-access-token"], "legacy-token"
@@ -497,7 +497,7 @@ class ShopifyClientTests(unittest.TestCase):
             client = ShopifyClient(access_token="shpat_token")
             client._secrets_client_obj = _StubSecretsClient({})
             self.assertFalse(client.refresh_access_token())
-            self.assertEqual(client.refresh_error(), "missing_refresh_token")
+            self.assertEqual(client.refresh_error(), "non_json_token")
 
     def test_refresh_access_token_disabled_sets_error(self) -> None:
         client = ShopifyClient(access_token="shpat_token")
@@ -801,9 +801,28 @@ class ShopifyClientTests(unittest.TestCase):
             client._load_access_token()
             self.assertIsNotNone(client._token_info)
             self.assertFalse(client._refresh_access_token(client._token_info))
-            self.assertEqual(client.refresh_error(), "missing_refresh_token")
+            self.assertEqual(client.refresh_error(), "non_json_token")
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
+
+    def test_refresh_access_token_skips_when_source_not_admin(self) -> None:
+        token_info = ShopifyTokenInfo(
+            access_token="token",
+            refresh_token="refresh",
+            expires_at=1,
+            raw_format="json",
+            source_secret_id="rp-mw/local/shopify/admin_api_token",
+        )
+        with mock.patch.dict(
+            os.environ,
+            {"SHOPIFY_REFRESH_ENABLED": "true"},
+            clear=False,
+        ):
+            client = ShopifyClient(access_token="shpua_token")
+            client._token_info = token_info
+            client._refresh_token_source = "secret"
+            self.assertFalse(client._refresh_access_token(token_info))
+            self.assertEqual(client.refresh_error(), "non_admin_token_source")
 
     def test_extract_secret_field_returns_none_when_key_missing(self) -> None:
         client = ShopifyClient(access_token="test-token")
@@ -863,6 +882,7 @@ class ShopifyClientTests(unittest.TestCase):
             clear=False,
         ):
             client = ShopifyClient()
+            client._secrets_client_obj = _StubSecretsClient({})
             self.assertFalse(client.refresh_access_token())
             self.assertEqual(client.refresh_error(), "missing_access_token")
 

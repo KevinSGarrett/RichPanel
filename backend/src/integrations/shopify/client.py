@@ -523,6 +523,30 @@ class ShopifyClient:
         if not access_token or not self._token_info:
             self._last_refresh_error = "missing_access_token"
             return False
+        if self._token_info.raw_format != "json":
+            self._logger.info(
+                "refresh skipped (non-json token)",
+                extra={
+                    "reason": "non_json_token",
+                    "secret_id": self.access_token_secret_id,
+                    "raw_format": self._token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_json_token"
+            return False
+        if self._refresh_token_source != "admin_api_token":
+            self._logger.info(
+                "refresh skipped (non-admin token source)",
+                extra={
+                    "reason": "non_admin_token_source",
+                    "secret_id": self.access_token_secret_id,
+                    "raw_format": self._token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_admin_token_source"
+            return False
         if not self._token_info.refresh_token:
             self._logger.info(
                 "shopify.refresh_skipped",
@@ -697,7 +721,7 @@ class ShopifyClient:
             token_info = self._parse_token_secret(
                 secret_value, source_secret_id=secret_id
             )
-            if not token_info.refresh_token:
+            if token_info.raw_format == "json" and not token_info.refresh_token:
                 refresh_token = self._load_refresh_token(client)
                 if refresh_token:
                     token_info.refresh_token = refresh_token
@@ -859,6 +883,32 @@ class ShopifyClient:
             )
             self._last_refresh_error = "refresh_disabled"
             return False
+        if token_info.raw_format != "json":
+            self._logger.info(
+                "refresh skipped (non-json token)",
+                extra={
+                    "reason": "non_json_token",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                    "raw_format": token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_json_token"
+            return False
+        if self._refresh_token_source != "admin_api_token":
+            self._logger.info(
+                "refresh skipped (non-admin token source)",
+                extra={
+                    "reason": "non_admin_token_source",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                    "raw_format": token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "non_admin_token_source"
+            return False
         if not token_info.refresh_token:
             self._logger.info(
                 "shopify.refresh_skipped",
@@ -995,6 +1045,16 @@ class ShopifyClient:
     def _persist_token_info(self, token_info: ShopifyTokenInfo) -> None:
         if not token_info.access_token or not str(token_info.access_token).strip():
             self._logger.warning("shopify.refresh_skip_empty_token")
+            return
+        if token_info.raw_format != "json":
+            self._logger.info(
+                "shopify.refresh_skip_non_bundle",
+                extra={
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                    "raw_format": token_info.raw_format,
+                },
+            )
             return
         client = self._secrets_client_obj
         if client is None and boto3 is None:

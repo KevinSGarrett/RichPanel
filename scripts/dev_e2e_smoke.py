@@ -89,6 +89,7 @@ from integrations.common import (  # type: ignore  # noqa: E402
     PRODUCTION_ENVIRONMENTS,
     prod_write_ack_matches,
 )
+from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env  # type: ignore  # noqa: E402
 from secrets_preflight import run_secrets_preflight  # type: ignore  # noqa: E402
 
 
@@ -2231,6 +2232,16 @@ def parse_args() -> argparse.Namespace:
         help="Optional AWS profile name for the boto3 session (default: use ambient credentials).",
     )
     parser.add_argument(
+        "--expect-account-id",
+        help="Expected AWS account id for Secrets Manager preflight.",
+    )
+    parser.add_argument(
+        "--require-secret",
+        action="append",
+        default=[],
+        help="Require a Secrets Manager secret id (repeatable).",
+    )
+    parser.add_argument(
         "--ticket-id",
         help="Richpanel ticket/conversation ID to target for tag verification (optional).",
     )
@@ -4305,7 +4316,20 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     os.environ.setdefault("AWS_REGION", region)
     if args.preflight_secrets:
         print("[INFO] Running AWS account + secrets preflight...")
-        run_secrets_preflight(env_name=env_name, region=region, fail_on_error=True)
+        normalized_env = normalize_env(env_name)
+        expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(normalized_env)
+        if not expected_account_id:
+            raise SystemExit(
+                f"Unknown env '{normalized_env}' for AWS preflight (expected dev/staging/prod)."
+            )
+        run_secrets_preflight(
+            env_name=normalized_env,
+            region=region,
+            profile=args.profile,
+            expected_account_id=expected_account_id,
+            require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
     order_status_mode = _is_order_status_scenario(args.scenario)
     negative_scenario = args.scenario in _NEGATIVE_SCENARIOS
     not_order_status_mode = args.scenario == "not_order_status"

@@ -1,0 +1,87 @@
+# AWS preflight pass (DEV)
+
+Output (ARN redacted):
+~~~
+[AWS PREFLIGHT] account_id=151124909266 arn=[REDACTED_ARN] region=us-east-2
+{
+  "env": "dev",
+  "aws_account_id": "151124909266",
+  "aws_arn": "[REDACTED_ARN]",
+  "region": "us-east-2",
+  "timestamp_utc": "2026-02-05T02:46:00.982586+00:00",
+  "account_preflight": {
+    "env": "dev",
+    "region": "us-east-2",
+    "aws_account_id": "151124909266",
+    "aws_arn": "[REDACTED_ARN]",
+    "expected_account_id": "151124909266",
+    "expected_region": "us-east-2",
+    "ok": true,
+    "error": null
+  },
+  "secrets": {
+    "rp-mw/dev/openai/api_key": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    },
+    "rp-mw/dev/richpanel/api_key": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    },
+    "rp-mw/dev/richpanel/webhook_token": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    },
+    "rp-mw/dev/shopify/admin_api_token": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    },
+    "rp-mw/dev/shopify/access_token": {
+      "exists": false,
+      "readable": false,
+      "required": false,
+      "error": "ResourceNotFoundException",
+      "error_message": "An error occurred (ResourceNotFoundException) when calling the DescribeSecret operation: Secrets Manager can't find the specified secret.",
+      "note": "Legacy fallback for Shopify client."
+    },
+    "rp-mw/dev/shopify/client_id": {
+      "exists": true,
+      "readable": true,
+      "required": false
+    },
+    "rp-mw/dev/shopify/client_secret": {
+      "exists": true,
+      "readable": true,
+      "required": false
+    },
+    "rp-mw/dev/richpanel/bot_agent_id": {
+      "exists": true,
+      "readable": true,
+      "required": true,
+      "note": "Can be provided via RICHPANEL_BOT_AGENT_ID env var instead."
+    }
+  },
+  "ssm": {
+    "/rp-mw/dev/safe_mode": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    },
+    "/rp-mw/dev/automation_enabled": {
+      "exists": true,
+      "readable": true,
+      "required": true
+    }
+  },
+  "overall_status": "PASS",
+  "failures": {
+    "account": null,
+    "required_secrets": [],
+    "required_ssm": []
+  }
+}
+~~~

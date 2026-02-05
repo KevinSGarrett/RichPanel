@@ -118,7 +118,16 @@ def main() -> int:
         action="store_true",
         help="Emit diagnostic details to stdout.",
     )
+    parser.add_argument(
+        "--diagnose",
+        action="store_true",
+        help="Enable verbose output and include AWS account id.",
+    )
     args = parser.parse_args()
+
+    if args.diagnose:
+        args.verbose = True
+        args.include_aws_account_id = True
 
     if args.env:
         os.environ["ENVIRONMENT"] = args.env

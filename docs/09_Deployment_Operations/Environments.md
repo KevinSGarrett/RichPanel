@@ -25,12 +25,34 @@ AWS account (dev vs prod) or region.
 Run locally (PII-safe):
 ```bash
 python scripts/aws_account_preflight.py --env dev --region us-east-2
-python scripts/secrets_preflight.py --env dev --region us-east-2 --out artifacts/preflight_dev.json
+python scripts/secrets_preflight.py \
+  --env dev \
+  --region us-east-2 \
+  --expect-account-id 151124909266 \
+  --require-secret rp-mw/dev/richpanel/api_key \
+  --out artifacts/preflight_dev.json
 ```
 
 Expected behavior:
 - Fails fast if the AWS account id does not match the environment.
 - Fails fast if required secrets or SSM kill-switch parameters are missing or unreadable.
+
+---
+
+## AWS account split (authoritative)
+Secrets are **not shared** between accounts. Always verify which account you are in.
+
+### DEV account
+- Account ID: `151124909266`
+- Owns: `rp-mw-dev-ingress` API Gateway (`pj41mkbj38`)
+- Owns: all `rp-mw/dev/*` secrets
+
+### PROD account
+- Account ID: `878145708918`
+- Owns: prod secrets and token refresh infrastructure
+- Owns: all `rp-mw/prod/*` secrets
+
+If a secret exists in DEV, it will **not** be visible in PROD (and vice versa).
 
 ---
 

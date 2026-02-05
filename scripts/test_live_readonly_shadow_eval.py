@@ -440,6 +440,18 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 
 
 class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow_eval,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
     def test_require_prod_environment_blocks_non_prod(self) -> None:
         env = {"MW_ENV": "dev"}
         with mock.patch.dict(os.environ, env, clear=True):
@@ -2043,6 +2055,42 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             self.assertTrue(report_path.parent.exists())
             self.assertTrue(report_md_path.parent.exists())
             self.assertTrue(trace_path.parent.exists())
+
+    def test_preflight_skips_when_boto3_missing(self) -> None:
+        env = {
+            "MW_ENV": "dev",
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+        }
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(os.environ, env, clear=True):
+            report_path = Path(tmpdir) / "report.json"
+            argv = [
+                "live_readonly_shadow_eval.py",
+                "--sample-size",
+                "1",
+                "--allow-empty-sample",
+                "--allow-non-prod",
+                "--out",
+                str(report_path),
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                shadow_eval, "_build_richpanel_client", return_value=_StubClient()
+            ), mock.patch.object(
+                shadow_eval,
+                "_build_shopify_client",
+                return_value=SimpleNamespace(shop_domain="example.myshopify.com"),
+            ), mock.patch.object(
+                shadow_eval, "_resolve_shopify_secrets_client", return_value=None
+            ), mock.patch.object(
+                shadow_eval, "_fetch_recent_ticket_refs", return_value=[]
+            ), mock.patch.object(shadow_eval, "run_secrets_preflight") as preflight, mock.patch.object(
+                shadow_eval, "boto3", None
+            ):
+                result = shadow_eval.main()
+            self.assertEqual(result, 0)
+            preflight.assert_not_called()
 
     def test_resolve_report_path_variants(self) -> None:
         with TemporaryDirectory() as tmpdir:

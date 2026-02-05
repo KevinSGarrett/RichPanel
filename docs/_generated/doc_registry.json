@@ -2310,6 +2310,16 @@
     "last_updated": "2025-12-22"
   },
   {
+    "path": "09_Deployment/AWS_Account_Split.md",
+    "title": "AWS Account Split",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 80,
+    "approx_tokens": 104,
+    "last_updated": ""
+  },
+  {
     "path": "09_Deployment/Order_Status_Monitoring.md",
     "title": "Order Status Monitoring (MVP)",
     "section": "09_Deployment",
@@ -2327,6 +2337,16 @@
     "in_index": false,
     "word_count": 212,
     "approx_tokens": 275,
+    "last_updated": ""
+  },
+  {
+    "path": "09_Deployment/Shopify_Token_Runbook.md",
+    "title": "Shopify Token Runbook",
+    "section": "09_Deployment",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 296,
+    "approx_tokens": 384,
     "last_updated": ""
   },
   {
@@ -2355,8 +2375,8 @@
     "section": "09_Deployment_Operations",
     "status": "canonical",
     "in_index": true,
-    "word_count": 456,
-    "approx_tokens": 592,
+    "word_count": 537,
+    "approx_tokens": 698,
     "last_updated": "2025-12-22"
   },
   {
@@ -3955,8 +3975,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10803,
-    "approx_tokens": 14043,
+    "word_count": 10821,
+    "approx_tokens": 14067,
     "last_updated": ""
   },
   {
