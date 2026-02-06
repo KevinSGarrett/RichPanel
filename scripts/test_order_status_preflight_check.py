@@ -646,6 +646,7 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
                 "timestamp_utc": "2026-02-02T00:00:00Z",
                 "overall_status": "PASS",
                 "bot_agent_id_secret_present": True,
+                "bot_agent_id_secret_checked": True,
                 "checks": [
                     {
                         "name": "richpanel_api",
@@ -713,8 +714,63 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
             self.assertTrue(Path(out_json).exists())
             payload = json.loads(Path(out_json).read_text(encoding="utf-8"))
             self.assertTrue(payload.get("bot_agent_id_secret_present"))
+            self.assertTrue(payload.get("bot_agent_id_secret_checked"))
             self.assertTrue(Path(out_md).exists())
 
+    def test_main_skip_secrets_marks_bot_agent_unknown(self) -> None:
+        preflight.boto3 = _StubBoto3WithSession(_StubSecretsClient())
+        preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
+            response=_StubResponse(status_code=200, dry_run=False)
+        )
+        preflight.ShopifyClient = lambda **kwargs: _StubShopifyClient(  # type: ignore[assignment]
+            response=_StubResponse(status_code=200, dry_run=False),
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_json = str(Path(tmpdir) / "out.json")
+            argv = [
+                "order_status_preflight_check.py",
+                "--env",
+                "dev",
+                "--aws-profile",
+                "rp-admin-dev",
+                "--skip-secrets-check",
+                "--out-json",
+                out_json,
+            ]
+            with mock.patch.object(
+                preflight, "_check_shopify_graphql", return_value={"status": "PASS", "details": "ok"}
+            ), mock.patch.object(
+                preflight,
+                "_check_refresh_lambda_config",
+                return_value={"status": "PASS", "details": "ok"},
+            ), mock.patch.object(
+                preflight,
+                "_check_refresh_lambda_last_success",
+                return_value={"status": "PASS", "details": "ok"},
+            ), mock.patch.dict(
+                os.environ,
+                {
+                    "ENVIRONMENT": "dev",
+                    "MW_ALLOW_NETWORK_READS": "true",
+                    "RICHPANEL_READ_ONLY": "true",
+                    "RICHPANEL_WRITE_DISABLED": "true",
+                    "RICHPANEL_OUTBOUND_ENABLED": "false",
+                    "SHOPIFY_OUTBOUND_ENABLED": "true",
+                    "SHOPIFY_WRITE_DISABLED": "true",
+                    "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+                },
+                clear=False,
+            ), mock.patch.object(sys, "argv", argv):
+                self.assertEqual(preflight.main(), 0)
+            payload = json.loads(Path(out_json).read_text(encoding="utf-8"))
+            self.assertIsNone(payload.get("bot_agent_id_secret_present"))
+            self.assertFalse(payload.get("bot_agent_id_secret_checked"))
+            bot_entry = next(
+                entry
+                for entry in payload.get("checks", [])
+                if entry.get("name") == "bot_agent_id_secret"
+            )
+            self.assertEqual(bot_entry.get("status"), "SKIP")
     def test_main_includes_refresh_lambda_checks(self) -> None:
         preflight.boto3 = _StubBoto3WithSession(_StubSecretsClient())
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]

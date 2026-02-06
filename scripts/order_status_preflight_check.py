@@ -68,6 +68,7 @@ def _write_markdown(path: Path, payload: Dict[str, Any]) -> None:
         f"- timestamp_utc: {payload.get('timestamp_utc')}",
         f"- overall_status: {payload.get('overall_status')}",
         f"- bot_agent_id_secret_present: {payload.get('bot_agent_id_secret_present')}",
+        f"- bot_agent_id_secret_checked: {payload.get('bot_agent_id_secret_checked')}",
         "",
         "## Checks",
     ]
@@ -578,6 +579,16 @@ def main() -> int:
             env_name=env_name, session=session
         )
         checks.append({"name": "bot_agent_id_secret", **bot_agent_result})
+    else:
+        checks.append(
+            {
+                "name": "bot_agent_id_secret",
+                "status": "SKIP",
+                "details": "skipped_by_flag",
+                "next_action": "Re-run without --skip-secrets-check to verify bot agent id secret.",
+                "present": None,
+            }
+        )
     richpanel_result = _check_richpanel(
         base_url=args.richpanel_base_url,
         api_key_secret_id=args.richpanel_secret_id,
@@ -624,12 +635,14 @@ def main() -> int:
         if entry.get("name") == "bot_agent_id_secret":
             bot_agent_present = entry.get("present")
             break
+    bot_agent_checked = bot_agent_present is not None
     payload = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "overall_status": overall_status,
         "checks": checks,
         "shopify_token_diagnostics": token_diagnostics,
-        "bot_agent_id_secret_present": bool(bot_agent_present),
+        "bot_agent_id_secret_present": bot_agent_present,
+        "bot_agent_id_secret_checked": bot_agent_checked,
     }
 
     print(f"overall_status {overall_status}")
