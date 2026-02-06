@@ -125,15 +125,22 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 class ProdShadowTicketRefsTests(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
-        self._preflight_patch = mock.patch.object(
+        self._shadow_preflight_patch = mock.patch.object(
             shadow,
             "run_secrets_preflight",
             return_value={"overall_status": "PASS"},
         )
-        self._preflight_patch.start()
+        self._prod_preflight_patch = mock.patch.object(
+            prod_shadow,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._shadow_preflight_patch.start()
+        self._prod_preflight_patch.start()
 
     def tearDown(self) -> None:
-        self._preflight_patch.stop()
+        self._prod_preflight_patch.stop()
+        self._shadow_preflight_patch.stop()
         super().tearDown()
 
     def test_load_ticket_refs_skips_blank_and_comments(self) -> None:
@@ -145,6 +152,70 @@ class ProdShadowTicketRefsTests(unittest.TestCase):
             )
             refs = prod_shadow._load_ticket_refs(str(path))
         self.assertEqual(refs, ["12345", "ticket-abc"])
+
+    def test_ticket_refs_path_populates_explicit_refs(self) -> None:
+        env = {
+            "MW_ALLOW_NETWORK_READS": "true",
+            "RICHPANEL_READ_ONLY": "true",
+            "RICHPANEL_WRITE_DISABLED": "true",
+            "RICHPANEL_OUTBOUND_ENABLED": "false",
+            "MW_OPENAI_ROUTING_ENABLED": "true",
+            "MW_OPENAI_INTENT_ENABLED": "true",
+            "MW_OPENAI_SHADOW_ENABLED": "true",
+            "OPENAI_ALLOW_NETWORK": "true",
+            "SHOPIFY_OUTBOUND_ENABLED": "true",
+            "SHOPIFY_WRITE_DISABLED": "true",
+            "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
+        }
+        stub_ticket = {
+            "id": "ticket-1",
+            "created_at": "2026-02-01T00:00:00Z",
+            "conversation_id": "conv-1",
+            "comments": [],
+        }
+        routing = SimpleNamespace(intent="order_status_tracking")
+        routing_artifact = SimpleNamespace(primary_source=None, llm_suggestion={})
+        order_status_intent = SimpleNamespace(
+            llm_called=False,
+            response_id=None,
+            response_id_unavailable_reason=None,
+            gated_reason=None,
+            accepted=None,
+            result=None,
+        )
+        with TemporaryDirectory() as tmpdir, mock.patch.dict(
+            os.environ, _with_openai_env(env), clear=True
+        ):
+            refs_path = Path(tmpdir) / "refs.txt"
+            refs_path.write_text("ref-1\nref-2\n", encoding="utf-8")
+            out_json = Path(tmpdir) / "out.json"
+            out_md = Path(tmpdir) / "out.md"
+            argv = [
+                "prod_shadow_order_status_report.py",
+                "--env",
+                "prod",
+                "--ticket-refs-path",
+                str(refs_path),
+                "--out-json",
+                str(out_json),
+                "--out-md",
+                str(out_md),
+                "--allow-empty-sample",
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                prod_shadow, "_fetch_ticket", return_value=stub_ticket
+            ), mock.patch.object(
+                prod_shadow, "_fetch_conversation", return_value={}
+            ), mock.patch.object(
+                prod_shadow, "compute_dual_routing", return_value=(routing, routing_artifact)
+            ), mock.patch.object(
+                prod_shadow, "classify_order_status_intent", return_value=order_status_intent
+            ), mock.patch.object(
+                prod_shadow, "lookup_order_summary", return_value={}
+            ):
+                self.assertEqual(prod_shadow.main(), 0)
+            payload = json.loads(out_json.read_text(encoding="utf-8"))
+        self.assertEqual(payload["ticket_count"], 2)
 
     def test_require_env_flag_missing_and_mismatch(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):

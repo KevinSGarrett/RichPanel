@@ -84,6 +84,13 @@ class RichpanelClientSafetyTests(unittest.TestCase):
                 client = RichpanelClient()
                 self.assertEqual(client._load_api_key(), "rp-secret-value")
 
+    def test_extract_api_key_handles_json_variants(self) -> None:
+        self.assertEqual(
+            RichpanelClient._extract_api_key('{"RICHPANEL_KEY": "k1"}'), "k1"
+        )
+        self.assertEqual(RichpanelClient._extract_api_key('{"key": "k2"}'), "k2")
+        self.assertEqual(RichpanelClient._extract_api_key("raw-key"), "raw-key")
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())

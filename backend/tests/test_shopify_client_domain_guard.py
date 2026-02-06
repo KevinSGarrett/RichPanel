@@ -21,6 +21,12 @@ class ShopifyClientDomainGuardTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 ShopifyClient()
 
+    def test_non_prod_allows_default_domain(self) -> None:
+        env = {"MW_ENV": "dev"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            client = ShopifyClient()
+        self.assertEqual(client.shop_domain, "example.myshopify.com")
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())
