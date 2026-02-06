@@ -12564,11 +12564,6 @@
       },
       {
         "level": 3,
-        "text": "Shopify token types and expiry",
-        "anchor": "shopify-token-types-and-expiry"
-      },
-      {
-        "level": 3,
         "text": "Shopify token stability proof (no 48h wait)",
         "anchor": "shopify-token-stability-proof-no-48h-wait"
       },
@@ -14601,11 +14596,6 @@
         "level": 2,
         "text": "Fast diagnostics",
         "anchor": "fast-diagnostics"
-      },
-      {
-        "level": 2,
-        "text": "CI guardrail (E2E workflows)",
-        "anchor": "ci-guardrail-e2e-workflows"
       },
       {
         "level": 2,

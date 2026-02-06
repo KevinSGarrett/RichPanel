@@ -13979,12 +13979,6 @@
       "anchor": "shopify-legacy-path-compatibility"
     }
   ],
-  "shopify token types and expiry": [
-    {
-      "path": "08_Engineering/Secrets_and_Environments.md",
-      "anchor": "shopify-token-types-and-expiry"
-    }
-  ],
   "shopify token stability proof (no 48h wait)": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
@@ -16199,12 +16193,6 @@
     {
       "path": "09_Deployment/Shopify_Token_Runbook.md",
       "anchor": "fast-diagnostics"
-    }
-  ],
-  "ci guardrail (e2e workflows)": [
-    {
-      "path": "09_Deployment/Shopify_Token_Runbook.md",
-      "anchor": "ci-guardrail-e2e-workflows"
     }
   ],
   "handling 401 / 403": [
