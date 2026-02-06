@@ -4015,6 +4015,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "08_Testing_Quality/LLM_Regression_Gates_Checklist.md",
       "anchor": "purpose"
     },
@@ -14131,6 +14135,72 @@
       "anchor": "secret-path-templates"
     }
   ],
+  "shopify token truth table": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "shopify-token-truth-table"
+    }
+  ],
+  "token types and behavior": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "token-types-and-behavior"
+    }
+  ],
+  "token truth table (dev / staging / prod)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "token-truth-table-dev-staging-prod"
+    }
+  ],
+  "how to determine token type (quick)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "how-to-determine-token-type-quick"
+    }
+  ],
+  "quick validation (prove auth works)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "quick-validation-prove-auth-works"
+    }
+  ],
+  "what to do on failure": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "what-to-do-on-failure"
+    }
+  ],
+  "401 unauthorized": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "401-unauthorized"
+    }
+  ],
+  "403 forbidden": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "403-forbidden"
+    }
+  ],
+  "429 too many requests": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "429-too-many-requests"
+    }
+  ],
+  "network / request errors": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "network-request-errors"
+    }
+  ],
+  "operational workflow (do not re-add secrets blindly)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "operational-workflow-do-not-re-add-secrets-blindly"
+    }
+  ],
   "analytics data model and exports (wave 08)": [
     {
       "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
@@ -16075,6 +16145,10 @@
       "anchor": "scope"
     },
     {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "scope"
+    },
+    {
       "path": "11_Governance_Continuous_Improvement/Change_Management.md",
       "anchor": "scope"
     },
@@ -16637,6 +16711,48 @@
     {
       "path": "12_Cursor_Agent_Work_Packages/01_Work_Breakdown/Dependency_Map.md",
       "anchor": "3-change-protocol"
+    }
+  ],
+  "order status — prod cutover runbook": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "order-status-prod-cutover-runbook"
+    }
+  ],
+  "accounts and region": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "accounts-and-region"
+    }
+  ],
+  "prereqs (must be true before cutover)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "prereqs-must-be-true-before-cutover"
+    }
+  ],
+  "cutover steps (in order)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "cutover-steps-in-order"
+    }
+  ],
+  "canary procedure (safe)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "canary-procedure-safe"
+    }
+  ],
+  "rollback steps": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "rollback-steps"
+    }
+  ],
+  "evidence checklist (pii-safe)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "evidence-checklist-pii-safe"
     }
   ],
   "legacy folder: 10_governance_continuous_improvement": [
@@ -22947,6 +23063,12 @@
     {
       "path": "REGISTRY.md",
       "anchor": "09deploymentoperations"
+    }
+  ],
+  "09_runbooks": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09runbooks"
     }
   ],
   "10_governance_continuous_improvement": [

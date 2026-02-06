@@ -267,6 +267,7 @@ Legend:
 - ✅ [Repository Conventions](08_Engineering/Repository_Conventions.md)  (`08_Engineering/Repository_Conventions.md`)
 - 📎 [Richpanel Reply Paths](08_Engineering/Richpanel_Reply_Paths.md)  (`08_Engineering/Richpanel_Reply_Paths.md`)
 - 📎 [Secrets and Environments](08_Engineering/Secrets_and_Environments.md)  (`08_Engineering/Secrets_and_Environments.md`)
+- 📎 [Shopify Token Truth Table](08_Engineering/Shopify_Token_Truth_Table.md)  (`08_Engineering/Shopify_Token_Truth_Table.md`)
 
 ## 08_Observability_Analytics
 
@@ -314,6 +315,10 @@ Legend:
 - ✅ [Go / No-Go Checklist (Release Readiness)](09_Deployment_Operations/Go_No_Go_Checklist.md)  (`09_Deployment_Operations/Go_No_Go_Checklist.md`)
 - ✅ [Release and Rollback Plan](09_Deployment_Operations/Release_and_Rollback.md)  (`09_Deployment_Operations/Release_and_Rollback.md`)
 - ✅ [Runbooks](09_Deployment_Operations/Runbooks.md)  (`09_Deployment_Operations/Runbooks.md`)
+
+## 09_Runbooks
+
+- 📎 [Order Status — Prod Cutover Runbook](09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md)  (`09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md`)
 
 ## 10_Governance_Continuous_Improvement
 

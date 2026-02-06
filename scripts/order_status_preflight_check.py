@@ -67,6 +67,8 @@ def _write_markdown(path: Path, payload: Dict[str, Any]) -> None:
         "",
         f"- timestamp_utc: {payload.get('timestamp_utc')}",
         f"- overall_status: {payload.get('overall_status')}",
+        f"- bot_agent_id_secret_present: {payload.get('bot_agent_id_secret_present')}",
+        f"- bot_agent_id_secret_checked: {payload.get('bot_agent_id_secret_checked')}",
         "",
         "## Checks",
     ]
@@ -89,6 +91,11 @@ def _write_markdown(path: Path, payload: Dict[str, Any]) -> None:
         )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_json(path: Path, payload: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 def _canonical_env(env_name: str) -> str:
@@ -137,14 +144,18 @@ def _build_secret_ids(env_name: str) -> List[str]:
     return [f"{base}/{group}/{name}" for group, name in REQUIRED_SECRET_SUFFIXES]
 
 
-def _check_secrets(*, env_name: str) -> Dict[str, str]:
+def _check_secrets(
+    *, env_name: str, session: Optional["boto3.session.Session"] = None
+) -> Dict[str, str]:
     if boto3 is None:
         return {
             "status": "FAIL",
             "details": "boto3_unavailable",
             "next_action": "Install boto3 or run in CI with AWS creds to verify secrets.",
         }
-    secrets_client = boto3.client("secretsmanager")
+    secrets_client = (
+        session.client("secretsmanager") if session else boto3.client("secretsmanager")
+    )
     secret_ids = _build_secret_ids(env_name)
     failures: List[str] = []
     for secret_id in secret_ids:
@@ -159,6 +170,41 @@ def _check_secrets(*, env_name: str) -> Dict[str, str]:
             "next_action": "Ensure required Secrets Manager entries exist and decrypt.",
         }
     return {"status": "PASS", "details": f"checked={len(secret_ids)}"}
+
+
+def _check_bot_agent_id_secret(
+    *, env_name: str, session: Optional["boto3.session.Session"] = None
+) -> Dict[str, Any]:
+    if boto3 is None:
+        return {
+            "status": "FAIL",
+            "details": "boto3_unavailable",
+            "next_action": "Install boto3 or run in CI with AWS creds to verify secrets.",
+            "present": False,
+        }
+    canonical_env = _canonical_env(env_name)
+    secret_id = f"rp-mw/{canonical_env}/richpanel/bot_agent_id"
+    secrets_client = (
+        session.client("secretsmanager") if session else boto3.client("secretsmanager")
+    )
+    try:
+        secrets_client.get_secret_value(SecretId=secret_id)
+    except (BotoCoreError, ClientError, Exception) as exc:
+        status = "FAIL" if canonical_env == "prod" else "WARN"
+        return {
+            "status": status,
+            "details": f"missing_or_unreadable ({exc.__class__.__name__})",
+            "next_action": (
+                "Create bot agent in Richpanel and store id into Secrets Manager "
+                f"at {secret_id}."
+            ),
+            "present": False,
+        }
+    return {
+        "status": "PASS",
+        "details": f"present ({secret_id})",
+        "present": True,
+    }
 
 
 def _check_shopify_graphql(
@@ -232,7 +278,10 @@ def _check_shopify_graphql(
 
 
 def _check_refresh_lambda_last_success(
-    *, env_name: str, window_hours: int = 8
+    *,
+    env_name: str,
+    window_hours: int = 8,
+    session: Optional["boto3.session.Session"] = None,
 ) -> Dict[str, str]:
     if boto3 is None:
         return {
@@ -248,7 +297,7 @@ def _check_refresh_lambda_last_success(
         or f"rp-mw-{canonical_env}-shopify-token-refresh"
     )
     log_group = log_group_override or f"/aws/lambda/{lambda_name}"
-    client = boto3.client("logs")
+    client = session.client("logs") if session else boto3.client("logs")
     now = datetime.now(timezone.utc)
     try:
         streams = client.describe_log_streams(
@@ -258,8 +307,13 @@ def _check_refresh_lambda_last_success(
             limit=5,
         ).get("logStreams", [])
     except (BotoCoreError, ClientError, Exception) as exc:
+        is_missing = False
+        if isinstance(exc, ClientError):
+            error_code = exc.response.get("Error", {}).get("Code", "")
+            is_missing = error_code == "ResourceNotFoundException"
+        status = "WARN" if is_missing and canonical_env != "prod" else "FAIL"
         return {
-            "status": "FAIL",
+            "status": status,
             "details": f"log_query_failed ({exc.__class__.__name__})",
             "next_action": "Verify CloudWatch Logs permissions and log group name.",
         }
@@ -469,6 +523,8 @@ def main() -> int:
         description="Order status preflight health check (read-only)."
     )
     parser.add_argument("--env", help="Environment override for secrets paths.")
+    parser.add_argument("--aws-profile", help="AWS profile to use for preflight.")
+    parser.add_argument("--out-json", help="Optional JSON output path.")
     parser.add_argument("--out-md", help="Optional markdown output path.")
     parser.add_argument("--shop-domain", help="Shopify shop domain override.")
     parser.add_argument(
@@ -502,13 +558,36 @@ def main() -> int:
 
     if args.env:
         os.environ["ENVIRONMENT"] = args.env
+    if args.aws_profile:
+        os.environ["AWS_PROFILE"] = args.aws_profile
+
+    session = None
+    if boto3 is not None and args.aws_profile:
+        session = boto3.session.Session(profile_name=args.aws_profile)
 
     checks: List[Dict[str, Any]] = []
     env_name, _ = resolve_env_name()
     checks.append({"name": "required_env", **_check_required_env()})
     if not args.skip_secrets_check:
         checks.append(
-            {"name": "required_secrets", **_check_secrets(env_name=env_name)}
+            {
+                "name": "required_secrets",
+                **_check_secrets(env_name=env_name, session=session),
+            }
+        )
+        bot_agent_result = _check_bot_agent_id_secret(
+            env_name=env_name, session=session
+        )
+        checks.append({"name": "bot_agent_id_secret", **bot_agent_result})
+    else:
+        checks.append(
+            {
+                "name": "bot_agent_id_secret",
+                "status": "SKIP",
+                "details": "skipped_by_flag",
+                "next_action": "Re-run without --skip-secrets-check to verify bot agent id secret.",
+                "present": None,
+            }
         )
     richpanel_result = _check_richpanel(
         base_url=args.richpanel_base_url,
@@ -540,6 +619,7 @@ def main() -> int:
                 **_check_refresh_lambda_last_success(
                     env_name=env_name,
                     window_hours=args.refresh_lambda_window_hours,
+                    session=session,
                 ),
             }
         )
@@ -550,11 +630,19 @@ def main() -> int:
         else "FAIL"
     )
     token_diagnostics = shopify_result.get("token_diagnostics")
+    bot_agent_present = None
+    for entry in checks:
+        if entry.get("name") == "bot_agent_id_secret":
+            bot_agent_present = entry.get("present")
+            break
+    bot_agent_checked = bot_agent_present is not None
     payload = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "overall_status": overall_status,
         "checks": checks,
         "shopify_token_diagnostics": token_diagnostics,
+        "bot_agent_id_secret_present": bot_agent_present,
+        "bot_agent_id_secret_checked": bot_agent_checked,
     }
 
     print(f"overall_status {overall_status}")
@@ -565,6 +653,8 @@ def main() -> int:
 
     if args.out_md:
         _write_markdown(Path(args.out_md), payload)
+    if args.out_json:
+        _write_json(Path(args.out_json), payload)
 
     return 0 if overall_status == "PASS" else 2
 

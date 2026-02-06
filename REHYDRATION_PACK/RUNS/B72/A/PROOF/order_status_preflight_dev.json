@@ -1,0 +1,69 @@
+{
+  "timestamp_utc": "2026-02-06T03:30:55.350029+00:00",
+  "overall_status": "PASS",
+  "checks": [
+    {
+      "name": "required_env",
+      "status": "PASS",
+      "details": "env=dev source=ENVIRONMENT"
+    },
+    {
+      "name": "required_secrets",
+      "status": "PASS",
+      "details": "checked=5"
+    },
+    {
+      "name": "bot_agent_id_secret",
+      "status": "PASS",
+      "details": "present (rp-mw/dev/richpanel/bot_agent_id)",
+      "present": true
+    },
+    {
+      "name": "richpanel_api",
+      "status": "PASS",
+      "details": "ok (200)"
+    },
+    {
+      "name": "shopify_token",
+      "status": "PASS",
+      "details": "ok (200)",
+      "token_diagnostics": {
+        "status": "loaded",
+        "token_type": "offline",
+        "raw_format": "plain",
+        "has_refresh_token": false,
+        "refresh_token_source": null,
+        "expires_at": null,
+        "expired": null,
+        "source_secret_id": "rp-mw/dev/shopify/admin_api_token"
+      }
+    },
+    {
+      "name": "shopify_graphql",
+      "status": "PASS",
+      "details": "ok (200)"
+    },
+    {
+      "name": "shopify_token_refresh_lambda",
+      "status": "PASS",
+      "details": "lambda_config_present"
+    },
+    {
+      "name": "shopify_token_refresh_last_success",
+      "status": "WARN",
+      "details": "log_query_failed (ResourceNotFoundException)",
+      "next_action": "Verify CloudWatch Logs permissions and log group name."
+    }
+  ],
+  "shopify_token_diagnostics": {
+    "status": "loaded",
+    "token_type": "offline",
+    "raw_format": "plain",
+    "has_refresh_token": false,
+    "refresh_token_source": null,
+    "expires_at": null,
+    "expired": null,
+    "source_secret_id": "rp-mw/dev/shopify/admin_api_token"
+  },
+  "bot_agent_id_secret_present": true
+}

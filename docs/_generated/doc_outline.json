@@ -12700,6 +12700,71 @@
     ]
   },
   {
+    "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Shopify Token Truth Table",
+        "anchor": "shopify-token-truth-table"
+      },
+      {
+        "level": 2,
+        "text": "Purpose",
+        "anchor": "purpose"
+      },
+      {
+        "level": 2,
+        "text": "Token types and behavior",
+        "anchor": "token-types-and-behavior"
+      },
+      {
+        "level": 2,
+        "text": "Token truth table (DEV / STAGING / PROD)",
+        "anchor": "token-truth-table-dev-staging-prod"
+      },
+      {
+        "level": 2,
+        "text": "How to determine token type (quick)",
+        "anchor": "how-to-determine-token-type-quick"
+      },
+      {
+        "level": 2,
+        "text": "Quick validation (prove auth works)",
+        "anchor": "quick-validation-prove-auth-works"
+      },
+      {
+        "level": 2,
+        "text": "What to do on failure",
+        "anchor": "what-to-do-on-failure"
+      },
+      {
+        "level": 3,
+        "text": "401 Unauthorized",
+        "anchor": "401-unauthorized"
+      },
+      {
+        "level": 3,
+        "text": "403 Forbidden",
+        "anchor": "403-forbidden"
+      },
+      {
+        "level": 3,
+        "text": "429 Too Many Requests",
+        "anchor": "429-too-many-requests"
+      },
+      {
+        "level": 3,
+        "text": "Network / request errors",
+        "anchor": "network-request-errors"
+      },
+      {
+        "level": 2,
+        "text": "Operational workflow (do not re-add secrets blindly)",
+        "anchor": "operational-workflow-do-not-re-add-secrets-blindly"
+      }
+    ]
+  },
+  {
     "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
     "outline": [
       {
@@ -15016,6 +15081,51 @@
         "level": 2,
         "text": "3) Change protocol",
         "anchor": "3-change-protocol"
+      }
+    ]
+  },
+  {
+    "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status — Prod Cutover Runbook",
+        "anchor": "order-status-prod-cutover-runbook"
+      },
+      {
+        "level": 2,
+        "text": "Scope",
+        "anchor": "scope"
+      },
+      {
+        "level": 2,
+        "text": "Accounts and region",
+        "anchor": "accounts-and-region"
+      },
+      {
+        "level": 2,
+        "text": "Prereqs (must be true before cutover)",
+        "anchor": "prereqs-must-be-true-before-cutover"
+      },
+      {
+        "level": 2,
+        "text": "Cutover steps (in order)",
+        "anchor": "cutover-steps-in-order"
+      },
+      {
+        "level": 2,
+        "text": "Canary procedure (safe)",
+        "anchor": "canary-procedure-safe"
+      },
+      {
+        "level": 2,
+        "text": "Rollback steps",
+        "anchor": "rollback-steps"
+      },
+      {
+        "level": 2,
+        "text": "Evidence checklist (PII-safe)",
+        "anchor": "evidence-checklist-pii-safe"
       }
     ]
   },
@@ -22511,6 +22621,11 @@
         "level": 2,
         "text": "09_Deployment_Operations",
         "anchor": "09deploymentoperations"
+      },
+      {
+        "level": 2,
+        "text": "09_Runbooks",
+        "anchor": "09runbooks"
       },
       {
         "level": 2,

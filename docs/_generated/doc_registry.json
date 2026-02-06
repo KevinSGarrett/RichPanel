@@ -2070,6 +2070,16 @@
     "last_updated": "2026-01-27"
   },
   {
+    "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+    "title": "Shopify Token Truth Table",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 545,
+    "approx_tokens": 708,
+    "last_updated": ""
+  },
+  {
     "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
     "title": "Analytics Data Model and Exports (Wave 08)",
     "section": "08_Observability_Analytics",
@@ -2418,6 +2428,16 @@
     "word_count": 336,
     "approx_tokens": 436,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+    "title": "Order Status — Prod Cutover Runbook",
+    "section": "09_Runbooks",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 380,
+    "approx_tokens": 494,
+    "last_updated": ""
   },
   {
     "path": "10_Governance_Continuous_Improvement/Change_Management.md",
@@ -3975,8 +3995,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10821,
-    "approx_tokens": 14067,
+    "word_count": 10843,
+    "approx_tokens": 14095,
     "last_updated": ""
   },
   {

@@ -460,7 +460,12 @@ def main() -> int:
     )
     parser.add_argument("--env", required=True, help="Target environment (dev|staging|prod).")
     parser.add_argument("--region", help="AWS region override (default: env/AWS default).")
-    parser.add_argument("--profile", help="AWS profile to use for the preflight session.")
+    parser.add_argument(
+        "--profile",
+        "--aws-profile",
+        dest="profile",
+        help="AWS profile to use for the preflight session.",
+    )
     parser.add_argument(
         "--expect-account-id",
         dest="expect_account_id",
@@ -472,7 +477,12 @@ def main() -> int:
         default=[],
         help="Require a Secrets Manager secret id (repeatable).",
     )
-    parser.add_argument("--out", help="Optional JSON output path.")
+    parser.add_argument(
+        "--out",
+        "--out-json",
+        dest="out",
+        help="Optional JSON output path.",
+    )
     args = parser.parse_args()
 
     payload = run_secrets_preflight(
