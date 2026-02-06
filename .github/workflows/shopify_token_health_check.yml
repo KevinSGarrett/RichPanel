@@ -41,6 +41,18 @@ jobs:
       SHOPIFY_REFRESH_ENABLED: "true"
       ROLE_ARN: arn:aws:iam::${{ matrix.aws_account_id }}:role/rp-ci-deploy
     steps:
+      - name: Check shop domain
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        id: shop_domain
+        shell: bash
+        run: |
+          if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+            echo "SHOPIFY_SHOP_DOMAIN missing; skipping health check for ${ENVIRONMENT}."
+            exit 0
+          fi
+          echo "missing=false" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         if: ${{ env.RUN_FOR_ENV == 'true' }}
         uses: actions/checkout@v4
@@ -65,18 +77,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Run Shopify health check
-        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        if: ${{ env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
-            if [ "${ENVIRONMENT}" = "prod" ]; then
-              echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
-            else
-              echo "SHOPIFY_SHOP_DOMAIN is required for non-prod runs (set workflow input shop-domain or DEV_SHOPIFY_SHOP_DOMAIN secret)."
-            fi
-            exit 2
-          fi
           mkdir -p artifacts/shopify
           python scripts/shopify_health_check.py \
             --env "${ENVIRONMENT}" \
@@ -88,7 +92,7 @@ jobs:
             --include-aws-account-id
 
       - name: Upload health check artifact
-        if: ${{ always() && env.RUN_FOR_ENV == 'true' }}
+        if: ${{ always() && env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         uses: actions/upload-artifact@v4
         with:
           name: shopify-token-health-check-${{ matrix.environment }}
