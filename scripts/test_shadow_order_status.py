@@ -1539,6 +1539,28 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         self.assertIn("Retry-After Validation", markdown)
         self.assertIn("Richpanel Identity", markdown)
 
+    def test_build_markdown_report_handles_missing_email(self) -> None:
+        report = {
+            "run_id": "RUN_TEST",
+            "timestamp": "2026-02-06T00:00:00Z",
+            "environment": "dev",
+            "classification_source": "deterministic",
+            "env_flags": {},
+            "classification_source_counts": {},
+            "order_status_rate": None,
+            "ticket_count": 0,
+            "conversation_mode": "full",
+            "stats": {"missing_email": 1, "shopify_error": 1},
+            "stats_global": {},
+            "stats_order_status": {},
+            "failure_modes": [],
+            "order_status_failure_modes": [],
+        }
+        markdown = prod_shadow._build_markdown_report(report)
+        self.assertIn("None observed in this sample.", markdown)
+        self.assertIn("Ensure customer email is available on tickets.", markdown)
+        self.assertIn("Re-validate Shopify read-only token/scopes.", markdown)
+
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
     suite.addTests(
