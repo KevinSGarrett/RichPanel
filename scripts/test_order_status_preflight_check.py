@@ -421,26 +421,40 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertIn("log_query_failed", result.get("details", ""))
 
     def test_refresh_lambda_last_success_missing_logs_warns_in_dev(self) -> None:
-        error = preflight.ClientError(
-            {"Error": {"Code": "ResourceNotFoundException", "Message": "missing"}},
-            "DescribeLogStreams",
-        )
-        logs_client = _StubLogsClient(raise_describe_exc=error)
-        preflight.boto3 = _StubBoto3(logs_client)
-        result = preflight._check_refresh_lambda_last_success(env_name="dev")
-        self.assertEqual(result.get("status"), "WARN")
-        self.assertIn("log_query_failed", result.get("details", ""))
+        original_client_error = preflight.ClientError
+        try:
+            class _StubClientError(Exception):
+                def __init__(self, code: str) -> None:
+                    super().__init__("stub")
+                    self.response = {"Error": {"Code": code, "Message": "missing"}}
+
+            preflight.ClientError = _StubClientError  # type: ignore[assignment]
+            error = _StubClientError("ResourceNotFoundException")
+            logs_client = _StubLogsClient(raise_describe_exc=error)
+            preflight.boto3 = _StubBoto3(logs_client)
+            result = preflight._check_refresh_lambda_last_success(env_name="dev")
+            self.assertEqual(result.get("status"), "WARN")
+            self.assertIn("log_query_failed", result.get("details", ""))
+        finally:
+            preflight.ClientError = original_client_error
 
     def test_refresh_lambda_last_success_missing_logs_fails_in_prod(self) -> None:
-        error = preflight.ClientError(
-            {"Error": {"Code": "ResourceNotFoundException", "Message": "missing"}},
-            "DescribeLogStreams",
-        )
-        logs_client = _StubLogsClient(raise_describe_exc=error)
-        preflight.boto3 = _StubBoto3(logs_client)
-        result = preflight._check_refresh_lambda_last_success(env_name="prod")
-        self.assertEqual(result.get("status"), "FAIL")
-        self.assertIn("log_query_failed", result.get("details", ""))
+        original_client_error = preflight.ClientError
+        try:
+            class _StubClientError(Exception):
+                def __init__(self, code: str) -> None:
+                    super().__init__("stub")
+                    self.response = {"Error": {"Code": code, "Message": "missing"}}
+
+            preflight.ClientError = _StubClientError  # type: ignore[assignment]
+            error = _StubClientError("ResourceNotFoundException")
+            logs_client = _StubLogsClient(raise_describe_exc=error)
+            preflight.boto3 = _StubBoto3(logs_client)
+            result = preflight._check_refresh_lambda_last_success(env_name="prod")
+            self.assertEqual(result.get("status"), "FAIL")
+            self.assertIn("log_query_failed", result.get("details", ""))
+        finally:
+            preflight.ClientError = original_client_error
 
         preflight.ShopifyClient = lambda **kwargs: _StubShopifyClient(  # type: ignore[assignment]
             exc=RuntimeError("boom")
