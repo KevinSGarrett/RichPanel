@@ -123,6 +123,19 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
 
 
 class ProdShadowTicketRefsTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
+
     def test_load_ticket_refs_skips_blank_and_comments(self) -> None:
         with TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "refs.txt"

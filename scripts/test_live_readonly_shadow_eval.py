@@ -1761,6 +1761,19 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
 
 class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow_eval,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
+
     def test_openai_shadow_defaults_set(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             shadow_eval._apply_openai_shadow_eval_defaults()
