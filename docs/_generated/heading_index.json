@@ -13979,6 +13979,12 @@
       "anchor": "shopify-legacy-path-compatibility"
     }
   ],
+  "shopify token types and expiry": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-token-types-and-expiry"
+    }
+  ],
   "shopify token stability proof (no 48h wait)": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
