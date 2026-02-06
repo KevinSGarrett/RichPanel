@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -103,14 +104,14 @@ class _StubSecretsClient:
 
 
 class _StubLogsClient:
-    def __init__(self, *, streams=None, events_by_stream=None, raise_describe=False):
+    def __init__(self, *, streams=None, events_by_stream=None, raise_describe_exc=None):
         self._streams = streams or []
         self._events_by_stream = events_by_stream or {}
-        self._raise_describe = raise_describe
+        self._raise_describe_exc = raise_describe_exc
 
     def describe_log_streams(self, **_kwargs):
-        if self._raise_describe:
-            raise RuntimeError("boom")
+        if self._raise_describe_exc is not None:
+            raise self._raise_describe_exc
         return {"logStreams": self._streams}
 
     def get_log_events(self, *, logStreamName: str, **_kwargs):
@@ -349,6 +350,28 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertEqual(result.get("status"), "FAIL")
         self.assertIn("boto3_unavailable", result.get("details", ""))
 
+    def test_check_bot_agent_id_secret_warns_in_dev(self) -> None:
+        preflight.boto3 = _StubBoto3(
+            _StubSecretsClient(fail_ids={"rp-mw/dev/richpanel/bot_agent_id"})
+        )
+        result = preflight._check_bot_agent_id_secret(env_name="dev")
+        self.assertEqual(result.get("status"), "WARN")
+        self.assertFalse(result.get("present"))
+
+    def test_check_bot_agent_id_secret_fails_in_prod(self) -> None:
+        preflight.boto3 = _StubBoto3(
+            _StubSecretsClient(fail_ids={"rp-mw/prod/richpanel/bot_agent_id"})
+        )
+        result = preflight._check_bot_agent_id_secret(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertFalse(result.get("present"))
+
+    def test_check_bot_agent_id_secret_passes_when_present(self) -> None:
+        preflight.boto3 = _StubBoto3(_StubSecretsClient())
+        result = preflight._check_bot_agent_id_secret(env_name="prod")
+        self.assertEqual(result.get("status"), "PASS")
+        self.assertTrue(result.get("present"))
+
     def test_refresh_lambda_last_success(self) -> None:
         now = preflight.datetime.now(preflight.timezone.utc)
         ts_ms = int((now - timedelta(hours=1)).timestamp() * 1000)
@@ -391,7 +414,29 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertIn("refresh_disabled", result.get("details", ""))
 
     def test_refresh_lambda_last_success_logs_error(self) -> None:
-        logs_client = _StubLogsClient(raise_describe=True)
+        logs_client = _StubLogsClient(raise_describe_exc=RuntimeError("boom"))
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertIn("log_query_failed", result.get("details", ""))
+
+    def test_refresh_lambda_last_success_missing_logs_warns_in_dev(self) -> None:
+        error = preflight.ClientError(
+            {"Error": {"Code": "ResourceNotFoundException", "Message": "missing"}},
+            "DescribeLogStreams",
+        )
+        logs_client = _StubLogsClient(raise_describe_exc=error)
+        preflight.boto3 = _StubBoto3(logs_client)
+        result = preflight._check_refresh_lambda_last_success(env_name="dev")
+        self.assertEqual(result.get("status"), "WARN")
+        self.assertIn("log_query_failed", result.get("details", ""))
+
+    def test_refresh_lambda_last_success_missing_logs_fails_in_prod(self) -> None:
+        error = preflight.ClientError(
+            {"Error": {"Code": "ResourceNotFoundException", "Message": "missing"}},
+            "DescribeLogStreams",
+        )
+        logs_client = _StubLogsClient(raise_describe_exc=error)
         preflight.boto3 = _StubBoto3(logs_client)
         result = preflight._check_refresh_lambda_last_success(env_name="prod")
         self.assertEqual(result.get("status"), "FAIL")
@@ -449,6 +494,14 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
             content = path.read_text(encoding="utf-8")
             self.assertIn("Order status preflight health check", content)
             self.assertIn("Shopify token diagnostics", content)
+
+    def test_write_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "out.json"
+            payload = {"overall_status": "PASS", "checks": []}
+            preflight._write_json(path, payload)
+            parsed = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(parsed.get("overall_status"), "PASS")
 
     def test_main_success_path(self) -> None:
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
