@@ -30,14 +30,14 @@ python scripts\order_status_preflight_check.py --env dev --aws-profile rp-admin-
 
 # E2E proof (operator reply + email channel + /send-message)
 python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --profile rp-admin-dev-admin `
-  --ticket-number 1257 --scenario order_status `
+  --ticket-number 1260 --scenario order_status `
   --require-operator-reply --require-email-channel `
   --require-send-message-path --require-send-message-used `
   --proof-path REHYDRATION_PACK\RUNS\B73\A\PROOF\dev_e2e_smoke.json
 
 # Follow-up routing safety (same harness, second DEV ticket)
 python scripts\dev_e2e_smoke.py --env dev --region us-east-2 --profile rp-admin-dev-admin `
-  --ticket-number 1258 --scenario order_status `
+  --ticket-number 1260 --scenario order_status `
   --require-operator-reply --require-email-channel `
   --require-send-message-path --require-send-message-used `
   --simulate-followup `

@@ -5690,13 +5690,14 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     followup_required = bool(args.simulate_followup)
     followup_performed = bool(followup_event_id) if followup_required else None
-    followup_route_tag_present = (
-        "route-email-support-team" in (followup_skip_tags_added or [])
+    followup_skip_followup_tag_present = (
+        "mw-skip-followup-after-auto-reply" in (followup_skip_tags_added or [])
         if followup_required
         else None
     )
-    followup_skip_followup_tag_present = (
-        "mw-skip-followup-after-auto-reply" in (followup_skip_tags_added or [])
+    followup_route_tag_present = (
+        "route-email-support-team" in (followup_skip_tags_added or [])
+        or bool(followup_skip_followup_tag_present)
         if followup_required
         else None
     )

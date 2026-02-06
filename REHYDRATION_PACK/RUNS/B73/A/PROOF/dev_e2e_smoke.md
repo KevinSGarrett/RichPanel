@@ -1,9 +1,9 @@
 # DEV E2E smoke proof (order_status)
 
-- timestamp_utc: 2026-02-06T21:04:11.608408+00:00
+- timestamp_utc: 2026-02-06T21:59:50.358843+00:00
 - env: dev
 - region: us-east-2
-- ticket_number: 1257 (dev sandbox email)
+- ticket_number: 1260 (dev sandbox email)
 - scenario: order_status (variant: order_status_tracking)
 - result: PASS (PASS_STRONG)
 

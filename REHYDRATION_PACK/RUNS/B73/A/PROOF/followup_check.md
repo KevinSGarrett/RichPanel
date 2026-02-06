@@ -1,8 +1,8 @@
 # Follow-up routing safety check (DEV)
 
-- ticket_number: 1258 (dev sandbox email)
+- ticket_number: 1260 (dev sandbox email)
 - scenario: order_status with follow-up simulation
-- run_id: 20260206150905
+- run_id: 20260206155921
 - result: PASS (PASS_STRONG)
 
 ## First customer email (automation + operator reply)
@@ -16,4 +16,4 @@
 - followup_performed: true
 - followup_reply_sent: false (message_count_delta=0)
 - followup_routed_support: true
-- followup_skip_tags_added: mw-skip-followup-after-auto-reply, route-email-support-team
+- followup_skip_tags_added: mw-skip-followup-after-auto-reply
