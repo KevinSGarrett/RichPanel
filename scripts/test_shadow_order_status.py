@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 import unittest
@@ -1297,6 +1298,162 @@ class ProdShadowOrderStatusOpenAITests(unittest.TestCase):
                     allow_deterministic_only=True
                 )
 
+
+class ProdShadowDiagnosticsTests(unittest.TestCase):
+    def test_max_requests_in_window_and_request_burst(self) -> None:
+        self.assertEqual(prod_shadow._max_requests_in_window([], 30), 0)
+        timestamps = [0.0, 5.0, 10.0, 40.0]
+        self.assertEqual(prod_shadow._max_requests_in_window(timestamps, 30), 3)
+        entries = [
+            {"path": "/v1/tickets", "timestamp": 1.0},
+            {"path": "/v1/tickets", "timestamp": 5.0},
+            {"path": "/v1/conversations", "timestamp": 10.0},
+            {"path": "/v1/tickets", "timestamp": 40.0},
+            {"path": None, "timestamp": 50.0},
+            {"path": "/v1/tickets"},
+        ]
+        summary = prod_shadow._summarize_request_burst(entries, window_seconds=30)
+        self.assertEqual(summary["max_requests_overall"], 3)
+        self.assertEqual(summary["window_seconds"], 30)
+        self.assertTrue(summary["max_requests_by_endpoint"])
+
+    def test_summarize_retry_after_counts_violations(self) -> None:
+        entries = [
+            {"retry_after": "5", "retry_delay_seconds": "2"},
+            {"retry_after": None, "retry_delay_seconds": 1},
+            {"retry_after": "oops", "retry_delay_seconds": "5"},
+        ]
+        summary = prod_shadow._summarize_retry_after(entries)
+        self.assertEqual(summary["checked"], 1)
+        self.assertEqual(summary["violations"], 1)
+        self.assertLess(summary["min_delta_seconds"], 0)
+
+    def test_retry_diagnostics_emit_and_summary(self) -> None:
+        handler = prod_shadow._RichpanelRetryDiagnostics()
+        record = logging.LogRecord(
+            name="test",
+            level=logging.WARNING,
+            pathname=__file__,
+            lineno=1,
+            msg="richpanel.retry",
+            args=(),
+            exc_info=None,
+        )
+        record.status = 429
+        record.attempt = "1"
+        record.retry_in = "0.5"
+        record.url = "https://api.example.com/v1/tickets/123"
+        handler.emit(record)
+        record_other = logging.LogRecord(
+            name="test",
+            level=logging.WARNING,
+            pathname=__file__,
+            lineno=1,
+            msg="richpanel.retry",
+            args=(),
+            exc_info=None,
+        )
+        record_other.status = 503
+        record_other.attempt = "bad"
+        record_other.retry_in = "bad"
+        record_other.url = "not-a-url"
+        handler.emit(record_other)
+        summary = prod_shadow._summarize_retry_diagnostics(handler)
+        self.assertEqual(summary["total_retries"], 2)
+        self.assertIn("status_counts", summary)
+        self.assertIn("top_retry_endpoints", summary)
+
+    def test_redact_url_path_handles_none_and_url(self) -> None:
+        self.assertEqual(prod_shadow._redact_url_path(None), "/")
+        redacted = prod_shadow._redact_url_path("https://api.example.com/v1/tickets/123")
+        self.assertTrue(redacted.startswith("/"))
+
+    def test_fetch_ticket_and_conversation_helpers(self) -> None:
+        ticket_payload = {"ticket": {"id": "t-1"}}
+        convo_payload = [{"body": "msg"}]
+
+        class _Client:
+            def __init__(self) -> None:
+                self.calls: list[str] = []
+
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                self.calls.append(path)
+                if path.startswith("/v1/tickets/number/"):
+                    return _StubResponse(ticket_payload)
+                if path.endswith("/messages"):
+                    return _StubResponse(convo_payload)
+                return _StubResponse({}, status_code=404)
+
+        client = _Client()
+        ticket = prod_shadow._fetch_ticket(client, "123")
+        self.assertEqual(ticket.get("id"), "t-1")
+        convo = prod_shadow._fetch_conversation(client, "t-1", conversation_id="c-1")
+        self.assertEqual(convo.get("messages"), convo_payload)
+
+    def test_fetch_ticket_errors_raise(self) -> None:
+        class _Client:
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                return _StubResponse({}, status_code=404)
+
+        with self.assertRaises(SystemExit):
+            prod_shadow._fetch_ticket(_Client(), "ticket-abc")
+
+    def test_extract_latest_customer_message_from_convo_messages(self) -> None:
+        convo = {"messages": [{"sender_type": "customer", "body": "hello"}]}
+        message = prod_shadow._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "hello")
+
+    def test_compute_eta_window_and_match_result(self) -> None:
+        self.assertIsNone(prod_shadow._compute_eta_window({}, None))
+        order_summary = {
+            "created_at": "2026-02-01T00:00:00Z",
+            "shipping_method": "Standard (3-5 business days)",
+        }
+        eta = prod_shadow._compute_eta_window(order_summary, "2026-02-03T00:00:00Z")
+        self.assertTrue(eta)
+        match = prod_shadow._match_result(
+            order_summary={"order_resolution": {"resolvedBy": "order_number"}},
+            order_number_present=True,
+            email_present=False,
+            shopify_calls=0,
+            error=None,
+        )
+        self.assertEqual(match, "matched_by_order_number")
+        match = prod_shadow._match_result(
+            order_summary={},
+            order_number_present=False,
+            email_present=True,
+            shopify_calls=1,
+            error=None,
+        )
+        self.assertEqual(match, "matched_by_email")
+
+    def test_failure_mode_classification(self) -> None:
+        failure = prod_shadow._failure_mode(
+            match_result="error",
+            order_number_present=True,
+            email_present=True,
+            error={"type": "richpanel_error"},
+        )
+        self.assertEqual(failure, "richpanel_error")
+        failure = prod_shadow._failure_mode(
+            match_result="error",
+            order_number_present=True,
+            email_present=True,
+            error=None,
+            order_resolution={
+                "shopify_diagnostics": {"category": "rate_limited"}
+            },
+        )
+        self.assertEqual(failure, "shopify_rate_limited")
+        failure = prod_shadow._failure_mode(
+            match_result="no_match",
+            order_number_present=False,
+            email_present=False,
+            error=None,
+        )
+        self.assertEqual(failure, "missing_order_number_and_email")
+
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
     suite.addTests(
@@ -1324,6 +1481,9 @@ def main() -> int:  # pragma: no cover
         unittest.defaultTestLoader.loadTestsFromTestCase(
             ProdShadowOrderStatusOpenAITests
         )
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(ProdShadowDiagnosticsTests)
     )
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
