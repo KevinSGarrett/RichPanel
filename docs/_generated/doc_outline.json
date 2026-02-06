@@ -12564,6 +12564,11 @@
       },
       {
         "level": 3,
+        "text": "Shopify token types and expiry",
+        "anchor": "shopify-token-types-and-expiry"
+      },
+      {
+        "level": 3,
         "text": "Shopify token stability proof (no 48h wait)",
         "anchor": "shopify-token-stability-proof-no-48h-wait"
       },
@@ -14534,6 +14539,11 @@
       },
       {
         "level": 2,
+        "text": "CI guardrail (E2E workflows)",
+        "anchor": "ci-guardrail-e2e-workflows"
+      },
+      {
+        "level": 2,
         "text": "Handling 401 / 403",
         "anchor": "handling-401-403"
       },
@@ -15011,6 +15021,51 @@
         "level": 2,
         "text": "3) Change protocol",
         "anchor": "3-change-protocol"
+      }
+    ]
+  },
+  {
+    "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Order Status — Prod Cutover Runbook",
+        "anchor": "order-status-prod-cutover-runbook"
+      },
+      {
+        "level": 2,
+        "text": "Scope",
+        "anchor": "scope"
+      },
+      {
+        "level": 2,
+        "text": "Accounts and region",
+        "anchor": "accounts-and-region"
+      },
+      {
+        "level": 2,
+        "text": "Prereqs (must be true before cutover)",
+        "anchor": "prereqs-must-be-true-before-cutover"
+      },
+      {
+        "level": 2,
+        "text": "Cutover steps (in order)",
+        "anchor": "cutover-steps-in-order"
+      },
+      {
+        "level": 2,
+        "text": "Canary procedure (safe)",
+        "anchor": "canary-procedure-safe"
+      },
+      {
+        "level": 2,
+        "text": "Rollback steps",
+        "anchor": "rollback-steps"
+      },
+      {
+        "level": 2,
+        "text": "Evidence checklist (PII-safe)",
+        "anchor": "evidence-checklist-pii-safe"
       }
     ]
   },
@@ -22506,6 +22561,11 @@
         "level": 2,
         "text": "09_Deployment_Operations",
         "anchor": "09deploymentoperations"
+      },
+      {
+        "level": 2,
+        "text": "09_Runbooks",
+        "anchor": "09runbooks"
       },
       {
         "level": 2,

@@ -2065,8 +2065,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2641,
-    "approx_tokens": 3433,
+    "word_count": 2728,
+    "approx_tokens": 3546,
     "last_updated": "2026-01-27"
   },
   {
@@ -2345,8 +2345,8 @@
     "section": "09_Deployment",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 296,
-    "approx_tokens": 384,
+    "word_count": 333,
+    "approx_tokens": 432,
     "last_updated": ""
   },
   {
@@ -2418,6 +2418,16 @@
     "word_count": 336,
     "approx_tokens": 436,
     "last_updated": "2025-12-29"
+  },
+  {
+    "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+    "title": "Order Status — Prod Cutover Runbook",
+    "section": "09_Runbooks",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 380,
+    "approx_tokens": 494,
+    "last_updated": ""
   },
   {
     "path": "10_Governance_Continuous_Improvement/Change_Management.md",
@@ -3975,8 +3985,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10821,
-    "approx_tokens": 14067,
+    "word_count": 10833,
+    "approx_tokens": 14082,
     "last_updated": ""
   },
   {

@@ -13975,6 +13975,12 @@
       "anchor": "shopify-legacy-path-compatibility"
     }
   ],
+  "shopify token types and expiry": [
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "shopify-token-types-and-expiry"
+    }
+  ],
   "shopify token stability proof (no 48h wait)": [
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
@@ -16069,6 +16075,10 @@
       "anchor": "scope"
     },
     {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "scope"
+    },
+    {
       "path": "11_Governance_Continuous_Improvement/Change_Management.md",
       "anchor": "scope"
     },
@@ -16119,6 +16129,12 @@
     {
       "path": "09_Deployment/Shopify_Token_Runbook.md",
       "anchor": "fast-diagnostics"
+    }
+  ],
+  "ci guardrail (e2e workflows)": [
+    {
+      "path": "09_Deployment/Shopify_Token_Runbook.md",
+      "anchor": "ci-guardrail-e2e-workflows"
     }
   ],
   "handling 401 / 403": [
@@ -16631,6 +16647,48 @@
     {
       "path": "12_Cursor_Agent_Work_Packages/01_Work_Breakdown/Dependency_Map.md",
       "anchor": "3-change-protocol"
+    }
+  ],
+  "order status — prod cutover runbook": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "order-status-prod-cutover-runbook"
+    }
+  ],
+  "accounts and region": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "accounts-and-region"
+    }
+  ],
+  "prereqs (must be true before cutover)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "prereqs-must-be-true-before-cutover"
+    }
+  ],
+  "cutover steps (in order)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "cutover-steps-in-order"
+    }
+  ],
+  "canary procedure (safe)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "canary-procedure-safe"
+    }
+  ],
+  "rollback steps": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "rollback-steps"
+    }
+  ],
+  "evidence checklist (pii-safe)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
+      "anchor": "evidence-checklist-pii-safe"
     }
   ],
   "legacy folder: 10_governance_continuous_improvement": [
@@ -22941,6 +22999,12 @@
     {
       "path": "REGISTRY.md",
       "anchor": "09deploymentoperations"
+    }
+  ],
+  "09_runbooks": [
+    {
+      "path": "REGISTRY.md",
+      "anchor": "09runbooks"
     }
   ],
   "10_governance_continuous_improvement": [
