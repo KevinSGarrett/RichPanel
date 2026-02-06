@@ -121,6 +121,18 @@ class ShadowOrderStatusGuardTests(unittest.TestCase):
         self._preflight_patch.stop()
         super().tearDown()
 
+
+class ProdShadowTicketRefsTests(unittest.TestCase):
+    def test_load_ticket_refs_skips_blank_and_comments(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "refs.txt"
+            path.write_text(
+                "\n# comment\n12345\n\n ticket-abc \n# another\n",
+                encoding="utf-8",
+            )
+            refs = prod_shadow._load_ticket_refs(str(path))
+        self.assertEqual(refs, ["12345", "ticket-abc"])
+
     def test_require_env_flag_missing_and_mismatch(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             with self.assertRaises(SystemExit):

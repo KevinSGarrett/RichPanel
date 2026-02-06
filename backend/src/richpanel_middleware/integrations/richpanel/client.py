@@ -801,6 +801,21 @@ class RichpanelClient:
     def clear_request_trace(self) -> None:
         self._request_trace = []
 
+    @staticmethod
+    def _extract_api_key(secret_value: str) -> str:
+        try:
+            payload = json.loads(secret_value)
+        except (TypeError, ValueError):
+            return secret_value
+        if isinstance(payload, str):
+            return payload
+        if isinstance(payload, dict):
+            for key in ("api_key", "RICHPANEL_KEY", "key"):
+                value = payload.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value
+        return secret_value
+
     def _load_api_key(self) -> str:
         if self._api_key:
             return self._api_key
@@ -816,7 +831,7 @@ class RichpanelClient:
         secret_value = self._load_secret_value(self.api_key_secret_id)
         if not secret_value:
             raise SecretLoadError("Richpanel API key secret is empty")
-        self._api_key = secret_value
+        self._api_key = self._extract_api_key(secret_value)
         return str(self._api_key)
 
     def _load_token_pool(self) -> List[str]:
@@ -830,7 +845,7 @@ class RichpanelClient:
         for secret_id in self._token_pool_secret_ids:
             value = self._load_secret_value(secret_id)
             if value:
-                secrets.append(value)
+                secrets.append(self._extract_api_key(value))
             else:
                 self._logger.warning(
                     "richpanel.token_pool_missing_secret",

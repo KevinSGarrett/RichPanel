@@ -460,6 +460,17 @@ def _redact_date(value: Optional[str]) -> Optional[str]:
     return None
 
 
+def _load_ticket_refs(path: str) -> List[str]:
+    lines = Path(path).expanduser().read_text(encoding="utf-8").splitlines()
+    refs: List[str] = []
+    for line in lines:
+        text = line.strip()
+        if not text or text.startswith("#"):
+            continue
+        refs.append(text)
+    return refs
+
+
 def _extract_channel(payload: Dict[str, Any]) -> str:
     if not isinstance(payload, dict):
         return ""
@@ -944,6 +955,10 @@ def main() -> int:
         help="Richpanel ticket or conversation id (repeatable).",
     )
     parser.add_argument(
+        "--ticket-refs-path",
+        help="Path to file containing ticket numbers or ids (one per line).",
+    )
+    parser.add_argument(
         "--sample-size",
         type=int,
         default=None,
@@ -1164,6 +1179,8 @@ def main() -> int:
 
     explicit_refs = [str(value).strip() for value in (args.ticket_number or [])]
     explicit_refs += [str(value).strip() for value in (args.ticket_id or [])]
+    if args.ticket_refs_path:
+        explicit_refs += _load_ticket_refs(args.ticket_refs_path)
     explicit_refs = [value for value in dict.fromkeys(explicit_refs) if value]
 
     ticket_refs: List[str] = []

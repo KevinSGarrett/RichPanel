@@ -267,11 +267,20 @@ class RichpanelClientTests(unittest.TestCase):
 
     def test_executor_defaults_to_dry_run(self) -> None:
         transport = _FailingTransport()
-        executor = RichpanelExecutor(
-            client=RichpanelClient(api_key="test-key", transport=transport)
-        )
-
-        response = executor.execute("POST", "/v1/tickets/abc", json_body={"foo": "bar"})
+        env = {
+            "RICHPANEL_ENV": "local",
+            "MW_ENV": "local",
+            "ENVIRONMENT": "local",
+            "RICHPANEL_READ_ONLY": "0",
+            "RICHPANEL_WRITE_DISABLED": "0",
+        }
+        with mock.patch.dict(os.environ, env, clear=False):
+            executor = RichpanelExecutor(
+                client=RichpanelClient(api_key="test-key", transport=transport)
+            )
+            response = executor.execute(
+                "POST", "/v1/tickets/abc", json_body={"foo": "bar"}
+            )
 
         self.assertTrue(response.dry_run)
         self.assertFalse(transport.called)
@@ -280,16 +289,23 @@ class RichpanelClientTests(unittest.TestCase):
         transport = _RecordingTransport(
             [TransportResponse(status_code=202, headers={}, body=b"accepted")]
         )
-        executor = RichpanelExecutor(
-            client=RichpanelClient(
-                api_key="test-key", transport=transport, dry_run=True
-            ),
-            outbound_enabled=True,
-        )
-
-        response = executor.execute(
-            "PUT", "/v1/tickets/abc/add-tags", json_body={"tags": ["vip"]}
-        )
+        env = {
+            "RICHPANEL_ENV": "local",
+            "MW_ENV": "local",
+            "ENVIRONMENT": "local",
+            "RICHPANEL_READ_ONLY": "0",
+            "RICHPANEL_WRITE_DISABLED": "0",
+        }
+        with mock.patch.dict(os.environ, env, clear=False):
+            executor = RichpanelExecutor(
+                client=RichpanelClient(
+                    api_key="test-key", transport=transport, dry_run=True
+                ),
+                outbound_enabled=True,
+            )
+            response = executor.execute(
+                "PUT", "/v1/tickets/abc/add-tags", json_body={"tags": ["vip"]}
+            )
 
         self.assertFalse(response.dry_run)
         self.assertEqual(response.status_code, 202)

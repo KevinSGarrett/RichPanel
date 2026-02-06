@@ -195,6 +195,10 @@ class ShopifyClient:
             or os.environ.get("SHOPIFY_SHOP")
             or "example.myshopify.com"
         ).rstrip("/")
+        if self.environment in {"prod", "production"} and self.shop_domain == "example.myshopify.com":
+            raise RuntimeError(
+                "SHOPIFY_SHOP_DOMAIN must be set for production; refusing to use example.myshopify.com."
+            )
         version = (
             api_version or os.environ.get("SHOPIFY_API_VERSION") or "2024-01"
         ).strip("/")
