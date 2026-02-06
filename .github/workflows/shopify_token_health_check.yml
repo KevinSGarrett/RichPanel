@@ -25,7 +25,6 @@ permissions:
 jobs:
   shopify-token-health:
     runs-on: ubuntu-latest
-    if: ${{ !inputs.environment || inputs.environment == matrix.environment }}
     strategy:
       fail-fast: false
       matrix:
@@ -35,6 +34,7 @@ jobs:
           - environment: prod
             aws_account_id: "878145708918"
     env:
+      RUN_FOR_ENV: ${{ !inputs.environment || inputs.environment == matrix.environment }}
       ENVIRONMENT: ${{ matrix.environment }}
       AWS_REGION: ${{ inputs['aws-region'] || secrets.AWS_REGION || 'us-east-2' }}
       SHOPIFY_SHOP_DOMAIN: ${{ matrix.environment == 'prod' && (inputs['shop-domain'] || secrets.PROD_SHOPIFY_SHOP_DOMAIN) || (inputs['shop-domain'] || secrets.DEV_SHOPIFY_SHOP_DOMAIN) }}
@@ -42,25 +42,30 @@ jobs:
       ROLE_ARN: arn:aws:iam::${{ matrix.aws_account_id }}:role/rp-ci-deploy
     steps:
       - name: Checkout repository
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
         run: |
           python -m pip install --upgrade pip
           pip install boto3
 
       - name: Configure AWS credentials
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Run Shopify health check
+        if: ${{ env.RUN_FOR_ENV == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -83,7 +88,7 @@ jobs:
             --include-aws-account-id
 
       - name: Upload health check artifact
-        if: always()
+        if: ${{ always() && env.RUN_FOR_ENV == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: shopify-token-health-check-${{ matrix.environment }}
