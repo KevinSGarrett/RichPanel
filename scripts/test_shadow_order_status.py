@@ -1403,6 +1403,14 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         message = prod_shadow._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "hello")
 
+    def test_extract_latest_customer_message_prefers_ticket_fields(self) -> None:
+        ticket = {
+            "customer_message": "direct message",
+            "comments": [{"body": "comment body", "via": {"isOperator": False}}],
+        }
+        message = prod_shadow._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "direct message")
+
     def test_compute_eta_window_and_match_result(self) -> None:
         self.assertIsNone(prod_shadow._compute_eta_window({}, None))
         order_summary = {
@@ -1453,6 +1461,27 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
             error=None,
         )
         self.assertEqual(failure, "missing_order_number_and_email")
+
+    def test_misc_helpers(self) -> None:
+        self.assertEqual(prod_shadow._classify_channel("email"), "email")
+        self.assertEqual(prod_shadow._classify_channel("live_chat"), "chat")
+        self.assertEqual(prod_shadow._classify_channel(""), "unknown")
+        self.assertIsNone(prod_shadow._hash_api_key(None))
+        self.assertEqual(len(prod_shadow._hash_api_key("secret") or ""), 8)
+        with mock.patch.dict(os.environ, {"ENVIRONMENT": "dev"}, clear=True):
+            self.assertEqual(
+                prod_shadow._require_prod_environment(allow_non_prod=True), "dev"
+            )
+            with self.assertRaises(SystemExit):
+                prod_shadow._require_prod_environment(allow_non_prod=False)
+
+    def test_build_order_payload_extracts_order_number(self) -> None:
+        ticket = {"customer_message": "order info"}
+        with mock.patch.object(
+            prod_shadow, "extract_order_number", return_value="12345"
+        ):
+            payload = prod_shadow._build_order_payload(ticket, {})
+        self.assertEqual(payload.get("order_number"), "12345")
 
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
