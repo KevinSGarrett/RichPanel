@@ -1029,6 +1029,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             os.environ,
             {
                 "MW_ENV": "prod",
+                "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
                 "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
                 "RICHPANEL_BOT_AGENT_ID": "",
                 "RICHPANEL_BOT_AUTHOR_ID": "",
@@ -1068,7 +1069,11 @@ class OutboundOrderStatusTests(unittest.TestCase):
             ticket_customer_email="customer@example.com",
         )
 
-        with mock.patch.dict(os.environ, {"MW_ENV": "prod"}, clear=False):
+        with mock.patch.dict(
+            os.environ,
+            {"MW_ENV": "prod", "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com"},
+            clear=False,
+        ):
             result = execute_order_status_reply(
                 envelope,
                 plan,
