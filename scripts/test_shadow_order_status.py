@@ -1483,6 +1483,62 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
             payload = prod_shadow._build_order_payload(ticket, {})
         self.assertEqual(payload.get("order_number"), "12345")
 
+    def test_build_markdown_report_includes_optional_sections(self) -> None:
+        report = {
+            "run_id": "RUN_TEST",
+            "timestamp": "2026-02-06T00:00:00Z",
+            "environment": "dev",
+            "classification_source": "deterministic",
+            "env_flags": {"MW_ALLOW_NETWORK_READS": "true"},
+            "classification_source_counts": {"deterministic": 1},
+            "order_status_rate": 0.5,
+            "ticket_count": 2,
+            "conversation_mode": "full",
+            "stats": {
+                "openai_routing_called": 1,
+                "openai_intent_called": 0,
+                "errors": 0,
+                "missing_order_number": 1,
+            },
+            "stats_global": {
+                "tickets_scanned": 2,
+                "classified_order_status_true": 1,
+                "classified_order_status_false": 1,
+            },
+            "stats_order_status": {
+                "order_status_count": 1,
+                "matched_by_order_number": 1,
+                "matched_by_email": 0,
+                "match_rate_among_order_status": 1.0,
+                "tracking_present_count": 1,
+                "tracking_rate": 1.0,
+                "eta_available_count": 0,
+                "eta_rate_when_no_tracking": 0.0,
+            },
+            "failure_modes": [{"mode": "missing_order_number", "count": 1}],
+            "order_status_failure_modes": [{"mode": "missing_email", "count": 1}],
+            "richpanel_retry_diagnostics": {
+                "total_retries": 1,
+                "status_counts": {"429": 1},
+                "top_retry_endpoints": [
+                    {"path_redacted": "/v1/tickets/redacted:abc", "retry_count": 1}
+                ],
+            },
+            "richpanel_request_burst": {"max_requests_overall": 3},
+            "richpanel_retry_after_validation": {"checked": 1, "violations": 0},
+            "richpanel_identity": {
+                "richpanel_base_url": "https://api.example.com",
+                "resolved_env": "dev",
+                "api_key_hash": "abcd1234",
+                "api_key_secret_id": "secret",
+            },
+        }
+        markdown = prod_shadow._build_markdown_report(report)
+        self.assertIn("Richpanel Retry Diagnostics", markdown)
+        self.assertIn("Richpanel Burst Summary", markdown)
+        self.assertIn("Retry-After Validation", markdown)
+        self.assertIn("Richpanel Identity", markdown)
+
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ShadowOrderStatusGuardTests)
     suite.addTests(
