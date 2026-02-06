@@ -134,6 +134,16 @@ token intact.
 
 **Code reference:** `backend/src/integrations/shopify/client.py` L178-L189
 
+### Shopify token types and expiry
+
+- **Offline tokens** (`token_type=offline`, prefix `shpat_`) are non-expiring by design.
+- **Online tokens** (`token_type=online`, prefix `shpua_`) expire and require a refresh token to stay valid.
+- **Refresh eligibility** requires:
+  - JSON admin token payload (contains `access_token` + `refresh_token`)
+  - `rp-mw/<env>/shopify/client_id` and `rp-mw/<env>/shopify/client_secret`
+  - `SHOPIFY_REFRESH_ENABLED=true`
+- If any of the above are missing, the refresh path is skipped and humans must rotate the token in Shopify and update Secrets Manager.
+
 ### Shopify token stability proof (no 48h wait)
 
 Use a deterministic proof instead of waiting:
@@ -141,7 +151,7 @@ Use a deterministic proof instead of waiting:
 1) **Token model evidence:** Shopify offline Admin API tokens (custom app Admin API tokens, typically `shpat_`) are non-expiring by design.
 2) **Health check script:** run `python scripts/shopify_health_check.py --env <env> --aws-region <region> --shop-domain <shop>.myshopify.com --out-json <path> --json --include-aws-account-id`
    and verify `status=PASS` + `health_check.status_code=200` with `aws_account_id` populated.
-3) **Scheduled monitor:** GitHub Action `Shopify Token Health Check` runs on cron and fails on non-200 responses.
+3) **Scheduled monitor:** GitHub Action `Shopify Token Health Check` runs every 6 hours, checks dev + prod, and attempts refresh when eligible (fails loudly on non-200 responses).
 
 This replaces any prior “wait 48 hours” token-stability requirement.
 

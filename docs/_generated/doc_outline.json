@@ -12564,6 +12564,11 @@
       },
       {
         "level": 3,
+        "text": "Shopify token types and expiry",
+        "anchor": "shopify-token-types-and-expiry"
+      },
+      {
+        "level": 3,
         "text": "Shopify token stability proof (no 48h wait)",
         "anchor": "shopify-token-stability-proof-no-48h-wait"
       },

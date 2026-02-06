@@ -49,7 +49,11 @@ secrets/
 /b48_rehydration_files.txt
 
 # PM scratch packs (local only)
-/PM_REHYDRATION_PACK/
+/PM_REHYDRATION_PACK/*
+!/PM_REHYDRATION_PACK/
+/PM_REHYDRATION_PACK/Issues/*
+!/PM_REHYDRATION_PACK/Issues/
+!/PM_REHYDRATION_PACK/Issues/ISSUE-003_SHOPIFY_TOKEN_EXPIRY_REFRESH.md
 
 # Large artifacts (keep lightweight pointers in REHYDRATION_PACK instead)
 artifacts/*

@@ -2,13 +2,12 @@ name: Shopify Token Health Check
 
 on:
   schedule:
-    - cron: "30 2 * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment name for Secrets Manager paths (dev|staging|prod)"
+        description: "Optional: limit run to dev or prod"
         required: false
-        default: "prod"
         type: string
       shop-domain:
         description: "Shopify shop domain (e.g. shop.myshopify.com)"
@@ -26,12 +25,21 @@ permissions:
 jobs:
   shopify-token-health:
     runs-on: ubuntu-latest
+    if: ${{ !inputs.environment || inputs.environment == matrix.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - environment: dev
+            aws_account_id: "151124909266"
+          - environment: prod
+            aws_account_id: "878145708918"
     env:
-      ENVIRONMENT: ${{ inputs['environment'] || 'prod' }}
+      ENVIRONMENT: ${{ matrix.environment }}
       AWS_REGION: ${{ inputs['aws-region'] || secrets.AWS_REGION || 'us-east-2' }}
-      SHOPIFY_SHOP_DOMAIN: ${{ (inputs['environment'] || 'prod') == 'prod' && (inputs['shop-domain'] || secrets.PROD_SHOPIFY_SHOP_DOMAIN) || inputs['shop-domain'] }}
-      SHOPIFY_REFRESH_ENABLED: "false"
-      ROLE_ARN: ${{ inputs['environment'] == 'dev' && 'arn:aws:iam::151124909266:role/rp-ci-deploy' || inputs['environment'] == 'staging' && 'arn:aws:iam::260475105304:role/rp-ci-deploy' || 'arn:aws:iam::878145708918:role/rp-ci-deploy' }}
+      SHOPIFY_SHOP_DOMAIN: ${{ matrix.environment == 'prod' && (inputs['shop-domain'] || secrets.PROD_SHOPIFY_SHOP_DOMAIN) || (inputs['shop-domain'] || secrets.DEV_SHOPIFY_SHOP_DOMAIN) }}
+      SHOPIFY_REFRESH_ENABLED: "true"
+      ROLE_ARN: arn:aws:iam::${{ matrix.aws_account_id }}:role/rp-ci-deploy
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -60,7 +68,7 @@ jobs:
             if [ "${ENVIRONMENT}" = "prod" ]; then
               echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."
             else
-              echo "SHOPIFY_SHOP_DOMAIN is required for non-prod runs (set workflow input shop-domain)."
+              echo "SHOPIFY_SHOP_DOMAIN is required for non-prod runs (set workflow input shop-domain or DEV_SHOPIFY_SHOP_DOMAIN secret)."
             fi
             exit 2
           fi
@@ -70,7 +78,7 @@ jobs:
             --aws-region "${AWS_REGION}" \
             --shop-domain "${SHOPIFY_SHOP_DOMAIN}" \
             --shopify-secret-id "rp-mw/${ENVIRONMENT}/shopify/admin_api_token" \
-            --out-json "artifacts/shopify/shopify_health_check.json" \
+            --out-json "artifacts/shopify/shopify_health_check_${ENVIRONMENT}.json" \
             --json \
             --include-aws-account-id
 
@@ -78,5 +86,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: shopify-token-health-check
-          path: artifacts/shopify/shopify_health_check.json
+          name: shopify-token-health-check-${{ matrix.environment }}
+          path: artifacts/shopify/shopify_health_check_${{ matrix.environment }}.json
