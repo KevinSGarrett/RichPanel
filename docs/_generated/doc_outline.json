@@ -15020,51 +15020,6 @@
     ]
   },
   {
-    "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
-    "outline": [
-      {
-        "level": 1,
-        "text": "Order Status — Prod Cutover Runbook",
-        "anchor": "order-status-prod-cutover-runbook"
-      },
-      {
-        "level": 2,
-        "text": "Scope",
-        "anchor": "scope"
-      },
-      {
-        "level": 2,
-        "text": "Accounts and region",
-        "anchor": "accounts-and-region"
-      },
-      {
-        "level": 2,
-        "text": "Prereqs (must be true before cutover)",
-        "anchor": "prereqs-must-be-true-before-cutover"
-      },
-      {
-        "level": 2,
-        "text": "Cutover steps (in order)",
-        "anchor": "cutover-steps-in-order"
-      },
-      {
-        "level": 2,
-        "text": "Canary procedure (safe)",
-        "anchor": "canary-procedure-safe"
-      },
-      {
-        "level": 2,
-        "text": "Rollback steps",
-        "anchor": "rollback-steps"
-      },
-      {
-        "level": 2,
-        "text": "Evidence checklist (PII-safe)",
-        "anchor": "evidence-checklist-pii-safe"
-      }
-    ]
-  },
-  {
     "path": "10_Governance_Continuous_Improvement/Change_Management.md",
     "outline": [
       {
@@ -22556,11 +22511,6 @@
         "level": 2,
         "text": "09_Deployment_Operations",
         "anchor": "09deploymentoperations"
-      },
-      {
-        "level": 2,
-        "text": "09_Runbooks",
-        "anchor": "09runbooks"
       },
       {
         "level": 2,

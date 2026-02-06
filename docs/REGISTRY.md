@@ -315,10 +315,6 @@ Legend:
 - ✅ [Release and Rollback Plan](09_Deployment_Operations/Release_and_Rollback.md)  (`09_Deployment_Operations/Release_and_Rollback.md`)
 - ✅ [Runbooks](09_Deployment_Operations/Runbooks.md)  (`09_Deployment_Operations/Runbooks.md`)
 
-## 09_Runbooks
-
-- 📎 [Order Status — Prod Cutover Runbook](09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md)  (`09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md`)
-
 ## 10_Governance_Continuous_Improvement
 
 - 🗄️ [Change Management](10_Governance_Continuous_Improvement/Change_Management.md)  (`10_Governance_Continuous_Improvement/Change_Management.md`)
