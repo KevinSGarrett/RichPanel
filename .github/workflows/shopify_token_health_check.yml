@@ -48,29 +48,29 @@ jobs:
         run: |
           if [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then
             echo "missing=true" >> "$GITHUB_OUTPUT"
-            echo "SHOPIFY_SHOP_DOMAIN missing; skipping health check for ${ENVIRONMENT}."
-            exit 0
+            echo "SHOPIFY_SHOP_DOMAIN is required for ${ENVIRONMENT}; failing health check."
+            exit 2
           fi
           echo "missing=false" >> "$GITHUB_OUTPUT"
 
       - name: Checkout repository
-        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        if: ${{ env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         uses: actions/checkout@v4
 
       - name: Set up Python
-        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        if: ${{ env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
-        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        if: ${{ env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         run: |
           python -m pip install --upgrade pip
           pip install boto3
 
       - name: Configure AWS credentials
-        if: ${{ env.RUN_FOR_ENV == 'true' }}
+        if: ${{ env.RUN_FOR_ENV == 'true' && steps.shop_domain.outputs.missing == 'false' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_ARN }}
