@@ -134,6 +134,18 @@ class _StubSession:
         return self._client
 
 
+class _StubBoto3WithSession:
+    def __init__(self, client):
+        self._client = client
+        self.session = self
+
+    def Session(self, profile_name: str | None = None):
+        return _StubSession(self._client)
+
+    def client(self, _name: str):
+        return self._client
+
+
 class OrderStatusPreflightCheckTests(unittest.TestCase):
     def setUp(self) -> None:
         self._orig_rp = preflight.RichpanelClient
@@ -544,6 +556,52 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
             preflight._write_json(path, payload)
             parsed = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(parsed.get("overall_status"), "PASS")
+
+    def test_main_writes_outputs_with_profile(self) -> None:
+        preflight.boto3 = _StubBoto3WithSession(_StubSecretsClient())
+        preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
+            response=_StubResponse(status_code=200, dry_run=False)
+        )
+        preflight.ShopifyClient = lambda **kwargs: _StubShopifyClient(  # type: ignore[assignment]
+            response=_StubResponse(status_code=200, dry_run=False),
+            diagnostics={"status": "loaded"},
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_json = str(Path(tmpdir) / "out.json")
+            out_md = str(Path(tmpdir) / "out.md")
+            argv = [
+                "order_status_preflight_check.py",
+                "--env",
+                "dev",
+                "--aws-profile",
+                "rp-admin-dev",
+                "--out-json",
+                out_json,
+                "--out-md",
+                out_md,
+                "--skip-refresh-lambda-check",
+            ]
+            with mock.patch.object(
+                preflight, "_check_shopify_graphql", return_value={"status": "PASS", "details": "ok"}
+            ), mock.patch.dict(
+                os.environ,
+                {
+                    "ENVIRONMENT": "dev",
+                    "MW_ALLOW_NETWORK_READS": "true",
+                    "RICHPANEL_READ_ONLY": "true",
+                    "RICHPANEL_WRITE_DISABLED": "true",
+                    "RICHPANEL_OUTBOUND_ENABLED": "false",
+                    "SHOPIFY_OUTBOUND_ENABLED": "true",
+                    "SHOPIFY_WRITE_DISABLED": "true",
+                    "SHOPIFY_SHOP_DOMAIN": "example.myshopify.com",
+                },
+                clear=False,
+            ), mock.patch.object(sys, "argv", argv):
+                self.assertEqual(preflight.main(), 0)
+            self.assertTrue(Path(out_json).exists())
+            payload = json.loads(Path(out_json).read_text(encoding="utf-8"))
+            self.assertTrue(payload.get("bot_agent_id_secret_present"))
+            self.assertTrue(Path(out_md).exists())
 
     def test_main_success_path(self) -> None:
         preflight.RichpanelClient = lambda **kwargs: _StubRichpanelClient(  # type: ignore[assignment]
