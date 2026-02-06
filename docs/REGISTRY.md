@@ -267,6 +267,7 @@ Legend:
 - ✅ [Repository Conventions](08_Engineering/Repository_Conventions.md)  (`08_Engineering/Repository_Conventions.md`)
 - 📎 [Richpanel Reply Paths](08_Engineering/Richpanel_Reply_Paths.md)  (`08_Engineering/Richpanel_Reply_Paths.md`)
 - 📎 [Secrets and Environments](08_Engineering/Secrets_and_Environments.md)  (`08_Engineering/Secrets_and_Environments.md`)
+- 📎 [Shopify Token Truth Table](08_Engineering/Shopify_Token_Truth_Table.md)  (`08_Engineering/Shopify_Token_Truth_Table.md`)
 
 ## 08_Observability_Analytics
 

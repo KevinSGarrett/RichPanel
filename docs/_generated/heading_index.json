@@ -4015,6 +4015,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "08_Testing_Quality/LLM_Regression_Gates_Checklist.md",
       "anchor": "purpose"
     },
@@ -14129,6 +14133,72 @@
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
       "anchor": "secret-path-templates"
+    }
+  ],
+  "shopify token truth table": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "shopify-token-truth-table"
+    }
+  ],
+  "token types and behavior": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "token-types-and-behavior"
+    }
+  ],
+  "token truth table (dev / staging / prod)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "token-truth-table-dev-staging-prod"
+    }
+  ],
+  "how to determine token type (quick)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "how-to-determine-token-type-quick"
+    }
+  ],
+  "quick validation (prove auth works)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "quick-validation-prove-auth-works"
+    }
+  ],
+  "what to do on failure": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "what-to-do-on-failure"
+    }
+  ],
+  "401 unauthorized": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "401-unauthorized"
+    }
+  ],
+  "403 forbidden": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "403-forbidden"
+    }
+  ],
+  "429 too many requests": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "429-too-many-requests"
+    }
+  ],
+  "network / request errors": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "network-request-errors"
+    }
+  ],
+  "operational workflow (do not re-add secrets blindly)": [
+    {
+      "path": "08_Engineering/Shopify_Token_Truth_Table.md",
+      "anchor": "operational-workflow-do-not-re-add-secrets-blindly"
     }
   ],
   "analytics data model and exports (wave 08)": [
