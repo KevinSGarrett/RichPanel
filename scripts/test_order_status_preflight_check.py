@@ -126,6 +126,14 @@ class _StubBoto3:
         return self._client
 
 
+class _StubSession:
+    def __init__(self, client):
+        self._client = client
+
+    def client(self, _name: str):
+        return self._client
+
+
 class OrderStatusPreflightCheckTests(unittest.TestCase):
     def setUp(self) -> None:
         self._orig_rp = preflight.RichpanelClient
@@ -372,6 +380,25 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
         self.assertEqual(result.get("status"), "PASS")
         self.assertTrue(result.get("present"))
 
+    def test_check_bot_agent_id_secret_boto3_missing(self) -> None:
+        preflight.boto3 = None
+        result = preflight._check_bot_agent_id_secret(env_name="prod")
+        self.assertEqual(result.get("status"), "FAIL")
+        self.assertFalse(result.get("present"))
+
+    def test_check_bot_agent_id_secret_uses_session(self) -> None:
+        session = _StubSession(_StubSecretsClient())
+        preflight.boto3 = _StubBoto3(_StubSecretsClient())
+        result = preflight._check_bot_agent_id_secret(env_name="prod", session=session)
+        self.assertEqual(result.get("status"), "PASS")
+        self.assertTrue(result.get("present"))
+
+    def test_check_secrets_uses_session(self) -> None:
+        session = _StubSession(_StubSecretsClient())
+        preflight.boto3 = _StubBoto3(_StubSecretsClient())
+        result = preflight._check_secrets(env_name="prod", session=session)
+        self.assertEqual(result.get("status"), "PASS")
+
     def test_refresh_lambda_last_success(self) -> None:
         now = preflight.datetime.now(preflight.timezone.utc)
         ts_ms = int((now - timedelta(hours=1)).timestamp() * 1000)
@@ -494,6 +521,7 @@ class OrderStatusPreflightCheckTests(unittest.TestCase):
             payload = {
                 "timestamp_utc": "2026-02-02T00:00:00Z",
                 "overall_status": "PASS",
+                "bot_agent_id_secret_present": True,
                 "checks": [
                     {
                         "name": "richpanel_api",
