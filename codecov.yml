@@ -1,0 +1,6 @@
+ignore:
+  - ".github/**"
+  - "PM_REHYDRATION_PACK/**"
+  - "REHYDRATION_PACK/**"
+  - "docs/REGISTRY.md"
+  - "docs/_generated/**"
