@@ -16131,12 +16131,6 @@
       "anchor": "fast-diagnostics"
     }
   ],
-  "ci guardrail (e2e workflows)": [
-    {
-      "path": "09_Deployment/Shopify_Token_Runbook.md",
-      "anchor": "ci-guardrail-e2e-workflows"
-    }
-  ],
   "handling 401 / 403": [
     {
       "path": "09_Deployment/Shopify_Token_Runbook.md",
