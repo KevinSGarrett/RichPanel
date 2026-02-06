@@ -11,6 +11,7 @@ SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from richpanel_middleware.integrations.richpanel import client as richpanel_client  # noqa: E402
 from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelClient,
     RichpanelWriteDisabledError,
@@ -73,6 +74,22 @@ class RichpanelClientSafetyTests(unittest.TestCase):
                 )
 
             transport.send.assert_not_called()
+
+    def test_load_api_key_extracts_from_json_secret(self) -> None:
+        secret_payload = '{"api_key": "rp-secret-value"}'
+        with mock.patch.object(richpanel_client, "boto3", object()):
+            with mock.patch.object(
+                RichpanelClient, "_load_secret_value", return_value=secret_payload
+            ):
+                client = RichpanelClient()
+                self.assertEqual(client._load_api_key(), "rp-secret-value")
+
+    def test_extract_api_key_handles_json_variants(self) -> None:
+        self.assertEqual(
+            RichpanelClient._extract_api_key('{"RICHPANEL_KEY": "k1"}'), "k1"
+        )
+        self.assertEqual(RichpanelClient._extract_api_key('{"key": "k2"}'), "k2")
+        self.assertEqual(RichpanelClient._extract_api_key("raw-key"), "raw-key")
 
 
 if __name__ == "__main__":

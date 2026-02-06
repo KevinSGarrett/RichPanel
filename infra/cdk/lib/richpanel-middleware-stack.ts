@@ -300,6 +300,7 @@ export class RichpanelMiddlewareStack extends Stack {
         MW_ALLOW_ENV_FLAG_OVERRIDE: this.environmentConfig.name === "dev" ? "true" : "false",
         RICHPANEL_API_KEY_SECRET_ARN: this.secrets.richpanelApiKey.secretArn,
         RICHPANEL_RATE_LIMIT_RPS: "0.5",
+        SHOPIFY_SHOP_DOMAIN: "scentimen-t.myshopify.com",
         MW_OUTBOUND_ALLOWLIST_EMAILS:
           this.environmentConfig.outboundAllowlistEmails ?? "",
         MW_OUTBOUND_ALLOWLIST_DOMAINS:

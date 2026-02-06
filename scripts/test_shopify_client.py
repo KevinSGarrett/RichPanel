@@ -251,63 +251,63 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(headers["Authorization"], "Bearer abc")
 
     def test_prod_write_requires_ack(self) -> None:
-        os.environ["MW_ENV"] = "prod"
+        env = {"MW_ENV": "prod", "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com"}
         transport = _FailingTransport()
-        client = ShopifyClient(
-            access_token="test-token", allow_network=True, transport=transport
-        )
+        with mock.patch.dict(os.environ, env, clear=False):
+            client = ShopifyClient(
+                access_token="test-token", allow_network=True, transport=transport
+            )
+            with self.assertRaises(ShopifyWriteDisabledError):
+                client.request(
+                    "POST",
+                    "/admin/api/2024-01/orders.json",
+                    safe_mode=False,
+                    automation_enabled=True,
+                    dry_run=False,
+                )
+            self.assertFalse(transport.called)
 
-        with self.assertRaises(ShopifyWriteDisabledError):
-            client.request(
+    def test_safe_mode_short_circuits_before_prod_ack(self) -> None:
+        env = {"MW_ENV": "prod", "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com"}
+        transport = _FailingTransport()
+        with mock.patch.dict(os.environ, env, clear=False):
+            client = ShopifyClient(
+                access_token="test-token", allow_network=True, transport=transport
+            )
+            response = client.request(
+                "POST",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=True,
+                automation_enabled=True,
+                dry_run=False,
+            )
+            self.assertTrue(response.dry_run)
+            self.assertEqual(response.reason, "safe_mode")
+            self.assertFalse(transport.called)
+
+    def test_prod_write_ack_allows_network(self) -> None:
+        env = {
+            "MW_ENV": "prod",
+            "MW_PROD_WRITES_ACK": "true",
+            "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
+        }
+        transport = _RecordingTransport(
+            [TransportResponse(status_code=201, headers={}, body=b'{"ok": true}')]
+        )
+        with mock.patch.dict(os.environ, env, clear=False):
+            client = ShopifyClient(
+                access_token="test-token", allow_network=True, transport=transport
+            )
+            response = client.request(
                 "POST",
                 "/admin/api/2024-01/orders.json",
                 safe_mode=False,
                 automation_enabled=True,
                 dry_run=False,
             )
-
-        self.assertFalse(transport.called)
-
-    def test_safe_mode_short_circuits_before_prod_ack(self) -> None:
-        os.environ["MW_ENV"] = "prod"
-        transport = _FailingTransport()
-        client = ShopifyClient(
-            access_token="test-token", allow_network=True, transport=transport
-        )
-
-        response = client.request(
-            "POST",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=True,
-            automation_enabled=True,
-            dry_run=False,
-        )
-
-        self.assertTrue(response.dry_run)
-        self.assertEqual(response.reason, "safe_mode")
-        self.assertFalse(transport.called)
-
-    def test_prod_write_ack_allows_network(self) -> None:
-        os.environ["MW_ENV"] = "prod"
-        os.environ["MW_PROD_WRITES_ACK"] = "true"
-        transport = _RecordingTransport(
-            [TransportResponse(status_code=201, headers={}, body=b'{"ok": true}')]
-        )
-        client = ShopifyClient(
-            access_token="test-token", allow_network=True, transport=transport
-        )
-
-        response = client.request(
-            "POST",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-            dry_run=False,
-        )
-
-        self.assertFalse(response.dry_run)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(len(transport.requests), 1)
+            self.assertFalse(response.dry_run)
+            self.assertEqual(response.status_code, 201)
+            self.assertEqual(len(transport.requests), 1)
 
     def test_non_prod_write_unaffected_by_prod_ack(self) -> None:
         os.environ["MW_ENV"] = "dev"

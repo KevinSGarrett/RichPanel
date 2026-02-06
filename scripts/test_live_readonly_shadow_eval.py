@@ -104,6 +104,7 @@ class LiveReadonlyShadowEvalGuardTests(unittest.TestCase):
     def test_prod_requires_write_disabled(self) -> None:
         env = {
             "MW_ENV": "prod",
+            "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "false",
             "RICHPANEL_READ_ONLY": "true",
@@ -494,7 +495,11 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
             importlib.reload(shadow_eval)
 
     def test_resolve_env_name_prefers_richpanel_env(self) -> None:
-        env = {"RICHPANEL_ENV": "Staging", "MW_ENV": "prod"}
+        env = {
+            "RICHPANEL_ENV": "Staging",
+            "MW_ENV": "prod",
+            "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
+        }
         with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             self.assertEqual(shadow_eval._resolve_env_name(), "staging")
 
@@ -976,7 +981,7 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(client.shop_domain, "example.myshopify.com")
 
     def test_is_prod_target_detects_env(self) -> None:
-        env = {"MW_ENV": "prod"}
+        env = {"MW_ENV": "prod", "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com"}
         with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
             result = shadow_eval._is_prod_target(
                 richpanel_base_url=shadow_eval.PROD_RICHPANEL_BASE_URL,
@@ -1756,6 +1761,19 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
 
 
 class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._preflight_patch = mock.patch.object(
+            shadow_eval,
+            "run_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        )
+        self._preflight_patch.start()
+
+    def tearDown(self) -> None:
+        self._preflight_patch.stop()
+        super().tearDown()
+
     def test_openai_shadow_defaults_set(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             shadow_eval._apply_openai_shadow_eval_defaults()
@@ -2937,6 +2955,7 @@ class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
     def test_main_reraises_system_exit_in_ticket_loop(self) -> None:
         env = {
             "MW_ENV": "prod",
+            "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
             "MW_ALLOW_NETWORK_READS": "true",
             "RICHPANEL_WRITE_DISABLED": "true",
             "RICHPANEL_READ_ONLY": "true",
