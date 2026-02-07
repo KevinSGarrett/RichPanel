@@ -80,9 +80,9 @@
   - Same command repeated for `batch_02` … `batch_12` with matching output paths.
 
 ### 7) Results & evidence
-**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/232/checks`  
-**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/232`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/232` (trigger via `@cursor review`)  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/232/checks`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/232`  
+**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/runs/62858861390`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B73/C/PROOF/prod_shadow_report.json`
@@ -99,6 +99,7 @@ order_status_match_rate: 0.919
 tracking_present_rate (matched only): 0.918
 eta_available_rate (matched only): 0.067
 max_requests_30s: 15
+ci_coverage_pct: 93.810
 ```
 
 ### 8) Risk & rollback
