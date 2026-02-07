@@ -4027,6 +4027,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "12_Cursor_Agent_Work_Packages/02_Epics/EP00_Preflight_access_tenant_verification.md",
       "anchor": "purpose"
     },
@@ -15663,6 +15667,10 @@
     {
       "path": "08_Testing_Quality/Smoke_Test_Pack_v1.md",
       "anchor": "preconditions"
+    },
+    {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
+      "anchor": "preconditions"
     }
   ],
   "checklist a — routing only (safe baseline)": [
@@ -15788,6 +15796,10 @@
   "artifacts": [
     {
       "path": "08_Testing_Quality/Order_Status_Sandbox_E2E_Suite.md",
+      "anchor": "artifacts"
+    },
+    {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
       "anchor": "artifacts"
     }
   ],
@@ -16753,6 +16765,24 @@
     {
       "path": "09_Runbooks/ORDER_STATUS_PROD_CUTOVER.md",
       "anchor": "evidence-checklist-pii-safe"
+    }
+  ],
+  "order status sandbox e2e (dev)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
+      "anchor": "order-status-sandbox-e2e-dev"
+    }
+  ],
+  "commands (dev)": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
+      "anchor": "commands-dev"
+    }
+  ],
+  "pass criteria": [
+    {
+      "path": "09_Runbooks/ORDER_STATUS_SANDBOX_E2E.md",
+      "anchor": "pass-criteria"
     }
   ],
   "legacy folder: 10_governance_continuous_improvement": [
