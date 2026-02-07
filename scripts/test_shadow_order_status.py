@@ -1392,6 +1392,21 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         summary = prod_shadow._summarize_retry_diagnostics(handler)
         self.assertEqual(summary["status_family_counts"].get("other"), 1)
 
+    def test_build_retry_proof_payload(self) -> None:
+        proof = prod_shadow._build_retry_proof(
+            run_id="RUN_TEST",
+            env_name="prod",
+            retry_diagnostics={"total_retries": 2},
+            trace_entries=[
+                {"retry_after": "5", "retry_delay_seconds": "5", "timestamp": 1.0}
+            ],
+        )
+        self.assertEqual(proof["run_id"], "RUN_TEST")
+        self.assertEqual(proof["environment"], "prod")
+        self.assertIn("retry_diagnostics", proof)
+        self.assertIn("request_burst", proof)
+        self.assertIn("retry_after_validation", proof)
+
     def test_fetch_ticket_and_conversation_helpers(self) -> None:
         ticket_payload = {"ticket": {"id": "t-1"}}
         convo_payload = [{"body": "msg"}]
