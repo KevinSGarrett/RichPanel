@@ -32,11 +32,13 @@
 - Emit per-ticket `no_match_reason` and aggregate top no-match reasons.
 - Aggregate 12 batch reports into a single B73 report with summary + run meta.
 - Mark B73 proof JSONs as binary diff to keep PR diffs under review limits.
+- Minify B73 proof JSON files to keep the PR diff under the Claude gate limit.
 
 **Design decisions (why this way):**
 - Use existing order-resolution diagnostics to map no-match reasons without exposing PII.
 - Keep batch size at 50 to avoid Cursor timeouts while preserving >=500 ticket coverage.
 - Suppress large JSON diffs so Claude gate can fetch the PR diff.
+- Store proof JSONs as compact JSON to keep diff line count under GitHub limits.
 
 ### 5) Scope / files touched
 **Runtime code:**
