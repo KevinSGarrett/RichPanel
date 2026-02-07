@@ -35,6 +35,7 @@
 - Minify B73 proof JSON files to keep the PR diff under the Claude gate limit.
 - Add tests for retry diagnostics status-family coverage and URL redaction fallbacks.
 - Add coverage for retry proof payload construction.
+- Add tests for Richpanel fetch error handling and empty conversation candidates.
 
 **Design decisions (why this way):**
 - Use existing order-resolution diagnostics to map no-match reasons without exposing PII.

@@ -1437,6 +1437,29 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             prod_shadow._fetch_ticket(_Client(), "ticket-abc")
 
+    def test_fetch_ticket_handles_request_error(self) -> None:
+        class _Client:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                self.calls += 1
+                if self.calls == 1:
+                    raise prod_shadow.RichpanelRequestError("boom")
+                return _StubResponse({}, status_code=404)
+
+        with self.assertRaises(SystemExit) as ctx:
+            prod_shadow._fetch_ticket(_Client(), "ticket-abc")
+        self.assertIn("Ticket lookup failed", str(ctx.exception))
+
+    def test_fetch_conversation_handles_missing_candidates(self) -> None:
+        class _Client:
+            def request(self, method: str, path: str, **kwargs) -> _StubResponse:
+                raise AssertionError("Request should not be called for empty candidate")
+
+        payload = prod_shadow._fetch_conversation(_Client(), "", conversation_id=None)
+        self.assertEqual(payload, {})
+
     def test_extract_latest_customer_message_from_convo_messages(self) -> None:
         convo = {"messages": [{"sender_type": "customer", "body": "hello"}]}
         message = prod_shadow._extract_latest_customer_message({}, convo)
