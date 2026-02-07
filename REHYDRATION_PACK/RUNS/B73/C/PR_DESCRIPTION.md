@@ -31,14 +31,18 @@
 - Compute order-status subset metrics (match rate, tracking/ETA rates) and include them in report JSON/MD.
 - Emit per-ticket `no_match_reason` and aggregate top no-match reasons.
 - Aggregate 12 batch reports into a single B73 report with summary + run meta.
+- Mark B73 proof JSONs as binary diff to keep PR diffs under review limits.
 
 **Design decisions (why this way):**
 - Use existing order-resolution diagnostics to map no-match reasons without exposing PII.
 - Keep batch size at 50 to avoid Cursor timeouts while preserving >=500 ticket coverage.
+- Suppress large JSON diffs so Claude gate can fetch the PR diff.
 
 ### 5) Scope / files touched
 **Runtime code:**
 - `scripts/prod_shadow_order_status_report.py`
+**Repo config:**
+- `.gitattributes`
 
 **Tests:**
 - `scripts/test_shadow_order_status.py`
