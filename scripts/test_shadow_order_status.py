@@ -1462,6 +1462,71 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         )
         self.assertEqual(failure, "missing_order_number_and_email")
 
+    def test_no_match_reason_classification(self) -> None:
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="matched_by_email",
+            order_number_present=False,
+            email_present=True,
+            error=None,
+            order_resolution=None,
+            failure_reason=None,
+        )
+        self.assertIsNone(reason)
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="error",
+            order_number_present=False,
+            email_present=False,
+            error={"type": "richpanel_error"},
+            order_resolution=None,
+            failure_reason="ticket_fetch_failed",
+        )
+        self.assertEqual(reason, "richpanel_fetch_failed")
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="error",
+            order_number_present=True,
+            email_present=True,
+            error={"type": "shopify_error"},
+            order_resolution={"shopify_diagnostics": {"category": "auth_fail"}},
+            failure_reason=None,
+        )
+        self.assertEqual(reason, "shopify_token_invalid")
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="no_match",
+            order_number_present=False,
+            email_present=True,
+            error=None,
+            order_resolution=None,
+            failure_reason=None,
+        )
+        self.assertEqual(reason, "no_order_number_extracted")
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="no_match",
+            order_number_present=True,
+            email_present=False,
+            error=None,
+            order_resolution=None,
+            failure_reason=None,
+        )
+        self.assertEqual(reason, "no_customer_email_on_ticket")
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="no_match",
+            order_number_present=True,
+            email_present=True,
+            error=None,
+            order_resolution={"reason": "shopify_no_match"},
+            failure_reason=None,
+        )
+        self.assertEqual(reason, "shopify_lookup_0_results")
+        reason = prod_shadow._derive_no_match_reason(
+            match_result="no_match",
+            order_number_present=True,
+            email_present=True,
+            error=None,
+            order_resolution={"reason": "email_only_multiple"},
+            failure_reason=None,
+        )
+        self.assertEqual(reason, "shopify_lookup_multiple_results")
+
     def test_misc_helpers(self) -> None:
         self.assertEqual(prod_shadow._classify_channel("email"), "email")
         self.assertEqual(prod_shadow._classify_channel("live_chat"), "chat")

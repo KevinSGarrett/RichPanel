@@ -730,6 +730,59 @@ def _failure_mode(
     return "no_shopify_match"
 
 
+def _no_match_reason_from_resolution(
+    order_resolution: Optional[Dict[str, Any]],
+) -> Optional[str]:
+    if not isinstance(order_resolution, dict):
+        return None
+    diagnostics = order_resolution.get("shopify_diagnostics")
+    if isinstance(diagnostics, dict):
+        category = str(diagnostics.get("category") or "").strip().lower()
+        if category == "auth_fail":
+            return "shopify_token_invalid"
+        if category == "rate_limited":
+            return "shopify_rate_limited"
+        if category == "no_match":
+            return "shopify_lookup_0_results"
+    reason = str(order_resolution.get("reason") or "").strip().lower()
+    if reason == "shopify_no_match":
+        return "shopify_lookup_0_results"
+    if reason == "email_only_multiple":
+        return "shopify_lookup_multiple_results"
+    return None
+
+
+def _derive_no_match_reason(
+    *,
+    match_result: str,
+    order_number_present: bool,
+    email_present: bool,
+    error: Optional[Dict[str, str]],
+    order_resolution: Optional[Dict[str, Any]],
+    failure_reason: Optional[str],
+) -> Optional[str]:
+    if match_result in {"matched_by_order_number", "matched_by_email"}:
+        return None
+    if failure_reason == "ticket_fetch_failed":
+        return "richpanel_fetch_failed"
+    if error:
+        error_type = error.get("type")
+        if error_type == "richpanel_error":
+            return "richpanel_fetch_failed"
+        if error_type == "shopify_error":
+            return _no_match_reason_from_resolution(order_resolution) or "unknown"
+    resolution_reason = _no_match_reason_from_resolution(order_resolution)
+    if resolution_reason:
+        return resolution_reason
+    if not email_present:
+        return "no_customer_email_on_ticket"
+    if not order_number_present:
+        return "no_order_number_extracted"
+    if match_result == "no_match":
+        return "shopify_lookup_0_results"
+    return "unknown"
+
+
 class _InstrumentedShopifyClient(GuardedShopifyClient):
     def __init__(self, *args: Any, guard: ReadOnlyHttpGuard, **kwargs: Any) -> None:
         super().__init__(*args, guard=guard, **kwargs)
@@ -773,19 +826,30 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
     order_status_count = stats_order_status.get(
         "order_status_count", stats.get("classified_order_status_true", 0)
     )
+    match_rate_value = stats_order_status.get("order_status_match_rate")
+    if not isinstance(match_rate_value, float):
+        match_rate_value = stats_order_status.get("match_rate_among_order_status")
     match_rate_pct = (
-        f"{stats_order_status.get('match_rate_among_order_status', 0) * 100:.1f}%"
-        if isinstance(stats_order_status.get("match_rate_among_order_status"), float)
-        else "n/a"
+        f"{match_rate_value * 100:.1f}%" if isinstance(match_rate_value, float) else "n/a"
     )
     tracking_rate_pct = (
         f"{stats_order_status.get('tracking_rate', 0) * 100:.1f}%"
         if isinstance(stats_order_status.get("tracking_rate"), float)
         else "n/a"
     )
+    tracking_present_rate_pct = (
+        f"{stats_order_status.get('tracking_present_rate', 0) * 100:.1f}%"
+        if isinstance(stats_order_status.get("tracking_present_rate"), float)
+        else "n/a"
+    )
     eta_rate_pct = (
         f"{stats_order_status.get('eta_rate_when_no_tracking', 0) * 100:.1f}%"
         if isinstance(stats_order_status.get("eta_rate_when_no_tracking"), float)
+        else "n/a"
+    )
+    eta_available_rate_pct = (
+        f"{stats_order_status.get('eta_available_rate', 0) * 100:.1f}%"
+        if isinstance(stats_order_status.get("eta_available_rate"), float)
         else "n/a"
     )
     env_flag_lines = [f"- `{key}={value}`" for key, value in sorted(env_flags.items())]
@@ -821,6 +885,10 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
             f"{stats_order_status.get('eta_available_count', 0)} when no tracking."
         ),
         (
+            f"- Tracking present rate (matched only): {tracking_present_rate_pct}; "
+            f"ETA available rate (matched only): {eta_available_rate_pct}."
+        ),
+        (
             f"- OpenAI routing calls: {stats.get('openai_routing_called', 0)}; "
             f"OpenAI intent calls: {stats.get('openai_intent_called', 0)}."
         ),
@@ -844,14 +912,18 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
         "| Metric | Count |",
         "| --- | --- |",
         f"| Order-status count | {stats_order_status.get('order_status_count', 0)} |",
+        f"| Order-status match success | {stats_order_status.get('order_status_true_match_success', 0)} |",
+        f"| Order-status no match | {stats_order_status.get('order_status_true_no_match', 0)} |",
         f"| Match attempted | {stats_order_status.get('match_attempted_count', 0)} |",
         f"| Matched by order number | {stats_order_status.get('matched_by_order_number', 0)} |",
         f"| Matched by email | {stats_order_status.get('matched_by_email', 0)} |",
         f"| Match rate among order-status | {match_rate_pct} |",
         f"| Tracking present | {stats_order_status.get('tracking_present_count', 0)} |",
         f"| Tracking rate | {tracking_rate_pct} |",
+        f"| Tracking present rate (matched only) | {tracking_present_rate_pct} |",
         f"| ETA available when no tracking | {stats_order_status.get('eta_available_count', 0)} |",
         f"| ETA rate when no tracking | {eta_rate_pct} |",
+        f"| ETA available rate (matched only) | {eta_available_rate_pct} |",
         "",
         "## Top Failure Modes (Order-status subset)",
     ]
@@ -859,6 +931,15 @@ def _build_markdown_report(report: Dict[str, Any]) -> str:
     if order_status_failure_modes:
         for entry in order_status_failure_modes:
             summary_lines.append(f"- {entry['mode']}: {entry['count']}")
+    else:
+        summary_lines.append("- None observed in this sample.")
+
+    no_match_reasons = report.get("order_status_no_match_reasons", []) or []
+    summary_lines.append("")
+    summary_lines.append("## Top No-Match Reasons (Order-status subset)")
+    if no_match_reasons:
+        for entry in no_match_reasons:
+            summary_lines.append(f"- {entry['reason']}: {entry['count']}")
     else:
         summary_lines.append("- None observed in this sample.")
 
@@ -1224,6 +1305,8 @@ def main() -> int:
     ticket_results: List[Dict[str, Any]] = []
     failure_modes: Counter[str] = Counter()
     order_status_failure_modes: Counter[str] = Counter()
+    no_match_reasons: Counter[str] = Counter()
+    order_status_no_match_reasons: Counter[str] = Counter()
     stats = Counter()
     trace_entries: List[Dict[str, Any]] = []
 
@@ -1246,6 +1329,9 @@ def main() -> int:
                 "ticket_id_redacted": redacted_ticket,
                 "classification_source": "deterministic_router",
             }
+            email = None
+            order_number = None
+            order_resolution = None
             shopify_calls_before = shopify_client.request_count
             error: Optional[Dict[str, str]] = None
             match_attempted = False
@@ -1365,6 +1451,7 @@ def main() -> int:
                 tracking_present = False
                 eta_window = None
                 order_resolution = None
+                no_match_reason = None
 
                 force_lookup = bool(args.force_shopify_lookup)
                 result["shopify_lookup_forced"] = bool(
@@ -1409,12 +1496,25 @@ def main() -> int:
                 else:
                     shopify_calls = 0
 
+                no_match_reason = _derive_no_match_reason(
+                    match_result=match_result,
+                    order_number_present=bool(order_number),
+                    email_present=bool(email),
+                    error=error,
+                    order_resolution=(
+                        order_resolution
+                        if isinstance(order_resolution, dict)
+                        else None
+                    ),
+                    failure_reason=result.get("failure_reason"),
+                )
                 result.update(
                     {
                         "match_result": match_result,
                         "tracking_present": tracking_present,
                         "eta_window": eta_window,
                         "match_attempted": match_attempted,
+                        "no_match_reason": no_match_reason,
                         "would_auto_reply": bool(
                             classified_order_status
                             and match_result
@@ -1433,6 +1533,7 @@ def main() -> int:
                     result["match_attempted"] = match_attempted
                     result["would_auto_reply"] = False
                     result["failure_reason"] = "ticket_fetch_failed"
+                    result["no_match_reason"] = "richpanel_fetch_failed"
                     run_warnings.append("ticket_fetch_failed")
                 else:
                     raise
@@ -1443,6 +1544,18 @@ def main() -> int:
                 result["eta_window"] = None
                 result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
+                result["no_match_reason"] = _derive_no_match_reason(
+                    match_result=result.get("match_result", "error"),
+                    order_number_present=bool(order_number),
+                    email_present=bool(email),
+                    error=error,
+                    order_resolution=(
+                        order_resolution
+                        if isinstance(order_resolution, dict)
+                        else None
+                    ),
+                    failure_reason=result.get("failure_reason"),
+                )
             except ReadOnlyGuardError as exc:
                 error = {"type": "read_only_guard"}
                 result["match_result"] = "error"
@@ -1451,6 +1564,18 @@ def main() -> int:
                 result["match_attempted"] = match_attempted
                 result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
+                result["no_match_reason"] = _derive_no_match_reason(
+                    match_result=result.get("match_result", "error"),
+                    order_number_present=bool(order_number),
+                    email_present=bool(email),
+                    error=error,
+                    order_resolution=(
+                        order_resolution
+                        if isinstance(order_resolution, dict)
+                        else None
+                    ),
+                    failure_reason=result.get("failure_reason"),
+                )
                 LOGGER.error("Read-only guard blocked request: %s", exc)
             except Exception as exc:
                 error = safe_error(exc)
@@ -1459,6 +1584,18 @@ def main() -> int:
                 result["eta_window"] = None
                 result["match_attempted"] = match_attempted
                 result["would_auto_reply"] = False
+                result["no_match_reason"] = _derive_no_match_reason(
+                    match_result=result.get("match_result", "error"),
+                    order_number_present=bool(order_number),
+                    email_present=bool(email),
+                    error=error,
+                    order_resolution=(
+                        order_resolution
+                        if isinstance(order_resolution, dict)
+                        else None
+                    ),
+                    failure_reason=result.get("failure_reason"),
+                )
             finally:
                 if error:
                     result["error"] = error
@@ -1519,6 +1656,11 @@ def main() -> int:
                     failure_modes[failure_mode] += 1
                     if result.get("classified_order_status"):
                         order_status_failure_modes[failure_mode] += 1
+                no_match_reason = result.get("no_match_reason")
+                if no_match_reason:
+                    no_match_reasons[no_match_reason] += 1
+                    if result.get("classified_order_status"):
+                        order_status_no_match_reasons[no_match_reason] += 1
                 if args.throttle_seconds:
                     time.sleep(args.throttle_seconds)
 
@@ -1570,6 +1712,13 @@ def main() -> int:
         item for item in ticket_results if item.get("classified_order_status")
     ]
     order_status_count = len(order_status_results)
+    match_success_results = [
+        item
+        for item in order_status_results
+        if item.get("match_result") in {"matched_by_order_number", "matched_by_email"}
+    ]
+    order_status_match_success = len(match_success_results)
+    order_status_no_match = order_status_count - order_status_match_success
     match_attempted_count = sum(
         1 for item in order_status_results if item.get("match_attempted")
     )
@@ -1589,6 +1738,12 @@ def main() -> int:
     eta_available_count = sum(
         1 for item in order_status_results if item.get("eta_window")
     )
+    tracking_present_matched_count = sum(
+        1 for item in match_success_results if item.get("tracking_present")
+    )
+    eta_available_matched_count = sum(
+        1 for item in match_success_results if item.get("eta_window")
+    )
     match_rate_among_order_status = (
         round(
             (matched_by_order_number + matched_by_email)
@@ -1603,10 +1758,20 @@ def main() -> int:
         if order_status_count
         else None
     )
+    tracking_present_rate = (
+        round(tracking_present_matched_count / max(order_status_match_success, 1), 3)
+        if order_status_match_success
+        else None
+    )
     no_tracking_count = order_status_count - tracking_present_count
     eta_rate_when_no_tracking = (
         round(eta_available_count / max(no_tracking_count, 1), 3)
         if no_tracking_count > 0
+        else None
+    )
+    eta_available_rate = (
+        round(eta_available_matched_count / max(order_status_match_success, 1), 3)
+        if order_status_match_success
         else None
     )
 
@@ -1643,6 +1808,10 @@ def main() -> int:
         "tickets_scanned": stats.get("tickets_scanned", 0),
         "classified_order_status_true": stats.get("classified_order_status_true", 0),
         "classified_order_status_false": stats.get("classified_order_status_false", 0),
+        "order_status_true": stats.get("classified_order_status_true", 0),
+        "order_status_false": stats.get("classified_order_status_false", 0),
+        "order_status_true_match_success": order_status_match_success,
+        "order_status_true_no_match": order_status_no_match,
         "openai_routing_called": stats.get("openai_routing_called", 0),
         "openai_intent_called": stats.get("openai_intent_called", 0),
         "shopify_lookup_forced": stats.get("shopify_lookup_forced", 0),
@@ -1654,14 +1823,40 @@ def main() -> int:
     }
     stats_order_status = {
         "order_status_count": order_status_count,
+        "order_status_true_match_success": order_status_match_success,
+        "order_status_true_no_match": order_status_no_match,
+        "order_status_match_rate": match_rate_among_order_status,
         "match_attempted_count": match_attempted_count,
         "matched_by_order_number": matched_by_order_number,
         "matched_by_email": matched_by_email,
         "match_rate_among_order_status": match_rate_among_order_status,
         "tracking_present_count": tracking_present_count,
         "tracking_rate": tracking_rate,
+        "tracking_present_rate": tracking_present_rate,
         "eta_available_count": eta_available_count,
         "eta_rate_when_no_tracking": eta_rate_when_no_tracking,
+        "eta_available_rate": eta_available_rate,
+    }
+
+    no_match_reason_list = [
+        {"reason": reason, "count": count}
+        for reason, count in no_match_reasons.most_common(5)
+    ]
+    order_status_no_match_reason_list = [
+        {"reason": reason, "count": count}
+        for reason, count in order_status_no_match_reasons.most_common(5)
+    ]
+
+    order_status_metrics = {
+        "tickets_scanned": stats.get("tickets_scanned", 0),
+        "order_status_true": stats.get("classified_order_status_true", 0),
+        "order_status_false": stats.get("classified_order_status_false", 0),
+        "order_status_true_match_success": order_status_match_success,
+        "order_status_true_no_match": order_status_no_match,
+        "order_status_rate": order_status_rate,
+        "order_status_match_rate": match_rate_among_order_status,
+        "tracking_present_rate": tracking_present_rate,
+        "eta_available_rate": eta_available_rate,
     }
 
     report = {
@@ -1675,11 +1870,14 @@ def main() -> int:
         "classification_source": classification_source,
         "classification_source_counts": dict(classification_counts),
         "order_status_rate": order_status_rate,
+        "order_status_metrics": order_status_metrics,
         "stats_global": stats_global,
         "stats_order_status": stats_order_status,
         "stats": dict(stats),
         "failure_modes": failure_mode_list,
         "order_status_failure_modes": order_status_failure_mode_list,
+        "no_match_reasons": no_match_reason_list,
+        "order_status_no_match_reasons": order_status_no_match_reason_list,
         "run_warnings": run_warnings,
         "tickets": ticket_results,
         "richpanel_retry_diagnostics": retry_diagnostics or None,
