@@ -33,6 +33,7 @@
 - Aggregate 12 batch reports into a single B73 report with summary + run meta.
 - Mark B73 proof JSONs as binary diff to keep PR diffs under review limits.
 - Minify B73 proof JSON files to keep the PR diff under the Claude gate limit.
+- Add tests for retry diagnostics status-family coverage and URL redaction fallbacks.
 
 **Design decisions (why this way):**
 - Use existing order-resolution diagnostics to map no-match reasons without exposing PII.

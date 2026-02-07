@@ -1367,6 +1367,30 @@ class ProdShadowDiagnosticsTests(unittest.TestCase):
         self.assertEqual(prod_shadow._redact_url_path(None), "/")
         redacted = prod_shadow._redact_url_path("https://api.example.com/v1/tickets/123")
         self.assertTrue(redacted.startswith("/"))
+        with mock.patch.object(
+            prod_shadow.urllib.parse, "urlparse", side_effect=ValueError("boom")
+        ):
+            redacted = prod_shadow._redact_url_path("not-a-url")
+        self.assertTrue(redacted.startswith("/"))
+
+    def test_retry_diagnostics_other_status_family(self) -> None:
+        handler = prod_shadow._RichpanelRetryDiagnostics()
+        record = logging.LogRecord(
+            name="test",
+            level=logging.WARNING,
+            pathname=__file__,
+            lineno=1,
+            msg="richpanel.retry",
+            args=(),
+            exc_info=None,
+        )
+        record.status = 418
+        record.attempt = 2
+        record.retry_in = None
+        record.url = "https://api.example.com/v1/unknown"
+        handler.emit(record)
+        summary = prod_shadow._summarize_retry_diagnostics(handler)
+        self.assertEqual(summary["status_family_counts"].get("other"), 1)
 
     def test_fetch_ticket_and_conversation_helpers(self) -> None:
         ticket_payload = {"ticket": {"id": "t-1"}}
