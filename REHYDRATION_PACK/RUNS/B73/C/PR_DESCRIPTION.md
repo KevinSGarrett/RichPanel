@@ -82,7 +82,7 @@
 ### 7) Results & evidence
 **CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/232/checks`  
 **Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/232`  
-**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/runs/62858861390`  
+**Bugbot:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/232/checks`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B73/C/PROOF/prod_shadow_report.json`
