@@ -1,9 +1,9 @@
-<!-- PR_QUALITY: title_score=98/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=false; timestamp=2026-02-07 -->
+<!-- PR_QUALITY: title_score=98/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-07 -->
 
 **Run ID:** `RUN_B73_C_AGGREGATE`  
 **Agents:** C  
 **Risk:** `risk:R2`  
-**Claude gate:** pending (not run yet)  
+**Claude gate:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/232`  
 
 ### 1) Summary
 - Report now separates order-status subset match metrics from global counts and adds no-match reason codes.
@@ -71,9 +71,9 @@
   - Same command repeated for `batch_02` … `batch_12` with matching output paths.
 
 ### 7) Results & evidence
-**CI:** pending — `<checks link>`  
-**Codecov:** pending — `<direct Codecov PR link>`  
-**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
+**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/232/checks`  
+**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/232`  
+**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/232` (trigger via `@cursor review`)  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B73/C/PROOF/prod_shadow_report.json`
