@@ -67,9 +67,9 @@
 - `python scripts/shopify_token_health_check.py --env prod --aws-region us-east-2 --include-aws-account-id --refresh --shop-domain scentimen-t.myshopify.com`
 
 ### 7) Results & evidence
-**CI:** pending — not run  
-**Codecov:** pending — not run  
-**Bugbot:** pending — not run  
+**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/actions/runs/21803068208/job/62901776255`  
+**Codecov:** pass — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/233`  
+**Bugbot:** pass — `https://cursor.com`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/B73/B/PROOF/aws_sts_dev.txt`
