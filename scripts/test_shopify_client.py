@@ -27,6 +27,7 @@ from integrations.shopify.client import (  # noqa: E402
     HttpTransport,
     ShopifyResponse,
     ShopifyTokenInfo,
+    ShopifyClient as IntegrationShopifyClient,
     _to_bool,
     _truncate,
 )
@@ -716,6 +717,204 @@ class ShopifyClientTests(unittest.TestCase):
             safe_mode=False,
             automation_enabled=True,
         )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_refresh_logs_failure_on_401(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret_id = "rp-mw/local/shopify/client_id"
+        client_secret_secret_id = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret_id: {
+                    "SecretString": json.dumps(
+                        {"access_token": "expired", "refresh_token": "refresh-token"}
+                    )
+                },
+                client_id_secret_id: {"SecretString": "client-id"},
+                client_secret_secret_id: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=401, headers={}, body=b""),
+                TransportResponse(status_code=400, headers={}, body=b"{}"),
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "SHOPIFY_REFRESH_ENABLED": "true",
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
+            },
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+            )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(len(transport.requests), 2)
+        self.assertEqual(
+            transport.requests[1].url,
+            "https://example.myshopify.com/admin/oauth/access_token",
+        )
+
+    def test_integration_refresh_failed_log_path(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret_id = "rp-mw/local/shopify/client_id"
+        client_secret_secret_id = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret_id: {
+                    "SecretString": json.dumps(
+                        {"access_token": "expired", "refresh_token": "refresh-token"}
+                    )
+                },
+                client_id_secret_id: {"SecretString": "client-id"},
+                client_secret_secret_id: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=401, headers={}, body=b""
+                ),
+                TransportResponse(
+                    status_code=400, headers={}, body=b"{}"
+                ),
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "dev",
+                "SHOPIFY_REFRESH_ENABLED": "true",
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
+            },
+            clear=False,
+        ):
+            client = IntegrationShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+                shop_domain="example.myshopify.com",
+            )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(len(transport.requests), 2)
+        self.assertEqual(
+            transport.requests[1].url,
+            "https://example.myshopify.com/admin/oauth/access_token",
+        )
+
+    def test_integration_refresh_attempted_already_logged(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret_id = "rp-mw/local/shopify/client_id"
+        client_secret_secret_id = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret_id: {
+                    "SecretString": json.dumps(
+                        {
+                            "access_token": "expired",
+                            "refresh_token": "refresh-token",
+                            "expires_at": 1,
+                        }
+                    )
+                },
+                client_id_secret_id: {"SecretString": "client-id"},
+                client_secret_secret_id: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=400, headers={}, body=b"{}"
+                ),
+                TransportResponse(
+                    status_code=401, headers={}, body=b""
+                ),
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "dev",
+                "SHOPIFY_REFRESH_ENABLED": "true",
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
+            },
+            clear=False,
+        ):
+            client = IntegrationShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+                shop_domain="example.myshopify.com",
+            )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(len(transport.requests), 2)
+
+    def test_integration_refresh_attempt_missing_refresh_token(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        secrets = _SelectiveStubSecretsClient(
+            {token_secret_id: {"SecretString": json.dumps({"access_token": "expired"})}}
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=401, headers={}, body=b""
+                )
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "dev",
+                "SHOPIFY_REFRESH_ENABLED": "true",
+            },
+            clear=False,
+        ):
+            client = IntegrationShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+                shop_domain="example.myshopify.com",
+            )
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
 
         self.assertEqual(response.status_code, 401)
 

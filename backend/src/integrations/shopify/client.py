@@ -419,6 +419,29 @@ class ShopifyClient:
             response = self._to_response(transport_response, url)
             last_response = response
 
+            if response.status_code == 401:
+                if not self.refresh_enabled:
+                    refresh_reason = "refresh_disabled"
+                    refresh_should_attempt = False
+                elif refresh_attempted:
+                    refresh_reason = "already_attempted"
+                    refresh_should_attempt = False
+                elif not self._token_info or not self._token_info.refresh_token:
+                    refresh_reason = "missing_refresh_token"
+                    refresh_should_attempt = False
+                else:
+                    refresh_reason = "attempt_refresh"
+                    refresh_should_attempt = True
+                self._logger.info(
+                    "shopify.refresh_attempt",
+                    extra={
+                        "attempted": refresh_should_attempt,
+                        "reason": refresh_reason,
+                        "environment": self.environment,
+                        "secret_id": self.access_token_secret_id,
+                    },
+                )
+
             if (
                 response.status_code == 401
                 and self.refresh_enabled
@@ -439,6 +462,16 @@ class ShopifyClient:
                         if attempt < self.max_attempts:
                             attempt += 1
                             continue
+                else:
+                    self._logger.warning(
+                        "shopify.refresh_failed_post_request",
+                        extra={
+                            "reason": self._last_refresh_error or "refresh_failed",
+                            "secret_id": self.access_token_secret_id,
+                            "environment": self.environment,
+                            "next_action": "Verify Shopify refresh metadata in Secrets Manager.",
+                        },
+                    )
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
