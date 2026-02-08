@@ -56,7 +56,7 @@
 
 ### 6) Test plan
 **Local / CI-equivalent:**
-- Not run (no code-level tests requested)
+- `python -m pytest scripts/test_shopify_token_health_check.py`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `aws sts get-caller-identity --profile rp-admin-dev`
