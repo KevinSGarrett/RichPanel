@@ -28,8 +28,6 @@ from integrations.shopify.client import (  # noqa: E402
     ShopifyResponse,
     ShopifyTokenInfo,
     ShopifyClient as IntegrationShopifyClient,
-    TransportResponse as IntegrationTransportResponse,
-    TransportRequest as IntegrationTransportRequest,
     _to_bool,
     _truncate,
 )
@@ -41,21 +39,6 @@ class _RecordingTransport:
         self.requests = []
 
     def send(self, request: TransportRequest) -> TransportResponse:
-        self.requests.append(request)
-        if not self.responses:
-            raise AssertionError("no response stub provided")
-        response = self.responses.pop(0)
-        if isinstance(response, Exception):
-            raise response
-        return response
-
-
-class _IntegrationRecordingTransport:
-    def __init__(self, responses):
-        self.responses = list(responses)
-        self.requests = []
-
-    def send(self, request: IntegrationTransportRequest) -> IntegrationTransportResponse:
         self.requests.append(request)
         if not self.responses:
             raise AssertionError("no response stub provided")
@@ -802,12 +785,12 @@ class ShopifyClientTests(unittest.TestCase):
                 client_secret_secret_id: {"SecretString": "client-secret"},
             }
         )
-        transport = _IntegrationRecordingTransport(
+        transport = _RecordingTransport(
             [
-                IntegrationTransportResponse(
+                TransportResponse(
                     status_code=401, headers={}, body=b""
                 ),
-                IntegrationTransportResponse(
+                TransportResponse(
                     status_code=400, headers={}, body=b"{}"
                 ),
             ]
@@ -862,12 +845,12 @@ class ShopifyClientTests(unittest.TestCase):
                 client_secret_secret_id: {"SecretString": "client-secret"},
             }
         )
-        transport = _IntegrationRecordingTransport(
+        transport = _RecordingTransport(
             [
-                IntegrationTransportResponse(
+                TransportResponse(
                     status_code=400, headers={}, body=b"{}"
                 ),
-                IntegrationTransportResponse(
+                TransportResponse(
                     status_code=401, headers={}, body=b""
                 ),
             ]
@@ -904,9 +887,9 @@ class ShopifyClientTests(unittest.TestCase):
         secrets = _SelectiveStubSecretsClient(
             {token_secret_id: {"SecretString": json.dumps({"access_token": "expired"})}}
         )
-        transport = _IntegrationRecordingTransport(
+        transport = _RecordingTransport(
             [
-                IntegrationTransportResponse(
+                TransportResponse(
                     status_code=401, headers={}, body=b""
                 )
             ]
