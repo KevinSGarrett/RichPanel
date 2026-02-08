@@ -1,21 +1,6 @@
 from __future__ import annotations
 
-import sys
-from typing import Optional
-
-try:
-    import boto3  # type: ignore
-except ImportError:  # pragma: no cover - optional dependency
-    boto3 = None  # type: ignore
-
-
-def _load_aws_account_id() -> Optional[str]:
-    if boto3 is None:
-        return None
-    try:
-        return boto3.client("sts").get_caller_identity().get("Account")
-    except Exception:
-        return None
+from shopify_health_check import _load_aws_account_id  # noqa: WPS433
 
 
 def main() -> int:

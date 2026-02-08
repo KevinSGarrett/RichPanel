@@ -464,7 +464,7 @@ class ShopifyClient:
                             continue
                 else:
                     self._logger.warning(
-                        "shopify.refresh_failed",
+                        "shopify.refresh_failed_post_request",
                         extra={
                             "reason": self._last_refresh_error or "refresh_failed",
                             "secret_id": self.access_token_secret_id,

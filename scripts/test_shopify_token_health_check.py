@@ -7,26 +7,6 @@ import shopify_token_health_check as token_check
 
 
 class ShopifyTokenHealthCheckWrapperTests(unittest.TestCase):
-    def test_load_aws_account_id_missing_boto3(self) -> None:
-        original = token_check.boto3
-        token_check.boto3 = None
-        try:
-            self.assertIsNone(token_check._load_aws_account_id())
-        finally:
-            token_check.boto3 = original
-
-    def test_load_aws_account_id_client_error(self) -> None:
-        class _StubBoto3:
-            def client(self, service_name):
-                raise RuntimeError("boom")
-
-        original = token_check.boto3
-        token_check.boto3 = _StubBoto3()
-        try:
-            self.assertIsNone(token_check._load_aws_account_id())
-        finally:
-            token_check.boto3 = original
-
     def test_main_prints_account_and_delegates(self) -> None:
         with mock.patch.object(
             token_check, "_load_aws_account_id", return_value="123456789012"
