@@ -59,6 +59,7 @@
 **Local / CI-equivalent:**
 - `python -m pytest scripts/test_shopify_token_health_check.py`
 - `python -m pytest scripts/test_shopify_client.py -k refresh_logs_failure_on_401`
+- `python -m pytest scripts/test_shopify_client.py -k integration_refresh_failed_log_path`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `aws sts get-caller-identity --profile rp-admin-dev`
