@@ -26,6 +26,45 @@ Use these only if you need LLM evidence or non-default secrets:
 - `SHOPIFY_SHOP_DOMAIN=<your-shop>.myshopify.com`
 - `SHOPIFY_ACCESS_TOKEN_SECRET_ID=rp-mw/<env>/shopify/admin_api_token`
 
+## Shopify Token Health Check (Order Status)
+Run these before shadow-mode validation to confirm Shopify auth health and AWS account alignment.
+
+### AWS Account Preflight
+Verify you are in the intended AWS account before running any health checks:
+- **DEV / sandbox** account: `151124909266`
+- **PROD / live** account: `878145708918`
+
+Command:
+```
+aws sts get-caller-identity
+```
+
+If Cursor cannot load AWS credentials, set a profile explicitly and retry:
+```
+AWS_SDK_LOAD_CONFIG=1 AWS_PROFILE=<your-dev-or-prod-profile> aws sts get-caller-identity
+```
+
+### Health Check Commands
+Use the read-only health check script (outputs JSON diagnostics):
+
+DEV (run in account `151124909266`):
+```
+python scripts/shopify_token_health_check.py --env dev --include-aws-account-id
+```
+
+PROD (run in account `878145708918`):
+```
+python scripts/shopify_token_health_check.py --env prod --include-aws-account-id
+```
+
+Healthy output cues:
+- `"status": "PASS"` with a 2xx `health_check.status_code`
+- `"can_refresh": true` only when refresh metadata exists (client id/secret + refresh token)
+
+If token is invalid:
+- Expect `"status": "FAIL_INVALID_TOKEN"` and `health_check.status_code=401`
+- Action: confirm Secrets Manager values for `rp-mw/<env>/shopify/admin_api_token`, plus `client_id`/`client_secret` if refresh is expected.
+
 ## Run For One Ticket
 Example:
 

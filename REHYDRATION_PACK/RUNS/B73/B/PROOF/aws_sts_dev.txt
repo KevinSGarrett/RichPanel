@@ -1,0 +1,7 @@
+﻿DEV aws sts get-caller-identity (rp-admin-dev):
+{
+    "UserId": "AROASGL57DTJKBCKXKECG:rp-admin-kevin",
+    "Account": "151124909266",
+    "Arn": "arn:aws:sts::151124909266:assumed-role/AWSReservedSSO_RP-Admin_65ba0b62bcc9f8ed/rp-admin-kevin"
+}
+

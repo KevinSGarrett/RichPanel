@@ -1,0 +1,7 @@
+﻿PROD aws sts get-caller-identity (rp-admin-prod):
+{
+    "UserId": "AROA4Y5MQEN3E5KRSFG44:rp-deployer-prod",
+    "Account": "878145708918",
+    "Arn": "arn:aws:sts::878145708918:assumed-role/AWSReservedSSO_RP-Deployer_19cf80c2655853f2/rp-deployer-prod"
+}
+
