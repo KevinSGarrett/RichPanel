@@ -1,4 +1,5 @@
 import io
+import runpy
 import unittest
 from unittest import mock
 
@@ -9,6 +10,18 @@ class ShopifyTokenHealthCheckWrapperTests(unittest.TestCase):
     def test_load_aws_account_id_missing_boto3(self) -> None:
         original = token_check.boto3
         token_check.boto3 = None
+        try:
+            self.assertIsNone(token_check._load_aws_account_id())
+        finally:
+            token_check.boto3 = original
+
+    def test_load_aws_account_id_client_error(self) -> None:
+        class _StubBoto3:
+            def client(self, service_name):
+                raise RuntimeError("boom")
+
+        original = token_check.boto3
+        token_check.boto3 = _StubBoto3()
         try:
             self.assertIsNone(token_check._load_aws_account_id())
         finally:
@@ -26,3 +39,10 @@ class ShopifyTokenHealthCheckWrapperTests(unittest.TestCase):
         self.assertEqual(output[0], "Account=123456789012")
         self.assertEqual(exit_code, 0)
         stub_main.assert_called_once()
+
+    def test_module_main_guard(self) -> None:
+        with mock.patch("shopify_health_check.main", return_value=0):
+            with mock.patch("sys.stdout", new_callable=io.StringIO):
+                with self.assertRaises(SystemExit) as ctx:
+                    runpy.run_module("shopify_token_health_check", run_name="__main__")
+        self.assertEqual(ctx.exception.code, 0)
