@@ -29,6 +29,7 @@
 **Core changes:**
 - Added `scripts/shopify_token_health_check.py` wrapper to print `Account=<id>` then delegate to the existing health check.
 - Added a structured refresh-attempt log and actionable failure log in `backend/src/integrations/shopify/client.py`.
+- Added the new token health check wrapper test to the CI-equivalent test list.
 - Updated `REHYDRATION_PACK/SHOPIFY_STRATEGY/SHADOW_MODE_RUNBOOK.md` health check commands.
 
 **Design decisions (why this way):**
