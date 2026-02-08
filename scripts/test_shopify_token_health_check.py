@@ -29,3 +29,15 @@ class ShopifyTokenHealthCheckWrapperTests(unittest.TestCase):
                             "shopify_token_health_check", run_name="__main__"
                         )
         self.assertEqual(ctx.exception.code, 0)
+
+
+def main() -> int:  # pragma: no cover
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(
+        ShopifyTokenHealthCheckWrapperTests
+    )
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    return 0 if result.wasSuccessful() else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
