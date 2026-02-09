@@ -312,10 +312,28 @@ def _resolve_outbound_evidence(
     sent_value = outbound_result.get("sent")
     reason_value = outbound_result.get("reason")
     responses_value = outbound_result.get("responses")
+    channel_detected = outbound_result.get("channel_detected")
+    channel_detection_source = outbound_result.get("channel_detection_source")
+    bot_agent_id_source = outbound_result.get("bot_agent_id_source")
+    read_only_guard_active = outbound_result.get("read_only_guard_active")
     return {
         "sent": sent_value if isinstance(sent_value, bool) else None,
         "reason": str(reason_value) if reason_value is not None else None,
         "responses": _sanitize_outbound_responses(responses_value),
+        "channel_detected": str(channel_detected)
+        if isinstance(channel_detected, str)
+        else None,
+        "channel_detection_source": str(channel_detection_source)
+        if isinstance(channel_detection_source, str)
+        else None,
+        "bot_agent_id_source": str(bot_agent_id_source)
+        if isinstance(bot_agent_id_source, str)
+        else None,
+        "read_only_guard_active": (
+            read_only_guard_active
+            if isinstance(read_only_guard_active, bool)
+            else None
+        ),
     }
 
 

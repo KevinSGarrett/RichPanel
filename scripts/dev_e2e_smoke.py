@@ -360,6 +360,39 @@ def _load_bot_agent_id(
     return secret_str.strip()
 
 
+def _resolve_bot_agent_id_source(
+    *, env_name: str, region: str, session: Any
+) -> Optional[str]:
+    env_override = os.environ.get("RICHPANEL_BOT_AGENT_ID")
+    if isinstance(env_override, str) and env_override.strip():
+        return "env"
+    bot_agent_id = _load_bot_agent_id(env_name=env_name, region=region, session=session)
+    if bot_agent_id:
+        return "secrets_manager"
+    return "missing"
+
+
+def _read_only_guard_active(env_name: str) -> bool:
+    env_override = os.environ.get("RICHPANEL_READ_ONLY") or os.environ.get(
+        "RICH_PANEL_READ_ONLY"
+    )
+    if env_override is not None and str(env_override).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }:
+        return True
+    if str(os.environ.get("RICHPANEL_WRITE_DISABLED") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }:
+        return True
+    return env_name in {"prod", "production", "staging"}
+
+
 def _iso_timestamp_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -1297,6 +1330,10 @@ def _build_skip_proof_payload(
         "allowlist": allowlist_config or {},
         "proof_fields": {
             "ticket_channel": None,
+            "channel_detected": None,
+            "channel_detection_source": None,
+            "bot_agent_id_source": None,
+            "read_only_guard_active": None,
             "intent_after": None,
             "outbound_attempted": None,
             "outbound_failure_classification": None,
@@ -1316,6 +1353,7 @@ def _build_skip_proof_payload(
             "reply_contains_tracking_number_like": None,
             "reply_contains_eta_date_like": None,
             "latest_comment_is_operator": None,
+            "is_operator_reply": None,
             "latest_comment_source": None,
             "send_message_author_id_redacted": None,
             "bot_agent_id_redacted": None,
@@ -5853,6 +5891,46 @@ def main() -> int:  # pragma: no cover - integration entrypoint
     outbound_reason = (
         outbound_result.get("reason") if isinstance(outbound_result, dict) else None
     )
+    channel_detected = (
+        outbound_result.get("channel_detected") if isinstance(outbound_result, dict) else None
+    )
+    channel_detection_source = (
+        outbound_result.get("channel_detection_source")
+        if isinstance(outbound_result, dict)
+        else None
+    )
+    bot_agent_id_source = (
+        outbound_result.get("bot_agent_id_source")
+        if isinstance(outbound_result, dict)
+        else None
+    )
+    read_only_guard_active = (
+        outbound_result.get("read_only_guard_active")
+        if isinstance(outbound_result, dict)
+        else None
+    )
+    if channel_detected is None and isinstance(ticket_channel, str):
+        lowered = ticket_channel.strip().lower()
+        if lowered == "email":
+            channel_detected = "email"
+        elif "chat" in lowered:
+            channel_detected = "chat"
+        else:
+            channel_detected = "unknown"
+    if channel_detection_source is None:
+        channel_detection_source = (
+            "fetched_ticket" if isinstance(ticket_channel, str) else "unknown"
+        )
+    if bot_agent_id_source is None:
+        bot_agent_id_source = (
+            _resolve_bot_agent_id_source(
+                env_name=env_name, region=region, session=session
+            )
+            if allow_network
+            else "missing"
+        )
+    if read_only_guard_active is None:
+        read_only_guard_active = _read_only_guard_active(env_name)
 
     outbound_attempted = _evaluate_outbound_attempted(
         message_count_delta=message_count_delta,
@@ -6522,6 +6600,10 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     proof_fields = {
         "ticket_channel": ticket_channel,
+        "channel_detected": channel_detected,
+        "channel_detection_source": channel_detection_source,
+        "bot_agent_id_source": bot_agent_id_source,
+        "read_only_guard_active": read_only_guard_active,
         "openai_routing_used": openai_routing_used,
         "openai_rewrite_used": openai_rewrite_used,
         "openai_routing_response_id": (
@@ -6554,6 +6636,11 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "reply_contains_tracking_number_like": reply_contains_tracking_number_like,
         "reply_contains_eta_date_like": reply_contains_eta_date_like,
         "latest_comment_source": latest_comment_source,
+        "is_operator_reply": (
+            latest_comment_is_operator
+            if isinstance(latest_comment_is_operator, bool)
+            else None
+        ),
         "routing_ticket_excerpt_redacted": (
             order_status_intent.get("ticket_excerpt_redacted")
             or fallback_ticket_excerpt_redacted

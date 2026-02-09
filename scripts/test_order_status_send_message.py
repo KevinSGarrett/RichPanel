@@ -24,6 +24,9 @@ os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
     ActionPlan,
     execute_order_status_reply,
+    EMAIL_SUPPORT_ROUTE_TAG,
+    LOOP_PREVENTION_TAG,
+    SKIP_FOLLOWUP_TAG,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 from richpanel_middleware.integrations.richpanel.tickets import (  # noqa: E402
@@ -97,7 +100,10 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
 
         with mock.patch.dict(
             os.environ,
-            {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allowed@example.com"},
+            {
+                "MW_OUTBOUND_ALLOWLIST_EMAILS": "allowed@example.com",
+                "RICHPANEL_BOT_AGENT_ID": "agent-xyz",
+            },
             clear=False,
         ), mock.patch(
             "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
@@ -112,9 +118,6 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline._safe_ticket_comment_operator_fetch",
             return_value=True,
-        ), mock.patch(
-            "richpanel_middleware.automation.pipeline._resolve_author_id",
-            return_value=("author-123", "stub"),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
             return_value=("dev", None),
@@ -146,6 +149,208 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
             200,
             send_response_entries[0].get("status"),
         )
+
+    def test_email_channel_missing_bot_agent_routes_support(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "ticket-456",
+                "channel": "email",
+                "message": "Where is my order?",
+                "customer_email": "allowed@example.com",
+            }
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {"draft_reply": {"body": "Update."}},
+                }
+            ],
+        )
+        executor = FakeExecutor()
+
+        with mock.patch.dict(
+            os.environ,
+            {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allowed@example.com"},
+            clear=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
+            return_value=(
+                TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False),
+                "email",
+                "allowed@example.com",
+            ),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
+
+        send_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ]
+        self.assertEqual(0, len(send_calls))
+        self.assertEqual(result.get("blocked_reason"), "missing_bot_agent_id")
+
+    def test_non_email_channel_does_not_use_send_message(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "ticket-789", "channel": "chat", "message": "Status?"}
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {"draft_reply": {"body": "Update."}},
+                }
+            ],
+        )
+        executor = FakeExecutor()
+
+        with mock.patch.dict(
+            os.environ,
+            {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allowed@example.com"},
+            clear=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
+            return_value=(
+                TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False),
+                "chat",
+                None,
+            ),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
+
+        send_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ]
+        self.assertEqual(0, len(send_calls))
+
+    def test_read_only_blocks_outbound(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "ticket-999", "channel": "email", "message": "Status?"}
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {"draft_reply": {"body": "Update."}},
+                }
+            ],
+        )
+        executor = FakeExecutor()
+
+        with mock.patch.dict(
+            os.environ,
+            {"RICHPANEL_READ_ONLY": "true"},
+            clear=False,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
+
+        self.assertEqual(result.get("reason"), "read_only_guard")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
+    def test_followup_routes_support_without_reply(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "ticket-321", "channel": "email", "message": "Follow-up"}
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {"draft_reply": {"body": "Update."}},
+                }
+            ],
+        )
+        executor = FakeExecutor()
+
+        with mock.patch.dict(
+            os.environ,
+            {"MW_OUTBOUND_ALLOWLIST_EMAILS": "allowed@example.com"},
+            clear=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
+            return_value=(
+                TicketMetadata(
+                    status="open",
+                    tags={LOOP_PREVENTION_TAG},
+                    status_code=200,
+                    dry_run=False,
+                ),
+                "email",
+                "allowed@example.com",
+            ),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
+
+        tag_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/add-tags")
+        ]
+        self.assertTrue(tag_calls)
+        self.assertEqual(result.get("reason"), "followup_after_auto_reply")
+        self.assertIn(EMAIL_SUPPORT_ROUTE_TAG, tag_calls[0]["json_body"]["tags"])
+        self.assertIn(SKIP_FOLLOWUP_TAG, tag_calls[0]["json_body"]["tags"])
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entrypoint

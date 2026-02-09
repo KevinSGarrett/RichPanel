@@ -35,10 +35,8 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _extract_customer_email_from_payload,
     _match_allowlist_email,
     _parse_allowlist_entries,
-    _resolve_author_id,
-    _user_is_agent,
     _safe_ticket_snapshot_fetch,
-    _AUTHOR_ID_CACHE,
+    _resolve_bot_agent_id,
     _latest_comment_is_operator,
     _comment_operator_flag,
     _comment_created_at,
@@ -1695,61 +1693,37 @@ class _CommentRetryExecutor:
         )
 
 
-class AuthorResolutionTests(unittest.TestCase):
+class BotAgentResolutionTests(unittest.TestCase):
     def setUp(self) -> None:
-        _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
         os.environ.pop("RICHPANEL_BOT_AGENT_ID", None)
-        os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
 
-    def test_resolve_author_id_prefers_bot_agent_env(self) -> None:
-        executor = _RecordingExecutor(users=[{"id": "agent-1", "role": "agent"}])
+    def test_resolve_bot_agent_id_prefers_env(self) -> None:
         with mock.patch.dict(
             os.environ,
-            {
-                "RICHPANEL_BOT_AGENT_ID": "agent-xyz",
-                "RICHPANEL_BOT_AUTHOR_ID": "agent-old",
-            },
+            {"RICHPANEL_BOT_AGENT_ID": "agent-xyz"},
             clear=False,
         ):
-            author_id, strategy = _resolve_author_id(
-                executor=cast(RichpanelExecutor, executor), allow_network=True
+            agent_id, source = _resolve_bot_agent_id(
+                env_name="dev", allow_network=True
             )
-        self.assertEqual(author_id, "agent-xyz")
-        self.assertEqual(strategy, "env:bot_agent_id")
-        user_calls = [
-            call for call in executor.calls if call["path"].startswith("/v1/users")
-        ]
-        self.assertEqual(len(user_calls), 0)
+        self.assertEqual(agent_id, "agent-xyz")
+        self.assertEqual(source, "env")
 
-    def test_resolve_author_id_network_disabled(self) -> None:
-        executor = _RecordingExecutor()
-        author_id, strategy = _resolve_author_id(
-            executor=cast(RichpanelExecutor, executor), allow_network=False
-        )
-        self.assertIsNone(author_id)
-        self.assertEqual(strategy, "network_disabled")
+    def test_resolve_bot_agent_id_network_disabled(self) -> None:
+        agent_id, source = _resolve_bot_agent_id(env_name="dev", allow_network=False)
+        self.assertIsNone(agent_id)
+        self.assertEqual(source, "missing")
 
-    def test_resolve_author_id_caches_success(self) -> None:
-        executor = _RecordingExecutor(users=[{"id": "agent-1", "role": "agent"}])
-        author_id, strategy = _resolve_author_id(
-            executor=cast(RichpanelExecutor, executor), allow_network=True
-        )
-        self.assertEqual(author_id, "agent-1")
-        self.assertEqual(strategy, "role_match")
-        author_id_cached, cached_strategy = _resolve_author_id(
-            executor=cast(RichpanelExecutor, executor), allow_network=True
-        )
-        self.assertEqual(author_id_cached, "agent-1")
-        self.assertTrue(cached_strategy.startswith("cache"))
-        user_calls = [
-            call for call in executor.calls if call["path"].startswith("/v1/users")
-        ]
-        self.assertEqual(len(user_calls), 1)
-
-    def test_user_is_agent_role_variants(self) -> None:
-        self.assertTrue(_user_is_agent({"role": ["support", "operator"]}))
-        self.assertTrue(_user_is_agent({"type": {"name": "AGENT"}}))
-        self.assertFalse(_user_is_agent({"role": "customer"}))
+    def test_resolve_bot_agent_id_from_secrets(self) -> None:
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline._load_secret_value",
+            return_value='{"bot_agent_id": "agent-123"}',
+        ):
+            agent_id, source = _resolve_bot_agent_id(
+                env_name="dev", allow_network=True
+            )
+        self.assertEqual(agent_id, "agent-123")
+        self.assertEqual(source, "secrets_manager")
 
     def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
         class _ChannelExecutor:

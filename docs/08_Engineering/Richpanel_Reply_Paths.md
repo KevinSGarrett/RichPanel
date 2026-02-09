@@ -9,12 +9,15 @@ Outbound replies must be deterministic and channel-aware to prevent “metadata 
 without actual delivery. The middleware selects one of two reply paths and fails closed
 when safety gates or allowlists block outbound.
 
+Important: a middleware comment (`PUT /v1/tickets/{id}` with `comment`) does **not**
+send a customer email. Email delivery requires the `/send-message` endpoint.
+
 ## Channel detection
 
-1. Prefer the channel fetched from the ticket (`GET /v1/tickets/{id}`) and inspect
-   `ticket.via.channel` (or `ticket.channel`).
-2. If missing, fall back to the envelope payload:
+1. Prefer the channel provided in the webhook envelope payload:
    - `via.channel`, `channel`, or nested `ticket.via.channel`.
+2. If missing, perform **one** ticket fetch (`GET /v1/tickets/{id}`) and inspect
+   `ticket.via.channel` (or `ticket.channel`).
 3. If the channel is still unknown, treat it as **non-email** (no `send-message`).
 
 ## Email channel path (delivery-critical)
@@ -25,8 +28,8 @@ When `channel == email` and outbound is permitted:
    `allow_network=true`, `RICHPANEL_OUTBOUND_ENABLED=true`.
 2. **Allowlist gate** (prod or configured): if not allowlisted, **no outbound attempt**.
 3. **Author id**:
-   - Prefer `RICHPANEL_BOT_AGENT_ID` (fallback: `RICHPANEL_BOT_AUTHOR_ID`).
-   - In dev, fallback to `GET /v1/users` with caching.
+   - Prefer `RICHPANEL_BOT_AGENT_ID` (emergency override).
+   - Otherwise load from AWS Secrets Manager: `rp-mw/{env}/richpanel/bot_agent_id`.
    - If unresolved, **block outbound** and route to support (do not comment instead).
 4. **Send**: `PUT /v1/tickets/{id}/send-message` with `author_id` + body.
 5. **Verify**: fetch the ticket and confirm the latest comment has `is_operator=true`.
