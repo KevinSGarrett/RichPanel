@@ -1973,7 +1973,7 @@ class ReadOnlyGuardTests(unittest.TestCase):
 
     def test_read_only_guard_prod_env(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
-            self.assertFalse(_read_only_guard_active("prod"))
+            self.assertTrue(_read_only_guard_active("prod"))
 
     def test_read_only_guard_false_in_dev(self) -> None:
         with patch.dict(os.environ, {}, clear=True):

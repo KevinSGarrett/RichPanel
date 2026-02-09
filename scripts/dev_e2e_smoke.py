@@ -391,7 +391,7 @@ def _read_only_guard_active(env_name: str) -> bool:
         "on",
     }:
         return True
-    return False
+    return env_name in {"prod", "production", "staging"}
 
 
 def _iso_timestamp_now() -> str:

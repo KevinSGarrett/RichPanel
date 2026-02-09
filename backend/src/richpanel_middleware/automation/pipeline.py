@@ -102,6 +102,7 @@ _SKIP_REASON_TAGS = {
     "allowlist_blocked": OUTBOUND_BLOCKED_ALLOWLIST_TAG,
     "missing_bot_agent_id": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
+_READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
 _SECRET_VALUE_CACHE_TTL_SECONDS = 900
 _SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
 
@@ -191,7 +192,7 @@ def _read_only_guard_active(env_name: str) -> bool:
     write_disabled = os.environ.get("RICHPANEL_WRITE_DISABLED")
     if write_disabled is not None:
         return _to_bool(write_disabled)
-    return False
+    return env_name in _READ_ONLY_ENVIRONMENTS
 
 
 def _load_secret_value(secret_id: str) -> Optional[str]:

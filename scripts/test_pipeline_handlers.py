@@ -812,10 +812,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "missing_bot_agent_id")
-        self.assertFalse(
-            any(call["path"].endswith("/send-message") for call in executor.calls)
-        )
+        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(len(executor.calls), 0)
         close_calls = [
             call
             for call in executor.calls
@@ -1070,10 +1068,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "allowlist_blocked")
-        self.assertFalse(
-            any(call["path"].endswith("/send-message") for call in executor.calls)
-        )
+        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_non_prod_when_set(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -1770,7 +1766,7 @@ class ReadOnlyGuardTests(unittest.TestCase):
 
     def test_read_only_guard_prod_env(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
-            self.assertFalse(_read_only_guard_active("prod"))
+            self.assertTrue(_read_only_guard_active("prod"))
 
     def test_read_only_guard_false_in_dev(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
