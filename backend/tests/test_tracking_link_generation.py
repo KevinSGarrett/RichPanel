@@ -6,8 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "backend" / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     build_carrier_tracking_url,
@@ -64,3 +63,5 @@ class TrackingLinkGenerationTests(unittest.TestCase):
         self.assertIsNone(build_carrier_tracking_url("", "TEST123"))
         self.assertIsNone(build_carrier_tracking_url("FedEx", ""))
         self.assertIsNone(build_carrier_tracking_url("", ""))
+        self.assertIsNone(build_carrier_tracking_url("   ", "TEST123"))
+        self.assertIsNone(build_carrier_tracking_url("FedEx", "   "))
