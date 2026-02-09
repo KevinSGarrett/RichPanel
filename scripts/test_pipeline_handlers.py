@@ -612,7 +612,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
 
-    def test_outbound_channel_prefers_ticket_snapshot(self) -> None:
+    def test_outbound_channel_prefers_webhook_payload(self) -> None:
         envelope, plan = self._build_order_status_plan()
         if isinstance(envelope.payload, dict):
             envelope.payload["channel"] = "chat"
@@ -632,7 +632,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertTrue(result["sent"])
-        self.assertTrue(
+        self.assertFalse(
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
 
