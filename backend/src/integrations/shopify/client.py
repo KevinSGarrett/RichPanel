@@ -207,7 +207,6 @@ class ShopifyClient:
         ).rstrip("/")
         canonical_secret = f"rp-mw/{self.environment}/shopify/admin_api_token"
         legacy_secret = f"rp-mw/{self.environment}/shopify/access_token"
-        self._canonical_token_secret_id = canonical_secret
         self._legacy_token_secret_id = legacy_secret
         primary_secret = (
             access_token_secret_id
@@ -1154,11 +1153,7 @@ class ShopifyClient:
         self, status_code: int, *, refresh_reason: str
     ) -> str:
         hint = "Verify rp-mw/<env>/shopify/admin_api_token in Secrets Manager."
-        if status_code == 403:
-            hint = (
-                "Verify the Shopify app scopes; the token may lack required read scopes."
-            )
-        elif refresh_reason in {"missing_refresh_token", "refresh_disabled"}:
+        if refresh_reason in {"missing_refresh_token", "refresh_disabled"}:
             hint = (
                 "Provide rp-mw/<env>/shopify/refresh_token and enable "
                 "SHOPIFY_REFRESH_ENABLED=true, or rotate the Admin API token."
@@ -1167,6 +1162,10 @@ class ShopifyClient:
             hint = (
                 "Move the token to rp-mw/<env>/shopify/admin_api_token "
                 "and retry; legacy tokens are not refreshed."
+            )
+        elif status_code == 403:
+            hint = (
+                "Verify the Shopify app scopes; the token may lack required read scopes."
             )
         return (
             f"Shopify auth failed (status={status_code}). {hint}"
