@@ -46,6 +46,15 @@ class _DummySession:
 
 
 class AwsSecretsPreflightTests(unittest.TestCase):
+    def test_dummy_clients_exercise_error_branches(self) -> None:
+        secrets = _DummySecretsClient(missing_ids={"missing"}, unreadable_ids={"deny"})
+        with self.assertRaises(RuntimeError):
+            secrets.get_secret_value("deny")
+        with self.assertRaises(RuntimeError):
+            secrets.get_secret_value("missing")
+        session = _DummySession()
+        with self.assertRaises(ValueError):
+            session.client("unexpected-service")
     def test_required_secret_ids(self) -> None:
         required = aws_secrets_preflight._required_secret_ids("dev")
         self.assertIn("rp-mw/dev/shopify/admin_api_token", required)
@@ -258,5 +267,5 @@ def main() -> int:  # pragma: no cover
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
