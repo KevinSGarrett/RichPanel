@@ -237,5 +237,5 @@ def main() -> int:
     return 0 if payload.get("overall_status") == "PASS" else 2
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
