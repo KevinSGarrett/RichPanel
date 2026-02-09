@@ -92,21 +92,15 @@ ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 # Follow-up after auto-reply should route to support without escalation.
-_ESCALATION_REASONS: set[str] = {
-    "author_id_missing",
-    "missing_bot_agent_id",
-    "reply_close_failed",
-}
+_ESCALATION_REASONS: set[str] = {"missing_bot_agent_id", "reply_close_failed"}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
     "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
-    "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
     "send_message_failed": SEND_MESSAGE_FAILED_TAG,
     "send_message_operator_missing": SEND_MESSAGE_OPERATOR_MISSING_TAG,
     "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
     "allowlist_blocked": OUTBOUND_BLOCKED_ALLOWLIST_TAG,
-    "bot_author_missing": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
     "missing_bot_agent_id": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
 _READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
@@ -1179,6 +1173,13 @@ def execute_order_status_reply(
     channel_detected = _classify_channel(payload_channel)
     channel_detection_source = "webhook" if payload_channel else "unknown"
     bot_agent_id_source = "missing"
+    def _metadata() -> Dict[str, Any]:
+        return {
+            "channel_detected": channel_detected,
+            "channel_detection_source": channel_detection_source,
+            "bot_agent_id_source": bot_agent_id_source,
+            "read_only_guard_active": read_only_guard_active,
+        }
     reason = _outbound_block_reason(
         outbound_enabled=outbound_enabled,
         safe_mode=safe_mode,
@@ -1211,11 +1212,8 @@ def execute_order_status_reply(
         return {
             "sent": False,
             "reason": reason,
-            "channel_detected": channel_detected,
-            "channel_detection_source": channel_detection_source,
-            "bot_agent_id_source": bot_agent_id_source,
-            "read_only_guard_active": read_only_guard_active,
             "dry_run_would_send_message": dry_run_would_send_message,
+            **_metadata(),
         }
 
     executor = richpanel_executor or RichpanelExecutor(
@@ -1303,14 +1301,7 @@ def execute_order_status_reply(
 
         if ticket_metadata is None:
             result = _route_email_support("status_read_failed")
-            result.update(
-                {
-                    "channel_detected": channel_detected,
-                    "channel_detection_source": channel_detection_source,
-                    "bot_agent_id_source": bot_agent_id_source,
-                    "read_only_guard_active": read_only_guard_active,
-                }
-            )
+            result.update(_metadata())
             return result
 
         ticket_status = ticket_metadata.status
@@ -1323,14 +1314,7 @@ def execute_order_status_reply(
             result = _route_email_support(
                 "followup_after_auto_reply", ticket_status=ticket_status
             )
-            result.update(
-                {
-                    "channel_detected": channel_detected,
-                    "channel_detection_source": channel_detection_source,
-                    "bot_agent_id_source": bot_agent_id_source,
-                    "read_only_guard_active": read_only_guard_active,
-                }
-            )
+            result.update(_metadata())
             return result
 
         if order_action is None:
@@ -1342,25 +1326,11 @@ def execute_order_status_reply(
                     "reason": "missing_order_status_action",
                 },
             )
-            return {
-                "sent": False,
-                "reason": "missing_order_status_action",
-                "channel_detected": channel_detected,
-                "channel_detection_source": channel_detection_source,
-                "bot_agent_id_source": bot_agent_id_source,
-                "read_only_guard_active": read_only_guard_active,
-            }
+            return {"sent": False, "reason": "missing_order_status_action", **_metadata()}
 
         if _is_closed_status(ticket_status):
             result = _route_email_support("already_resolved", ticket_status=ticket_status)
-            result.update(
-                {
-                    "channel_detected": channel_detected,
-                    "channel_detection_source": channel_detection_source,
-                    "bot_agent_id_source": bot_agent_id_source,
-                    "read_only_guard_active": read_only_guard_active,
-                }
-            )
+            result.update(_metadata())
             return result
 
         (
@@ -1395,14 +1365,7 @@ def execute_order_status_reply(
                 result = _route_email_support(
                     "allowlist_blocked", ticket_status=ticket_status
                 )
-                result.update(
-                    {
-                        "channel_detected": channel_detected,
-                        "channel_detection_source": channel_detection_source,
-                        "bot_agent_id_source": bot_agent_id_source,
-                        "read_only_guard_active": read_only_guard_active,
-                    }
-                )
+                result.update(_metadata())
                 return result
 
         parameters = order_action.get("parameters") or {}
@@ -1417,14 +1380,7 @@ def execute_order_status_reply(
                     "reason": "missing_draft_reply",
                 },
             )
-            return {
-                "sent": False,
-                "reason": "missing_draft_reply",
-                "channel_detected": channel_detected,
-                "channel_detection_source": channel_detection_source,
-                "bot_agent_id_source": bot_agent_id_source,
-                "read_only_guard_active": read_only_guard_active,
-            }
+            return {"sent": False, "reason": "missing_draft_reply", **_metadata()}
 
         order_summary = parameters.get("order_summary") or {}
         delivery_estimate = parameters.get("delivery_estimate") or order_summary.get(
@@ -1666,10 +1622,7 @@ def execute_order_status_reply(
                     "missing_bot_agent_id", ticket_status=ticket_status
                 )
                 result["blocked_reason"] = "missing_bot_agent_id"
-                result["bot_agent_id_source"] = bot_agent_id_source
-                result["channel_detected"] = channel_detected
-                result["channel_detection_source"] = channel_detection_source
-                result["read_only_guard_active"] = read_only_guard_active
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1692,10 +1645,7 @@ def execute_order_status_reply(
                     "sent": False,
                     "reason": "send_message_dry_run",
                     "responses": responses,
-                    "channel_detected": channel_detected,
-                    "channel_detection_source": channel_detection_source,
-                    "bot_agent_id_source": bot_agent_id_source,
-                    "read_only_guard_active": read_only_guard_active,
+                    **_metadata(),
                 }
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
@@ -1704,14 +1654,7 @@ def execute_order_status_reply(
                 result = _route_email_support(
                     "send_message_failed", ticket_status=ticket_status
                 )
-                result.update(
-                    {
-                        "channel_detected": channel_detected,
-                        "channel_detection_source": channel_detection_source,
-                        "bot_agent_id_source": bot_agent_id_source,
-                        "read_only_guard_active": read_only_guard_active,
-                    }
-                )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1737,14 +1680,7 @@ def execute_order_status_reply(
                         OUTBOUND_PATH_SEND_MESSAGE_TAG,
                     ],
                 )
-                result.update(
-                    {
-                        "channel_detected": channel_detected,
-                        "channel_detection_source": channel_detection_source,
-                        "bot_agent_id_source": bot_agent_id_source,
-                        "read_only_guard_active": read_only_guard_active,
-                    }
-                )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1764,14 +1700,7 @@ def execute_order_status_reply(
                         OUTBOUND_PATH_SEND_MESSAGE_TAG,
                     ],
                 )
-                result.update(
-                    {
-                        "channel_detected": channel_detected,
-                        "channel_detection_source": channel_detection_source,
-                        "bot_agent_id_source": bot_agent_id_source,
-                        "read_only_guard_active": read_only_guard_active,
-                    }
-                )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1822,10 +1751,7 @@ def execute_order_status_reply(
                 "sent": True,
                 "reason": "sent",
                 "responses": responses,
-                "channel_detected": channel_detected,
-                "channel_detection_source": channel_detection_source,
-                "bot_agent_id_source": bot_agent_id_source,
-                "read_only_guard_active": read_only_guard_active,
+                **_metadata(),
             }
             if openai_rewrite is not None:
                 result["openai_rewrite"] = openai_rewrite
@@ -1839,10 +1765,7 @@ def execute_order_status_reply(
                 "sent": False,
                 "reason": "reply_update_failed",
                 "responses": responses,
-                "channel_detected": channel_detected,
-                "channel_detection_source": channel_detection_source,
-                "bot_agent_id_source": bot_agent_id_source,
-                "read_only_guard_active": read_only_guard_active,
+                **_metadata(),
             }
             if openai_rewrite is not None:
                 result["openai_rewrite"] = openai_rewrite
@@ -1894,10 +1817,7 @@ def execute_order_status_reply(
             "sent": True,
             "reason": "sent",
             "responses": responses,
-            "channel_detected": channel_detected,
-            "channel_detection_source": channel_detection_source,
-            "bot_agent_id_source": bot_agent_id_source,
-            "read_only_guard_active": read_only_guard_active,
+            **_metadata(),
         }
         if openai_rewrite is not None:
             result["openai_rewrite"] = openai_rewrite
@@ -1913,10 +1833,7 @@ def execute_order_status_reply(
         result = {
             "sent": False,
             "reason": "exception",
-            "channel_detected": channel_detected,
-            "channel_detection_source": channel_detection_source,
-            "bot_agent_id_source": bot_agent_id_source,
-            "read_only_guard_active": read_only_guard_active,
+            **_metadata(),
         }
         if openai_rewrite is not None:
             result["openai_rewrite"] = openai_rewrite
