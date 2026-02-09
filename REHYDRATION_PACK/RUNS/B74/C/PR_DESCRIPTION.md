@@ -36,6 +36,7 @@
 
 ### 5) Scope / files touched
 **Tests / fixtures:**
+- `backend/tests/fixtures/README.md`
 - `backend/tests/fixtures/order_status_regression_samples.jsonl`
 - `scripts/test_order_status_regression_guard.py`
 

@@ -113,6 +113,21 @@ class OrderStatusRegressionGuardTests(unittest.TestCase):
             )
             self.assertEqual(artifact.accepted, sample.expected_is_order_status)
 
+    def test_intent_rejects_invalid_response(self) -> None:
+        client = _StubClient("not-json")
+        artifact = classify_order_status_intent(
+            "Where is my order?",
+            conversation_id="conv-invalid",
+            event_id="evt-invalid",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=client,
+        )
+        self.assertFalse(artifact.accepted)
+        self.assertIsNotNone(artifact.parse_error)
+
 
 if __name__ == "__main__":
     unittest.main()

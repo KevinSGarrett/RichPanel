@@ -35,9 +35,9 @@ python scripts/test_order_status_regression_guard.py
 ```
 Result:
 ```
-..
+...
 ----------------------------------------------------------------------
-Ran 2 tests in 0.00s
+Ran 3 tests in 0.001s
 
 OK
 ```

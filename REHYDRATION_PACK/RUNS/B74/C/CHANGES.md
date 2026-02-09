@@ -10,6 +10,7 @@
 - `REHYDRATION_PACK/RUNS/B74/C/PR_DESCRIPTION.md`
 
 ## Tests / Fixtures
+- `backend/tests/fixtures/README.md`
 - `backend/tests/fixtures/order_status_regression_samples.jsonl`
 - `scripts/test_order_status_regression_guard.py`
 
