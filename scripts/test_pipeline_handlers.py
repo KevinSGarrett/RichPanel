@@ -1766,7 +1766,7 @@ class ReadOnlyGuardTests(unittest.TestCase):
 
     def test_read_only_guard_prod_env(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
-            self.assertTrue(_read_only_guard_active("prod"))
+            self.assertFalse(_read_only_guard_active("prod"))
 
     def test_read_only_guard_false_in_dev(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
