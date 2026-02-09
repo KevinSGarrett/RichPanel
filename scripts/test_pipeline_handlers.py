@@ -39,6 +39,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _safe_ticket_snapshot_fetch,
     _extract_bot_agent_id,
     _load_secret_value,
+    _read_only_guard_active,
     _resolve_bot_agent_id,
     _latest_comment_is_operator,
     _comment_operator_flag,
@@ -1730,6 +1731,24 @@ class BotAgentSecretLoadTests(unittest.TestCase):
 
         with mock.patch.object(pipeline_module, "boto3", _Boto3()):
             self.assertEqual(_load_secret_value("secret-id"), "secret-binary")
+
+
+class ReadOnlyGuardTests(unittest.TestCase):
+    def test_read_only_guard_env_override(self) -> None:
+        with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_write_disabled(self) -> None:
+        with mock.patch.dict(os.environ, {"RICHPANEL_WRITE_DISABLED": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_prod_env(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(_read_only_guard_active("prod"))
+
+    def test_read_only_guard_false_in_dev(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(_read_only_guard_active("dev"))
 
     def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
         class _ChannelExecutor:
