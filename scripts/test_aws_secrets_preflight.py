@@ -105,13 +105,20 @@ class AwsSecretsPreflightTests(unittest.TestCase):
         self.assertIn("wrong account", str(ctx.exception))
 
     def test_preflight_boto3_unavailable(self) -> None:
-        with mock.patch.object(aws_secrets_preflight, "boto3", new=None):
-            payload = aws_secrets_preflight.run_aws_secrets_preflight(
-                env_name="dev",
-                region="us-east-2",
-                session=None,
-                fail_on_error=False,
-            )
+        import tempfile
+        import os
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_path = os.path.join(tmpdir, "payload.json")
+            with mock.patch.object(aws_secrets_preflight, "boto3", new=None):
+                payload = aws_secrets_preflight.run_aws_secrets_preflight(
+                    env_name="dev",
+                    region="us-east-2",
+                    session=None,
+                    out_path=out_path,
+                    fail_on_error=False,
+                )
+            self.assertTrue(os.path.exists(out_path))
         self.assertEqual(payload["overall_status"], "FAIL")
         self.assertEqual(payload["error"], "boto3_unavailable")
         with mock.patch.object(aws_secrets_preflight, "boto3", new=None):
@@ -205,6 +212,35 @@ class AwsSecretsPreflightTests(unittest.TestCase):
                     )
                     self.assertTrue(os.path.exists(out_path))
         self.assertIn("rp-mw/dev/shopify/custom_extra", payload["secrets"])
+
+    def test_preflight_fail_on_error_includes_secret_detail(self) -> None:
+        missing = {"rp-mw/dev/shopify/admin_api_token"}
+        secrets_client = _DummySecretsClient(missing_ids=missing)
+        session = _DummySession(secrets_client=secrets_client)
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=SimpleNamespace()):
+            with mock.patch.object(
+                aws_secrets_preflight,
+                "run_account_preflight",
+                return_value=aws_account_preflight.AccountPreflightResult(
+                    env="dev",
+                    region="us-east-2",
+                    aws_account_id="151124909266",
+                    aws_arn=None,
+                    expected_account_id="151124909266",
+                    expected_region="us-east-2",
+                    ok=True,
+                    error=None,
+                ),
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    aws_secrets_preflight.run_aws_secrets_preflight(
+                        env_name="dev",
+                        region="us-east-2",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        message = str(ctx.exception)
+        self.assertIn("secret_id: rp-mw/dev/shopify/admin_api_token", message)
 
     def test_main_exit_code(self) -> None:
         with mock.patch.object(
