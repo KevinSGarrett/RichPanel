@@ -343,10 +343,10 @@ def build_carrier_tracking_url(
     encoded_tracking = quote(tracking_value, safe="")
     if "fedex" in carrier_lower:
         return f"https://www.fedex.com/fedextrack/?trknbr={encoded_tracking}"
-    if "ups" in carrier_lower:
-        return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
     if "usps" in carrier_lower:
         return f"https://tools.usps.com/go/TrackConfirmAction?tLabels={encoded_tracking}"
+    if "ups" in carrier_lower:
+        return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
     if "dhl" in carrier_lower:
         return (
             "https://www.dhl.com/global-en/home/tracking/tracking-express.html"
@@ -359,6 +359,9 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
     """
     Construct a deterministic draft reply for tracking-present order status cases.
     Returns None if no tracking signal is present.
+
+    Note: when we can deterministically build a carrier tracking URL, we persist it
+    on the provided order_summary so downstream consumers can reuse it.
     """
     tracking_number = (
         order_summary.get("tracking_number")
