@@ -1158,12 +1158,12 @@ class ShopifyClient:
             hint = (
                 "Verify the Shopify app scopes; the token may lack required read scopes."
             )
-        if refresh_reason in {"missing_refresh_token", "refresh_disabled"}:
+        elif refresh_reason in {"missing_refresh_token", "refresh_disabled"}:
             hint = (
                 "Provide rp-mw/<env>/shopify/refresh_token and enable "
                 "SHOPIFY_REFRESH_ENABLED=true, or rotate the Admin API token."
             )
-        if refresh_reason == "legacy_token_source":
+        elif refresh_reason == "legacy_token_source":
             hint = (
                 "Move the token to rp-mw/<env>/shopify/admin_api_token "
                 "and retry; legacy tokens are not refreshed."
