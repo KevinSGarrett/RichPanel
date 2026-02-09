@@ -1158,6 +1158,11 @@ class ShopifyClient:
                 "Provide rp-mw/<env>/shopify/refresh_token and enable "
                 "SHOPIFY_REFRESH_ENABLED=true, or rotate the Admin API token."
             )
+        elif refresh_reason == "refresh_failed":
+            hint = (
+                "Refresh failed; verify client_id/client_secret or rotate the "
+                "Admin API token."
+            )
         elif refresh_reason == "legacy_token_source":
             hint = (
                 "Move the token to rp-mw/<env>/shopify/admin_api_token "
