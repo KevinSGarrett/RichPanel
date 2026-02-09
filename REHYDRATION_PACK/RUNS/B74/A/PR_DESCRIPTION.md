@@ -7,7 +7,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01KSsHqGWobqzUzRwCbrKY6a`  
+**Anthropic response id:** `msg_01J8QYgFMtNezMZwZzYoAiwW`  
 
 ### 1) Summary
 - Add Secrets Manager bot agent id resolution and enforce email-only `/send-message`.
