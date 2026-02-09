@@ -1713,6 +1713,9 @@ class BotAgentResolutionTests(unittest.TestCase):
 
 
 class BotAgentSecretLoadTests(unittest.TestCase):
+    def setUp(self) -> None:
+        _SECRET_VALUE_CACHE.clear()
+
     def test_load_secret_value_boto3_missing(self) -> None:
         with mock.patch.object(pipeline_module, "boto3", None):
             self.assertIsNone(_load_secret_value("secret-id"))
