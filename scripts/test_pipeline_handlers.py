@@ -1042,7 +1042,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(result["reason"], "missing_bot_agent_id")
         self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_prod_when_unset(self) -> None:
@@ -1068,7 +1068,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(result["reason"], "allowlist_blocked")
         self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_non_prod_when_set(self) -> None:
