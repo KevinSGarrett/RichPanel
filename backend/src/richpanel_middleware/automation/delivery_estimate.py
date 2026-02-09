@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from urllib.parse import quote
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -329,6 +330,31 @@ def compute_delivery_estimate(
     }
 
 
+def build_carrier_tracking_url(
+    carrier: str, tracking_number: str
+) -> Optional[str]:
+    if not carrier or not tracking_number:
+        return None
+    carrier_lower = str(carrier).strip().lower()
+    tracking_value = str(tracking_number).strip()
+    if not carrier_lower or not tracking_value:
+        return None
+
+    encoded_tracking = quote(tracking_value, safe="")
+    if "fedex" in carrier_lower:
+        return f"https://www.fedex.com/fedextrack/?trknbr={encoded_tracking}"
+    if "ups" in carrier_lower:
+        return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
+    if "usps" in carrier_lower:
+        return f"https://tools.usps.com/go/TrackConfirmAction?tLabels={encoded_tracking}"
+    if "dhl" in carrier_lower:
+        return (
+            "https://www.dhl.com/global-en/home/tracking/tracking-express.html"
+            f"?submit=1&tracking-id={encoded_tracking}"
+        )
+    return None
+
+
 def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Construct a deterministic draft reply for tracking-present order status cases.
@@ -356,6 +382,12 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
     # Require at least one tracking signal; don't fabricate.
     if not tracking_number and not tracking_url and not carrier:
         return None
+
+    if not tracking_url and tracking_number and carrier:
+        generated_url = build_carrier_tracking_url(carrier, tracking_number)
+        if generated_url:
+            tracking_url = generated_url
+            order_summary["tracking_url"] = generated_url
 
     tn = tracking_number or "(not available)"
     cr = carrier or "(not available)"
@@ -441,6 +473,7 @@ def build_no_tracking_reply(
 
 __all__ = [
     "add_business_days",
+    "build_carrier_tracking_url",
     "build_tracking_reply",
     "build_no_tracking_reply",
     "business_days_between",
