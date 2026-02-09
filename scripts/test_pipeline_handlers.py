@@ -830,6 +830,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
         self.assertIn("route-email-support-team", route_tags)
         self.assertIn("mw-outbound-blocked-missing-bot-author", route_tags)
+        self.assertIn("mw-escalated-human", route_tags)
 
     def test_outbound_email_operator_missing_routes_to_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -1701,6 +1702,9 @@ class BotAgentResolutionTests(unittest.TestCase):
     def test_extract_bot_agent_id_plain(self) -> None:
         self.assertEqual(_extract_bot_agent_id("agent-xyz"), "agent-xyz")
 
+    def test_extract_bot_agent_id_unknown_json(self) -> None:
+        self.assertIsNone(_extract_bot_agent_id("{\"other_key\": \"value\"}"))
+
 
 class BotAgentSecretLoadTests(unittest.TestCase):
     def test_load_secret_value_boto3_missing(self) -> None:
@@ -1723,7 +1727,7 @@ class BotAgentSecretLoadTests(unittest.TestCase):
     def test_load_secret_value_secret_binary(self) -> None:
         class _Client:
             def get_secret_value(self, SecretId: str) -> dict:
-                return {"SecretBinary": b"c2VjcmV0LWJpbmFyeQ=="}
+                return {"SecretBinary": b"secret-binary"}
 
         class _Boto3:
             def client(self, name: str):

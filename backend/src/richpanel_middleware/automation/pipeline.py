@@ -92,7 +92,11 @@ ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 # Follow-up after auto-reply should route to support without escalation.
-_ESCALATION_REASONS: set[str] = {"author_id_missing", "reply_close_failed"}
+_ESCALATION_REASONS: set[str] = {
+    "author_id_missing",
+    "missing_bot_agent_id",
+    "reply_close_failed",
+}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
@@ -214,7 +218,14 @@ def _load_secret_value(secret_id: str) -> Optional[str]:
         return None
     secret_value = response.get("SecretString")
     if secret_value is None and response.get("SecretBinary") is not None:
-        secret_value = base64.b64decode(response["SecretBinary"]).decode("utf-8")
+        secret_binary = response.get("SecretBinary")
+        if isinstance(secret_binary, (bytes, bytearray)):
+            secret_value = secret_binary.decode("utf-8")
+        else:
+            try:
+                secret_value = base64.b64decode(secret_binary).decode("utf-8")
+            except (TypeError, ValueError):
+                return None
     if not secret_value:
         return None
     return str(secret_value)
@@ -232,7 +243,7 @@ def _extract_bot_agent_id(secret_value: str) -> Optional[str]:
             value = payload.get(key)
             if isinstance(value, str) and value.strip():
                 return _normalize_optional_text(value)
-    return _normalize_optional_text(secret_value)
+    return None
 
 
 def _resolve_bot_agent_id(
@@ -676,50 +687,6 @@ def _safe_ticket_comment_operator_fetch(
     ticket_payload = ticket_obj if isinstance(ticket_obj, dict) else payload
     comments = ticket_payload.get("comments") if isinstance(ticket_payload, dict) else None
     return _latest_comment_is_operator(comments)
-
-
-def _user_id_from_payload(user: Dict[str, Any]) -> Optional[str]:
-    return _normalize_optional_text(
-        user.get("id") or user.get("user_id") or user.get("userId")
-    )
-
-
-def _iter_role_values(user: Dict[str, Any]) -> List[Any]:
-    values: List[Any] = []
-    for key in ("role", "type", "user_type", "userType"):
-        raw = user.get(key)
-        if isinstance(raw, dict):
-            for subkey in ("name", "type", "role"):
-                if subkey in raw:
-                    values.append(raw.get(subkey))
-        elif isinstance(raw, list):
-            values.extend(raw)
-        else:
-            values.append(raw)
-    return values
-
-
-def _user_is_agent(user: Dict[str, Any]) -> bool:
-    for value in _iter_role_values(user):
-        text = _normalize_optional_text(value)
-        if not text:
-            continue
-        lowered = text.lower()
-        if "agent" in lowered or "operator" in lowered:
-            return True
-    return False
-
-
-def _extract_users(payload: Any) -> List[Dict[str, Any]]:
-    if isinstance(payload, dict):
-        for key in ("users", "data", "agents", "items"):
-            candidates = payload.get(key)
-            if isinstance(candidates, list):
-                return [user for user in candidates if isinstance(user, dict)]
-        return []
-    if isinstance(payload, list):
-        return [user for user in payload if isinstance(user, dict)]
-    return []
 
 
 def _resolve_target_ticket_id(
@@ -1270,11 +1237,14 @@ def execute_order_status_reply(
             executor=executor,
             allow_network=allow_network,
         )
-        if channel_detection_source == "unknown":
-            channel_detected = _classify_channel(ticket_channel)
-            channel_detection_source = (
-                "fetched_ticket" if ticket_channel else "unknown"
-            )
+        resolved_channel = payload_channel or ticket_channel
+        channel_detected = _classify_channel(resolved_channel)
+        if payload_channel:
+            channel_detection_source = "webhook"
+        elif ticket_channel:
+            channel_detection_source = "fetched_ticket"
+        else:
+            channel_detection_source = "unknown"
 
         def _route_email_support(
             reason: str,
@@ -1336,8 +1306,6 @@ def execute_order_status_reply(
             return result
 
         ticket_status = ticket_metadata.status
-        resolved_channel = ticket_channel or payload_channel
-        channel_detected = _classify_channel(resolved_channel)
         is_email_channel = channel_detected == "email"
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
