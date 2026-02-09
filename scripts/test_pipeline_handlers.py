@@ -825,8 +825,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertEqual(len(route_calls), 1)
         route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
         self.assertIn("route-email-support-team", route_tags)
-        self.assertIn("mw-escalated-human", route_tags)
-        self.assertIn("mw-send-message-author-missing", route_tags)
+        self.assertIn("mw-outbound-blocked-missing-bot-author", route_tags)
 
     def test_outbound_email_operator_missing_routes_to_support(self) -> None:
         envelope, plan = self._build_order_status_plan()
