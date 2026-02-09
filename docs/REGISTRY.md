@@ -269,6 +269,7 @@ Legend:
 - 📎 [Richpanel Reply Paths](08_Engineering/Richpanel_Reply_Paths.md)  (`08_Engineering/Richpanel_Reply_Paths.md`)
 - 📎 [Secrets and Environments](08_Engineering/Secrets_and_Environments.md)  (`08_Engineering/Secrets_and_Environments.md`)
 - 📎 [Shopify Token Truth Table](08_Engineering/Shopify_Token_Truth_Table.md)  (`08_Engineering/Shopify_Token_Truth_Table.md`)
+- 📎 [Tracking Link Generation](08_Engineering/Tracking_Link_Generation.md)  (`08_Engineering/Tracking_Link_Generation.md`)
 
 ## 08_Observability_Analytics
 

@@ -13995,6 +13995,10 @@
     {
       "path": "08_Engineering/Secrets_and_Environments.md",
       "anchor": "overview"
+    },
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "overview"
     }
   ],
   "channel detection": [
@@ -14295,6 +14299,30 @@
     {
       "path": "08_Engineering/Shopify_Token_Truth_Table.md",
       "anchor": "operational-workflow-do-not-re-add-secrets-blindly"
+    }
+  ],
+  "tracking link generation": [
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "tracking-link-generation"
+    }
+  ],
+  "supported carriers and templates": [
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "supported-carriers-and-templates"
+    }
+  ],
+  "fallback behavior": [
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "fallback-behavior"
+    }
+  ],
+  "pii safety": [
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "pii-safety"
     }
   ],
   "analytics data model and exports (wave 08)": [

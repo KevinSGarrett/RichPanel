@@ -12850,6 +12850,36 @@
     ]
   },
   {
+    "path": "08_Engineering/Tracking_Link_Generation.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "Tracking Link Generation",
+        "anchor": "tracking-link-generation"
+      },
+      {
+        "level": 2,
+        "text": "Overview",
+        "anchor": "overview"
+      },
+      {
+        "level": 2,
+        "text": "Supported carriers and templates",
+        "anchor": "supported-carriers-and-templates"
+      },
+      {
+        "level": 2,
+        "text": "Fallback behavior",
+        "anchor": "fallback-behavior"
+      },
+      {
+        "level": 2,
+        "text": "PII safety",
+        "anchor": "pii-safety"
+      }
+    ]
+  },
+  {
     "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
     "outline": [
       {

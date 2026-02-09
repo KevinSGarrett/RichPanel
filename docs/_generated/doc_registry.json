@@ -2090,6 +2090,16 @@
     "last_updated": ""
   },
   {
+    "path": "08_Engineering/Tracking_Link_Generation.md",
+    "title": "Tracking Link Generation",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 170,
+    "approx_tokens": 221,
+    "last_updated": ""
+  },
+  {
     "path": "08_Observability_Analytics/Analytics_Data_Model_and_Exports.md",
     "title": "Analytics Data Model and Exports (Wave 08)",
     "section": "08_Observability_Analytics",
@@ -4015,8 +4025,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10864,
-    "approx_tokens": 14123,
+    "word_count": 10873,
+    "approx_tokens": 14134,
     "last_updated": ""
   },
   {
