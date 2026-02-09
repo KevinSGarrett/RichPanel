@@ -55,7 +55,7 @@ Key comparisons are embedded in:
 
 ## Tests
 ```
-python -m pytest backend/tests/test_order_status_regression_guard.py
+python scripts/test_order_status_regression_guard.py
 ```
 
 ## Docs Update

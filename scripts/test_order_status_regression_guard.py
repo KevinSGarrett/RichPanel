@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import os
 import sys
+import unittest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -22,7 +23,9 @@ from richpanel_middleware.automation.order_status_intent import (  # noqa: E402
 from richpanel_middleware.integrations.openai import ChatCompletionResponse  # noqa: E402
 
 
-FIXTURES_PATH = ROOT / "backend" / "tests" / "fixtures" / "order_status_regression_samples.jsonl"
+FIXTURES_PATH = (
+    ROOT / "backend" / "tests" / "fixtures" / "order_status_regression_samples.jsonl"
+)
 
 
 @dataclass
@@ -75,33 +78,41 @@ def _build_response(*, is_order_status: bool, order_number: str | None) -> str:
     return json.dumps(payload)
 
 
-def test_regression_guard_extracts_order_numbers() -> None:
-    for sample in _load_samples():
-        if sample.expected_order_number:
-            extracted = extract_order_number_from_text(sample.text)
-            assert (
-                extracted == sample.expected_order_number
-            ), f"{sample.sample_id}: expected {sample.expected_order_number}, got {extracted}"
+class OrderStatusRegressionGuardTests(unittest.TestCase):
+    def test_extracts_order_numbers(self) -> None:
+        for sample in _load_samples():
+            if sample.expected_order_number:
+                extracted = extract_order_number_from_text(sample.text)
+                self.assertEqual(
+                    extracted,
+                    sample.expected_order_number,
+                    msg=f"{sample.sample_id}: expected {sample.expected_order_number}, got {extracted}",
+                )
 
-
-def test_regression_guard_intent_classification() -> None:
-    for sample in _load_samples():
-        client = _StubClient(
-            _build_response(
-                is_order_status=sample.expected_is_order_status,
-                order_number=sample.expected_order_number,
+    def test_intent_classification(self) -> None:
+        for sample in _load_samples():
+            client = _StubClient(
+                _build_response(
+                    is_order_status=sample.expected_is_order_status,
+                    order_number=sample.expected_order_number,
+                )
             )
-        )
-        artifact = classify_order_status_intent(
-            sample.text,
-            conversation_id=f"conv-{sample.sample_id}",
-            event_id=f"evt-{sample.sample_id}",
-            safe_mode=False,
-            automation_enabled=True,
-            allow_network=True,
-            outbound_enabled=True,
-            client=client,
-        )
-        assert artifact.result is not None
-        assert artifact.result.is_order_status is sample.expected_is_order_status
-        assert artifact.accepted is sample.expected_is_order_status
+            artifact = classify_order_status_intent(
+                sample.text,
+                conversation_id=f"conv-{sample.sample_id}",
+                event_id=f"evt-{sample.sample_id}",
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                client=client,
+            )
+            self.assertIsNotNone(artifact.result)
+            self.assertEqual(
+                artifact.result.is_order_status, sample.expected_is_order_status
+            )
+            self.assertEqual(artifact.accepted, sample.expected_is_order_status)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -11,7 +11,7 @@
 
 ## Tests / Fixtures
 - `backend/tests/fixtures/order_status_regression_samples.jsonl`
-- `backend/tests/test_order_status_regression_guard.py`
+- `scripts/test_order_status_regression_guard.py`
 
 ## Docs
 - `docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`

@@ -31,9 +31,13 @@ Richpanel 429 retries: 0
 
 ## Regression Guard Tests
 ```
-python -m pytest backend/tests/test_order_status_regression_guard.py
+python scripts/test_order_status_regression_guard.py
 ```
 Result:
 ```
-2 passed in 0.24s
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.00s
+
+OK
 ```
