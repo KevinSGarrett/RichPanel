@@ -104,6 +104,117 @@ class AwsSecretsPreflightTests(unittest.TestCase):
                     )
         self.assertIn("wrong account", str(ctx.exception))
 
+    def test_preflight_boto3_unavailable(self) -> None:
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=None):
+            payload = aws_secrets_preflight.run_aws_secrets_preflight(
+                env_name="dev",
+                region="us-east-2",
+                session=None,
+                fail_on_error=False,
+            )
+        self.assertEqual(payload["overall_status"], "FAIL")
+        self.assertEqual(payload["error"], "boto3_unavailable")
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=None):
+            with self.assertRaises(SystemExit):
+                aws_secrets_preflight.run_aws_secrets_preflight(
+                    env_name="dev",
+                    region="us-east-2",
+                    session=None,
+                    fail_on_error=True,
+                )
+
+    def test_preflight_region_mismatch_message(self) -> None:
+        session = _DummySession()
+        account_result = aws_account_preflight.AccountPreflightResult(
+            env="dev",
+            region="us-west-1",
+            aws_account_id="151124909266",
+            aws_arn=None,
+            expected_account_id="151124909266",
+            expected_region="us-east-2",
+            ok=False,
+            error="region_mismatch(expected=us-east-2,actual=us-west-1)",
+        )
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=SimpleNamespace()):
+            with mock.patch.object(
+                aws_secrets_preflight, "run_account_preflight", return_value=account_result
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    aws_secrets_preflight.run_aws_secrets_preflight(
+                        env_name="dev",
+                        region="us-west-1",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        self.assertIn("wrong region", str(ctx.exception))
+
+    def test_preflight_unknown_env_message(self) -> None:
+        session = _DummySession()
+        account_result = aws_account_preflight.AccountPreflightResult(
+            env="unknown",
+            region="us-east-2",
+            aws_account_id=None,
+            aws_arn=None,
+            expected_account_id=None,
+            expected_region="us-east-2",
+            ok=False,
+            error="unknown_env",
+        )
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=SimpleNamespace()):
+            with mock.patch.object(
+                aws_secrets_preflight, "run_account_preflight", return_value=account_result
+            ):
+                with self.assertRaises(SystemExit) as ctx:
+                    aws_secrets_preflight.run_aws_secrets_preflight(
+                        env_name="unknown",
+                        region="us-east-2",
+                        session=session,
+                        fail_on_error=True,
+                    )
+        self.assertIn("unknown env", str(ctx.exception))
+
+    def test_preflight_writes_output_and_extra_secret(self) -> None:
+        session = _DummySession()
+        with mock.patch.object(aws_secrets_preflight, "boto3", new=SimpleNamespace()):
+            with mock.patch.object(
+                aws_secrets_preflight,
+                "run_account_preflight",
+                return_value=aws_account_preflight.AccountPreflightResult(
+                    env="dev",
+                    region="us-east-2",
+                    aws_account_id="151124909266",
+                    aws_arn=None,
+                    expected_account_id="151124909266",
+                    expected_region="us-east-2",
+                    ok=True,
+                    error=None,
+                ),
+            ):
+                import tempfile
+                import os
+
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    out_path = os.path.join(tmpdir, "payload.json")
+                    payload = aws_secrets_preflight.run_aws_secrets_preflight(
+                        env_name="dev",
+                        region="us-east-2",
+                        session=session,
+                        require_secrets=["rp-mw/dev/shopify/custom_extra"],
+                        out_path=out_path,
+                        fail_on_error=False,
+                    )
+                    self.assertTrue(os.path.exists(out_path))
+        self.assertIn("rp-mw/dev/shopify/custom_extra", payload["secrets"])
+
+    def test_main_exit_code(self) -> None:
+        with mock.patch.object(
+            aws_secrets_preflight,
+            "run_aws_secrets_preflight",
+            return_value={"overall_status": "PASS"},
+        ):
+            with mock.patch("sys.argv", ["aws_secrets_preflight.py", "--env", "dev"]):
+                self.assertEqual(aws_secrets_preflight.main(), 0)
+
 
 def main() -> int:  # pragma: no cover
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(AwsSecretsPreflightTests)
