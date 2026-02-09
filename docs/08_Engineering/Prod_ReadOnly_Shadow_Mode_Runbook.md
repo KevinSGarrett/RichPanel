@@ -242,6 +242,20 @@ Use a deterministic proof instead of waiting:
   - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_order_status_report.json`
   - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_order_status_report.md`
 
+### Prod shadow canary (200 tickets)
+
+Use this canary to guard against classification or extraction regressions with minimal load.
+
+- Sample size: 200 (use a pre-generated `--ticket-refs-path` if list endpoints 403).
+- Rate limit: `RICHPANEL_RATE_LIMIT_RPS=1.0` plus `--batch-size 25 --batch-delay-seconds 1`.
+- Output artifacts:
+  - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_canary_200.json`
+  - `REHYDRATION_PACK/RUNS/<RUN_ID>/C/PROOF/prod_shadow_canary_200.md`
+- Compare against baseline metrics:
+  - `order_status_rate`, `match_rate`, `tracking_present_rate`, `eta_available_rate`
+  - `no_match_count`, `missing_order_number_count`, Richpanel 429 retries + top endpoints
+- Mark **RED** if any metric regresses by >20% relative vs baseline.
+
 #### B61/C: Enhanced Diagnostic Metrics
 
 The shadow eval report now includes **diagnostic and actionable metrics** to help identify drift and performance issues:
