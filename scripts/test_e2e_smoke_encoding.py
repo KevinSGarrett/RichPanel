@@ -38,6 +38,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
+    _read_only_guard_active,
+    _resolve_bot_agent_id_source,
     _extract_latest_comment_body,
     _comment_author_id,
     _resolve_requirement_flags,
@@ -1913,6 +1915,69 @@ class BotAgentIdLoaderTests(unittest.TestCase):
             ),
             "plain-bot",
         )
+
+
+class BotAgentIdSourceTests(unittest.TestCase):
+    def test_resolve_bot_agent_id_source_env(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_BOT_AGENT_ID": "env-bot"}):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=None
+                ),
+                "env",
+            )
+
+    def test_resolve_bot_agent_id_source_secrets(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"bot_agent_id\":\"secret-bot\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=_Session()
+                ),
+                "secrets_manager",
+            )
+
+    def test_resolve_bot_agent_id_source_missing(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "   "}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=_Session()
+                ),
+                "missing",
+            )
+
+
+class ReadOnlyGuardTests(unittest.TestCase):
+    def test_read_only_guard_env_override(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_write_disabled(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_WRITE_DISABLED": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_prod_env(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(_read_only_guard_active("prod"))
+
+    def test_read_only_guard_false_in_dev(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(_read_only_guard_active("dev"))
 
     def test_load_bot_agent_id_unrecognized_json_returns_raw(self) -> None:
         class _SecretsClient:
