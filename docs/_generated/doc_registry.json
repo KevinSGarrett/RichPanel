@@ -1920,6 +1920,16 @@
     "last_updated": ""
   },
   {
+    "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+    "title": "AWS Account Resource Map",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 388,
+    "approx_tokens": 504,
+    "last_updated": "2026-02-08"
+  },
+  {
     "path": "08_Engineering/Branch_Protection_and_Merge_Settings.md",
     "title": "Branch Protection and Merge Settings",
     "section": "08_Engineering",
@@ -2065,8 +2075,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2728,
-    "approx_tokens": 3546,
+    "word_count": 2753,
+    "approx_tokens": 3578,
     "last_updated": "2026-01-27"
   },
   {
@@ -4005,8 +4015,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10854,
-    "approx_tokens": 14110,
+    "word_count": 10864,
+    "approx_tokens": 14123,
     "last_updated": ""
   },
   {

@@ -12325,6 +12325,92 @@
       "anchor": "faqs"
     }
   ],
+  "aws account resource map": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "aws-account-resource-map"
+    }
+  ],
+  "account → environment map": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "account-environment-map"
+    }
+  ],
+  "api gateway + lambda ownership": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "api-gateway-lambda-ownership"
+    }
+  ],
+  "dev (account 151124909266)": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "dev-account-151124909266"
+    },
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "dev-account-151124909266"
+    }
+  ],
+  "prod (account 878145708918)": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "prod-account-878145708918"
+    },
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "prod-account-878145708918"
+    }
+  ],
+  "secrets manager paths (authoritative)": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "secrets-manager-paths-authoritative"
+    }
+  ],
+  "cursor aws profiles": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "cursor-aws-profiles"
+    }
+  ],
+  "how to verify": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "how-to-verify"
+    }
+  ],
+  "confirm account + region": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "confirm-account-region"
+    }
+  ],
+  "confirm api gateway + stack outputs": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "confirm-api-gateway-stack-outputs"
+    }
+  ],
+  "confirm api gateway name → id mapping": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "confirm-api-gateway-name-id-mapping"
+    }
+  ],
+  "confirm lambda ownership": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "confirm-lambda-ownership"
+    }
+  ],
+  "confirm secrets manager paths": [
+    {
+      "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+      "anchor": "confirm-secrets-manager-paths"
+    }
+  ],
   "branch protection and merge settings": [
     {
       "path": "08_Engineering/Branch_Protection_and_Merge_Settings.md",
