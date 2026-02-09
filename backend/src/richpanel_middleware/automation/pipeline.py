@@ -1198,6 +1198,7 @@ def execute_order_status_reply(
     order_action = _find_order_status_action(plan)
     payload = envelope.payload if isinstance(envelope.payload, dict) else {}
     env_name, _ = resolve_env_name()
+    is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
     read_only_guard_active = _read_only_guard_active(env_name)
     payload_channel = _extract_ticket_channel_from_payload(payload)
     channel_detected = _classify_channel(payload_channel)
