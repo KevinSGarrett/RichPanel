@@ -38,6 +38,8 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _business_day_anchor,
     _build_followup_payload,
     _prepare_followup_proof,
+    _read_only_guard_active,
+    _resolve_bot_agent_id_source,
     _extract_latest_comment_body,
     _comment_author_id,
     _resolve_requirement_flags,
@@ -1254,6 +1256,10 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertEqual(payload["result"]["classification"], "SKIP")
         self.assertIn("proof_fields", payload)
         self.assertIn("ticket_channel", payload["proof_fields"])
+        self.assertIn("channel_detected", payload["proof_fields"])
+        self.assertIn("channel_detection_source", payload["proof_fields"])
+        self.assertIn("bot_agent_id_source", payload["proof_fields"])
+        self.assertIn("read_only_guard_active", payload["proof_fields"])
         self.assertIn("intent_after", payload["proof_fields"])
         self.assertIsNone(payload["proof_fields"]["outbound_attempted"])
         self.assertIn("outbound_send_message_status", payload["proof_fields"])
@@ -1265,6 +1271,7 @@ class SkipProofPayloadTests(unittest.TestCase):
         self.assertIn("reply_contains_tracking_number_like", payload["proof_fields"])
         self.assertIn("reply_contains_eta_date_like", payload["proof_fields"])
         self.assertIn("latest_comment_is_operator", payload["proof_fields"])
+        self.assertIn("is_operator_reply", payload["proof_fields"])
         self.assertIn("latest_comment_source", payload["proof_fields"])
         self.assertIn("order_match_method", payload["proof_fields"])
         self.assertIn("order_match_method_raw", payload["proof_fields"])
@@ -1908,6 +1915,69 @@ class BotAgentIdLoaderTests(unittest.TestCase):
             ),
             "plain-bot",
         )
+
+
+class BotAgentIdSourceTests(unittest.TestCase):
+    def test_resolve_bot_agent_id_source_env(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_BOT_AGENT_ID": "env-bot"}):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=None
+                ),
+                "env",
+            )
+
+    def test_resolve_bot_agent_id_source_secrets(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "{\"bot_agent_id\":\"secret-bot\"}"}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=_Session()
+                ),
+                "secrets_manager",
+            )
+
+    def test_resolve_bot_agent_id_source_missing(self) -> None:
+        class _SecretsClient:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "   "}
+
+        class _Session:
+            def client(self, name: str, region_name: str | None = None):
+                return _SecretsClient()
+
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                _resolve_bot_agent_id_source(
+                    env_name="dev", region="us-east-2", session=_Session()
+                ),
+                "missing",
+            )
+
+
+class ReadOnlyGuardTests(unittest.TestCase):
+    def test_read_only_guard_env_override(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_write_disabled(self) -> None:
+        with patch.dict(os.environ, {"RICHPANEL_WRITE_DISABLED": "true"}):
+            self.assertTrue(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_prod_env(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(_read_only_guard_active("prod"))
+
+    def test_read_only_guard_false_in_dev(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(_read_only_guard_active("dev"))
 
     def test_load_bot_agent_id_unrecognized_json_returns_raw(self) -> None:
         class _SecretsClient:
@@ -4054,6 +4124,8 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(CommentAuthorIdTests))
     suite.addTests(loader.loadTestsFromTestCase(BotAgentIdLoaderTests))
+    suite.addTests(loader.loadTestsFromTestCase(BotAgentIdSourceTests))
+    suite.addTests(loader.loadTestsFromTestCase(ReadOnlyGuardTests))
     suite.addTests(loader.loadTestsFromTestCase(AuthorMatchResolverTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodFinalizerTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodResolverTests))

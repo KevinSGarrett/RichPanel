@@ -402,7 +402,15 @@ class WorkerHandlerFlagWiringTests(unittest.TestCase):
         self.assertIsNone(worker._resolve_outbound_evidence("nope"))
         self.assertEqual(
             worker._resolve_outbound_evidence({"sent": "yes", "responses": "bad"}),
-            {"sent": None, "reason": None, "responses": []},
+            {
+                "sent": None,
+                "reason": None,
+                "responses": [],
+                "channel_detected": None,
+                "channel_detection_source": None,
+                "bot_agent_id_source": None,
+                "read_only_guard_active": None,
+            },
         )
 
     def test_record_outbound_evidence_skips_when_invalid(self) -> None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
@@ -10,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
-from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name
+from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name, _to_bool
 from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
@@ -56,6 +57,17 @@ from richpanel_middleware.automation.prompts import (
 )
 from richpanel_middleware.ingest.envelope import EventEnvelope, normalize_envelope
 
+try:
+    import boto3  # type: ignore
+    from botocore.exceptions import BotoCoreError, ClientError  # type: ignore
+except ImportError:  # pragma: no cover
+    boto3 = None  # type: ignore
+
+    class _FallbackBotoError(Exception):
+        """Placeholder to allow offline tests without boto3."""
+
+    BotoCoreError = ClientError = _FallbackBotoError  # type: ignore
+
 LOGGER = logging.getLogger(__name__)
 LOOP_PREVENTION_TAG = "mw-auto-replied"
 ORDER_STATUS_REPLY_TAG = "mw-order-status-answered"
@@ -66,7 +78,6 @@ REPLY_SENT_TAG = "mw-reply-sent"
 OUTBOUND_PATH_SEND_MESSAGE_TAG = "mw-outbound-path-send-message"
 OUTBOUND_PATH_COMMENT_TAG = "mw-outbound-path-comment"
 SEND_MESSAGE_FAILED_TAG = "mw-send-message-failed"
-SEND_MESSAGE_AUTHOR_MISSING_TAG = "mw-send-message-author-missing"
 SEND_MESSAGE_CLOSE_FAILED_TAG = "mw-send-message-close-failed"
 SEND_MESSAGE_OPERATOR_MISSING_TAG = "mw-send-message-operator-missing"
 OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
@@ -80,20 +91,20 @@ ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
 # Follow-up after auto-reply should route to support without escalation.
-_ESCALATION_REASONS: set[str] = {"author_id_missing", "reply_close_failed"}
+_ESCALATION_REASONS: set[str] = {"missing_bot_agent_id", "reply_close_failed"}
 _SKIP_REASON_TAGS = {
     "already_resolved": SKIP_RESOLVED_TAG,
     "followup_after_auto_reply": SKIP_FOLLOWUP_TAG,
     "status_read_failed": SKIP_STATUS_READ_FAILED_TAG,
-    "author_id_missing": SEND_MESSAGE_AUTHOR_MISSING_TAG,
     "send_message_failed": SEND_MESSAGE_FAILED_TAG,
     "send_message_operator_missing": SEND_MESSAGE_OPERATOR_MISSING_TAG,
     "reply_close_failed": SEND_MESSAGE_CLOSE_FAILED_TAG,
     "allowlist_blocked": OUTBOUND_BLOCKED_ALLOWLIST_TAG,
-    "bot_author_missing": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
+    "missing_bot_agent_id": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
-_AUTHOR_ID_CACHE: Dict[str, Any] = {"author_id": None, "strategy": None, "expires_at": 0.0}
-_AUTHOR_ID_CACHE_TTL_SECONDS = 900.0
+_READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
+_SECRET_VALUE_CACHE_TTL_SECONDS = 900
+_SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -141,6 +152,17 @@ def _normalize_ticket_channel(value: Any) -> Optional[str]:
     return normalized.lower()
 
 
+def _classify_channel(value: Optional[str]) -> str:
+    if not value:
+        return "unknown"
+    normalized = value.strip().lower()
+    if normalized == "email":
+        return "email"
+    if "chat" in normalized:
+        return "chat"
+    return "unknown"
+
+
 def _extract_ticket_channel_from_payload(payload: Any) -> Optional[str]:
     if not isinstance(payload, dict):
         return None
@@ -159,6 +181,88 @@ def _extract_ticket_channel_from_payload(payload: Any) -> Optional[str]:
             if channel:
                 return channel
     return None
+
+
+def _read_only_guard_active(env_name: str) -> bool:
+    env_override = os.environ.get("RICHPANEL_READ_ONLY") or os.environ.get(
+        "RICH_PANEL_READ_ONLY"
+    )
+    if env_override is not None:
+        return _to_bool(env_override)
+    write_disabled = os.environ.get("RICHPANEL_WRITE_DISABLED")
+    if write_disabled is not None:
+        return _to_bool(write_disabled)
+    return env_name in _READ_ONLY_ENVIRONMENTS
+
+
+def _load_secret_value(secret_id: str) -> Optional[str]:
+    now = time.time()
+    cached = _SECRET_VALUE_CACHE.get(secret_id)
+    if cached and cached.get("expires_at", 0.0) > now:
+        return cached.get("value")
+    if boto3 is None:
+        return None
+    try:
+        client = boto3.client("secretsmanager")
+        response = client.get_secret_value(SecretId=secret_id)
+    except (BotoCoreError, ClientError):
+        if cached:
+            return cached.get("value")
+        return None
+    secret_value = response.get("SecretString")
+    if secret_value is None and response.get("SecretBinary") is not None:
+        secret_binary = response.get("SecretBinary")
+        if isinstance(secret_binary, (bytes, bytearray)):
+            try:
+                secret_value = secret_binary.decode("utf-8")
+            except (UnicodeDecodeError, ValueError):
+                return None
+        else:
+            try:
+                secret_value = base64.b64decode(secret_binary).decode("utf-8")
+            except (TypeError, ValueError):
+                return None
+    if not secret_value:
+        return None
+    normalized = str(secret_value)
+    _SECRET_VALUE_CACHE[secret_id] = {
+        "value": normalized,
+        "expires_at": now + _SECRET_VALUE_CACHE_TTL_SECONDS,
+    }
+    return normalized
+
+
+def _extract_bot_agent_id(secret_value: str) -> Optional[str]:
+    try:
+        payload = json.loads(secret_value)
+    except (TypeError, ValueError):
+        return _normalize_optional_text(secret_value)
+    if isinstance(payload, (str, int, float)):
+        return _normalize_optional_text(payload)
+    if isinstance(payload, dict):
+        for key in ("bot_agent_id", "agent_id", "id"):
+            value = payload.get(key)
+            if value is not None:
+                return _normalize_optional_text(value)
+    return None
+
+
+def _resolve_bot_agent_id(
+    *, env_name: str, allow_network: bool
+) -> Tuple[Optional[str], str]:
+    env_agent_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AGENT_ID"))
+    if env_agent_id:
+        return env_agent_id, "env"
+    if not allow_network:
+        return None, "missing"
+    secret_id = f"rp-mw/{env_name}/richpanel/bot_agent_id"
+    secret_value = _load_secret_value(secret_id)
+    if not secret_value:
+        return None, "missing"
+    agent_id = _extract_bot_agent_id(secret_value)
+    if not agent_id:
+        return None, "missing"
+    return agent_id, "secrets_manager"
 
 
 def _parse_allowlist_entries(value: Optional[str], *, strip_at: bool = False) -> set[str]:
@@ -584,117 +688,6 @@ def _safe_ticket_comment_operator_fetch(
     ticket_payload = ticket_obj if isinstance(ticket_obj, dict) else payload
     comments = ticket_payload.get("comments") if isinstance(ticket_payload, dict) else None
     return _latest_comment_is_operator(comments)
-
-
-def _user_id_from_payload(user: Dict[str, Any]) -> Optional[str]:
-    return _normalize_optional_text(
-        user.get("id") or user.get("user_id") or user.get("userId")
-    )
-
-
-def _iter_role_values(user: Dict[str, Any]) -> List[Any]:
-    values: List[Any] = []
-    for key in ("role", "type", "user_type", "userType"):
-        raw = user.get(key)
-        if isinstance(raw, dict):
-            for subkey in ("name", "type", "role"):
-                if subkey in raw:
-                    values.append(raw.get(subkey))
-        elif isinstance(raw, list):
-            values.extend(raw)
-        else:
-            values.append(raw)
-    return values
-
-
-def _user_is_agent(user: Dict[str, Any]) -> bool:
-    for value in _iter_role_values(user):
-        text = _normalize_optional_text(value)
-        if not text:
-            continue
-        lowered = text.lower()
-        if "agent" in lowered or "operator" in lowered:
-            return True
-    return False
-
-
-def _extract_users(payload: Any) -> List[Dict[str, Any]]:
-    if isinstance(payload, dict):
-        for key in ("users", "data", "agents", "items"):
-            candidates = payload.get(key)
-            if isinstance(candidates, list):
-                return [user for user in candidates if isinstance(user, dict)]
-        return []
-    if isinstance(payload, list):
-        return [user for user in payload if isinstance(user, dict)]
-    return []
-
-
-def _resolve_author_id(
-    *,
-    executor: RichpanelExecutor,
-    allow_network: bool,
-) -> Tuple[Optional[str], str]:
-    env_agent_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AGENT_ID"))
-    if env_agent_id:
-        return env_agent_id, "env:bot_agent_id"
-    env_author_id = _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AUTHOR_ID"))
-    if env_author_id:
-        return env_author_id, "env:bot_author_id"
-    if not allow_network:
-        return None, "network_disabled"
-    cached_author_id = _normalize_optional_text(_AUTHOR_ID_CACHE.get("author_id"))
-    cached_expires_at = _AUTHOR_ID_CACHE.get("expires_at")
-    if cached_author_id and isinstance(cached_expires_at, (int, float)):
-        if cached_expires_at > time.time():
-            cached_strategy = _AUTHOR_ID_CACHE.get("strategy")
-            cached_label = f"cache:{cached_strategy}" if cached_strategy else "cache"
-            return cached_author_id, cached_label
-    try:
-        response = executor.execute(
-            "GET",
-            "/v1/users",
-            dry_run=not allow_network,
-            log_body_excerpt=False,
-        )
-    except (RichpanelRequestError, SecretLoadError, TransportError):
-        return None, "user_fetch_failed"
-    if response.dry_run:
-        return None, "dry_run"
-    if response.status_code < 200 or response.status_code >= 300:
-        return None, "user_fetch_failed"
-
-    users = _extract_users(response.json())
-    if not users:
-        return None, "user_list_empty"
-
-    for user in users:
-        user_id = _user_id_from_payload(user)
-        if not user_id:
-            continue
-        if _user_is_agent(user):
-            _AUTHOR_ID_CACHE.update(
-                {
-                    "author_id": user_id,
-                    "strategy": "role_match",
-                    "expires_at": time.time() + _AUTHOR_ID_CACHE_TTL_SECONDS,
-                }
-            )
-            return user_id, "role_match"
-
-    for user in users:
-        user_id = _user_id_from_payload(user)
-        if user_id:
-            _AUTHOR_ID_CACHE.update(
-                {
-                    "author_id": user_id,
-                    "strategy": "first_available",
-                    "expires_at": time.time() + _AUTHOR_ID_CACHE_TTL_SECONDS,
-                }
-            )
-            return user_id, "first_available"
-
-    return None, "user_id_missing"
 
 
 def _resolve_target_ticket_id(
@@ -1134,6 +1127,7 @@ def _outbound_block_reason(
     automation_enabled: bool,
     allow_network: bool,
     has_action: bool,
+    read_only_guard_active: bool,
 ) -> Optional[str]:
     if not outbound_enabled:
         return "outbound_disabled"
@@ -1141,6 +1135,8 @@ def _outbound_block_reason(
         return "safe_mode"
     if not automation_enabled:
         return "automation_disabled"
+    if read_only_guard_active:
+        return "read_only_guard"
     if not allow_network:
         return "network_disabled"
     if not has_action:
@@ -1169,14 +1165,34 @@ def execute_order_status_reply(
     """
     order_action = _find_order_status_action(plan)
     payload = envelope.payload if isinstance(envelope.payload, dict) else {}
+    env_name, _ = resolve_env_name()
+    is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
+    read_only_guard_active = _read_only_guard_active(env_name)
+    payload_channel = _extract_ticket_channel_from_payload(payload)
+    channel_detected = _classify_channel(payload_channel)
+    channel_detection_source = "webhook" if payload_channel else "unknown"
+    bot_agent_id_source = "missing"
+    def _metadata() -> Dict[str, Any]:
+        return {
+            "channel_detected": channel_detected,
+            "channel_detection_source": channel_detection_source,
+            "bot_agent_id_source": bot_agent_id_source,
+            "read_only_guard_active": read_only_guard_active,
+        }
     reason = _outbound_block_reason(
         outbound_enabled=outbound_enabled,
         safe_mode=safe_mode,
         automation_enabled=automation_enabled,
         allow_network=allow_network,
         has_action=order_action is not None,
+        read_only_guard_active=read_only_guard_active,
     )
     if reason and reason != "missing_order_status_action":
+        dry_run_would_send_message = bool(
+            channel_detected == "email"
+            and order_action is not None
+            and reason in {"outbound_disabled", "read_only_guard"}
+        )
         LOGGER.info(
             "automation.order_status_reply.skip",
             extra={
@@ -1185,9 +1201,19 @@ def execute_order_status_reply(
                 "reason": reason,
                 "outbound_enabled": outbound_enabled,
                 "allow_network": allow_network,
+                "channel_detected": channel_detected,
+                "channel_detection_source": channel_detection_source,
+                "bot_agent_id_source": bot_agent_id_source,
+                "read_only_guard_active": read_only_guard_active,
+                "dry_run_would_send_message": dry_run_would_send_message,
             },
         )
-        return {"sent": False, "reason": reason}
+        return {
+            "sent": False,
+            "reason": reason,
+            "dry_run_would_send_message": dry_run_would_send_message,
+            **_metadata(),
+        }
 
     executor = richpanel_executor or RichpanelExecutor(
         outbound_enabled=outbound_enabled
@@ -1216,6 +1242,14 @@ def execute_order_status_reply(
             executor=executor,
             allow_network=allow_network,
         )
+        resolved_channel = payload_channel or ticket_channel
+        channel_detected = _classify_channel(resolved_channel)
+        if payload_channel:
+            channel_detection_source = "webhook"
+        elif ticket_channel:
+            channel_detection_source = "fetched_ticket"
+        else:
+            channel_detection_source = "unknown"
 
         def _route_email_support(
             reason: str,
@@ -1265,22 +1299,22 @@ def execute_order_status_reply(
             }
 
         if ticket_metadata is None:
-            return _route_email_support("status_read_failed")
+            result = _route_email_support("status_read_failed")
+            result.update(_metadata())
+            return result
 
         ticket_status = ticket_metadata.status
-        payload_channel = _extract_ticket_channel_from_payload(payload)
-        resolved_channel = ticket_channel or payload_channel
-        is_email_channel = resolved_channel == "email"
-        env_name, _ = resolve_env_name()
-        is_prod_env = env_name in PRODUCTION_ENVIRONMENTS
+        is_email_channel = channel_detected == "email"
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
             # no escalation). Preserve loop-prevention tag to avoid repeated replies,
             # even if the ticket is already closed.
-            return _route_email_support(
+            result = _route_email_support(
                 "followup_after_auto_reply", ticket_status=ticket_status
             )
+            result.update(_metadata())
+            return result
 
         if order_action is None:
             LOGGER.info(
@@ -1291,10 +1325,12 @@ def execute_order_status_reply(
                     "reason": "missing_order_status_action",
                 },
             )
-            return {"sent": False, "reason": "missing_order_status_action"}
+            return {"sent": False, "reason": "missing_order_status_action", **_metadata()}
 
         if _is_closed_status(ticket_status):
-            return _route_email_support("already_resolved", ticket_status=ticket_status)
+            result = _route_email_support("already_resolved", ticket_status=ticket_status)
+            result.update(_metadata())
+            return result
 
         (
             allowlist_emails,
@@ -1325,9 +1361,11 @@ def execute_order_status_reply(
                         "customer_email_hash": _hash_identifier(customer_email),
                     },
                 )
-                return _route_email_support(
+                result = _route_email_support(
                     "allowlist_blocked", ticket_status=ticket_status
                 )
+                result.update(_metadata())
+                return result
 
         parameters = order_action.get("parameters") or {}
         draft_reply = parameters.get("draft_reply") or {}
@@ -1341,7 +1379,7 @@ def execute_order_status_reply(
                     "reason": "missing_draft_reply",
                 },
             )
-            return {"sent": False, "reason": "missing_draft_reply"}
+            return {"sent": False, "reason": "missing_draft_reply", **_metadata()}
 
         order_summary = parameters.get("order_summary") or {}
         delivery_estimate = parameters.get("delivery_estimate") or order_summary.get(
@@ -1552,36 +1590,9 @@ def execute_order_status_reply(
             return update_success
 
         if is_email_channel:
-            if is_prod_env:
-                author_id = _normalize_optional_text(
-                    os.environ.get("RICHPANEL_BOT_AGENT_ID")
-                ) or _normalize_optional_text(
-                    os.environ.get("RICHPANEL_BOT_AUTHOR_ID")
-                )
-                author_strategy = (
-                    "env_required:bot_agent_id"
-                    if _normalize_optional_text(os.environ.get("RICHPANEL_BOT_AGENT_ID"))
-                    else "env_required:bot_author_id"
-                )
-                if not author_id:
-                    LOGGER.info(
-                        "automation.order_status_reply.bot_author_missing",
-                        extra={
-                            "event_id": envelope.event_id,
-                            "conversation_id": envelope.conversation_id,
-                            "environment": env_name,
-                        },
-                    )
-                    result = _route_email_support(
-                        "bot_author_missing", ticket_status=ticket_status
-                    )
-                    if openai_rewrite is not None:
-                        result["openai_rewrite"] = openai_rewrite
-                    return result
-            else:
-                author_id, author_strategy = _resolve_author_id(
-                    executor=executor, allow_network=allow_network
-                )
+            author_id, bot_agent_id_source = _resolve_bot_agent_id(
+                env_name=env_name, allow_network=allow_network
+            )
             author_hash = _hash_identifier(author_id)
             if author_id:
                 LOGGER.info(
@@ -1589,8 +1600,10 @@ def execute_order_status_reply(
                     extra={
                         "event_id": envelope.event_id,
                         "conversation_id": envelope.conversation_id,
-                        "strategy": author_strategy,
+                        "bot_agent_id_source": bot_agent_id_source,
                         "author_id_hash": author_hash,
+                        "channel_detected": channel_detected,
+                        "channel_detection_source": channel_detection_source,
                     },
                 )
             else:
@@ -1599,12 +1612,16 @@ def execute_order_status_reply(
                     extra={
                         "event_id": envelope.event_id,
                         "conversation_id": envelope.conversation_id,
-                        "strategy": author_strategy,
+                        "bot_agent_id_source": bot_agent_id_source,
+                        "channel_detected": channel_detected,
+                        "channel_detection_source": channel_detection_source,
                     },
                 )
                 result = _route_email_support(
-                    "author_id_missing", ticket_status=ticket_status
+                    "missing_bot_agent_id", ticket_status=ticket_status
                 )
+                result["blocked_reason"] = "missing_bot_agent_id"
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1627,6 +1644,7 @@ def execute_order_status_reply(
                     "sent": False,
                     "reason": "send_message_dry_run",
                     "responses": responses,
+                    **_metadata(),
                 }
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
@@ -1635,6 +1653,7 @@ def execute_order_status_reply(
                 result = _route_email_support(
                     "send_message_failed", ticket_status=ticket_status
                 )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1660,6 +1679,7 @@ def execute_order_status_reply(
                         OUTBOUND_PATH_SEND_MESSAGE_TAG,
                     ],
                 )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1679,6 +1699,7 @@ def execute_order_status_reply(
                         OUTBOUND_PATH_SEND_MESSAGE_TAG,
                     ],
                 )
+                result.update(_metadata())
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
@@ -1720,9 +1741,17 @@ def execute_order_status_reply(
                     "loop_tag": loop_prevention_tag,
                     "update_candidate": update_success,
                     "outbound_path": "send_message",
+                    "channel_detected": channel_detected,
+                    "channel_detection_source": channel_detection_source,
+                    "bot_agent_id_source": bot_agent_id_source,
                 },
             )
-            result = {"sent": True, "reason": "sent", "responses": responses}
+            result = {
+                "sent": True,
+                "reason": "sent",
+                "responses": responses,
+                **_metadata(),
+            }
             if openai_rewrite is not None:
                 result["openai_rewrite"] = openai_rewrite
             return result
@@ -1735,6 +1764,7 @@ def execute_order_status_reply(
                 "sent": False,
                 "reason": "reply_update_failed",
                 "responses": responses,
+                **_metadata(),
             }
             if openai_rewrite is not None:
                 result["openai_rewrite"] = openai_rewrite
@@ -1777,9 +1807,17 @@ def execute_order_status_reply(
                 "loop_tag": loop_prevention_tag,
                 "update_candidate": update_success,
                 "outbound_path": "comment",
+                "channel_detected": channel_detected,
+                "channel_detection_source": channel_detection_source,
+                "bot_agent_id_source": bot_agent_id_source,
             },
         )
-        result = {"sent": True, "reason": "sent", "responses": responses}
+        result = {
+            "sent": True,
+            "reason": "sent",
+            "responses": responses,
+            **_metadata(),
+        }
         if openai_rewrite is not None:
             result["openai_rewrite"] = openai_rewrite
         return result
@@ -1791,7 +1829,11 @@ def execute_order_status_reply(
                 "conversation_id": envelope.conversation_id,
             },
         )
-        result = {"sent": False, "reason": "exception"}
+        result = {
+            "sent": False,
+            "reason": "exception",
+            **_metadata(),
+        }
         if openai_rewrite is not None:
             result["openai_rewrite"] = openai_rewrite
         return result
