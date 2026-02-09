@@ -548,10 +548,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
         worker._TABLE_CACHE.clear()
         worker._DDB_RESOURCE = None
         worker._SSM_CLIENT = None
-        _AUTHOR_ID_CACHE.update({"author_id": None, "strategy": None, "expires_at": 0.0})
         os.environ.pop("RICHPANEL_OUTBOUND_ENABLED", None)
         os.environ.pop("RICHPANEL_BOT_AGENT_ID", None)
-        os.environ.pop("RICHPANEL_BOT_AUTHOR_ID", None)
         os.environ.pop("MW_OUTBOUND_ALLOWLIST_EMAILS", None)
         os.environ.pop("MW_OUTBOUND_ALLOWLIST_DOMAINS", None)
         os.environ.pop("RICHPANEL_ENV", None)
@@ -706,23 +704,20 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
     def test_outbound_email_author_resolution_role_match(self) -> None:
         envelope, plan = self._build_order_status_plan()
-        executor = _RecordingExecutor(
-            ticket_channel="email",
-            users=[
-                {"id": "user-1", "role": "customer"},
-                {"id": "agent-1", "role": {"name": "Agent"}},
-            ],
-        )
+        executor = _RecordingExecutor(ticket_channel="email")
 
-        result = execute_order_status_reply(
-            envelope,
-            plan,
-            safe_mode=False,
-            automation_enabled=True,
-            allow_network=True,
-            outbound_enabled=True,
-            richpanel_executor=cast(RichpanelExecutor, executor),
-        )
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-1"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
 
         self.assertTrue(result["sent"])
         send_call = [
@@ -731,7 +726,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             if call["method"] == "PUT" and call["path"].endswith("/send-message")
         ][0]
         self.assertEqual(send_call["kwargs"]["json_body"].get("author_id"), "agent-1")
-        self.assertTrue(
+        self.assertFalse(
             any(
                 call["method"] == "GET" and call["path"].startswith("/v1/users")
                 for call in executor.calls
@@ -740,23 +735,20 @@ class OutboundOrderStatusTests(unittest.TestCase):
 
     def test_outbound_email_author_resolution_falls_back_to_first(self) -> None:
         envelope, plan = self._build_order_status_plan()
-        executor = _RecordingExecutor(
-            ticket_channel="email",
-            users=[
-                {"id": "user-1", "role": "customer"},
-                {"id": "user-2", "type": "buyer"},
-            ],
-        )
+        executor = _RecordingExecutor(ticket_channel="email")
 
-        result = execute_order_status_reply(
-            envelope,
-            plan,
-            safe_mode=False,
-            automation_enabled=True,
-            allow_network=True,
-            outbound_enabled=True,
-            richpanel_executor=cast(RichpanelExecutor, executor),
-        )
+        with mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
 
         self.assertTrue(result["sent"])
         send_call = [
@@ -764,7 +756,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             for call in executor.calls
             if call["method"] == "PUT" and call["path"].endswith("/send-message")
         ][0]
-        self.assertEqual(send_call["kwargs"]["json_body"].get("author_id"), "user-1")
+        self.assertEqual(send_call["kwargs"]["json_body"].get("author_id"), "agent-123")
 
     def test_outbound_email_close_failure_routes_with_loop_tag(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -775,7 +767,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         with mock.patch.dict(
-            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
         ):
             result = execute_order_status_reply(
                 envelope,
@@ -843,7 +835,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         with mock.patch.dict(
-            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
         ):
             result = execute_order_status_reply(
                 envelope,
@@ -888,7 +880,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         with mock.patch.dict(
-            os.environ, {"RICHPANEL_BOT_AUTHOR_ID": "agent-123"}, clear=False
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
         ):
             result = execute_order_status_reply(
                 envelope,
@@ -1030,7 +1022,6 @@ class OutboundOrderStatusTests(unittest.TestCase):
                 "SHOPIFY_SHOP_DOMAIN": "test-shop.myshopify.com",
                 "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
                 "RICHPANEL_BOT_AGENT_ID": "",
-                "RICHPANEL_BOT_AUTHOR_ID": "",
             },
             clear=False,
         ):
@@ -1045,7 +1036,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "bot_author_missing")
+        self.assertEqual(result["reason"], "missing_bot_agent_id")
         self.assertFalse(
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
@@ -1191,7 +1182,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
             os.environ,
             {
                 "MW_OUTBOUND_ALLOWLIST_EMAILS": "allow@example.com",
-                "RICHPANEL_BOT_AUTHOR_ID": "agent-123",
+                "RICHPANEL_BOT_AGENT_ID": "agent-123",
             },
             clear=False,
         ):
