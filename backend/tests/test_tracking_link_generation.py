@@ -52,6 +52,15 @@ class TrackingLinkGenerationTests(unittest.TestCase):
         )
         self.assertIn("https://example.com/track?x=1", reply["body"])
 
+    def test_tracking_reply_generates_and_persists_url(self) -> None:
+        summary = {"carrier": "FedEx", "tracking_number": "TEST123"}
+        reply = build_tracking_reply(summary)
+        assert reply is not None
+        self.assertIn("fedextrack", reply["body"])
+        self.assertIn("TEST123", reply["body"])
+        self.assertIn("tracking_url", summary)
+        self.assertIn("fedextrack", summary["tracking_url"])
+
     def test_unknown_carrier_fallback(self) -> None:
         summary = {"carrier": "Local Courier", "tracking_number": "TEST123"}
         reply = build_tracking_reply(summary)
