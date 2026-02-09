@@ -24,6 +24,7 @@ os.environ.setdefault("AUDIT_TRAIL_TABLE_NAME", "local-audit-trail")
 os.environ.setdefault("CONVERSATION_STATE_TTL_SECONDS", "3600")
 os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 
+from richpanel_middleware.automation import pipeline as pipeline_module  # noqa: E402
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
     execute_order_status_reply,
     execute_routing_tags,
@@ -36,6 +37,8 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _match_allowlist_email,
     _parse_allowlist_entries,
     _safe_ticket_snapshot_fetch,
+    _extract_bot_agent_id,
+    _load_secret_value,
     _resolve_bot_agent_id,
     _latest_comment_is_operator,
     _comment_operator_flag,
@@ -1693,6 +1696,40 @@ class BotAgentResolutionTests(unittest.TestCase):
             )
         self.assertEqual(agent_id, "agent-123")
         self.assertEqual(source, "secrets_manager")
+
+    def test_extract_bot_agent_id_plain(self) -> None:
+        self.assertEqual(_extract_bot_agent_id("agent-xyz"), "agent-xyz")
+
+
+class BotAgentSecretLoadTests(unittest.TestCase):
+    def test_load_secret_value_boto3_missing(self) -> None:
+        with mock.patch.object(pipeline_module, "boto3", None):
+            self.assertIsNone(_load_secret_value("secret-id"))
+
+    def test_load_secret_value_secret_string(self) -> None:
+        class _Client:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretString": "secret-value"}
+
+        class _Boto3:
+            def client(self, name: str):
+                self.last_client = name
+                return _Client()
+
+        with mock.patch.object(pipeline_module, "boto3", _Boto3()):
+            self.assertEqual(_load_secret_value("secret-id"), "secret-value")
+
+    def test_load_secret_value_secret_binary(self) -> None:
+        class _Client:
+            def get_secret_value(self, SecretId: str) -> dict:
+                return {"SecretBinary": b"c2VjcmV0LWJpbmFyeQ=="}
+
+        class _Boto3:
+            def client(self, name: str):
+                return _Client()
+
+        with mock.patch.object(pipeline_module, "boto3", _Boto3()):
+            self.assertEqual(_load_secret_value("secret-id"), "secret-binary")
 
     def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
         class _ChannelExecutor:
