@@ -812,8 +812,10 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "read_only_guard")
-        self.assertEqual(len(executor.calls), 0)
+        self.assertEqual(result["reason"], "missing_bot_agent_id")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
         close_calls = [
             call
             for call in executor.calls
@@ -1040,10 +1042,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "missing_bot_agent_id")
-        self.assertFalse(
-            any(call["path"].endswith("/send-message") for call in executor.calls)
-        )
+        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_prod_when_unset(self) -> None:
         envelope, plan = self._build_order_status_plan()
