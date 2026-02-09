@@ -55,7 +55,7 @@
 
 ### 6) Test plan
 **Local / CI-equivalent:**
-- Not run (pending).
+- `python scripts/run_ci_checks.py`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `python scripts/shopify_token_health_check.py --env dev --aws-region us-east-2 --shop-domain scentimen-t.myshopify.com --include-aws-account-id --out-json REHYDRATION_PACK/RUNS/B74/B/PROOF/shopify_token_health_dev_run1.json`
@@ -81,6 +81,10 @@
 dev status=PASS health_check.status_code=200 aws_account_id=151124909266
 prod status=PASS health_check.status_code=200 aws_account_id=878145708918
 ```
+
+**Known preflight failures (current):**
+- DEV preflight failed with `ForbiddenException` (no access to GetRoleCredentials).
+- PROD preflight failed because `rp-mw/prod/shopify/refresh_token` is missing.
 
 ### 8) Risk & rollback
 **Risk rationale:** `risk:R2` — production auth behavior changes (refresh + error handling).
