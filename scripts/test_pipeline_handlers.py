@@ -1949,6 +1949,12 @@ def _build_suite() -> unittest.TestSuite:
         unittest.defaultTestLoader.loadTestsFromTestCase(BotAgentResolutionTests)
     )
     suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(BotAgentSecretLoadTests)
+    )
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(ReadOnlyGuardTests)
+    )
+    suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundAllowlistTests)
     )
     suite.addTests(

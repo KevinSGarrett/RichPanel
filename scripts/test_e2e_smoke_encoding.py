@@ -4124,6 +4124,8 @@ def _build_suite(loader: unittest.TestLoader) -> unittest.TestSuite:
     suite.addTests(loader.loadTestsFromTestCase(OperatorSendMessageHelperTests))
     suite.addTests(loader.loadTestsFromTestCase(CommentAuthorIdTests))
     suite.addTests(loader.loadTestsFromTestCase(BotAgentIdLoaderTests))
+    suite.addTests(loader.loadTestsFromTestCase(BotAgentIdSourceTests))
+    suite.addTests(loader.loadTestsFromTestCase(ReadOnlyGuardTests))
     suite.addTests(loader.loadTestsFromTestCase(AuthorMatchResolverTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodFinalizerTests))
     suite.addTests(loader.loadTestsFromTestCase(OrderMatchMethodResolverTests))
