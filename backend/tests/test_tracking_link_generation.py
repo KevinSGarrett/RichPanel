@@ -60,6 +60,7 @@ class TrackingLinkGenerationTests(unittest.TestCase):
         self.assertIn("Tracking link: (not available)", reply["body"])
         self.assertIsNone(build_carrier_tracking_url("Local Courier", "TEST123"))
 
-
-if __name__ == "__main__":
-    raise SystemExit(unittest.main())
+    def test_missing_inputs_return_none(self) -> None:
+        self.assertIsNone(build_carrier_tracking_url("", "TEST123"))
+        self.assertIsNone(build_carrier_tracking_url("FedEx", ""))
+        self.assertIsNone(build_carrier_tracking_url("", ""))
