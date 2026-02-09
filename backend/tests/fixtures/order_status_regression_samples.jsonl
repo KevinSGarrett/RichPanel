@@ -1,0 +1,5 @@
+{"id":"status_where_is_my_order","text":"Where is my order #10001?","expected_is_order_status":true,"expected_order_number":"10001"}
+{"id":"status_tracking","text":"Need tracking for order 555321.","expected_is_order_status":true,"expected_order_number":"555321"}
+{"id":"status_delivered","text":"Delivered? Order #98765 shows delivered but not here.","expected_is_order_status":true,"expected_order_number":"98765"}
+{"id":"status_shipping_delay","text":"Shipping delay for order #24680.","expected_is_order_status":true,"expected_order_number":"24680"}
+{"id":"not_status_refund","text":"I want a refund for order 12345.","expected_is_order_status":false,"expected_order_number":"12345"}
