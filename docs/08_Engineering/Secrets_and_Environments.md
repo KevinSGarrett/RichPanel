@@ -126,6 +126,9 @@ The admin API token secret can be either a plain token string or a JSON payload:
 }
 ```
 
+The refresh token may also be stored in `rp-mw/<env>/shopify/refresh_token`. The
+Shopify client will merge it with the `admin_api_token` bundle when present.
+
 For rotating tokens, the refresh Lambda uses the Shopify OAuth
 `grant_type=refresh_token` flow with the client id/secret **and a refresh
 token** to mint a fresh access token on a schedule. If no refresh token is

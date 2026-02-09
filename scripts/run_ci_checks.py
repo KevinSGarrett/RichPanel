@@ -91,6 +91,7 @@ def main() -> int:
         ["python", "scripts/test_richpanel_client.py"],
         ["python", "scripts/test_eval_order_status_intent.py"],
         ["python", "scripts/test_openai_client.py"],
+        ["python", "scripts/test_aws_secrets_preflight.py"],
         ["python", "scripts/test_shopify_client.py"],
         ["python", "scripts/test_shopify_token_health_check.py"],
         ["python", "scripts/test_shipstation_client.py"],

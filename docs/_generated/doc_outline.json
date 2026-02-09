@@ -11075,6 +11075,86 @@
     ]
   },
   {
+    "path": "08_Engineering/AWS_ACCOUNT_RESOURCE_MAP.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "AWS Account Resource Map",
+        "anchor": "aws-account-resource-map"
+      },
+      {
+        "level": 2,
+        "text": "Account → Environment Map",
+        "anchor": "account-environment-map"
+      },
+      {
+        "level": 2,
+        "text": "API Gateway + Lambda Ownership",
+        "anchor": "api-gateway-lambda-ownership"
+      },
+      {
+        "level": 3,
+        "text": "DEV (account 151124909266)",
+        "anchor": "dev-account-151124909266"
+      },
+      {
+        "level": 3,
+        "text": "PROD (account 878145708918)",
+        "anchor": "prod-account-878145708918"
+      },
+      {
+        "level": 2,
+        "text": "Secrets Manager Paths (Authoritative)",
+        "anchor": "secrets-manager-paths-authoritative"
+      },
+      {
+        "level": 3,
+        "text": "DEV (account 151124909266)",
+        "anchor": "dev-account-151124909266"
+      },
+      {
+        "level": 3,
+        "text": "PROD (account 878145708918)",
+        "anchor": "prod-account-878145708918"
+      },
+      {
+        "level": 2,
+        "text": "Cursor AWS Profiles",
+        "anchor": "cursor-aws-profiles"
+      },
+      {
+        "level": 2,
+        "text": "How to Verify",
+        "anchor": "how-to-verify"
+      },
+      {
+        "level": 3,
+        "text": "Confirm account + region",
+        "anchor": "confirm-account-region"
+      },
+      {
+        "level": 3,
+        "text": "Confirm API Gateway + stack outputs",
+        "anchor": "confirm-api-gateway-stack-outputs"
+      },
+      {
+        "level": 3,
+        "text": "Confirm API Gateway name → ID mapping",
+        "anchor": "confirm-api-gateway-name-id-mapping"
+      },
+      {
+        "level": 3,
+        "text": "Confirm Lambda ownership",
+        "anchor": "confirm-lambda-ownership"
+      },
+      {
+        "level": 3,
+        "text": "Confirm Secrets Manager paths",
+        "anchor": "confirm-secrets-manager-paths"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Branch_Protection_and_Merge_Settings.md",
     "outline": [
       {

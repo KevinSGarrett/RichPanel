@@ -207,6 +207,8 @@ class ShopifyClient:
         ).rstrip("/")
         canonical_secret = f"rp-mw/{self.environment}/shopify/admin_api_token"
         legacy_secret = f"rp-mw/{self.environment}/shopify/access_token"
+        self._canonical_token_secret_id = canonical_secret
+        self._legacy_token_secret_id = legacy_secret
         primary_secret = (
             access_token_secret_id
             or os.environ.get("SHOPIFY_ACCESS_TOKEN_SECRET_ID")
@@ -419,7 +421,8 @@ class ShopifyClient:
             response = self._to_response(transport_response, url)
             last_response = response
 
-            if response.status_code == 401:
+            refresh_reason = "refresh_unavailable"
+            if response.status_code in {401, 403}:
                 if not self.refresh_enabled:
                     refresh_reason = "refresh_disabled"
                     refresh_should_attempt = False
@@ -443,7 +446,7 @@ class ShopifyClient:
                 )
 
             if (
-                response.status_code == 401
+                response.status_code in {401, 403}
                 and self.refresh_enabled
                 and not refresh_attempted
                 and self._token_info
@@ -472,6 +475,21 @@ class ShopifyClient:
                             "next_action": "Verify Shopify refresh metadata in Secrets Manager.",
                         },
                     )
+                raise ShopifyRequestError(
+                    self._build_auth_failure_message(
+                        response.status_code, refresh_reason="refresh_failed"
+                    ),
+                    response=response,
+                )
+
+            if response.status_code in {401, 403}:
+                raise ShopifyRequestError(
+                    self._build_auth_failure_message(
+                        response.status_code,
+                        refresh_reason=refresh_reason,
+                    ),
+                    response=response,
+                )
 
             should_retry, delay = self._should_retry(response, attempt)
             self._log_response(
@@ -572,17 +590,17 @@ class ShopifyClient:
             )
             self._last_refresh_error = "non_json_token"
             return False
-        if self._refresh_token_source != "admin_api_token":
+        if self._refresh_token_source not in {"admin_api_token", "secret", "override"}:
             self._logger.info(
-                "refresh skipped (non-admin token source)",
+                "refresh skipped (unsupported refresh token source)",
                 extra={
-                    "reason": "non_admin_token_source",
+                    "reason": "unsupported_refresh_token_source",
                     "secret_id": self.access_token_secret_id,
                     "raw_format": self._token_info.raw_format,
                     "refresh_token_source": self._refresh_token_source,
                 },
             )
-            self._last_refresh_error = "non_admin_token_source"
+            self._last_refresh_error = "unsupported_refresh_token_source"
             return False
         if not self._token_info.refresh_token:
             self._logger.info(
@@ -933,18 +951,31 @@ class ShopifyClient:
             )
             self._last_refresh_error = "non_json_token"
             return False
-        if self._refresh_token_source != "admin_api_token":
+        if token_info.source_secret_id == self._legacy_token_secret_id:
             self._logger.info(
-                "refresh skipped (non-admin token source)",
+                "refresh skipped (legacy token source)",
                 extra={
-                    "reason": "non_admin_token_source",
+                    "reason": "legacy_token_source",
                     "secret_id": token_info.source_secret_id
                     or self.access_token_secret_id,
                     "raw_format": token_info.raw_format,
                     "refresh_token_source": self._refresh_token_source,
                 },
             )
-            self._last_refresh_error = "non_admin_token_source"
+            self._last_refresh_error = "legacy_token_source"
+            return False
+        if self._refresh_token_source not in {"admin_api_token", "secret", "override"}:
+            self._logger.info(
+                "refresh skipped (unsupported refresh token source)",
+                extra={
+                    "reason": "unsupported_refresh_token_source",
+                    "secret_id": token_info.source_secret_id
+                    or self.access_token_secret_id,
+                    "raw_format": token_info.raw_format,
+                    "refresh_token_source": self._refresh_token_source,
+                },
+            )
+            self._last_refresh_error = "unsupported_refresh_token_source"
             return False
         if not token_info.refresh_token:
             self._logger.info(
@@ -1118,6 +1149,28 @@ class ShopifyClient:
                 "shopify.refresh_secret_write_failed",
                 extra={"secret_id": secret_id},
             )
+
+    def _build_auth_failure_message(
+        self, status_code: int, *, refresh_reason: str
+    ) -> str:
+        hint = "Verify rp-mw/<env>/shopify/admin_api_token in Secrets Manager."
+        if status_code == 403:
+            hint = (
+                "Verify the Shopify app scopes; the token may lack required read scopes."
+            )
+        if refresh_reason in {"missing_refresh_token", "refresh_disabled"}:
+            hint = (
+                "Provide rp-mw/<env>/shopify/refresh_token and enable "
+                "SHOPIFY_REFRESH_ENABLED=true, or rotate the Admin API token."
+            )
+        if refresh_reason == "legacy_token_source":
+            hint = (
+                "Move the token to rp-mw/<env>/shopify/admin_api_token "
+                "and retry; legacy tokens are not refreshed."
+            )
+        return (
+            f"Shopify auth failed (status={status_code}). {hint}"
+        )
 
     def token_diagnostics(self) -> Dict[str, Any]:
         token_info = self._token_info

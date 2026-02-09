@@ -696,6 +696,60 @@ class ShopifyClientTests(unittest.TestCase):
         )
         self.assertIn(token_secret_id, secrets.put_calls)
 
+    def test_refresh_on_403_retries_once(self) -> None:
+        token_secret_id = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret_id = "rp-mw/local/shopify/client_id"
+        client_secret_secret_id = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret_id: {
+                    "SecretString": json.dumps(
+                        {"access_token": "expired", "refresh_token": "refresh-token"}
+                    )
+                },
+                client_id_secret_id: {"SecretString": "client-id"},
+                client_secret_secret_id: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(status_code=403, headers={}, body=b""),
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=b'{"access_token":"new-token","refresh_token":"new-refresh","expires_in":3600}',
+                ),
+                TransportResponse(status_code=200, headers={}, body=b"{}"),
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "SHOPIFY_REFRESH_ENABLED": "true",
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret_id,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret_id,
+            },
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret_id,
+            )
+
+            response = client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+
+        self.assertFalse(response.dry_run)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(transport.requests), 3)
+        self.assertIn(token_secret_id, secrets.put_calls)
+
     def test_refresh_skips_without_refresh_token(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
         secrets = _StubSecretsClient(
@@ -710,15 +764,14 @@ class ShopifyClientTests(unittest.TestCase):
             secrets_client=secrets,
             access_token_secret_id=token_secret_id,
         )
-
-        response = client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
-
-        self.assertEqual(response.status_code, 401)
+        with self.assertRaises(ShopifyRequestError) as ctx:
+            client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
+        self.assertEqual(ctx.exception.response.status_code, 401)
 
     def test_refresh_logs_failure_on_401(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
@@ -756,14 +809,15 @@ class ShopifyClientTests(unittest.TestCase):
                 secrets_client=secrets,
                 access_token_secret_id=token_secret_id,
             )
-            response = client.request(
-                "GET",
-                "/admin/api/2024-01/orders.json",
-                safe_mode=False,
-                automation_enabled=True,
-            )
+            with self.assertRaises(ShopifyRequestError) as ctx:
+                client.request(
+                    "GET",
+                    "/admin/api/2024-01/orders.json",
+                    safe_mode=False,
+                    automation_enabled=True,
+                )
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(ctx.exception.response.status_code, 401)
         self.assertEqual(len(transport.requests), 2)
         self.assertEqual(
             transport.requests[1].url,
@@ -812,14 +866,15 @@ class ShopifyClientTests(unittest.TestCase):
                 access_token_secret_id=token_secret_id,
                 shop_domain="example.myshopify.com",
             )
-            response = client.request(
-                "GET",
-                "/admin/api/2024-01/orders.json",
-                safe_mode=False,
-                automation_enabled=True,
-            )
+            with self.assertRaises(ShopifyRequestError) as ctx:
+                client.request(
+                    "GET",
+                    "/admin/api/2024-01/orders.json",
+                    safe_mode=False,
+                    automation_enabled=True,
+                )
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(ctx.exception.response.status_code, 401)
         self.assertEqual(len(transport.requests), 2)
         self.assertEqual(
             transport.requests[1].url,
@@ -872,14 +927,15 @@ class ShopifyClientTests(unittest.TestCase):
                 access_token_secret_id=token_secret_id,
                 shop_domain="example.myshopify.com",
             )
-            response = client.request(
-                "GET",
-                "/admin/api/2024-01/orders.json",
-                safe_mode=False,
-                automation_enabled=True,
-            )
+            with self.assertRaises(ShopifyRequestError) as ctx:
+                client.request(
+                    "GET",
+                    "/admin/api/2024-01/orders.json",
+                    safe_mode=False,
+                    automation_enabled=True,
+                )
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(ctx.exception.response.status_code, 401)
         self.assertEqual(len(transport.requests), 2)
 
     def test_integration_refresh_attempt_missing_refresh_token(self) -> None:
@@ -909,14 +965,15 @@ class ShopifyClientTests(unittest.TestCase):
                 access_token_secret_id=token_secret_id,
                 shop_domain="example.myshopify.com",
             )
-            response = client.request(
-                "GET",
-                "/admin/api/2024-01/orders.json",
-                safe_mode=False,
-                automation_enabled=True,
-            )
+            with self.assertRaises(ShopifyRequestError) as ctx:
+                client.request(
+                    "GET",
+                    "/admin/api/2024-01/orders.json",
+                    safe_mode=False,
+                    automation_enabled=True,
+                )
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(ctx.exception.response.status_code, 401)
 
     def test_request_logs_forbidden_status(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
@@ -932,15 +989,15 @@ class ShopifyClientTests(unittest.TestCase):
             secrets_client=secrets,
             access_token_secret_id=token_secret_id,
         )
+        with self.assertRaises(ShopifyRequestError) as ctx:
+            client.request(
+                "GET",
+                "/admin/api/2024-01/orders.json",
+                safe_mode=False,
+                automation_enabled=True,
+            )
 
-        response = client.request(
-            "GET",
-            "/admin/api/2024-01/orders.json",
-            safe_mode=False,
-            automation_enabled=True,
-        )
-
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(ctx.exception.response.status_code, 403)
 
     def test_refresh_fails_without_client_credentials(self) -> None:
         token_secret_id = "rp-mw/local/shopify/admin_api_token"
@@ -1004,7 +1061,7 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
 
-    def test_refresh_access_token_skips_when_source_not_admin(self) -> None:
+    def test_refresh_access_token_allows_secret_refresh_source(self) -> None:
         token_info = ShopifyTokenInfo(
             access_token="token",
             refresh_token="refresh",
@@ -1020,8 +1077,15 @@ class ShopifyClientTests(unittest.TestCase):
             client = ShopifyClient(access_token="shpua_token")
             client._token_info = token_info
             client._refresh_token_source = "secret"
-            self.assertFalse(client._refresh_access_token(token_info))
-            self.assertEqual(client.refresh_error(), "non_admin_token_source")
+            import integrations.shopify.client as shopify_client
+
+            original = shopify_client.boto3
+            shopify_client.boto3 = None
+            try:
+                self.assertFalse(client._refresh_access_token(token_info))
+                self.assertEqual(client.refresh_error(), "missing_client_credentials")
+            finally:
+                shopify_client.boto3 = original
 
     def test_extract_secret_field_returns_none_when_key_missing(self) -> None:
         client = ShopifyClient(access_token="test-token")

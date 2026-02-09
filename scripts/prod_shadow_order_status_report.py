@@ -72,6 +72,7 @@ from readonly_shadow_utils import (
     safe_error,
 )
 from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env
+from aws_secrets_preflight import run_aws_secrets_preflight
 from secrets_preflight import run_secrets_preflight
 
 LOGGER = logging.getLogger("prod_shadow_order_status")
@@ -1160,6 +1161,19 @@ def main() -> int:
         help="Skip AWS account + secrets preflight.",
     )
     parser.set_defaults(preflight_secrets=True)
+    parser.add_argument(
+        "--shopify-secrets-preflight",
+        dest="shopify_secrets_preflight",
+        action="store_true",
+        help="Run Shopify secrets preflight (admin token + refresh inputs).",
+    )
+    parser.add_argument(
+        "--no-shopify-secrets-preflight",
+        dest="shopify_secrets_preflight",
+        action="store_false",
+        help="Skip Shopify secrets preflight.",
+    )
+    parser.set_defaults(shopify_secrets_preflight=False)
     parser.add_argument("--env", dest="env_name", help="Target environment name.")
     parser.add_argument("--richpanel-secret-id", help="Richpanel secret id override.")
     parser.add_argument("--shopify-secret-id", help="Shopify secret id override.")
@@ -1220,6 +1234,21 @@ def main() -> int:
             profile=args.aws_profile,
             expected_account_id=expected_account_id,
             require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
+    if args.shopify_secrets_preflight:
+        LOGGER.info("Running Shopify secrets preflight...")
+        preflight_env = normalize_env(env_name)
+        expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(preflight_env)
+        if not expected_account_id:
+            raise SystemExit(
+                f"Unknown env '{preflight_env}' for AWS preflight (expected dev/staging/prod)."
+            )
+        run_aws_secrets_preflight(
+            env_name=preflight_env,
+            region=args.region,
+            profile=args.aws_profile,
+            expected_account_id=expected_account_id,
             fail_on_error=True,
         )
     enforced_env = _require_env_flags("prod shadow order status")

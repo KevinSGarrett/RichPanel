@@ -90,6 +90,7 @@ from integrations.common import (  # type: ignore  # noqa: E402
     prod_write_ack_matches,
 )
 from aws_account_preflight import ENV_ACCOUNT_IDS, normalize_env  # type: ignore  # noqa: E402
+from aws_secrets_preflight import run_aws_secrets_preflight  # type: ignore  # noqa: E402
 from secrets_preflight import run_secrets_preflight  # type: ignore  # noqa: E402
 
 
@@ -2242,6 +2243,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.set_defaults(preflight_secrets=True)
     parser.add_argument(
+        "--shopify-secrets-preflight",
+        dest="shopify_secrets_preflight",
+        action="store_true",
+        help="Run Shopify secrets preflight (admin token + refresh inputs).",
+    )
+    parser.add_argument(
+        "--no-shopify-secrets-preflight",
+        dest="shopify_secrets_preflight",
+        action="store_false",
+        help="Skip Shopify secrets preflight.",
+    )
+    parser.set_defaults(shopify_secrets_preflight=False)
+    parser.add_argument(
         "--stack-name",
         default="RichpanelMiddleware-dev",
         help="CloudFormation stack name to read outputs from.",
@@ -4366,6 +4380,21 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             profile=args.profile,
             expected_account_id=expected_account_id,
             require_secrets=args.require_secret,
+            fail_on_error=True,
+        )
+    if args.shopify_secrets_preflight:
+        print("[INFO] Running Shopify secrets preflight...")
+        normalized_env = normalize_env(env_name)
+        expected_account_id = args.expect_account_id or ENV_ACCOUNT_IDS.get(normalized_env)
+        if not expected_account_id:
+            raise SystemExit(
+                f"Unknown env '{normalized_env}' for AWS preflight (expected dev/staging/prod)."
+            )
+        run_aws_secrets_preflight(
+            env_name=normalized_env,
+            region=region,
+            profile=args.profile,
+            expected_account_id=expected_account_id,
             fail_on_error=True,
         )
     order_status_mode = _is_order_status_scenario(args.scenario)
