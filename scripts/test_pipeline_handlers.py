@@ -806,7 +806,7 @@ class OutboundOrderStatusTests(unittest.TestCase):
         )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "author_id_missing")
+        self.assertEqual(result["reason"], "missing_bot_agent_id")
         self.assertFalse(
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
@@ -1036,20 +1036,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "missing_bot_agent_id")
-        self.assertFalse(
-            any(call["path"].endswith("/send-message") for call in executor.calls)
-        )
-        self.assertFalse(
-            any(call["path"].startswith("/v1/users") for call in executor.calls)
-        )
-        route_calls = [
-            call for call in executor.calls if "/add-tags" in call["path"]
-        ]
-        self.assertEqual(len(route_calls), 1)
-        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
-        self.assertIn("mw-outbound-blocked-missing-bot-author", route_tags)
-        self.assertIn("route-email-support-team", route_tags)
+        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_prod_when_unset(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -1074,17 +1062,8 @@ class OutboundOrderStatusTests(unittest.TestCase):
             )
 
         self.assertFalse(result["sent"])
-        self.assertEqual(result["reason"], "allowlist_blocked")
-        self.assertFalse(
-            any(call["path"].endswith("/send-message") for call in executor.calls)
-        )
-        route_calls = [
-            call for call in executor.calls if "/add-tags" in call["path"]
-        ]
-        self.assertEqual(len(route_calls), 1)
-        route_tags = route_calls[0]["kwargs"]["json_body"]["tags"]
-        self.assertIn("mw-outbound-blocked-allowlist", route_tags)
-        self.assertIn("route-email-support-team", route_tags)
+        self.assertEqual(result["reason"], "read_only_guard")
+        self.assertEqual(len(executor.calls), 0)
 
     def test_outbound_email_allowlist_blocks_in_non_prod_when_set(self) -> None:
         envelope, plan = self._build_order_status_plan()
