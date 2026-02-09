@@ -12249,6 +12249,11 @@
       },
       {
         "level": 3,
+        "text": "Prod shadow canary (200 tickets)",
+        "anchor": "prod-shadow-canary-200-tickets"
+      },
+      {
+        "level": 3,
         "text": "Deployment gate criteria (recommended)",
         "anchor": "deployment-gate-criteria-recommended"
       },

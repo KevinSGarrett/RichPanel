@@ -13627,6 +13627,12 @@
       "anchor": "prod-shadow-order-status-report-scaled"
     }
   ],
+  "prod shadow canary (200 tickets)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "prod-shadow-canary-200-tickets"
+    }
+  ],
   "deployment gate criteria (recommended)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
