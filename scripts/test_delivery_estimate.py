@@ -15,6 +15,8 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     add_business_days,
+    build_tracking_reply,
+    build_tracking_url,
     business_days_between,
     compute_delivery_estimate,
     normalize_shipping_method,
@@ -278,8 +280,69 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(priority["max_days"], 1)
 
 
+class TrackingUrlTests(unittest.TestCase):
+    def test_build_tracking_url_variants(self) -> None:
+        self.assertEqual(
+            build_tracking_url("Fed Ex", "123"),
+            "https://www.fedex.com/fedextrack/?trknbr=123",
+        )
+        self.assertEqual(
+            build_tracking_url("Federal Express", "123"),
+            "https://www.fedex.com/fedextrack/?trknbr=123",
+        )
+        self.assertEqual(
+            build_tracking_url("United Parcel Service", "1Z999"),
+            "https://www.ups.com/track?loc=en_US&tracknum=1Z999",
+        )
+        self.assertEqual(
+            build_tracking_url("United States Postal Service", "9400"),
+            "https://tools.usps.com/go/TrackConfirmAction?tLabels=9400",
+        )
+        self.assertEqual(
+            build_tracking_url("DHL Express", "JD014"),
+            "https://www.dhl.com/global-en/home/tracking.html?tracking-id=JD014",
+        )
+
+    def test_build_tracking_url_unknown_carrier(self) -> None:
+        self.assertIsNone(build_tracking_url("Unknown Carrier", "123"))
+
+    def test_build_tracking_url_strips_and_encodes(self) -> None:
+        url = build_tracking_url("UPS", " 1Z 999 ")
+        self.assertEqual(
+            url, "https://www.ups.com/track?loc=en_US&tracknum=1Z%20999"
+        )
+
+    def test_build_tracking_reply_preserves_existing_url(self) -> None:
+        order_summary = {
+            "tracking_number": "ZX999",
+            "tracking_url": "https://tracking.example.com/track/ZX999",
+            "carrier": "FedEx",
+        }
+        reply = build_tracking_reply(order_summary)
+        assert reply is not None
+        self.assertEqual(
+            reply["tracking_url"], "https://tracking.example.com/track/ZX999"
+        )
+
+    def test_build_tracking_reply_uses_generated_url(self) -> None:
+        order_summary = {
+            "tracking_number": "ZX999",
+            "carrier": "USPS",
+        }
+        reply = build_tracking_reply(order_summary)
+        assert reply is not None
+        self.assertEqual(
+            reply["tracking_url"],
+            "https://tools.usps.com/go/TrackConfirmAction?tLabels=ZX999",
+        )
+
+
 def main() -> int:
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(DeliveryEstimateTests)
+    suite = unittest.TestSuite()
+    suite.addTests(
+        unittest.defaultTestLoader.loadTestsFromTestCase(DeliveryEstimateTests)
+    )
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TrackingUrlTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
 

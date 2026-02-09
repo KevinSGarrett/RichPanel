@@ -330,29 +330,43 @@ def compute_delivery_estimate(
     }
 
 
-def build_carrier_tracking_url(
-    carrier: str, tracking_number: str
+def _normalize_carrier_name(carrier: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]", "", str(carrier).lower())
+    return normalized
+
+
+def build_tracking_url(
+    carrier: str | None, tracking_number: str | None
 ) -> Optional[str]:
     if not carrier or not tracking_number:
         return None
-    carrier_lower = str(carrier).strip().lower()
     tracking_value = str(tracking_number).strip()
-    if not carrier_lower or not tracking_value:
+    if not tracking_value:
+        return None
+
+    normalized_carrier = _normalize_carrier_name(carrier)
+    if not normalized_carrier:
         return None
 
     encoded_tracking = quote(tracking_value, safe="")
-    if "fedex" in carrier_lower:
+    if normalized_carrier in {"fedex", "fedexexpress", "federalexpress"}:
         return f"https://www.fedex.com/fedextrack/?trknbr={encoded_tracking}"
-    if "usps" in carrier_lower:
-        return f"https://tools.usps.com/go/TrackConfirmAction?tLabels={encoded_tracking}"
-    if "ups" in carrier_lower:
+    if normalized_carrier in {"ups", "unitedparcelservice"}:
         return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
-    if "dhl" in carrier_lower:
+    if normalized_carrier in {"usps", "unitedstatespostalservice"}:
+        return f"https://tools.usps.com/go/TrackConfirmAction?tLabels={encoded_tracking}"
+    if normalized_carrier in {"dhl", "dhlexpress"}:
         return (
-            "https://www.dhl.com/global-en/home/tracking/tracking-express.html"
-            f"?submit=1&tracking-id={encoded_tracking}"
+            "https://www.dhl.com/global-en/home/tracking.html"
+            f"?tracking-id={encoded_tracking}"
         )
     return None
+
+
+def build_carrier_tracking_url(
+    carrier: str, tracking_number: str
+) -> Optional[str]:
+    return build_tracking_url(carrier, tracking_number)
 
 
 def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -387,7 +401,7 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
         return None
 
     if not tracking_url and tracking_number and carrier:
-        generated_url = build_carrier_tracking_url(carrier, tracking_number)
+        generated_url = build_tracking_url(carrier, tracking_number)
         if generated_url:
             tracking_url = generated_url
             order_summary["tracking_url"] = generated_url
@@ -477,6 +491,7 @@ def build_no_tracking_reply(
 __all__ = [
     "add_business_days",
     "build_carrier_tracking_url",
+    "build_tracking_url",
     "build_tracking_reply",
     "build_no_tracking_reply",
     "business_days_between",
