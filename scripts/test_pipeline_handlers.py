@@ -40,6 +40,8 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _extract_bot_agent_id,
     _load_secret_value,
     _read_only_guard_active,
+    _SECRET_VALUE_CACHE,
+    _SECRET_VALUE_CACHE_TTL_SECONDS,
     _resolve_bot_agent_id,
     _latest_comment_is_operator,
     _comment_operator_flag,
@@ -1705,6 +1707,10 @@ class BotAgentResolutionTests(unittest.TestCase):
     def test_extract_bot_agent_id_unknown_json(self) -> None:
         self.assertIsNone(_extract_bot_agent_id("{\"other_key\": \"value\"}"))
 
+    def test_extract_bot_agent_id_numeric(self) -> None:
+        self.assertEqual(_extract_bot_agent_id("12345"), "12345")
+        self.assertEqual(_extract_bot_agent_id("{\"bot_agent_id\": 12345}"), "12345")
+
 
 class BotAgentSecretLoadTests(unittest.TestCase):
     def test_load_secret_value_boto3_missing(self) -> None:
@@ -1736,6 +1742,15 @@ class BotAgentSecretLoadTests(unittest.TestCase):
         with mock.patch.object(pipeline_module, "boto3", _Boto3()):
             self.assertEqual(_load_secret_value("secret-id"), "secret-binary")
 
+    def test_load_secret_value_cache_hit(self) -> None:
+        _SECRET_VALUE_CACHE.clear()
+        _SECRET_VALUE_CACHE["secret-id"] = {
+            "value": "cached-value",
+            "expires_at": time.time() + _SECRET_VALUE_CACHE_TTL_SECONDS,
+        }
+        with mock.patch.object(pipeline_module, "boto3", None):
+            self.assertEqual(_load_secret_value("secret-id"), "cached-value")
+
 
 class ReadOnlyGuardTests(unittest.TestCase):
     def test_read_only_guard_env_override(self) -> None:
@@ -1753,6 +1768,10 @@ class ReadOnlyGuardTests(unittest.TestCase):
     def test_read_only_guard_false_in_dev(self) -> None:
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertFalse(_read_only_guard_active("dev"))
+
+    def test_read_only_guard_false_override_in_prod(self) -> None:
+        with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "false"}):
+            self.assertFalse(_read_only_guard_active("prod"))
 
     def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
         class _ChannelExecutor:

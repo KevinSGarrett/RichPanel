@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
-from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name
+from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name, _to_bool
 from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
@@ -110,6 +110,8 @@ _SKIP_REASON_TAGS = {
     "missing_bot_agent_id": OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG,
 }
 _READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
+_SECRET_VALUE_CACHE_TTL_SECONDS = 900
+_SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -157,12 +159,6 @@ def _normalize_ticket_channel(value: Any) -> Optional[str]:
     return normalized.lower()
 
 
-def _to_bool(value: Optional[str]) -> bool:
-    if value is None:
-        return False
-    return str(value).strip().lower() in {"1", "true", "yes", "on"}
-
-
 def _classify_channel(value: Optional[str]) -> str:
     if not value:
         return "unknown"
@@ -199,28 +195,35 @@ def _read_only_guard_active(env_name: str) -> bool:
         "RICH_PANEL_READ_ONLY"
     )
     if env_override is not None:
-        if _to_bool(env_override):
-            return True
-    if _to_bool(os.environ.get("RICHPANEL_WRITE_DISABLED")):
-        return True
-    if env_name in _READ_ONLY_ENVIRONMENTS:
-        return True
-    return False
+        return _to_bool(env_override)
+    write_disabled = os.environ.get("RICHPANEL_WRITE_DISABLED")
+    if write_disabled is not None:
+        return _to_bool(write_disabled)
+    return env_name in _READ_ONLY_ENVIRONMENTS
 
 
 def _load_secret_value(secret_id: str) -> Optional[str]:
+    now = time.time()
+    cached = _SECRET_VALUE_CACHE.get(secret_id)
+    if cached and cached.get("expires_at", 0.0) > now:
+        return cached.get("value")
     if boto3 is None:
         return None
     try:
         client = boto3.client("secretsmanager")
         response = client.get_secret_value(SecretId=secret_id)
     except (BotoCoreError, ClientError):
+        if cached:
+            return cached.get("value")
         return None
     secret_value = response.get("SecretString")
     if secret_value is None and response.get("SecretBinary") is not None:
         secret_binary = response.get("SecretBinary")
         if isinstance(secret_binary, (bytes, bytearray)):
-            secret_value = secret_binary.decode("utf-8")
+            try:
+                secret_value = secret_binary.decode("utf-8")
+            except (UnicodeDecodeError, ValueError):
+                return None
         else:
             try:
                 secret_value = base64.b64decode(secret_binary).decode("utf-8")
@@ -228,7 +231,12 @@ def _load_secret_value(secret_id: str) -> Optional[str]:
                 return None
     if not secret_value:
         return None
-    return str(secret_value)
+    normalized = str(secret_value)
+    _SECRET_VALUE_CACHE[secret_id] = {
+        "value": normalized,
+        "expires_at": now + _SECRET_VALUE_CACHE_TTL_SECONDS,
+    }
+    return normalized
 
 
 def _extract_bot_agent_id(secret_value: str) -> Optional[str]:
@@ -236,12 +244,12 @@ def _extract_bot_agent_id(secret_value: str) -> Optional[str]:
         payload = json.loads(secret_value)
     except (TypeError, ValueError):
         return _normalize_optional_text(secret_value)
-    if isinstance(payload, str):
+    if isinstance(payload, (str, int, float)):
         return _normalize_optional_text(payload)
     if isinstance(payload, dict):
         for key in ("bot_agent_id", "agent_id", "id"):
             value = payload.get(key)
-            if isinstance(value, str) and value.strip():
+            if value is not None:
                 return _normalize_optional_text(value)
     return None
 
