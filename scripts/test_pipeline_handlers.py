@@ -1921,7 +1921,7 @@ def _build_suite() -> unittest.TestSuite:
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundOrderStatusTests)
     )
     suite.addTests(
-        unittest.defaultTestLoader.loadTestsFromTestCase(AuthorResolutionTests)
+        unittest.defaultTestLoader.loadTestsFromTestCase(BotAgentResolutionTests)
     )
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(OutboundAllowlistTests)
