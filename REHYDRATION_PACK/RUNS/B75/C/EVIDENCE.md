@@ -5,8 +5,8 @@ Command: aws sso login --profile rp-admin-prod
 Attempting to open your default browser.
 If the browser does not open, open the following URL:
 
-https://oidc.us-east-1.amazonaws.com/authorize?response_type=code&client_id=9YC5OGMirGaE9d9UAW4YrHVzLWVhc3QtMQ&redirect_uri=http%3A%2F%2F127.0.0.1%3A56815%2Foauth%2Fcallback&state=5e9148ca-5fec-4fe6-9259-c7d8f7412a12&code_challenge_method=S256&scopes=sso%3Aaccount%3Aaccess&code_challenge=8afMR_5XZCXWjA7T2zw6QryHBi0g-5gGfCsagFYilks
-Successfully logged into Start URL: https://d-9066183f41.awsapps.com/start
+<redacted-oidc-authorize-url>
+Successfully logged into Start URL: <redacted-sso-start-url>
 
 Command: aws sts get-caller-identity --profile rp-admin-prod --output json
 {
@@ -234,4 +234,5 @@ Command: aws cloudformation describe-stacks --stack-name RichpanelMiddleware-pro
 
 ## CloudFormation template env (worker Lambda, PII-safe extract)
 Note: CloudFormation template body is YAML in this account; parsing requires a YAML parser not available in this environment. Lambda env context was captured via aws lambda get-function-configuration above.
+
 
