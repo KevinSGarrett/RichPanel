@@ -41,7 +41,7 @@ PR status at handoff:
 - `validate`: PASS
 - `claude-gate-check`: PASS
 - `risk-label-check`: PASS
-- `Cursor Bugbot`: PASS
+- `Cursor Bugbot`: SKIPPING on latest commit (most recent Bugbot review comment reported no new issues)
 - `codecov/patch`: PASS
 
 ## GO / NO-GO recommendation
