@@ -45,6 +45,10 @@ fully satisfied and explicitly approved.
   behavior inside the worker.
 - In prod, these env vars may be unset by default; verify current values on
   `rp-mw-prod-worker` and set them explicitly before any flip.
+- **Default behavior when unset (per code):**
+  - `RICHPANEL_OUTBOUND_ENABLED` defaults to `false` (dry-run).
+  - `RICHPANEL_READ_ONLY` defaults to `true` in prod/staging (read-only guard).
+  - `RICHPANEL_WRITE_DISABLED` defaults to `false` (must be explicitly set to block writes).
 - Set SSM via `set-runtime-flags.yml` or the AWS Console (Parameter Store).
 - Set Lambda env vars in AWS Console on `rp-mw-prod-worker` (prod changes require approval).
 

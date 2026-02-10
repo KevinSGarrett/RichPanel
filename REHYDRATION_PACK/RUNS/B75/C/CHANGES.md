@@ -5,4 +5,4 @@
 - Added `REHYDRATION_PACK/RUNS/B75/C/RUN_REPORT.md` and `REHYDRATION_PACK/RUNS/B75/C/CHANGES.md`.
 - Regenerated doc registries and plan checklist outputs via `python scripts/run_ci_checks.py`.
 - Redacted production endpoint URLs/ARNs from evidence and noted CloudFormation template parsing limitation.
-- Added a runbook note that prod Lambda env vars may be unset and must be explicitly set.
+- Added runbook notes on prod Lambda env vars being unset by default and their default behavior.

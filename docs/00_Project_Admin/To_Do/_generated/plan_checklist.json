@@ -2747,7 +2747,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-338440EF01",
-    "line": 202,
+    "line": 206,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "(Optional) Confirm `SHOPIFY_WRITE_DISABLED=true` is set"
   },
@@ -2755,7 +2755,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-63D92BC391",
-    "line": 200,
+    "line": 204,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Confirm SSM parameters are set: `safe_mode=true`, `automation_enabled=false` (via workflow or SSM console)"
   },
@@ -2763,7 +2763,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-86987EF95C",
-    "line": 201,
+    "line": 205,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Confirm Lambda env vars are set: `MW_ALLOW_NETWORK_READS=true`, `RICHPANEL_WRITE_DISABLED=true`, `RICHPANEL_OUTBOUND_ENABLED=false`"
   },
@@ -2771,7 +2771,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-8716DBA8C7",
-    "line": 204,
+    "line": 208,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Review CloudWatch logs to confirm no write operations are attempted"
   },
@@ -2779,7 +2779,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-BCC323546C",
-    "line": 205,
+    "line": 209,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Run the \"Prove zero writes\" audit (see below)"
   },
@@ -2787,7 +2787,7 @@
     "checked": false,
     "heading_path": "Disable ALL outbound communications (email, SMS, push notifications) > Verification checklist",
     "id": "PLN-EBAA7D2D16",
-    "line": 203,
+    "line": 207,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "For go-live in prod, confirm `MW_PROD_WRITES_ACK=I_UNDERSTAND_PROD_WRITES` is set"
   },
@@ -2795,7 +2795,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-1147C85A0D",
-    "line": 1043,
+    "line": 1047,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Monitor for 15-30 minutes (watch for unexpected writes or errors)"
   },
@@ -2803,7 +2803,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-2259FA7192",
-    "line": 1042,
+    "line": 1046,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Test hard-fail behavior (trigger write operation, confirm it fails)"
   },
@@ -2811,7 +2811,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-243AC63DE2",
-    "line": 1037,
+    "line": 1041,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Obtain PM/lead approval for production shadow mode (record in Progress Log)"
   },
@@ -2819,7 +2819,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-323A3F9587",
-    "line": 1049,
+    "line": 1053,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Store evidence in `qa/test_evidence/shadow_mode_validation/<RUN_ID>/`"
   },
@@ -2827,7 +2827,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-3B68BA8EF8",
-    "line": 1040,
+    "line": 1044,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Verify flags are set (AWS CLI or Console)"
   },
@@ -2835,7 +2835,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-46B9C7CAF5",
-    "line": 1041,
+    "line": 1045,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Run \"Prove zero writes\" audit (CloudWatch Logs queries)"
   },
@@ -2843,7 +2843,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-7852FB054F",
-    "line": 1045,
+    "line": 1049,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Run validation use case (data structures, routing accuracy, order lookup)"
   },
@@ -2851,7 +2851,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-89205A9EA6",
-    "line": 1046,
+    "line": 1050,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Disable shadow mode (revert flags)"
   },
@@ -2859,7 +2859,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-AF527C2E52",
-    "line": 1038,
+    "line": 1042,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Document incident response plan (who can disable flags, escalation path)"
   },
@@ -2867,7 +2867,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-E66DE5BD9A",
-    "line": 1039,
+    "line": 1043,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Enable shadow mode flags (see \"How to enable shadow mode\")"
   },
@@ -2875,7 +2875,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-EA05D137F0",
-    "line": 1044,
+    "line": 1048,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Capture evidence (logs, metrics, sample payloads)"
   },
@@ -2883,7 +2883,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-EADC70FE80",
-    "line": 1047,
+    "line": 1051,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Verify flags were reverted (AWS CLI or Console)"
   },
@@ -2891,7 +2891,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)",
     "id": "PLN-F2A01E4EC8",
-    "line": 1048,
+    "line": 1052,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Document findings in Progress Log and relevant spec docs"
   },
@@ -2899,7 +2899,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > After disabling",
     "id": "PLN-125D20CDA4",
-    "line": 1006,
+    "line": 1010,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Updated documentation (if data structures differ from expectations)"
   },
@@ -2907,7 +2907,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > After disabling",
     "id": "PLN-38FE5A5D67",
-    "line": 1005,
+    "line": 1009,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Summary of findings (data structures validated, accuracy measured, etc.)"
   },
@@ -2915,7 +2915,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > After disabling",
     "id": "PLN-C88CC3523F",
-    "line": 1007,
+    "line": 1011,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Progress Log entry with start/end timestamps"
   },
@@ -2923,7 +2923,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > After disabling",
     "id": "PLN-E506DDC149",
-    "line": 1004,
+    "line": 1008,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Confirmation that flags were reverted"
   },
@@ -2931,7 +2931,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > Before enabling",
     "id": "PLN-3DBC800731",
-    "line": 993,
+    "line": 997,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "PM/lead approval timestamp (for production)"
   },
@@ -2939,7 +2939,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > Before enabling",
     "id": "PLN-3E16A1516D",
-    "line": 994,
+    "line": 998,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Current Lambda environment variables (screenshot or CLI output)"
   },
@@ -2947,7 +2947,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > Before enabling",
     "id": "PLN-F8480F18F8",
-    "line": 995,
+    "line": 999,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Incident response plan documented (who can disable flags)"
   },
@@ -2955,7 +2955,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > During shadow mode",
     "id": "PLN-0A6AC21700",
-    "line": 1001,
+    "line": 1005,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Any errors or warnings logged"
   },
@@ -2963,7 +2963,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > During shadow mode",
     "id": "PLN-88A9A1B871",
-    "line": 1000,
+    "line": 1004,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "Sample routing/classification logs (redacted)"
   },
@@ -2971,7 +2971,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > During shadow mode",
     "id": "PLN-AF29C638EC",
-    "line": 998,
+    "line": 1002,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "CloudWatch Logs query results (prove zero writes)"
   },
@@ -2979,7 +2979,7 @@
     "checked": false,
     "heading_path": "Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > During shadow mode",
     "id": "PLN-D8BF3C3C18",
-    "line": 999,
+    "line": 1003,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "API usage metrics (Richpanel/Shopify dashboards)"
   },
@@ -2987,7 +2987,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-1554EE3D8A",
-    "line": 109,
+    "line": 113,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "prod automation rule triggers the correct webhook"
   },
@@ -2995,7 +2995,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-6151E889F5",
-    "line": 107,
+    "line": 111,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "prod `rp-mw/prod/richpanel/bot_agent_id` secret exists (do not print value)"
   },
@@ -3003,7 +3003,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-7BD4980BC1",
-    "line": 108,
+    "line": 112,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "prod HTTP target points to the approved API Gateway"
   },
@@ -3011,7 +3011,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-8C94C55493",
-    "line": 113,
+    "line": 117,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "monitoring/rollback ready (owners + steps documented)"
   },
@@ -3019,7 +3019,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-C0109EBF71",
-    "line": 110,
+    "line": 114,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "prod secrets present (api_key, webhook_token, bot_agent_id, shopify token)"
   },
@@ -3027,7 +3027,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-D447F97256",
-    "line": 111,
+    "line": 115,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "final dev E2E proof passed"
   },
@@ -3035,7 +3035,7 @@
     "checked": false,
     "heading_path": "Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)",
     "id": "PLN-E19550E8BC",
-    "line": 112,
+    "line": 116,
     "source_path": "docs/08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "text": "canary plan decided (allowlist or single internal ticket)"
   },
