@@ -35,7 +35,14 @@ aws sts get-caller-identity --profile rp-admin-prod 2>&1 | Tee-Object -FilePath 
 
 ## PR links
 
-- No PR created in this run (local workspace changes only).
+- `https://github.com/KevinSGarrett/RichPanel/pull/241`
+
+PR status at handoff:
+- `validate`: PASS
+- `claude-gate-check`: PASS
+- `risk-label-check`: PASS
+- `Cursor Bugbot`: PASS
+- `codecov/patch`: PASS
 
 ## GO / NO-GO recommendation
 
