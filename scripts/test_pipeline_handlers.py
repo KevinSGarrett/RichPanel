@@ -49,6 +49,9 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _latest_comment_entry,
     _safe_ticket_comment_operator_fetch,
 )
+from richpanel_middleware.integrations.richpanel.tickets import (  # noqa: E402
+    TicketMetadata,
+)
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
 )
@@ -720,7 +723,12 @@ class OutboundOrderStatusTests(unittest.TestCase):
                 "shipping_method": "USPS/UPS Ground",
             },
         ):
-            plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+            plan = plan_actions(
+                envelope,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+            )
 
         executor = _RecordingExecutor(ticket_channel="email")
         captured: dict[str, Any] = {}
