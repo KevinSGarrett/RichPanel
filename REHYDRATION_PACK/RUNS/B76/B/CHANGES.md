@@ -18,9 +18,11 @@
 - Added run artifacts under `REHYDRATION_PACK/RUNS/B76/B/ARTIFACTS/`:
   - `secrets_preflight_prod.txt`
   - `sts_identity_prod.txt`
-  - `sts_identity_prod_profile_attempt.txt`
+  - `sts_identity_prod_verified.txt`
   - `preflight_prod/preflight_prod.json`
   - `preflight_prod/preflight_prod.md`
+- Re-ran preflight evidence in verified PROD account (`878145708918`) using `rp-admin-prod`.
+- Updated B76 run docs to reflect final verified evidence and readiness recommendation.
 - Added run documentation:
   - `REHYDRATION_PACK/RUNS/B76/B/RUN_REPORT.md`
   - `REHYDRATION_PACK/RUNS/B76/B/EVIDENCE.md`

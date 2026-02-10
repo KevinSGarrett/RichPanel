@@ -1,28 +1,26 @@
 # Order status preflight health check
 
-- timestamp_utc: 2026-02-10T17:05:35.879935+00:00
+- timestamp_utc: 2026-02-10T18:33:43.372018+00:00
 - overall_status: FAIL
-- bot_agent_id_secret_present: False
+- bot_agent_id_secret_present: True
 - bot_agent_id_secret_checked: True
 
 ## Checks
 - required_env: FAIL — missing=MW_ALLOW_NETWORK_READS,RICHPANEL_OUTBOUND_ENABLED,RICHPANEL_READ_ONLY,RICHPANEL_WRITE_DISABLED,SHOPIFY_OUTBOUND_ENABLED,SHOPIFY_SHOP_DOMAIN,SHOPIFY_WRITE_DISABLED
   - next_action: Set required env vars and safety flags for read-only preflight.
 - required_secrets: PASS — checked=5
-- bot_agent_id_secret: FAIL — missing_or_unreadable (ResourceNotFoundException)
-  - next_action: Create bot agent in Richpanel and store id into Secrets Manager at rp-mw/prod/richpanel/bot_agent_id.
+- bot_agent_id_secret: PASS — present (rp-mw/prod/richpanel/bot_agent_id)
 - richpanel_api: PASS — ok (200)
 - shopify_token: PASS — ok (200)
 - shopify_graphql: PASS — ok (200)
 - shopify_token_refresh_lambda: PASS — lambda_config_present
-- shopify_token_refresh_last_success: FAIL — log_query_failed (ResourceNotFoundException)
-  - next_action: Verify CloudWatch Logs permissions and log group name.
+- shopify_token_refresh_last_success: PASS — last_success_age_hours=1.87
 
 ## Shopify token diagnostics
 ```
 {
-  "expired": null,
-  "expires_at": null,
+  "expired": false,
+  "expires_at": 1770828079.2729716,
   "has_refresh_token": false,
   "raw_format": "json",
   "refresh_token_source": null,

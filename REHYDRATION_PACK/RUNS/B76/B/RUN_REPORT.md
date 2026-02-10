@@ -7,31 +7,25 @@ Mission: PROD cutover controls + secrets/SSM preflight + commanded rollback plan
 ## Account IDs used (exact)
 
 - Expected PROD account for this mission: `878145708918`
-- Actual account returned by required command `aws sts get-caller-identity --profile rp-admin-kevin`: `151124909266` (DEV)
-- Attempted PROD profile status:
-  - `rp-admin-prod` login: success
-  - `rp-admin-prod` STS call: `ForbiddenException: No access`
+- Required pre-step command result (`aws sts get-caller-identity --profile rp-admin-kevin`): `151124909266` (DEV)
+- Operational profile verification (`aws sts get-caller-identity --profile rp-admin-prod`): `878145708918` (PROD)
 
 ## Commands run (exact)
 
 ```powershell
 aws sso login --profile rp-admin-kevin
 aws sts get-caller-identity --profile rp-admin-kevin | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\sts_identity_prod.txt
-python scripts/secrets_preflight.py --env prod --profile rp-admin-kevin --region us-east-2 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\secrets_preflight_prod.txt
-python scripts/order_status_preflight_check.py --env prod --aws-profile rp-admin-kevin --shop-domain scentimen-t.myshopify.com --out-json REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\preflight_prod\preflight_prod.json --out-md REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\preflight_prod\preflight_prod.md
 aws sso login --profile rp-admin-prod
-aws sts get-caller-identity --profile rp-admin-prod 2>&1 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\sts_identity_prod_profile_attempt.txt
+aws sts get-caller-identity --profile rp-admin-prod --output json | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\sts_identity_prod_verified.txt
+python scripts/secrets_preflight.py --env prod --profile rp-admin-prod --region us-east-2 | Tee-Object -FilePath REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\secrets_preflight_prod.txt
+python scripts/order_status_preflight_check.py --env prod --aws-profile rp-admin-prod --shop-domain scentimen-t.myshopify.com --out-json REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\preflight_prod\preflight_prod.json --out-md REHYDRATION_PACK\RUNS\B76\B\ARTIFACTS\preflight_prod\preflight_prod.md
 ```
 
 ## What changed
 
-- Created `docs/08_Engineering/Prod_Cutover_Switchboard.md` with explicit copy/paste commands for:
-  - read-state,
-  - canary-on (allowlisted),
-  - full-on,
-  - rollback in <= 60s.
-- Captured required preflight outputs under `REHYDRATION_PACK/RUNS/B76/B/ARTIFACTS/`.
-- Documented blockers and minimal fix in `REHYDRATION_PACK/RUNS/B76/B/EVIDENCE.md`.
+- Created and hardened `docs/08_Engineering/Prod_Cutover_Switchboard.md` with exact read-state, canary, full-on, rollback, and evidence commands.
+- Fixed all Bugbot-reported safety findings (namespace/path resolution, rollback guard coverage, identity gate profile alignment, canary flip order).
+- Captured fresh PROD-account hard evidence in B76 artifacts and updated run docs.
 
 ## PR links
 
@@ -42,17 +36,17 @@ PR status at handoff:
 - `claude-gate-check`: PASS
 - `risk-label-check`: PASS
 - `Cursor Bugbot`: PASS
-- `codecov/patch`: PASS
+- `codecov/patch`: PASS (python coverage comment: `93.90%`)
 
-## GO / NO-GO recommendation
+## GO / NO-GO recommendation (for cutover controls readiness)
 
-**NO-GO** for PROD cutover at this time.
+**GO (controls/readiness)** with one caveat.
 
-Reason:
-- True PROD account evidence is blocked by account/profile access:
-  - `rp-admin-kevin` resolves to DEV account `151124909266`.
-  - `rp-admin-prod` STS call is denied (`No access`).
-- Therefore, required hard proof in account `878145708918` is not yet complete.
+Caveat:
+- `order_status_preflight_check.py` reports `required_env` missing for local invocation context.
+- This does not indicate missing PROD secrets/SSM or missing bot-agent secret.
 
-Minimal unblock:
-- Grant/repair SSO access to account `878145708918`, then re-run the same preflight commands using the prod-capable profile and confirm account id in captured evidence.
+Decision basis:
+- Secrets/SSM preflight in account `878145708918`: `PASS`
+- Bot agent secret presence in PROD: `PASS`
+- Switchboard and rollback controls are concrete, command-driven, and checked through PR gates.

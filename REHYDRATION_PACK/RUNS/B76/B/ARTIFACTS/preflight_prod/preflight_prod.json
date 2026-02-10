@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-02-10T17:05:35.879935+00:00",
+  "timestamp_utc": "2026-02-10T18:33:43.372018+00:00",
   "overall_status": "FAIL",
   "checks": [
     {
@@ -15,10 +15,9 @@
     },
     {
       "name": "bot_agent_id_secret",
-      "status": "FAIL",
-      "details": "missing_or_unreadable (ResourceNotFoundException)",
-      "next_action": "Create bot agent in Richpanel and store id into Secrets Manager at rp-mw/prod/richpanel/bot_agent_id.",
-      "present": false
+      "status": "PASS",
+      "details": "present (rp-mw/prod/richpanel/bot_agent_id)",
+      "present": true
     },
     {
       "name": "richpanel_api",
@@ -35,8 +34,8 @@
         "raw_format": "json",
         "has_refresh_token": false,
         "refresh_token_source": null,
-        "expires_at": null,
-        "expired": null,
+        "expires_at": 1770828079.2729716,
+        "expired": false,
         "source_secret_id": "rp-mw/prod/shopify/admin_api_token"
       }
     },
@@ -52,9 +51,8 @@
     },
     {
       "name": "shopify_token_refresh_last_success",
-      "status": "FAIL",
-      "details": "log_query_failed (ResourceNotFoundException)",
-      "next_action": "Verify CloudWatch Logs permissions and log group name."
+      "status": "PASS",
+      "details": "last_success_age_hours=1.87"
     }
   ],
   "shopify_token_diagnostics": {
@@ -63,10 +61,10 @@
     "raw_format": "json",
     "has_refresh_token": false,
     "refresh_token_source": null,
-    "expires_at": null,
-    "expired": null,
+    "expires_at": 1770828079.2729716,
+    "expired": false,
     "source_secret_id": "rp-mw/prod/shopify/admin_api_token"
   },
-  "bot_agent_id_secret_present": false,
+  "bot_agent_id_secret_present": true,
   "bot_agent_id_secret_checked": true
 }
