@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:57:26.960004+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "note": "verification after fulfillment tracking selection fix"
+  },
+  "summary": {
+    "total": 4,
+    "tracking_present": 0,
+    "carrier_present": 0,
+    "tracking_link_present": 0,
+    "shipping_method_present": 0
+  },
+  "rows": [
+    {
+      "order_number": "1042063",
+      "ticket_number": "1341",
+      "status": "OPEN",
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number": "1106830",
+      "ticket_number": "1342",
+      "status": "OPEN",
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number": "1051523",
+      "ticket_number": "1343",
+      "status": "OPEN",
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number": "1050994",
+      "ticket_number": "1344",
+      "status": "OPEN",
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    }
+  ]
+}

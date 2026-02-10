@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:52:59.505301+00:00",
+    "env": "dev",
+    "ticket_number": "1348"
+  },
+  "email_field_paths": [
+    "customer_profile.email"
+  ]
+}

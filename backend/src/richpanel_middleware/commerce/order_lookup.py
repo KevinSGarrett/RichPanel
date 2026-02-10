@@ -225,7 +225,7 @@ def lookup_order_summary(
     if payload_summary:
         summary = _merge_summary(summary, payload_summary)
         order_id = summary.get("order_id")
-        if _has_payload_shipping_signal(summary) and order_id not in (
+        if _has_payload_tracking_signal(summary) and order_id not in (
             None,
             "",
             "unknown",
@@ -1043,6 +1043,20 @@ def _has_payload_shipping_signal(summary: OrderSummary) -> bool:
     return False
 
 
+def _has_payload_tracking_signal(summary: OrderSummary) -> bool:
+    if not summary:
+        return False
+    for key in (
+        "tracking_number",
+        "tracking_url",
+        "carrier",
+    ):
+        value = summary.get(key)
+        if value not in (None, "", "unknown"):
+            return True
+    return False
+
+
 def _extract_order_id(payload: Dict[str, Any]) -> str:
     for key in ("order_id", "order_number"):
         value = _coerce_str(payload.get(key))
@@ -1250,14 +1264,29 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
     carrier = ""
     fulfillments = payload.get("fulfillments")
     if isinstance(fulfillments, list) and fulfillments:
-        first = fulfillments[0]
-        if isinstance(first, dict):
-            carrier = _coerce_str(first.get("tracking_company")) or carrier
-            tracking_number = (
-                _first_str(first.get("tracking_numbers"))
-                or _coerce_str(first.get("tracking_number"))
-                or tracking_number
+        selected = None
+        for entry in fulfillments:
+            if not isinstance(entry, dict):
+                continue
+            candidate = _first_str(entry.get("tracking_numbers")) or _coerce_str(
+                entry.get("tracking_number")
             )
+            if candidate:
+                selected = entry
+                tracking_number = candidate
+                break
+        if selected is None:
+            first = fulfillments[0]
+            if isinstance(first, dict):
+                selected = first
+        if isinstance(selected, dict):
+            carrier = _coerce_str(selected.get("tracking_company")) or carrier
+            if not tracking_number:
+                tracking_number = (
+                    _first_str(selected.get("tracking_numbers"))
+                    or _coerce_str(selected.get("tracking_number"))
+                    or tracking_number
+                )
     shipping_method = None
     shipping_lines = payload.get("shipping_lines")
     if isinstance(shipping_lines, list) and shipping_lines:
@@ -1446,3 +1475,8 @@ def _first_str(values: Any) -> Optional[str]:
     if isinstance(values, list) and values:
         return _coerce_str(values[0])
     return _coerce_str(values)
+
+
+def extract_order_number_from_payload(payload: Dict[str, Any]) -> str:
+    order_number, _ = _extract_order_number_from_payload(payload)
+    return order_number

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T04:11:14.340322+00:00",
+    "env": "dev",
+    "note": "after CDK timeout+flags fix"
+  },
+  "ticket": {
+    "ticket_number": "1351",
+    "status": "OPEN",
+    "tags": [
+      "mw-smoke-autoticket",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied"
+    ]
+  },
+  "reply": {
+    "carrier": false,
+    "tracking_number": false,
+    "tracking_link": false,
+    "shipping_method": false
+  }
+}

@@ -383,6 +383,10 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
         or order_summary.get("tracking_no")
         or order_summary.get("trackingCode")
     )
+    if isinstance(tracking_number, (list, dict)):
+        tracking_number = None
+    if isinstance(tracking_number, str) and tracking_number.strip() in {"[]", "none", "null"}:
+        tracking_number = None
     tracking_url = (
         order_summary.get("tracking_url")
         or order_summary.get("tracking_link")
@@ -395,6 +399,13 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
         or order_summary.get("carrier_name")
         or order_summary.get("carrierName")
     )
+    shipping_method = (
+        order_summary.get("shipping_method")
+        or order_summary.get("shipping_method_name")
+        or order_summary.get("shipping_service")
+        or order_summary.get("shipping_option")
+    )
+    shipping_method = normalize_shipping_method_for_carrier(shipping_method, carrier)
 
     # Require at least one tracking signal; don't fabricate.
     if not tracking_number and not tracking_url and not carrier:
@@ -409,12 +420,15 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
     tn = tracking_number or "(not available)"
     cr = carrier or "(not available)"
     link = tracking_url or "(not available)"
+    sm = shipping_method
 
+    shipping_line = f"- Shipping method: {sm}\n" if sm else ""
     body = (
         "Thanks for reaching out — here’s the latest tracking information for your order:\n\n"
         f"- Carrier: {cr}\n"
         f"- Tracking number: {tn}\n"
-        f"- Tracking link: {link}\n\n"
+        f"- Tracking link: {link}\n"
+        f"{shipping_line}\n"
         "If the link doesn’t show updates yet, please try again in a few hours — carrier scans can take time to appear."
     )
 
@@ -423,7 +437,50 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
         "tracking_number": tracking_number,
         "tracking_url": tracking_url,
         "carrier": carrier,
+        "shipping_method": shipping_method,
     }
+
+
+def normalize_shipping_method_for_carrier(
+    shipping_method: Optional[str], carrier: Optional[str]
+) -> Optional[str]:
+    """
+    Normalize the shipping method label to align with the actual carrier when they conflict.
+
+    Example: "USPS/UPS® Ground" + carrier "FedEx" -> "FedEx Ground"
+    """
+    if not carrier:
+        return shipping_method
+    carrier_text = str(carrier).strip()
+    if not carrier_text:
+        return shipping_method
+
+    if not shipping_method:
+        return None
+    method_text = str(shipping_method).strip()
+    if not method_text:
+        return None
+
+    normalized_carrier = _normalize_carrier_name(carrier_text)
+    if normalized_carrier:
+        if normalized_carrier in {"ups", "usps", "fedex", "dhl"}:
+            if re.search(
+                rf"\b{re.escape(normalized_carrier)}\b",
+                method_text,
+                flags=re.IGNORECASE,
+            ):
+                return method_text
+        else:
+            normalized_method = _normalize_carrier_name(method_text)
+            if normalized_carrier in normalized_method:
+                return method_text
+
+    # Strip known carrier tokens from the method label and keep the service portion.
+    cleaned = re.sub(r"\b(usps|ups|fedex|dhl)\b", " ", method_text, flags=re.IGNORECASE)
+    cleaned = re.sub(r"[^A-Za-z0-9]+", " ", cleaned).strip()
+    if cleaned:
+        return f"{carrier_text} {cleaned}"
+    return carrier_text
 
 
 def build_no_tracking_reply(

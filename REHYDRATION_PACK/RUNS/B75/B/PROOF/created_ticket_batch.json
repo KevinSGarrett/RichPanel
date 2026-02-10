@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T01:59:45.272522+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "records": [
+    {
+      "order_number_fingerprint": "cbf4c8447258",
+      "ticket_number_redacted": "redacted:065f4fa6723d",
+      "ticket_number_fingerprint": "065f4fa6723d",
+      "conversation_id_redacted": "redacted:72573d3a462c",
+      "conversation_id_fingerprint": "72573d3a462c"
+    },
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number_redacted": "redacted:c999d2c4092b",
+      "ticket_number_fingerprint": "c999d2c4092b",
+      "conversation_id_redacted": "redacted:654476cfd5eb",
+      "conversation_id_fingerprint": "654476cfd5eb"
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number_redacted": "redacted:0e0c8d9c5fa4",
+      "ticket_number_fingerprint": "0e0c8d9c5fa4",
+      "conversation_id_redacted": "redacted:9f99678baadb",
+      "conversation_id_fingerprint": "9f99678baadb"
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number_redacted": "redacted:8c8f6b438142",
+      "ticket_number_fingerprint": "8c8f6b438142",
+      "conversation_id_redacted": "redacted:280d4e129c99",
+      "conversation_id_fingerprint": "280d4e129c99"
+    },
+    {
+      "order_number_fingerprint": "2fe941a711fa",
+      "ticket_number_redacted": "redacted:a9b9bd8e0ec8",
+      "ticket_number_fingerprint": "a9b9bd8e0ec8",
+      "conversation_id_redacted": "redacted:174ab2792b99",
+      "conversation_id_fingerprint": "174ab2792b99"
+    },
+    {
+      "order_number_fingerprint": "c4f86a23a75e",
+      "ticket_number_redacted": "redacted:400b6feaba94",
+      "ticket_number_fingerprint": "400b6feaba94",
+      "conversation_id_redacted": "redacted:ccf8e4f85cae",
+      "conversation_id_fingerprint": "ccf8e4f85cae"
+    },
+    {
+      "order_number_fingerprint": "ceee07397d9f",
+      "ticket_number_redacted": "redacted:587a49055762",
+      "ticket_number_fingerprint": "587a49055762",
+      "conversation_id_redacted": "redacted:03fafb5f87e1",
+      "conversation_id_fingerprint": "03fafb5f87e1"
+    },
+    {
+      "order_number_fingerprint": "5ccd706a2956",
+      "ticket_number_redacted": "redacted:9c499c3ddf63",
+      "ticket_number_fingerprint": "9c499c3ddf63",
+      "conversation_id_redacted": "redacted:354a03b2dbbd",
+      "conversation_id_fingerprint": "354a03b2dbbd"
+    },
+    {
+      "order_number_fingerprint": "2840745bc3f0",
+      "ticket_number_redacted": "redacted:18959bb5d775",
+      "ticket_number_fingerprint": "18959bb5d775",
+      "conversation_id_redacted": "redacted:3d211b3b6253",
+      "conversation_id_fingerprint": "3d211b3b6253"
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number_redacted": "redacted:f7961248034a",
+      "ticket_number_fingerprint": "f7961248034a",
+      "conversation_id_redacted": "redacted:fb5c37be8d4f",
+      "conversation_id_fingerprint": "fb5c37be8d4f"
+    }
+  ]
+}

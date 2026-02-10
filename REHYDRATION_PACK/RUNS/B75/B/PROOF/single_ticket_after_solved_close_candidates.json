@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:23:13.393360+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "note": "single ticket after solved close candidates"
+  },
+  "ticket": {
+    "order_number": "1051523",
+    "ticket_number": "1347",
+    "status": "OPEN"
+  },
+  "reply": {
+    "latest_comment_is_operator": true,
+    "carrier_present": false,
+    "tracking_number_present": false,
+    "tracking_link_present": false,
+    "shipping_method_present": false
+  }
+}

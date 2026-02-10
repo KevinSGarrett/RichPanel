@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:12:17.890100+00:00",
+    "env": "dev",
+    "ticket_number": "1345"
+  },
+  "conversation_id": "<CAMxAqfXOMJBwSi1-XcU=gLi5YqK5yWJfhgO-MB0gWY6rZ5_mYQ@mail.gmail.com>",
+  "audit": [
+    {
+      "ts_action_id": "2026-02-10T03:08:43.676368+00:00#evt:614adb9a-1361-4408-bb74-56710118ff13",
+      "routing": {
+        "M": {
+          "reason": {
+            "S": "order number present with shipping or tracking language"
+          },
+          "category": {
+            "S": "order_status"
+          },
+          "department": {
+            "S": "Email Support Team"
+          },
+          "intent": {
+            "S": "order_status_tracking"
+          },
+          "tags": {
+            "L": [
+              {
+                "S": "mw-routing-applied"
+              },
+              {
+                "S": "mw-intent-order_status_tracking"
+              }
+            ]
+          }
+        }
+      },
+      "order_summary": {},
+      "outbound_result": {},
+      "openai_rewrite": {}
+    }
+  ]
+}

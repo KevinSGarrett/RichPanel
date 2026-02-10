@@ -2,5 +2,6 @@ ignore:
   - ".github/**"
   - "PM_REHYDRATION_PACK/**"
   - "REHYDRATION_PACK/**"
+  - "infra/**"
   - "docs/REGISTRY.md"
   - "docs/_generated/**"

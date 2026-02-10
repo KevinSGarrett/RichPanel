@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:53:49.575247+00:00",
+    "env": "dev",
+    "ticket_number": "1336"
+  },
+  "conversation_id": "api-scentimenttesting3300-ca4b28cc-ca38-4009-b380-ca9231fe10f2",
+  "outbound_result": null,
+  "actions": {
+    "L": [
+      {
+        "M": {
+          "type": {
+            "S": "analyze"
+          },
+          "note": {
+            "S": "automation candidate (dry-run)"
+          },
+          "reasons": {
+            "L": [
+              {
+                "S": "order number present with shipping or tracking language"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "M": {
+          "note": {
+            "S": "order status draft reply (dry-run)"
+          },
+          "dry_run": {
+            "BOOL": true
+          },
+          "reasons": {
+            "L": [
+              {
+                "S": "order number present with shipping or tracking language"
+              }
+            ]
+          },
+          "type": {
+            "S": "order_status_draft_reply"
+          },
+          "parameters": {
+            "M": {
+              "prompt_fingerprint": {
+                "S": "cae011edddd5a7ff6e69c3f7f334a699f36aaf599f46e9d15e9fc64125844139"
+              },
+              "draft_reply_fingerprint": {
+                "S": "27c6cb3b3586"
+              },
+              "has_draft_reply": {
+                "BOOL": true
+              },
+              "order_summary_fingerprint": {
+                "S": "f01abd379425"
+              }
+            }
+          },
+          "enabled": {
+            "BOOL": false
+          }
+        }
+      }
+    ]
+  }
+}

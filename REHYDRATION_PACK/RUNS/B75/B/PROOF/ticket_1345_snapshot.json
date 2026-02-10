@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:11:59.968558+00:00",
+    "env": "dev",
+    "ticket_number": "1345"
+  },
+  "ticket": {
+    "id": "<CAMxAqfXOMJBwSi1-XcU=gLi5YqK5yWJfhgO-MB0gWY6rZ5_mYQ@mail.gmail.com>",
+    "status": "OPEN",
+    "state": null,
+    "tags": [
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied"
+    ],
+    "comment_count": 2
+  }
+}

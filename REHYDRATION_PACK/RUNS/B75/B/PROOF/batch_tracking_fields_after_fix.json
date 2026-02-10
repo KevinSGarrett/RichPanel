@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:48:09.111869+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "note": "batch verification after tracking enrichment fix"
+  },
+  "summary": {
+    "total": 10,
+    "tracking_present": 5,
+    "carrier_present": 5,
+    "tracking_link_present": 5,
+    "shipping_method_present": 5
+  },
+  "rows": [
+    {
+      "order_number_fingerprint": "cbf4c8447258",
+      "ticket_number": "1331",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number": "1332",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number": "1333",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number": "1334",
+      "status": "OPEN",
+      "latest_comment_is_operator": false,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number_fingerprint": "2fe941a711fa",
+      "ticket_number": "1335",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "order_number_fingerprint": "c4f86a23a75e",
+      "ticket_number": "1336",
+      "status": "CLOSED",
+      "latest_comment_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "order_number_fingerprint": "ceee07397d9f",
+      "ticket_number": "1337",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "order_number_fingerprint": "5ccd706a2956",
+      "ticket_number": "1338",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "order_number_fingerprint": "2840745bc3f0",
+      "ticket_number": "1339",
+      "status": "OPEN",
+      "latest_comment_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number": "1340",
+      "status": "OPEN",
+      "latest_comment_is_operator": false,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    }
+  ]
+}

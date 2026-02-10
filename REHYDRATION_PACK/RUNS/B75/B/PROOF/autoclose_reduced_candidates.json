@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T04:23:18.995443+00:00",
+    "env": "dev",
+    "note": "after reduced close candidates"
+  },
+  "ticket": {
+    "ticket_number": "1353",
+    "status": "CLOSED",
+    "tags": [
+      "mw-smoke-autoticket",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied",
+      "mw-auto-replied",
+      "mw-order-status-answered",
+      "mw-outbound-path-send-message",
+      "mw-reply-sent"
+    ]
+  }
+}

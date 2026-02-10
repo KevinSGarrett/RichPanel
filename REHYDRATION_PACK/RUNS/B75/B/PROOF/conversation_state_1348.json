@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:41:37.005380+00:00",
+    "env": "dev",
+    "ticket_number": "1348"
+  },
+  "conversation_id": "api-scentimenttesting3300-50575593-d4eb-43d4-8b5c-a603a37d3366",
+  "outbound_result": null,
+  "actions": {
+    "L": [
+      {
+        "M": {
+          "type": {
+            "S": "analyze"
+          },
+          "note": {
+            "S": "automation candidate (dry-run)"
+          },
+          "reasons": {
+            "L": [
+              {
+                "S": "order number present with shipping or tracking language"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "M": {
+          "note": {
+            "S": "order status draft reply (dry-run)"
+          },
+          "dry_run": {
+            "BOOL": true
+          },
+          "reasons": {
+            "L": [
+              {
+                "S": "order number present with shipping or tracking language"
+              }
+            ]
+          },
+          "type": {
+            "S": "order_status_draft_reply"
+          },
+          "parameters": {
+            "M": {
+              "prompt_fingerprint": {
+                "S": "bbb285798d3ddd0039f27f02e03929df9b3263cc2b36ef467547b2a0d15c4b29"
+              },
+              "delivery_estimate_present": {
+                "BOOL": true
+              },
+              "draft_reply_fingerprint": {
+                "S": "bebc20f114ba"
+              },
+              "has_draft_reply": {
+                "BOOL": true
+              },
+              "order_summary_fingerprint": {
+                "S": "649aec8e2822"
+              }
+            }
+          },
+          "enabled": {
+            "BOOL": false
+          }
+        }
+      }
+    ]
+  },
+  "reasons": null
+}

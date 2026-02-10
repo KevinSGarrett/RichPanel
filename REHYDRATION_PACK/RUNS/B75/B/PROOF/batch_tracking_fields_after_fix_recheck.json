@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:51:27.210552+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "note": "recheck after processing delay"
+  },
+  "summary": {
+    "total": 10,
+    "tracking_present": 6,
+    "carrier_present": 6,
+    "tracking_link_present": 6,
+    "shipping_method_present": 6,
+    "closed": 1
+  },
+  "rows": [
+    {
+      "ticket_number": "1331",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "ticket_number": "1332",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "ticket_number": "1333",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "ticket_number": "1334",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "ticket_number": "1335",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "ticket_number": "1336",
+      "status": "CLOSED",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "ticket_number": "1337",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "ticket_number": "1338",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": false,
+      "tracking_number_present": false,
+      "tracking_link_present": false,
+      "shipping_method_present": false
+    },
+    {
+      "ticket_number": "1339",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    },
+    {
+      "ticket_number": "1340",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2,
+      "latest_is_operator": true,
+      "carrier_present": true,
+      "tracking_number_present": true,
+      "tracking_link_present": true,
+      "shipping_method_present": true
+    }
+  ]
+}

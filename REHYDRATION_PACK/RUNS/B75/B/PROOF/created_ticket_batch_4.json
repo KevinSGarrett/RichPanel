@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:29:16.316788+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "records": [
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number_redacted": "redacted:845aab778f5f",
+      "ticket_number_fingerprint": "845aab778f5f",
+      "conversation_id_redacted": "redacted:c242f08e64c0",
+      "conversation_id_fingerprint": "c242f08e64c0"
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number_redacted": "redacted:095eaa09cd36",
+      "ticket_number_fingerprint": "095eaa09cd36",
+      "conversation_id_redacted": "redacted:4d814b0147a1",
+      "conversation_id_fingerprint": "4d814b0147a1"
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number_redacted": "redacted:560229669058",
+      "ticket_number_fingerprint": "560229669058",
+      "conversation_id_redacted": "redacted:49b8872c0d00",
+      "conversation_id_fingerprint": "49b8872c0d00"
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number_redacted": "redacted:5f0fbfc126a9",
+      "ticket_number_fingerprint": "5f0fbfc126a9",
+      "conversation_id_redacted": "redacted:5cbe5bf56d64",
+      "conversation_id_fingerprint": "5cbe5bf56d64"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T04:17:54.298134+00:00",
+    "env": "dev",
+    "note": "fresh ticket after CDK flags fix"
+  },
+  "ticket": {
+    "ticket_number": "1352",
+    "status": "OPEN",
+    "tags": [
+      "mw-smoke-autoticket",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied"
+    ]
+  },
+  "reply": {
+    "carrier": true,
+    "tracking_number": true,
+    "tracking_link": true,
+    "shipping_method": true
+  }
+}

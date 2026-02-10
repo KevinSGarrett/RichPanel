@@ -26,6 +26,7 @@ os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 
 from richpanel_middleware.automation import pipeline as pipeline_module  # noqa: E402
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
+    ActionPlan,
     execute_order_status_reply,
     execute_routing_tags,
     execute_plan,
@@ -43,11 +44,15 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _SECRET_VALUE_CACHE,
     _SECRET_VALUE_CACHE_TTL_SECONDS,
     _resolve_bot_agent_id,
+    LOOP_PREVENTION_TAG,
     _latest_comment_is_operator,
     _comment_operator_flag,
     _comment_created_at,
     _latest_comment_entry,
     _safe_ticket_comment_operator_fetch,
+)
+from richpanel_middleware.integrations.richpanel.tickets import (  # noqa: E402
+    TicketMetadata,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (  # noqa: E402
     ReplyRewriteResult,
@@ -214,6 +219,45 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn(
             "We'll send tracking as soon as it ships.", draft_reply["body"]
         )
+
+    def test_plan_actions_merges_ticket_snapshot_payload(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-merge",
+                "message": "Where is my order?",
+            }
+        )
+        ticket_payload = {
+            "order_number": "12345",
+            "subject": "Order #12345",
+            "body": "Where is my order #12345",
+        }
+        metadata = TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False)
+        captured: dict[str, Any] = {}
+
+        def _fake_lookup(envelope: Any, **_: Any) -> dict[str, Any]:
+            captured["payload"] = envelope.payload
+            return {"tracking_number": "TN1", "carrier": "FedEx"}
+
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
+            return_value=(metadata, "email", "buyer@example.com", ticket_payload),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.lookup_order_summary",
+            side_effect=_fake_lookup,
+        ):
+            plan_actions(
+                envelope,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+            )
+
+        merged_payload = captured.get("payload") or {}
+        self.assertEqual(merged_payload.get("order_number"), "12345")
+        self.assertEqual(merged_payload.get("email"), "buyer@example.com")
+        self.assertEqual(merged_payload.get("subject"), "Order #12345")
+        self.assertEqual(merged_payload.get("body"), "Where is my order #12345")
 
     def test_no_tracking_reply_includes_remaining_window(self) -> None:
         inquiry_date = "2024-01-03"
@@ -637,6 +681,216 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertFalse(
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
+
+    def test_existing_operator_reply_closes_without_send_message(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email", ticket_status="open")
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=True
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        self.assertEqual(result["reason"], "closed_after_existing_operator_reply")
+        self.assertTrue(any(call["path"].endswith("/add-tags") for call in executor.calls))
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
+    def test_existing_operator_reply_close_failure_routes_support(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email", ticket_status="open", reply_status_codes=[500]
+        )
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=True
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "reply_close_failed")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
+    def test_existing_operator_reply_retry_only_on_unknown(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email", ticket_status="open")
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=False
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
+        ) as sleep_mock, mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        sleep_mock.assert_not_called()
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=None
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
+        ) as sleep_mock, mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        sleep_mock.assert_called_once()
+
+    def test_loop_prevention_tag_skips_existing_operator_reply(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_status="open",
+            ticket_tags=[LOOP_PREVENTION_TAG],
+        )
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=True
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertEqual(result["reason"], "followup_after_auto_reply")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
+    def test_reply_context_normalizes_shipping_method(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-ship-method",
+                "channel": "email",
+                "message": "Where is my order?",
+            }
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "draft_reply": {
+                            "body": "Draft reply body",
+                            "tracking_number": "TN1",
+                            "tracking_url": "https://example.com/track",
+                            "carrier": "FedEx",
+                        },
+                        "order_summary": {
+                            "shipping_method": "USPS/UPS Ground",
+                        },
+                    },
+                }
+            ],
+        )
+
+        executor = _RecordingExecutor(ticket_channel="email")
+        captured: dict[str, Any] = {}
+
+        def _capture_prompt(*, context: Any, **_: Any) -> list[dict[str, str]]:
+            captured["context"] = context
+            return []
+
+        rewrite_result = ReplyRewriteResult(
+            body="draft",
+            rewritten=False,
+            reason="skipped",
+            model="gpt-5.2-chat-latest",
+            confidence=0.0,
+            dry_run=False,
+            fingerprint="fp",
+            llm_called=False,
+            response_id=None,
+        )
+
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.build_order_status_reply_prompt",
+            side_effect=_capture_prompt,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.rewrite_reply",
+            return_value=rewrite_result,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_comment_operator_fetch",
+            return_value=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ), mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        reply_context = captured.get("context")
+        self.assertIsNotNone(reply_context)
+        self.assertEqual(reply_context.shipping_method, "FedEx Ground")
 
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
@@ -1790,7 +2044,7 @@ class ReadOnlyGuardTests(unittest.TestCase):
                     dry_run=kwargs.get("dry_run", False),
                 )
 
-        metadata, channel, customer_email = _safe_ticket_snapshot_fetch(
+        metadata, channel, customer_email, _ticket_payload = _safe_ticket_snapshot_fetch(
             "ticket-1",
             executor=cast(RichpanelExecutor, _ChannelExecutor()),
             allow_network=True,

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:18:10.737564+00:00",
+    "env": "dev",
+    "ticket_number": "1346"
+  },
+  "encoded_id": "api-scentimenttesting3300-84d94959-cca5-4a4c-bd50-b0519794f5f3",
+  "update_results": [
+    {
+      "candidate": "ticket_state_closed",
+      "status": 200
+    },
+    {
+      "candidate": "ticket_status_closed",
+      "status": 400
+    },
+    {
+      "candidate": "state_closed",
+      "status": 400
+    },
+    {
+      "candidate": "status_closed",
+      "status": 400
+    },
+    {
+      "candidate": "ticket_state_resolved",
+      "status": 200
+    },
+    {
+      "candidate": "ticket_status_resolved",
+      "status": 400
+    }
+  ],
+  "final_status": "OPEN",
+  "final_state": null
+}

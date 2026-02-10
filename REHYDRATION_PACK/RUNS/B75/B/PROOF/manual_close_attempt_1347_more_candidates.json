@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:24:21.605779+00:00",
+    "env": "dev",
+    "ticket_number": "1347"
+  },
+  "update_results": [
+    {
+      "candidate": "ticket_state_closed_status_CLOSED",
+      "status": 200
+    },
+    {
+      "candidate": "ticket_state_CLOSED_status_CLOSED",
+      "status": 200
+    },
+    {
+      "candidate": "ticket_state_closed_status_closed",
+      "status": 400
+    },
+    {
+      "candidate": "ticket_state_resolved_status_RESOLVED",
+      "status": 400
+    },
+    {
+      "candidate": "ticket_state_RESOLVED_status_RESOLVED",
+      "status": 400
+    },
+    {
+      "candidate": "ticket_state_solved_status_SOLVED",
+      "status": 400
+    }
+  ],
+  "final_status": "CLOSED",
+  "final_state": null
+}

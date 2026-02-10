@@ -8,6 +8,8 @@
         "region": "us-east-2",
         "owner": "middleware",
         "costCenter": "eng-dev",
+        "outboundAllowlistEmails": "sandbox.test+allowlist@example.com,sandbox.test+autoticket@example.com",
+        "richpanelBotAuthorId": "f2193c62-be32-4361-90f2-5d73a24e896e",
         "tags": {
           "service": "richpanel-middleware",
           "tier": "dev"

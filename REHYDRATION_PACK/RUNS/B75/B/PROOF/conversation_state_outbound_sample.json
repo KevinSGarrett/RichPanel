@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:00:14.990327+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "note": "conversation_state outbound_result for sample tickets"
+  },
+  "rows": [
+    {
+      "ticket_number": "1331",
+      "conversation_id": "api-scentimenttesting3300-a2ad9042-9c7d-477b-8cde-1f8c36b39e90",
+      "outbound_result": null
+    },
+    {
+      "ticket_number": "1332",
+      "conversation_id": "api-scentimenttesting3300-7e5524e8-ee90-4e47-a527-0835a19d8565",
+      "outbound_result": null
+    },
+    {
+      "ticket_number": "1333",
+      "conversation_id": "api-scentimenttesting3300-5930fc58-5be8-48d5-ab73-76fb0b4fef45",
+      "outbound_result": null
+    },
+    {
+      "ticket_number": "1334",
+      "conversation_id": "api-scentimenttesting3300-2ba1d95b-d5a9-4917-a8e6-d75736e46c3f",
+      "outbound_result": null
+    },
+    {
+      "ticket_number": "1338",
+      "conversation_id": "api-scentimenttesting3300-836879c1-36dd-4a4c-b335-63792d489ee2",
+      "outbound_result": null
+    }
+  ]
+}

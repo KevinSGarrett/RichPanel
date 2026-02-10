@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:59:53.197030+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "note": "audit trail snapshot for missing tracking tickets"
+  },
+  "rows": [
+    {
+      "ticket_number": "1331",
+      "conversation_id": "api-scentimenttesting3300-a2ad9042-9c7d-477b-8cde-1f8c36b39e90",
+      "audit": [
+        {
+          "ts_action_id": "2026-02-10T02:46:18.980910+00:00#evt:afae4549-8105-49da-b448-76c7d82eac23",
+          "routing": {
+            "M": {
+              "reason": {
+                "S": "order number present with shipping or tracking language"
+              },
+              "category": {
+                "S": "order_status"
+              },
+              "department": {
+                "S": "Email Support Team"
+              },
+              "intent": {
+                "S": "order_status_tracking"
+              },
+              "tags": {
+                "L": [
+                  {
+                    "S": "mw-routing-applied"
+                  },
+                  {
+                    "S": "mw-intent-order_status_tracking"
+                  }
+                ]
+              }
+            }
+          },
+          "order_summary": {},
+          "outbound_result": {},
+          "openai_rewrite": {}
+        }
+      ]
+    },
+    {
+      "ticket_number": "1333",
+      "conversation_id": "api-scentimenttesting3300-5930fc58-5be8-48d5-ab73-76fb0b4fef45",
+      "audit": [
+        {
+          "ts_action_id": "2026-02-10T02:46:56.074151+00:00#evt:781e7cfe-f5d9-46e9-af3a-4a5557398acc",
+          "routing": {
+            "M": {
+              "reason": {
+                "S": "order number present with shipping or tracking language"
+              },
+              "category": {
+                "S": "order_status"
+              },
+              "department": {
+                "S": "Email Support Team"
+              },
+              "intent": {
+                "S": "order_status_tracking"
+              },
+              "tags": {
+                "L": [
+                  {
+                    "S": "mw-routing-applied"
+                  },
+                  {
+                    "S": "mw-intent-order_status_tracking"
+                  }
+                ]
+              }
+            }
+          },
+          "order_summary": {},
+          "outbound_result": {},
+          "openai_rewrite": {}
+        }
+      ]
+    },
+    {
+      "ticket_number": "1334",
+      "conversation_id": "api-scentimenttesting3300-2ba1d95b-d5a9-4917-a8e6-d75736e46c3f",
+      "audit": [
+        {
+          "ts_action_id": "2026-02-10T02:49:11.138731+00:00#evt:2722eec3-164f-4d8d-85a8-076358f13268",
+          "routing": {
+            "M": {
+              "reason": {
+                "S": "order number present with shipping or tracking language"
+              },
+              "category": {
+                "S": "order_status"
+              },
+              "department": {
+                "S": "Email Support Team"
+              },
+              "intent": {
+                "S": "order_status_tracking"
+              },
+              "tags": {
+                "L": [
+                  {
+                    "S": "mw-routing-applied"
+                  },
+                  {
+                    "S": "mw-intent-order_status_tracking"
+                  }
+                ]
+              }
+            }
+          },
+          "order_summary": {},
+          "outbound_result": {},
+          "openai_rewrite": {}
+        }
+      ]
+    },
+    {
+      "ticket_number": "1338",
+      "conversation_id": "api-scentimenttesting3300-836879c1-36dd-4a4c-b335-63792d489ee2",
+      "audit": [
+        {
+          "ts_action_id": "2026-02-10T02:47:59.493157+00:00#evt:dc99bfce-8217-4546-9bd4-432c709399a7",
+          "routing": {
+            "M": {
+              "reason": {
+                "S": "order number present with shipping or tracking language"
+              },
+              "category": {
+                "S": "order_status"
+              },
+              "department": {
+                "S": "Email Support Team"
+              },
+              "intent": {
+                "S": "order_status_tracking"
+              },
+              "tags": {
+                "L": [
+                  {
+                    "S": "mw-routing-applied"
+                  },
+                  {
+                    "S": "mw-intent-order_status_tracking"
+                  }
+                ]
+              }
+            }
+          },
+          "order_summary": {},
+          "outbound_result": {},
+          "openai_rewrite": {}
+        }
+      ]
+    }
+  ]
+}

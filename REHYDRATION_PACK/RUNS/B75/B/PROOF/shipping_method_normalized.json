@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T01:50:58.491186+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "ticket": {
+    "ticket_number_redacted": "redacted"
+  },
+  "proof_fields": {
+    "carrier_present": true,
+    "shipping_method_present": true,
+    "shipping_method_matches_carrier": true,
+    "carrier_value": "FedEx",
+    "shipping_method_value": "FedEx Ground"
+  }
+}
