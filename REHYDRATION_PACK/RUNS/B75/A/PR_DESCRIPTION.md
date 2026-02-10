@@ -52,6 +52,7 @@
 ### 6) Test plan
 **Local / CI-equivalent:**
 - `python scripts/test_delivery_estimate.py`
+- `python -m pytest backend/tests/test_tracking_link_generation.py`
 
 ### 7) Results & evidence
 **CI:** not run locally  

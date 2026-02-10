@@ -23,6 +23,7 @@ python scripts/test_delivery_estimate.py
 
 ## Tests
 - `python scripts/test_delivery_estimate.py` (includes new tracking URL tests)
+- `python -m pytest backend/tests/test_tracking_link_generation.py`
 
 ## Artifacts
 - `REHYDRATION_PACK/RUNS/B75/A/PROOF/secrets_preflight_dev.json`

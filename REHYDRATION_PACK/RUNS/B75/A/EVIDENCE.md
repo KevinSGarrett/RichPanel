@@ -26,8 +26,17 @@ python scripts/test_delivery_estimate.py
 ```
 Result (summary):
 ```
-Ran 27 tests in 0.009s
+Ran 27 tests in 0.008s
 OK
+```
+
+Additional coverage:
+```
+python -m pytest backend/tests/test_tracking_link_generation.py
+```
+Result (summary):
+```
+8 passed in 0.15s
 ```
 
 ## Tracking URL Proof (redacted)

@@ -349,13 +349,13 @@ def build_tracking_url(
         return None
 
     encoded_tracking = quote(tracking_value, safe="")
-    if normalized_carrier in {"fedex", "fedexexpress", "federalexpress"}:
+    if "fedex" in normalized_carrier or "federalexpress" in normalized_carrier:
         return f"https://www.fedex.com/fedextrack/?trknbr={encoded_tracking}"
-    if normalized_carrier in {"ups", "unitedparcelservice"}:
-        return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
-    if normalized_carrier in {"usps", "unitedstatespostalservice"}:
+    if "usps" in normalized_carrier or "unitedstatespostalservice" in normalized_carrier:
         return f"https://tools.usps.com/go/TrackConfirmAction?tLabels={encoded_tracking}"
-    if normalized_carrier in {"dhl", "dhlexpress"}:
+    if "ups" in normalized_carrier or "unitedparcelservice" in normalized_carrier:
+        return f"https://www.ups.com/track?loc=en_US&tracknum={encoded_tracking}"
+    if "dhl" in normalized_carrier or "dhlexpress" in normalized_carrier:
         return (
             "https://www.dhl.com/global-en/home/tracking.html"
             f"?tracking-id={encoded_tracking}"
