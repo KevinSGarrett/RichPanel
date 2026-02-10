@@ -195,6 +195,9 @@ $AUTOMATION_PARAM = aws cloudformation describe-stacks `
   --query "Stacks[0].Outputs[?OutputKey=='AutomationEnabledParamPath'].OutputValue | [0]" `
   --output text
 
+if (-not $SAFE_MODE_PARAM -or $SAFE_MODE_PARAM -eq "None") { throw "SafeModeParamPath output missing; aborting." }
+if (-not $AUTOMATION_PARAM -or $AUTOMATION_PARAM -eq "None") { throw "AutomationEnabledParamPath output missing; aborting." }
+
 aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value false --overwrite --region $REGION --profile $PROFILE
 aws ssm put-parameter --name $AUTOMATION_PARAM --type String --value true --overwrite --region $REGION --profile $PROFILE
 ```
@@ -250,6 +253,7 @@ aws lambda wait function-updated `
 
 ```powershell
 $SAFE_MODE_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" --output text
+if (-not $SAFE_MODE_PARAM -or $SAFE_MODE_PARAM -eq "None") { throw "SafeModeParamPath output missing; aborting rollback." }
 aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value true --overwrite --region us-east-2 --profile rp-admin-prod
 ```
 
@@ -259,7 +263,7 @@ If SSM API is unavailable, also force env outbound off:
 
 ```powershell
 aws lambda get-function-configuration --function-name rp-mw-prod-worker --region us-east-2 --profile rp-admin-prod --query "Environment.Variables" --output json > .tmp.lambda_env.json
-python -c "import json; d=json.load(open('.tmp.lambda_env.json')); d['RICHPANEL_OUTBOUND_ENABLED']='false'; json.dump({'Variables':d}, open('.tmp.lambda_env_patch.json','w'))"
+python -c "import json; d=json.load(open('.tmp.lambda_env.json')); d['RICHPANEL_OUTBOUND_ENABLED']='false'; d['RICHPANEL_WRITE_DISABLED']='true'; d['RICHPANEL_READ_ONLY']='true'; json.dump({'Variables':d}, open('.tmp.lambda_env_patch.json','w'))"
 aws lambda update-function-configuration --function-name rp-mw-prod-worker --region us-east-2 --profile rp-admin-prod --environment file://.tmp.lambda_env_patch.json
 ```
 
