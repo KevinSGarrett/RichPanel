@@ -17,7 +17,8 @@ Scope: Production write-guard flip runbook + readiness checklist + evidence capt
   - Worker env context shows `MW_ENV=prod` and SSM parameter wiring.
   - Guard env vars `RICHPANEL_READ_ONLY`, `RICHPANEL_WRITE_DISABLED`, `RICHPANEL_OUTBOUND_ENABLED` returned null (not set in Lambda env as queried).
   - CloudFormation stack outputs confirm SSM parameter paths and ingress endpoint.
-  - Template parsing for worker env vars failed due to non-JSON template body; errors captured in evidence.
+  - Template parsing for worker env vars failed due to non-JSON template body; limitation noted in evidence.
+  - Production endpoints and ARNs were redacted from evidence to avoid exposing sensitive infra details.
 
 ## Notes / risks
 - No production writes were performed.

@@ -43,6 +43,8 @@ fully satisfied and explicitly approved.
 **Owner notes:**
 - SSM flags are authoritative for runtime gating; Lambda env vars guard read/write
   behavior inside the worker.
+- In prod, these env vars may be unset by default; verify current values on
+  `rp-mw-prod-worker` and set them explicitly before any flip.
 - Set SSM via `set-runtime-flags.yml` or the AWS Console (Parameter Store).
 - Set Lambda env vars in AWS Console on `rp-mw-prod-worker` (prod changes require approval).
 
