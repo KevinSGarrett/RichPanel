@@ -84,10 +84,22 @@ Artifacts:
 - `REHYDRATION_PACK/RUNS/B76/B/ARTIFACTS/preflight_prod/preflight_prod.md`
 
 Key output facts:
-- `overall_status=FAIL`
+- `overall_status=PASS` (after setting required local preflight env vars to explicit safe values)
 - `bot_agent_id_secret=PASS` (`present (rp-mw/prod/richpanel/bot_agent_id)`)
 - `richpanel_api=PASS (200)`
 - `shopify_token=PASS (200)`
 - `shopify_graphql=PASS (200)`
 - `shopify_token_refresh_last_success=PASS`
-- Remaining failure is `required_env` (local preflight runtime env vars not set for this invocation), not a missing bot-agent secret and not an account mismatch.
+
+Safe env values used for passing local preflight contract:
+```powershell
+$env:MW_ALLOW_NETWORK_READS='true'
+$env:RICHPANEL_OUTBOUND_ENABLED='false'
+$env:RICHPANEL_READ_ONLY='true'
+$env:RICHPANEL_WRITE_DISABLED='true'
+$env:SHOPIFY_OUTBOUND_ENABLED='true'
+$env:SHOPIFY_SHOP_DOMAIN='scentimen-t.myshopify.com'
+$env:SHOPIFY_WRITE_DISABLED='true'
+```
+
+These values were applied only for local script execution and did not mutate PROD Lambda configuration.

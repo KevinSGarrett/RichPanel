@@ -1,12 +1,11 @@
 {
-  "timestamp_utc": "2026-02-10T18:33:43.372018+00:00",
-  "overall_status": "FAIL",
+  "timestamp_utc": "2026-02-10T18:39:46.930036+00:00",
+  "overall_status": "PASS",
   "checks": [
     {
       "name": "required_env",
-      "status": "FAIL",
-      "details": "missing=MW_ALLOW_NETWORK_READS,RICHPANEL_OUTBOUND_ENABLED,RICHPANEL_READ_ONLY,RICHPANEL_WRITE_DISABLED,SHOPIFY_OUTBOUND_ENABLED,SHOPIFY_SHOP_DOMAIN,SHOPIFY_WRITE_DISABLED",
-      "next_action": "Set required env vars and safety flags for read-only preflight."
+      "status": "PASS",
+      "details": "env=prod source=ENVIRONMENT"
     },
     {
       "name": "required_secrets",
@@ -52,7 +51,7 @@
     {
       "name": "shopify_token_refresh_last_success",
       "status": "PASS",
-      "details": "last_success_age_hours=1.87"
+      "details": "last_success_age_hours=1.97"
     }
   ],
   "shopify_token_diagnostics": {

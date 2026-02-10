@@ -40,13 +40,9 @@ PR status at handoff:
 
 ## GO / NO-GO recommendation (for cutover controls readiness)
 
-**GO (controls/readiness)** with one caveat.
-
-Caveat:
-- `order_status_preflight_check.py` reports `required_env` missing for local invocation context.
-- This does not indicate missing PROD secrets/SSM or missing bot-agent secret.
+**GO (controls/readiness)**.
 
 Decision basis:
 - Secrets/SSM preflight in account `878145708918`: `PASS`
-- Bot agent secret presence in PROD: `PASS`
+- Bot agent/order-status preflight in PROD account: `PASS`
 - Switchboard and rollback controls are concrete, command-driven, and checked through PR gates.
