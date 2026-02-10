@@ -20,6 +20,96 @@ Validate production data shapes and integration behavior **without any writes or
 
 To enable production read-only shadow mode, you must configure both **runtime kill switches (SSM)** and **Lambda environment variables**:
 
+---
+
+## Production write-guard flip runbook (authoritative)
+
+This section is the single source of truth for where the production guard flags live,
+the exact flip/rollback sequence for deployment, and the canary strategy. Do not
+perform any production writes unless the checklist at the end of this section is
+fully satisfied and explicitly approved.
+
+### Where the prod guard flags live
+
+**SSM (runtime kill switches):**
+- `/rp-mw/prod/safe_mode` (expected values: `true` for shadow, `false` for live)
+- `/rp-mw/prod/automation_enabled` (expected values: `false` for shadow, `true` for live)
+
+**Lambda env vars (worker):**
+- `RICHPANEL_READ_ONLY`
+- `RICHPANEL_WRITE_DISABLED`
+- `RICHPANEL_OUTBOUND_ENABLED`
+
+**Owner notes:**
+- SSM flags are authoritative for runtime gating; Lambda env vars guard read/write
+  behavior inside the worker.
+- Set SSM via `set-runtime-flags.yml` or the AWS Console (Parameter Store).
+- Set Lambda env vars in AWS Console on `rp-mw-prod-worker` (prod changes require approval).
+
+### Required bot agent secret (prod)
+
+Production requires the Richpanel bot agent id secret:
+- Secret name: `rp-mw/prod/richpanel/bot_agent_id`
+
+Creation procedure (one time):
+1) Create the bot agent in Richpanel (Admin UI).
+2) Copy the bot agent id value.
+3) Store it in AWS Secrets Manager as `rp-mw/prod/richpanel/bot_agent_id`.
+4) Verify the secret exists and is readable in prod (do not print the value).
+
+### Exact flag values (explicit)
+
+**Current safe (shadow):**
+- `RICHPANEL_READ_ONLY=true`
+- `RICHPANEL_WRITE_DISABLED=true`
+- `RICHPANEL_OUTBOUND_ENABLED=false`
+
+**Deployment enable (writes + outbound):**
+- `RICHPANEL_READ_ONLY=false`
+- `RICHPANEL_WRITE_DISABLED=false`
+- `RICHPANEL_OUTBOUND_ENABLED=true`
+
+### Exact flip sequence (deployment)
+
+1) **Verify prod identity (no writes):**
+   - `aws sso login --profile rp-admin-prod`
+   - `aws sts get-caller-identity --profile rp-admin-prod` (must be `878145708918`)
+2) **Confirm SSM kill switches are ready:**
+   - `/rp-mw/prod/safe_mode=false`
+   - `/rp-mw/prod/automation_enabled=true`
+3) **Set Lambda env vars for deployment enable:**
+   - `RICHPANEL_READ_ONLY=false`
+   - `RICHPANEL_WRITE_DISABLED=false`
+   - `RICHPANEL_OUTBOUND_ENABLED=true`
+4) **Enable the automation rule in Richpanel (unpause).**
+5) **Canary/allowlist strategy (before full enablement):**
+   - Keep outbound disabled until canary passes (step 3 can be staged).
+   - If allowlist is supported, restrict to internal emails or test ticket ids.
+   - If no allowlist, send a single internal test ticket and verify logs only.
+6) **Only after canary success:** turn outbound on and remove allowlist.
+
+### Exact rollback sequence
+
+1) Pause the automation rule in Richpanel.
+2) Revert Lambda env vars to safe (shadow) values:
+   - `RICHPANEL_READ_ONLY=true`
+   - `RICHPANEL_WRITE_DISABLED=true`
+   - `RICHPANEL_OUTBOUND_ENABLED=false`
+3) Revert SSM kill switches:
+   - `/rp-mw/prod/safe_mode=true`
+   - `/rp-mw/prod/automation_enabled=false`
+4) Verify no outbound sends and no new write attempts in logs.
+
+### Production readiness checklist (must complete)
+
+- [ ] prod `rp-mw/prod/richpanel/bot_agent_id` secret exists (do not print value)
+- [ ] prod HTTP target points to the approved API Gateway
+- [ ] prod automation rule triggers the correct webhook
+- [ ] prod secrets present (api_key, webhook_token, bot_agent_id, shopify token)
+- [ ] final dev E2E proof passed
+- [ ] canary plan decided (allowlist or single internal ticket)
+- [ ] monitoring/rollback ready (owners + steps documented)
+
 ### Environment contract (explicit)
 
 Use these exact env var settings depending on mode.
