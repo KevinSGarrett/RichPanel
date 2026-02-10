@@ -1341,13 +1341,23 @@ def execute_order_status_reply(
         ticket_status = ticket_metadata.status
         is_email_channel = channel_detected == "email"
 
+        if loop_prevention_tag in (ticket_metadata.tags or set()):
+            # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
+            # no escalation). Preserve loop-prevention tag to avoid repeated replies,
+            # even if the ticket is already closed.
+            result = _route_email_support(
+                "followup_after_auto_reply", ticket_status=ticket_status
+            )
+            result.update(_metadata())
+            return result
+
         # If an operator reply already exists (e.g., Richpanel rule), close + tag
         # to preserve the auto-close + follow-up routing behavior.
         if is_email_channel and not _is_closed_status(ticket_status):
             existing_operator_reply = _safe_ticket_comment_operator_fetch(
                 target_id, executor=executor, allow_network=allow_network
             )
-            if existing_operator_reply is not True:
+            if existing_operator_reply is None:
                 # Give Richpanel rule-based replies a moment to land, then re-check.
                 time.sleep(2)
                 existing_operator_reply = _safe_ticket_comment_operator_fetch(
@@ -1406,16 +1416,6 @@ def execute_order_status_reply(
                 if openai_rewrite is not None:
                     result["openai_rewrite"] = openai_rewrite
                 return result
-
-        if loop_prevention_tag in (ticket_metadata.tags or set()):
-            # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
-            # no escalation). Preserve loop-prevention tag to avoid repeated replies,
-            # even if the ticket is already closed.
-            result = _route_email_support(
-                "followup_after_auto_reply", ticket_status=ticket_status
-            )
-            result.update(_metadata())
-            return result
 
         if order_action is None:
             LOGGER.info(

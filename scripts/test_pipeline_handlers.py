@@ -736,6 +736,79 @@ class OutboundOrderStatusTests(unittest.TestCase):
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
 
+    def test_existing_operator_reply_retry_only_on_unknown(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email", ticket_status="open")
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=False
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
+        ) as sleep_mock, mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        sleep_mock.assert_not_called()
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=None
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
+        ) as sleep_mock, mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        sleep_mock.assert_called_once()
+
+    def test_loop_prevention_tag_skips_existing_operator_reply(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="email",
+            ticket_status="open",
+            ticket_tags=[LOOP_PREVENTION_TAG],
+        )
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=True
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertEqual(result["reason"], "followup_after_auto_reply")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
     def test_reply_context_normalizes_shipping_method(self) -> None:
         envelope = build_event_envelope(
             {

@@ -8,7 +8,7 @@
         "region": "us-east-2",
         "owner": "middleware",
         "costCenter": "eng-dev",
-        "outboundAllowlistEmails": "sandbox.test+allowlist@example.com,sandbox.test+autoticket@example.com,kevin.garrett+rp-sandbox@gmail.com,kevinsgarrett+rp-sandbox@gmail.com,garretttrainingsystems@gmail.com,kevin.garrett@scentiment.com,calleenmillican@gmail.com",
+        "outboundAllowlistEmails": "sandbox.test+allowlist@example.com,sandbox.test+autoticket@example.com",
         "richpanelBotAuthorId": "f2193c62-be32-4361-90f2-5d73a24e896e",
         "tags": {
           "service": "richpanel-middleware",
