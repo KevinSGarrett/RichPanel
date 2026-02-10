@@ -44,6 +44,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _SECRET_VALUE_CACHE,
     _SECRET_VALUE_CACHE_TTL_SECONDS,
     _resolve_bot_agent_id,
+    LOOP_PREVENTION_TAG,
     _latest_comment_is_operator,
     _comment_operator_flag,
     _comment_created_at,
