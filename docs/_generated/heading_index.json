@@ -4015,6 +4015,10 @@
       "anchor": "purpose"
     },
     {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "purpose"
+    },
+    {
       "path": "08_Engineering/Shopify_Token_Truth_Table.md",
       "anchor": "purpose"
     },
@@ -13553,6 +13557,120 @@
     {
       "path": "08_Engineering/PR_Review_Checklist.md",
       "anchor": "merge-policy"
+    }
+  ],
+  "prod cutover switchboard": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "prod-cutover-switchboard"
+    }
+  ],
+  "guardrails (must follow)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "guardrails-must-follow"
+    }
+  ],
+  "0) identity gate (run before any aws operation)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "0-identity-gate-run-before-any-aws-operation"
+    }
+  ],
+  "1) read current state (no writes)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "1-read-current-state-no-writes"
+    }
+  ],
+  "1a) cloudformation stack outputs + nested stacks": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "1a-cloudformation-stack-outputs-nested-stacks"
+    }
+  ],
+  "1b) lambda function name(s) for middleware handler": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "1b-lambda-function-names-for-middleware-handler"
+    }
+  ],
+  "1c) read lambda safety env vars": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "1c-read-lambda-safety-env-vars"
+    }
+  ],
+  "1d) resolve kill-switch parameter paths (authoritative)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "1d-resolve-kill-switch-parameter-paths-authoritative"
+    }
+  ],
+  "2) canary on (safe + allowlisted)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "2-canary-on-safe-allowlisted"
+    }
+  ],
+  "2a) set lambda env vars for canary": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "2a-set-lambda-env-vars-for-canary"
+    }
+  ],
+  "2b) flip ssm kill switches for canary": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "2b-flip-ssm-kill-switches-for-canary"
+    }
+  ],
+  "2c) post-change verification": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "2c-post-change-verification"
+    }
+  ],
+  "3) full on (after canary success only)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "3-full-on-after-canary-success-only"
+    }
+  ],
+  "4) rollback in <60 seconds": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "4-rollback-in-60-seconds"
+    }
+  ],
+  "preferred single-command rollback (authoritative kill switch)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "preferred-single-command-rollback-authoritative-kill-switch"
+    }
+  ],
+  "secondary rollback command (lambda outbound hard stop)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "secondary-rollback-command-lambda-outbound-hard-stop"
+    }
+  ],
+  "5) evidence to capture (mandatory)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "5-evidence-to-capture-mandatory"
+    }
+  ],
+  "6) preflight commands (required before cutover)": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "6-preflight-commands-required-before-cutover"
+    }
+  ],
+  "7) safety notes": [
+    {
+      "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+      "anchor": "7-safety-notes"
     }
   ],
   "production read-only shadow mode runbook": [

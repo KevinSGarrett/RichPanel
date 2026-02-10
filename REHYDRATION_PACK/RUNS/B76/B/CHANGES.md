@@ -1,0 +1,29 @@
+# B76/B Changes
+
+- Added `docs/08_Engineering/Prod_Cutover_Switchboard.md` as the authoritative copy/paste cutover switchboard:
+  - read current state commands,
+  - canary-on commands (allowlisted),
+  - full-on commands,
+  - rollback commands with `safe_mode` precedence,
+  - mandatory evidence capture commands.
+- Updated switchboard after Bugbot review to make SSM path usage fail-safe:
+  - derives `SafeModeParamPath` and `AutomationEnabledParamPath` from CloudFormation outputs,
+  - uses derived paths for canary flip, rollback, and evidence commands.
+- Regenerated repository doc registries required by CI:
+  - `docs/REGISTRY.md`
+  - `docs/_generated/doc_outline.json`
+  - `docs/_generated/doc_registry.compact.json`
+  - `docs/_generated/doc_registry.json`
+  - `docs/_generated/heading_index.json`
+- Added run artifacts under `REHYDRATION_PACK/RUNS/B76/B/ARTIFACTS/`:
+  - `secrets_preflight_prod.txt`
+  - `sts_identity_prod.txt`
+  - `sts_identity_prod_verified.txt`
+  - `preflight_prod/preflight_prod.json`
+  - `preflight_prod/preflight_prod.md`
+- Re-ran preflight evidence in verified PROD account (`878145708918`) using `rp-admin-prod`.
+- Updated B76 run docs to reflect final verified evidence and readiness recommendation.
+- Added run documentation:
+  - `REHYDRATION_PACK/RUNS/B76/B/RUN_REPORT.md`
+  - `REHYDRATION_PACK/RUNS/B76/B/EVIDENCE.md`
+  - `REHYDRATION_PACK/RUNS/B76/B/CHANGES.md`
