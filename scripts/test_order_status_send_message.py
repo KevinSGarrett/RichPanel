@@ -111,6 +111,7 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
                 TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False),
                 "email",
                 "allowed@example.com",
+                {},
             ),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline._safe_ticket_metadata_fetch",
@@ -183,6 +184,7 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
                 TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False),
                 "email",
                 "allowed@example.com",
+                {},
             ),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
@@ -234,6 +236,7 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
                 TicketMetadata(status="open", tags=set(), status_code=200, dry_run=False),
                 "chat",
                 None,
+                {},
             ),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
@@ -327,6 +330,7 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
                 ),
                 "email",
                 "allowed@example.com",
+                {},
             ),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
