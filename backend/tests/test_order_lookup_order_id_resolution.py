@@ -651,6 +651,22 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual(summary.get("created_at"), "2026-01-01T00:00:00Z")
         self.assertEqual(summary.get("total_price"), "10.50")
 
+    def test_extract_shopify_fields_prefers_fulfillment_with_tracking(self) -> None:
+        payload = {
+            "fulfillments": [
+                {"tracking_number": "", "tracking_company": "UPS"},
+                {"tracking_number": "TN2", "tracking_company": "FedEx"},
+            ]
+        }
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("tracking_number"), "TN2")
+        self.assertEqual(summary.get("carrier"), "FedEx")
+
+    def test_extract_shopify_fields_falls_back_to_first_fulfillment(self) -> None:
+        payload = {"fulfillments": [{"tracking_company": "UPS"}]}
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("carrier"), "UPS")
+
     def test_coerce_helpers_handle_exceptions(self) -> None:
         class _BadStr:
             def __str__(self) -> str:

@@ -638,6 +638,33 @@ class OutboundOrderStatusTests(unittest.TestCase):
             any(call["path"].endswith("/send-message") for call in executor.calls)
         )
 
+    def test_existing_operator_reply_closes_without_send_message(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="email", ticket_status="open")
+
+        with mock.patch.object(
+            pipeline_module, "_safe_ticket_comment_operator_fetch", return_value=True
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        self.assertEqual(result["reason"], "closed_after_existing_operator_reply")
+        self.assertTrue(any(call["path"].endswith("/add-tags") for call in executor.calls))
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_channel="email")
