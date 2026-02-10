@@ -26,10 +26,14 @@ This runbook does not enable PROD outbound by default.
 ```powershell
 aws sso login --profile rp-admin-kevin
 aws sts get-caller-identity --profile rp-admin-kevin --output json
+
+# Validate the profile used by operational commands in this runbook.
+aws sso login --profile rp-admin-prod
+aws sts get-caller-identity --profile rp-admin-prod --output json
 ```
 
 Expected for PROD operations:
-- `Account` must be `878145708918`
+- `Account` must be `878145708918` for both profiles above.
 
 If the account is not PROD, stop and fix profile/account access before proceeding.
 
