@@ -104,6 +104,9 @@ class TrackingLinkGenerationTests(unittest.TestCase):
             normalize_shipping_method_for_carrier("USPS Ground", "UPS"), "UPS Ground"
         )
 
+    def test_normalize_shipping_method_returns_none_when_missing(self) -> None:
+        self.assertIsNone(normalize_shipping_method_for_carrier(None, "FedEx"))
+
     def test_missing_inputs_return_none(self) -> None:
         self.assertIsNone(build_carrier_tracking_url("", "TEST123"))
         self.assertIsNone(build_carrier_tracking_url("FedEx", ""))
