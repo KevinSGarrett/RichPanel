@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:51:22.060654+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "note": "single ticket after existing-operator close fallback"
+  },
+  "ticket": {
+    "order_number": "1051523",
+    "ticket_number": "1349",
+    "status": "OPEN",
+    "tags": [
+      "mw-smoke-autoticket",
+      "mw-intent-order_status_tracking",
+      "mw-routing-applied"
+    ]
+  },
+  "reply": {
+    "latest_comment_is_operator": true,
+    "carrier_present": false,
+    "tracking_number_present": false,
+    "tracking_link_present": false,
+    "shipping_method_present": false
+  }
+}

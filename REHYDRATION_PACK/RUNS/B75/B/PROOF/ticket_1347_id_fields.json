@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:23:57.868917+00:00",
+    "env": "dev",
+    "ticket_number": "1347"
+  },
+  "id_fields": {
+    "id": "api-scentimenttesting3300-effce901-0ed2-44cb-8884-db44b8442457",
+    "cookieId": "scentimenttesting3300_kevin.garrett+rp-sandbox@gmail.com",
+    "assignee_id": "ec0b1170-a826-4d2a-b4b8-03a6fc0315cf",
+    "organization_id": "scentimenttesting330",
+    "scenarioId": "None",
+    "scenario_id": "None",
+    "app_client_id": "scentimenttesting3300"
+  }
+}

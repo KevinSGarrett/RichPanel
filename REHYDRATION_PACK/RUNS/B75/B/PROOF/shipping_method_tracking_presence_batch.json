@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:09:30.313975+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "summary": {
+    "total": 10,
+    "tracking_present": 2,
+    "tracking_missing": 8,
+    "carrier_missing": 8,
+    "shipping_method_missing": 8
+  },
+  "rows": [
+    {
+      "order_number_fingerprint": "cbf4c8447258",
+      "ticket_number_redacted": "redacted:40367c3cc999",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number_redacted": "redacted:d59a23c3feff",
+      "carrier_present": true,
+      "shipping_method_present": true,
+      "tracking_number_present": true,
+      "shipping_method_matches_carrier": true
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number_redacted": "redacted:df4011e630c0",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number_redacted": "redacted:a037a7dfaf26",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "2fe941a711fa",
+      "ticket_number_redacted": "redacted:0f2cb44170f4",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "c4f86a23a75e",
+      "ticket_number_redacted": "redacted:ee47968ec53b",
+      "carrier_present": true,
+      "shipping_method_present": true,
+      "tracking_number_present": true,
+      "shipping_method_matches_carrier": true
+    },
+    {
+      "order_number_fingerprint": "ceee07397d9f",
+      "ticket_number_redacted": "redacted:58070c528ac8",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "5ccd706a2956",
+      "ticket_number_redacted": "redacted:8ecb5bcd8cd8",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "2840745bc3f0",
+      "ticket_number_redacted": "redacted:c7f4f146491d",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number_redacted": "redacted:2c17079b4da7",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "tracking_number_present": false,
+      "shipping_method_matches_carrier": null
+    }
+  ]
+}

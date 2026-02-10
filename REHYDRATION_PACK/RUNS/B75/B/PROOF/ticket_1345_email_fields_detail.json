@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:29:16.734319+00:00",
+    "env": "dev",
+    "ticket_number": "1345"
+  },
+  "ticket_email_hashes": [
+    "25edb07c2a9e"
+  ],
+  "comment_author_email_hashes": [],
+  "ticket_email_count": 2,
+  "comment_email_count": 0
+}

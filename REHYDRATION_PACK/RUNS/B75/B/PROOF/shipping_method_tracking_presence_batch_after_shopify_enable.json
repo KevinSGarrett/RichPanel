@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:20:40.612124+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status",
+    "note": "batch tracking presence after SHOPIFY_OUTBOUND_ENABLED enabled"
+  },
+  "summary": {
+    "total": 10,
+    "tracking_present": 6,
+    "tracking_missing": 4
+  },
+  "rows": [
+    {
+      "order_number_fingerprint": "cbf4c8447258",
+      "ticket_number_redacted": "redacted:8c144858bb5e",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number_redacted": "redacted:c2c2cbd7d05c",
+      "tracking_number_present": false
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number_redacted": "redacted:0c1a70e4512e",
+      "tracking_number_present": false
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number_redacted": "redacted:28995a2c0d04",
+      "tracking_number_present": false
+    },
+    {
+      "order_number_fingerprint": "2fe941a711fa",
+      "ticket_number_redacted": "redacted:7611f1a57f80",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "c4f86a23a75e",
+      "ticket_number_redacted": "redacted:712dca40936b",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "ceee07397d9f",
+      "ticket_number_redacted": "redacted:1cfafff6d51a",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "5ccd706a2956",
+      "ticket_number_redacted": "redacted:3324dab86f4d",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "2840745bc3f0",
+      "ticket_number_redacted": "redacted:b3b32ef85491",
+      "tracking_number_present": true
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number_redacted": "redacted:b572ebd3a02e",
+      "tracking_number_present": false
+    }
+  ]
+}

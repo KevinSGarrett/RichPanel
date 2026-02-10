@@ -286,7 +286,7 @@ export class RichpanelMiddlewareStack extends Stack {
 
       description:
         "SQS worker that logs events, enforces kill switches, and writes idempotency records.",
-      timeout: Duration.seconds(30),
+      timeout: Duration.seconds(60),
       memorySize: 512,
       reservedConcurrentExecutions: 1,
       environment: {
@@ -300,11 +300,31 @@ export class RichpanelMiddlewareStack extends Stack {
         MW_ALLOW_ENV_FLAG_OVERRIDE: this.environmentConfig.name === "dev" ? "true" : "false",
         RICHPANEL_API_KEY_SECRET_ARN: this.secrets.richpanelApiKey.secretArn,
         RICHPANEL_RATE_LIMIT_RPS: "0.5",
+        RICHPANEL_HTTP_MAX_ATTEMPTS: "6",
+        RICHPANEL_429_COOLDOWN_MULTIPLIER: "3.0",
+        RICHPANEL_OUTBOUND_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "false",
+        RICHPANEL_TOKEN_POOL_ENABLED: "false",
+        RICHPANEL_TOKEN_POOL_SECRET_IDS: "",
         SHOPIFY_SHOP_DOMAIN: "scentimen-t.myshopify.com",
+        SHOPIFY_OUTBOUND_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "false",
+        SHOPIFY_WRITE_DISABLED: "true",
         MW_OUTBOUND_ALLOWLIST_EMAILS:
           this.environmentConfig.outboundAllowlistEmails ?? "",
         MW_OUTBOUND_ALLOWLIST_DOMAINS:
           this.environmentConfig.outboundAllowlistDomains ?? "",
+        MW_SAFE_MODE_OVERRIDE:
+          this.environmentConfig.name === "dev" ? "false" : "",
+        MW_AUTOMATION_ENABLED_OVERRIDE:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        MW_OPENAI_INTENT_ENABLED: "true",
+        MW_OPENAI_ROUTING_ENABLED: "true",
+        MW_OPENAI_REWRITE_ENABLED: "true",
+        MW_OPENAI_SHADOW_ENABLED: "true",
+        OPENAI_REPLY_REWRITE_ENABLED: "true",
+        OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD: "0.7",
+        OPENAI_ROUTING_PRIMARY: "false",
         RICHPANEL_BOT_AGENT_ID:
           this.environmentConfig.richpanelBotAuthorId ?? "",
         RICHPANEL_BOT_AUTHOR_ID:

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:23:39.672799+00:00",
+    "env": "dev",
+    "ticket_number": "1347",
+    "endpoint": "/v1/tickets/number/{number}"
+  },
+  "update_results": [
+    {
+      "candidate": "ticket_state_closed",
+      "status": 404
+    },
+    {
+      "candidate": "ticket_status_closed",
+      "status": 404
+    },
+    {
+      "candidate": "ticket_status_solved",
+      "status": 404
+    },
+    {
+      "candidate": "ticket_state_solved",
+      "status": 404
+    },
+    {
+      "candidate": "status_closed",
+      "status": 404
+    },
+    {
+      "candidate": "status_solved",
+      "status": 404
+    }
+  ],
+  "final_status": "OPEN",
+  "final_state": null
+}

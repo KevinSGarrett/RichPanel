@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T04:42:38.460356+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "stack_name": "RichpanelMiddleware-dev",
+    "scenario": "order_status"
+  },
+  "request": {
+    "channel": "email",
+    "from_email_redacted": "redacted:d7b57bf96e9e",
+    "subject_fingerprint": "5d0e256d882e",
+    "body_fingerprint": "5d0e256d882e",
+    "tags": [
+      "mw-smoke-autoticket"
+    ]
+  },
+  "response": {
+    "status_code": 200,
+    "ticket_number_redacted": "redacted:85e63bcfdcfc",
+    "ticket_number_fingerprint": "85e63bcfdcfc"
+  },
+  "proof_fields": {
+    "automation_triggered": true,
+    "intent_order_status": true,
+    "order_matched": true,
+    "tracking_number_present": true,
+    "tracking_number_redacted": "redacted",
+    "reply_contains_tracking_url": true,
+    "reply_contains_url_domain": true,
+    "reply_url_domain_match": "www.fedex.com",
+    "latest_comment_is_operator": true,
+    "outbound_attempted": true,
+    "reply_sent": true,
+    "ticket_auto_closed": true,
+    "ticket_status": "CLOSED",
+    "has_loop_prevention_tag": true,
+    "carrier_value": "FedEx",
+    "shipping_method_value": "FedEx Ground",
+    "shipping_method_matches_carrier": true
+  },
+  "tags": [
+    "mw-smoke-autoticket",
+    "mw-intent-order_status_tracking",
+    "mw-routing-applied",
+    "mw-auto-replied",
+    "mw-order-status-answered",
+    "mw-outbound-path-send-message",
+    "mw-reply-sent"
+  ]
+}

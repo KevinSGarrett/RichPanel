@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:33:11.046190+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "shopify_tracking_presence",
+    "shop_domain": "scentimen-t.myshopify.com"
+  },
+  "summary": {
+    "total": 10,
+    "found": 10,
+    "not_found": 0,
+    "tracking_present": 9,
+    "tracking_missing": 1
+  },
+  "rows": [
+    {
+      "order_number_fingerprint": "389f036dbef1",
+      "found": true,
+      "fulfillment_count": 3,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "cdd2461bd65d",
+      "found": true,
+      "fulfillment_count": 2,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "fdff113cb9c1",
+      "found": true,
+      "fulfillment_count": 0,
+      "tracking_present": false,
+      "tracking_entry_count": 0,
+      "carrier_present": false,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "89863345d610",
+      "found": true,
+      "fulfillment_count": 2,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "23f94e046d52",
+      "found": true,
+      "fulfillment_count": 1,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "391b3fb36ca2",
+      "found": true,
+      "fulfillment_count": 1,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "81ac6561a6c6",
+      "found": true,
+      "fulfillment_count": 1,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "ebae789c26bd",
+      "found": true,
+      "fulfillment_count": 2,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "f5476988d8d3",
+      "found": true,
+      "fulfillment_count": 2,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    },
+    {
+      "order_number_fingerprint": "7014f8dc3173",
+      "found": true,
+      "fulfillment_count": 1,
+      "tracking_present": true,
+      "tracking_entry_count": 2,
+      "carrier_present": true,
+      "status_code": 200
+    }
+  ]
+}

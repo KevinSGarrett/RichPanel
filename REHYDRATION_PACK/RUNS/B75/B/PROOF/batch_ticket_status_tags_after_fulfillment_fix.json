@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T02:57:47.977724+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "note": "ticket status/tags for latest 4 tickets"
+  },
+  "rows": [
+    {
+      "ticket_number": "1341",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2
+    },
+    {
+      "ticket_number": "1342",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2
+    },
+    {
+      "ticket_number": "1343",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2
+    },
+    {
+      "ticket_number": "1344",
+      "status": "OPEN",
+      "tags": [
+        "mw-smoke-autoticket",
+        "mw-intent-order_status_tracking",
+        "mw-routing-applied"
+      ],
+      "comment_count": 2
+    }
+  ]
+}

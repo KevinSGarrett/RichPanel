@@ -7,7 +7,7 @@ import logging
 import os
 import time
 import urllib.parse
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
@@ -17,6 +17,7 @@ from richpanel_middleware.automation.delivery_estimate import (
     build_tracking_reply,
     compute_delivery_estimate,
     normalize_shipping_method,
+    normalize_shipping_method_for_carrier,
 )
 from richpanel_middleware.automation.router import (
     RoutingDecision,
@@ -38,7 +39,10 @@ from richpanel_middleware.automation.order_status_prompts import (
     OrderStatusReplyContext,
     build_order_status_reply_prompt,
 )
-from richpanel_middleware.commerce.order_lookup import lookup_order_summary
+from richpanel_middleware.commerce.order_lookup import (
+    extract_order_number_from_payload,
+    lookup_order_summary,
+)
 from richpanel_middleware.integrations.richpanel.client import (
     RichpanelExecutor,
     RichpanelRequestError,
@@ -542,7 +546,7 @@ def _safe_ticket_snapshot_fetch(
     *,
     executor: RichpanelExecutor,
     allow_network: bool,
-) -> Tuple[Optional[TicketMetadata], Optional[str], Optional[str]]:
+) -> Tuple[Optional[TicketMetadata], Optional[str], Optional[str], Optional[Dict[str, Any]]]:
     """
     Fetch PII-safe ticket metadata plus channel (via.channel) and customer email.
     """
@@ -555,7 +559,7 @@ def _safe_ticket_snapshot_fetch(
             log_body_excerpt=False,
         )
     except (RichpanelRequestError, SecretLoadError, TransportError):
-        return None, None, None
+        return None, None, None, None
 
     if response.dry_run:
         return (
@@ -564,10 +568,11 @@ def _safe_ticket_snapshot_fetch(
             ),
             None,
             None,
+            None,
         )
 
     if response.status_code < 200 or response.status_code >= 300:
-        return None, None, None
+        return None, None, None, None
 
     payload = response.json() or {}
     if not isinstance(payload, dict):
@@ -594,6 +599,7 @@ def _safe_ticket_snapshot_fetch(
         ),
         channel,
         customer_email,
+        ticket_payload,
     )
 
 
@@ -830,8 +836,37 @@ def plan_actions(
                     routing_artifact=routing_artifact,
                     order_status_intent=order_status_intent,
                 )
+            lookup_envelope = envelope
+            if allow_network and not safe_mode and automation_enabled and isinstance(payload, dict):
+                executor = RichpanelExecutor(outbound_enabled=allow_network)
+                target_id = _resolve_target_ticket_id(
+                    envelope, executor=executor, allow_network=allow_network
+                )
+                _, _, ticket_customer_email, ticket_payload = _safe_ticket_snapshot_fetch(
+                    target_id,
+                    executor=executor,
+                    allow_network=allow_network,
+                )
+                if isinstance(ticket_payload, dict):
+                    lookup_payload = dict(payload)
+                    for key in ("subject", "body", "text", "message", "customer_message"):
+                        if key not in lookup_payload and ticket_payload.get(key):
+                            lookup_payload[key] = ticket_payload.get(key)
+                    extracted_order_number = extract_order_number_from_payload(ticket_payload)
+                    if extracted_order_number and not (
+                        lookup_payload.get("order_number")
+                        or lookup_payload.get("orderNumber")
+                    ):
+                        lookup_payload["order_number"] = extracted_order_number
+                    if ticket_customer_email and not (
+                        lookup_payload.get("email")
+                        or lookup_payload.get("customer_email")
+                    ):
+                        lookup_payload["email"] = ticket_customer_email
+                    lookup_envelope = replace(envelope, payload=lookup_payload)
+
             order_summary = lookup_order_summary(
-                envelope,
+                lookup_envelope,
                 safe_mode=safe_mode,
                 automation_enabled=automation_enabled,
                 allow_network=allow_network,
@@ -1237,7 +1272,7 @@ def execute_order_status_reply(
             f"{ORDER_STATUS_REPLY_TAG}:{run_id}" if run_id else ORDER_STATUS_REPLY_TAG
         )
 
-        ticket_metadata, ticket_channel, ticket_customer_email = _safe_ticket_snapshot_fetch(
+        ticket_metadata, ticket_channel, ticket_customer_email, _ = _safe_ticket_snapshot_fetch(
             target_id,
             executor=executor,
             allow_network=allow_network,
@@ -1305,6 +1340,65 @@ def execute_order_status_reply(
 
         ticket_status = ticket_metadata.status
         is_email_channel = channel_detected == "email"
+
+        # If an operator reply already exists (e.g., Richpanel rule), close + tag
+        # to preserve the auto-close + follow-up routing behavior.
+        if is_email_channel and not _is_closed_status(ticket_status):
+            existing_operator_reply = _safe_ticket_comment_operator_fetch(
+                target_id, executor=executor, allow_network=allow_network
+            )
+            if existing_operator_reply is not True:
+                # Give Richpanel rule-based replies a moment to land, then re-check.
+                time.sleep(2)
+                existing_operator_reply = _safe_ticket_comment_operator_fetch(
+                    target_id, executor=executor, allow_network=allow_network
+                )
+            if existing_operator_reply is True:
+                close_response = executor.execute(
+                    "PUT",
+                    f"/v1/tickets/{encoded_id}",
+                    json_body={"ticket": {"state": "closed", "status": "CLOSED"}},
+                    dry_run=not allow_network,
+                )
+                responses.append(
+                    {
+                        "action": "close_after_existing_operator_reply",
+                        "status": close_response.status_code,
+                        "dry_run": close_response.dry_run,
+                    }
+                )
+                if 200 <= close_response.status_code < 300 and not close_response.dry_run:
+                    tags_to_apply = sorted(
+                        dedupe_tags(
+                            [
+                                loop_prevention_tag,
+                                ORDER_STATUS_REPLY_TAG,
+                                REPLY_SENT_TAG,
+                            ]
+                        )
+                    )
+                    tag_response = executor.execute(
+                        "PUT",
+                        f"/v1/tickets/{encoded_id}/add-tags",
+                        json_body={"tags": tags_to_apply},
+                        dry_run=not allow_network,
+                    )
+                    responses.append(
+                        {
+                            "action": "add_tag",
+                            "status": tag_response.status_code,
+                            "dry_run": tag_response.dry_run,
+                        }
+                    )
+                    result = {
+                        "sent": True,
+                        "reason": "closed_after_existing_operator_reply",
+                        "responses": responses,
+                        **_metadata(),
+                    }
+                    if openai_rewrite is not None:
+                        result["openai_rewrite"] = openai_rewrite
+                    return result
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
@@ -1393,6 +1487,9 @@ def execute_order_status_reply(
             or order_summary.get("shipping_method_name")
             or order_summary.get("shipping_method")
         )
+        shipping_method = normalize_shipping_method_for_carrier(
+            shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
+        )
         reply_context = OrderStatusReplyContext(
             tracking_number=draft_reply.get("tracking_number"),
             tracking_url=draft_reply.get("tracking_url"),
@@ -1475,26 +1572,13 @@ def execute_order_status_reply(
             )
 
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
-        # Try minimal working payloads first (state-only), then add status/comment variants.
+        # Proven-working close payloads for Richpanel (ordered by reliability).
+        # {"ticket": {"state": "closed", "status": "CLOSED"}} is the only payload
+        # confirmed to transition Richpanel tickets to CLOSED status.
         update_candidates: List[Tuple[str, Dict[str, Any]]] = [
-            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload}}),
-            ("ticket_status_closed", {"ticket": {"status": "closed", "comment": comment_payload}}),
-            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload}}),
-            ("ticket_status_resolved", {"ticket": {"status": "resolved", "comment": comment_payload}}),
-            ("state_closed", {"state": "closed", "comment": comment_payload}),
-            ("status_closed", {"status": "closed", "comment": comment_payload}),
-            ("state_resolved", {"state": "resolved", "comment": comment_payload}),
-            ("status_resolved", {"status": "resolved", "comment": comment_payload}),
             ("ticket_state_closed_status_CLOSED", {"ticket": {"state": "closed", "status": "CLOSED", "comment": comment_payload}}),
-            ("ticket_state_CLOSED_status_CLOSED", {"ticket": {"state": "CLOSED", "status": "CLOSED", "comment": comment_payload}}),
-            ("ticket_state_CLOSED", {"ticket": {"state": "CLOSED", "comment": comment_payload}}),
-            ("ticket_state_RESOLVED", {"ticket": {"state": "RESOLVED", "comment": comment_payload}}),
-            ("ticket_state_resolved_status_RESOLVED", {"ticket": {"state": "resolved", "status": "RESOLVED", "comment": comment_payload}}),
-            ("ticket_status_resolved_state_RESOLVED", {"ticket": {"status": "resolved", "state": "RESOLVED", "comment": comment_payload}}),
-            ("state_CLOSED", {"state": "CLOSED", "comment": comment_payload}),
-            ("status_CLOSED", {"status": "CLOSED", "comment": comment_payload}),
-            ("state_RESOLVED", {"state": "RESOLVED", "comment": comment_payload}),
-            ("status_RESOLVED", {"status": "RESOLVED", "comment": comment_payload}),
+            ("ticket_state_closed", {"ticket": {"state": "closed", "comment": comment_payload}}),
+            ("ticket_state_resolved", {"ticket": {"state": "resolved", "comment": comment_payload}}),
         ]
 
         def _strip_comment(payload: Any) -> Dict[str, Any]:

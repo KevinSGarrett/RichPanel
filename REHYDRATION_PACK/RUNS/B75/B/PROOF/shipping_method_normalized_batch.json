@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T01:59:45.272522+00:00",
+    "env": "dev",
+    "region": "us-east-2",
+    "scenario": "order_status"
+  },
+  "summary": {
+    "total": 10,
+    "matches_true": 1,
+    "matches_false": 2,
+    "missing_shipping_method": 7
+  },
+  "rows": [
+    {
+      "order_number_fingerprint": "cbf4c8447258",
+      "ticket_number_redacted": "redacted:065f4fa6723d",
+      "carrier_present": true,
+      "shipping_method_present": true,
+      "shipping_method_matches_carrier": false,
+      "carrier_value": "(not available)",
+      "shipping_method_value": "USPS/UPS\u00ae Ground"
+    },
+    {
+      "order_number_fingerprint": "7321c672775e",
+      "ticket_number_redacted": "redacted:c999d2c4092b",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "fc1e295289e8",
+      "ticket_number_redacted": "redacted:0e0c8d9c5fa4",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "19323ff54c12",
+      "ticket_number_redacted": "redacted:8c8f6b438142",
+      "carrier_present": true,
+      "shipping_method_present": true,
+      "shipping_method_matches_carrier": false,
+      "carrier_value": "(not available)",
+      "shipping_method_value": "USPS/UPS\u00ae Ground"
+    },
+    {
+      "order_number_fingerprint": "2fe941a711fa",
+      "ticket_number_redacted": "redacted:a9b9bd8e0ec8",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "c4f86a23a75e",
+      "ticket_number_redacted": "redacted:400b6feaba94",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "ceee07397d9f",
+      "ticket_number_redacted": "redacted:587a49055762",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "5ccd706a2956",
+      "ticket_number_redacted": "redacted:9c499c3ddf63",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "2840745bc3f0",
+      "ticket_number_redacted": "redacted:18959bb5d775",
+      "carrier_present": false,
+      "shipping_method_present": false,
+      "shipping_method_matches_carrier": null,
+      "carrier_value": null,
+      "shipping_method_value": null
+    },
+    {
+      "order_number_fingerprint": "64d9bed78e10",
+      "ticket_number_redacted": "redacted:f7961248034a",
+      "carrier_present": true,
+      "shipping_method_present": true,
+      "shipping_method_matches_carrier": true,
+      "carrier_value": "FedEx",
+      "shipping_method_value": "FedEx Free shipping"
+    }
+  ]
+}

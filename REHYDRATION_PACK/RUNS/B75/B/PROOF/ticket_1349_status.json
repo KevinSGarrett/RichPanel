@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "timestamp": "2026-02-10T03:52:11.626308+00:00",
+    "env": "dev",
+    "ticket_number": "1349"
+  },
+  "status": "OPEN",
+  "tags": [
+    "mw-smoke-autoticket",
+    "mw-intent-order_status_tracking",
+    "mw-routing-applied"
+  ]
+}
