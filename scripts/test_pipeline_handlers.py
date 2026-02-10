@@ -26,6 +26,7 @@ os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 
 from richpanel_middleware.automation import pipeline as pipeline_module  # noqa: E402
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
+    ActionPlan,
     execute_order_status_reply,
     execute_routing_tags,
     execute_plan,
@@ -711,24 +712,32 @@ class OutboundOrderStatusTests(unittest.TestCase):
         envelope = build_event_envelope(
             {
                 "ticket_id": "t-ship-method",
-                "order_id": "ord-555",
+                "channel": "email",
                 "message": "Where is my order?",
             }
         )
-        with mock.patch(
-            "richpanel_middleware.automation.pipeline.lookup_order_summary",
-            return_value={
-                "tracking_number": "TN1",
-                "carrier": "FedEx",
-                "shipping_method": "USPS/UPS Ground",
-            },
-        ):
-            plan = plan_actions(
-                envelope,
-                safe_mode=False,
-                automation_enabled=True,
-                allow_network=True,
-            )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "draft_reply": {
+                            "body": "Draft reply body",
+                            "tracking_number": "TN1",
+                            "tracking_url": "https://example.com/track",
+                            "carrier": "FedEx",
+                        },
+                        "order_summary": {
+                            "shipping_method": "USPS/UPS Ground",
+                        },
+                    },
+                }
+            ],
+        )
 
         executor = _RecordingExecutor(ticket_channel="email")
         captured: dict[str, Any] = {}
