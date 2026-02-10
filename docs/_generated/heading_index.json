@@ -13567,6 +13567,48 @@
       "anchor": "required-configuration"
     }
   ],
+  "production write-guard flip runbook (authoritative)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "production-write-guard-flip-runbook-authoritative"
+    }
+  ],
+  "where the prod guard flags live": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "where-the-prod-guard-flags-live"
+    }
+  ],
+  "required bot agent secret (prod)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "required-bot-agent-secret-prod"
+    }
+  ],
+  "exact flag values (explicit)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "exact-flag-values-explicit"
+    }
+  ],
+  "exact flip sequence (deployment)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "exact-flip-sequence-deployment"
+    }
+  ],
+  "exact rollback sequence": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "exact-rollback-sequence"
+    }
+  ],
+  "production readiness checklist (must complete)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "production-readiness-checklist-must-complete"
+    }
+  ],
   "environment contract (explicit)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
