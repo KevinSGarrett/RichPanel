@@ -1790,7 +1790,7 @@ class ReadOnlyGuardTests(unittest.TestCase):
                     dry_run=kwargs.get("dry_run", False),
                 )
 
-        metadata, channel, customer_email = _safe_ticket_snapshot_fetch(
+        metadata, channel, customer_email, _ticket_payload = _safe_ticket_snapshot_fetch(
             "ticket-1",
             executor=cast(RichpanelExecutor, _ChannelExecutor()),
             allow_network=True,
