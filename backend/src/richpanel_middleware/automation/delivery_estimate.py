@@ -456,15 +456,24 @@ def normalize_shipping_method_for_carrier(
         return shipping_method
 
     if not shipping_method:
-        return carrier_text
+        return None
     method_text = str(shipping_method).strip()
     if not method_text:
-        return carrier_text
+        return None
 
-    normalized_method = _normalize_carrier_name(method_text)
     normalized_carrier = _normalize_carrier_name(carrier_text)
-    if normalized_carrier and normalized_carrier in normalized_method:
-        return method_text
+    if normalized_carrier:
+        if normalized_carrier in {"ups", "usps", "fedex", "dhl"}:
+            if re.search(
+                rf"\b{re.escape(normalized_carrier)}\b",
+                method_text,
+                flags=re.IGNORECASE,
+            ):
+                return method_text
+        else:
+            normalized_method = _normalize_carrier_name(method_text)
+            if normalized_carrier in normalized_method:
+                return method_text
 
     # Strip known carrier tokens from the method label and keep the service portion.
     cleaned = re.sub(r"\b(usps|ups|fedex|dhl)\b", " ", method_text, flags=re.IGNORECASE)

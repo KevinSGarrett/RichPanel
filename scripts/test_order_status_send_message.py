@@ -118,7 +118,10 @@ class EmailOutboundSendMessageTests(unittest.TestCase):
             return_value=TicketMetadata(status="closed", tags=set(), status_code=200, dry_run=False),
         ), mock.patch(
             "richpanel_middleware.automation.pipeline._safe_ticket_comment_operator_fetch",
-            return_value=False,
+            side_effect=[False, False, True],
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.time.sleep",
+            return_value=None,
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
             return_value=("dev", None),

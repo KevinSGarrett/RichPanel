@@ -318,12 +318,18 @@ export class RichpanelMiddlewareStack extends Stack {
           this.environmentConfig.name === "dev" ? "false" : "",
         MW_AUTOMATION_ENABLED_OVERRIDE:
           this.environmentConfig.name === "dev" ? "true" : "",
-        MW_OPENAI_INTENT_ENABLED: "true",
-        MW_OPENAI_ROUTING_ENABLED: "true",
-        MW_OPENAI_REWRITE_ENABLED: "true",
-        MW_OPENAI_SHADOW_ENABLED: "true",
-        OPENAI_REPLY_REWRITE_ENABLED: "true",
-        OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD: "0.7",
+        MW_OPENAI_INTENT_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        MW_OPENAI_ROUTING_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        MW_OPENAI_REWRITE_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        MW_OPENAI_SHADOW_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        OPENAI_REPLY_REWRITE_ENABLED:
+          this.environmentConfig.name === "dev" ? "true" : "",
+        OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD:
+          this.environmentConfig.name === "dev" ? "0.7" : "",
         OPENAI_ROUTING_PRIMARY: "false",
         RICHPANEL_BOT_AGENT_ID:
           this.environmentConfig.richpanelBotAuthorId ?? "",

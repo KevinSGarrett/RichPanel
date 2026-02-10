@@ -1399,6 +1399,13 @@ def execute_order_status_reply(
                     if openai_rewrite is not None:
                         result["openai_rewrite"] = openai_rewrite
                     return result
+                result = _route_email_support(
+                    "reply_close_failed", ticket_status=ticket_status
+                )
+                result.update(_metadata())
+                if openai_rewrite is not None:
+                    result["openai_rewrite"] = openai_rewrite
+                return result
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
