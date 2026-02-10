@@ -8,6 +8,7 @@ Scope: Production write-guard flip runbook + readiness checklist + evidence capt
 - Updated canonical runbook with explicit guard-flag locations, flip/rollback sequence, canary/allowlist strategy, and readiness checklist.
 - Documented required prod secret `rp-mw/prod/richpanel/bot_agent_id` and creation steps.
 - Captured PII-safe AWS CLI evidence of prod account identity, SSM runtime flags, worker env context, and CloudFormation stack outputs/resources.
+- Regenerated doc registries and plan checklist outputs to satisfy CI validation.
 
 ## Evidence
 - `REHYDRATION_PACK/RUNS/B75/C/EVIDENCE.md`

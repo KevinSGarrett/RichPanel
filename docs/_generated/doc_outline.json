@@ -12198,6 +12198,41 @@
         "anchor": "required-configuration"
       },
       {
+        "level": 2,
+        "text": "Production write-guard flip runbook (authoritative)",
+        "anchor": "production-write-guard-flip-runbook-authoritative"
+      },
+      {
+        "level": 3,
+        "text": "Where the prod guard flags live",
+        "anchor": "where-the-prod-guard-flags-live"
+      },
+      {
+        "level": 3,
+        "text": "Required bot agent secret (prod)",
+        "anchor": "required-bot-agent-secret-prod"
+      },
+      {
+        "level": 3,
+        "text": "Exact flag values (explicit)",
+        "anchor": "exact-flag-values-explicit"
+      },
+      {
+        "level": 3,
+        "text": "Exact flip sequence (deployment)",
+        "anchor": "exact-flip-sequence-deployment"
+      },
+      {
+        "level": 3,
+        "text": "Exact rollback sequence",
+        "anchor": "exact-rollback-sequence"
+      },
+      {
+        "level": 3,
+        "text": "Production readiness checklist (must complete)",
+        "anchor": "production-readiness-checklist-must-complete"
+      },
+      {
         "level": 3,
         "text": "Environment contract (explicit)",
         "anchor": "environment-contract-explicit"
