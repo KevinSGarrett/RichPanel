@@ -202,8 +202,8 @@ $AUTOMATION_PARAM = aws cloudformation describe-stacks `
 if (-not $SAFE_MODE_PARAM -or $SAFE_MODE_PARAM -eq "None") { throw "SafeModeParamPath output missing; aborting." }
 if (-not $AUTOMATION_PARAM -or $AUTOMATION_PARAM -eq "None") { throw "AutomationEnabledParamPath output missing; aborting." }
 
-aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value false --overwrite --region $REGION --profile $PROFILE
 aws ssm put-parameter --name $AUTOMATION_PARAM --type String --value true --overwrite --region $REGION --profile $PROFILE
+aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value false --overwrite --region $REGION --profile $PROFILE
 ```
 
 ### 2C) Post-change verification
