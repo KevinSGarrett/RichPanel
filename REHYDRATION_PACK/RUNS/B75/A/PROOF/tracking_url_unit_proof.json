@@ -1,0 +1,34 @@
+{
+  "test_run": "tracking_url_unit_proof",
+  "timestamp_utc": "2026-02-09T00:00:00Z",
+  "notes": [
+    "All samples are synthetic; no real tracking numbers.",
+    "TRACK_PLACEHOLDER is not a real tracking number."
+  ],
+  "cases": [
+    {
+      "carrier_input": "Fed Ex",
+      "expected_template": "https://www.fedex.com/fedextrack/?trknbr={TRACK}"
+    },
+    {
+      "carrier_input": "Federal Express",
+      "expected_template": "https://www.fedex.com/fedextrack/?trknbr={TRACK}"
+    },
+    {
+      "carrier_input": "United Parcel Service",
+      "expected_template": "https://www.ups.com/track?loc=en_US&tracknum={TRACK}"
+    },
+    {
+      "carrier_input": "United States Postal Service",
+      "expected_template": "https://tools.usps.com/go/TrackConfirmAction?tLabels={TRACK}"
+    },
+    {
+      "carrier_input": "DHL Express",
+      "expected_template": "https://www.dhl.com/global-en/home/tracking.html?tracking-id={TRACK}"
+    }
+  ],
+  "encoding": {
+    "example_input": "TRACK PLACEHOLDER",
+    "encoded_placeholder": "TRACK%20PLACEHOLDER"
+  }
+}

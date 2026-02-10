@@ -36,7 +36,7 @@ class TrackingLinkGenerationTests(unittest.TestCase):
     def test_dhl_tracking_url(self) -> None:
         url = build_carrier_tracking_url("DHL Express", "DHL123")
         assert url is not None
-        self.assertIn("tracking-express", url)
+        self.assertIn("tracking.html", url)
         self.assertIn("tracking-id=DHL123", url)
 
     def test_existing_tracking_url_is_unchanged(self) -> None:
