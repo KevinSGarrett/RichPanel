@@ -337,7 +337,7 @@ class TrackingUrlTests(unittest.TestCase):
         )
 
 
-def main() -> int:
+def main() -> int:  # pragma: no cover
     suite = unittest.TestSuite()
     suite.addTests(
         unittest.defaultTestLoader.loadTestsFromTestCase(DeliveryEstimateTests)
@@ -347,5 +347,5 @@ def main() -> int:
     return 0 if result.wasSuccessful() else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
