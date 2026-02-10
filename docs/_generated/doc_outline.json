@@ -12180,6 +12180,111 @@
     ]
   },
   {
+    "path": "08_Engineering/Prod_Cutover_Switchboard.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "PROD Cutover Switchboard",
+        "anchor": "prod-cutover-switchboard"
+      },
+      {
+        "level": 2,
+        "text": "Purpose",
+        "anchor": "purpose"
+      },
+      {
+        "level": 2,
+        "text": "Guardrails (must follow)",
+        "anchor": "guardrails-must-follow"
+      },
+      {
+        "level": 2,
+        "text": "0) Identity Gate (run before any AWS operation)",
+        "anchor": "0-identity-gate-run-before-any-aws-operation"
+      },
+      {
+        "level": 2,
+        "text": "1) Read Current State (no writes)",
+        "anchor": "1-read-current-state-no-writes"
+      },
+      {
+        "level": 3,
+        "text": "1A) CloudFormation stack outputs + nested stacks",
+        "anchor": "1a-cloudformation-stack-outputs-nested-stacks"
+      },
+      {
+        "level": 3,
+        "text": "1B) Lambda function name(s) for middleware handler",
+        "anchor": "1b-lambda-function-names-for-middleware-handler"
+      },
+      {
+        "level": 3,
+        "text": "1C) Read Lambda safety env vars",
+        "anchor": "1c-read-lambda-safety-env-vars"
+      },
+      {
+        "level": 3,
+        "text": "1D) Resolve kill-switch parameter paths (authoritative)",
+        "anchor": "1d-resolve-kill-switch-parameter-paths-authoritative"
+      },
+      {
+        "level": 2,
+        "text": "2) CANARY ON (safe + allowlisted)",
+        "anchor": "2-canary-on-safe-allowlisted"
+      },
+      {
+        "level": 3,
+        "text": "2A) Set Lambda env vars for canary",
+        "anchor": "2a-set-lambda-env-vars-for-canary"
+      },
+      {
+        "level": 3,
+        "text": "2B) Flip SSM kill switches for canary",
+        "anchor": "2b-flip-ssm-kill-switches-for-canary"
+      },
+      {
+        "level": 3,
+        "text": "2C) Post-change verification",
+        "anchor": "2c-post-change-verification"
+      },
+      {
+        "level": 2,
+        "text": "3) FULL ON (after canary success only)",
+        "anchor": "3-full-on-after-canary-success-only"
+      },
+      {
+        "level": 2,
+        "text": "4) Rollback in <60 seconds",
+        "anchor": "4-rollback-in-60-seconds"
+      },
+      {
+        "level": 3,
+        "text": "Preferred single-command rollback (authoritative kill switch)",
+        "anchor": "preferred-single-command-rollback-authoritative-kill-switch"
+      },
+      {
+        "level": 3,
+        "text": "Secondary rollback command (Lambda outbound hard stop)",
+        "anchor": "secondary-rollback-command-lambda-outbound-hard-stop"
+      },
+      {
+        "level": 2,
+        "text": "5) Evidence to Capture (mandatory)",
+        "anchor": "5-evidence-to-capture-mandatory"
+      },
+      {
+        "level": 2,
+        "text": "6) Preflight Commands (required before cutover)",
+        "anchor": "6-preflight-commands-required-before-cutover"
+      },
+      {
+        "level": 2,
+        "text": "7) Safety Notes",
+        "anchor": "7-safety-notes"
+      }
+    ]
+  },
+  {
     "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
     "outline": [
       {

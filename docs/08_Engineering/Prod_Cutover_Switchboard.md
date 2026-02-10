@@ -99,23 +99,36 @@ aws lambda get-function-configuration `
   --output json
 ```
 
-### 1D) Resolve kill-switch parameter namespace
+### 1D) Resolve kill-switch parameter paths (authoritative)
 
-Use requested namespace first; if not found, fall back to deployed namespace from stack outputs.
+Do not guess namespace during incident response. Resolve authoritative parameter
+paths from CloudFormation outputs first.
 
 ```powershell
 $PROFILE="rp-admin-prod"
 $REGION="us-east-2"
+$STACK="RichpanelMiddleware-prod"
 
-aws ssm get-parameters `
-  --names /richpanel-middleware/prod/safe_mode /richpanel-middleware/prod/automation_enabled `
+$SAFE_MODE_PARAM = aws cloudformation describe-stacks `
+  --stack-name $STACK `
   --region $REGION `
   --profile $PROFILE `
-  --output table
+  --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" `
+  --output text
 
-# Fallback currently used in deployed stack/runbooks (if above shows NotFound):
+$AUTOMATION_PARAM = aws cloudformation describe-stacks `
+  --stack-name $STACK `
+  --region $REGION `
+  --profile $PROFILE `
+  --query "Stacks[0].Outputs[?OutputKey=='AutomationEnabledParamPath'].OutputValue | [0]" `
+  --output text
+
+Write-Host "SAFE_MODE_PARAM=$SAFE_MODE_PARAM"
+Write-Host "AUTOMATION_PARAM=$AUTOMATION_PARAM"
+
+# Sanity check both the requested namespace and currently deployed namespace.
 aws ssm get-parameters `
-  --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled `
+  --names /richpanel-middleware/prod/safe_mode /richpanel-middleware/prod/automation_enabled /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled `
   --region $REGION `
   --profile $PROFILE `
   --output table
@@ -135,7 +148,8 @@ Goal:
 $PROFILE="rp-admin-prod"
 $REGION="us-east-2"
 $FUNCTION_NAME="rp-mw-prod-worker"
-$ALLOWLIST="owner1@company.com,owner2@company.com"
+$ALLOWLIST="<internal1@company.com,internal2@company.com>"
+$env:ALLOWLIST=$ALLOWLIST
 
 aws lambda get-function-configuration `
   --function-name $FUNCTION_NAME `
@@ -144,7 +158,7 @@ aws lambda get-function-configuration `
   --query "Environment.Variables" `
   --output json > .tmp.lambda_env.json
 
-python -c "import json; p='.tmp.lambda_env.json'; d=json.load(open(p)); d.update({'MW_ENV':'prod','RICHPANEL_OUTBOUND_ENABLED':'true','RICHPANEL_WRITE_DISABLED':'false','RICHPANEL_READ_ONLY':'false','MW_PROD_WRITES_ACK':'I_UNDERSTAND_PROD_WRITES','MW_PROD_OUTBOUND_ALLOWLIST_EMAILS':'owner1@company.com,owner2@company.com'}); json.dump({'Variables':d}, open('.tmp.lambda_env_patch.json','w'))"
+python -c "import json, os; p='.tmp.lambda_env.json'; d=json.load(open(p)); d.update({'MW_ENV':'prod','RICHPANEL_OUTBOUND_ENABLED':'true','RICHPANEL_WRITE_DISABLED':'false','RICHPANEL_READ_ONLY':'false','MW_PROD_WRITES_ACK':'I_UNDERSTAND_PROD_WRITES','MW_PROD_OUTBOUND_ALLOWLIST_EMAILS':os.environ['ALLOWLIST']}); json.dump({'Variables':d}, open('.tmp.lambda_env_patch.json','w'))"
 
 aws lambda update-function-configuration `
   --function-name $FUNCTION_NAME `
@@ -160,25 +174,37 @@ aws lambda wait function-updated `
 
 ### 2B) Flip SSM kill switches for canary
 
-Use the namespace that exists in your account (resolved in section 1D):
+Use parameter paths resolved in section 1D:
 
 ```powershell
 $PROFILE="rp-admin-prod"
 $REGION="us-east-2"
+$STACK="RichpanelMiddleware-prod"
 
-# Preferred namespace from request:
-aws ssm put-parameter --name /richpanel-middleware/prod/safe_mode --type String --value false --overwrite --region $REGION --profile $PROFILE
-aws ssm put-parameter --name /richpanel-middleware/prod/automation_enabled --type String --value true --overwrite --region $REGION --profile $PROFILE
+$SAFE_MODE_PARAM = aws cloudformation describe-stacks `
+  --stack-name $STACK `
+  --region $REGION `
+  --profile $PROFILE `
+  --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" `
+  --output text
 
-# If your deployed namespace is /rp-mw/prod, use instead:
-# aws ssm put-parameter --name /rp-mw/prod/safe_mode --type String --value false --overwrite --region $REGION --profile $PROFILE
-# aws ssm put-parameter --name /rp-mw/prod/automation_enabled --type String --value true --overwrite --region $REGION --profile $PROFILE
+$AUTOMATION_PARAM = aws cloudformation describe-stacks `
+  --stack-name $STACK `
+  --region $REGION `
+  --profile $PROFILE `
+  --query "Stacks[0].Outputs[?OutputKey=='AutomationEnabledParamPath'].OutputValue | [0]" `
+  --output text
+
+aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value false --overwrite --region $REGION --profile $PROFILE
+aws ssm put-parameter --name $AUTOMATION_PARAM --type String --value true --overwrite --region $REGION --profile $PROFILE
 ```
 
 ### 2C) Post-change verification
 
 ```powershell
-aws ssm get-parameters --names /richpanel-middleware/prod/safe_mode /richpanel-middleware/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+$SAFE_MODE_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" --output text
+$AUTOMATION_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='AutomationEnabledParamPath'].OutputValue | [0]" --output text
+aws ssm get-parameters --names $SAFE_MODE_PARAM $AUTOMATION_PARAM --region us-east-2 --profile rp-admin-prod --output table
 
 aws lambda get-function-configuration `
   --function-name rp-mw-prod-worker `
@@ -223,13 +249,8 @@ aws lambda wait function-updated `
 ### Preferred single-command rollback (authoritative kill switch)
 
 ```powershell
-aws ssm put-parameter --name /richpanel-middleware/prod/safe_mode --type String --value true --overwrite --region us-east-2 --profile rp-admin-prod
-```
-
-If your deployed namespace is `/rp-mw/prod`, use:
-
-```powershell
-aws ssm put-parameter --name /rp-mw/prod/safe_mode --type String --value true --overwrite --region us-east-2 --profile rp-admin-prod
+$SAFE_MODE_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" --output text
+aws ssm put-parameter --name $SAFE_MODE_PARAM --type String --value true --overwrite --region us-east-2 --profile rp-admin-prod
 ```
 
 ### Secondary rollback command (Lambda outbound hard stop)
@@ -248,7 +269,9 @@ For each state transition (read-state, canary-on, full-on, rollback), capture:
 
 - SSM truth:
   ```powershell
-  aws ssm get-parameters --names /richpanel-middleware/prod/safe_mode /richpanel-middleware/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+  $SAFE_MODE_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='SafeModeParamPath'].OutputValue | [0]" --output text
+  $AUTOMATION_PARAM = aws cloudformation describe-stacks --stack-name RichpanelMiddleware-prod --region us-east-2 --profile rp-admin-prod --query "Stacks[0].Outputs[?OutputKey=='AutomationEnabledParamPath'].OutputValue | [0]" --output text
+  aws ssm get-parameters --names $SAFE_MODE_PARAM $AUTOMATION_PARAM --region us-east-2 --profile rp-admin-prod --output table
   ```
 - Lambda env truth:
   ```powershell

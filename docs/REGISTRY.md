@@ -263,6 +263,7 @@ Legend:
 - 📎 [OpenAI Model Plan](08_Engineering/OpenAI_Model_Plan.md)  (`08_Engineering/OpenAI_Model_Plan.md`)
 - 📎 [Order Status OpenAI Contract](08_Engineering/Order_Status_OpenAI_Contract.md)  (`08_Engineering/Order_Status_OpenAI_Contract.md`)
 - 📎 [PR Review Checklist](08_Engineering/PR_Review_Checklist.md)  (`08_Engineering/PR_Review_Checklist.md`)
+- 📎 [PROD Cutover Switchboard](08_Engineering/Prod_Cutover_Switchboard.md)  (`08_Engineering/Prod_Cutover_Switchboard.md`)
 - 📎 [Production Read-Only Shadow Mode Runbook](08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md)  (`08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md`)
 - ✅ [Protected Paths and Safe Deletion Rules](08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md)  (`08_Engineering/Protected_Paths_and_Safe_Deletion_Rules.md`)
 - ✅ [Repository Conventions](08_Engineering/Repository_Conventions.md)  (`08_Engineering/Repository_Conventions.md`)
