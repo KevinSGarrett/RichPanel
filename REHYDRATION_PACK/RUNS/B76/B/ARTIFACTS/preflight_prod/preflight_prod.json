@@ -1,0 +1,72 @@
+{
+  "timestamp_utc": "2026-02-10T17:05:35.879935+00:00",
+  "overall_status": "FAIL",
+  "checks": [
+    {
+      "name": "required_env",
+      "status": "FAIL",
+      "details": "missing=MW_ALLOW_NETWORK_READS,RICHPANEL_OUTBOUND_ENABLED,RICHPANEL_READ_ONLY,RICHPANEL_WRITE_DISABLED,SHOPIFY_OUTBOUND_ENABLED,SHOPIFY_SHOP_DOMAIN,SHOPIFY_WRITE_DISABLED",
+      "next_action": "Set required env vars and safety flags for read-only preflight."
+    },
+    {
+      "name": "required_secrets",
+      "status": "PASS",
+      "details": "checked=5"
+    },
+    {
+      "name": "bot_agent_id_secret",
+      "status": "FAIL",
+      "details": "missing_or_unreadable (ResourceNotFoundException)",
+      "next_action": "Create bot agent in Richpanel and store id into Secrets Manager at rp-mw/prod/richpanel/bot_agent_id.",
+      "present": false
+    },
+    {
+      "name": "richpanel_api",
+      "status": "PASS",
+      "details": "ok (200)"
+    },
+    {
+      "name": "shopify_token",
+      "status": "PASS",
+      "details": "ok (200)",
+      "token_diagnostics": {
+        "status": "loaded",
+        "token_type": "offline",
+        "raw_format": "json",
+        "has_refresh_token": false,
+        "refresh_token_source": null,
+        "expires_at": null,
+        "expired": null,
+        "source_secret_id": "rp-mw/prod/shopify/admin_api_token"
+      }
+    },
+    {
+      "name": "shopify_graphql",
+      "status": "PASS",
+      "details": "ok (200)"
+    },
+    {
+      "name": "shopify_token_refresh_lambda",
+      "status": "PASS",
+      "details": "lambda_config_present"
+    },
+    {
+      "name": "shopify_token_refresh_last_success",
+      "status": "FAIL",
+      "details": "log_query_failed (ResourceNotFoundException)",
+      "next_action": "Verify CloudWatch Logs permissions and log group name."
+    }
+  ],
+  "shopify_token_diagnostics": {
+    "status": "loaded",
+    "token_type": "offline",
+    "raw_format": "json",
+    "has_refresh_token": false,
+    "refresh_token_source": null,
+    "expires_at": null,
+    "expired": null,
+    "source_secret_id": "rp-mw/prod/shopify/admin_api_token"
+  },
+  "bot_agent_id_secret_present": false,
+  "bot_agent_id_secret_checked": true
+}
