@@ -167,3 +167,8 @@ OK
 Uncommitted changes:
 M scripts/test_order_lookup.py
 ```
+
+### python scripts/run_ci_checks.py --ci (helper coverage, clean tree)
+```
+[OK] CI-equivalent checks passed.
+```
