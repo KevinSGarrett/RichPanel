@@ -172,3 +172,22 @@ M scripts/test_order_lookup.py
 ```
 [OK] CI-equivalent checks passed.
 ```
+
+### python -m unittest scripts.test_order_lookup (opt-in gating coverage)
+```
+Ran 121 tests in 18.248s
+
+OK
+```
+
+### python -m pytest -q scripts/test_order_lookup.py (opt-in gating coverage)
+```
+121 passed in 18.47s
+```
+
+### python scripts/run_ci_checks.py --ci (opt-in gating coverage)
+```
+[FAIL] Generated files changed after regen. Commit the regenerated outputs.
+Uncommitted changes:
+M scripts/test_order_lookup.py
+```

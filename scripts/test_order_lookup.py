@@ -645,6 +645,62 @@ class OrderLookupTests(unittest.TestCase):
         )
         self.assertEqual(product_ids, [])
 
+    def test_fetch_shopify_line_item_product_ids_network_disabled(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        shopify_client = ShopifyClient(
+            access_token="test-token",
+            allow_network=True,
+        )
+        product_ids = order_lookup_module._fetch_shopify_line_item_product_ids(
+            "P-400",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            client=shopify_client,
+        )
+        self.assertEqual(product_ids, [])
+
+    def test_payload_opt_in_line_item_product_ids_network_disabled(self) -> None:
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
+        payload = {"order_id": "P-500", "tracking_number": "TRACK-500"}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=False,
+            require_line_item_product_ids=True,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
+        )
+
+        self.assertNotIn("line_item_product_ids", summary)
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_opt_in_line_item_product_ids_safe_mode(self) -> None:
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
+        payload = {"order_id": "P-600", "tracking_number": "TRACK-600"}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=True,
+            automation_enabled=True,
+            allow_network=True,
+            require_line_item_product_ids=True,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
+        )
+
+        self.assertNotIn("line_item_product_ids", summary)
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
     def test_shipstation_enrichment_fills_tracking_when_shopify_missing(self) -> None:
         shopify_payload = deepcopy(_load_fixture("shopify_order.json"))
         if isinstance(shopify_payload.get("order"), dict):
