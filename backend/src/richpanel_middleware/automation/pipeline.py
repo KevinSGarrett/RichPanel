@@ -467,6 +467,7 @@ def _order_status_intent_rejection_reason(intent: OrderStatusIntentArtifact) -> 
 def _maybe_apply_order_status_intent_override(
     routing: RoutingDecision,
     *,
+    customer_message: str,
     order_status_intent: OrderStatusIntentArtifact,
     reasons: List[str],
 ) -> RoutingDecision:
@@ -474,8 +475,13 @@ def _maybe_apply_order_status_intent_override(
     Guardrail: if intent classifier strongly accepts order-status, ensure action
     planning does not silently drop into unknown/general routing.
     """
+    if not (customer_message or "").strip():
+        return routing
     result = order_status_intent.result
     if not (order_status_intent.accepted and result and result.is_order_status):
+        return routing
+    # Only rescue ambiguous/fallback routing; do not override concrete non-order intents.
+    if routing.intent not in {"unknown", "unknown_other"}:
         return routing
     if routing.intent in {"order_status_tracking", "shipping_delay_not_shipped"}:
         return routing
@@ -841,7 +847,10 @@ def plan_actions(
     )
     reasons: List[str] = []
     routing = _maybe_apply_order_status_intent_override(
-        routing, order_status_intent=order_status_intent, reasons=reasons
+        routing,
+        customer_message=customer_message,
+        order_status_intent=order_status_intent,
+        reasons=reasons,
     )
 
     effective_automation = automation_enabled and not safe_mode
