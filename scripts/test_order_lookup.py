@@ -588,6 +588,63 @@ class OrderLookupTests(unittest.TestCase):
         self.assertIn("/orders/P-200.json", request.url)
         self.assertFalse(shipstation_client.called)
 
+    def test_normalize_shopify_product_id_variants(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        self.assertIsNone(order_lookup_module._normalize_shopify_product_id(None))
+        self.assertIsNone(order_lookup_module._normalize_shopify_product_id(True))
+        self.assertEqual(
+            order_lookup_module._normalize_shopify_product_id(12345), "12345"
+        )
+        self.assertEqual(
+            order_lookup_module._normalize_shopify_product_id(" 456 "), "456"
+        )
+        self.assertEqual(
+            order_lookup_module._normalize_shopify_product_id(
+                "gid://shopify/Product/789"
+            ),
+            "789",
+        )
+        self.assertIsNone(
+            order_lookup_module._normalize_shopify_product_id(
+                "gid://shopify/Product/not-a-number"
+            )
+        )
+        self.assertIsNone(order_lookup_module._normalize_shopify_product_id("abc"))
+
+    def test_extract_shopify_line_item_product_ids_dedup(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        payload = {
+            "line_items": [
+                {"product_id": 9733948571895},
+                {"productId": "gid://shopify/Product/9733948571895"},
+                {"productId": "gid://shopify/Product/9755753185527"},
+                "not-a-dict",
+                {"product_id": None},
+            ]
+        }
+        self.assertEqual(
+            order_lookup_module._extract_shopify_line_item_product_ids(payload),
+            ["9733948571895", "9755753185527"],
+        )
+
+    def test_fetch_shopify_line_item_product_ids_dry_run(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        shopify_client = ShopifyClient(
+            access_token="test-token",
+            allow_network=False,
+        )
+        product_ids = order_lookup_module._fetch_shopify_line_item_product_ids(
+            "P-300",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            client=shopify_client,
+        )
+        self.assertEqual(product_ids, [])
+
     def test_shipstation_enrichment_fills_tracking_when_shopify_missing(self) -> None:
         shopify_payload = deepcopy(_load_fixture("shopify_order.json"))
         if isinstance(shopify_payload.get("order"), dict):
