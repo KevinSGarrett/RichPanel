@@ -119,3 +119,8 @@ M scripts/test_order_lookup.py
 ?? scripts/fixtures/order_lookup/shopify_order_gid.json
 ?? REHYDRATION_PACK/RUNS/RUN_20260211_2118Z/
 ```
+
+### python scripts/run_ci_checks.py --ci (clean tree)
+```
+[OK] CI-equivalent checks passed.
+```
