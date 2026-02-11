@@ -36,8 +36,15 @@ ISSUE_TERMS = [
 ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
 
 
+<<<<<<< HEAD
 def _default_out_dir() -> str:
     # Keep a deterministic local default while remaining cross-platform.
+=======
+def _default_output_dir() -> str:
+    env_override = os.environ.get("MW_PROD_LOG_WATCH_OUT_DIR")
+    if env_override and env_override.strip():
+        return env_override.strip()
+>>>>>>> 4b5d12e (Reduce API key exposure in log watch)
     return str(Path.cwd() / "MONITORING")
 
 
@@ -51,7 +58,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--interval-minutes", type=int, default=10)
     parser.add_argument(
         "--out-dir",
+<<<<<<< HEAD
         default=_default_out_dir(),
+=======
+        default=_default_output_dir(),
+>>>>>>> 4b5d12e (Reduce API key exposure in log watch)
     )
     return parser.parse_args()
 
@@ -182,7 +193,7 @@ def _build_interval_report(
     failure_counts: Dict[str, int],
     issue_counts: Dict[str, int],
     order_items: List[Dict[str, Any]],
-    api_key: str,
+    api_key: Optional[str],
     ticket_cache: Dict[str, Optional[str]],
 ) -> Dict[str, Any]:
     order_rows: List[Dict[str, Any]] = []
@@ -217,9 +228,11 @@ def _build_interval_report(
             if isinstance(item.get("outbound_result"), dict)
             else {}
         )
-        ticket_number = _resolve_ticket_number(
-            conv_id, api_key=api_key, cache=ticket_cache
-        )
+        ticket_number = None
+        if api_key:
+            ticket_number = _resolve_ticket_number(
+                conv_id, api_key=api_key, cache=ticket_cache
+            )
         order_rows.append(
             {
                 "ticket_number": ticket_number,
@@ -319,7 +332,6 @@ def main() -> int:
     ddb = session.resource("dynamodb")
     cw = session.client("cloudwatch")
 
-    api_key = _load_richpanel_key(sm_client, env="prod")
     state_table = ddb.Table("rp_mw_prod_conversation_state")
 
     start_ts = _utc_now()
@@ -357,6 +369,12 @@ def main() -> int:
         issue_counts = _aggregate_terms(events, ISSUE_TERMS)
         order_items = _scan_order_status_state(state_table, cursor, interval_end)
 
+        # Load API key only for intervals that need ticket lookups to reduce
+        # in-memory exposure time for long-running monitoring sessions.
+        api_key: Optional[str] = None
+        if order_items:
+            api_key = _load_richpanel_key(sm_client, env="prod")
+
         report = _build_interval_report(
             index=idx,
             start=cursor,
@@ -368,6 +386,7 @@ def main() -> int:
             api_key=api_key,
             ticket_cache=ticket_cache,
         )
+        api_key = None
 
         # Add interval-level Lambda metrics for operational health.
         metric_payload: Dict[str, int] = {}
