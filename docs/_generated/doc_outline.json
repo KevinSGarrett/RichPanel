@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-11 - RUN_20260211_2118Z (B77: line_item_product_ids extraction)",
+        "anchor": "2026-02-11-run202602112118z-b77-lineitemproductids-extraction"
+      },
+      {
+        "level": 3,
         "text": "2026-01-22 - RUN_20260122_0113Z (B50: OpenAI order status proof + John scenario)",
         "anchor": "2026-01-22-run202601220113z-b50-openai-order-status-proof-john-scenario"
       },

@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-11 - RUN_20260211_2118Z (B77: line_item_product_ids extraction)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260211_2118Z
+- Added Shopify line item product ID extraction with opt-in enrichment path.
+- Added coverage for product ID extraction, including GID parsing and opt-in fetch.
+
 ### 2026-01-22 - RUN_20260122_0113Z (B50: OpenAI order status proof + John scenario)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260122_0113Z
 - Documented OpenAI routing vs rewrite roles and env flags in order status docs.

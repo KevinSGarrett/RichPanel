@@ -35,6 +35,12 @@ SHOPIFY_ORDER_FIELDS = [
     "shipping_lines",
 ]
 
+SHOPIFY_ORDER_FIELDS_LINE_ITEM_IDS = [
+    "created_at",
+    "id",
+    "line_items",
+]
+
 SHOPIFY_ORDER_FIELDS_WITH_CUSTOMER = SHOPIFY_ORDER_FIELDS + [
     "email",
     "customer",
@@ -71,6 +77,7 @@ ORDER_NUMBER_PATTERNS = (
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
+_SHOPIFY_PRODUCT_GID_PATTERN = re.compile(r"^gid://shopify/Product/(\d+)$")
 
 EMAIL_PATTERN = re.compile(
     r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
@@ -210,6 +217,7 @@ def lookup_order_summary(
     safe_mode: bool,
     automation_enabled: bool,
     allow_network: bool = False,
+    require_line_item_product_ids: bool = False,
     shopify_client: Optional[ShopifyClient] = None,
     shipstation_client: Optional[ShipStationClient] = None,
 ) -> OrderSummary:
@@ -230,6 +238,15 @@ def lookup_order_summary(
             "",
             "unknown",
         ):
+            if require_line_item_product_ids:
+                summary = _maybe_enrich_line_item_product_ids(
+                    summary,
+                    order_id=order_id,
+                    allow_network=allow_network,
+                    safe_mode=safe_mode,
+                    automation_enabled=automation_enabled,
+                    shopify_client=shopify_client,
+                )
             return summary
 
     payload_dict = envelope.payload if isinstance(envelope.payload, dict) else {}
@@ -340,6 +357,15 @@ def lookup_order_summary(
             pass
 
     if summary.get("tracking_number"):
+        if require_line_item_product_ids:
+            summary = _maybe_enrich_line_item_product_ids(
+                summary,
+                order_id=order_id,
+                allow_network=allow_network,
+                safe_mode=safe_mode,
+                automation_enabled=automation_enabled,
+                shopify_client=shopify_client,
+            )
         if resolution:
             summary["order_resolution"] = resolution
         return summary
@@ -369,6 +395,49 @@ def _should_enrich(
     if not order_id or order_id == "unknown":
         return False
     return allow_network and not safe_mode and automation_enabled
+
+
+def _normalize_shopify_product_id(value: Any) -> Optional[str]:
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return str(int(value))
+    if isinstance(value, str):
+        candidate = value.strip()
+        if not candidate:
+            return None
+        match = _SHOPIFY_PRODUCT_GID_PATTERN.match(candidate)
+        if match:
+            return match.group(1)
+        if candidate.isdigit():
+            return candidate
+    return None
+
+
+def _extract_shopify_line_item_product_ids(
+    shopify_order: Dict[str, Any],
+) -> List[str]:
+    if not isinstance(shopify_order, dict):
+        return []
+    line_items = shopify_order.get("line_items")
+    if not isinstance(line_items, list):
+        return []
+    seen: set[str] = set()
+    product_ids: List[str] = []
+    for item in line_items:
+        if not isinstance(item, dict):
+            continue
+        product_id: Optional[str] = None
+        for key in ("product_id", "productId"):
+            if key not in item:
+                continue
+            product_id = _normalize_shopify_product_id(item.get(key))
+            if product_id:
+                break
+        if product_id and product_id not in seen:
+            seen.add(product_id)
+            product_ids.append(product_id)
+    return product_ids
 
 
 def _extract_shopify_order_payload(data: Any) -> Dict[str, Any]:
@@ -637,6 +706,62 @@ def _lookup_shopify(
     else:
         payload = _extract_shopify_order_payload(response.json() or {})
     return _extract_shopify_fields(payload)
+
+
+def _fetch_shopify_line_item_product_ids(
+    order_id: str,
+    *,
+    safe_mode: bool,
+    automation_enabled: bool,
+    allow_network: bool,
+    client: Optional[ShopifyClient],
+) -> List[str]:
+    if not allow_network:
+        return []
+    client = client or ShopifyClient(allow_network=allow_network)
+    response = client.get_order(
+        order_id,
+        fields=SHOPIFY_ORDER_FIELDS_LINE_ITEM_IDS,
+        safe_mode=safe_mode,
+        automation_enabled=automation_enabled,
+        dry_run=not allow_network,
+    )
+    if response.dry_run or response.status_code >= 400:
+        return []
+    payload = _extract_shopify_order_payload(response.json() or {})
+    return _extract_shopify_line_item_product_ids(payload)
+
+
+def _maybe_enrich_line_item_product_ids(
+    summary: OrderSummary,
+    *,
+    order_id: str,
+    allow_network: bool,
+    safe_mode: bool,
+    automation_enabled: bool,
+    shopify_client: Optional[ShopifyClient],
+) -> OrderSummary:
+    if summary.get("line_item_product_ids"):
+        return summary
+    if not order_id or order_id == "unknown":
+        return summary
+    if not allow_network or safe_mode or not automation_enabled:
+        return summary
+    try:
+        product_ids = _fetch_shopify_line_item_product_ids(
+            order_id,
+            safe_mode=safe_mode,
+            automation_enabled=automation_enabled,
+            allow_network=allow_network,
+            client=shopify_client,
+        )
+    except Exception:
+        return summary
+    if not product_ids:
+        return summary
+    enriched = dict(summary)
+    enriched["line_item_product_ids"] = product_ids
+    return enriched
 
 
 def _normalize_email(value: Any) -> str:
@@ -1303,6 +1428,7 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
     items_count = _coerce_int(payload.get("line_items_count"))
     if items_count is None and isinstance(line_items, list):
         items_count = len(line_items)
+    line_item_product_ids = _extract_shopify_line_item_product_ids(payload)
 
     summary: OrderSummary = {}
     order_number = payload.get("order_number")
@@ -1330,6 +1456,8 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
     if shipping_method:
         summary["shipping_method"] = shipping_method
         summary["shipping_method_name"] = shipping_method
+    if line_item_product_ids:
+        summary["line_item_product_ids"] = line_item_product_ids
     return summary
 
 

@@ -8,11 +8,13 @@
     "line_items": [
       {
         "id": 1,
-        "name": "Widget A"
+        "name": "Widget A",
+        "product_id": 9733948571895
       },
       {
         "id": 2,
-        "name": "Widget B"
+        "name": "Widget B",
+        "product_id": 9631164694775
       }
     ],
     "fulfillments": [
