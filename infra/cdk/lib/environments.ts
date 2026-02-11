@@ -8,6 +8,14 @@ export interface EnvironmentSettings {
   readonly tags?: Record<string, string>;
   readonly outboundAllowlistEmails?: string;
   readonly outboundAllowlistDomains?: string;
+  readonly outboundRequireAllowlist?: boolean;
+  readonly richpanelOutboundEnabled?: boolean;
+  readonly shopifyOutboundEnabled?: boolean;
+  readonly openaiIntentEnabled?: boolean;
+  readonly openaiRoutingEnabled?: boolean;
+  readonly openaiRewriteEnabled?: boolean;
+  readonly openaiShadowEnabled?: boolean;
+  readonly openaiReplyRewriteEnabled?: boolean;
   readonly richpanelBotAuthorId?: string;
 }
 
@@ -88,6 +96,22 @@ export function buildEnvironmentConfig(
       overrides?.outboundAllowlistEmails ?? base.outboundAllowlistEmails,
     outboundAllowlistDomains:
       overrides?.outboundAllowlistDomains ?? base.outboundAllowlistDomains,
+    outboundRequireAllowlist:
+      overrides?.outboundRequireAllowlist ?? base.outboundRequireAllowlist,
+    richpanelOutboundEnabled:
+      overrides?.richpanelOutboundEnabled ?? base.richpanelOutboundEnabled,
+    shopifyOutboundEnabled:
+      overrides?.shopifyOutboundEnabled ?? base.shopifyOutboundEnabled,
+    openaiIntentEnabled:
+      overrides?.openaiIntentEnabled ?? base.openaiIntentEnabled,
+    openaiRoutingEnabled:
+      overrides?.openaiRoutingEnabled ?? base.openaiRoutingEnabled,
+    openaiRewriteEnabled:
+      overrides?.openaiRewriteEnabled ?? base.openaiRewriteEnabled,
+    openaiShadowEnabled:
+      overrides?.openaiShadowEnabled ?? base.openaiShadowEnabled,
+    openaiReplyRewriteEnabled:
+      overrides?.openaiReplyRewriteEnabled ?? base.openaiReplyRewriteEnabled,
     richpanelBotAuthorId:
       overrides?.richpanelBotAuthorId ?? base.richpanelBotAuthorId,
     tags: {

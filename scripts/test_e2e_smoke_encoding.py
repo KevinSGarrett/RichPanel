@@ -124,6 +124,7 @@ from dev_e2e_smoke import (  # type: ignore  # noqa: E402
     _load_bot_agent_id,
     _resolve_author_match,
     _resolve_author_evidence,
+    _require_prod_synthetic_webhook_override,
     wait_for_openai_rewrite_state_record,
     wait_for_openai_rewrite_audit_record,
     build_payload,
@@ -1523,6 +1524,20 @@ class ParseArgsTests(unittest.TestCase):
         ):
             args = parse_args()
         self.assertTrue(args.require_email_channel)
+
+    def test_parse_args_accepts_allow_prod_synthetic_webhook(self) -> None:
+        with patch.object(
+            sys,
+            "argv",
+            [
+                "dev_e2e_smoke.py",
+                "--region",
+                "us-east-2",
+                "--allow-prod-synthetic-webhook",
+            ],
+        ):
+            args = parse_args()
+        self.assertTrue(args.allow_prod_synthetic_webhook)
 
 
 class TestRequirementFlagResolution(unittest.TestCase):
@@ -3004,6 +3019,34 @@ class AutoTicketHelpersTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             _require_prod_write_ack_script(
                 env_name="production", ack_token="I_UNDERSTAND_PROD_WRITES"
+            )
+
+    def test_prod_synthetic_webhook_requires_explicit_override(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(SmokeFailure):
+                _require_prod_synthetic_webhook_override(
+                    env_name="prod",
+                    scenario="order_status",
+                    allow_prod_synthetic_webhook=False,
+                    ack_token=None,
+                )
+
+    def test_prod_synthetic_webhook_allows_with_override_and_ack(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            _require_prod_synthetic_webhook_override(
+                env_name="prod",
+                scenario="order_status",
+                allow_prod_synthetic_webhook=True,
+                ack_token="I_UNDERSTAND_PROD_WRITES",
+            )
+
+    def test_prod_synthetic_webhook_baseline_allowed_without_override(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            _require_prod_synthetic_webhook_override(
+                env_name="prod",
+                scenario="baseline",
+                allow_prod_synthetic_webhook=False,
+                ack_token=None,
             )
 
 

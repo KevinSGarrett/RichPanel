@@ -88,6 +88,7 @@ OUTBOUND_BLOCKED_ALLOWLIST_TAG = "mw-outbound-blocked-allowlist"
 OUTBOUND_BLOCKED_MISSING_BOT_AUTHOR_TAG = "mw-outbound-blocked-missing-bot-author"
 MW_OUTBOUND_ALLOWLIST_EMAILS_ENV = "MW_OUTBOUND_ALLOWLIST_EMAILS"
 MW_OUTBOUND_ALLOWLIST_DOMAINS_ENV = "MW_OUTBOUND_ALLOWLIST_DOMAINS"
+MW_OUTBOUND_REQUIRE_ALLOWLIST_ENV = "MW_OUTBOUND_REQUIRE_ALLOWLIST"
 SKIP_RESOLVED_TAG = "mw-skip-order-status-closed"
 SKIP_FOLLOWUP_TAG = "mw-skip-followup-after-auto-reply"
 SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
@@ -284,6 +285,19 @@ def _parse_allowlist_entries(value: Optional[str], *, strip_at: bool = False) ->
     return entries
 
 
+def _parse_env_bool(value: Optional[str]) -> Optional[bool]:
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if not normalized:
+        return None
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return None
+
+
 def _load_outbound_allowlist() -> tuple[set[str], set[str], bool]:
     emails = _parse_allowlist_entries(
         os.environ.get(MW_OUTBOUND_ALLOWLIST_EMAILS_ENV)
@@ -292,6 +306,19 @@ def _load_outbound_allowlist() -> tuple[set[str], set[str], bool]:
         os.environ.get(MW_OUTBOUND_ALLOWLIST_DOMAINS_ENV), strip_at=True
     )
     return emails, domains, bool(emails or domains)
+
+
+def _allowlist_enforcement_required(
+    *, is_prod_env: bool, allowlist_configured: bool
+) -> bool:
+    # Explicit override for controlled rollouts. If allowlist entries are set,
+    # always enforce them regardless of override value.
+    override = _parse_env_bool(os.environ.get(MW_OUTBOUND_REQUIRE_ALLOWLIST_ENV))
+    if allowlist_configured:
+        return True
+    if override is not None:
+        return override
+    return is_prod_env
 
 
 def _match_allowlist_email(
@@ -435,6 +462,42 @@ def _order_status_intent_rejection_reason(intent: OrderStatusIntentArtifact) -> 
     if intent.result and intent.result.confidence < intent.confidence_threshold:
         return "order_status_intent_low_confidence"
     return "order_status_intent_rejected"
+
+
+def _maybe_apply_order_status_intent_override(
+    routing: RoutingDecision,
+    *,
+    customer_message: str,
+    order_status_intent: OrderStatusIntentArtifact,
+    reasons: List[str],
+) -> RoutingDecision:
+    """
+    Guardrail: if intent classifier strongly accepts order-status, ensure action
+    planning does not silently drop into unknown/general routing.
+    """
+    if not (customer_message or "").strip():
+        return routing
+    result = order_status_intent.result
+    if not (order_status_intent.accepted and result and result.is_order_status):
+        return routing
+    # Only rescue ambiguous/fallback routing; do not override concrete non-order intents.
+    if routing.intent not in {"unknown", "unknown_other"}:
+        return routing
+
+    preserved_tags = [
+        str(tag)
+        for tag in (routing.tags or [])
+        if isinstance(tag, str) and not tag.startswith("mw-intent-unknown")
+    ]
+    routing.intent = "order_status_tracking"
+    routing.category = "order_status"
+    routing.department = "Email Support Team"
+    routing.reason = "order_status_intent_override:accepted_intent"
+    routing.tags = sorted(
+        dedupe_tags(preserved_tags + [ROUTING_APPLIED_TAG, "mw-intent-order_status_tracking"])
+    )
+    reasons.append("order_status_intent_override")
+    return routing
 
 
 @dataclass
@@ -780,11 +843,17 @@ def plan_actions(
         outbound_enabled=outbound_enabled,
         metadata=intent_metadata or None,
     )
+    reasons: List[str] = []
+    routing = _maybe_apply_order_status_intent_override(
+        routing,
+        customer_message=customer_message,
+        order_status_intent=order_status_intent,
+        reasons=reasons,
+    )
 
     effective_automation = automation_enabled and not safe_mode
     mode = "automation_candidate" if effective_automation else "route_only"
 
-    reasons: List[str] = []
     if safe_mode:
         reasons.append("safe_mode")
     if not automation_enabled:
@@ -1438,7 +1507,9 @@ def execute_order_status_reply(
             allowlist_domains,
             allowlist_configured,
         ) = _load_outbound_allowlist()
-        allowlist_required = is_prod_env or allowlist_configured
+        allowlist_required = _allowlist_enforcement_required(
+            is_prod_env=is_prod_env, allowlist_configured=allowlist_configured
+        )
         if allowlist_required:
             customer_email = ticket_customer_email or _extract_customer_email_from_payload(
                 payload

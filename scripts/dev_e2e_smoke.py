@@ -219,6 +219,38 @@ def _require_prod_write_ack(*, env_name: str, ack_token: Optional[str]) -> None:
     )
 
 
+def _require_prod_synthetic_webhook_override(
+    *,
+    env_name: str,
+    scenario: str,
+    allow_prod_synthetic_webhook: bool,
+    ack_token: Optional[str],
+) -> None:
+    """
+    Prevent synthetic smoke payloads from being sent to production by default.
+
+    Scenarios other than baseline inject synthetic order/tracking fields and must
+    be explicitly acknowledged in prod.
+    """
+    if env_name.strip().lower() not in PRODUCTION_ENVIRONMENTS:
+        return
+    if scenario == "baseline":
+        return
+    env_value = os.environ.get(PROD_WRITE_ACK_ENV)
+    if allow_prod_synthetic_webhook and (
+        prod_write_ack_matches(env_value) or prod_write_ack_matches(ack_token)
+    ):
+        return
+    raise SmokeFailure(
+        "Refusing to send synthetic webhook payloads to production. "
+        "Use read-only tracing for prod validation. "
+        "Override only if strictly necessary with "
+        "--allow-prod-synthetic-webhook and "
+        f"--i-understand-prod-writes {PROD_WRITE_ACK_PHRASE} "
+        f"(or {PROD_WRITE_ACK_ENV}={PROD_WRITE_ACK_PHRASE})."
+    )
+
+
 def _is_order_status_scenario(name: str) -> bool:
     return name in _ORDER_STATUS_SCENARIOS
 
@@ -2587,6 +2619,14 @@ def parse_args() -> argparse.Namespace:
         "--richpanel-secret-id",
         help="Optional override for the Richpanel API key secret ARN/ID.",
     )
+    parser.add_argument(
+        "--allow-prod-synthetic-webhook",
+        action="store_true",
+        help=(
+            "DANGEROUS: allow synthetic scenario payload injection in prod. "
+            "Requires --i-understand-prod-writes acknowledgement."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -4476,6 +4516,12 @@ def main() -> int:  # pragma: no cover - integration entrypoint
 
     if args.create_ticket:
         _require_prod_write_ack(env_name=env_name, ack_token=args.prod_writes_ack)
+    _require_prod_synthetic_webhook_override(
+        env_name=env_name,
+        scenario=args.scenario,
+        allow_prod_synthetic_webhook=args.allow_prod_synthetic_webhook,
+        ack_token=args.prod_writes_ack,
+    )
 
     print(f"[INFO] Target stack: {args.stack_name} (region={region}, env={env_name})")
     if args.scenario != "baseline":
