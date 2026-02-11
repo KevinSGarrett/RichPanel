@@ -529,6 +529,65 @@ class OrderLookupTests(unittest.TestCase):
         self.assertIn("fields=created_at%2Cid%2Cline_items", request.url)
         self.assertFalse(shipstation_client.called)
 
+    def test_payload_line_item_product_ids_skip_network(self) -> None:
+        shopify = _failing_shopify_client()
+        shipstation = _failing_shipstation_client()
+        payload = {
+            "order_id": "P-100",
+            "tracking_number": "TRACK-100",
+            "line_items": [{"id": 10, "product_id": 9733948571895}],
+        }
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            require_line_item_product_ids=True,
+            shopify_client=cast(ShopifyClient, shopify),
+            shipstation_client=cast(ShipStationClient, shipstation),
+        )
+
+        self.assertEqual(summary["line_item_product_ids"], ["9733948571895"])
+        self.assertFalse(shopify.called)
+        self.assertFalse(shipstation.called)
+
+    def test_payload_opt_in_product_ids_fail_closed_on_404(self) -> None:
+        transport = _RecordingTransport(
+            [
+                ShopifyTransportResponse(
+                    status_code=404,
+                    headers={},
+                    body=b"{}",
+                )
+            ]
+        )
+        shopify_client = ShopifyClient(
+            access_token="test-token",
+            allow_network=True,
+            transport=transport,
+        )
+        shipstation_client = _failing_shipstation_client()
+        payload = {"order_id": "P-200", "tracking_number": "TRACK-200"}
+        envelope = _envelope(payload)
+
+        summary = lookup_order_summary(
+            envelope,
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            require_line_item_product_ids=True,
+            shopify_client=shopify_client,
+            shipstation_client=cast(ShipStationClient, shipstation_client),
+        )
+
+        self.assertNotIn("line_item_product_ids", summary)
+        self.assertEqual(len(transport.requests), 1)
+        request: ShopifyTransportRequest = transport.requests[0]
+        self.assertIn("/orders/P-200.json", request.url)
+        self.assertFalse(shipstation_client.called)
+
     def test_shipstation_enrichment_fills_tracking_when_shopify_missing(self) -> None:
         shopify_payload = deepcopy(_load_fixture("shopify_order.json"))
         if isinstance(shopify_payload.get("order"), dict):

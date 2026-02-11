@@ -124,3 +124,22 @@ M scripts/test_order_lookup.py
 ```
 [OK] CI-equivalent checks passed.
 ```
+
+### python -m unittest scripts.test_order_lookup (post-coverage)
+```
+Ran 115 tests in 18.310s
+
+OK
+```
+
+### python -m pytest -q scripts/test_order_lookup.py (post-coverage)
+```
+115 passed in 18.43s
+```
+
+### python scripts/run_ci_checks.py --ci (post-coverage)
+```
+[FAIL] Generated files changed after regen. Commit the regenerated outputs.
+Uncommitted changes:
+M scripts/test_order_lookup.py
+```
