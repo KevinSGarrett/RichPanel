@@ -36,15 +36,10 @@ ISSUE_TERMS = [
 ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
 
 
-<<<<<<< HEAD
-def _default_out_dir() -> str:
-    # Keep a deterministic local default while remaining cross-platform.
-=======
 def _default_output_dir() -> str:
     env_override = os.environ.get("MW_PROD_LOG_WATCH_OUT_DIR")
     if env_override and env_override.strip():
         return env_override.strip()
->>>>>>> 4b5d12e (Reduce API key exposure in log watch)
     return str(Path.cwd() / "MONITORING")
 
 
@@ -58,11 +53,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--interval-minutes", type=int, default=10)
     parser.add_argument(
         "--out-dir",
-<<<<<<< HEAD
-        default=_default_out_dir(),
-=======
         default=_default_output_dir(),
->>>>>>> 4b5d12e (Reduce API key exposure in log watch)
     )
     return parser.parse_args()
 
