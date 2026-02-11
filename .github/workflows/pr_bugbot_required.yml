@@ -78,8 +78,12 @@ jobs:
             function isReviewResponse(comment) {
               const body = String(comment.body || "");
               if (!body.includes("<!-- CLAUDE_REVIEW_CANONICAL -->")) return false;
+              if (String(comment.user?.login || "") !== "github-actions[bot]") return false;
+              const reviewTimestamp = String(
+                comment.updated_at || comment.created_at || ""
+              );
               if (!triggerCreatedAt) return true;
-              return String(comment.created_at || "") >= triggerCreatedAt;
+              return reviewTimestamp >= triggerCreatedAt;
             }
 
             while (Date.now() < deadline) {
