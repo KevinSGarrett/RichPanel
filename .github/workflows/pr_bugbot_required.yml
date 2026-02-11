@@ -71,9 +71,11 @@ jobs:
             const repo = context.repo.repo;
             const issue_number = pr.number;
             const triggerCreatedAt = `${{ steps.trigger.outputs.trigger_created_at }}`;
-            const timeoutMs = 10 * 60 * 1000;
+            const minRuntimeMs = 5 * 60 * 1000;
+            const timeoutMs = 20 * 60 * 1000;
             const intervalMs = 15 * 1000;
             const deadline = Date.now() + timeoutMs;
+            const triggerMs = Date.parse(triggerCreatedAt || new Date().toISOString());
 
             function isReviewResponse(comment) {
               const body = String(comment.body || "");
@@ -95,6 +97,15 @@ jobs:
               });
               const match = comments.find(isReviewResponse);
               if (match) {
+                const elapsedMs = Date.now() - triggerMs;
+                if (elapsedMs < minRuntimeMs) {
+                  const remainingSec = Math.ceil((minRuntimeMs - elapsedMs) / 1000);
+                  core.info(
+                    `Review evidence detected, waiting ${remainingSec}s to satisfy minimum runtime gate.`
+                  );
+                  await new Promise((resolve) => setTimeout(resolve, intervalMs));
+                  continue;
+                }
                 core.info(`Review response detected at ${match.created_at}.`);
                 return;
               }
