@@ -483,8 +483,6 @@ def _maybe_apply_order_status_intent_override(
     # Only rescue ambiguous/fallback routing; do not override concrete non-order intents.
     if routing.intent not in {"unknown", "unknown_other"}:
         return routing
-    if routing.intent in {"order_status_tracking", "shipping_delay_not_shipped"}:
-        return routing
 
     preserved_tags = [
         str(tag)

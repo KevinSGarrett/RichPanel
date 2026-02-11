@@ -36,6 +36,11 @@ ISSUE_TERMS = [
 ORDER_STATUS_INTENTS = {"order_status_tracking", "shipping_delay_not_shipped"}
 
 
+def _default_out_dir() -> str:
+    # Keep a deterministic local default while remaining cross-platform.
+    return str(Path.cwd() / "MONITORING")
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Monitor prod worker logs and order-status classification findings."
@@ -46,7 +51,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--interval-minutes", type=int, default=10)
     parser.add_argument(
         "--out-dir",
-        default=r"C:\RichPanel_Runs\AM_\AM_B35\Runs\B75\Agent_B\MONITORING",
+        default=_default_out_dir(),
     )
     return parser.parse_args()
 
