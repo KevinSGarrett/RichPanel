@@ -36,6 +36,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
     _fingerprint_reply_body,
     _extract_customer_email_from_payload,
     _match_allowlist_email,
+    _allowlist_enforcement_required,
     _parse_allowlist_entries,
     _safe_ticket_snapshot_fetch,
     _extract_bot_agent_id,
@@ -96,6 +97,24 @@ def _accepted_intent_artifact() -> OrderStatusIntentArtifact:
         response_id_unavailable_reason="stubbed",
         confidence_threshold=0.85,
         accepted=True,
+    )
+
+
+def _rejected_intent_artifact() -> OrderStatusIntentArtifact:
+    return OrderStatusIntentArtifact(
+        result=OrderStatusIntentResult(
+            is_order_status=False,
+            confidence=0.98,
+            reason="stubbed-rejected",
+            extracted_order_number=None,
+            language="en",
+        ),
+        llm_called=False,
+        model="gpt-test",
+        response_id=None,
+        response_id_unavailable_reason="stubbed",
+        confidence_threshold=0.85,
+        accepted=False,
     )
 
 
@@ -318,6 +337,75 @@ class PipelineTests(unittest.TestCase):
         draft_reply = order_actions[0]["parameters"].get("draft_reply", {})
         self.assertIn("body", draft_reply)
         self.assertTrue(draft_reply["body"])
+
+    def test_plan_overrides_unknown_routing_when_intent_accepted(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-override",
+                "order_id": "ord-override",
+                "created_at": "2025-01-01T00:00:00Z",
+                "shipping_method": "Standard 3-5 business days",
+                "message": "Hi there",
+            }
+        )
+        forced_routing = RoutingDecision(
+            category="general",
+            tags=["mw-routing-applied", "mw-intent-unknown_other"],
+            reason="no strong intent keyword detected",
+            department="Email Support Team",
+            intent="unknown_other",
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_dual_routing",
+            return_value=(forced_routing, None),
+        ):
+            plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        order_actions = [
+            action for action in plan.actions if action["type"] == "order_status_draft_reply"
+        ]
+        self.assertEqual(len(order_actions), 1)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(routing.intent, "order_status_tracking")
+        self.assertEqual(routing.category, "order_status")
+        self.assertIn("mw-intent-order_status_tracking", routing.tags)
+        self.assertNotIn("mw-intent-unknown_other", routing.tags)
+
+    def test_plan_does_not_override_unknown_routing_when_intent_rejected(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-no-override",
+                "order_id": "ord-no-override",
+                "created_at": "2025-01-01T00:00:00Z",
+                "shipping_method": "Standard 3-5 business days",
+                "message": "Hi there",
+            }
+        )
+        forced_routing = RoutingDecision(
+            category="general",
+            tags=["mw-routing-applied", "mw-intent-unknown_other"],
+            reason="no strong intent keyword detected",
+            department="Email Support Team",
+            intent="unknown_other",
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.classify_order_status_intent",
+            return_value=_rejected_intent_artifact(),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_dual_routing",
+            return_value=(forced_routing, None),
+        ):
+            plan = plan_actions(envelope, safe_mode=False, automation_enabled=True)
+
+        action_types = [action["type"] for action in plan.actions]
+        self.assertNotIn("order_status_draft_reply", action_types)
+        routing = cast(RoutingDecision, plan.routing)
+        self.assertIsNotNone(routing)
+        assert routing is not None
+        self.assertEqual(routing.intent, "unknown_other")
+        self.assertEqual(routing.category, "general")
 
     def test_routing_classifies_returns(self) -> None:
         envelope = build_event_envelope(
@@ -1400,6 +1488,67 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIn("mw-outbound-blocked-allowlist", route_tags)
         self.assertIn("route-email-support-team", route_tags)
 
+    def test_outbound_prod_allows_without_allowlist_when_override_false(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(ticket_channel="chat")
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "MW_ENV": "prod",
+                "RICHPANEL_READ_ONLY": "false",
+                "MW_OUTBOUND_REQUIRE_ALLOWLIST": "false",
+            },
+            clear=False,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertTrue(result["sent"])
+        self.assertNotEqual(result.get("reason"), "allowlist_blocked")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+
+    def test_outbound_non_prod_blocks_when_allowlist_override_true(self) -> None:
+        envelope, plan = self._build_order_status_plan()
+        executor = _RecordingExecutor(
+            ticket_channel="chat",
+            ticket_customer_email="customer@example.com",
+        )
+
+        with mock.patch.dict(
+            os.environ,
+            {"MW_OUTBOUND_REQUIRE_ALLOWLIST": "true"},
+            clear=False,
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+
+        self.assertFalse(result["sent"])
+        self.assertEqual(result["reason"], "allowlist_blocked")
+        self.assertFalse(
+            any(call["path"].endswith("/send-message") for call in executor.calls)
+        )
+        route_calls = [
+            call for call in executor.calls if "/add-tags" in call["path"]
+        ]
+        self.assertEqual(len(route_calls), 1)
+
     def test_outbound_allowlist_prefers_snapshot_email(self) -> None:
         envelope = build_event_envelope(
             {
@@ -2029,6 +2178,34 @@ class ReadOnlyGuardTests(unittest.TestCase):
     def test_read_only_guard_false_override_in_prod(self) -> None:
         with mock.patch.dict(os.environ, {"RICHPANEL_READ_ONLY": "false"}):
             self.assertFalse(_read_only_guard_active("prod"))
+
+    def test_allowlist_enforcement_required_prod_default_true(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(
+                _allowlist_enforcement_required(
+                    is_prod_env=True, allowlist_configured=False
+                )
+            )
+
+    def test_allowlist_enforcement_required_override_false(self) -> None:
+        with mock.patch.dict(
+            os.environ, {"MW_OUTBOUND_REQUIRE_ALLOWLIST": "false"}, clear=True
+        ):
+            self.assertFalse(
+                _allowlist_enforcement_required(
+                    is_prod_env=True, allowlist_configured=False
+                )
+            )
+
+    def test_allowlist_enforcement_required_respects_configured_lists(self) -> None:
+        with mock.patch.dict(
+            os.environ, {"MW_OUTBOUND_REQUIRE_ALLOWLIST": "false"}, clear=True
+        ):
+            self.assertTrue(
+                _allowlist_enforcement_required(
+                    is_prod_env=False, allowlist_configured=True
+                )
+            )
 
     def test_safe_ticket_snapshot_fetch_channel_fallback(self) -> None:
         class _ChannelExecutor:

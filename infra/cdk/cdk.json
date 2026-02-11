@@ -30,6 +30,15 @@
         "region": "us-east-2",
         "owner": "middleware",
         "costCenter": "eng-prod",
+        "richpanelBotAuthorId": "95b936a4-d9aa-4301-8221-a01d692ec344",
+        "richpanelOutboundEnabled": true,
+        "shopifyOutboundEnabled": true,
+        "openaiIntentEnabled": true,
+        "openaiRoutingEnabled": true,
+        "openaiRewriteEnabled": true,
+        "openaiShadowEnabled": true,
+        "openaiReplyRewriteEnabled": true,
+        "outboundRequireAllowlist": false,
         "tags": {
           "service": "richpanel-middleware",
           "tier": "prod"

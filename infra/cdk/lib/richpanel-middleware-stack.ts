@@ -303,31 +303,87 @@ export class RichpanelMiddlewareStack extends Stack {
         RICHPANEL_HTTP_MAX_ATTEMPTS: "6",
         RICHPANEL_429_COOLDOWN_MULTIPLIER: "3.0",
         RICHPANEL_OUTBOUND_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "false",
+          this.environmentConfig.richpanelOutboundEnabled !== undefined
+            ? this.environmentConfig.richpanelOutboundEnabled
+              ? "true"
+              : "false"
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "false",
         RICHPANEL_TOKEN_POOL_ENABLED: "false",
         RICHPANEL_TOKEN_POOL_SECRET_IDS: "",
         SHOPIFY_SHOP_DOMAIN: "scentimen-t.myshopify.com",
         SHOPIFY_OUTBOUND_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "false",
+          this.environmentConfig.shopifyOutboundEnabled !== undefined
+            ? this.environmentConfig.shopifyOutboundEnabled
+              ? "true"
+              : "false"
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "false",
+        MW_PROD_WRITES_ACK:
+          this.environmentConfig.name === "prod"
+            ? "I_UNDERSTAND_PROD_WRITES"
+            : "",
+        RICHPANEL_READ_ONLY: "false",
+        RICHPANEL_WRITE_DISABLED: "false",
         SHOPIFY_WRITE_DISABLED: "true",
         MW_OUTBOUND_ALLOWLIST_EMAILS:
           this.environmentConfig.outboundAllowlistEmails ?? "",
         MW_OUTBOUND_ALLOWLIST_DOMAINS:
           this.environmentConfig.outboundAllowlistDomains ?? "",
+        MW_OUTBOUND_REQUIRE_ALLOWLIST:
+          this.environmentConfig.outboundRequireAllowlist !== undefined
+            ? this.environmentConfig.outboundRequireAllowlist
+              ? "true"
+              : "false"
+            : this.environmentConfig.name === "prod"
+              ? "true"
+              : "false",
         MW_SAFE_MODE_OVERRIDE:
           this.environmentConfig.name === "dev" ? "false" : "",
         MW_AUTOMATION_ENABLED_OVERRIDE:
           this.environmentConfig.name === "dev" ? "true" : "",
         MW_OPENAI_INTENT_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "",
+          this.environmentConfig.openaiIntentEnabled !== undefined
+            ? this.environmentConfig.openaiIntentEnabled
+              ? "true"
+              : ""
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "",
         MW_OPENAI_ROUTING_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "",
+          this.environmentConfig.openaiRoutingEnabled !== undefined
+            ? this.environmentConfig.openaiRoutingEnabled
+              ? "true"
+              : ""
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "",
         MW_OPENAI_REWRITE_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "",
+          this.environmentConfig.openaiRewriteEnabled !== undefined
+            ? this.environmentConfig.openaiRewriteEnabled
+              ? "true"
+              : ""
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "",
         MW_OPENAI_SHADOW_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "",
+          this.environmentConfig.openaiShadowEnabled !== undefined
+            ? this.environmentConfig.openaiShadowEnabled
+              ? "true"
+              : ""
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "",
         OPENAI_REPLY_REWRITE_ENABLED:
-          this.environmentConfig.name === "dev" ? "true" : "",
+          this.environmentConfig.openaiReplyRewriteEnabled !== undefined
+            ? this.environmentConfig.openaiReplyRewriteEnabled
+              ? "true"
+              : ""
+            : this.environmentConfig.name === "dev"
+              ? "true"
+              : "",
         ...(this.environmentConfig.name === "dev"
           ? { OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD: "0.7" }
           : {}),
