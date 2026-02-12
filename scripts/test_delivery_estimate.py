@@ -15,10 +15,13 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     add_business_days,
+    build_no_tracking_reply,
     build_tracking_reply,
     build_tracking_url,
     business_days_between,
     compute_delivery_estimate,
+    compute_preorder_delivery_estimate,
+    detect_preorder_items,
     normalize_shipping_method,
     parse_transit_days,
 )
@@ -278,6 +281,41 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(priority["bucket"], "Priority")
         self.assertEqual(priority["min_days"], 1)
         self.assertEqual(priority["max_days"], 1)
+
+    def test_preorder_delivery_window_example(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping",
+            inquiry_date="2026-02-09",
+            line_item_product_ids=["9733948571895"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["delivery_window_human"], "April 3–April 6, 2026")
+
+    def test_detect_preorder_items_all_products(self) -> None:
+        items = detect_preorder_items(
+            ["9755753185527", "9631164694775", "9733948571895"]
+        )
+        self.assertEqual(
+            items,
+            ["Car Diffuser", "Diffuser Pro 2", "Car Diffuser Discovery Kit"],
+        )
+
+    def test_no_tracking_reply_non_preorder_regression(self) -> None:
+        order_summary = {
+            "order_id": "12345",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-03")
+        assert reply is not None
+        self.assertEqual(
+            reply["body"],
+            "Thanks for your patience. Order 12345 was placed on 2024-01-01. "
+            "With Standard (3-5 business days) shipping, It should arrive in about "
+            "1-3 business days. We'll send tracking as soon as it ships.",
+        )
 
 
 class TrackingUrlTests(unittest.TestCase):

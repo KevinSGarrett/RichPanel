@@ -94,8 +94,12 @@ class ReadOnlyShadowModeTests(unittest.TestCase):
                 outbound_enabled=False,
             )
 
-        lookup_mock.assert_called_once()
-        self.assertTrue(lookup_mock.call_args.kwargs.get("allow_network"))
+        self.assertEqual(lookup_mock.call_count, 2)
+        self.assertTrue(lookup_mock.call_args_list[0].kwargs.get("allow_network"))
+        self.assertTrue(lookup_mock.call_args_list[1].kwargs.get("allow_network"))
+        self.assertTrue(
+            lookup_mock.call_args_list[1].kwargs.get("require_line_item_product_ids")
+        )
         self.assertIsNotNone(plan)
         self.assertTrue(
             any(
