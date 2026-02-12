@@ -6,8 +6,8 @@
 **Agents:** B  
 **Labels:** `risk:R1`, `gate:claude`  
 **Risk:** `risk:R1`  
-**Claude gate model (used):** `pending — @cursor review`  
-**Anthropic response id:** `pending — @cursor review`  
+**Claude gate model (used):** `pending — https://github.com/KevinSGarrett/RichPanel/pull/246`  
+**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/246`  
 
 ### 1) Summary
 - Add Shopify order tags to `order_summary` as read-only extraction.
@@ -71,9 +71,9 @@
 - Not run (extraction-only change).
 
 ### 7) Results & evidence
-**CI:** pending — `<link>`  
-**Codecov:** pending — `<direct Codecov PR link>`  
-**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
+**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/246/checks`  
+**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/246`  
+**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/246` (triggered)  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260212_2150Z/b78/agent_b.md`
