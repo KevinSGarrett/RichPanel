@@ -338,6 +338,66 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("body", draft_reply)
         self.assertTrue(draft_reply["body"])
 
+    def test_plan_uses_preorder_estimate_when_enriched(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-preorder",
+                "order_id": "ord-pre",
+                "created_at": "2026-02-01T00:00:00Z",
+                "shipping_method": "Standard Shipping",
+                "message": "Where is my order?",
+            }
+        )
+        base_summary = {
+            "order_id": "ord-pre",
+            "created_at": "2026-02-01T00:00:00Z",
+            "shipping_method": "Standard Shipping",
+        }
+        enriched_summary = dict(
+            base_summary, line_item_product_ids=["9733948571895"]
+        )
+        preorder_estimate = {
+            "preorder": True,
+            "preorder_items": ["Car Diffuser"],
+            "preorder_ship_date_human": "Saturday, March 28, 2026",
+            "delivery_window_human": "April 3–April 6, 2026",
+            "days_from_inquiry_human": "53–56 days",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "order_created_date": "2026-02-01",
+            "inquiry_date": "2026-02-09",
+            "window_min_days": 3,
+            "window_max_days": 5,
+        }
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.lookup_order_summary",
+            side_effect=[base_summary, enriched_summary],
+        ) as lookup_mock, mock.patch(
+            "richpanel_middleware.automation.pipeline.build_tracking_reply",
+            return_value=None,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_preorder_delivery_estimate",
+            return_value=preorder_estimate,
+        ):
+            plan = plan_actions(
+                envelope, safe_mode=False, automation_enabled=True, allow_network=True
+            )
+
+        self.assertEqual(lookup_mock.call_count, 2)
+        self.assertTrue(lookup_mock.call_args_list[1].kwargs.get("require_line_item_product_ids"))
+        order_actions = [
+            action
+            for action in plan.actions
+            if action["type"] == "order_status_draft_reply"
+        ]
+        self.assertEqual(len(order_actions), 1)
+        params = order_actions[0]["parameters"]
+        self.assertTrue(params.get("delivery_estimate", {}).get("preorder"))
+        draft_reply = params.get("draft_reply", {})
+        self.assertIn("pre-order", draft_reply.get("body", ""))
+        self.assertIn("Saturday, March 28, 2026", draft_reply.get("body", ""))
+
     def test_plan_overrides_unknown_routing_when_intent_accepted(self) -> None:
         envelope = build_event_envelope(
             {

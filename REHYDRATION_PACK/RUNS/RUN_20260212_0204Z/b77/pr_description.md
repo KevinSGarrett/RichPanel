@@ -79,6 +79,7 @@
 ```text
 python -m unittest scripts.test_delivery_estimate  # PASS
 python -m pytest -q scripts/test_delivery_estimate.py  # PASS (30 tests)
+python scripts/test_pipeline_handlers.py  # PASS
 AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python -m unittest discover -s scripts -p "test_*.py"  # PASS
 python scripts/run_ci_checks.py --ci  # FAIL: generated docs changed after regen (commit outputs)
 ```

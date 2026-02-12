@@ -22,6 +22,7 @@ from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     compute_delivery_estimate,
     compute_preorder_delivery_estimate,
     detect_preorder_items,
+    is_preorder_order,
     normalize_shipping_method,
     parse_transit_days,
 )
@@ -302,6 +303,35 @@ class DeliveryEstimateTests(unittest.TestCase):
             ["Car Diffuser", "Diffuser Pro 2", "Car Diffuser Discovery Kit"],
         )
 
+    def test_detect_preorder_items_accepts_gid_and_int(self) -> None:
+        items = detect_preorder_items(
+            ["gid://shopify/Product/9733948571895", 9631164694775, "invalid"]
+        )
+        self.assertEqual(items, ["Car Diffuser", "Diffuser Pro 2"])
+
+    def test_is_preorder_order_requires_date_before_ship(self) -> None:
+        self.assertTrue(is_preorder_order("2026-03-27", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("2026-03-28", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("not-a-date", ["Car Diffuser"]))
+
+    def test_preorder_delivery_estimate_returns_none_when_invalid(self) -> None:
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-03-28",
+                shipping_method="Standard Shipping",
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-01",
+                shipping_method=None,
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+
     def test_no_tracking_reply_non_preorder_regression(self) -> None:
         order_summary = {
             "order_id": "12345",
@@ -316,6 +346,18 @@ class DeliveryEstimateTests(unittest.TestCase):
             "With Standard (3-5 business days) shipping, It should arrive in about "
             "1-3 business days. We'll send tracking as soon as it ships.",
         )
+
+    def test_no_tracking_reply_preorder_without_eta(self) -> None:
+        order_summary = {
+            "order_id": "PO-1",
+            "line_item_product_ids": ["9755753185527"],
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-02-09")
+        assert reply is not None
+        self.assertIn("pre-order", reply["body"])
+        self.assertIn("Car Diffuser Discovery Kit", reply["body"])
+        self.assertIn("Saturday, March 28, 2026", reply["body"])
+        self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
 
 
 class TrackingUrlTests(unittest.TestCase):
