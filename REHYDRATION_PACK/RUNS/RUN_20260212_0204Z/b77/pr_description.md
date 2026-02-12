@@ -5,12 +5,13 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01GPCD4skfQ59H5m1K6naZh7`  
+**Anthropic response id:** `msg_01GnyPy6zpfGy7mwxECax5Ag`  
 
 ### 1) Summary
 - Add preorder-aware ETA computation + reply branch for no-tracking order status.
 - Enrich line item product IDs on-demand to detect preorder products.
 - Add preorder tests + strict non-preorder reply regression test.
+- Fix preorder reply ship-date fallback and omit negative day windows.
 
 ### 2) Why
 - **Problem / risk:** preorder orders need deterministic ETA that references the known ship date.
@@ -32,6 +33,7 @@
 - Add preorder catalog/constants, canonicalization, detection, and ETA compute.
 - Update no-tracking reply to include preorder ship date and items when applicable.
 - Enrich `line_item_product_ids` for preorder detection when missing (allow-network only).
+- Guard preorder reply ship date fallback and suppress negative “in X–Y days”.
 
 **Design decisions (why this way):**
 - Keep preorder computation separate to preserve existing ETA logic.
@@ -68,7 +70,7 @@
 - None
 
 ### 7) Results & evidence
-**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931840401/job/63337235722  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21933126956/job/63341272855  
 **Codecov:** pass (patch 96.07%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/244  
 **Bugbot:** triggered via https://github.com/KevinSGarrett/RichPanel/pull/244#issuecomment-3888342105 (no findings posted)  
 

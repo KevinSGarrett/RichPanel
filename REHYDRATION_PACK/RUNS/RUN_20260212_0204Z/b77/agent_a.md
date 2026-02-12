@@ -2,6 +2,7 @@
 
 ## Summary
 - Added preorder-aware ETA detection + formatting (fail-closed) and preorder-specific no-tracking reply.
+- Fixed preorder reply ship-date fallback when standard estimate is present and clamped negative day windows.
 - Wired pipeline to enrich line item product IDs when missing and compute preorder ETA before standard ETA.
 - Added preorder tests + strict non-preorder reply regression; updated shadow-mode test expectation.
 - Logged run in `docs/00_Project_Admin/Progress_Log.md`; regenerated docs/_generated via CI script.
@@ -10,6 +11,7 @@
 - `backend/src/richpanel_middleware/automation/delivery_estimate.py`
   - Added preorder catalog/constants, canonicalization, detection, preorder ETA compute + formatting.
   - Added preorder-aware branch in `build_no_tracking_reply()` while preserving non-preorder output.
+  - Guarded preorder reply ship date fallback and omitted negative day windows.
 - `backend/src/richpanel_middleware/automation/pipeline.py`
   - Enrich `line_item_product_ids` on no-tracking path when missing and `allow_network=True`.
   - Compute preorder ETA before fallback to standard ETA.
