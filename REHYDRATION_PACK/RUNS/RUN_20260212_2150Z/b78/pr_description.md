@@ -6,8 +6,8 @@
 **Agents:** B  
 **Labels:** `risk:R1`, `gate:claude`  
 **Risk:** `risk:R1`  
-**Claude gate model (used):** `pending — https://github.com/KevinSGarrett/RichPanel/pull/246`  
-**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/246`  
+**Claude gate model (used):** `claude-sonnet-4-5-20250929`  
+**Anthropic response id:** `msg_01Xmu41NFz82b99FsqCan9Lp`  
 
 ### 1) Summary
 - Add Shopify order tags to `order_summary` as read-only extraction.
