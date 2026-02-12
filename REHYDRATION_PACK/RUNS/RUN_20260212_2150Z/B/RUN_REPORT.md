@@ -1,3 +1,4 @@
+...
 # RUN_REPORT
 
 ## Diffstat
@@ -11,12 +12,12 @@
 - python -m unittest scripts.test_order_lookup (PASS; warnings logged).
 - python -m unittest discover -s scripts -p "test_*.py" (PASS with AWS region set).
 - python -m pytest -q scripts/test_order_lookup.py (PASS).
-- python scripts/run_ci_checks.py --ci (FAIL: generated files changed after regen).
+- python scripts/run_ci_checks.py --ci (PASS).
 
 ## Tests / Proof
 - Unit tests passed for order lookup.
 - Full scripts unittest discovery passed with AWS region configured.
-- CI checks still require committing regenerated outputs.
+- CI-equivalent checks passed.
 
 ## Files Changed
 - backend/src/richpanel_middleware/commerce/order_lookup.py
