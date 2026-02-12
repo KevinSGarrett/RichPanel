@@ -5,7 +5,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_01SydbY9fSwpqwXWK3aj9GfP`  
+**Anthropic response id:** `msg_01GPCD4skfQ59H5m1K6naZh7`  
 
 ### 1) Summary
 - Add preorder-aware ETA computation + reply branch for no-tracking order status.
@@ -68,7 +68,7 @@
 - None
 
 ### 7) Results & evidence
-**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931629561/job/63336603991  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931744918/job/63336941128  
 **Codecov:** pass (patch 96.07%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/244  
 **Bugbot:** triggered via https://github.com/KevinSGarrett/RichPanel/pull/244#issuecomment-3888342105 (no findings posted)  
 
