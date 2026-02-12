@@ -451,7 +451,7 @@ export class RichpanelMiddlewareStack extends Stack {
               "shopify",
               "refresh_token"
             ),
-            SHOPIFY_REFRESH_ENABLED: "false",
+            SHOPIFY_REFRESH_ENABLED: "true",
           },
           code: lambda.Code.fromAsset(lambdaSourceRoot),
         }

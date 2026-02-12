@@ -1061,6 +1061,56 @@ class ShopifyClientTests(unittest.TestCase):
         self.assertEqual(client._access_token, "old-token")
         self.assertEqual(len(transport.requests), 0)
 
+    def test_refresh_uses_client_credentials_when_no_refresh_token(self) -> None:
+        """Token bundle has no refresh_token → should use client_credentials grant."""
+        token_secret = "rp-mw/local/shopify/admin_api_token"
+        client_id_secret = "rp-mw/local/shopify/client_id"
+        client_secret_secret = "rp-mw/local/shopify/client_secret"
+        secrets = _SelectiveStubSecretsClient(
+            {
+                token_secret: {
+                    "SecretString": json.dumps({"access_token": "old-token"})
+                },
+                client_id_secret: {"SecretString": "client-id"},
+                client_secret_secret: {"SecretString": "client-secret"},
+            }
+        )
+        transport = _RecordingTransport(
+            [
+                TransportResponse(
+                    status_code=200,
+                    headers={},
+                    body=b'{"access_token":"new-token","expires_in":3600}',
+                )
+            ]
+        )
+        with mock.patch.dict(
+            os.environ,
+            {
+                "SHOPIFY_REFRESH_ENABLED": "true",
+                "SHOPIFY_CLIENT_ID_SECRET_ID": client_id_secret,
+                "SHOPIFY_CLIENT_SECRET_SECRET_ID": client_secret_secret,
+            },
+            clear=False,
+        ):
+            client = ShopifyClient(
+                allow_network=True,
+                transport=transport,
+                secrets_client=secrets,
+                access_token_secret_id=token_secret,
+            )
+            refreshed = client.refresh_access_token()
+
+        self.assertTrue(refreshed)
+        self.assertEqual(len(transport.requests), 1)
+        req = transport.requests[0]
+        body = req.body.decode("utf-8") if isinstance(req.body, bytes) else req.body
+        self.assertIn("grant_type=client_credentials", body)
+        self.assertNotIn("refresh_token", body)
+        self.assertIn("client_id=client-id", body)
+        self.assertIn("client_secret=client-secret", body)
+        self.assertIn(token_secret, secrets.put_calls)
+
     def test_refresh_access_token_allows_secret_refresh_source(self) -> None:
         token_info = ShopifyTokenInfo(
             access_token="token",

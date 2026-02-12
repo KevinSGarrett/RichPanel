@@ -589,7 +589,12 @@ class ShopifyClient:
             )
             self._last_refresh_error = "non_json_token"
             return False
-        if self._refresh_token_source not in {"admin_api_token", "secret", "override"}:
+        if self._refresh_token_source not in {
+            "admin_api_token",
+            "secret",
+            "override",
+            None,
+        }:
             self._logger.info(
                 "refresh skipped (unsupported refresh token source)",
                 extra={
@@ -600,16 +605,6 @@ class ShopifyClient:
                 },
             )
             self._last_refresh_error = "unsupported_refresh_token_source"
-            return False
-        if not self._token_info.refresh_token:
-            self._logger.info(
-                "shopify.refresh_skipped",
-                extra={
-                    "reason": "missing_refresh_token",
-                    "secret_id": self.access_token_secret_id,
-                },
-            )
-            self._last_refresh_error = "missing_refresh_token"
             return False
         return self._refresh_access_token(self._token_info)
 
@@ -963,7 +958,12 @@ class ShopifyClient:
             )
             self._last_refresh_error = "legacy_token_source"
             return False
-        if self._refresh_token_source not in {"admin_api_token", "secret", "override"}:
+        if self._refresh_token_source not in {
+            "admin_api_token",
+            "secret",
+            "override",
+            None,
+        }:
             self._logger.info(
                 "refresh skipped (unsupported refresh token source)",
                 extra={
@@ -975,17 +975,6 @@ class ShopifyClient:
                 },
             )
             self._last_refresh_error = "unsupported_refresh_token_source"
-            return False
-        if not token_info.refresh_token:
-            self._logger.info(
-                "shopify.refresh_skipped",
-                extra={
-                    "reason": "missing_refresh_token",
-                    "secret_id": token_info.source_secret_id
-                    or self.access_token_secret_id,
-                },
-            )
-            self._last_refresh_error = "missing_refresh_token"
             return False
         client_id, client_secret = self._load_client_credentials()
         if not client_id or not client_secret:
@@ -1000,12 +989,19 @@ class ShopifyClient:
             return False
 
         url = f"https://{self.shop_domain}/admin/oauth/access_token"
-        payload = {
-            "grant_type": "refresh_token",
-            "refresh_token": token_info.refresh_token,
-            "client_id": client_id,
-            "client_secret": client_secret,
-        }
+        if token_info.refresh_token:
+            payload = {
+                "grant_type": "refresh_token",
+                "refresh_token": token_info.refresh_token,
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
+        else:
+            payload = {
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+            }
         body = urllib.parse.urlencode(payload).encode("utf-8")
         headers = {
             "accept": "application/json",
