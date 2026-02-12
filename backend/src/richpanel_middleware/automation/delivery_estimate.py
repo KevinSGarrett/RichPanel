@@ -153,9 +153,14 @@ def compute_preorder_delivery_estimate(
     delivery_max = add_business_days(ship_start_date, latest_offset)
 
     delivery_window_human = _format_delivery_window(delivery_min, delivery_max)
-    days_from_inquiry_human = _format_day_window(
-        (delivery_min - inquiry).days, (delivery_max - inquiry).days
-    )
+    days_min = (delivery_min - inquiry).days
+    days_max = (delivery_max - inquiry).days
+    if days_max < 0:
+        days_from_inquiry_human = None
+    else:
+        days_from_inquiry_human = _format_day_window(
+            max(0, days_min), max(0, days_max)
+        )
 
     return {
         "bucket": window["bucket"],
@@ -639,7 +644,11 @@ def build_no_tracking_reply(
     """
     summary = order_summary if isinstance(order_summary, dict) else {}
     preorder_items = detect_preorder_items(summary.get("line_item_product_ids"))
-    preorder_estimate = delivery_estimate if isinstance(delivery_estimate, dict) else None
+    preorder_estimate = (
+        delivery_estimate
+        if isinstance(delivery_estimate, dict) and delivery_estimate.get("preorder")
+        else None
+    )
     preorder_items_from_estimate = (
         preorder_estimate.get("preorder_items")
         if preorder_estimate and isinstance(preorder_estimate.get("preorder_items"), list)
@@ -662,7 +671,7 @@ def build_no_tracking_reply(
         order_label = f"Order {order_id}" if has_order_id else "Your order"
         ship_date_human = (
             preorder_estimate.get("preorder_ship_date_human")
-            if preorder_estimate
+            if preorder_estimate and preorder_estimate.get("preorder_ship_date_human")
             else _format_long_date(PREORDER_SHIP_DATE)
         )
         delivery_window_human = (

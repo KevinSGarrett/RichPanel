@@ -375,6 +375,17 @@ class DeliveryEstimateTests(unittest.TestCase):
             )
         )
 
+    def test_preorder_delivery_estimate_omits_negative_days(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping",
+            inquiry_date="2026-04-10",
+            line_item_product_ids=["9733948571895"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertIsNone(estimate.get("days_from_inquiry_human"))
+
     def test_no_tracking_reply_non_preorder_regression(self) -> None:
         order_summary = {
             "order_id": "12345",
@@ -408,6 +419,7 @@ class DeliveryEstimateTests(unittest.TestCase):
             "shipping_method": "Standard Shipping",
         }
         preorder_estimate = {
+            "preorder": True,
             "preorder_items": ["Car Diffuser"],
             "preorder_ship_date_human": "Saturday, March 28, 2026",
             "delivery_window_human": "April 3–April 6, 2026",
@@ -423,6 +435,34 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("pre-order", reply["body"])
         self.assertIn("April 3–April 6, 2026", reply["body"])
         self.assertIn("in 53–56 days", reply["body"])
+
+    def test_no_tracking_reply_preorder_with_standard_estimate(self) -> None:
+        order_summary = {
+            "order_id": "PO-3",
+            "line_item_product_ids": ["9733948571895"],
+        }
+        standard_estimate = {
+            "bucket": "Standard",
+            "window_min_days": 3,
+            "window_max_days": 5,
+            "raw_method": "Standard Shipping",
+            "normalized_method": "Standard (3-5 business days)",
+            "order_created_date": "2026-04-01",
+            "inquiry_date": "2026-04-02",
+            "elapsed_business_days": 1,
+            "remaining_min_days": 2,
+            "remaining_max_days": 4,
+            "eta_human": "2-4 business days",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            order_summary, inquiry_date="2026-04-02", delivery_estimate=standard_estimate
+        )
+        assert reply is not None
+        self.assertIn(
+            "Pre-orders are scheduled to ship on Saturday, March 28, 2026.",
+            reply["body"],
+        )
 
 
 class TrackingUrlTests(unittest.TestCase):
