@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-12 - run_20260212_0204z (b77: preorder eta + no-tracking reply)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-12-run202602120204z-b77-preorder-eta-no-tracking-reply"
+    }
+  ],
   "2026-02-11 - run_20260211_2118z (b77: line_item_product_ids extraction)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
