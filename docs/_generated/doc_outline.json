@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-12 - RUN_20260212_2150Z (B78: Shopify order tags extraction)",
+        "anchor": "2026-02-12-run202602122150z-b78-shopify-order-tags-extraction"
+      },
+      {
+        "level": 3,
         "text": "2026-02-12 - RUN_20260212_0204Z (B77: preorder ETA + no-tracking reply)",
         "anchor": "2026-02-12-run202602120204z-b77-preorder-eta-no-tracking-reply"
       },

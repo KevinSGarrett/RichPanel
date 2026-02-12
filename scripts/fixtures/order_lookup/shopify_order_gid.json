@@ -5,6 +5,7 @@
     "fulfillment_status": "fulfilled",
     "updated_at": "2024-01-12T12:00:00Z",
     "total_price": "19.99",
+    "tags": "First Subscription, Pre-order, Recart",
     "line_items": [
       {
         "id": 3,

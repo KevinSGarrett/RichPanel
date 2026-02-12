@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-12 - run_20260212_2150z (b78: shopify order tags extraction)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-12-run202602122150z-b78-shopify-order-tags-extraction"
+    }
+  ],
   "2026-02-12 - run_20260212_0204z (b77: preorder eta + no-tracking reply)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

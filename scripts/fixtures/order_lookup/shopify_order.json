@@ -5,6 +5,7 @@
     "fulfillment_status": "fulfilled",
     "updated_at": "2024-01-10T12:00:00Z",
     "total_price": "39.98",
+    "tags": "Pre-order",
     "line_items": [
       {
         "id": 1,
