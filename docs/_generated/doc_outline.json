@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-12 - RUN_20260212_0204Z (B77: preorder ETA + no-tracking reply)",
+        "anchor": "2026-02-12-run202602120204z-b77-preorder-eta-no-tracking-reply"
+      },
+      {
+        "level": 3,
         "text": "2026-02-11 - RUN_20260211_2118Z (B77: line_item_product_ids extraction)",
         "anchor": "2026-02-11-run202602112118z-b77-lineitemproductids-extraction"
       },

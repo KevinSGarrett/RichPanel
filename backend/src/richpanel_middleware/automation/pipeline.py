@@ -15,6 +15,7 @@ from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name, _to_b
 from richpanel_middleware.automation.delivery_estimate import (
     build_no_tracking_reply,
     build_tracking_reply,
+    compute_preorder_delivery_estimate,
     compute_delivery_estimate,
     normalize_shipping_method,
     normalize_shipping_method_for_carrier,
@@ -1002,7 +1003,31 @@ def plan_actions(
                     or payload.get("shipping_method")
                     or payload.get("shipping_method_name")
                 )
-                delivery_estimate = compute_delivery_estimate(
+                line_item_product_ids = order_summary.get("line_item_product_ids")
+                if not line_item_product_ids and allow_network:
+                    enriched_summary = lookup_order_summary(
+                        lookup_envelope,
+                        safe_mode=safe_mode,
+                        automation_enabled=automation_enabled,
+                        allow_network=allow_network,
+                        require_line_item_product_ids=True,
+                    )
+                    if (
+                        isinstance(enriched_summary, dict)
+                        and enriched_summary.get("line_item_product_ids")
+                    ):
+                        order_summary = dict(order_summary)
+                        order_summary["line_item_product_ids"] = enriched_summary.get(
+                            "line_item_product_ids"
+                        )
+                        line_item_product_ids = order_summary.get("line_item_product_ids")
+
+                delivery_estimate = compute_preorder_delivery_estimate(
+                    order_created_at,
+                    shipping_method,
+                    ticket_created_at,
+                    line_item_product_ids,
+                ) or compute_delivery_estimate(
                     order_created_at, shipping_method, ticket_created_at
                 )
                 if delivery_estimate:

@@ -15,12 +15,19 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     add_business_days,
+    build_no_tracking_reply,
     build_tracking_reply,
     build_tracking_url,
     business_days_between,
     compute_delivery_estimate,
+    compute_preorder_delivery_estimate,
+    detect_preorder_items,
+    is_preorder_order,
     normalize_shipping_method,
     parse_transit_days,
+    _canonicalize_product_id,
+    _format_delivery_window,
+    _format_day_window,
 )
 
 
@@ -278,6 +285,184 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(priority["bucket"], "Priority")
         self.assertEqual(priority["min_days"], 1)
         self.assertEqual(priority["max_days"], 1)
+
+    def test_preorder_delivery_window_example(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping",
+            inquiry_date="2026-02-09",
+            line_item_product_ids=["9733948571895"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["delivery_window_human"], "April 3–April 6, 2026")
+
+    def test_detect_preorder_items_all_products(self) -> None:
+        items = detect_preorder_items(
+            ["9755753185527", "9631164694775", "9733948571895"]
+        )
+        self.assertEqual(
+            items,
+            ["Car Diffuser", "Diffuser Pro 2", "Car Diffuser Discovery Kit"],
+        )
+
+    def test_detect_preorder_items_accepts_gid_and_int(self) -> None:
+        items = detect_preorder_items(
+            ["gid://shopify/Product/9733948571895", 9631164694775, "invalid"]
+        )
+        self.assertEqual(items, ["Car Diffuser", "Diffuser Pro 2"])
+
+    def test_canonicalize_product_id_variants(self) -> None:
+        self.assertEqual(_canonicalize_product_id(123), "123")
+        self.assertEqual(_canonicalize_product_id(123.0), "123")
+        self.assertIsNone(_canonicalize_product_id(123.4))
+        self.assertIsNone(_canonicalize_product_id(True))
+        self.assertEqual(_canonicalize_product_id("9755753185527"), "9755753185527")
+
+    def test_is_preorder_order_requires_date_before_ship(self) -> None:
+        self.assertTrue(is_preorder_order("2026-03-27", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("2026-03-28", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("not-a-date", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("2026-03-27", []))
+
+    def test_format_helpers(self) -> None:
+        self.assertEqual(
+            _format_delivery_window(date(2026, 4, 3), date(2026, 4, 3)),
+            "April 3, 2026",
+        )
+        self.assertEqual(
+            _format_delivery_window(date(2026, 4, 3), date(2026, 5, 1)),
+            "April 3–May 1, 2026",
+        )
+        self.assertEqual(
+            _format_delivery_window(date(2026, 12, 30), date(2027, 1, 2)),
+            "December 30, 2026–January 2, 2027",
+        )
+        self.assertEqual(_format_day_window(3, 3), "3 days")
+        self.assertEqual(_format_day_window(3, 5), "3–5 days")
+
+    def test_preorder_delivery_estimate_returns_none_when_invalid(self) -> None:
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-03-28",
+                shipping_method="Standard Shipping",
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-01",
+                shipping_method=None,
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-10",
+                shipping_method="Standard Shipping",
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-01",
+                shipping_method="Unknown Carrier",
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+
+    def test_preorder_delivery_estimate_omits_negative_days(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping",
+            inquiry_date="2026-04-10",
+            line_item_product_ids=["9733948571895"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertIsNone(estimate.get("days_from_inquiry_human"))
+
+    def test_no_tracking_reply_non_preorder_regression(self) -> None:
+        order_summary = {
+            "order_id": "12345",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-03")
+        assert reply is not None
+        self.assertEqual(
+            reply["body"],
+            "Thanks for your patience. Order 12345 was placed on 2024-01-01. "
+            "With Standard (3-5 business days) shipping, It should arrive in about "
+            "1-3 business days. We'll send tracking as soon as it ships.",
+        )
+
+    def test_no_tracking_reply_preorder_without_eta(self) -> None:
+        order_summary = {
+            "order_id": "PO-1",
+            "line_item_product_ids": ["9755753185527"],
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-02-09")
+        assert reply is not None
+        self.assertIn("pre-order", reply["body"])
+        self.assertIn("Car Diffuser Discovery Kit", reply["body"])
+        self.assertIn("Saturday, March 28, 2026", reply["body"])
+        self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
+
+    def test_no_tracking_reply_preorder_with_eta(self) -> None:
+        order_summary = {
+            "order_id": "PO-2",
+            "shipping_method": "Standard Shipping",
+        }
+        preorder_estimate = {
+            "preorder": True,
+            "preorder_items": ["Car Diffuser"],
+            "preorder_ship_date_human": "Saturday, March 28, 2026",
+            "delivery_window_human": "April 3–April 6, 2026",
+            "days_from_inquiry_human": "53–56 days",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "bucket": "Standard",
+        }
+        reply = build_no_tracking_reply(
+            order_summary, inquiry_date="2026-02-09", delivery_estimate=preorder_estimate
+        )
+        assert reply is not None
+        self.assertIn("pre-order", reply["body"])
+        self.assertIn("April 3–April 6, 2026", reply["body"])
+        self.assertIn("in 53–56 days", reply["body"])
+
+    def test_no_tracking_reply_preorder_with_standard_estimate(self) -> None:
+        order_summary = {
+            "order_id": "PO-3",
+            "line_item_product_ids": ["9733948571895"],
+        }
+        standard_estimate = {
+            "bucket": "Standard",
+            "window_min_days": 3,
+            "window_max_days": 5,
+            "raw_method": "Standard Shipping",
+            "normalized_method": "Standard (3-5 business days)",
+            "order_created_date": "2026-04-01",
+            "inquiry_date": "2026-04-02",
+            "elapsed_business_days": 1,
+            "remaining_min_days": 2,
+            "remaining_max_days": 4,
+            "eta_human": "2-4 business days",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            order_summary, inquiry_date="2026-04-02", delivery_estimate=standard_estimate
+        )
+        assert reply is not None
+        self.assertIn(
+            "Pre-orders are scheduled to ship on Saturday, March 28, 2026.",
+            reply["body"],
+        )
 
 
 class TrackingUrlTests(unittest.TestCase):

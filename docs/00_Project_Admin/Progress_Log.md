@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-12 - RUN_20260212_0204Z (B77: preorder ETA + no-tracking reply)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260212_0204Z
+- Added preorder-aware ETA logic and preorder-specific no-tracking reply with fail-closed behavior.
+- Added tests for preorder detection, preorder ETA window example, and non-preorder reply regression.
+
 ### 2026-02-11 - RUN_20260211_2118Z (B77: line_item_product_ids extraction)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260211_2118Z
 - Added Shopify line item product ID extraction with opt-in enrichment path.
