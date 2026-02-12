@@ -1,0 +1,30 @@
+{
+  "order": {
+    "id": 1002,
+    "name": "#1002",
+    "fulfillment_status": "fulfilled",
+    "updated_at": "2024-01-12T12:00:00Z",
+    "total_price": "19.99",
+    "line_items": [
+      {
+        "id": 3,
+        "name": "Widget C",
+        "productId": "gid://shopify/Product/9755753185527"
+      },
+      {
+        "id": 4,
+        "name": "Widget D",
+        "productId": "gid://shopify/Product/9733948571895"
+      }
+    ],
+    "fulfillments": [
+      {
+        "tracking_company": "UPS",
+        "tracking_number": "1Z998",
+        "tracking_numbers": [
+          "1Z998"
+        ]
+      }
+    ]
+  }
+}

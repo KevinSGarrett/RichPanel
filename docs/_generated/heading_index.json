@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-11 - run_20260211_2118z (b77: line_item_product_ids extraction)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-11-run202602112118z-b77-lineitemproductids-extraction"
+    }
+  ],
   "2026-01-22 - run_20260122_0113z (b50: openai order status proof + john scenario)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
