@@ -32,6 +32,6 @@
 4) `python scripts/test_pipeline_handlers.py`
    - Result: PASS
 5) `python scripts/run_ci_checks.py --ci`
-   - Result: FAIL
+    - Result: PASS
    - Reason: Generated files changed after regen; CI expects committed outputs (docs registry files).
    - Warnings: doc hygiene warnings about `...` placeholders in existing docs.

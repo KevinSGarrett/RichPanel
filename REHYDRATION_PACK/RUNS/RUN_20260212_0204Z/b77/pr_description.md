@@ -4,8 +4,8 @@
 **Agents:** A  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** `pending — @cursor review`  
-**Anthropic response id:** `pending — @cursor review`  
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01SydbY9fSwpqwXWK3aj9GfP`  
 
 ### 1) Summary
 - Add preorder-aware ETA computation + reply branch for no-tracking order status.
@@ -68,9 +68,9 @@
 - None
 
 ### 7) Results & evidence
-**CI:** pending — `<link>`  
-**Codecov:** pending — `<direct Codecov PR link>`  
-**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931629561/job/63336603991  
+**Codecov:** pass (patch 96.07%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/244  
+**Bugbot:** triggered via https://github.com/KevinSGarrett/RichPanel/pull/244#issuecomment-3888342105 (no findings posted)  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md`
@@ -81,7 +81,7 @@ python -m unittest scripts.test_delivery_estimate  # PASS
 python -m pytest -q scripts/test_delivery_estimate.py  # PASS (30 tests)
 python scripts/test_pipeline_handlers.py  # PASS
 AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python -m unittest discover -s scripts -p "test_*.py"  # PASS
-python scripts/run_ci_checks.py --ci  # FAIL: generated docs changed after regen (commit outputs)
+python scripts/run_ci_checks.py --ci  # PASS
 ```
 
 ### 8) Risk & rollback
