@@ -68,7 +68,7 @@
 - None
 
 ### 7) Results & evidence
-**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931744918/job/63336941128  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/21931840401/job/63337235722  
 **Codecov:** pass (patch 96.07%) — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/244  
 **Bugbot:** triggered via https://github.com/KevinSGarrett/RichPanel/pull/244#issuecomment-3888342105 (no findings posted)  
 
