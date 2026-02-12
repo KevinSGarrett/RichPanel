@@ -25,6 +25,9 @@ from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     is_preorder_order,
     normalize_shipping_method,
     parse_transit_days,
+    _canonicalize_product_id,
+    _format_delivery_window,
+    _format_day_window,
 )
 
 
@@ -309,10 +312,34 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertEqual(items, ["Car Diffuser", "Diffuser Pro 2"])
 
+    def test_canonicalize_product_id_variants(self) -> None:
+        self.assertEqual(_canonicalize_product_id(123), "123")
+        self.assertEqual(_canonicalize_product_id(123.0), "123")
+        self.assertIsNone(_canonicalize_product_id(123.4))
+        self.assertIsNone(_canonicalize_product_id(True))
+        self.assertEqual(_canonicalize_product_id("9755753185527"), "9755753185527")
+
     def test_is_preorder_order_requires_date_before_ship(self) -> None:
         self.assertTrue(is_preorder_order("2026-03-27", ["Car Diffuser"]))
         self.assertFalse(is_preorder_order("2026-03-28", ["Car Diffuser"]))
         self.assertFalse(is_preorder_order("not-a-date", ["Car Diffuser"]))
+        self.assertFalse(is_preorder_order("2026-03-27", []))
+
+    def test_format_helpers(self) -> None:
+        self.assertEqual(
+            _format_delivery_window(date(2026, 4, 3), date(2026, 4, 3)),
+            "April 3, 2026",
+        )
+        self.assertEqual(
+            _format_delivery_window(date(2026, 4, 3), date(2026, 5, 1)),
+            "April 3–May 1, 2026",
+        )
+        self.assertEqual(
+            _format_delivery_window(date(2026, 12, 30), date(2027, 1, 2)),
+            "December 30, 2026–January 2, 2027",
+        )
+        self.assertEqual(_format_day_window(3, 3), "3 days")
+        self.assertEqual(_format_day_window(3, 5), "3–5 days")
 
     def test_preorder_delivery_estimate_returns_none_when_invalid(self) -> None:
         self.assertIsNone(
@@ -327,6 +354,22 @@ class DeliveryEstimateTests(unittest.TestCase):
             compute_preorder_delivery_estimate(
                 order_created_at="2026-02-01",
                 shipping_method=None,
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-10",
+                shipping_method="Standard Shipping",
+                inquiry_date="2026-02-09",
+                line_item_product_ids=["9733948571895"],
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="2026-02-01",
+                shipping_method="Unknown Carrier",
                 inquiry_date="2026-02-09",
                 line_item_product_ids=["9733948571895"],
             )
@@ -358,6 +401,28 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("Car Diffuser Discovery Kit", reply["body"])
         self.assertIn("Saturday, March 28, 2026", reply["body"])
         self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
+
+    def test_no_tracking_reply_preorder_with_eta(self) -> None:
+        order_summary = {
+            "order_id": "PO-2",
+            "shipping_method": "Standard Shipping",
+        }
+        preorder_estimate = {
+            "preorder_items": ["Car Diffuser"],
+            "preorder_ship_date_human": "Saturday, March 28, 2026",
+            "delivery_window_human": "April 3–April 6, 2026",
+            "days_from_inquiry_human": "53–56 days",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "bucket": "Standard",
+        }
+        reply = build_no_tracking_reply(
+            order_summary, inquiry_date="2026-02-09", delivery_estimate=preorder_estimate
+        )
+        assert reply is not None
+        self.assertIn("pre-order", reply["body"])
+        self.assertIn("April 3–April 6, 2026", reply["body"])
+        self.assertIn("in 53–56 days", reply["body"])
 
 
 class TrackingUrlTests(unittest.TestCase):

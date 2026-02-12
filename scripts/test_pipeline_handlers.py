@@ -398,6 +398,63 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("pre-order", draft_reply.get("body", ""))
         self.assertIn("Saturday, March 28, 2026", draft_reply.get("body", ""))
 
+    def test_plan_falls_back_to_standard_estimate_when_preorder_none(self) -> None:
+        envelope = build_event_envelope(
+            {
+                "ticket_id": "t-preorder-fallback",
+                "order_id": "ord-pre-fallback",
+                "created_at": "2026-02-01T00:00:00Z",
+                "shipping_method": "Standard Shipping",
+                "message": "Where is my order?",
+            }
+        )
+        summary = {
+            "order_id": "ord-pre-fallback",
+            "created_at": "2026-02-01T00:00:00Z",
+            "shipping_method": "Standard Shipping",
+            "line_item_product_ids": ["9733948571895"],
+        }
+        standard_estimate = {
+            "bucket": "Standard",
+            "window_min_days": 3,
+            "window_max_days": 5,
+            "raw_method": "Standard Shipping",
+            "normalized_method": "Standard (3-5 business days)",
+            "order_created_date": "2026-02-01",
+            "inquiry_date": "2026-02-09",
+            "elapsed_business_days": 0,
+            "remaining_min_days": 3,
+            "remaining_max_days": 5,
+            "eta_human": "3-5 business days",
+            "is_late": False,
+        }
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.lookup_order_summary",
+            return_value=summary,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.build_tracking_reply",
+            return_value=None,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_preorder_delivery_estimate",
+            return_value=None,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.compute_delivery_estimate",
+            return_value=standard_estimate,
+        ) as compute_standard_mock:
+            plan = plan_actions(
+                envelope, safe_mode=False, automation_enabled=True, allow_network=True
+            )
+
+        compute_standard_mock.assert_called_once()
+        order_actions = [
+            action
+            for action in plan.actions
+            if action["type"] == "order_status_draft_reply"
+        ]
+        self.assertEqual(len(order_actions), 1)
+        params = order_actions[0]["parameters"]
+        self.assertEqual(params.get("delivery_estimate"), standard_estimate)
+
     def test_plan_overrides_unknown_routing_when_intent_accepted(self) -> None:
         envelope = build_event_envelope(
             {
