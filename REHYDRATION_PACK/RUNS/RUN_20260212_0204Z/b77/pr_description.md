@@ -1,4 +1,4 @@
-<!-- PR_QUALITY: title_score=100/100; body_score=95/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-12 -->
+<!-- PR_QUALITY: title_score=100/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-12 -->
 
 **Run ID:** `RUN_20260212_0204Z`  
 **Agents:** A  
@@ -64,6 +64,7 @@
 - `python -m unittest scripts.test_delivery_estimate`
 - `python -m unittest discover -s scripts -p "test_*.py"`
 - `python -m pytest -q scripts/test_delivery_estimate.py`
+- `python scripts/test_pipeline_handlers.py`
 - `python scripts/run_ci_checks.py --ci`
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
@@ -80,7 +81,7 @@
 **Proof snippet(s) (PII-safe):**
 ```text
 python -m unittest scripts.test_delivery_estimate  # PASS
-python -m pytest -q scripts/test_delivery_estimate.py  # PASS (30 tests)
+python -m pytest -q scripts/test_delivery_estimate.py  # PASS (39 tests)
 python scripts/test_pipeline_handlers.py  # PASS
 AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python -m unittest discover -s scripts -p "test_*.py"  # PASS
 python scripts/run_ci_checks.py --ci  # PASS

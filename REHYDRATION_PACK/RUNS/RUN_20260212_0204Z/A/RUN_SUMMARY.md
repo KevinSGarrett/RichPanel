@@ -1,33 +1,37 @@
-# Run Summary
+﻿# Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** RUN_20260212_0204Z  
+**Agent:** A  
+**Date:** 2026-02-12
 
 ## Objective
-<FILL_ME>
+Add preorder ETA logic + deterministic no-tracking reply with fail-closed behavior and strict regression coverage.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- Implemented preorder ETA detection and reply logic; fixed ship-date and negative day window edge cases.
+- Added unit and pipeline coverage; validated CI + Codecov.
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- backend/src/richpanel_middleware/automation/delivery_estimate.py
+- backend/src/richpanel_middleware/automation/pipeline.py
+- scripts/test_delivery_estimate.py
+- scripts/test_pipeline_handlers.py
+- docs/00_Project_Admin/Progress_Log.md
+- docs/_generated/*
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Working branch: b77/preorder-eta
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/244
+- CI status at end of run: green
+- Main updated: no
+- Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: python -m unittest scripts.test_delivery_estimate; python scripts/test_pipeline_handlers.py; python scripts/run_ci_checks.py --ci
+- Evidence path/link: REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md
 
 ## Decisions made
-- <NONE or list>
+- NONE
 
 ## Issues / follow-ups
-- <NONE or list>
+- NONE

@@ -1,15 +1,16 @@
-# Test Matrix
+﻿# Test Matrix
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** RUN_20260212_0204Z  
+**Agent:** A  
+**Date:** 2026-02-12
 
 List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| <TEST_1> | <COMMAND_1> | pass/fail | <PATH_OR_LINK> |
-| <TEST_2> | <COMMAND_2> | pass/fail | <PATH_OR_LINK> |
+| delivery_estimate | python -m unittest scripts.test_delivery_estimate | pass | REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md |
+| pipeline_handlers | python scripts/test_pipeline_handlers.py | pass | REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md |
+| ci_checks | python scripts/run_ci_checks.py --ci | pass | REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md |
 
 ## Notes
-<FILL_ME>
+All tests executed locally; CI green in PR #244.

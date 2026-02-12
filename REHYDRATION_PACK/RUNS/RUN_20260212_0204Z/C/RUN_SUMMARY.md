@@ -1,33 +1,31 @@
-# Run Summary
+﻿# Run Summary
 
-**Run ID:** `RUN_<YYYYMMDD>_<HHMMZ>`  
-**Agent:** A | B | C  
-**Date:** YYYY-MM-DD
+**Run ID:** RUN_20260212_0204Z  
+**Agent:** C  
+**Date:** 2026-02-12
 
 ## Objective
-<FILL_ME>
+Not used for this single-agent run.
 
 ## Work completed (bullets)
-- <ITEM_1>
-- <ITEM_2>
+- NONE
 
 ## Files changed
-- <PATH_1>
-- <PATH_2>
+- NONE
 
 ## Git/GitHub status (required)
-- Working branch: <run/<RUN_ID> or run/<RUN_ID>-A/B/C>
-- PR: <none | link | number>
-- CI status at end of run: <green | red | not run>
-- Main updated: <yes/no> (Integrator only)
-- Branch cleanup done: <yes/no> (Integrator only)
+- Working branch: b77/preorder-eta
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/244
+- CI status at end of run: green
+- Main updated: no
+- Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: <FILL_ME>
-- Evidence path/link: <FILL_ME>
+- Tests run: NONE
+- Evidence path/link: REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/b77/agent_a.md
 
 ## Decisions made
-- <NONE or list>
+- NONE
 
 ## Issues / follow-ups
-- <NONE or list>
+- NONE

@@ -1,28 +1,28 @@
-# Git Run Plan (Template)
+﻿# Git Run Plan
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
-**Mode:** sequential (default)  
-**Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
-**Merge strategy:** merge commit (locked)  
-**Branch cleanup:** yes (required)  
+**RUN_ID:** RUN_20260212_0204Z  
+**Mode:** sequential (single-agent)  
+**Integrator:** N/A (single-agent run)  
+**Target branch:** 77/preorder-eta  
+**Merge strategy:** merge commit (required)  
+**Branch cleanup:** no (human-owned)  
 
 ---
 
 ## Main branch rule
-- `main` is protected: changes land via PR (required status checks; merge commit).
+- main is protected: changes land via PR (required status checks; merge commit).
 
 ## Branch plan
-### Sequential (default)
-- All agents use: `run/<RUN_ID>`
+### Sequential (single-agent)
+- Agent A uses: b77/preorder-eta
 
-### Parallel (only when scopes are disjoint)
-- Agent A: `run/<RUN_ID>-A`
-- Agent B: `run/<RUN_ID>-B`
-- Agent C: `run/<RUN_ID>-C`
-- Integrator merges into `run/<RUN_ID>`
+### Parallel (not used)
+- Agent A: N/A
+- Agent B: N/A
+- Agent C: N/A
+- Integrator merges into run branch
 
 ---
 
@@ -30,29 +30,27 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - backend/src/richpanel_middleware/automation/
+  - scripts/
+  - docs/00_Project_Admin/
+  - docs/_generated/
+  - REHYDRATION_PACK/RUNS/RUN_20260212_0204Z/
 - Locked paths (do not edit):
-  - <path patterns>
+  - NONE
 
 ### Agent B
 - Allowed paths:
-  - <path patterns>
+  - NONE (not used)
 - Locked paths:
-  - <path patterns>
+  - ALL
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - NONE (not used)
 - Locked paths:
-  - <path patterns>
+  - ALL
 
 ---
 
 ## Integration checklist (Integrator)
-- [ ] Pull latest `main`
-- [ ] Merge agent branches (if parallel) into `run/<RUN_ID>`
-- [ ] Run: `python scripts/run_ci_checks.py`
-- [ ] Merge `run/<RUN_ID>` → `main` (PR preferred)
-- [ ] Confirm Actions are green (or document failure + fix)
-- [ ] Delete run branches + agent branches
-- [ ] Update: `REHYDRATION_PACK/GITHUB_STATE.md`
+- [ ] N/A (single-agent run)

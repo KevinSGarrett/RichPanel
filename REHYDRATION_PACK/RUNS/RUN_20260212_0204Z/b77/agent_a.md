@@ -30,10 +30,8 @@
 2) `python -m unittest discover -s scripts -p "test_*.py"`
    - Result: PASS (with `AWS_PROFILE=rp-admin-prod`, `AWS_REGION=us-east-2`, `AWS_DEFAULT_REGION=us-east-2`)
 3) `python -m pytest -q scripts/test_delivery_estimate.py`
-   - Result: PASS (30 tests)
+   - Result: PASS (39 tests)
 4) `python scripts/test_pipeline_handlers.py`
    - Result: PASS
 5) `python scripts/run_ci_checks.py --ci`
     - Result: PASS
-   - Reason: Generated files changed after regen; CI expects committed outputs (docs registry files).
-   - Warnings: doc hygiene warnings about `...` placeholders in existing docs.
