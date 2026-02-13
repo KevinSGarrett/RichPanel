@@ -33,6 +33,7 @@ SHOPIFY_ORDER_FIELDS = [
     "line_items",
     "fulfillments",
     "shipping_lines",
+    "tags",
 ]
 
 SHOPIFY_ORDER_FIELDS_LINE_ITEM_IDS = [
@@ -438,6 +439,20 @@ def _extract_shopify_line_item_product_ids(
             seen.add(product_id)
             product_ids.append(product_id)
     return product_ids
+
+
+def _parse_shopify_tags(tags_raw: str) -> List[str]:
+    if not tags_raw:
+        return []
+    seen: set[str] = set()
+    parsed: List[str] = []
+    for value in tags_raw.split(","):
+        candidate = value.strip()
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        parsed.append(candidate)
+    return parsed
 
 
 def _extract_shopify_order_payload(data: Any) -> Dict[str, Any]:
@@ -1458,6 +1473,12 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
         summary["shipping_method_name"] = shipping_method
     if line_item_product_ids:
         summary["line_item_product_ids"] = line_item_product_ids
+    tags_raw = payload.get("tags")
+    if isinstance(tags_raw, str) and tags_raw.strip():
+        parsed_tags = _parse_shopify_tags(tags_raw)
+        if parsed_tags:
+            summary.setdefault("order_tags_raw", tags_raw)
+            summary.setdefault("order_tags", parsed_tags)
     return summary
 
 

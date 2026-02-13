@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-12 - RUN_20260212_2150Z (B78: Shopify order tags extraction)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260212_2150Z
+- Added Shopify order tag extraction into order summary (order_tags_raw/order_tags).
+- Added tag parsing helper and updated fixtures/tests (extraction-only; no ETA changes).
+
 ### 2026-02-12 - RUN_20260212_0204Z (B77: preorder ETA + no-tracking reply)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260212_0204Z
 - Added preorder-aware ETA logic and preorder-specific no-tracking reply with fail-closed behavior.

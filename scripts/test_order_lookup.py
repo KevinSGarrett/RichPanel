@@ -412,6 +412,8 @@ class OrderLookupTests(unittest.TestCase):
         self.assertEqual(summary["carrier"], "UPS")
         self.assertEqual(summary["items_count"], 2)
         self.assertEqual(summary["total_price"], "39.98")
+        self.assertEqual(summary["order_tags_raw"], "Pre-order")
+        self.assertEqual(summary["order_tags"], ["Pre-order"])
         self.assertEqual(
             summary["line_item_product_ids"],
             ["9733948571895", "9631164694775"],
@@ -486,6 +488,10 @@ class OrderLookupTests(unittest.TestCase):
         self.assertEqual(
             summary["line_item_product_ids"],
             ["9755753185527", "9733948571895"],
+        )
+        self.assertEqual(
+            summary["order_tags"],
+            ["First Subscription", "Pre-order", "Recart"],
         )
         self.assertEqual(len(transport.requests), 1)
         self.assertFalse(shipstation_client.called)
@@ -628,6 +634,29 @@ class OrderLookupTests(unittest.TestCase):
             order_lookup_module._extract_shopify_line_item_product_ids(payload),
             ["9733948571895", "9755753185527"],
         )
+
+    def test_parse_shopify_tags_dedup_trim(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        self.assertEqual(
+            order_lookup_module._parse_shopify_tags(
+                " Pre-order , Pre-order, Recart ,"
+            ),
+            ["Pre-order", "Recart"],
+        )
+
+    def test_parse_shopify_tags_empty(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        self.assertEqual(order_lookup_module._parse_shopify_tags(""), [])
+
+    def test_extract_shopify_tags_empty_is_ignored(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        payload = {"id": 1003, "name": "#1003", "tags": " , "}
+        summary = order_lookup_module._extract_shopify_fields(payload)
+        self.assertNotIn("order_tags_raw", summary)
+        self.assertNotIn("order_tags", summary)
 
     def test_fetch_shopify_line_item_product_ids_dry_run(self) -> None:
         from richpanel_middleware.commerce import order_lookup as order_lookup_module
