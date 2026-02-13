@@ -1,0 +1,411 @@
+{
+  "run_id": "RUN_20260213_2103Z",
+  "timestamp": "2026-02-13T21:04:17.732045+00:00",
+  "environment": "prod",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false"
+  },
+  "target": {
+    "env": "prod",
+    "region": "us-east-2",
+    "stack_name": null,
+    "richpanel_base_url": "https://api.richpanel.com",
+    "shop_domain": "redacted:06239836ff8b"
+  },
+  "prod_target": true,
+  "sample_mode": "explicit",
+  "conversation_mode": "full",
+  "ticket_count": 4,
+  "match_success_rate": 1.0,
+  "match_failure_buckets": {
+    "no_email": 0,
+    "no_order_number": 0,
+    "ambiguous_customer": 0,
+    "no_order_candidates": 0,
+    "order_match_failed": 0,
+    "parse_error": 0,
+    "api_error": 0,
+    "other_failure": 0,
+    "unknown": 0
+  },
+  "tracking_or_eta_available_rate": 1.0,
+  "would_reply_send": false,
+  "top_failure_reasons": [],
+  "counts": {
+    "tickets_requested": 4,
+    "tickets_selected": 4,
+    "tickets_scanned": 4,
+    "order_status_candidates": 2,
+    "orders_matched": 4,
+    "tracking_found": 2,
+    "eta_available": 4,
+    "tracking_or_eta_available": 4,
+    "errors": 0
+  },
+  "shopify_probe": {
+    "enabled": true,
+    "status_code": 200,
+    "dry_run": false,
+    "ok": true
+  },
+  "tickets": [
+    {
+      "ticket_id_redacted": "redacted:ef6eeba126f7",
+      "channel": "unknown",
+      "ticket_schema_fingerprint": "ffecef4c3545",
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "shopify_tracking_number": true,
+      "shopify_tracking_redacted": "***",
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": "USPS/UPS® Ground",
+      "computed_eta": {
+        "order_date_redacted": "2026-01-XX",
+        "inquiry_date_redacted": "2026-02-XX",
+        "shipping_method": "Standard (3-7 business days)",
+        "elapsed_business_days": 20,
+        "remaining_min_days": 0,
+        "remaining_max_days": 0,
+        "eta_human": "should arrive any day now",
+        "is_late": true,
+        "bucket": "Standard"
+      },
+      "shopify_schema_fingerprint": "7cc9cf8d267e",
+      "comment_count": 5,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "order_status_tracking",
+        "department": "Email Support Team",
+        "reason": "order number present with shipping or tracking language",
+        "primary_source": "deterministic",
+        "confidence": 0.91,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-D8ubwaJdCL3yU5TXOygrK30x4SWOx",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": true,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "preorder_proof": {
+        "preorder_delivery_estimate": true,
+        "preorder_ship_date_human": "Tuesday, March 3, 2026",
+        "preorder_ship_in_days": "18 days",
+        "preorder_delivery_window_human": "March 6–March 12, 2026",
+        "preorder_arrives_in_days": "21–27 days",
+        "draft_reply_present": true,
+        "draft_reply_has_preorder_word": true,
+        "draft_reply_has_ship_date": true,
+        "draft_reply_has_delivery_window": true,
+        "draft_reply_has_ship_in_days": true,
+        "draft_reply_has_arrives_in_days": true,
+        "draft_reply_ends_with_tracking_line": true,
+        "draft_reply_body_fingerprint": "e47544b53e28"
+      },
+      "order_status_candidate": true,
+      "order_matched": true,
+      "tracking_found": true,
+      "eta_available": true,
+      "elapsed_seconds": 11.86,
+      "richpanel_request_count": 10,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/redacted": 1,
+        "/v1/tickets/number/redacted": 1,
+        "/api/v1/conversations/redacted": 2,
+        "/v1/conversations/redacted": 2,
+        "/api/v1/conversations/redacted/messages": 2,
+        "/v1/conversations/redacted/messages": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:dbb9295f3e6c",
+      "channel": "email",
+      "ticket_schema_fingerprint": "c16e04440a1d",
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "standalone_digits_6_8"
+      },
+      "shopify_tracking_number": false,
+      "shopify_tracking_redacted": null,
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": "USPS/UPS® Ground",
+      "computed_eta": {
+        "order_date_redacted": "2026-01-XX",
+        "inquiry_date_redacted": "2026-02-XX",
+        "shipping_method": "Standard (3-7 business days)",
+        "elapsed_business_days": 27,
+        "remaining_min_days": 0,
+        "remaining_max_days": 0,
+        "eta_human": "should arrive any day now",
+        "is_late": true,
+        "bucket": "Standard"
+      },
+      "shopify_schema_fingerprint": "7cc9cf8d267e",
+      "comment_count": 2,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "order_status_tracking",
+        "department": "Email Support Team",
+        "reason": "order_status_intent_override:accepted_intent",
+        "primary_source": "deterministic",
+        "confidence": 0.96,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-D8ucC7uzqiPxSxoKL9WVR6xoLTKdb",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": false,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "preorder_proof": {
+        "preorder_delivery_estimate": true,
+        "preorder_ship_date_human": "Saturday, February 21, 2026",
+        "preorder_ship_in_days": "8 days",
+        "preorder_delivery_window_human": "February 25–March 3, 2026",
+        "preorder_arrives_in_days": "12–18 days",
+        "draft_reply_present": true,
+        "draft_reply_has_preorder_word": true,
+        "draft_reply_has_ship_date": true,
+        "draft_reply_has_delivery_window": true,
+        "draft_reply_has_ship_in_days": true,
+        "draft_reply_has_arrives_in_days": true,
+        "draft_reply_ends_with_tracking_line": true,
+        "draft_reply_body_fingerprint": "cfac8a5e3200"
+      },
+      "order_status_candidate": true,
+      "order_matched": true,
+      "tracking_found": false,
+      "eta_available": true,
+      "elapsed_seconds": 21.046,
+      "richpanel_request_count": 10,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/redacted": 1,
+        "/v1/tickets/number/redacted": 1,
+        "/api/v1/conversations/redacted": 2,
+        "/v1/conversations/redacted": 2,
+        "/api/v1/conversations/redacted/messages": 2,
+        "/v1/conversations/redacted/messages": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:174deb98a48f",
+      "channel": "email",
+      "ticket_schema_fingerprint": "c16e04440a1d",
+      "order_resolution": {
+        "resolvedBy": "shopify_email_name",
+        "confidence": "high",
+        "reason": "email_name_match"
+      },
+      "shopify_tracking_number": true,
+      "shopify_tracking_redacted": "***",
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": "Pre-order Delivery",
+      "shopify_schema_fingerprint": "f5fce6625db9",
+      "comment_count": 1,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "billing_issue",
+        "department": "Email Support Team",
+        "reason": "matched billing keyword",
+        "primary_source": "deterministic",
+        "confidence": 0.9,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-D8ucS3SFoRSIPAljRihP8OXvSiGaL",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": false,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "order_status_candidate": false,
+      "order_matched": true,
+      "tracking_found": true,
+      "eta_available": true,
+      "elapsed_seconds": 8.079,
+      "richpanel_request_count": 10,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/redacted": 1,
+        "/v1/tickets/number/redacted": 1,
+        "/api/v1/conversations/redacted": 2,
+        "/v1/conversations/redacted": 2,
+        "/api/v1/conversations/redacted/messages": 2,
+        "/v1/conversations/redacted/messages": 2
+      }
+    },
+    {
+      "ticket_id_redacted": "redacted:48bc2f8f66b1",
+      "channel": "email",
+      "ticket_schema_fingerprint": "beaf5a5004e1",
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "shopify_tracking_number": false,
+      "shopify_tracking_redacted": null,
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": "USPS/UPS® Ground",
+      "computed_eta": {
+        "order_date_redacted": "2026-01-XX",
+        "inquiry_date_redacted": "2026-02-XX",
+        "shipping_method": "Standard (3-7 business days)",
+        "elapsed_business_days": 9,
+        "remaining_min_days": 0,
+        "remaining_max_days": 0,
+        "eta_human": "should arrive any day now",
+        "is_late": true,
+        "bucket": "Standard"
+      },
+      "shopify_schema_fingerprint": "7cc9cf8d267e",
+      "comment_count": 5,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "unknown_other",
+        "department": "Email Support Team",
+        "reason": "no strong intent keyword detected",
+        "primary_source": "deterministic",
+        "confidence": 0.89,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-D8ucgijg2w89w5BN6TwvMxW93ma1R",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": true,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "order_status_candidate": false,
+      "order_matched": true,
+      "tracking_found": false,
+      "eta_available": true,
+      "elapsed_seconds": 13.359,
+      "richpanel_request_count": 10,
+      "richpanel_request_counts_by_endpoint": {
+        "/v1/tickets/redacted": 1,
+        "/v1/tickets/number/redacted": 1,
+        "/api/v1/conversations/redacted": 2,
+        "/v1/conversations/redacted": 2,
+        "/api/v1/conversations/redacted/messages": 2,
+        "/v1/conversations/redacted/messages": 2
+      }
+    }
+  ],
+  "summary_path": "C:\\RichPanel_GIT\\REHYDRATION_PACK\\RUNS\\RUN_20260213_1603Z\\b80\\live_shadow_summary.json",
+  "run_warnings": [],
+  "http_trace_path": "C:\\RichPanel_GIT\\REHYDRATION_PACK\\RUNS\\RUN_20260213_1603Z\\b80\\live_shadow_http_trace.json",
+  "http_trace_summary": {
+    "total_requests": 83,
+    "methods": {
+      "GET": 55,
+      "POST": 28
+    },
+    "services": {
+      "aws_portal": 1,
+      "aws_secretsmanager": 20,
+      "shopify": 7,
+      "richpanel": 44,
+      "openai": 8,
+      "shipstation": 3
+    },
+    "sources": {
+      "aws_sdk": 21,
+      "urllib": 62
+    },
+    "aws_operations": {
+      "GetSecretValue": 20
+    },
+    "aws_missing_operations": 0,
+    "aws_sdk_trace_enabled": true,
+    "allowed_methods_only": true
+  },
+  "richpanel_request_burst": {
+    "window_seconds": 30,
+    "max_requests_overall": 25,
+    "max_requests_by_endpoint": [
+      {
+        "path": "/api/v1/conversations/redacted",
+        "max_requests": 6,
+        "total_requests": 8
+      },
+      {
+        "path": "/v1/conversations/redacted",
+        "max_requests": 6,
+        "total_requests": 8
+      },
+      {
+        "path": "/api/v1/conversations/redacted/messages",
+        "max_requests": 6,
+        "total_requests": 8
+      },
+      {
+        "path": "/v1/conversations/redacted/messages",
+        "max_requests": 6,
+        "total_requests": 8
+      },
+      {
+        "path": "/v1/tickets/redacted",
+        "max_requests": 3,
+        "total_requests": 4
+      },
+      {
+        "path": "/v1/tickets/number/redacted",
+        "max_requests": 3,
+        "total_requests": 4
+      }
+    ]
+  },
+  "richpanel_retry_after_validation": {
+    "checked": 0,
+    "violations": 0
+  },
+  "richpanel_identity": {
+    "richpanel_base_url": "https://api.richpanel.com",
+    "mw_env": "prod",
+    "richpanel_env": "prod",
+    "resolved_env": "prod",
+    "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
+    "api_key_hash": "7ab000f0",
+    "api_key_error": null,
+    "run_started_at": "2026-02-13T21:03:16.571184+00:00",
+    "run_duration_seconds": 61.172
+  },
+  "notes": [
+    "Ticket identifiers are hashed.",
+    "Shopify shop domains are hashed.",
+    "No message bodies or customer identifiers are stored.",
+    "HTTP trace captures urllib.request and AWS SDK (botocore) calls; entries include source and AWS operation metadata."
+  ]
+}

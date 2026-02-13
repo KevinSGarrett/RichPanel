@@ -290,6 +290,39 @@ What it does:
 - Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
   (or `live_shadow_http_trace.json` when `--out` is used) and fails if any non-GET calls are observed
 
+### Preorder proof (tag +45)
+
+- Detection: preorder is **only** when Shopify order tags include `Pre-order` (case-insensitive variants).
+- Ship date rule: `order_date + 45` calendar days.
+- Delivery window: `ship_date + shipping window` (business days) based on the shipping method.
+- Proof run (read-only, no customer contact):
+
+```powershell
+$env:MW_ALLOW_NETWORK_READS = "true"
+$env:RICHPANEL_READ_ONLY = "true"
+$env:RICHPANEL_WRITE_DISABLED = "true"
+$env:RICHPANEL_OUTBOUND_ENABLED = "false"
+$env:SHOPIFY_OUTBOUND_ENABLED = "true"
+$env:SHOPIFY_WRITE_DISABLED = "true"
+$env:SHOPIFY_SHOP_DOMAIN = "<shop>.myshopify.com"
+$env:AWS_REGION = "us-east-2"
+$env:AWS_DEFAULT_REGION = "us-east-2"
+
+python scripts/live_readonly_shadow_eval.py `
+  --env prod `
+  --region us-east-2 `
+  --expect-account-id 878145708918 `
+  --allow-deterministic-only `
+  --shopify-probe `
+  --request-trace `
+  --allow-ticket-fetch-failures `
+  --ticket-id <ticket-id> `
+  --out REHYDRATION_PACK/RUNS/<RUN_ID>/b80/shadow_eval_prod_report.json `
+  --summary-md-out REHYDRATION_PACK/RUNS/<RUN_ID>/b80/shadow_eval_prod_summary.md
+```
+
+- Invariant: **no customer contact** (no sends, notes, closes, or writes).
+
 #### Token stability proof (no 48h wait)
 
 Use a deterministic proof instead of waiting:

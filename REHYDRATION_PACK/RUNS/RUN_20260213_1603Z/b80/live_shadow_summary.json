@@ -1,0 +1,405 @@
+{
+  "run_id": "RUN_20260213_2103Z",
+  "generated_at": "2026-02-13T21:04:17.732045+00:00",
+  "sample_size_requested": 4,
+  "ticket_count": 4,
+  "tickets_evaluated": 4,
+  "email_channel_count": 3,
+  "chat_channel_count": 0,
+  "unknown_channel_count": 1,
+  "order_match_success_count": 4,
+  "order_match_failure_count": 0,
+  "order_match_success_rate": 1.0,
+  "match_success_rate": 1.0,
+  "tracking_or_eta_available_count": 4,
+  "tracking_or_eta_available_rate": 1.0,
+  "would_reply_send": false,
+  "route_decisions": {
+    "non_order_status": 4
+  },
+  "route_decision_percentages": {
+    "non_order_status": 1.0
+  },
+  "match_methods": {
+    "order_number": 3,
+    "name_email": 1
+  },
+  "match_method_percentages": {
+    "order_number": 0.75,
+    "name_email": 0.25
+  },
+  "failure_buckets": {},
+  "match_failure_buckets": {
+    "no_email": 0,
+    "no_order_number": 0,
+    "ambiguous_customer": 0,
+    "no_order_candidates": 0,
+    "order_match_failed": 0,
+    "parse_error": 0,
+    "api_error": 0,
+    "other_failure": 0,
+    "unknown": 0
+  },
+  "top_failure_reasons": [],
+  "failure_reasons": {},
+  "richpanel_fetch_failures": {},
+  "shopify_fetch_failures": {},
+  "timing": {
+    "run_duration_seconds": 61.172,
+    "ticket_avg_seconds": 13.586,
+    "ticket_p50_seconds": 13.359,
+    "ticket_p95_seconds": 21.046,
+    "ticket_min_seconds": 8.079,
+    "ticket_max_seconds": 21.046
+  },
+  "schema_drift": {
+    "threshold": 0.2,
+    "warning": true,
+    "ticket_schema": {
+      "total": 4,
+      "unique": 3,
+      "new": 3,
+      "new_ratio": 0.75
+    },
+    "shopify_schema": {
+      "total": 4,
+      "unique": 2,
+      "new": 2,
+      "new_ratio": 0.5
+    }
+  },
+  "run_warnings": [],
+  "status": "warning",
+  "schema_key_stats": {
+    "note": "Key paths include field names only; schema drift excludes ids, timestamps, pagination, and volatile subtrees (ignored paths include nested keys).",
+    "ticket": {
+      "filtered_total_unique": 27,
+      "ignored_total_unique": 32,
+      "filtered_top_paths": [
+        {
+          "path": "comments[]",
+          "count": 4
+        },
+        {
+          "path": "comments",
+          "count": 4
+        },
+        {
+          "path": "tags",
+          "count": 4
+        },
+        {
+          "path": "via.source.from",
+          "count": 4
+        },
+        {
+          "path": "satisfaction_rating",
+          "count": 4
+        },
+        {
+          "path": "scenario_name",
+          "count": 4
+        },
+        {
+          "path": "recipient",
+          "count": 4
+        },
+        {
+          "path": "via",
+          "count": 4
+        },
+        {
+          "path": "via.source",
+          "count": 4
+        },
+        {
+          "path": "priority",
+          "count": 4
+        },
+        {
+          "path": "via.source.to",
+          "count": 4
+        },
+        {
+          "path": "conversation_no",
+          "count": 4
+        },
+        {
+          "path": "subject",
+          "count": 4
+        },
+        {
+          "path": "via.channel",
+          "count": 4
+        },
+        {
+          "path": "scenarioName",
+          "count": 4
+        },
+        {
+          "path": "status",
+          "count": 4
+        },
+        {
+          "path": "customFields",
+          "count": 4
+        },
+        {
+          "path": "customer_profile.type",
+          "count": 3
+        },
+        {
+          "path": "customer_profile",
+          "count": 3
+        },
+        {
+          "path": "customer_profile.email",
+          "count": 3
+        },
+        {
+          "path": "customer_profile.name",
+          "count": 3
+        },
+        {
+          "path": "via.source.to.address",
+          "count": 3
+        },
+        {
+          "path": "via.source.from.address",
+          "count": 3
+        },
+        {
+          "path": "resolution_duration",
+          "count": 1
+        },
+        {
+          "path": "satisfaction_rating.score",
+          "count": 1
+        }
+      ],
+      "ignored_top_paths": [
+        {
+          "path": "comments[].metadata",
+          "count": 4
+        },
+        {
+          "path": "app_client_id",
+          "count": 4
+        },
+        {
+          "path": "comments[].author_id",
+          "count": 4
+        },
+        {
+          "path": "comments[]",
+          "count": 4
+        },
+        {
+          "path": "comments[].is_operator",
+          "count": 4
+        },
+        {
+          "path": "comments[].created_at",
+          "count": 4
+        },
+        {
+          "path": "scenario_id",
+          "count": 4
+        },
+        {
+          "path": "comments[].attachments[]",
+          "count": 4
+        },
+        {
+          "path": "url",
+          "count": 4
+        },
+        {
+          "path": "comments[].id",
+          "count": 4
+        },
+        {
+          "path": "organization_id",
+          "count": 4
+        },
+        {
+          "path": "comments[].via",
+          "count": 4
+        },
+        {
+          "path": "scenarioId",
+          "count": 4
+        },
+        {
+          "path": "comments[].plain_body",
+          "count": 4
+        },
+        {
+          "path": "assignee_id",
+          "count": 4
+        },
+        {
+          "path": "id",
+          "count": 4
+        },
+        {
+          "path": "comments[].attachments",
+          "count": 4
+        },
+        {
+          "path": "updated_at",
+          "count": 4
+        },
+        {
+          "path": "cookieId",
+          "count": 4
+        },
+        {
+          "path": "comments[].type",
+          "count": 4
+        },
+        {
+          "path": "created_at",
+          "count": 4
+        },
+        {
+          "path": "comments[].body",
+          "count": 4
+        },
+        {
+          "path": "customer_profile.id",
+          "count": 3
+        },
+        {
+          "path": "comments[].via.channel",
+          "count": 3
+        },
+        {
+          "path": "comments[].html_body",
+          "count": 3
+        }
+      ]
+    },
+    "shopify": {
+      "filtered_total_unique": 18,
+      "ignored_total_unique": 4,
+      "filtered_top_paths": [
+        {
+          "path": "items_count",
+          "count": 4
+        },
+        {
+          "path": "order_number",
+          "count": 4
+        },
+        {
+          "path": "line_item_product_ids[]",
+          "count": 4
+        },
+        {
+          "path": "order_tags_raw",
+          "count": 4
+        },
+        {
+          "path": "order_resolution",
+          "count": 4
+        },
+        {
+          "path": "order_resolution.confidence",
+          "count": 4
+        },
+        {
+          "path": "shipping_method",
+          "count": 4
+        },
+        {
+          "path": "order_tags[]",
+          "count": 4
+        },
+        {
+          "path": "line_item_product_ids",
+          "count": 4
+        },
+        {
+          "path": "order_resolution.resolvedBy",
+          "count": 4
+        },
+        {
+          "path": "total_price",
+          "count": 4
+        },
+        {
+          "path": "order_resolution.reason",
+          "count": 4
+        },
+        {
+          "path": "carrier",
+          "count": 4
+        },
+        {
+          "path": "status",
+          "count": 4
+        },
+        {
+          "path": "order_tags",
+          "count": 4
+        },
+        {
+          "path": "shipping_method_name",
+          "count": 4
+        },
+        {
+          "path": "tracking_number",
+          "count": 4
+        },
+        {
+          "path": "order_resolution.order_number_source",
+          "count": 3
+        }
+      ],
+      "ignored_top_paths": [
+        {
+          "path": "order_id",
+          "count": 4
+        },
+        {
+          "path": "created_at",
+          "count": 4
+        },
+        {
+          "path": "updated_at",
+          "count": 4
+        },
+        {
+          "path": "id",
+          "count": 4
+        }
+      ]
+    }
+  },
+  "drift_watch": {
+    "thresholds": {
+      "match_rate_drop_pct": 10.0,
+      "api_error_rate_pct": 5.0,
+      "order_number_share_drop_pct": 15.0,
+      "schema_drift_new_ratio": 0.2
+    },
+    "current_values": {
+      "match_rate_pct": 100.0,
+      "api_error_rate_pct": 0.0,
+      "order_number_share_pct": 75.0,
+      "schema_new_ratio_pct": 75.0,
+      "ticket_fetch_failure_rate_pct": 0.0
+    },
+    "alerts": [
+      {
+        "metric": "schema_drift",
+        "threshold": 20.0,
+        "current": 75.0,
+        "message": "Schema drift (75.0%) exceeds threshold (20.0%)"
+      }
+    ],
+    "has_alerts": true,
+    "note": "Historical comparison not yet implemented; schema drift uses filtered key paths (ids, timestamps, pagination, and volatile subtrees ignored)."
+  }
+}
