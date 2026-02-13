@@ -21,11 +21,9 @@ from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     business_days_between,
     compute_delivery_estimate,
     compute_preorder_delivery_estimate,
-    detect_preorder_items,
-    is_preorder_order,
+    has_preorder_tag,
     normalize_shipping_method,
     parse_transit_days,
-    _canonicalize_product_id,
     _format_delivery_window,
     _format_day_window,
 )
@@ -286,44 +284,35 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(priority["min_days"], 1)
         self.assertEqual(priority["max_days"], 1)
 
-    def test_preorder_delivery_window_example(self) -> None:
+    def test_preorder_tag_delivery_window_example_matches_requirement(self) -> None:
         estimate = compute_preorder_delivery_estimate(
-            order_created_at="2026-02-01",
-            shipping_method="Standard Shipping",
-            inquiry_date="2026-02-09",
-            line_item_product_ids=["9733948571895"],
+            order_created_at="2026-02-12",
+            shipping_method="Standard Shipping (3-7 business days)",
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertEqual(estimate["delivery_window_human"], "April 3–April 6, 2026")
+        self.assertIn("March", estimate["preorder_ship_date_human"])
+        self.assertIn("29", estimate["preorder_ship_date_human"])
+        self.assertIn("2026", estimate["preorder_ship_date_human"])
+        self.assertEqual(estimate["delivery_window_human"], "April 1–April 7, 2026")
+        self.assertEqual(estimate["ship_days_from_inquiry_human"], "15 days")
+        self.assertEqual(estimate["days_from_inquiry_human"], "18–24 days")
 
-    def test_detect_preorder_items_all_products(self) -> None:
-        items = detect_preorder_items(
-            ["9755753185527", "9631164694775", "9733948571895"]
+    def test_has_preorder_tag_variants(self) -> None:
+        self.assertTrue(
+            has_preorder_tag(
+                None,
+                "First Subscription, Pre-order, Recart",
+            )
         )
-        self.assertEqual(
-            items,
-            ["Car Diffuser", "Diffuser Pro 2", "Car Diffuser Discovery Kit"],
-        )
-
-    def test_detect_preorder_items_accepts_gid_and_int(self) -> None:
-        items = detect_preorder_items(
-            ["gid://shopify/Product/9733948571895", 9631164694775, "invalid"]
-        )
-        self.assertEqual(items, ["Car Diffuser", "Diffuser Pro 2"])
-
-    def test_canonicalize_product_id_variants(self) -> None:
-        self.assertEqual(_canonicalize_product_id(123), "123")
-        self.assertEqual(_canonicalize_product_id(123.0), "123")
-        self.assertIsNone(_canonicalize_product_id(123.4))
-        self.assertIsNone(_canonicalize_product_id(True))
-        self.assertEqual(_canonicalize_product_id("9755753185527"), "9755753185527")
-
-    def test_is_preorder_order_requires_date_before_ship(self) -> None:
-        self.assertTrue(is_preorder_order("2026-03-27", ["Car Diffuser"]))
-        self.assertFalse(is_preorder_order("2026-03-28", ["Car Diffuser"]))
-        self.assertFalse(is_preorder_order("not-a-date", ["Car Diffuser"]))
-        self.assertFalse(is_preorder_order("2026-03-27", []))
+        self.assertTrue(has_preorder_tag([], "Pre-order, Recart"))
+        self.assertTrue(has_preorder_tag(None, "tag1,  PRE ORDER  , tag2"))
+        self.assertTrue(has_preorder_tag(["preorder"]))
+        self.assertTrue(has_preorder_tag(["Pre Order"]))
+        self.assertTrue(has_preorder_tag(["  Pre   Order  "]))
+        self.assertFalse(has_preorder_tag(["NotPreorder"]))
 
     def test_format_helpers(self) -> None:
         self.assertEqual(
@@ -344,34 +333,26 @@ class DeliveryEstimateTests(unittest.TestCase):
     def test_preorder_delivery_estimate_returns_none_when_invalid(self) -> None:
         self.assertIsNone(
             compute_preorder_delivery_estimate(
-                order_created_at="2026-03-28",
+                order_created_at="2026-02-01",
                 shipping_method="Standard Shipping",
                 inquiry_date="2026-02-09",
-                line_item_product_ids=["9733948571895"],
+                order_tags=None,
+            )
+        )
+        self.assertIsNone(
+            compute_preorder_delivery_estimate(
+                order_created_at="not-a-date",
+                shipping_method="Standard Shipping",
+                inquiry_date="2026-02-09",
+                order_tags=["Pre-order"],
             )
         )
         self.assertIsNone(
             compute_preorder_delivery_estimate(
                 order_created_at="2026-02-01",
-                shipping_method=None,
-                inquiry_date="2026-02-09",
-                line_item_product_ids=["9733948571895"],
-            )
-        )
-        self.assertIsNone(
-            compute_preorder_delivery_estimate(
-                order_created_at="2026-02-10",
                 shipping_method="Standard Shipping",
-                inquiry_date="2026-02-09",
-                line_item_product_ids=["9733948571895"],
-            )
-        )
-        self.assertIsNone(
-            compute_preorder_delivery_estimate(
-                order_created_at="2026-02-01",
-                shipping_method="Unknown Carrier",
-                inquiry_date="2026-02-09",
-                line_item_product_ids=["9733948571895"],
+                inquiry_date="bad-date",
+                order_tags=["Pre-order"],
             )
         )
 
@@ -380,11 +361,24 @@ class DeliveryEstimateTests(unittest.TestCase):
             order_created_at="2026-02-01",
             shipping_method="Standard Shipping",
             inquiry_date="2026-04-10",
-            line_item_product_ids=["9733948571895"],
+            order_tags=["Pre-order"],
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertIsNone(estimate.get("days_from_inquiry_human"))
+
+    def test_preorder_delivery_estimate_without_shipping_window(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-12",
+            shipping_method=None,
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertTrue(estimate.get("preorder"))
+        self.assertIsNotNone(estimate.get("preorder_ship_date_human"))
+        self.assertIsNone(estimate.get("delivery_window_human"))
 
     def test_no_tracking_reply_non_preorder_regression(self) -> None:
         order_summary = {
@@ -401,68 +395,23 @@ class DeliveryEstimateTests(unittest.TestCase):
             "1-3 business days. We'll send tracking as soon as it ships.",
         )
 
-    def test_no_tracking_reply_preorder_without_eta(self) -> None:
-        order_summary = {
-            "order_id": "PO-1",
-            "line_item_product_ids": ["9755753185527"],
-        }
-        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-02-09")
-        assert reply is not None
-        self.assertIn("pre-order", reply["body"])
-        self.assertIn("Car Diffuser Discovery Kit", reply["body"])
-        self.assertIn("Saturday, March 28, 2026", reply["body"])
-        self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
-
-    def test_no_tracking_reply_preorder_with_eta(self) -> None:
+    def test_no_tracking_reply_preorder_includes_ship_and_eta(self) -> None:
         order_summary = {
             "order_id": "PO-2",
-            "shipping_method": "Standard Shipping",
-        }
-        preorder_estimate = {
-            "preorder": True,
-            "preorder_items": ["Car Diffuser"],
-            "preorder_ship_date_human": "Saturday, March 28, 2026",
-            "delivery_window_human": "April 3–April 6, 2026",
-            "days_from_inquiry_human": "53–56 days",
-            "normalized_method": "Standard (3-5 business days)",
-            "raw_method": "Standard Shipping",
-            "bucket": "Standard",
+            "created_at": "2026-02-12",
+            "shipping_method": "Standard Shipping (3-7 business days)",
+            "order_tags": ["Pre-order"],
         }
         reply = build_no_tracking_reply(
-            order_summary, inquiry_date="2026-02-09", delivery_estimate=preorder_estimate
+            order_summary, inquiry_date="2026-03-14", delivery_estimate=None
         )
         assert reply is not None
         self.assertIn("pre-order", reply["body"])
-        self.assertIn("April 3–April 6, 2026", reply["body"])
-        self.assertIn("in 53–56 days", reply["body"])
-
-    def test_no_tracking_reply_preorder_with_standard_estimate(self) -> None:
-        order_summary = {
-            "order_id": "PO-3",
-            "line_item_product_ids": ["9733948571895"],
-        }
-        standard_estimate = {
-            "bucket": "Standard",
-            "window_min_days": 3,
-            "window_max_days": 5,
-            "raw_method": "Standard Shipping",
-            "normalized_method": "Standard (3-5 business days)",
-            "order_created_date": "2026-04-01",
-            "inquiry_date": "2026-04-02",
-            "elapsed_business_days": 1,
-            "remaining_min_days": 2,
-            "remaining_max_days": 4,
-            "eta_human": "2-4 business days",
-            "is_late": False,
-        }
-        reply = build_no_tracking_reply(
-            order_summary, inquiry_date="2026-04-02", delivery_estimate=standard_estimate
-        )
-        assert reply is not None
-        self.assertIn(
-            "Pre-orders are scheduled to ship on Saturday, March 28, 2026.",
-            reply["body"],
-        )
+        self.assertIn("scheduled to ship on", reply["body"])
+        self.assertIn("in 15 days", reply["body"])
+        self.assertIn("April 1–April 7, 2026", reply["body"])
+        self.assertIn("in 18–24 days", reply["body"])
+        self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
 
 
 class TrackingUrlTests(unittest.TestCase):

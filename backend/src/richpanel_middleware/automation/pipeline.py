@@ -1003,30 +1003,16 @@ def plan_actions(
                     or payload.get("shipping_method")
                     or payload.get("shipping_method_name")
                 )
-                line_item_product_ids = order_summary.get("line_item_product_ids")
-                if not line_item_product_ids and allow_network:
-                    enriched_summary = lookup_order_summary(
-                        lookup_envelope,
-                        safe_mode=safe_mode,
-                        automation_enabled=automation_enabled,
-                        allow_network=allow_network,
-                        require_line_item_product_ids=True,
-                    )
-                    if (
-                        isinstance(enriched_summary, dict)
-                        and enriched_summary.get("line_item_product_ids")
-                    ):
-                        order_summary = dict(order_summary)
-                        order_summary["line_item_product_ids"] = enriched_summary.get(
-                            "line_item_product_ids"
-                        )
-                        line_item_product_ids = order_summary.get("line_item_product_ids")
-
+                order_tags = order_summary.get("order_tags")
+                order_tags_raw = order_summary.get("order_tags_raw") or order_summary.get(
+                    "tags"
+                )
                 delivery_estimate = compute_preorder_delivery_estimate(
                     order_created_at,
                     shipping_method,
                     ticket_created_at,
-                    line_item_product_ids,
+                    order_tags,
+                    order_tags_raw,
                 ) or compute_delivery_estimate(
                     order_created_at, shipping_method, ticket_created_at
                 )

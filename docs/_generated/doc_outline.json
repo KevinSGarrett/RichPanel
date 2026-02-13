@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-12 - RUN_20260213_0438Z (B79: preorder ETA tag-based + 45-day ship rule)",
+        "anchor": "2026-02-12-run202602130438z-b79-preorder-eta-tag-based-45-day-ship-rule"
+      },
+      {
+        "level": 3,
         "text": "2026-02-12 - RUN_20260212_2150Z (B78: Shopify order tags extraction)",
         "anchor": "2026-02-12-run202602122150z-b78-shopify-order-tags-extraction"
       },

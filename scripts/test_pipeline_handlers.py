@@ -352,15 +352,12 @@ class PipelineTests(unittest.TestCase):
             "order_id": "ord-pre",
             "created_at": "2026-02-01T00:00:00Z",
             "shipping_method": "Standard Shipping",
+            "order_tags": ["Pre-order"],
         }
-        enriched_summary = dict(
-            base_summary, line_item_product_ids=["9733948571895"]
-        )
         preorder_estimate = {
             "preorder": True,
-            "preorder_items": ["Car Diffuser"],
-            "preorder_ship_date_human": "Saturday, March 28, 2026",
-            "delivery_window_human": "April 3–April 6, 2026",
+            "preorder_ship_date_human": "Sunday, March 29, 2026",
+            "delivery_window_human": "April 1–April 7, 2026",
             "days_from_inquiry_human": "53–56 days",
             "bucket": "Standard",
             "normalized_method": "Standard (3-5 business days)",
@@ -369,10 +366,11 @@ class PipelineTests(unittest.TestCase):
             "inquiry_date": "2026-02-09",
             "window_min_days": 3,
             "window_max_days": 5,
+            "ship_days_from_inquiry_human": "49 days",
         }
         with mock.patch(
             "richpanel_middleware.automation.pipeline.lookup_order_summary",
-            side_effect=[base_summary, enriched_summary],
+            return_value=base_summary,
         ) as lookup_mock, mock.patch(
             "richpanel_middleware.automation.pipeline.build_tracking_reply",
             return_value=None,
@@ -384,8 +382,7 @@ class PipelineTests(unittest.TestCase):
                 envelope, safe_mode=False, automation_enabled=True, allow_network=True
             )
 
-        self.assertEqual(lookup_mock.call_count, 2)
-        self.assertTrue(lookup_mock.call_args_list[1].kwargs.get("require_line_item_product_ids"))
+        self.assertEqual(lookup_mock.call_count, 1)
         order_actions = [
             action
             for action in plan.actions
@@ -396,7 +393,7 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(params.get("delivery_estimate", {}).get("preorder"))
         draft_reply = params.get("draft_reply", {})
         self.assertIn("pre-order", draft_reply.get("body", ""))
-        self.assertIn("Saturday, March 28, 2026", draft_reply.get("body", ""))
+        self.assertIn("Sunday, March 29, 2026", draft_reply.get("body", ""))
 
     def test_plan_falls_back_to_standard_estimate_when_preorder_none(self) -> None:
         envelope = build_event_envelope(
@@ -412,7 +409,6 @@ class PipelineTests(unittest.TestCase):
             "order_id": "ord-pre-fallback",
             "created_at": "2026-02-01T00:00:00Z",
             "shipping_method": "Standard Shipping",
-            "line_item_product_ids": ["9733948571895"],
         }
         standard_estimate = {
             "bucket": "Standard",
@@ -812,6 +808,9 @@ class OutboundOrderStatusTests(unittest.TestCase):
         os.environ.pop("MW_ENV", None)
         os.environ.pop("ENV", None)
         os.environ.pop("ENVIRONMENT", None)
+        os.environ.pop("RICHPANEL_READ_ONLY", None)
+        os.environ.pop("RICH_PANEL_READ_ONLY", None)
+        os.environ.pop("RICHPANEL_WRITE_DISABLED", None)
 
     def _build_order_status_plan(self) -> tuple[Any, Any]:
         envelope = build_event_envelope(
