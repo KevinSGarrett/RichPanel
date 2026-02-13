@@ -5,7 +5,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-sonnet-4-5-20250929`  
-**Anthropic response id:** `msg_0182fTkBCENDxPgzMBnLqLry`
+**Anthropic response id:** `msg_016n6Rxh29yB6AAZbfa4pcr7`
 
 ### 1) Summary
 - Pre-order detection based ONLY on Shopify order tag with fail-closed behavior.
@@ -78,22 +78,22 @@
 - `SHOPIFY_WRITE_DISABLED=true`
 
 ### 7) Results & evidence
-**CI:** pending â€” https://github.com/KevinSGarrett/RichPanel/pull/248/checks  
-**Codecov:** pending â€” https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/248  
-**Bugbot:** N/A â€” workflow retired; checks link: https://github.com/KevinSGarrett/RichPanel/pull/248/checks
+**CI:** pass - https://github.com/KevinSGarrett/RichPanel/pull/248/checks
+**Codecov:** pending - https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/248  
+**Bugbot:** N/A - workflow retired; checks link: https://github.com/KevinSGarrett/RichPanel/pull/248/checks
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260213_0438Z/b79/agent_a.md`
 
 **Proof snippet(s) (PII-safe):**
 ```text
-Ran 34 tests in 0.010s â€” OK
-Ran 206 tests in 52.340s â€” OK
+Ran 34 tests in 0.010s - OK
+Ran 206 tests in 52.340s - OK
 [OK] CI-equivalent checks passed.
 ```
 
 ### 8) Risk & rollback
-**Risk rationale:** `risk:R2` â€” Order-status messaging changes affect preorder ETA copy and timing calculations.
+**Risk rationale:** `risk:R2` - Order-status messaging changes affect preorder ETA copy and timing calculations.
 
 **Failure impact:** Incorrect ship/ETA messaging for preorder-tagged orders.
 
