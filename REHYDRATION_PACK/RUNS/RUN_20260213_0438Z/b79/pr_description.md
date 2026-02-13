@@ -11,6 +11,7 @@
 - Pre-order detection based ONLY on Shopify order tag with fail-closed behavior.
 - Ship date = order_date + 45 calendar days; delivery = ship_date + shipping business-day window.
 - Non-preorder reply output unchanged (bit-for-bit), verified by regression test.
+- No outbound writes; no customer contact; read-only development.
 
 ### 2) Why
 - **Problem / risk:** Pre-order ETA logic was incorrect (product IDs + fixed date), causing wrong ship/ETA messaging.
