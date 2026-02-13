@@ -5,7 +5,7 @@
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-sonnet-4-5-20250929`  
-**Anthropic response id:** `msg_016n6Rxh29yB6AAZbfa4pcr7`
+**Anthropic response id:** `msg_01Qtw8UUySxutTkWVqA1GQdV`
 
 ### 1) Summary
 - Pre-order detection based ONLY on Shopify order tag with fail-closed behavior.
@@ -23,6 +23,7 @@
 - Pre-order detection uses only order tags (`order_tags` or `order_tags_raw`), not product IDs.
 - Ship date is always `order_date + 45` calendar days for preorder-tagged orders.
 - Delivery window uses business days from ship date and never falls back to standard estimates for preorder.
+- If the shipping method window is missing, preorder estimates return ship date only (no delivery window).
 - Non-preorder reply body is bit-for-bit unchanged.
 - No outbound writes during development; tests run with read-only env flags.
 
