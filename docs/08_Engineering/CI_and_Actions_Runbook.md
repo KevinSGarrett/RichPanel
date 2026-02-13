@@ -20,15 +20,15 @@ Every PR automatically runs:
 2. Set up Node.js 20 with npm cache for `infra/cdk`
 3. `npm ci`, `npm run build`, and `npx cdk synth` in `infra/cdk`
 4. `python scripts/run_ci_checks.py --ci` for repo-wide policy + hygiene validation
-5. `python -m compileall -q scripts backend/src backend/tests` (**blocking**)
-6. `ruff check backend/src scripts` (**blocking**)
+5. `python -m compileall -q scripts backend/src backend/tests` (**blocking**; relaxed via rollback mode)
+6. `ruff check backend/src scripts` (advisory; continue-on-error)
 7. `black --check backend/src scripts` (advisory; continue-on-error)
-8. `mypy --config-file mypy.ini` (**blocking**)
+8. `mypy --config-file mypy.ini` (advisory; continue-on-error)
 9. `coverage run` for scripts tests + backend tests (with `-a` for append) + `coverage xml`
 10. Upload to Codecov using `codecov/codecov-action@v4` with `fail_ci_if_error: false`
 11. Upload `coverage.xml` as artifact with 30-day retention
 
-Steps 1-8 are blocking (steps 5-6, 8 can be relaxed via rollback mode — see Section 14). Black (7) remains advisory. Coverage (9-11) is uploaded to Codecov which gates via the `codecov/patch` check.
+Steps 1-5 are blocking (step 5 can be relaxed via rollback mode — see Section 14). Ruff (6), Black (7), and Mypy (8) are advisory due to pre-existing lint/type errors. Coverage (9-11) is uploaded to Codecov which gates via the `codecov/patch` check.
 
 ### Additional PR checks (separate workflows)
 - `Architecture Boundaries / import-linter` — enforces import boundary rules (architecture-boundaries.yml)
