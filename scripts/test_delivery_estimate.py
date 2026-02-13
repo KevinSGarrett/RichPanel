@@ -307,6 +307,7 @@ class DeliveryEstimateTests(unittest.TestCase):
                 "First Subscription, Pre-order, Recart",
             )
         )
+        self.assertTrue(has_preorder_tag(None, "tag1,  PRE ORDER  , tag2"))
         self.assertTrue(has_preorder_tag(["preorder"]))
         self.assertTrue(has_preorder_tag(["Pre Order"]))
         self.assertTrue(has_preorder_tag(["  Pre   Order  "]))
@@ -364,6 +365,19 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertIsNone(estimate.get("days_from_inquiry_human"))
+
+    def test_preorder_delivery_estimate_without_shipping_window(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-12",
+            shipping_method=None,
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertTrue(estimate.get("preorder"))
+        self.assertIsNotNone(estimate.get("preorder_ship_date_human"))
+        self.assertIsNone(estimate.get("delivery_window_human"))
 
     def test_no_tracking_reply_non_preorder_regression(self) -> None:
         order_summary = {
