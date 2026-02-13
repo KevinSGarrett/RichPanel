@@ -7,7 +7,7 @@
 **Labels:** `risk:R1`, `gate:claude`  
 **Risk:** `risk:R1`  
 **Claude gate model (used):** `claude-sonnet-4-5-20250929`  
-**Anthropic response id:** `msg_017qwZoZB9nP4w3d9VZtjVdK`  
+**Anthropic response id:** `see latest Claude gate comment — https://github.com/KevinSGarrett/RichPanel/pull/246#issuecomment-3894017965`  
 
 ### 1) Summary
 - Add Shopify order tags to `order_summary` as read-only extraction.
@@ -71,9 +71,9 @@
 - Not run (extraction-only change).
 
 ### 7) Results & evidence
-**CI:** pass — `https://github.com/KevinSGarrett/RichPanel/pull/246/checks`  
-**Codecov:** pass (codecov/patch ≥93.79%) — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/246`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/246` (triggered)  
+**CI:** see checks — `https://github.com/KevinSGarrett/RichPanel/pull/246/checks`  
+**Codecov:** see report (>=93.79%) — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/246`  
+**Bugbot:** see PR comments (triggered) — `https://github.com/KevinSGarrett/RichPanel/pull/246`  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260212_2150Z/b78/agent_b.md`
