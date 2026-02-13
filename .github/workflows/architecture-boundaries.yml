@@ -23,6 +23,8 @@ jobs:
 
       - name: Run import-linter (enforced)
         if: env.ROLLBACK_MODE != '1'
+        env:
+          PYTHONPATH: backend/src
         run: lint-imports
 
       - name: Rollback mode (pass without enforcement)

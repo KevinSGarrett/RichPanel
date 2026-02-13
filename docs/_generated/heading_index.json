@@ -12517,6 +12517,18 @@
       "anchor": "what-runs-in-ci-ciyml"
     }
   ],
+  "additional pr checks (separate workflows)": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "additional-pr-checks-separate-workflows"
+    }
+  ],
+  "rollback mode": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "rollback-mode"
+    }
+  ],
   "2) local ci-equivalent checks": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
@@ -12541,34 +12553,22 @@
       "anchor": "mypy-asset-not-a-valid-package-name-cdk-outputs"
     }
   ],
-  "3) bugbot pr review (cursor)": [
+  "3) pr-agent advisory review (replaces bugbot)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "3-bugbot-pr-review-cursor"
+      "anchor": "3-pr-agent-advisory-review-replaces-bugbot"
     }
   ],
-  "“extensions are not cli” (cursor/vs code)": [
+  "how it works": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "extensions-are-not-cli-cursorvs-code"
+      "anchor": "how-it-works"
     }
   ],
-  "how to trigger a review (mention-only mode)": [
+  "viewing the advisory review": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "how-to-trigger-a-review-mention-only-mode"
-    }
-  ],
-  "powershell-safe `gh` examples": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "powershell-safe-gh-examples"
-    }
-  ],
-  "alternative trigger: workflow dispatch (actions tab)": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+      "anchor": "viewing-the-advisory-review"
     }
   ],
   "merge policy (auditability)": [
@@ -12595,10 +12595,10 @@
       "anchor": "40-wait-for-green-gate-mandatory"
     }
   ],
-  "4.1 bugbot review": [
+  "4.1 pr-agent advisory review": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "41-bugbot-review"
+      "anchor": "41-pr-agent-advisory-review"
     }
   ],
   "4.2 codecov status verification": [
@@ -12759,10 +12759,6 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "current-state-2026-01-11"
-    },
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "current-state-2026-01-11"
     }
   ],
   "operational plan (phased rollout)": [
@@ -12783,22 +12779,16 @@
       "anchor": "troubleshooting-codecov-failures"
     }
   ],
-  "11) lint/type enforcement roadmap": [
+  "11) lint/type enforcement status": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "11-linttype-enforcement-roadmap"
+      "anchor": "11-linttype-enforcement-status"
     }
   ],
-  "operational plan (phased enforcement)": [
+  "current state (2026-02-12)": [
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "operational-plan-phased-enforcement"
-    }
-  ],
-  "tracking": [
-    {
-      "path": "08_Engineering/CI_and_Actions_Runbook.md",
-      "anchor": "tracking"
+      "anchor": "current-state-2026-02-12"
     }
   ],
   "12) if you cannot fix quickly": [
@@ -12823,6 +12813,12 @@
     {
       "path": "08_Engineering/CI_and_Actions_Runbook.md",
       "anchor": "aws-secret-ids-written-when-the-matching-github-secret-is-present"
+    }
+  ],
+  "14) pr checks rollback mode": [
+    {
+      "path": "08_Engineering/CI_and_Actions_Runbook.md",
+      "anchor": "14-pr-checks-rollback-mode"
     }
   ],
   "claude gate audit proof": [
@@ -13529,6 +13525,84 @@
       "anchor": "revision-history"
     }
   ],
+  "pr checks rollback playbook": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "pr-checks-rollback-playbook"
+    }
+  ],
+  "overview": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "overview"
+    },
+    {
+      "path": "08_Engineering/Richpanel_Reply_Paths.md",
+      "anchor": "overview"
+    },
+    {
+      "path": "08_Engineering/Secrets_and_Environments.md",
+      "anchor": "overview"
+    },
+    {
+      "path": "08_Engineering/Tracking_Link_Generation.md",
+      "anchor": "overview"
+    }
+  ],
+  "what rollback mode does": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "what-rollback-mode-does"
+    }
+  ],
+  "a) fast rollback (no code revert)": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "a-fast-rollback-no-code-revert"
+    }
+  ],
+  "b) re-enable enforcement": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "b-re-enable-enforcement"
+    }
+  ],
+  "c) hard rollback (full code revert)": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "c-hard-rollback-full-code-revert"
+    }
+  ],
+  "d) bugbot restore option": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "d-bugbot-restore-option"
+    }
+  ],
+  "e) safe rollout guidance": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "e-safe-rollout-guidance"
+    }
+  ],
+  "required check contexts (for branch protection)": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "required-check-contexts-for-branch-protection"
+    }
+  ],
+  "required (blocking)": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "required-blocking"
+    }
+  ],
+  "advisory only (not required)": [
+    {
+      "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+      "anchor": "advisory-only-not-required"
+    }
+  ],
   "pr review checklist": [
     {
       "path": "08_Engineering/PR_Review_Checklist.md",
@@ -14163,20 +14237,6 @@
     {
       "path": "08_Engineering/Richpanel_Reply_Paths.md",
       "anchor": "richpanel-reply-paths"
-    }
-  ],
-  "overview": [
-    {
-      "path": "08_Engineering/Richpanel_Reply_Paths.md",
-      "anchor": "overview"
-    },
-    {
-      "path": "08_Engineering/Secrets_and_Environments.md",
-      "anchor": "overview"
-    },
-    {
-      "path": "08_Engineering/Tracking_Link_Generation.md",
-      "anchor": "overview"
     }
   ],
   "channel detection": [

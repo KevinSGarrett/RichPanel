@@ -1935,8 +1935,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 433,
-    "approx_tokens": 562,
+    "word_count": 490,
+    "approx_tokens": 637,
     "last_updated": ""
   },
   {
@@ -1945,8 +1945,8 @@
     "section": "08_Engineering",
     "status": "canonical",
     "in_index": true,
-    "word_count": 5656,
-    "approx_tokens": 7352,
+    "word_count": 5515,
+    "approx_tokens": 7169,
     "last_updated": "2026-01-23"
   },
   {
@@ -2015,9 +2015,19 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 2606,
-    "approx_tokens": 3387,
+    "word_count": 2609,
+    "approx_tokens": 3391,
     "last_updated": ""
+  },
+  {
+    "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+    "title": "PR Checks Rollback Playbook",
+    "section": "08_Engineering",
+    "status": "supplemental",
+    "in_index": false,
+    "word_count": 673,
+    "approx_tokens": 874,
+    "last_updated": "2026-02-12"
   },
   {
     "path": "08_Engineering/PR_Review_Checklist.md",
@@ -2025,8 +2035,8 @@
     "section": "08_Engineering",
     "status": "supplemental",
     "in_index": false,
-    "word_count": 583,
-    "approx_tokens": 757,
+    "word_count": 598,
+    "approx_tokens": 777,
     "last_updated": ""
   },
   {
@@ -4035,8 +4045,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10882,
-    "approx_tokens": 14146,
+    "word_count": 10892,
+    "approx_tokens": 14159,
     "last_updated": ""
   },
   {
