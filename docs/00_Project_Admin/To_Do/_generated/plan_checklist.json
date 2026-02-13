@@ -2674,10 +2674,10 @@
   {
     "checked": false,
     "heading_path": "PR Review Checklist > Required CI Checks",
-    "id": "PLN-9927D39E78",
+    "id": "PLN-97DFC43C45",
     "line": 45,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
-    "text": "**Lint** \u2014 Ruff, Mypy (blocking), Black (advisory), compileall (blocking)"
+    "text": "**Lint** \u2014 Ruff (advisory), Mypy (advisory), Black (advisory), compileall (blocking)"
   },
   {
     "checked": false,

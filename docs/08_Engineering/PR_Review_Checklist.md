@@ -42,7 +42,7 @@ Every PR must have **exactly one** risk label:
 ## Required CI Checks
 
 - [ ] **Unit Tests** — All tests must pass
-- [ ] **Lint** — Ruff, Mypy (blocking), Black (advisory), compileall (blocking)
+- [ ] **Lint** — Ruff (advisory), Mypy (advisory), Black (advisory), compileall (blocking)
 - [ ] **CI Checks** — `python scripts/run_ci_checks.py --ci` must pass
   - Rehydration pack validation
   - Docs registry validation

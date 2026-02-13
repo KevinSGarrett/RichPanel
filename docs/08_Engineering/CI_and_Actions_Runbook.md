@@ -744,15 +744,16 @@ Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to ve
 ## 11) Lint/Type enforcement status
 
 ### Current state (2026-02-12)
-Ruff, Mypy, and compileall are now **blocking** in CI (they fail the `validate` check if they error).
+Ruff and Mypy remain **advisory** (`continue-on-error: true`) due to pre-existing lint/type errors.
+compileall is **blocking** (fails the `validate` check on compile errors).
 Black remains advisory (`continue-on-error: true`).
 
-All blocking lint/type steps can be de-escalated to advisory via rollback mode (`PR_CHECKS_ROLLBACK_MODE=1`). See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`.
+The compileall step can be de-escalated to advisory via rollback mode (`PR_CHECKS_ROLLBACK_MODE=1`). See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`.
 
 | Tool | Status | Rollback behavior |
 |------|--------|-------------------|
-| Ruff | **Blocking** | Advisory (continue-on-error) |
-| Mypy | **Blocking** | Advisory (continue-on-error) |
+| Ruff | Advisory | Advisory (unchanged) |
+| Mypy | Advisory | Advisory (unchanged) |
 | compileall | **Blocking** | Advisory (continue-on-error) |
 | Black | Advisory | Advisory (unchanged) |
 

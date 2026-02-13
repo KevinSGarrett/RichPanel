@@ -872,7 +872,7 @@ Counts: total=671, checked=115, unchecked=556
   - Source line: 44
 - [ ] PLN-96D83560B4 — **CI Checks** — `python scripts/run_ci_checks.py --ci` must pass  
   - Source line: 46
-- [ ] PLN-9927D39E78 — **Lint** — Ruff, Mypy (blocking), Black (advisory), compileall (blocking)  
+- [ ] PLN-97DFC43C45 — **Lint** — Ruff (advisory), Mypy (advisory), Black (advisory), compileall (blocking)  
   - Source line: 45
 - [ ] PLN-FC5B0D8D71 — **Codecov** — Coverage checks must pass or be acceptable  
   - Source line: 53

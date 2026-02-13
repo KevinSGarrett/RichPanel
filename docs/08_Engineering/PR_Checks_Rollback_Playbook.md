@@ -25,8 +25,8 @@ When `PR_CHECKS_ROLLBACK_MODE=1`:
 |-------|----------------|-------------------|
 | `Architecture Boundaries / import-linter` | Fails on forbidden imports | Passes without running import-linter |
 | `CodeQL / analyze` | Runs full CodeQL analysis | Passes without running CodeQL |
-| `validate` (Ruff) | Fails on lint errors | Runs but does not block (continue-on-error) |
-| `validate` (Mypy) | Fails on type errors | Runs but does not block (continue-on-error) |
+| `validate` (Ruff) | Runs (advisory, continue-on-error) | Runs (advisory, continue-on-error) |
+| `validate` (Mypy) | Runs (advisory, continue-on-error) | Runs (advisory, continue-on-error) |
 | `validate` (compileall) | Fails on compile errors | Runs but does not block (continue-on-error) |
 | `validate` (tests/coverage) | Always runs | Always runs (unchanged) |
 | `PR Agent (advisory)` | Posts advisory comment | Skips silently |

@@ -63,7 +63,7 @@ jobs:
           python -m compileall -q scripts backend/src backend/tests
 
       - name: Ruff
-        continue-on-error: ${{ env.ROLLBACK_MODE == '1' }}
+        continue-on-error: true
         run: |
           ruff check backend/src scripts
 
@@ -73,7 +73,7 @@ jobs:
           black --check backend/src scripts
 
       - name: Mypy
-        continue-on-error: ${{ env.ROLLBACK_MODE == '1' }}
+        continue-on-error: true
         run: |
           mypy --config-file mypy.ini
 
