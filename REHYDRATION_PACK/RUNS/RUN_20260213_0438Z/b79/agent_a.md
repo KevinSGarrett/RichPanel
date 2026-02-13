@@ -227,6 +227,13 @@ Output (tail):
 [OK] CI-equivalent checks passed.
 
 Commit:
+- B79: fallback to order_tags_raw when tags empty (commit c1c423e)
+
+7) python scripts/run_ci_checks.py --ci (after commit)
+Output (tail):
+[OK] CI-equivalent checks passed.
+
+Commit:
 - B79: normalize preorder tag whitespace (commit 5e5223f)
 
 ## Test Commands + Outputs (preorder missing-shipping test update)
