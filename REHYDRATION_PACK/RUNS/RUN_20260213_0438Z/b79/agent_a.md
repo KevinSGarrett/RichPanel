@@ -114,3 +114,10 @@ M scripts/test_order_status_send_message.py
 M scripts/test_pipeline_handlers.py
 M scripts/test_read_only_shadow_mode.py
 ?? REHYDRATION_PACK/RUNS/RUN_20260213_0438Z/
+
+7) python scripts/run_ci_checks.py --ci (after commit)
+Output (tail):
+[OK] CI-equivalent checks passed.
+
+Commit:
+- B79: fix preorder ETA via tag + 45-day rule (commit 4e9c086)
