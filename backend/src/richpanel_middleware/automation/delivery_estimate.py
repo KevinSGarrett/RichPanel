@@ -45,7 +45,7 @@ def has_preorder_tag(order_tags: Any, order_tags_raw: Any = None) -> bool:
         return False
 
     for token in tokens:
-        normalized = token.strip().lower()
+        normalized = " ".join(token.strip().lower().split())
         if normalized in _PREORDER_TAG_TOKENS:
             return True
     return False
@@ -82,7 +82,7 @@ def compute_preorder_delivery_estimate(
     order_tags: Any = None,
     order_tags_raw: Any = None,
 ) -> Optional[Dict[str, Any]]:
-    """Compute a preorder-specific delivery window for no-tracking orders."""
+    """Compute a tag-based preorder delivery window (ship date = order_date + 45 days)."""
     if not has_preorder_tag(order_tags, order_tags_raw):
         return None
     if not order_created_at or not inquiry_date:

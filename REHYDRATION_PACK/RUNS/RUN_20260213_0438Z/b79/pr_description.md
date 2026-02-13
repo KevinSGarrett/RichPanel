@@ -1,11 +1,11 @@
-﻿<!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-12 -->
+﻿<!-- PR_QUALITY: title_score=96/100; body_score=97/100; rubric_title=07; rubric_body=03; risk=risk:R2; p0_ok=true; timestamp=2026-02-13 -->
 
 **Run ID:** `RUN_20260213_0438Z`  
 **Agents:** A  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** pending â€” https://github.com/KevinSGarrett/RichPanel/pull/248/checks
+**Claude gate model (used):** `claude-sonnet-4-5-20250929`  
+**Anthropic response id:** `msg_0182fTkBCENDxPgzMBnLqLry`
 
 ### 1) Summary
 - Pre-order detection based ONLY on Shopify order tag with fail-closed behavior.

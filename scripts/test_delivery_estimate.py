@@ -309,6 +309,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertTrue(has_preorder_tag(["preorder"]))
         self.assertTrue(has_preorder_tag(["Pre Order"]))
+        self.assertTrue(has_preorder_tag(["  Pre   Order  "]))
         self.assertFalse(has_preorder_tag(["NotPreorder"]))
 
     def test_format_helpers(self) -> None:
