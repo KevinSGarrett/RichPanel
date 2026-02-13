@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-12 - run_20260213_0438z (b79: preorder eta tag-based + 45-day ship rule)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-12-run202602130438z-b79-preorder-eta-tag-based-45-day-ship-rule"
+    }
+  ],
   "2026-02-12 - run_20260212_2150z (b78: shopify order tags extraction)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

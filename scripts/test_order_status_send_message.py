@@ -75,6 +75,11 @@ class FakeExecutor:
 
 
 class EmailOutboundSendMessageTests(unittest.TestCase):
+    def setUp(self) -> None:
+        os.environ.pop("RICHPANEL_READ_ONLY", None)
+        os.environ.pop("RICH_PANEL_READ_ONLY", None)
+        os.environ.pop("RICHPANEL_WRITE_DISABLED", None)
+
     def test_email_channel_uses_send_message_and_records_status(self) -> None:
         envelope = build_event_envelope(
             {

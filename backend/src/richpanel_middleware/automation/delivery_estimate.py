@@ -32,65 +32,23 @@ DEFAULT_SHIPPING_METHOD_TRANSIT_MAP: Dict[str, tuple[int, int]] = {
     "mail": (5, 7),
 }
 
-PREORDER_PRODUCT_CATALOG: Dict[str, str] = {
-    "9733948571895": "Car Diffuser",
-    "9631164694775": "Diffuser Pro 2",
-    "9755753185527": "Car Diffuser Discovery Kit",
-}
-PREORDER_SHIP_DATE = date(2026, 3, 28)
-PREORDER_EXTRA_BUFFER_BUSINESS_DAYS = 1
-_PREORDER_GID_PATTERN = re.compile(r"^gid://shopify/Product/(\d+)$")
+_PREORDER_TAG_TOKENS = {"pre-order", "preorder", "pre order"}
 
 
-def _canonicalize_product_id(value: Any) -> Optional[str]:
-    if value is None or isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return str(value)
-    if isinstance(value, float):
-        return str(int(value)) if value.is_integer() else None
-    if isinstance(value, str):
-        candidate = value.strip()
-        if not candidate:
-            return None
-        match = _PREORDER_GID_PATTERN.match(candidate)
-        if match:
-            return match.group(1)
-        if candidate.isdigit():
-            return candidate
-        return None
-    return None
-
-
-def detect_preorder_items(line_item_product_ids: Any) -> List[str]:
-    if isinstance(line_item_product_ids, (list, tuple, set)):
-        candidates = line_item_product_ids
-    elif line_item_product_ids is None:
-        candidates = []
+def has_preorder_tag(order_tags: Any, order_tags_raw: Any = None) -> bool:
+    tokens: List[str] = []
+    if isinstance(order_tags, list):
+        tokens = [token for token in order_tags if isinstance(token, str)]
+    elif isinstance(order_tags_raw, str):
+        tokens = [token for token in order_tags_raw.split(",")]
     else:
-        candidates = [line_item_product_ids]
-
-    matched_ids: set[str] = set()
-    for candidate in candidates:
-        normalized = _canonicalize_product_id(candidate)
-        if normalized:
-            matched_ids.add(normalized)
-
-    items: List[str] = []
-    for product_id, name in PREORDER_PRODUCT_CATALOG.items():
-        if product_id in matched_ids:
-            items.append(name)
-    return items
-
-
-def is_preorder_order(order_created_at: Any, preorder_items: List[str]) -> bool:
-    if not preorder_items:
         return False
-    try:
-        order_date = _coerce_date(order_created_at)
-    except ValueError:
-        return False
-    return order_date < PREORDER_SHIP_DATE
+
+    for token in tokens:
+        normalized = token.strip().lower()
+        if normalized in _PREORDER_TAG_TOKENS:
+            return True
+    return False
 
 
 def _format_long_date(value: date) -> str:
@@ -121,11 +79,13 @@ def compute_preorder_delivery_estimate(
     order_created_at: Any,
     shipping_method: Any,
     inquiry_date: Any,
-    line_item_product_ids: Any,
+    order_tags: Any = None,
+    order_tags_raw: Any = None,
 ) -> Optional[Dict[str, Any]]:
     """Compute a preorder-specific delivery window for no-tracking orders."""
-    preorder_items = detect_preorder_items(line_item_product_ids)
-    if not preorder_items or not order_created_at or not shipping_method or not inquiry_date:
+    if not has_preorder_tag(order_tags, order_tags_raw):
+        return None
+    if not order_created_at or not inquiry_date:
         return None
 
     try:
@@ -133,25 +93,27 @@ def compute_preorder_delivery_estimate(
         inquiry = _coerce_date(inquiry_date)
     except ValueError:
         return None
-    if inquiry < order_date:
-        return None
-    if order_date >= PREORDER_SHIP_DATE:
-        return None
+
+    ship_date = order_date + timedelta(days=45)
+    ship_date_human = _format_long_date(ship_date)
+    ships_in_days = (ship_date - inquiry).days
+    ship_days_from_inquiry_human = (
+        _format_day_window(ships_in_days, ships_in_days) if ships_in_days >= 0 else None
+    )
 
     window = normalize_shipping_method(shipping_method)
     if not window:
-        return None
+        return {
+            "order_created_date": order_date.isoformat(),
+            "inquiry_date": inquiry.isoformat(),
+            "preorder": True,
+            "preorder_ship_date_human": ship_date_human,
+            "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
+            "eta_human": None,
+        }
 
-    earliest_offset = window["min_days"] + PREORDER_EXTRA_BUFFER_BUSINESS_DAYS
-    latest_offset = max(window["max_days"], earliest_offset)
-    ship_start_date = (
-        PREORDER_SHIP_DATE
-        if PREORDER_SHIP_DATE.weekday() < 5
-        else add_business_days(PREORDER_SHIP_DATE, 1)
-    )
-    delivery_min = add_business_days(ship_start_date, earliest_offset)
-    delivery_max = add_business_days(ship_start_date, latest_offset)
-
+    delivery_min = add_business_days(ship_date, window["min_days"])
+    delivery_max = add_business_days(ship_date, window["max_days"])
     delivery_window_human = _format_delivery_window(delivery_min, delivery_max)
     days_min = (delivery_min - inquiry).days
     days_max = (delivery_max - inquiry).days
@@ -170,16 +132,13 @@ def compute_preorder_delivery_estimate(
         "normalized_method": window["normalized_method"],
         "order_created_date": order_date.isoformat(),
         "inquiry_date": inquiry.isoformat(),
-        "elapsed_business_days": business_days_between(order_date, inquiry),
-        "remaining_min_days": None,
-        "remaining_max_days": None,
         "eta_human": delivery_window_human,
         "is_late": False,
         "preorder": True,
-        "preorder_items": preorder_items,
-        "preorder_ship_date_human": _format_long_date(PREORDER_SHIP_DATE),
+        "preorder_ship_date_human": ship_date_human,
         "delivery_window_human": delivery_window_human,
         "days_from_inquiry_human": days_from_inquiry_human,
+        "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
     }
 
 
@@ -643,83 +602,75 @@ def build_no_tracking_reply(
     Construct a deterministic draft reply for no-tracking order status cases.
     """
     summary = order_summary if isinstance(order_summary, dict) else {}
-    preorder_items = detect_preorder_items(summary.get("line_item_product_ids"))
+    preorder_tagged = has_preorder_tag(
+        summary.get("order_tags"),
+        summary.get("order_tags_raw") or summary.get("tags"),
+    )
     preorder_estimate = (
         delivery_estimate
         if isinstance(delivery_estimate, dict) and delivery_estimate.get("preorder")
         else None
     )
-    preorder_items_from_estimate = (
-        preorder_estimate.get("preorder_items")
-        if preorder_estimate and isinstance(preorder_estimate.get("preorder_items"), list)
-        else []
-    )
-    has_preorder = bool(preorder_items or preorder_items_from_estimate)
-    estimate = delivery_estimate or compute_delivery_estimate(
-        summary.get("created_at") or summary.get("order_created_at"),
-        summary.get("shipping_method") or summary.get("shipping_method_name"),
-        inquiry_date,
-    )
+    if preorder_estimate is None and preorder_tagged:
+        preorder_estimate = compute_preorder_delivery_estimate(
+            summary.get("created_at") or summary.get("order_created_at"),
+            summary.get("shipping_method") or summary.get("shipping_method_name"),
+            inquiry_date,
+            summary.get("order_tags"),
+            summary.get("order_tags_raw") or summary.get("tags"),
+        )
+    has_preorder = bool(preorder_estimate or preorder_tagged)
+    estimate = None
+    if not has_preorder:
+        estimate = delivery_estimate or compute_delivery_estimate(
+            summary.get("created_at") or summary.get("order_created_at"),
+            summary.get("shipping_method") or summary.get("shipping_method_name"),
+            inquiry_date,
+        )
 
     raw_order_id = summary.get("order_id") or summary.get("id")
     order_id = str(raw_order_id).strip() if raw_order_id is not None else ""
     has_order_id = bool(order_id) and order_id.lower() not in {"unknown", "your order"}
 
-    if has_preorder:
-        resolved_items = preorder_items or preorder_items_from_estimate
-        items_human = ", ".join(resolved_items)
-        order_label = f"Order {order_id}" if has_order_id else "Your order"
-        ship_date_human = (
-            preorder_estimate.get("preorder_ship_date_human")
-            if preorder_estimate and preorder_estimate.get("preorder_ship_date_human")
-            else _format_long_date(PREORDER_SHIP_DATE)
+    if has_preorder and preorder_estimate:
+        ship_date_human = preorder_estimate.get("preorder_ship_date_human")
+        delivery_window_human = preorder_estimate.get("delivery_window_human")
+        days_from_inquiry_human = preorder_estimate.get("days_from_inquiry_human")
+        ship_days_from_inquiry_human = preorder_estimate.get(
+            "ship_days_from_inquiry_human"
         )
-        delivery_window_human = (
-            preorder_estimate.get("delivery_window_human") if preorder_estimate else None
+        method_label = (
+            preorder_estimate.get("normalized_method")
+            or preorder_estimate.get("raw_method")
+            or summary.get("shipping_method")
+            or summary.get("shipping_method_name")
         )
-        days_from_inquiry_human = (
-            preorder_estimate.get("days_from_inquiry_human") if preorder_estimate else None
-        )
-        method_label = None
-        if preorder_estimate:
-            method_label = preorder_estimate.get("normalized_method") or preorder_estimate.get(
-                "raw_method"
-            )
-        if not method_label:
-            method_label = summary.get("shipping_method") or summary.get(
-                "shipping_method_name"
-            )
-
-        preorder_sentence = (
-            f"{order_label} includes pre-order item(s): {items_human}."
-        )
-        ship_sentence = f"Pre-orders are scheduled to ship on {ship_date_human}."
-
-        eta_sentence = ""
-        if delivery_window_human:
-            if method_label:
-                eta_sentence = (
-                    f"With {method_label} shipping, the estimated delivery window is "
-                    f"{delivery_window_human}"
-                )
-            else:
-                eta_sentence = (
-                    f"The estimated delivery window is {delivery_window_human}"
-                )
-            if days_from_inquiry_human:
-                eta_sentence = f"{eta_sentence} (in {days_from_inquiry_human})."
-            else:
-                eta_sentence = f"{eta_sentence}."
 
         body = (
-            f"Thanks for your patience. {preorder_sentence} {ship_sentence} "
-            f"{eta_sentence} We'll send tracking as soon as it ships."
+            "Thanks for your patience. Your order is marked as a pre-order. "
+            f"It is scheduled to ship on {ship_date_human}"
         )
+        if ship_days_from_inquiry_human:
+            body = f"{body} (in {ship_days_from_inquiry_human})."
+        else:
+            body = f"{body}."
+
+        if delivery_window_human and method_label:
+            body = (
+                f"{body} With {method_label} shipping, the estimated delivery window is "
+                f"{delivery_window_human}"
+            )
+            if days_from_inquiry_human:
+                body = f"{body} (in {days_from_inquiry_human})."
+            else:
+                body = f"{body}."
+
+        body = f"{body} We'll send tracking as soon as it ships."
 
         return {
-            "body": body.replace("  ", " ").strip(),
+            "body": body.strip(),
             "eta_human": delivery_window_human,
-            "bucket": preorder_estimate.get("bucket") if preorder_estimate else None,
+            "bucket": preorder_estimate.get("bucket"),
             "is_late": False,
         }
 
@@ -774,8 +725,7 @@ __all__ = [
     "business_days_between",
     "compute_preorder_delivery_estimate",
     "compute_delivery_estimate",
-    "detect_preorder_items",
-    "is_preorder_order",
+    "has_preorder_tag",
     "parse_transit_days",
     "format_eta_window",
     "normalize_shipping_method",
