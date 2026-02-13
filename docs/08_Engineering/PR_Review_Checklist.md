@@ -32,17 +32,17 @@ Every PR must have **exactly one** risk label:
     - R1: Sonnet 4.5
     - R2/R3/R4: Opus 4.5
 
-- [ ] **Bugbot Review** — Mandatory for all PRs (or documented fallback)
-  - Trigger via PR comment: `@cursor review` or `bugbot run`
+- [ ] **PR-Agent Advisory Review** — Auto-posted on all same-repo PRs (replaces deprecated Bugbot)
+  - Runs automatically via `pull_request_target` (no manual trigger needed)
   - View output via `gh pr view <PR#> --comments`
-  - If quota exhausted: document manual review in `RUN_REPORT.md`
+  - If unavailable: document manual review in `RUN_REPORT.md`
 
 ---
 
 ## Required CI Checks
 
 - [ ] **Unit Tests** — All tests must pass
-- [ ] **Lint** — Ruff, Black, Mypy (advisory, but fix if possible)
+- [ ] **Lint** — Ruff, Mypy (blocking), Black (advisory), compileall (blocking)
 - [ ] **CI Checks** — `python scripts/run_ci_checks.py --ci` must pass
   - Rehydration pack validation
   - Docs registry validation
@@ -51,8 +51,8 @@ Every PR must have **exactly one** risk label:
   - Protected delete checks
 
 - [ ] **Codecov** — Coverage checks must pass or be acceptable
-  - Patch coverage ≥50% (±10% threshold)
-  - Project coverage must not drop >5% from base branch
+  - `codecov/patch` must meet the repo's current threshold (see the PR's status check)
+  - `codecov/project` must not drop significantly from base branch
   - If unavailable: download `coverage-report` artifact and document
 
 ---
@@ -95,7 +95,7 @@ If this PR touches **order status automation**, **order lookup logic**, or **Sho
   - Summary of changes
   - CI output
   - Test results
-  - Bugbot findings (or manual review notes)
+  - PR-Agent findings (or manual review notes)
   - Codecov status
 
 - [ ] **Test Matrix** — If applicable, E2E proof results
@@ -105,7 +105,7 @@ If this PR touches **order status automation**, **order lookup logic**, or **Sho
 
 ## Final Checks
 
-- [ ] **All checks green** — Unit tests, lint, CI checks, Codecov, Bugbot, Claude gate
+- [ ] **All checks green** — Unit tests, lint, CI checks, Codecov, architecture boundaries, CodeQL, Claude gate
 - [ ] **No placeholders** — No `???`, `TBD`, `WIP` in code or docs
 - [ ] **No PII** — No raw customer emails, phone numbers, ticket IDs in PR body
 - [ ] **Run artifacts complete** — All required files in `REHYDRATION_PACK/RUNS/<RUN_ID>/`

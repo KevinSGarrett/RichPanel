@@ -41,12 +41,20 @@ Configured so history is consistent and PRs stay bounded per run:
 ## Branch protection: `main`
 Configured so merges are gated by CI and conversations are resolved:
 - Require pull requests before merge: **true** (merge-commit only)
-- Required status check: **`validate`** (strict/up-to-date: **true**)
+- Required status checks (strict/up-to-date: **true**):
+  - `validate` — CI job (ci.yml)
+  - `risk-label-check` — PR risk label required (pr_risk_label_required.yml)
+  - `claude-gate-check` — Claude gate required (pr_claude_gate_required.yml)
+  - `Architecture Boundaries / import-linter` — Import boundaries (architecture-boundaries.yml)
+  - `CodeQL / analyze` — Vulnerability scanning (codeql.yml)
+  - `codecov/patch` — Codecov patch coverage gate (external)
 - Require conversation resolution: **true**
 - Enforce for admins: **true**
 - Force pushes: **disabled**
 - Deletions: **disabled**
 - PR reviews: **enabled** with approvals required: **0** (single-owner automation-friendly; bot-friendly but still enforces conversation resolution)
+- Advisory (NOT required): `PR Agent (advisory)` — AI review comment (pr-agent.yml)
+- Rollback mode: set `PR_CHECKS_ROLLBACK_MODE=1` in Actions variables to de-escalate new checks (see `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`)
 
 ## How to verify (PowerShell)
 ```powershell
@@ -96,7 +104,8 @@ git worktree list
 ---
 
 ## Notes
-- The required status check name is **`validate`** (the job name), not `CI`.
+- Required status check names are the **job names** (e.g., `validate`, `risk-label-check`), not workflow names (e.g., `CI`).
 - If running `python scripts/run_ci_checks.py --ci` locally, keep the tree clean (or ensure scratch files are ignored).
 - **Before committing:** Always verify you're in the correct worktree with `pwd` and on the correct branch with `git branch --show-current`.
 - See `REHYDRATION_PACK/WORKTREE_GUIDE.md` for troubleshooting "No changes detected" issues.
+- Bugbot has been deprecated and replaced by in-repo PR-Agent advisory review. See `docs/08_Engineering/CI_and_Actions_Runbook.md` Section 3.

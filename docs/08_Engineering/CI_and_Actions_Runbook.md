@@ -20,14 +20,26 @@ Every PR automatically runs:
 2. Set up Node.js 20 with npm cache for `infra/cdk`
 3. `npm ci`, `npm run build`, and `npx cdk synth` in `infra/cdk`
 4. `python scripts/run_ci_checks.py --ci` for repo-wide policy + hygiene validation
-5. `ruff check backend/src scripts` (advisory; continue-on-error)
-6. `black --check backend/src scripts` (advisory; continue-on-error)
-7. `mypy --config-file mypy.ini` (advisory; continue-on-error)
-8. `coverage run -m unittest discover -s scripts -p "test_*.py"` + `coverage xml`
-9. Upload to Codecov using `codecov/codecov-action@v4` with `fail_ci_if_error: false`
-10. Upload `coverage.xml` as artifact with 30-day retention
+5. `python -m compileall -q scripts backend/src backend/tests` (**blocking**)
+6. `ruff check backend/src scripts` (**blocking**)
+7. `black --check backend/src scripts` (advisory; continue-on-error)
+8. `mypy --config-file mypy.ini` (**blocking**)
+9. `coverage run` for scripts tests + backend tests (with `-a` for append) + `coverage xml`
+10. Upload to Codecov using `codecov/codecov-action@v4` with `fail_ci_if_error: false`
+11. Upload `coverage.xml` as artifact with 30-day retention
 
-Steps 1-4 are blocking; lint (5-7) and coverage (8-10) are advisory but should be addressed over time. See Section 9 (Codecov) and Section 10 (Lint enforcement) for phased rollout plans.
+Steps 1-8 are blocking (steps 5-6, 8 can be relaxed via rollback mode — see Section 14). Black (7) remains advisory. Coverage (9-11) is uploaded to Codecov which gates via the `codecov/patch` check.
+
+### Additional PR checks (separate workflows)
+- `Architecture Boundaries / import-linter` — enforces import boundary rules (architecture-boundaries.yml)
+- `CodeQL / analyze` — vulnerability scanning for Python + JS/TS (codeql.yml)
+- `risk-label-check` — enforces exactly one risk:R0-R4 label (pr_risk_label_required.yml)
+- `claude-gate-check` — Anthropic API-based code review gate (pr_claude_gate_required.yml)
+- `codecov/patch` — Codecov patch coverage gate (external)
+- `PR Agent (advisory)` — advisory AI review comment (pr-agent.yml, non-blocking)
+
+### Rollback mode
+All new/tightened checks respect the `PR_CHECKS_ROLLBACK_MODE` variable. See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`.
 
 ---
 
@@ -79,57 +91,26 @@ If this fails locally, **fix before pushing**.
 
 ---
 
-## 3) Bugbot PR review (Cursor)
-Bugbot is a **standard part of our hardened PR loop**, but it is **not a hard CI blocker yet**. Treat it as required human process: run it, read it, and address findings (or explicitly document why not) before merging.
+## 3) PR-Agent Advisory Review (replaces Bugbot)
 
-### “Extensions are not CLI” (Cursor/VS Code)
-Do not assume a VS Code/Cursor extension can be triggered from the terminal.
+> **Bugbot is deprecated.** The external Cursor Bugbot service has been replaced by an in-repo, deterministic PR-Agent advisory workflow. See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md` for restore instructions if needed.
 
-- **Extensions are UI/editor integrations**: you can’t reliably “run” them via CLI in CI or scripts.
-- **Enforcement lives in CI + scripts**: rely on `python scripts/run_ci_checks.py` and GitHub Actions as the source of truth.
-- **Bugbot is triggered via GitHub PR comments** (UI or `gh`), not by a local extension command.
+PR-Agent is an **advisory-only, comment-only** AI reviewer that posts ONE structured comment per PR. It does **not** block merges.
 
-### How to trigger a review (mention-only mode)
-If Bugbot is configured to only run on mention, trigger it by adding one of these PR comments:
-- `bugbot run`
-- `@cursor review`
+### How it works
+- Workflow: `.github/workflows/pr-agent.yml`
+- Trigger: `pull_request_target` (same-repo PRs only; fork PRs are excluded for security)
+- The workflow:
+  1. Fetches PR metadata and diff via GitHub API
+  2. Calls Anthropic (Sonnet model) for an advisory review
+  3. Posts/updates a single canonical comment with sections:
+     - Summary, Architecture Drift Risks, Logic Correctness Risks, Missing Tests / Weak Coverage, Suggestions, Risk Summary
+- The comment is idempotent: re-runs update the same comment (no duplicates)
+- Uses a different marker (`PR_AGENT_REVIEW_CANONICAL`) than Claude gate (`CLAUDE_REVIEW_CANONICAL`), so comments never overwrite each other
 
-### PowerShell-safe `gh` examples
-Post the trigger comment:
+### Viewing the advisory review
 ```powershell
-# Trigger Bugbot on a specific PR number
-gh pr comment 123 -b 'bugbot run'
-# or
-gh pr comment 123 -b '@cursor review'
-```
-
-Then view PR comments (including Bugbot output):
-```powershell
-gh pr view 123 --comments
-```
-
-Tip: if you’re already on the PR branch, you can let `gh` infer the PR:
-```powershell
-$pr = gh pr view --json number --jq '.number'
-gh pr comment $pr -b 'bugbot run'
-gh pr view $pr --comments
-```
-
-### Alternative trigger: workflow dispatch (Actions tab)
-If you can’t (or don’t want to) comment from the UI/`gh`, you can trigger Bugbot via an on-demand workflow that **posts the comment for you**:
-
-- Workflow: `.github/workflows/bugbot-review.yml`
-- Inputs:
-  - `pr_number` (required)
-  - `comment_body` (optional; defaults to `@cursor review`)
-
-PowerShell-safe examples:
-```powershell
-# Posts the default comment body (@cursor review)
-gh workflow run bugbot-review.yml -f pr_number=123
-
-# Override the posted comment body if needed
-gh workflow run bugbot-review.yml -f pr_number=123 -f comment_body='bugbot run'
+gh pr view <PR#> --comments
 ```
 
 ### Merge policy (auditability)
@@ -184,10 +165,10 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 
 **PR requirements (merge blockers):**
 - Labels: exactly one `risk:R?` (required), `gate:claude` is auto-applied
-- Checks green: unit tests, lint, typecheck, Codecov, Bugbot, and **Claude gate (always required)**
+- Checks green: unit tests, lint, typecheck, Codecov, architecture boundaries, CodeQL, and **Claude gate (always required)**
 - Claude gate MUST show Anthropic response ID and token usage in the PR comment
 
-**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **Codecov, Bugbot, and Claude gate** are green. The Claude gate is now **mandatory and unskippable** for all PRs (see PR Health Check).
+**Merge safety reminder:** Do not enable auto-merge or declare a PR complete until **Codecov and Claude gate** are green, and PR-Agent advisory review has been addressed. The Claude gate is now **mandatory and unskippable** for all PRs (see PR Health Check).
 
 **Claude gate cannot be bypassed:**
 - The workflow automatically creates and applies the `gate:claude` label if missing
@@ -213,8 +194,8 @@ Every PR must carry exactly one risk label from the approved set. CI enforces th
 Every PR must pass the following health checks before being considered "done" and merged. Document all findings in `REHYDRATION_PACK/RUNS/<RUN_ID>/<AGENT_ID>/RUN_REPORT.md`.
 
 ### 4.0 Wait-for-green gate (mandatory)
-- **No “done” until green:** Do not declare a run complete or enable auto-merge until unit tests, lint, typecheck, Codecov, Bugbot, and Claude gate (if `gate:claude`) are green (or an explicitly documented fallback is recorded).
-- **Wait loop:** After pushing and triggering Bugbot, poll checks every 120–240 seconds until the PR status rollup (and `gh pr checks <PR#>`) shows Codecov + Bugbot contexts completed/green.
+- **No "done" until green:** Do not declare a run complete or enable auto-merge until unit tests, lint, typecheck, Codecov, architecture boundaries, CodeQL, and Claude gate are green (or an explicitly documented fallback is recorded).
+- **Wait loop:** After pushing, poll checks every 120–240 seconds until the PR status rollup (and `gh pr checks <PR#>`) shows all required contexts completed/green.
   ```powershell
   $pr = <PR#>
   do {
@@ -222,38 +203,23 @@ Every PR must pass the following health checks before being considered "done" an
     Start-Sleep -Seconds (Get-Random -Minimum 120 -Maximum 240)
   } while (gh pr checks $pr | Select-String -Pattern 'Pending|In progress|Queued')
   ```
-- **Bugbot quota exhausted:** Record "Bugbot quota exhausted; performed manual review" in `RUN_REPORT.md`, perform a manual diff review (focus on risk areas/tests touched), and capture findings/deferrals. You must still wait for Codecov to finish and be green before merging.
+- **PR-Agent unavailable:** If the advisory PR-Agent review fails to post (API down, etc.), record "PR-Agent unavailable; performed manual review" in `RUN_REPORT.md`, perform a manual diff review (focus on risk areas/tests touched), and capture findings/deferrals. You must still wait for all required checks (Codecov, architecture boundaries, CodeQL, Claude gate) to finish and be green before merging.
 
-### 4.1 Bugbot review
+### 4.1 PR-Agent advisory review
 
-**Requirement:** All PRs must receive a Bugbot review (or explicit fallback if quota exceeded).
+**Requirement:** All PRs receive an automated PR-Agent advisory review (non-blocking). Address findings or document deferrals.
 
-#### How to trigger Bugbot (mention-only mode)
-Post a trigger comment on the PR:
+PR-Agent runs automatically on every same-repo PR via `pull_request_target`. No manual trigger needed.
+
+#### How to view PR-Agent output
 ```powershell
-# Using PR number
-gh pr comment <PR#> -b '@cursor review'
-# or
-gh pr comment <PR#> -b 'bugbot run'
-
-# Using current branch (infers PR)
-gh pr comment (gh pr view --json number --jq '.number') -b '@cursor review'
-```
-
-Alternative: Use workflow dispatch (see Section 3 for details).
-
-#### How to view Bugbot output
-```powershell
-# View all PR comments (including Bugbot output)
+# View all PR comments (including PR-Agent review)
 gh pr view <PR#> --comments
-
-# Filter for Bugbot comments (if many comments exist)
-gh pr view <PR#> --json comments --jq '.comments[] | select(.author.login=="cursor-bot" or .body | contains("Bugbot")) | {author: .author.login, body: .body}'
 ```
 
 #### Action required
-- **If Bugbot flags issues**: Either fix them in this run OR document each deferred finding with a follow-up checklist item in `REHYDRATION_PACK/05_TASK_BOARD.md` or `docs/00_Project_Admin/To_Do/MASTER_CHECKLIST.md`
-- **If quota exceeded**: Document "Bugbot quota exceeded; performed manual code review" and list manual review findings
+- **If PR-Agent flags issues**: Either fix them in this run OR document each deferred finding with a follow-up checklist item
+- PR-Agent is advisory and does **not** block merges
 
 ### 4.2 Codecov status verification
 
@@ -269,8 +235,8 @@ gh pr checks <PR#>
 ```
 
 #### Codecov thresholds (current)
-- **Patch coverage**: ≥50% (±10% threshold)
-- **Project coverage**: must not drop >5% from base branch
+- **Patch coverage**: must meet the repo's current Codecov patch gate (see the PR's `codecov/patch` status check for the actual enforced threshold)
+- **Project coverage**: must not drop significantly from base branch (see `codecov/project` status check)
 
 #### Action required
 - **If patch coverage is low**: Add tests to cover new/changed lines OR document why coverage is acceptable (e.g., "integration test planned for staging")
@@ -326,14 +292,14 @@ Capture in `TEST_MATRIX.md`:
 
 Quick reference for all health checks:
 ```powershell
-# 1. Trigger Bugbot
-gh pr comment <PR#> -b '@cursor review'
-
-# 2. View Bugbot output
+# 1. View PR-Agent advisory review (auto-posted on same-repo PRs)
 gh pr view <PR#> --comments
 
-# 3. View Codecov status
+# 2. View all PR checks (CI, architecture, CodeQL, Codecov, Claude gate)
 gh pr checks <PR#>
+
+# 3. View Codecov status specifically
+gh pr view <PR#> --json statusCheckRollup --jq '.statusCheckRollup[] | select(.context | contains("codecov"))'
 
 # 4. Run E2E smoke (dev)
 $eventId = "evt:" + (Get-Date -Format 'yyyyMMddHHmmss')
@@ -727,14 +693,14 @@ python scripts/run_ci_checks.py
 With `CODECOV_TOKEN` configured as a GitHub repository secret, coverage is automatically uploaded on every CI run.
 
 **Coverage workflow:**
-1. CI runs `coverage run -m unittest discover -s scripts -p "test_*.py"` followed by `coverage xml`
+1. CI runs `coverage run` for scripts tests, then `coverage run -a` for backend tests, then `coverage xml`
 2. `coverage.xml` is uploaded to Codecov using `codecov/codecov-action@v4` (advisory; does not block CI)
 3. `coverage.xml` is also uploaded as a GitHub Actions artifact (`coverage-report`) with 30-day retention for debugging
 
-**Status checks configured in codecov.yml:**
-- **Project status**: requires coverage not to drop by more than 5% compared to base branch
-- **Patch status**: requires at least 50% coverage on new/changed lines (±10% threshold)
-- Both checks use `target: auto` and generous thresholds to avoid breaking PRs on day 1
+**Status checks:**
+- **`codecov/patch`**: enforces patch coverage on new/changed lines (see the PR's `codecov/patch` status check for the actual enforced threshold)
+- **`codecov/project`**: enforces overall project coverage (if configured)
+- Thresholds are managed in Codecov's settings/`codecov.yml` — do NOT hardcode specific numbers in docs
 
 ### Operational plan (phased rollout)
 
@@ -775,35 +741,20 @@ Assuming `CODECOV_TOKEN` is configured and CI is green, use this checklist to ve
 
 ---
 
-## 11) Lint/Type enforcement roadmap
+## 11) Lint/Type enforcement status
 
-### Current state (2026-01-11)
-Linters (ruff, black, mypy) run in CI but use `continue-on-error: true` (advisory). They do **not** block PR merges.
+### Current state (2026-02-12)
+Ruff, Mypy, and compileall are now **blocking** in CI (they fail the `validate` check if they error).
+Black remains advisory (`continue-on-error: true`).
 
-**Lint status snapshot:**
-- **Ruff**: ~4 issues (line length E501, unused imports F401, unused variables F841)
-- **Black**: ~30+ files would be reformatted
-- **Mypy**: 11 errors in 3 files (union-attr, arg-type, return-value)
+All blocking lint/type steps can be de-escalated to advisory via rollback mode (`PR_CHECKS_ROLLBACK_MODE=1`). See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`.
 
-### Operational plan (phased enforcement)
-
-**Phase 1: Advisory (current)**
-- All lint steps run but do not block CI
-- Developers can see lint warnings in CI logs and optionally fix
-
-**Phase 2: Fix + enforce (target: after 2-3 green PRs)**
-- Dedicated PR to auto-fix black formatting: `black backend/src scripts`
-- Dedicated PR to fix ruff issues: `ruff check --fix backend/src scripts`
-- Once both pass cleanly, remove `continue-on-error: true` from those steps to make them blocking
-
-**Phase 3: Mypy enforcement (incremental)**
-- Address mypy errors file-by-file (envelope.py, client.py, order_lookup.py)
-- Once mypy passes, remove `continue-on-error: true` to make it blocking
-- Consider adding mypy to pre-commit hooks
-
-### Tracking
-- When Phase 2 is complete, update this section and `ci.yml` to reflect blocking status
-- File issues for any recurring lint failures that block progress
+| Tool | Status | Rollback behavior |
+|------|--------|-------------------|
+| Ruff | **Blocking** | Advisory (continue-on-error) |
+| Mypy | **Blocking** | Advisory (continue-on-error) |
+| compileall | **Blocking** | Advisory (continue-on-error) |
+| Black | Advisory | Advisory (unchanged) |
 
 ---
 
@@ -857,5 +808,20 @@ gh run watch --exit-status
 gh run view --json url --jq '.url'
 ```
 Notes:
-- The script only writes secrets when the corresponding GitHub secret exists; missing inputs show as “skipped” in the job + step summary.
+- The script only writes secrets when the corresponding GitHub secret exists; missing inputs show as "skipped" in the job + step summary.
 - Secret values are never echoed; only secret IDs and env var names appear in logs.
+
+---
+
+## 14) PR Checks Rollback Mode
+
+All new and tightened PR checks support a global rollback mode that relaxes enforcement without reverting code.
+
+**Variable:** `PR_CHECKS_ROLLBACK_MODE` (GitHub repo Settings > Secrets and variables > Actions > Variables)
+
+| Value | Behavior |
+|-------|----------|
+| `0` (default) | Normal enforcement — checks block merges on failure |
+| `1` | Rollback mode — new checks pass without enforcement |
+
+For full details, see `docs/08_Engineering/PR_Checks_Rollback_Playbook.md`.
