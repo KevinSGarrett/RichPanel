@@ -194,6 +194,38 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertIsNone(result["draft_reply_body_fingerprint"])
         self.assertNotIn("body", result)
 
+    def test_extract_preorder_proof_signals_eta_fallback(self) -> None:
+        parameters = {
+            "delivery_estimate": None,
+            "draft_reply": {
+                "body": (
+                    "Your pre-order ships soon. Estimated delivery window is "
+                    "April 1–April 7, 2026. We'll send tracking as soon as it ships."
+                ),
+                "eta_human": "April 1–April 7, 2026",
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_missing_ship_date(self) -> None:
+        parameters = {
+            "delivery_estimate": {"preorder": True},
+            "draft_reply": {
+                "body": "Your pre-order ships soon. We'll send tracking as soon as it ships."
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
     def test_extract_match_method_none(self) -> None:
         result = {
             "order_matched": False,
@@ -1170,6 +1202,16 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         }
         message = shadow_eval._extract_latest_customer_message(ticket, {})
         self.assertEqual(message, "Order number 123\n\nCustomer body text")
+
+        ticket = {
+            "subject": "Order #12345",
+            "customer_message": "Order #12345",
+            "comments": [
+                {"plain_body": "Longer customer body", "via": {"isOperator": False}}
+            ],
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Order #12345\n\nLonger customer body")
 
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):

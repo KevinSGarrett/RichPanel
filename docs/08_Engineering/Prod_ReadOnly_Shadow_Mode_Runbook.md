@@ -316,7 +316,7 @@ python scripts/live_readonly_shadow_eval.py `
   --shopify-probe `
   --request-trace `
   --allow-ticket-fetch-failures `
-  --ticket-id <ticket-id> `
+  --ticket-id <redacted-ticket-id> `
   --out REHYDRATION_PACK/RUNS/<RUN_ID>/b80/shadow_eval_prod_report.json `
   --summary-md-out REHYDRATION_PACK/RUNS/<RUN_ID>/b80/shadow_eval_prod_summary.md
 ```
