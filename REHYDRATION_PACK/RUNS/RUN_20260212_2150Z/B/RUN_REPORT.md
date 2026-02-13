@@ -11,7 +11,7 @@
 - aws sts get-caller-identity (account 878145708918).
 - python -m unittest scripts.test_order_lookup (PASS; warnings logged).
 - python -m unittest discover -s scripts -p "test_*.py" (PASS with AWS region set).
-- python -m pytest -q scripts/test_order_lookup.py (PASS).
+- python -m pytest -q scripts/test_order_lookup.py (PASS; 124 tests).
 - python scripts/run_ci_checks.py --ci (PASS).
 
 ## Tests / Proof

@@ -645,6 +645,19 @@ class OrderLookupTests(unittest.TestCase):
             ["Pre-order", "Recart"],
         )
 
+    def test_parse_shopify_tags_empty(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        self.assertEqual(order_lookup_module._parse_shopify_tags(""), [])
+
+    def test_extract_shopify_tags_empty_is_ignored(self) -> None:
+        from richpanel_middleware.commerce import order_lookup as order_lookup_module
+
+        payload = {"id": 1003, "name": "#1003", "tags": " , "}
+        summary = order_lookup_module._extract_shopify_fields(payload)
+        self.assertNotIn("order_tags_raw", summary)
+        self.assertNotIn("order_tags", summary)
+
     def test_fetch_shopify_line_item_product_ids_dry_run(self) -> None:
         from richpanel_middleware.commerce import order_lookup as order_lookup_module
 

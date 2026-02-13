@@ -81,7 +81,7 @@
 **Proof snippet(s) (PII-safe):**
 ```text
 python -m pytest -q scripts/test_order_lookup.py
-122 passed in 50.52s
+124 passed in 18.75s
 ```
 
 ### 8) Risk & rollback
