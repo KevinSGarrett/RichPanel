@@ -327,3 +327,10 @@ Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.
 Uncommitted changes:
 M scripts/test_delivery_estimate.py
 ?? claude_gate_audit.json
+
+7) python scripts/run_ci_checks.py --ci (after commit)
+Output (tail):
+[OK] CI-equivalent checks passed.
+
+Commit:
+- B79: add preorder missing-shipping test (commit 92ded42)
