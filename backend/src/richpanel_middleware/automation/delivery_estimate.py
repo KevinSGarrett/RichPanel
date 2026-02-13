@@ -44,6 +44,9 @@ def has_preorder_tag(order_tags: Any, order_tags_raw: Any = None) -> bool:
     else:
         return False
 
+    if not tokens and isinstance(order_tags_raw, str):
+        tokens = [token for token in order_tags_raw.split(",")]
+
     for token in tokens:
         normalized = " ".join(token.strip().lower().split())
         if normalized in _PREORDER_TAG_TOKENS:

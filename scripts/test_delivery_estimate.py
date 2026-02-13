@@ -307,6 +307,7 @@ class DeliveryEstimateTests(unittest.TestCase):
                 "First Subscription, Pre-order, Recart",
             )
         )
+        self.assertTrue(has_preorder_tag([], "Pre-order, Recart"))
         self.assertTrue(has_preorder_tag(None, "tag1,  PRE ORDER  , tag2"))
         self.assertTrue(has_preorder_tag(["preorder"]))
         self.assertTrue(has_preorder_tag(["Pre Order"]))
