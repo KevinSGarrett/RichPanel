@@ -221,3 +221,10 @@ Uncommitted changes:
 M backend/src/richpanel_middleware/automation/delivery_estimate.py
 M scripts/test_delivery_estimate.py
 ?? claude_gate_audit.json
+
+7) python scripts/run_ci_checks.py --ci (after commit)
+Output (tail):
+[OK] CI-equivalent checks passed.
+
+Commit:
+- B79: normalize preorder tag whitespace (commit 5e5223f)
