@@ -59,16 +59,26 @@ Path: **Settings → Branches → Branch protection rules → Add rule**
 ### Status checks
 **Required**
 - ✅ Require status checks to pass before merging
-- ✅ Required checks must include the repo CI workflow/job
+- ✅ Required checks must include the following contexts:
 
-This repo’s baseline workflow + job:
-- `.github/workflows/ci.yml` → workflow name: `CI`, job: **`validate`** (strict/up-to-date = **true**)
+| Check context | Source workflow | Purpose |
+|---------------|---------------|---------|
+| `validate` | ci.yml | CI (build, lint, type-check, tests) |
+| `risk-label-check` | pr_risk_label_required.yml | Risk label enforcement |
+| `claude-gate-check` | pr_claude_gate_required.yml | Claude AI gate review |
+| `Architecture Boundaries / import-linter` | architecture-boundaries.yml | Import boundary enforcement |
+| `CodeQL / analyze` | codeql.yml | Vulnerability scanning |
+| `codecov/patch` | Codecov (external) | Diff coverage gate |
+
+Advisory only (NOT required for merge):
+- `PR Agent (advisory)` — pr-agent.yml — AI review comment (replaces Bugbot)
 
 Important:
 - GitHub only lets you select required checks after the workflow has run at least once.
 - Create a small PR to trigger CI, then return here and select the check(s) from the list.
+- See `docs/08_Engineering/PR_Checks_Rollback_Playbook.md` for rollback instructions.
 
-Recommended
+**Required**
 - ✅ Require branches to be up to date before merging
 
 ### Admin / destructive controls
