@@ -5,7 +5,7 @@
 **Labels:** `risk:R1`, `gate:claude`  
 **Risk:** `risk:R1`  
 **Claude gate model (used):** `claude-sonnet-4-5`  
-**Anthropic response id:** `pending — run after PR opens`
+**Anthropic response id:** `pending — @cursor review triggered`
 
 ### 1) Summary
 - Added PII-safe preorder proof signals to live read-only shadow eval output.
@@ -57,16 +57,15 @@
 ### 6) Test plan
 **Local / CI-equivalent:**
 - `python -m unittest scripts.test_live_readonly_shadow_eval`
-- `python scripts/run_ci_checks.py --ci` (fails: generated docs changed after regen)
-- `python -m unittest scripts.test_live_readonly_shadow_eval` (MW_ENV=dev; SHOPIFY_SHOP_DOMAIN=test-shop.myshopify.com)
+- `python scripts/run_ci_checks.py --ci` (PASS in prod env with read-only flags + SHOPIFY_SHOP_DOMAIN set)
 
 **E2E / proof runs (redact ticket numbers in PR body if claiming PII-safe):**
 - `python scripts/live_readonly_shadow_eval.py --env prod --region us-east-2 --expect-account-id 878145708918 --allow-deterministic-only --shopify-probe --request-trace --allow-ticket-fetch-failures --ticket-id <redacted> ... --out REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/shadow_eval_prod_report.json --summary-md-out REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/shadow_eval_prod_summary.md`
 
 ### 7) Results & evidence
-**CI:** local run failed due to generated docs changes after regen (expected with new run entry).  
-**Codecov:** pending — `<direct Codecov PR link>`  
-**Bugbot:** pending — `<PR link>` (trigger via `@cursor review`)  
+**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/249/checks`  
+**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/249`  
+**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/249` (@cursor review triggered)
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/preflight_prod.json`
