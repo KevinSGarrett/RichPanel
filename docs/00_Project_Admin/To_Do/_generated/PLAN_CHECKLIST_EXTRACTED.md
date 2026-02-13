@@ -814,25 +814,25 @@ Counts: total=671, checked=115, unchecked=556
 
 ### 5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)
 - [ ] PLN-115DD100F4 — DynamoDB evidence (idempotency/state/audit record links)  
-  - Source line: 616
+  - Source line: 582
 - [ ] PLN-38B7D770B9 — Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)  
-  - Source line: 618
+  - Source line: 584
 - [ ] PLN-5C795D71FE — CloudWatch Logs links (worker execution, routing decision, reply sent)  
-  - Source line: 617
+  - Source line: 583
 - [ ] PLN-6664EFC4CE — Follow-up behavior (if tested): confirm no duplicate reply, routing tags applied  
-  - Source line: 621
+  - Source line: 587
 - [ ] PLN-9F3622A347 — Message count delta or `last_message_source` evidence  
-  - Source line: 619
+  - Source line: 585
 - [ ] PLN-B3684CA430 — PII scan result (confirm proof JSON is safe)  
-  - Source line: 620
+  - Source line: 586
 - [ ] PLN-B8C9C5E794 — Exact commands used (with redacted ticket numbers for public artifacts)  
-  - Source line: 613
+  - Source line: 579
 - [ ] PLN-D470EB41BB — PASS classification (PASS_STRONG or PASS_WEAK) for each scenario  
-  - Source line: 614
+  - Source line: 580
 - [ ] PLN-D8E8C345C2 — OpenAI evidence: `openai.routing.llm_called=true` and `openai.rewrite.rewrite_applied=true` (or recorded fallback with `fallback_used=true` + `error_class`)  
-  - Source line: 615
+  - Source line: 581
 - [ ] PLN-F363631DD5 — Proof JSON paths for both scenarios (tracking + no-tracking)  
-  - Source line: 612
+  - Source line: 578
 
 
 ## docs/08_Engineering/PR_Review_Checklist.md
@@ -850,14 +850,14 @@ Counts: total=671, checked=115, unchecked=556
   - Source line: 110
 - [ ] PLN-4A4F8CCD6F — **PR body score ≥95** (R0/R1) or ≥97 (R2/R3/R4) — Using `03_PR_DESCRIPTION_SCORING_RUBRIC.md`  
   - Source line: 113
+- [ ] PLN-6F0999FB3B — **All checks green** — Unit tests, lint, CI checks, Codecov, architecture boundaries, CodeQL, Claude gate  
+  - Source line: 108
 - [ ] PLN-7E990CB915 — **PR title score ≥95** — Using `07_PR_TITLE_SCORING_RUBRIC.md`  
   - Source line: 112
 - [ ] PLN-8709262D55 — **No placeholders** — No `???`, `TBD`, `WIP` in code or docs  
   - Source line: 109
 - [ ] PLN-92241CFD86 — **Run artifacts complete** — All required files in `REHYDRATION_PACK/RUNS/<RUN_ID>/`  
   - Source line: 111
-- [ ] PLN-D1118FD2F3 — **All checks green** — Unit tests, lint, CI checks, Codecov, Bugbot, Claude gate  
-  - Source line: 108
 
 ### PR Review Checklist > Order Status Changes (Special Requirements)
 - [ ] PLN-4C823C01DA — **E2E Proof (PASS_STRONG)** — Both scenarios required:  
@@ -868,12 +868,12 @@ Counts: total=671, checked=115, unchecked=556
   - Source line: 85
 
 ### PR Review Checklist > Required CI Checks
-- [ ] PLN-579B730851 — **Lint** — Ruff, Black, Mypy (advisory, but fix if possible)  
-  - Source line: 45
 - [ ] PLN-742537250C — **Unit Tests** — All tests must pass  
   - Source line: 44
 - [ ] PLN-96D83560B4 — **CI Checks** — `python scripts/run_ci_checks.py --ci` must pass  
   - Source line: 46
+- [ ] PLN-97DFC43C45 — **Lint** — Ruff (advisory), Mypy (advisory), Black (advisory), compileall (blocking)  
+  - Source line: 45
 - [ ] PLN-FC5B0D8D71 — **Codecov** — Coverage checks must pass or be acceptable  
   - Source line: 53
 
@@ -890,7 +890,7 @@ Counts: total=671, checked=115, unchecked=556
   - Source line: 14
 
 ### PR Review Checklist > Required Reviews
-- [ ] PLN-14536CBC9F — **Bugbot Review** — Mandatory for all PRs (or documented fallback)  
+- [ ] PLN-5AC389EDDA — **PR-Agent Advisory Review** — Auto-posted on all same-repo PRs (replaces deprecated Bugbot)  
   - Source line: 35
 - [ ] PLN-9FCC597D06 — **Claude Review** — Mandatory for all PRs  
   - Source line: 24

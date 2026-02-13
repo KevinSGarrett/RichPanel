@@ -11253,6 +11253,16 @@
         "anchor": "what-runs-in-ci-ciyml"
       },
       {
+        "level": 3,
+        "text": "Additional PR checks (separate workflows)",
+        "anchor": "additional-pr-checks-separate-workflows"
+      },
+      {
+        "level": 3,
+        "text": "Rollback mode",
+        "anchor": "rollback-mode"
+      },
+      {
         "level": 2,
         "text": "2) Local CI-equivalent checks",
         "anchor": "2-local-ci-equivalent-checks"
@@ -11274,28 +11284,18 @@
       },
       {
         "level": 2,
-        "text": "3) Bugbot PR review (Cursor)",
-        "anchor": "3-bugbot-pr-review-cursor"
+        "text": "3) PR-Agent Advisory Review (replaces Bugbot)",
+        "anchor": "3-pr-agent-advisory-review-replaces-bugbot"
       },
       {
         "level": 3,
-        "text": "“Extensions are not CLI” (Cursor/VS Code)",
-        "anchor": "extensions-are-not-cli-cursorvs-code"
+        "text": "How it works",
+        "anchor": "how-it-works"
       },
       {
         "level": 3,
-        "text": "How to trigger a review (mention-only mode)",
-        "anchor": "how-to-trigger-a-review-mention-only-mode"
-      },
-      {
-        "level": 3,
-        "text": "PowerShell-safe `gh` examples",
-        "anchor": "powershell-safe-gh-examples"
-      },
-      {
-        "level": 3,
-        "text": "Alternative trigger: workflow dispatch (Actions tab)",
-        "anchor": "alternative-trigger-workflow-dispatch-actions-tab"
+        "text": "Viewing the advisory review",
+        "anchor": "viewing-the-advisory-review"
       },
       {
         "level": 3,
@@ -11319,8 +11319,8 @@
       },
       {
         "level": 3,
-        "text": "4.1 Bugbot review",
-        "anchor": "41-bugbot-review"
+        "text": "4.1 PR-Agent advisory review",
+        "anchor": "41-pr-agent-advisory-review"
       },
       {
         "level": 3,
@@ -11474,23 +11474,13 @@
       },
       {
         "level": 2,
-        "text": "11) Lint/Type enforcement roadmap",
-        "anchor": "11-linttype-enforcement-roadmap"
+        "text": "11) Lint/Type enforcement status",
+        "anchor": "11-linttype-enforcement-status"
       },
       {
         "level": 3,
-        "text": "Current state (2026-01-11)",
-        "anchor": "current-state-2026-01-11"
-      },
-      {
-        "level": 3,
-        "text": "Operational plan (phased enforcement)",
-        "anchor": "operational-plan-phased-enforcement"
-      },
-      {
-        "level": 3,
-        "text": "Tracking",
-        "anchor": "tracking"
+        "text": "Current state (2026-02-12)",
+        "anchor": "current-state-2026-02-12"
       },
       {
         "level": 2,
@@ -11516,6 +11506,11 @@
         "level": 3,
         "text": "How to run (PowerShell-safe)",
         "anchor": "how-to-run-powershell-safe"
+      },
+      {
+        "level": 2,
+        "text": "14) PR Checks Rollback Mode",
+        "anchor": "14-pr-checks-rollback-mode"
       }
     ]
   },
@@ -12141,6 +12136,66 @@
         "level": 2,
         "text": "Revision History",
         "anchor": "revision-history"
+      }
+    ]
+  },
+  {
+    "path": "08_Engineering/PR_Checks_Rollback_Playbook.md",
+    "outline": [
+      {
+        "level": 1,
+        "text": "PR Checks Rollback Playbook",
+        "anchor": "pr-checks-rollback-playbook"
+      },
+      {
+        "level": 2,
+        "text": "Overview",
+        "anchor": "overview"
+      },
+      {
+        "level": 3,
+        "text": "What rollback mode does",
+        "anchor": "what-rollback-mode-does"
+      },
+      {
+        "level": 2,
+        "text": "A) Fast Rollback (no code revert)",
+        "anchor": "a-fast-rollback-no-code-revert"
+      },
+      {
+        "level": 2,
+        "text": "B) Re-enable Enforcement",
+        "anchor": "b-re-enable-enforcement"
+      },
+      {
+        "level": 2,
+        "text": "C) Hard Rollback (full code revert)",
+        "anchor": "c-hard-rollback-full-code-revert"
+      },
+      {
+        "level": 2,
+        "text": "D) Bugbot Restore Option",
+        "anchor": "d-bugbot-restore-option"
+      },
+      {
+        "level": 2,
+        "text": "E) Safe Rollout Guidance",
+        "anchor": "e-safe-rollout-guidance"
+      },
+      {
+        "level": 2,
+        "text": "Required Check Contexts (for Branch Protection)",
+        "anchor": "required-check-contexts-for-branch-protection"
+      },
+      {
+        "level": 3,
+        "text": "Required (blocking)",
+        "anchor": "required-blocking"
+      },
+      {
+        "level": 3,
+        "text": "Advisory only (NOT required)",
+        "anchor": "advisory-only-not-required"
       }
     ]
   },

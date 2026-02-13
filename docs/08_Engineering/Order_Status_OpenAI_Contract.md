@@ -696,7 +696,7 @@ An order_status proof run is **NOT acceptable** if:
 2. **Add gating:** All new OpenAI calls must be gated (safe_mode, automation_enabled, allow_network)
 3. **Add evidence:** Log `llm_called`, `response_id`, `model`, `dry_run`, `gated_reason`
 4. **Update proof harness:** Add validation checks to `scripts/dev_e2e_smoke.py`
-5. **PR requirements:** R3+ risk label, Claude gate, Bugbot, Codecov, CI green
+5. **PR requirements:** R3+ risk label, Claude gate, PR-Agent advisory review, Codecov, CI green
 
 ---
 

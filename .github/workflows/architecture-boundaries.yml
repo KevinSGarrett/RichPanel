@@ -1,0 +1,35 @@
+name: Architecture Boundaries
+
+on:
+  pull_request:
+
+jobs:
+  import-linter:
+    name: "Architecture Boundaries / import-linter"
+    runs-on: ubuntu-latest
+    env:
+      ROLLBACK_MODE: ${{ vars.PR_CHECKS_ROLLBACK_MODE || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install import-linter
+        run: pip install import-linter
+
+      - name: Run import-linter (enforced)
+        if: env.ROLLBACK_MODE != '1'
+        env:
+          PYTHONPATH: backend/src
+        run: lint-imports
+
+      - name: Rollback mode (pass without enforcement)
+        if: env.ROLLBACK_MODE == '1'
+        run: |
+          echo "::notice::PR_CHECKS_ROLLBACK_MODE=1 — Architecture boundary check disabled. Passing without enforcement."
+          echo "## Architecture Boundaries — Rollback Mode" >> "$GITHUB_STEP_SUMMARY"
+          echo "Import-linter was **skipped** because \`PR_CHECKS_ROLLBACK_MODE=1\`." >> "$GITHUB_STEP_SUMMARY"

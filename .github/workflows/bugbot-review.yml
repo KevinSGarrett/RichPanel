@@ -1,46 +1,30 @@
-name: Bugbot Review Trigger
+name: "Bugbot Review Trigger [DEPRECATED]"
+
+# DEPRECATED: This workflow is no longer used.
+# Cursor Bugbot has been replaced by the in-repo PR-Agent advisory review
+# (see .github/workflows/pr-agent.yml).
+#
+# To restore Bugbot behavior, revert this commit or re-enable the original
+# workflow_dispatch trigger below. See docs/08_Engineering/PR_Checks_Rollback_Playbook.md.
 
 on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "Pull Request number to comment on"
+        description: "[DEPRECATED] This workflow is disabled. Use PR-Agent instead."
         required: true
         type: string
-      comment_body:
-        description: "Comment body to post on the PR"
-        required: false
-        default: "@cursor review"
-        type: string
-
-permissions:
-  issues: write
-  pull-requests: write
 
 jobs:
-  post_comment:
-    name: Post Bugbot trigger comment
+  deprecated:
+    name: "Bugbot [DEPRECATED]"
     runs-on: ubuntu-latest
     steps:
-      - name: Create PR comment
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            const prNumberRaw = String(context.payload.inputs?.pr_number ?? "").trim();
-            const commentBody = String(context.payload.inputs?.comment_body ?? "@cursor review");
-
-            const prNumber = Number(prNumberRaw);
-            if (!Number.isInteger(prNumber) || prNumber <= 0) {
-              core.setFailed(`Invalid pr_number: "${prNumberRaw}". Expected a positive integer as a string.`);
-              return;
-            }
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: commentBody,
-            });
-
-
+      - name: Deprecation notice
+        run: |
+          echo "::warning::Bugbot Review Trigger is DEPRECATED."
+          echo "Cursor Bugbot has been replaced by the in-repo PR-Agent advisory review."
+          echo "See .github/workflows/pr-agent.yml and docs/08_Engineering/PR_Checks_Rollback_Playbook.md."
+          echo ""
+          echo "## Bugbot — DEPRECATED" >> "$GITHUB_STEP_SUMMARY"
+          echo "This workflow is **deprecated**. Use PR-Agent instead." >> "$GITHUB_STEP_SUMMARY"

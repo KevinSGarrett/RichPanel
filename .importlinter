@@ -1,0 +1,20 @@
+[importlinter]
+root_packages =
+    richpanel_middleware
+source_location = backend/src
+
+[importlinter:contract:integrations-no-automation]
+name = integrations must not import automation
+type = forbidden
+source_modules =
+    richpanel_middleware.integrations
+forbidden_modules =
+    richpanel_middleware.automation
+
+[importlinter:contract:ingest-no-automation]
+name = ingest must not import automation
+type = forbidden
+source_modules =
+    richpanel_middleware.ingest
+forbidden_modules =
+    richpanel_middleware.automation

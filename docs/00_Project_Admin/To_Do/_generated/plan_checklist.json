@@ -2483,7 +2483,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-115DD100F4",
-    "line": 616,
+    "line": 582,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "DynamoDB evidence (idempotency/state/audit record links)"
   },
@@ -2491,7 +2491,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-38B7D770B9",
-    "line": 618,
+    "line": 584,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Pre/post ticket status + tags (confirm `mw-auto-replied`, `mw-order-status-answered`, status=closed)"
   },
@@ -2499,7 +2499,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-5C795D71FE",
-    "line": 617,
+    "line": 583,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "CloudWatch Logs links (worker execution, routing decision, reply sent)"
   },
@@ -2507,7 +2507,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-6664EFC4CE",
-    "line": 621,
+    "line": 587,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Follow-up behavior (if tested): confirm no duplicate reply, routing tags applied"
   },
@@ -2515,7 +2515,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-9F3622A347",
-    "line": 619,
+    "line": 585,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Message count delta or `last_message_source` evidence"
   },
@@ -2523,7 +2523,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-B3684CA430",
-    "line": 620,
+    "line": 586,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "PII scan result (confirm proof JSON is safe)"
   },
@@ -2531,7 +2531,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-B8C9C5E794",
-    "line": 613,
+    "line": 579,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Exact commands used (with redacted ticket numbers for public artifacts)"
   },
@@ -2539,7 +2539,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-D470EB41BB",
-    "line": 614,
+    "line": 580,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "PASS classification (PASS_STRONG or PASS_WEAK) for each scenario"
   },
@@ -2547,7 +2547,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-D8E8C345C2",
-    "line": 615,
+    "line": 581,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "OpenAI evidence: `openai.routing.llm_called=true` and `openai.rewrite.rewrite_applied=true` (or recorded fallback with `fallback_used=true` + `error_class`)"
   },
@@ -2555,7 +2555,7 @@
     "checked": false,
     "heading_path": "5. View E2E results > 6) Dev E2E smoke workflow > Order Status Proof (canonical requirements)",
     "id": "PLN-F363631DD5",
-    "line": 612,
+    "line": 578,
     "source_path": "docs/08_Engineering/CI_and_Actions_Runbook.md",
     "text": "Proof JSON paths for both scenarios (tracking + no-tracking)"
   },
@@ -2602,6 +2602,14 @@
   {
     "checked": false,
     "heading_path": "PR Review Checklist > Final Checks",
+    "id": "PLN-6F0999FB3B",
+    "line": 108,
+    "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
+    "text": "**All checks green** \u2014 Unit tests, lint, CI checks, Codecov, architecture boundaries, CodeQL, Claude gate"
+  },
+  {
+    "checked": false,
+    "heading_path": "PR Review Checklist > Final Checks",
     "id": "PLN-7E990CB915",
     "line": 112,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
@@ -2622,14 +2630,6 @@
     "line": 111,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
     "text": "**Run artifacts complete** \u2014 All required files in `REHYDRATION_PACK/RUNS/<RUN_ID>/`"
-  },
-  {
-    "checked": false,
-    "heading_path": "PR Review Checklist > Final Checks",
-    "id": "PLN-D1118FD2F3",
-    "line": 108,
-    "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
-    "text": "**All checks green** \u2014 Unit tests, lint, CI checks, Codecov, Bugbot, Claude gate"
   },
   {
     "checked": false,
@@ -2658,14 +2658,6 @@
   {
     "checked": false,
     "heading_path": "PR Review Checklist > Required CI Checks",
-    "id": "PLN-579B730851",
-    "line": 45,
-    "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
-    "text": "**Lint** \u2014 Ruff, Black, Mypy (advisory, but fix if possible)"
-  },
-  {
-    "checked": false,
-    "heading_path": "PR Review Checklist > Required CI Checks",
     "id": "PLN-742537250C",
     "line": 44,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
@@ -2678,6 +2670,14 @@
     "line": 46,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
     "text": "**CI Checks** \u2014 `python scripts/run_ci_checks.py --ci` must pass"
+  },
+  {
+    "checked": false,
+    "heading_path": "PR Review Checklist > Required CI Checks",
+    "id": "PLN-97DFC43C45",
+    "line": 45,
+    "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
+    "text": "**Lint** \u2014 Ruff (advisory), Mypy (advisory), Black (advisory), compileall (blocking)"
   },
   {
     "checked": false,
@@ -2730,10 +2730,10 @@
   {
     "checked": false,
     "heading_path": "PR Review Checklist > Required Reviews",
-    "id": "PLN-14536CBC9F",
+    "id": "PLN-5AC389EDDA",
     "line": 35,
     "source_path": "docs/08_Engineering/PR_Review_Checklist.md",
-    "text": "**Bugbot Review** \u2014 Mandatory for all PRs (or documented fallback)"
+    "text": "**PR-Agent Advisory Review** \u2014 Auto-posted on all same-repo PRs (replaces deprecated Bugbot)"
   },
   {
     "checked": false,
