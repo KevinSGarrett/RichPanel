@@ -239,6 +239,18 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertFalse(result["draft_reply_has_ship_in_days"])
         self.assertFalse(result["draft_reply_ends_with_tracking_line"])
 
+    def test_extract_preorder_proof_signals_eta_fallback_with_estimate(self) -> None:
+        parameters = {
+            "delivery_estimate": {"preorder": True},
+            "draft_reply": {
+                "body": "Delivery window April 10–April 16, 2026.",
+                "eta_human": "April 10–April 16, 2026",
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+
     def test_extract_preorder_proof_signals_non_dict_parameters(self) -> None:
         result = shadow_eval._extract_preorder_proof_signals("not-a-dict")
         self.assertFalse(result["preorder_delivery_estimate"])
@@ -1270,6 +1282,19 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         ticket = {"subject": _BadStr(), "customer_message": "Body text"}
         message = shadow_eval._extract_latest_customer_message(ticket, {})
         self.assertEqual(message, "Body text")
+
+        ticket = {"subject": "Subject line"}
+        convo = {
+            "comments": [
+                {"plain_body": "Convo body text", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "Subject line\n\nConvo body text")
+
+        convo = {"subject": "Convo subject", "customer_message": "Convo body"}
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "Convo subject\n\nConvo body")
 
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
