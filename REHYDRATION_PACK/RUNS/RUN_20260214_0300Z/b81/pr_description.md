@@ -1,14 +1,15 @@
 ﻿<!-- PR_QUALITY: title_score=95/100; body_score=95/100; rubric_title=07; rubric_body=03; risk=risk:R0; p0_ok=true; timestamp=2026-02-14 -->
 
-**Labels:** isk:R0, gate:claude  
-**Risk:** isk:R0 (docs/evidence only)  
-**Claude gate model (used):** claude-haiku-4-5  
-**Anthropic response id:** pending â€” will be captured by gate run  
+**Labels:** `risk:R0`, `gate:claude`  
+**Risk:** `risk:R0` (docs/evidence only)  
+**Claude gate model (used):** `claude-haiku-4-5`  
+**Anthropic response id:** `msg_01DxpSu1MJQ3KkVtzVifNqQq`  
 
 ### Summary
 - RUN_20260214_0300Z: PROD deploy evidence for preorder ETA (tags +45 rule)
 - Deploy-prod workflow succeeded: https://github.com/KevinSGarrett/RichPanel/actions/runs/22010351142
 - No Richpanel writes / no customer contact performed (safe_mode true, automation disabled during verification)
+- Backfilled missing agent folders for RUN_20260213_0436Z to satisfy build-mode validation.
 
 ### Why
 - Capture auditable evidence for prod deploy and read-only verification of the already-merged preorder ETA logic.
@@ -28,6 +29,7 @@
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_postdeploy.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/deploy_prod_run_url.txt
   - docs/00_Project_Admin/Progress_Log.md
+  - REHYDRATION_PACK/RUNS/RUN_20260213_0436Z/A|B|C/* (build-mode backfill)
 
 ### Evidence
 - CI: local python scripts/run_ci_checks.py --ci PASS (see RUN_REPORT snippet)
@@ -42,6 +44,7 @@
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_before.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_after.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_postdeploy.json
+- Runtime flags were set to safe values before deploy (see LastModifiedDate fields in prod_runtime_flags_after.json).
 
 ### Reviewer focus
 - Double-check:
