@@ -89,3 +89,10 @@
 - Shopify shop domains are hashed in the JSON report.
 - No message bodies or customer identifiers are stored.
 - HTTP trace captures urllib.request and AWS SDK (botocore) calls.
+
+## Preorder Proof Summary (PII-safe)
+- preorder_delivery_estimate=true tickets: 1
+  - redacted:cb6d57d9b987 (order_status_candidate=true; routing_intent=order_status_tracking)
+- preorder_delivery_estimate=false tickets: 6
+  - redacted:cd92c15d6341, redacted:a372973056e6, redacted:0074fb03dde8,
+    redacted:fd6e103a5093, redacted:924e4905c954, redacted:f427ba602116

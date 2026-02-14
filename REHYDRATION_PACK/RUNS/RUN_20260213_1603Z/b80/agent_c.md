@@ -30,6 +30,7 @@
 - Summary (RUN_20260213_1729Z): tickets_scanned=7; orders_matched=7; tracking_found=7; eta_available=7; would_reply_send=false for all tickets
 - preorder_proof present for all 7 tickets; preorder_delivery_estimate=true for ticket 116837 (redacted:cb6d57d9b987)
 - Ticket 116700 now classified as order_status_tracking via OpenAI override after subject+comment concatenation in shadow eval.
+- Preorder-tag summary added to `shadow_eval_prod_summary.md` (PII-safe, redacted ticket IDs).
 
 ## Shadow Eval (PROD, read-only) — Ticket 119207
 
