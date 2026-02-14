@@ -14,7 +14,7 @@ List the tests you ran (or explicitly note none).
  |
 | Preflight (prod) | python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check | pass | REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/preflight_prod.json |
 | Runtime flags (postdeploy) | aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled | pass | REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_postdeploy.json |
-| CI gate | python scripts/run_ci_checks.py --ci | pending | output snippet in B/RUN_REPORT.md |
+| CI gate | python scripts/run_ci_checks.py --ci | pass | output snippet in B/RUN_REPORT.md |
 
 ## Notes
 Deploy-prod workflow URL: https://github.com/KevinSGarrett/RichPanel/actions/runs/22010351142

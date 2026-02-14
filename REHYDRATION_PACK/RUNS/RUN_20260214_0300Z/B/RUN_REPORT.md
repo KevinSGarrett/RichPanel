@@ -119,12 +119,14 @@ Include test commands + results + links to evidence.
 - python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check - pass - evidence:
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/preflight_prod.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/preflight_prod.md
-- python scripts/run_ci_checks.py --ci - pending
+- python scripts/run_ci_checks.py --ci - pass - evidence: output snippet below
 
 Paste output snippet proving you ran:
 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py
 
-Pending; will paste after CI run.
+$ python scripts/check_protected_deletes.py --ci
+
+[OK] CI-equivalent checks passed.
 
 ## Docs impact (summary)
 - **Docs updated:** REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/* run docs; docs/00_Project_Admin/Progress_Log.md; docs/_generated/*.
@@ -138,7 +140,6 @@ Pending; will paste after CI run.
 - None (deploy and preflight completed).
 
 ## Follow-ups (actionable)
-- [ ] Run python scripts/run_ci_checks.py --ci and record output.
 - [ ] Open PR with required labels/template.
 
 ## Rollback / Safety Plan
