@@ -3,7 +3,7 @@
 **Labels:** `risk:R0`, `gate:claude`  
 **Risk:** `risk:R0` (docs/evidence only)  
 **Claude gate model (used):** `claude-haiku-4-5`  
-**Anthropic response id:** `msg_01Tk1t2skEB9v1HwxrE7GUZU`  
+**Anthropic response id:** `msg_01XTEessYPC55a1PM2Nf3NQ9`  
 
 ### Summary
 - RUN_20260214_0300Z: PROD deploy evidence for preorder ETA (tags +45 rule)
