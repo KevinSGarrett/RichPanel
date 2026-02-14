@@ -29,6 +29,7 @@
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_after.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/prod_runtime_flags_postdeploy.json
   - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/deploy_prod_run_url.txt
+  - REHYDRATION_PACK/RUNS/RUN_20260214_0300Z/B/README.md
   - docs/00_Project_Admin/Progress_Log.md
   - REHYDRATION_PACK/RUNS/RUN_20260213_0436Z/A|B|C/* (build-mode backfill)
 

@@ -4,6 +4,7 @@
 - overall_status: PASS
 - bot_agent_id_secret_present: True
 - bot_agent_id_secret_checked: True
+- note: ran with --skip-refresh-lambda-check for read-only verification
 
 ## Checks
 - required_env: PASS — env=prod source=ENVIRONMENT
