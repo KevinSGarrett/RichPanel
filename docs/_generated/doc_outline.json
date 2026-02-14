@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-14 - RUN_20260214_0300Z (B81: PROD deploy evidence for preorder ETA)",
+        "anchor": "2026-02-14-run202602140300z-b81-prod-deploy-evidence-for-preorder-eta"
+      },
+      {
+        "level": 3,
         "text": "2026-02-13 - RUN_20260213_1603Z (B80: preorder proof signals + prod read-only artifacts)",
         "anchor": "2026-02-13-run202602131603z-b80-preorder-proof-signals-prod-read-only-artifacts"
       },

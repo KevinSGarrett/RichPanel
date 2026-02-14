@@ -1,0 +1,23 @@
+﻿{
+    "Parameters": [
+        {
+            "Name": "/rp-mw/prod/automation_enabled",
+            "Type": "String",
+            "Value": "false",
+            "Version": 4,
+            "LastModifiedDate": "2026-02-13T21:30:57.825000-06:00",
+            "ARN": "arn:aws:ssm:us-east-2:878145708918:parameter/rp-mw/prod/automation_enabled",
+            "DataType": "text"
+        },
+        {
+            "Name": "/rp-mw/prod/safe_mode",
+            "Type": "String",
+            "Value": "true",
+            "Version": 3,
+            "LastModifiedDate": "2026-02-13T21:29:00.267000-06:00",
+            "ARN": "arn:aws:ssm:us-east-2:878145708918:parameter/rp-mw/prod/safe_mode",
+            "DataType": "text"
+        }
+    ],
+    "InvalidParameters": []
+}

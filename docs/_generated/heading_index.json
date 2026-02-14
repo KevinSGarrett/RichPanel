@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-14 - run_20260214_0300z (b81: prod deploy evidence for preorder eta)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-14-run202602140300z-b81-prod-deploy-evidence-for-preorder-eta"
+    }
+  ],
   "2026-02-13 - run_20260213_1603z (b80: preorder proof signals + prod read-only artifacts)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
