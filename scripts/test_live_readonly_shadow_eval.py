@@ -212,6 +212,49 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertTrue(result["draft_reply_has_delivery_window"])
         self.assertTrue(result["draft_reply_ends_with_tracking_line"])
 
+    def test_extract_preorder_proof_signals_multi_ship_dates(self) -> None:
+        body = (
+            "Items ship in batches. First ships April 1, 2026. "
+            "Second ships April 15, 2026. We'll send tracking as soon as it ships."
+        )
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 15, 2026",
+            },
+            "draft_reply": {"body": body},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_tracking_unavailable(self) -> None:
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 1, 2026",
+                "ship_days_from_inquiry_human": "15 days",
+                "delivery_window_human": "April 5–April 9, 2026",
+                "days_from_inquiry_human": "19–23 days",
+            },
+            "draft_reply": {
+                "body": (
+                    "Your pre-order ships April 1, 2026. "
+                    "It ships in 15 days. Delivery window April 5–April 9, 2026. "
+                    "Arrives in 19–23 days. We'll send tracking as soon as it ships."
+                )
+            },
+            "order_summary": {"tracking_number": None},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_has_ship_in_days"])
+        self.assertTrue(result["draft_reply_has_arrives_in_days"])
+
     def test_extract_preorder_proof_signals_missing_ship_date(self) -> None:
         parameters = {
             "delivery_estimate": {"preorder": True},
@@ -2615,6 +2658,7 @@ class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
             # Shopify fields are populated from the lookup summary
             self.assertIn("shopify_tracking_number", payload["tickets"][0])
             self.assertIn("order_resolution", payload["tickets"][0])
+            self.assertNotIn("preorder_proof", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {

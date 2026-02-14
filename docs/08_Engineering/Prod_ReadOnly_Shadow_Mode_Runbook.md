@@ -323,6 +323,17 @@ python scripts/live_readonly_shadow_eval.py `
 
 - Invariant: **no customer contact** (no sends, notes, closes, or writes).
 
+#### Interpreting preorder proof signals (PII-safe)
+- `preorder_delivery_estimate=true` means Shopify tags indicated preorder and the ETA logic produced preorder fields.
+- If `preorder_delivery_estimate=true`, the draft-reply flags should typically be true for:
+  `draft_reply_has_preorder_word`, `draft_reply_has_ship_date`,
+  `draft_reply_has_ship_in_days`, and `draft_reply_ends_with_tracking_line`.
+- If a delivery window is available, `draft_reply_has_delivery_window` and
+  `draft_reply_has_arrives_in_days` should be true.
+- `draft_reply_body_fingerprint` is a hash only; the draft body itself is never stored.
+- Shadow intent input concatenates subject + body for stronger signal; production routing
+  may prioritize subject only, so treat classification drift as a **shadow-only** artifact.
+
 #### Token stability proof (no 48h wait)
 
 Use a deterministic proof instead of waiting:
