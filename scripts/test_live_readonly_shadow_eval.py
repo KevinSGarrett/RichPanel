@@ -145,6 +145,180 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
         method = shadow_eval._extract_match_method(result)
         self.assertEqual(method, "email_only")
 
+
+class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
+    def test_extract_preorder_proof_signals_preorder(self) -> None:
+        body = (
+            "Your pre-order ships Sunday, March 29, 2026. "
+            "It ships in 15 days. Delivery window April 1–April 7, 2026. "
+            "Arrives in 18–24 days. We'll send tracking as soon as it ships."
+        )
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "Sunday, March 29, 2026",
+                "ship_days_from_inquiry_human": "15 days",
+                "delivery_window_human": "April 1–April 7, 2026",
+                "days_from_inquiry_human": "18–24 days",
+            },
+            "draft_reply": {"body": body},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_has_ship_in_days"])
+        self.assertTrue(result["draft_reply_has_arrives_in_days"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+        self.assertIsNotNone(result["draft_reply_body_fingerprint"])
+        self.assertNotIn("body", result)
+
+    def test_extract_preorder_proof_signals_non_preorder(self) -> None:
+        parameters = {
+            "delivery_estimate": {
+                "preorder": False,
+            },
+            "draft_reply": None,
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_preorder_word"])
+        self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertFalse(result["draft_reply_has_delivery_window"])
+        self.assertFalse(result["draft_reply_has_ship_in_days"])
+        self.assertFalse(result["draft_reply_has_arrives_in_days"])
+        self.assertFalse(result["draft_reply_ends_with_tracking_line"])
+        self.assertIsNone(result["draft_reply_body_fingerprint"])
+        self.assertNotIn("body", result)
+
+    def test_extract_preorder_proof_signals_eta_fallback(self) -> None:
+        parameters = {
+            "delivery_estimate": None,
+            "draft_reply": {
+                "body": (
+                    "Your pre-order ships soon. Estimated delivery window is "
+                    "April 1–April 7, 2026. We'll send tracking as soon as it ships."
+                ),
+                "eta_human": "April 1–April 7, 2026",
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_multi_ship_dates(self) -> None:
+        body = (
+            "Items ship in batches. First ships April 1, 2026. "
+            "Second ships April 15, 2026. We'll send tracking as soon as it ships."
+        )
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 15, 2026",
+            },
+            "draft_reply": {"body": body},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_tracking_unavailable(self) -> None:
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 1, 2026",
+                "ship_days_from_inquiry_human": "15 days",
+                "delivery_window_human": "April 5–April 9, 2026",
+                "days_from_inquiry_human": "19–23 days",
+            },
+            "draft_reply": {
+                "body": (
+                    "Your pre-order ships April 1, 2026. "
+                    "It ships in 15 days. Delivery window April 5–April 9, 2026. "
+                    "Arrives in 19–23 days. We'll send tracking as soon as it ships."
+                )
+            },
+            "order_summary": {"tracking_number": None},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_has_ship_in_days"])
+        self.assertTrue(result["draft_reply_has_arrives_in_days"])
+
+    def test_extract_preorder_proof_signals_missing_ship_date(self) -> None:
+        parameters = {
+            "delivery_estimate": {"preorder": True},
+            "draft_reply": {
+                "body": "Your pre-order ships soon. We'll send tracking as soon as it ships."
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_no_eta_fallback(self) -> None:
+        parameters = {
+            "delivery_estimate": None,
+            "draft_reply": {"body": "Your pre-order ships soon."},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertFalse(result["draft_reply_has_delivery_window"])
+        self.assertFalse(result["draft_reply_has_ship_in_days"])
+        self.assertFalse(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_eta_fallback_with_estimate(self) -> None:
+        parameters = {
+            "delivery_estimate": {"preorder": True},
+            "draft_reply": {
+                "body": "Delivery window April 10–April 16, 2026.",
+                "eta_human": "April 10–April 16, 2026",
+            },
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_delivery_window"])
+
+    def test_extract_preorder_proof_signals_non_dict_parameters(self) -> None:
+        result = shadow_eval._extract_preorder_proof_signals("not-a-dict")
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_preorder_word"])
+        self.assertIsNone(result["draft_reply_body_fingerprint"])
+
+    def test_extract_preorder_proof_signals_bad_body_text(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 1, 2026",
+            },
+            "draft_reply": {"body": _BadStr()},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertIsNone(result["draft_reply_body_fingerprint"])
+
     def test_extract_match_method_none(self) -> None:
         result = {
             "order_matched": False,
@@ -975,9 +1149,15 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         self.assertEqual(summary["match_failure_buckets"]["api_error"], 2)
 
     def test_build_shopify_client(self) -> None:
-        client = shadow_eval._build_shopify_client(
-            allow_network=False, shop_domain="example.myshopify.com"
-        )
+        env = {
+            "MW_ENV": "dev",
+            "RICHPANEL_ENV": "dev",
+            "ENVIRONMENT": "dev",
+        }
+        with mock.patch.dict(os.environ, _with_openai_env(env), clear=True):
+            client = shadow_eval._build_shopify_client(
+                allow_network=False, shop_domain="example.myshopify.com"
+            )
         self.assertEqual(client.shop_domain, "example.myshopify.com")
 
     def test_is_prod_target_detects_env(self) -> None:
@@ -1106,6 +1286,58 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         convo = {"messages": ["not-a-dict", {"sender_type": "agent", "body": "ignore"}]}
         message = shadow_eval._extract_latest_customer_message({}, convo)
         self.assertEqual(message, "")
+
+        ticket = {
+            "subject": "Order number 123",
+            "comments": [
+                {"plain_body": "Customer body text", "via": {"isOperator": False}}
+            ],
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Order number 123\n\nCustomer body text")
+
+        ticket = {
+            "subject": "Order #12345",
+            "customer_message": "Order #12345",
+            "comments": [
+                {"plain_body": "Longer customer body", "via": {"isOperator": False}}
+            ],
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Order #12345\n\nLonger customer body")
+
+        ticket = {"ticket": {"subject": "Nested subject"}}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Nested subject")
+
+        ticket = {"subject": "Subject only"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Subject only")
+
+        ticket = {"subject": "Same", "customer_message": "Same"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Same")
+
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        ticket = {"subject": _BadStr(), "customer_message": "Body text"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Body text")
+
+        ticket = {"subject": "Subject line"}
+        convo = {
+            "comments": [
+                {"plain_body": "Convo body text", "via": {"isOperator": False}}
+            ]
+        }
+        message = shadow_eval._extract_latest_customer_message(ticket, convo)
+        self.assertEqual(message, "Subject line\n\nConvo body text")
+
+        convo = {"subject": "Convo subject", "customer_message": "Convo body"}
+        message = shadow_eval._extract_latest_customer_message({}, convo)
+        self.assertEqual(message, "Convo subject\n\nConvo body")
 
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
@@ -2426,6 +2658,7 @@ class LiveReadonlyShadowEvalOpenAITests(unittest.TestCase):
             # Shopify fields are populated from the lookup summary
             self.assertIn("shopify_tracking_number", payload["tickets"][0])
             self.assertIn("order_resolution", payload["tickets"][0])
+            self.assertNotIn("preorder_proof", payload["tickets"][0])
 
     def test_main_runs_with_stubbed_client(self) -> None:
         env = {

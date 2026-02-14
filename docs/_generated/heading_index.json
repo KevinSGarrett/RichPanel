@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-13 - run_20260213_1603z (b80: preorder proof signals + prod read-only artifacts)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-13-run202602131603z-b80-preorder-proof-signals-prod-read-only-artifacts"
+    }
+  ],
   "2026-02-12 - run_20260213_0438z (b79: preorder eta tag-based + 45-day ship rule)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
@@ -13871,6 +13877,12 @@
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
       "anchor": "validate-shopify-token-read-only"
+    }
+  ],
+  "preorder proof (tag +45)": [
+    {
+      "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
+      "anchor": "preorder-proof-tag-45"
     }
   ],
   "daily live read-only shadow eval (ci)": [

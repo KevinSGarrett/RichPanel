@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-13 - RUN_20260213_1603Z (B80: preorder proof signals + prod read-only artifacts)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260213_1603Z
+- Added PII-safe preorder proof signals to live read-only shadow eval and unit tests.
+- Added runbook guidance for preorder tag +45 rule and read-only proof command.
+
 ### 2026-02-12 - RUN_20260213_0438Z (B79: preorder ETA tag-based + 45-day ship rule)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260213_0438Z
 - Replaced preorder detection to use Shopify order tags; ship date now order_date + 45 calendar days.

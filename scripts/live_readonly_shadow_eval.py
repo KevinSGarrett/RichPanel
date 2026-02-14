@@ -1716,18 +1716,62 @@ def _fetch_conversation(
 def _extract_latest_customer_message(
     ticket: Dict[str, Any], convo: Dict[str, Any]
 ) -> str:
+    """Assemble customer message text for shadow intent classification.
+
+    Note: this concatenates subject + body when both exist to maximize
+    intent signal in shadow eval. Production routing may prioritize the
+    subject alone, so shadow results can differ; this is for analysis only.
+    """
+    def _extract_subject(payload: Dict[str, Any]) -> str:
+        if not isinstance(payload, dict):
+            return ""
+        for key in ("subject", "title"):
+            value = payload.get(key)
+            if value is None:
+                continue
+            try:
+                text = str(value).strip()
+            except Exception:
+                continue
+            if text:
+                return text
+        ticket_obj = payload.get("ticket")
+        if isinstance(ticket_obj, dict):
+            for key in ("subject", "title"):
+                value = ticket_obj.get(key)
+                if value is None:
+                    continue
+                try:
+                    text = str(value).strip()
+                except Exception:
+                    continue
+                if text:
+                    return text
+        return ""
+
+    def _combine_subject_and_body(subject: str, body: str) -> str:
+        if subject and body and subject != body:
+            return f"{subject}\n\n{body}"
+        return body or subject
+
+    subject = _extract_subject(ticket) or _extract_subject(convo)
+
+    comment_text = _extract_comment_message(ticket, extractor=extract_customer_message)
+    if not comment_text:
+        comment_text = _extract_comment_message(convo, extractor=extract_customer_message)
+
     text = extract_customer_message(ticket, default="")
     if text:
-        return text
-    text = _extract_comment_message(ticket, extractor=extract_customer_message)
-    if text:
-        return text
+        if subject and text == subject and comment_text:
+            return _combine_subject_and_body(subject, comment_text)
+        return _combine_subject_and_body(subject, text)
+    if comment_text:
+        return _combine_subject_and_body(subject, comment_text)
     text = extract_customer_message(convo, default="")
     if text:
-        return text
-    text = _extract_comment_message(convo, extractor=extract_customer_message)
-    if text:
-        return text
+        if subject and text == subject and comment_text:
+            return _combine_subject_and_body(subject, comment_text)
+        return _combine_subject_and_body(subject, text)
     messages = convo.get("messages") or convo.get("conversation_messages") or []
     if isinstance(messages, list):
         for message in reversed(messages):
@@ -1740,8 +1784,8 @@ def _extract_latest_customer_message(
                 continue
             candidate = extract_customer_message(message, default="")
             if candidate:
-                return candidate
-    return ""
+                return _combine_subject_and_body(subject, candidate)
+    return _combine_subject_and_body(subject, "")
 
 
 def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dict[str, Any]:
@@ -1768,6 +1812,65 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
         if order_number:
             merged["order_number"] = order_number
     return merged
+
+
+def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any]:
+    delivery_estimate = (
+        parameters.get("delivery_estimate") if isinstance(parameters, dict) else None
+    )
+    draft_reply = (
+        parameters.get("draft_reply") if isinstance(parameters, dict) else None
+    )
+    order_summary = (
+        parameters.get("order_summary") if isinstance(parameters, dict) else None
+    )
+    del order_summary  # Not used for proof signals yet; reserved for future use.
+
+    ship_date_human = None
+    ship_in_days = None
+    delivery_window_human = None
+    arrives_in_days = None
+    preorder_delivery_estimate = False
+    if isinstance(delivery_estimate, dict):
+        preorder_delivery_estimate = delivery_estimate.get("preorder") is True
+        ship_date_human = delivery_estimate.get("preorder_ship_date_human")
+        ship_in_days = delivery_estimate.get("ship_days_from_inquiry_human")
+        delivery_window_human = delivery_estimate.get("delivery_window_human")
+        arrives_in_days = delivery_estimate.get("days_from_inquiry_human")
+
+    eta_fallback = None
+    body = ""
+    if isinstance(draft_reply, dict):
+        eta_fallback = draft_reply.get("eta_human")
+        body = draft_reply.get("body") or ""
+    if delivery_window_human is None:
+        delivery_window_human = eta_fallback
+
+    body_text = _normalize_optional_text(body)
+    body_lower = body_text.lower()
+    fingerprint = _fingerprint(body_text) if body_text else None
+
+    def _contains(candidate: Optional[str]) -> bool:
+        if not candidate:
+            return False
+        return candidate in body_text
+
+    tracking_line = "We'll send tracking as soon as it ships."
+    return {
+        "preorder_delivery_estimate": preorder_delivery_estimate,
+        "preorder_ship_date_human": ship_date_human,
+        "preorder_ship_in_days": ship_in_days,
+        "preorder_delivery_window_human": delivery_window_human,
+        "preorder_arrives_in_days": arrives_in_days,
+        "draft_reply_present": bool(body_text),
+        "draft_reply_has_preorder_word": "pre-order" in body_lower,
+        "draft_reply_has_ship_date": _contains(ship_date_human),
+        "draft_reply_has_delivery_window": _contains(delivery_window_human),
+        "draft_reply_has_ship_in_days": _contains(ship_in_days),
+        "draft_reply_has_arrives_in_days": _contains(arrives_in_days),
+        "draft_reply_ends_with_tracking_line": body_text.endswith(tracking_line),
+        "draft_reply_body_fingerprint": fingerprint,
+    }
 
 
 def _tracking_present(order_summary: Dict[str, Any]) -> bool:
@@ -2625,6 +2728,10 @@ def main() -> int:
                     if isinstance(parameters, dict)
                     else None
                 )
+                if order_action is not None:
+                    result["preorder_proof"] = _extract_preorder_proof_signals(
+                        parameters if isinstance(parameters, dict) else {}
+                    )
 
                 # Use probe_summary (Shopify data) for tracking detection
                 tracking_found = _tracking_present(effective_summary)

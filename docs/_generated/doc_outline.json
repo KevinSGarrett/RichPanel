@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-13 - RUN_20260213_1603Z (B80: preorder proof signals + prod read-only artifacts)",
+        "anchor": "2026-02-13-run202602131603z-b80-preorder-proof-signals-prod-read-only-artifacts"
+      },
+      {
+        "level": 3,
         "text": "2026-02-12 - RUN_20260213_0438Z (B79: preorder ETA tag-based + 45-day ship rule)",
         "anchor": "2026-02-12-run202602130438z-b79-preorder-eta-tag-based-45-day-ship-rule"
       },
@@ -12451,6 +12456,11 @@
         "level": 3,
         "text": "Validate Shopify token (read-only)",
         "anchor": "validate-shopify-token-read-only"
+      },
+      {
+        "level": 3,
+        "text": "Preorder proof (tag +45)",
+        "anchor": "preorder-proof-tag-45"
       },
       {
         "level": 3,
