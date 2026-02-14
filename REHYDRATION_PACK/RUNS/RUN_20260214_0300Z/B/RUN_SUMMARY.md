@@ -26,7 +26,7 @@ Deploy preorder ETA fix to AWS PROD and capture hard evidence for deploy + read-
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260214_0300Z
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/250
 - CI status at end of run: green
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)
@@ -39,4 +39,4 @@ Deploy preorder ETA fix to AWS PROD and capture hard evidence for deploy + read-
 - Proceeded with deploy only after safe_mode=true and automation_enabled=false were verified.
 
 ## Issues / follow-ups
-- Open PR with required labels/template.
+- Monitor PR checks (validate/tests, codecov/patch, advisory, gate:claude).

@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-02-14
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260214_0300Z
-- **PR:** none
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/250
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -140,7 +140,7 @@ $ python scripts/check_protected_deletes.py --ci
 - None (deploy and preflight completed).
 
 ## Follow-ups (actionable)
-- [ ] Open PR with required labels/template.
+- [ ] Monitor PR checks (validate/tests, codecov/patch, advisory, gate:claude).
 
 ## Rollback / Safety Plan
 - If deploy-prod introduces issues: use rollback procedure in docs/09_Deployment_Operations/Release_and_Rollback.md.
