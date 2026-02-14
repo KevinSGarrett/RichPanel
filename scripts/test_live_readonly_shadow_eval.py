@@ -1251,6 +1251,26 @@ class LiveReadonlyShadowEvalHelpersTests(unittest.TestCase):
         message = shadow_eval._extract_latest_customer_message(ticket, {})
         self.assertEqual(message, "Order #12345\n\nLonger customer body")
 
+        ticket = {"ticket": {"subject": "Nested subject"}}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Nested subject")
+
+        ticket = {"subject": "Subject only"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Subject only")
+
+        ticket = {"subject": "Same", "customer_message": "Same"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Same")
+
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        ticket = {"subject": _BadStr(), "customer_message": "Body text"}
+        message = shadow_eval._extract_latest_customer_message(ticket, {})
+        self.assertEqual(message, "Body text")
+
     def test_require_env_flag_missing_raises(self) -> None:
         with mock.patch.dict(os.environ, _with_openai_env({}), clear=True):
             with self.assertRaises(SystemExit) as ctx:
