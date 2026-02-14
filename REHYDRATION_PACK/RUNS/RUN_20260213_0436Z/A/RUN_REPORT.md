@@ -13,6 +13,7 @@
 
 ## Objective + stop conditions
 - **Objective:** Backfill run folder for build-mode compliance.
+- **Backfill created:** 2026-02-14 (during RUN_20260214_0300Z).
 - **Stop conditions:** None; informational backfill only.
 
 ## What changed (high-level)
