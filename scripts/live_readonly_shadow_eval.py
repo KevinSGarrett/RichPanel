@@ -1716,6 +1716,12 @@ def _fetch_conversation(
 def _extract_latest_customer_message(
     ticket: Dict[str, Any], convo: Dict[str, Any]
 ) -> str:
+    """Assemble customer message text for shadow intent classification.
+
+    Note: this concatenates subject + body when both exist to maximize
+    intent signal in shadow eval. Production routing may prioritize the
+    subject alone, so shadow results can differ; this is for analysis only.
+    """
     def _extract_subject(payload: Dict[str, Any]) -> str:
         if not isinstance(payload, dict):
             return ""
