@@ -226,6 +226,44 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertFalse(result["draft_reply_has_ship_date"])
         self.assertTrue(result["draft_reply_ends_with_tracking_line"])
 
+    def test_extract_preorder_proof_signals_no_eta_fallback(self) -> None:
+        parameters = {
+            "delivery_estimate": None,
+            "draft_reply": {"body": "Your pre-order ships soon."},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_present"])
+        self.assertTrue(result["draft_reply_has_preorder_word"])
+        self.assertFalse(result["draft_reply_has_delivery_window"])
+        self.assertFalse(result["draft_reply_has_ship_in_days"])
+        self.assertFalse(result["draft_reply_ends_with_tracking_line"])
+
+    def test_extract_preorder_proof_signals_non_dict_parameters(self) -> None:
+        result = shadow_eval._extract_preorder_proof_signals("not-a-dict")
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_preorder_word"])
+        self.assertIsNone(result["draft_reply_body_fingerprint"])
+
+    def test_extract_preorder_proof_signals_bad_body_text(self) -> None:
+        class _BadStr:
+            def __str__(self) -> str:
+                raise ValueError("boom")
+
+        parameters = {
+            "delivery_estimate": {
+                "preorder": True,
+                "preorder_ship_date_human": "April 1, 2026",
+            },
+            "draft_reply": {"body": _BadStr()},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertIsNone(result["draft_reply_body_fingerprint"])
+
     def test_extract_match_method_none(self) -> None:
         result = {
             "order_matched": False,
