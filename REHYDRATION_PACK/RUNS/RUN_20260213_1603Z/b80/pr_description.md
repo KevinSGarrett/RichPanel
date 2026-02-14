@@ -64,9 +64,9 @@
 - `python scripts/live_readonly_shadow_eval.py --env prod --region us-east-2 --expect-account-id 878145708918 --allow-deterministic-only --shopify-probe --request-trace --allow-ticket-fetch-failures --ticket-id <redacted> ... --out REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/shadow_eval_prod_report.json --summary-md-out REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/shadow_eval_prod_summary.md`
 
 ### 7) Results & evidence
-**CI:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/249/checks`  
-**Codecov:** pending — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/249`  
-**Bugbot:** pending — `https://github.com/KevinSGarrett/RichPanel/pull/249` (@cursor review triggered)
+**CI:** PASS — `https://github.com/KevinSGarrett/RichPanel/pull/249/checks`  
+**Codecov:** PASS — `https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/249`  
+**Bugbot:** PASS — `https://github.com/KevinSGarrett/RichPanel/pull/249` (@cursor review triggered)
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260213_1603Z/b80/preflight_prod.json`
