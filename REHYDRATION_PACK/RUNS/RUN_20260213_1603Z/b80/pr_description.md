@@ -22,6 +22,7 @@
 - No customer contact; outbound disabled (no sends/notes/closes/writes).
 - No draft reply body stored; only fingerprints + signal booleans are emitted.
 - Scripts/tests/docs only; no runtime behavior change.
+- Shadow eval intent input concatenates subject + body for analysis; production may differ, so proof runs can diverge from live routing.
 
 **Non-goals (explicitly not changed):**
 - Production automation logic.
