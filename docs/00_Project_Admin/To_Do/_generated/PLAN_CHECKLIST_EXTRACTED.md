@@ -914,59 +914,59 @@ Counts: total=671, checked=115, unchecked=556
 
 ### Enable outbound writes for 30 minutes (max 55 minutes) > Checklist: Production shadow mode validation (complete workflow)
 - [ ] PLN-1147C85A0D — Monitor for 15-30 minutes (watch for unexpected writes or errors)  
-  - Source line: 1080
+  - Source line: 1091
 - [ ] PLN-2259FA7192 — Test hard-fail behavior (trigger write operation, confirm it fails)  
-  - Source line: 1079
+  - Source line: 1090
 - [ ] PLN-243AC63DE2 — Obtain PM/lead approval for production shadow mode (record in Progress Log)  
-  - Source line: 1074
-- [ ] PLN-323A3F9587 — Store evidence in `qa/test_evidence/shadow_mode_validation/<RUN_ID>/`  
-  - Source line: 1086
-- [ ] PLN-3B68BA8EF8 — Verify flags are set (AWS CLI or Console)  
-  - Source line: 1077
-- [ ] PLN-46B9C7CAF5 — Run "Prove zero writes" audit (CloudWatch Logs queries)  
-  - Source line: 1078
-- [ ] PLN-7852FB054F — Run validation use case (data structures, routing accuracy, order lookup)  
-  - Source line: 1082
-- [ ] PLN-89205A9EA6 — Disable shadow mode (revert flags)  
-  - Source line: 1083
-- [ ] PLN-AF527C2E52 — Document incident response plan (who can disable flags, escalation path)  
-  - Source line: 1075
-- [ ] PLN-E66DE5BD9A — Enable shadow mode flags (see "How to enable shadow mode")  
-  - Source line: 1076
-- [ ] PLN-EA05D137F0 — Capture evidence (logs, metrics, sample payloads)  
-  - Source line: 1081
-- [ ] PLN-EADC70FE80 — Verify flags were reverted (AWS CLI or Console)  
-  - Source line: 1084
-- [ ] PLN-F2A01E4EC8 — Document findings in Progress Log and relevant spec docs  
   - Source line: 1085
+- [ ] PLN-323A3F9587 — Store evidence in `qa/test_evidence/shadow_mode_validation/<RUN_ID>/`  
+  - Source line: 1097
+- [ ] PLN-3B68BA8EF8 — Verify flags are set (AWS CLI or Console)  
+  - Source line: 1088
+- [ ] PLN-46B9C7CAF5 — Run "Prove zero writes" audit (CloudWatch Logs queries)  
+  - Source line: 1089
+- [ ] PLN-7852FB054F — Run validation use case (data structures, routing accuracy, order lookup)  
+  - Source line: 1093
+- [ ] PLN-89205A9EA6 — Disable shadow mode (revert flags)  
+  - Source line: 1094
+- [ ] PLN-AF527C2E52 — Document incident response plan (who can disable flags, escalation path)  
+  - Source line: 1086
+- [ ] PLN-E66DE5BD9A — Enable shadow mode flags (see "How to enable shadow mode")  
+  - Source line: 1087
+- [ ] PLN-EA05D137F0 — Capture evidence (logs, metrics, sample payloads)  
+  - Source line: 1092
+- [ ] PLN-EADC70FE80 — Verify flags were reverted (AWS CLI or Console)  
+  - Source line: 1095
+- [ ] PLN-F2A01E4EC8 — Document findings in Progress Log and relevant spec docs  
+  - Source line: 1096
 
 ### Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > After disabling
 - [ ] PLN-125D20CDA4 — Updated documentation (if data structures differ from expectations)  
-  - Source line: 1043
+  - Source line: 1054
 - [ ] PLN-38FE5A5D67 — Summary of findings (data structures validated, accuracy measured, etc.)  
-  - Source line: 1042
+  - Source line: 1053
 - [ ] PLN-C88CC3523F — Progress Log entry with start/end timestamps  
-  - Source line: 1044
+  - Source line: 1055
 - [ ] PLN-E506DDC149 — Confirmation that flags were reverted  
-  - Source line: 1041
+  - Source line: 1052
 
 ### Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > Before enabling
 - [ ] PLN-3DBC800731 — PM/lead approval timestamp (for production)  
-  - Source line: 1030
+  - Source line: 1041
 - [ ] PLN-3E16A1516D — Current Lambda environment variables (screenshot or CLI output)  
-  - Source line: 1031
+  - Source line: 1042
 - [ ] PLN-F8480F18F8 — Incident response plan documented (who can disable flags)  
-  - Source line: 1032
+  - Source line: 1043
 
 ### Enable outbound writes for 30 minutes (max 55 minutes) > Evidence requirements > During shadow mode
 - [ ] PLN-0A6AC21700 — Any errors or warnings logged  
-  - Source line: 1038
+  - Source line: 1049
 - [ ] PLN-88A9A1B871 — Sample routing/classification logs (redacted)  
-  - Source line: 1037
+  - Source line: 1048
 - [ ] PLN-AF29C638EC — CloudWatch Logs query results (prove zero writes)  
-  - Source line: 1035
+  - Source line: 1046
 - [ ] PLN-D8BF3C3C18 — API usage metrics (Richpanel/Shopify dashboards)  
-  - Source line: 1036
+  - Source line: 1047
 
 ### Production Read-Only Shadow Mode Runbook > Production write-guard flip runbook (authoritative) > Production readiness checklist (must complete)
 - [ ] PLN-1554EE3D8A — prod automation rule triggers the correct webhook  
