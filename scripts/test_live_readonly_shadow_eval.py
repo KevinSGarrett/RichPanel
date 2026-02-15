@@ -245,6 +245,16 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertTrue(result["preorder_tag_match"])
         self.assertIn("pre order", result["preorder_tag_matches"])
 
+    def test_extract_preorder_proof_signals_tag_match_preorder_token(self) -> None:
+        parameters = {
+            "delivery_estimate": {"preorder": True},
+            "order_summary": {"order_tags_raw": "preorder"},
+            "draft_reply": None,
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertTrue(result["preorder_tag_match"])
+        self.assertIn("preorder", result["preorder_tag_matches"])
+
     def test_extract_preorder_proof_signals_multi_ship_dates(self) -> None:
         body = (
             "Items ship in batches. First ships April 1, 2026. "
