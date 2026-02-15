@@ -1829,6 +1829,10 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     ship_in_days = None
     delivery_window_human = None
     arrives_in_days = None
+    window_min_days = None
+    window_max_days = None
+    normalized_method = None
+    raw_method = None
     preorder_delivery_estimate = False
     order_created_date = None
     inquiry_date = None
@@ -1840,6 +1844,10 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         arrives_in_days = delivery_estimate.get("days_from_inquiry_human")
         order_created_date = delivery_estimate.get("order_created_date")
         inquiry_date = delivery_estimate.get("inquiry_date")
+        window_min_days = delivery_estimate.get("window_min_days")
+        window_max_days = delivery_estimate.get("window_max_days")
+        normalized_method = delivery_estimate.get("normalized_method")
+        raw_method = delivery_estimate.get("raw_method")
 
     preorder_tag_matches: list[str] = []
     if isinstance(order_summary, dict):
@@ -1875,12 +1883,18 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         return candidate in body_text
 
     tracking_line = "We'll send tracking as soon as it ships."
+    schedule_phrase = "scheduled to ship on"
+    delivery_phrase = "estimated delivery window is"
     return {
         "preorder_delivery_estimate": preorder_delivery_estimate,
         "preorder_tag_match": bool(preorder_tag_matches),
         "preorder_tag_matches": preorder_tag_matches,
         "order_created_date": order_created_date,
         "inquiry_date": inquiry_date,
+        "preorder_window_min_days": window_min_days,
+        "preorder_window_max_days": window_max_days,
+        "preorder_normalized_method": normalized_method,
+        "preorder_raw_method": raw_method,
         "preorder_ship_date_human": ship_date_human,
         "preorder_ship_in_days": ship_in_days,
         "preorder_delivery_window_human": delivery_window_human,
@@ -1888,7 +1902,13 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         "draft_reply_present": bool(body_text),
         "draft_reply_has_preorder_word": "pre-order" in body_lower,
         "draft_reply_has_ship_date": _contains(ship_date_human),
+        "draft_reply_has_ship_schedule_phrase": (
+            schedule_phrase in body_lower and _contains(ship_date_human)
+        ),
         "draft_reply_has_delivery_window": _contains(delivery_window_human),
+        "draft_reply_has_estimated_delivery_phrase": (
+            delivery_phrase in body_lower and _contains(delivery_window_human)
+        ),
         "draft_reply_has_ship_in_days": _contains(ship_in_days),
         "draft_reply_has_arrives_in_days": _contains(arrives_in_days),
         "draft_reply_ends_with_tracking_line": body_text.endswith(tracking_line),

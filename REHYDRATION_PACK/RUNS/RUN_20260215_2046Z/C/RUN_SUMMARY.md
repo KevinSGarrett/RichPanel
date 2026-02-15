@@ -10,7 +10,7 @@ Produce read-only PROD proof for preorder ETA (+45) logic on real tickets and dr
 ## Work completed (bullets)
 - Verified PROD kill switches remain `safe_mode=true` and `automation_enabled=false`.
 - Ran PROD preflight check and read-only shadow eval with proof signals.
-- Added preorder proof fields (order_created_date + tag matches) to shadow eval report.
+- Added preorder proof fields (order_created_date, tag matches, phrases, window min/max) to shadow eval report.
 - Generated audit artifacts and go-live checklist; updated summary and progress log.
 
 ## Files changed

@@ -149,7 +149,7 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
-            "Your pre-order ships Sunday, March 29, 2026. "
+            "Your pre-order is scheduled to ship on Sunday, March 29, 2026. "
             "It ships in 15 days. Delivery window April 1–April 7, 2026. "
             "Arrives in 18–24 days. We'll send tracking as soon as it ships."
         )
@@ -162,6 +162,10 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
                 "ship_days_from_inquiry_human": "15 days",
                 "delivery_window_human": "April 1–April 7, 2026",
                 "days_from_inquiry_human": "18–24 days",
+                "window_min_days": 3,
+                "window_max_days": 7,
+                "normalized_method": "standard",
+                "raw_method": "Standard",
             },
             "order_summary": {"order_tags_raw": "vip, pre-order, springsale"},
             "draft_reply": {"body": body},
@@ -172,9 +176,14 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertEqual(result["inquiry_date"], "2026-02-20")
         self.assertTrue(result["preorder_tag_match"])
         self.assertIn("pre-order", result["preorder_tag_matches"])
+        self.assertEqual(result["preorder_window_min_days"], 3)
+        self.assertEqual(result["preorder_window_max_days"], 7)
+        self.assertEqual(result["preorder_normalized_method"], "standard")
+        self.assertEqual(result["preorder_raw_method"], "Standard")
         self.assertTrue(result["draft_reply_present"])
         self.assertTrue(result["draft_reply_has_preorder_word"])
         self.assertTrue(result["draft_reply_has_ship_date"])
+        self.assertTrue(result["draft_reply_has_ship_schedule_phrase"])
         self.assertTrue(result["draft_reply_has_delivery_window"])
         self.assertTrue(result["draft_reply_has_ship_in_days"])
         self.assertTrue(result["draft_reply_has_arrives_in_days"])
@@ -194,10 +203,16 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertFalse(result["preorder_delivery_estimate"])
         self.assertFalse(result["preorder_tag_match"])
         self.assertEqual(result["preorder_tag_matches"], [])
+        self.assertIsNone(result["preorder_window_min_days"])
+        self.assertIsNone(result["preorder_window_max_days"])
+        self.assertIsNone(result["preorder_normalized_method"])
+        self.assertIsNone(result["preorder_raw_method"])
         self.assertFalse(result["draft_reply_present"])
         self.assertFalse(result["draft_reply_has_preorder_word"])
         self.assertFalse(result["draft_reply_has_ship_date"])
+        self.assertFalse(result["draft_reply_has_ship_schedule_phrase"])
         self.assertFalse(result["draft_reply_has_delivery_window"])
+        self.assertFalse(result["draft_reply_has_estimated_delivery_phrase"])
         self.assertFalse(result["draft_reply_has_ship_in_days"])
         self.assertFalse(result["draft_reply_has_arrives_in_days"])
         self.assertFalse(result["draft_reply_ends_with_tracking_line"])
@@ -220,6 +235,7 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertTrue(result["draft_reply_present"])
         self.assertTrue(result["draft_reply_has_preorder_word"])
         self.assertTrue(result["draft_reply_has_delivery_window"])
+        self.assertTrue(result["draft_reply_has_estimated_delivery_phrase"])
         self.assertTrue(result["draft_reply_ends_with_tracking_line"])
 
     def test_extract_preorder_proof_signals_tag_match_from_list(self) -> None:

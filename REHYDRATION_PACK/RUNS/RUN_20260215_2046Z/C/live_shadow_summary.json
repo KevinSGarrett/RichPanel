@@ -1,6 +1,6 @@
 {
-  "run_id": "RUN_20260215_2100Z",
-  "generated_at": "2026-02-15T21:02:24.488311+00:00",
+  "run_id": "RUN_20260215_2147Z",
+  "generated_at": "2026-02-15T21:49:23.518667+00:00",
   "sample_size_requested": 11,
   "ticket_count": 11,
   "tickets_evaluated": 11,
@@ -45,12 +45,12 @@
   "richpanel_fetch_failures": {},
   "shopify_fetch_failures": {},
   "timing": {
-    "run_duration_seconds": 111.594,
-    "ticket_avg_seconds": 9.521,
-    "ticket_p50_seconds": 9.312,
-    "ticket_p95_seconds": 13.391,
-    "ticket_min_seconds": 7.578,
-    "ticket_max_seconds": 13.391
+    "run_duration_seconds": 107.515,
+    "ticket_avg_seconds": 9.166,
+    "ticket_p50_seconds": 8.484,
+    "ticket_p95_seconds": 13.578,
+    "ticket_min_seconds": 7.828,
+    "ticket_max_seconds": 13.578
   },
   "schema_drift": {
     "threshold": 0.2,
@@ -77,23 +77,7 @@
       "ignored_total_unique": 33,
       "filtered_top_paths": [
         {
-          "path": "tags",
-          "count": 11
-        },
-        {
-          "path": "comments[]",
-          "count": 11
-        },
-        {
-          "path": "status",
-          "count": 11
-        },
-        {
-          "path": "via.channel",
-          "count": 11
-        },
-        {
-          "path": "first_response_duration",
+          "path": "recipient",
           "count": 11
         },
         {
@@ -101,39 +85,11 @@
           "count": 11
         },
         {
-          "path": "conversation_no",
-          "count": 11
-        },
-        {
-          "path": "via",
-          "count": 11
-        },
-        {
           "path": "priority",
           "count": 11
         },
         {
-          "path": "via.source.from",
-          "count": 11
-        },
-        {
-          "path": "comments",
-          "count": 11
-        },
-        {
-          "path": "customFields",
-          "count": 11
-        },
-        {
-          "path": "satisfaction_rating",
-          "count": 11
-        },
-        {
-          "path": "recipient",
-          "count": 11
-        },
-        {
-          "path": "subject",
+          "path": "comments[]",
           "count": 11
         },
         {
@@ -145,15 +101,59 @@
           "count": 11
         },
         {
+          "path": "via.source.from",
+          "count": 11
+        },
+        {
+          "path": "via",
+          "count": 11
+        },
+        {
+          "path": "satisfaction_rating",
+          "count": 11
+        },
+        {
+          "path": "tags",
+          "count": 11
+        },
+        {
+          "path": "subject",
+          "count": 11
+        },
+        {
+          "path": "via.channel",
+          "count": 11
+        },
+        {
           "path": "scenarioName",
           "count": 11
         },
         {
-          "path": "via.source.from.address",
-          "count": 10
+          "path": "status",
+          "count": 11
+        },
+        {
+          "path": "conversation_no",
+          "count": 11
+        },
+        {
+          "path": "comments",
+          "count": 11
+        },
+        {
+          "path": "customFields",
+          "count": 11
+        },
+        {
+          "path": "first_response_duration",
+          "count": 11
         },
         {
           "path": "via.source.to.address",
+          "count": 10
+        },
+        {
+          "path": "via.source.from.address",
           "count": 10
         },
         {
@@ -165,25 +165,29 @@
           "count": 9
         },
         {
-          "path": "customer_profile.email",
-          "count": 9
-        },
-        {
           "path": "customer_profile.type",
           "count": 9
         },
         {
-          "path": "resolution_duration",
+          "path": "customer_profile.email",
+          "count": 9
+        },
+        {
+          "path": "satisfaction_rating.rating_for",
           "count": 7
         }
       ],
       "ignored_top_paths": [
         {
-          "path": "comments[].author_id",
+          "path": "comments[].id",
           "count": 11
         },
         {
-          "path": "created_at",
+          "path": "comments[].attachments[]",
+          "count": 11
+        },
+        {
+          "path": "comments[].attachments",
           "count": 11
         },
         {
@@ -191,7 +195,15 @@
           "count": 11
         },
         {
-          "path": "updated_at",
+          "path": "comments[].body",
+          "count": 11
+        },
+        {
+          "path": "app_client_id",
+          "count": 11
+        },
+        {
+          "path": "comments[].plain_body",
           "count": 11
         },
         {
@@ -203,62 +215,6 @@
           "count": 11
         },
         {
-          "path": "cookieId",
-          "count": 11
-        },
-        {
-          "path": "id",
-          "count": 11
-        },
-        {
-          "path": "comments[].body",
-          "count": 11
-        },
-        {
-          "path": "organization_id",
-          "count": 11
-        },
-        {
-          "path": "comments[].id",
-          "count": 11
-        },
-        {
-          "path": "scenarioId",
-          "count": 11
-        },
-        {
-          "path": "comments[].type",
-          "count": 11
-        },
-        {
-          "path": "comments[].attachments",
-          "count": 11
-        },
-        {
-          "path": "comments[].plain_body",
-          "count": 11
-        },
-        {
-          "path": "comments[].created_at",
-          "count": 11
-        },
-        {
-          "path": "comments[].metadata",
-          "count": 11
-        },
-        {
-          "path": "app_client_id",
-          "count": 11
-        },
-        {
-          "path": "comments[].attachments[]",
-          "count": 11
-        },
-        {
-          "path": "scenario_id",
-          "count": 11
-        },
-        {
           "path": "first_response_time",
           "count": 11
         },
@@ -267,11 +223,55 @@
           "count": 11
         },
         {
+          "path": "comments[].type",
+          "count": 11
+        },
+        {
+          "path": "comments[].metadata",
+          "count": 11
+        },
+        {
+          "path": "comments[].created_at",
+          "count": 11
+        },
+        {
           "path": "url",
           "count": 11
         },
         {
+          "path": "scenario_id",
+          "count": 11
+        },
+        {
+          "path": "organization_id",
+          "count": 11
+        },
+        {
+          "path": "cookieId",
+          "count": 11
+        },
+        {
+          "path": "scenarioId",
+          "count": 11
+        },
+        {
+          "path": "updated_at",
+          "count": 11
+        },
+        {
+          "path": "id",
+          "count": 11
+        },
+        {
+          "path": "comments[].author_id",
+          "count": 11
+        },
+        {
           "path": "comments[].html_body",
+          "count": 11
+        },
+        {
+          "path": "created_at",
           "count": 11
         },
         {
@@ -285,47 +285,7 @@
       "ignored_total_unique": 4,
       "filtered_top_paths": [
         {
-          "path": "order_tags[]",
-          "count": 11
-        },
-        {
-          "path": "status",
-          "count": 11
-        },
-        {
-          "path": "tracking_number",
-          "count": 11
-        },
-        {
-          "path": "shipping_method_name",
-          "count": 11
-        },
-        {
-          "path": "order_resolution.resolvedBy",
-          "count": 11
-        },
-        {
           "path": "shipping_method",
-          "count": 11
-        },
-        {
-          "path": "items_count",
-          "count": 11
-        },
-        {
-          "path": "order_number",
-          "count": 11
-        },
-        {
-          "path": "line_item_product_ids",
-          "count": 11
-        },
-        {
-          "path": "order_tags",
-          "count": 11
-        },
-        {
-          "path": "order_resolution.reason",
           "count": 11
         },
         {
@@ -333,7 +293,23 @@
           "count": 11
         },
         {
-          "path": "order_resolution.confidence",
+          "path": "carrier",
+          "count": 11
+        },
+        {
+          "path": "items_count",
+          "count": 11
+        },
+        {
+          "path": "tracking_number",
+          "count": 11
+        },
+        {
+          "path": "order_tags",
+          "count": 11
+        },
+        {
+          "path": "order_tags[]",
           "count": 11
         },
         {
@@ -341,15 +317,39 @@
           "count": 11
         },
         {
-          "path": "carrier",
-          "count": 11
-        },
-        {
           "path": "line_item_product_ids[]",
           "count": 11
         },
         {
+          "path": "order_resolution.resolvedBy",
+          "count": 11
+        },
+        {
           "path": "order_tags_raw",
+          "count": 11
+        },
+        {
+          "path": "order_resolution.confidence",
+          "count": 11
+        },
+        {
+          "path": "order_resolution.reason",
+          "count": 11
+        },
+        {
+          "path": "order_number",
+          "count": 11
+        },
+        {
+          "path": "shipping_method_name",
+          "count": 11
+        },
+        {
+          "path": "line_item_product_ids",
+          "count": 11
+        },
+        {
+          "path": "status",
           "count": 11
         },
         {
@@ -359,7 +359,7 @@
       ],
       "ignored_top_paths": [
         {
-          "path": "created_at",
+          "path": "id",
           "count": 11
         },
         {
@@ -367,11 +367,11 @@
           "count": 11
         },
         {
-          "path": "id",
+          "path": "updated_at",
           "count": 11
         },
         {
-          "path": "updated_at",
+          "path": "created_at",
           "count": 11
         }
       ]

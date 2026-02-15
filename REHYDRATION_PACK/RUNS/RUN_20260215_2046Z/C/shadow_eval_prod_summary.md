@@ -1,7 +1,7 @@
 # Live Read-Only Shadow Eval Report
 
-- Run ID: `RUN_20260215_2100Z`
-- Generated (UTC): 2026-02-15T21:02:24.488311+00:00
+- Run ID: `RUN_20260215_2147Z`
+- Generated (UTC): 2026-02-15T21:49:23.518667+00:00
 - Environment: `prod`
 - Region: `us-east-2`
 - Stack name: `n/a`
@@ -97,11 +97,11 @@
 - Non-preorder tickets: 8 (no preorder wording detected)
 
 ### Preorder tickets (+45 ship date, tag evidence, reply signals)
-| ticket_id_redacted | preorder_tag_matches | order_created_date | preorder_ship_date_human | ship_date_plus_45 | delivery_window_human | ship_in_days | arrives_in_days | reply_has_preorder | reply_has_ship_date | reply_has_ship_in_days | reply_has_delivery_window | reply_has_arrives_in_days | ends_with_tracking |
-| - | - | - | - | - | - | - | - | - | - | - | - | - | - |
-| redacted:cb6d57d9b987 | pre-order | 2026-01-18 | Wednesday, March 4, 2026 | PASS | n/a | 21 days | n/a | True | True | True | False | False | True |
-| redacted:ef6eeba126f7 | pre-order | 2026-01-17 | Tuesday, March 3, 2026 | PASS | March 6–March 12, 2026 | 18 days | 21–27 days | True | True | True | True | True | True |
-| redacted:dbb9295f3e6c | pre-order | 2026-01-07 | Saturday, February 21, 2026 | PASS | February 25–March 3, 2026 | 8 days | 12–18 days | True | True | True | True | True | True |
+| ticket_id_redacted | preorder_tag_matches | order_created_date | preorder_ship_date_human | ship_date_plus_45 | window_min_days | window_max_days | window_calc_iso | window_matches_business_days | delivery_window_human | ship_in_days | arrives_in_days | reply_has_preorder | reply_has_ship_date | reply_has_ship_schedule_phrase | reply_has_ship_in_days | reply_has_delivery_window | reply_has_estimated_delivery_phrase | reply_has_arrives_in_days | ends_with_tracking |
+| - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| redacted:cb6d57d9b987 | pre-order | 2026-01-18 | Wednesday, March 4, 2026 | PASS | n/a | n/a | n/a | None | n/a | 21 days | n/a | True | True | True | True | False | False | False | True |
+| redacted:ef6eeba126f7 | pre-order | 2026-01-17 | Tuesday, March 3, 2026 | PASS | 3 | 7 | 2026-03-06 to 2026-03-12 | True | March 6–March 12, 2026 | 18 days | 21–27 days | True | True | True | True | True | True | True | True |
+| redacted:dbb9295f3e6c | pre-order | 2026-01-07 | Saturday, February 21, 2026 | PASS | 3 | 7 | 2026-02-25 to 2026-03-03 | True | February 25–March 3, 2026 | 8 days | 12–18 days | True | True | True | True | True | True | True | True |
 
 ### Non-preorder tickets (verified no preorder wording)
 redacted:cd92c15d6341, redacted:a372973056e6, redacted:0074fb03dde8, redacted:fd6e103a5093, redacted:924e4905c954, redacted:f427ba602116, redacted:174deb98a48f, redacted:48bc2f8f66b1
