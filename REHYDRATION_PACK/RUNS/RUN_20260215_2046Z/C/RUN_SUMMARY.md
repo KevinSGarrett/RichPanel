@@ -21,12 +21,12 @@ Produce read-only PROD proof for preorder ETA (+45) logic on real tickets and dr
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260215_2046Z
 - PR: pending
-- CI status at end of run: pending
+- CI status at end of run: green
 - Main updated: yes (pulled before branching)
 - Branch cleanup done: no (Integrator only)
 
 ## Tests and evidence
-- Tests run: PROD preflight, PROD read-only shadow eval, CI checks (pending)
+- Tests run: PROD preflight, PROD read-only shadow eval, CI checks
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/`
 
 ## Decisions made

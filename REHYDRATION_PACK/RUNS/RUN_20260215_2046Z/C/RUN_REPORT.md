@@ -22,7 +22,44 @@
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-<PASTE_DIFFSTAT>
+.../RUNS/RUN_20260215_2046Z/A/DOCS_IMPACT_MAP.md   |   23 +
+.../RUNS/RUN_20260215_2046Z/A/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260215_2046Z/A/GIT_RUN_PLAN.md      |   58 +
+.../RUNS/RUN_20260215_2046Z/A/RUN_REPORT.md        |   63 +
+.../RUNS/RUN_20260215_2046Z/A/RUN_SUMMARY.md       |   33 +
+.../RUNS/RUN_20260215_2046Z/A/STRUCTURE_REPORT.md  |   27 +
+.../RUNS/RUN_20260215_2046Z/A/TEST_MATRIX.md       |   15 +
+.../RUNS/RUN_20260215_2046Z/B/DOCS_IMPACT_MAP.md   |   23 +
+.../RUNS/RUN_20260215_2046Z/B/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260215_2046Z/B/GIT_RUN_PLAN.md      |   58 +
+.../RUNS/RUN_20260215_2046Z/B/RUN_REPORT.md        |   63 +
+.../RUNS/RUN_20260215_2046Z/B/RUN_SUMMARY.md       |   33 +
+.../RUNS/RUN_20260215_2046Z/B/STRUCTURE_REPORT.md  |   27 +
+.../RUNS/RUN_20260215_2046Z/B/TEST_MATRIX.md       |   15 +
+.../RUN_20260215_2046Z/C/AGENT_PROMPTS_ARCHIVE.md  |  156 +++
+.../RUNS/RUN_20260215_2046Z/C/DOCS_IMPACT_MAP.md   |   27 +
+.../RUNS/RUN_20260215_2046Z/C/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260215_2046Z/C/GIT_RUN_PLAN.md      |   60 +
+.../RUNS/RUN_20260215_2046Z/C/GO_LIVE_CHECKLIST.md |   36 +
+.../RUNS/RUN_20260215_2046Z/C/RUN_REPORT.md        |   78 ++
+.../RUNS/RUN_20260215_2046Z/C/RUN_SUMMARY.md       |   36 +
+.../RUNS/RUN_20260215_2046Z/C/STRUCTURE_REPORT.md  |   38 +
+.../RUNS/RUN_20260215_2046Z/C/TEST_MATRIX.md       |   16 +
+.../C/live_shadow_http_trace.json                  | 1290 ++++++++++++++++++++
+.../RUN_20260215_2046Z/C/live_shadow_summary.json  |  405 ++++++
+.../RUNS/RUN_20260215_2046Z/C/preflight_prod.json  |   59 +
+.../RUNS/RUN_20260215_2046Z/C/preflight_prod.md    |   28 +
+.../C/prod_runtime_flags_readonly.json             |   23 +
+.../C/shadow_eval_prod_report.json                 |  976 +++++++++++++++
+.../C/shadow_eval_prod_summary.md                  |  108 ++
+.../RUNS/RUN_20260215_2046Z/RUN_META.md            |   11 +
+docs/00_Project_Admin/Progress_Log.md              |    8 +
+docs/_generated/doc_outline.json                   |    5 +
+docs/_generated/doc_registry.compact.json          |    2 +-
+docs/_generated/doc_registry.json                  |    4 +-
+docs/_generated/heading_index.json                 |    6 +
+scripts/live_readonly_shadow_eval.py               |   25 +-
+37 files changed, 3894 insertions(+), 4 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -53,12 +90,15 @@ Include test commands + results + links to evidence.
 - `python scripts/live_readonly_shadow_eval.py --env prod --allow-deterministic-only --shopify-probe --request-trace` - pass - evidence:
   - `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_report.json`
   - `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_summary.md`
-- `python scripts/run_ci_checks.py --ci` - pending
+- `python scripts/run_ci_checks.py --ci` - pass
+- `python scripts/run_ci_checks.py --ci` - pass
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
 
-<PASTE_OUTPUT_SNIPPET>
+$ python scripts/check_protected_deletes.py --ci
+
+[OK] CI-equivalent checks passed.
 
 ## Docs impact (summary)
 - **Docs updated:** `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_summary.md`, `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/GO_LIVE_CHECKLIST.md`
@@ -72,7 +112,6 @@ Paste output snippet proving you ran:
 - None
 
 ## Follow-ups (actionable)
-- [ ] Run CI checks and update report with output snippet
 - [ ] Open PR and capture link
 
 <!-- End of template -->
