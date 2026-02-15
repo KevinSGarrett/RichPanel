@@ -12,6 +12,14 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-15 - RUN_20260215_2046Z (B82: PROD preorder proof + go-live checklist)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260215_2046Z
+- Tickets evaluated: 116700, 116759, 116762, 116770, 116805, 116837, 116888, 119207, 119201, 119202, 115699
+- Evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_report.json`
+- Summary: `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_summary.md`
+- Checklist: `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/GO_LIVE_CHECKLIST.md`
+- No customer contact; safe_mode/automation_enabled unchanged in PROD.
+
 ### 2026-02-14 - RUN_20260214_0300Z (B81: PROD deploy evidence for preorder ETA)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260214_0300Z
 - Deploy-prod workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/22010351142

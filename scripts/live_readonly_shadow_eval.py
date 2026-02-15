@@ -1824,19 +1824,38 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     order_summary = (
         parameters.get("order_summary") if isinstance(parameters, dict) else None
     )
-    del order_summary  # Not used for proof signals yet; reserved for future use.
 
     ship_date_human = None
     ship_in_days = None
     delivery_window_human = None
     arrives_in_days = None
     preorder_delivery_estimate = False
+    order_created_date = None
+    inquiry_date = None
     if isinstance(delivery_estimate, dict):
         preorder_delivery_estimate = delivery_estimate.get("preorder") is True
         ship_date_human = delivery_estimate.get("preorder_ship_date_human")
         ship_in_days = delivery_estimate.get("ship_days_from_inquiry_human")
         delivery_window_human = delivery_estimate.get("delivery_window_human")
         arrives_in_days = delivery_estimate.get("days_from_inquiry_human")
+        order_created_date = delivery_estimate.get("order_created_date")
+        inquiry_date = delivery_estimate.get("inquiry_date")
+
+    preorder_tag_matches: list[str] = []
+    if isinstance(order_summary, dict):
+        order_tags = order_summary.get("order_tags")
+        order_tags_raw = order_summary.get("order_tags_raw")
+        tokens: list[str] = []
+        if isinstance(order_tags, list):
+            tokens = [token for token in order_tags if isinstance(token, str)]
+        elif isinstance(order_tags_raw, str):
+            tokens = [token for token in order_tags_raw.split(",")]
+        if not tokens and isinstance(order_tags_raw, str):
+            tokens = [token for token in order_tags_raw.split(",")]
+        for token in tokens:
+            normalized = " ".join(token.strip().lower().split())
+            if normalized in {"pre-order", "preorder", "pre order"}:
+                preorder_tag_matches.append(normalized)
 
     eta_fallback = None
     body = ""
@@ -1858,6 +1877,10 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     tracking_line = "We'll send tracking as soon as it ships."
     return {
         "preorder_delivery_estimate": preorder_delivery_estimate,
+        "preorder_tag_match": bool(preorder_tag_matches),
+        "preorder_tag_matches": preorder_tag_matches,
+        "order_created_date": order_created_date,
+        "inquiry_date": inquiry_date,
         "preorder_ship_date_human": ship_date_human,
         "preorder_ship_in_days": ship_in_days,
         "preorder_delivery_window_human": delivery_window_human,

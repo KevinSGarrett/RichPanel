@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-15 - run_20260215_2046z (b82: prod preorder proof + go-live checklist)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-15-run202602152046z-b82-prod-preorder-proof-go-live-checklist"
+    }
+  ],
   "2026-02-14 - run_20260214_0300z (b81: prod deploy evidence for preorder eta)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
