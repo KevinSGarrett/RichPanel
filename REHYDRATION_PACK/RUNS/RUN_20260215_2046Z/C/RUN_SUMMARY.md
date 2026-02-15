@@ -15,6 +15,7 @@ Produce read-only PROD proof for preorder ETA (+45) logic on real tickets and dr
 
 ## Files changed
 - `scripts/live_readonly_shadow_eval.py` (preorder proof fields)
+- `scripts/test_live_readonly_shadow_eval.py` (coverage for preorder proof fields)
 - `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/*` (artifacts + checklist + summaries)
 - `docs/00_Project_Admin/Progress_Log.md`
 

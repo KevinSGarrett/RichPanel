@@ -19,6 +19,7 @@
 
 ## Files/folders modified
 - `scripts/live_readonly_shadow_eval.py`
+- `scripts/test_live_readonly_shadow_eval.py`
 - `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/shadow_eval_prod_summary.md`
 - `docs/00_Project_Admin/Progress_Log.md`
 - `docs/_generated/doc_outline.json`

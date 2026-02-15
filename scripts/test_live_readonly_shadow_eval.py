@@ -156,15 +156,22 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         parameters = {
             "delivery_estimate": {
                 "preorder": True,
+                "order_created_date": "2026-02-12",
+                "inquiry_date": "2026-02-20",
                 "preorder_ship_date_human": "Sunday, March 29, 2026",
                 "ship_days_from_inquiry_human": "15 days",
                 "delivery_window_human": "April 1–April 7, 2026",
                 "days_from_inquiry_human": "18–24 days",
             },
+            "order_summary": {"order_tags_raw": "vip, pre-order, springsale"},
             "draft_reply": {"body": body},
         }
         result = shadow_eval._extract_preorder_proof_signals(parameters)
         self.assertTrue(result["preorder_delivery_estimate"])
+        self.assertEqual(result["order_created_date"], "2026-02-12")
+        self.assertEqual(result["inquiry_date"], "2026-02-20")
+        self.assertTrue(result["preorder_tag_match"])
+        self.assertIn("pre-order", result["preorder_tag_matches"])
         self.assertTrue(result["draft_reply_present"])
         self.assertTrue(result["draft_reply_has_preorder_word"])
         self.assertTrue(result["draft_reply_has_ship_date"])
@@ -180,10 +187,13 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
             "delivery_estimate": {
                 "preorder": False,
             },
+            "order_summary": {"order_tags": ["vip", "priority"]},
             "draft_reply": None,
         }
         result = shadow_eval._extract_preorder_proof_signals(parameters)
         self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertFalse(result["preorder_tag_match"])
+        self.assertEqual(result["preorder_tag_matches"], [])
         self.assertFalse(result["draft_reply_present"])
         self.assertFalse(result["draft_reply_has_preorder_word"])
         self.assertFalse(result["draft_reply_has_ship_date"])

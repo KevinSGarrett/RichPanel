@@ -18,6 +18,7 @@
 ## What changed (high-level)
 - Added preorder proof signals (tag matches + order_created_date) in shadow eval output.
 - Captured PROD read-only artifacts and added human-only go-live checklist.
+- Added tests covering preorder proof tag/date fields.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -64,6 +65,7 @@ scripts/live_readonly_shadow_eval.py               |   25 +-
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
 - `scripts/live_readonly_shadow_eval.py` - add PII-safe preorder tag/date proof fields.
+- `scripts/test_live_readonly_shadow_eval.py` - cover new preorder proof fields.
 - `REHYDRATION_PACK/RUNS/RUN_20260215_2046Z/C/*` - read-only PROD artifacts, summary, checklist.
 - `docs/00_Project_Admin/Progress_Log.md` - run entry.
 - `docs/_generated/*` - regenerated doc registries from CI checks.
