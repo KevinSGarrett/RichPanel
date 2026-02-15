@@ -42,7 +42,7 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260215_2046Z/C/FIX_REPORT.md        |   21 +
 .../RUNS/RUN_20260215_2046Z/C/GIT_RUN_PLAN.md      |   60 +
 .../RUNS/RUN_20260215_2046Z/C/GO_LIVE_CHECKLIST.md |   36 +
-.../RUNS/RUN_20260215_2046Z/C/RUN_REPORT.md        |  119 ++
+.../RUNS/RUN_20260215_2046Z/C/RUN_REPORT.md        |  120 ++
 .../RUNS/RUN_20260215_2046Z/C/RUN_SUMMARY.md       |   37 +
 .../RUNS/RUN_20260215_2046Z/C/STRUCTURE_REPORT.md  |   39 +
 .../RUNS/RUN_20260215_2046Z/C/TEST_MATRIX.md       |   16 +
@@ -60,8 +60,8 @@ docs/_generated/doc_registry.compact.json          |    2 +-
 docs/_generated/doc_registry.json                  |    4 +-
 docs/_generated/heading_index.json                 |    6 +
 scripts/live_readonly_shadow_eval.py               |   25 +-
-scripts/test_live_readonly_shadow_eval.py          |   10 +
-38 files changed, 3947 insertions(+), 4 deletions(-)
+scripts/test_live_readonly_shadow_eval.py          |   33 +
+38 files changed, 3971 insertions(+), 4 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
