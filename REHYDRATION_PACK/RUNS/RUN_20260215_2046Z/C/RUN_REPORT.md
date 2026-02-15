@@ -60,8 +60,8 @@ docs/_generated/doc_registry.compact.json          |    2 +-
 docs/_generated/doc_registry.json                  |    4 +-
 docs/_generated/heading_index.json                 |    6 +
 scripts/live_readonly_shadow_eval.py               |   25 +-
-scripts/test_live_readonly_shadow_eval.py          |   33 +
-38 files changed, 3971 insertions(+), 4 deletions(-)
+scripts/test_live_readonly_shadow_eval.py          |   43 +
+38 files changed, 3981 insertions(+), 4 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
