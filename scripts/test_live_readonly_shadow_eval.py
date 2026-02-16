@@ -396,6 +396,11 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         decision = shadow_eval._extract_route_decision(result)
         self.assertEqual(decision, "order_status")
 
+    def test_extract_route_decision_order_status_tracking(self) -> None:
+        result = {"routing": {"intent": "order_status_tracking"}}
+        decision = shadow_eval._extract_route_decision(result)
+        self.assertEqual(decision, "order_status")
+
     def test_extract_route_decision_non_order_status(self) -> None:
         result = {"routing": {"intent": "returns"}}
         decision = shadow_eval._extract_route_decision(result)

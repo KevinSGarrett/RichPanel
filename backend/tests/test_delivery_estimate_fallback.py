@@ -50,6 +50,36 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             "we don't have tracking details available yet", reply["body"].lower()
         )
 
+    def test_preorder_delivery_fallback_window(self) -> None:
+        order_summary = {
+            "created_at": "2026-02-12",
+            "shipping_method": "Pre-order Delivery",
+            "order_tags_raw": "Pre-order",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-03-14")
+        assert reply is not None
+
+        body = reply["body"]
+        self.assertIn("marked as a pre-order", body)
+        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertIn("(in 15 days)", body)
+        self.assertIn("estimated delivery window is April 1–April 7, 2026", body)
+        self.assertIn("(in 18–24 days)", body)
+        self.assertIn("We'll send tracking as soon as it ships.", body)
+
+    def test_non_preorder_does_not_use_preorder_path(self) -> None:
+        order_summary = {
+            "created_at": "2026-02-12",
+            "shipping_method": "Pre-order Delivery",
+            "order_id": "ord-1",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-03-14")
+        assert reply is not None
+
+        body = reply["body"]
+        self.assertNotIn("pre-order", body.lower())
+        self.assertIn("We don't have tracking updates yet", body)
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())

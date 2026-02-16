@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-15 - run_20260215_2351z (b83: preorder eta fallback + shadow route fix)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-15-run202602152351z-b83-preorder-eta-fallback-shadow-route-fix"
+    }
+  ],
   "2026-02-15 - run_20260215_2046z (b82: prod preorder proof + go-live checklist)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",

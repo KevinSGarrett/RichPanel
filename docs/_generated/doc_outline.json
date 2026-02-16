@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-15 - RUN_20260215_2351Z (B83: preorder ETA fallback + shadow route fix)",
+        "anchor": "2026-02-15-run202602152351z-b83-preorder-eta-fallback-shadow-route-fix"
+      },
+      {
+        "level": 3,
         "text": "2026-02-15 - RUN_20260215_2046Z (B82: PROD preorder proof + go-live checklist)",
         "anchor": "2026-02-15-run202602152046z-b82-prod-preorder-proof-go-live-checklist"
       },
