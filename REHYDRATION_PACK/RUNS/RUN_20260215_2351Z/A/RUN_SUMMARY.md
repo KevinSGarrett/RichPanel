@@ -24,7 +24,7 @@ Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + d
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260215_2351Z`
 - PR: none
-- CI status at end of run: red (run_ci_checks failed due to generated files pending commit; re-run pending)
+- CI status at end of run: green
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)
 
@@ -36,4 +36,4 @@ Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + d
 - Used a preorder-only fallback for "Pre-order Delivery" to avoid widening non-preorder behavior.
 
 ## Issues / follow-ups
-- Re-run `python scripts/run_ci_checks.py --ci` after committing regenerated docs to get green.
+- None

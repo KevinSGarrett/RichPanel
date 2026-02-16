@@ -8,7 +8,7 @@ List the tests you ran (or explicitly note none).
 
 | Test name | Command / method | Pass/Fail | Evidence path/link |
 |---|---|---|---|
-| CI-equivalent | `python scripts/run_ci_checks.py --ci` | fail (regen pending) | `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md` |
+| CI-equivalent | `python scripts/run_ci_checks.py --ci` | pass | `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md` |
 | Unit tests | `pytest -q` | pass | `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md` |
 
 ## Notes
