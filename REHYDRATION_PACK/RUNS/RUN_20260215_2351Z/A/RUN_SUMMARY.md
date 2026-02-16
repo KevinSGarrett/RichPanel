@@ -23,7 +23,7 @@ Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + d
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260215_2351Z`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/252
 - CI status at end of run: green
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)

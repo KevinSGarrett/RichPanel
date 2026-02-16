@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-02-15
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260215_2351Z`
-- **PR:** none
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/252
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -26,7 +26,7 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260215_2351Z/A/DOCS_IMPACT_MAP.md   |  23 +++
 .../RUNS/RUN_20260215_2351Z/A/FIX_REPORT.md        |  21 +++
 .../RUNS/RUN_20260215_2351Z/A/GIT_RUN_PLAN.md      |  64 +++++++++
-.../RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md        | 111 +++++++++++++++
+.../RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md        | 112 +++++++++++++++
 .../RUNS/RUN_20260215_2351Z/A/RUN_SUMMARY.md       |  39 ++++++
 .../RUNS/RUN_20260215_2351Z/A/STRUCTURE_REPORT.md  |  30 ++++
 .../RUNS/RUN_20260215_2351Z/A/TEST_MATRIX.md       |  15 ++
@@ -48,7 +48,7 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260215_2351Z/C/TEST_MATRIX.md       |  15 ++
 .../RUNS/RUN_20260215_2351Z/RUN_META.md            |  11 ++
 .../automation/delivery_estimate.py                |  38 +++++
-backend/tests/test_delivery_estimate_fallback.py   |  30 ++++
+backend/tests/test_delivery_estimate_fallback.py   |  44 ++++++
 docs/00_Project_Admin/Progress_Log.md              |   5 +
 docs/_generated/doc_outline.json                   |   5 +
 docs/_generated/doc_registry.compact.json          |   2 +-
@@ -56,7 +56,7 @@ docs/_generated/doc_registry.json                  |   4 +-
 docs/_generated/heading_index.json                 |   6 +
 scripts/live_readonly_shadow_eval.py               |  10 +-
 scripts/test_live_readonly_shadow_eval.py          |   5 +
-33 files changed, 1148 insertions(+), 5 deletions(-)
+33 files changed, 1163 insertions(+), 5 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -78,6 +78,7 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (initially failed due to admin log).
 - `pytest -q` - unit tests (failed due to missing AWS region).
 - `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - unit tests with AWS region (pass).
+- `gh pr create --title "B83: Preorder ETA window for 'Pre-order Delivery' method (risk:R2)" --body-file REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/pr_description.md --label "risk:R2-medium" --label "gate:claude"` - open PR.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
