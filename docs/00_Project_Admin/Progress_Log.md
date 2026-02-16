@@ -12,6 +12,13 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-16 - RUN_20260216_0414Z (B84: PROD deploy for B83 preorder fallback)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260216_0414Z
+- Deploy-prod workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/22049889811
+- Verified prod runtime flags safe_mode=true and automation_enabled=false before and after deploy.
+- Read-only prod preflight PASS (artifacts in RUN_20260216_0414Z/B).
+- No customer contact; no Richpanel writes.
+
 ### 2026-02-16 - RUN_20260216_0238Z (B84: PROD deploy for B83 preorder fallback)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260216_0238Z
 - Deploy-prod workflow: https://github.com/KevinSGarrett/RichPanel/actions/runs/22048476996
