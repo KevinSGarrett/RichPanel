@@ -101,6 +101,7 @@ def _preorder_delivery_fallback_window(
     if normalized not in _PREORDER_DELIVERY_METHODS:
         return None
     raw_method = str(shipping_method).strip()
+    # Preorder fallback window is intentionally fixed per B83 requirements.
     min_days = 3
     max_days = 7
     bucket = "Standard"

@@ -8,8 +8,8 @@
 Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + days) without changing non-preorder logic, and fix shadow-eval route decision classification.
 
 ## Work completed (bullets)
-- Added a narrow pre-order shipping-method fallback window and updated preorder reply coverage.
-- Fixed shadow-eval routing intent classification and added a unit test.
+- Added preorder-only fallback window, documented fixed window source, and expanded preorder fail-closed tests.
+- Fixed shadow-eval routing intent classification and added tests for both current intents.
 - Updated progress log and generated run artifacts for this run.
 
 ## Files changed
@@ -29,7 +29,7 @@ Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + d
 - Branch cleanup done: no (Integrator only)
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci`, `pytest -q`
+- Tests run: `python scripts/run_ci_checks.py --ci`, `pytest -q` (1531 tests)
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
 
 ## Decisions made

@@ -94,6 +94,20 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
 
+    def test_preorder_unknown_method_fails_closed(self) -> None:
+        order_summary = {
+            "created_at": "2026-02-12",
+            "shipping_method": "Mystery Courier",
+            "order_tags_raw": "Pre-order",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-03-14")
+        assert reply is not None
+
+        body = reply["body"]
+        self.assertIn("marked as a pre-order", body)
+        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertNotIn("estimated delivery window", body)
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())

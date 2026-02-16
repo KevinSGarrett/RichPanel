@@ -26,7 +26,7 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260215_2351Z/A/DOCS_IMPACT_MAP.md   |  23 +++
 .../RUNS/RUN_20260215_2351Z/A/FIX_REPORT.md        |  21 +++
 .../RUNS/RUN_20260215_2351Z/A/GIT_RUN_PLAN.md      |  64 +++++++++
-.../RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md        | 112 +++++++++++++++
+.../RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md        | 122 ++++++++++++++++
 .../RUNS/RUN_20260215_2351Z/A/RUN_SUMMARY.md       |  39 ++++++
 .../RUNS/RUN_20260215_2351Z/A/STRUCTURE_REPORT.md  |  30 ++++
 .../RUNS/RUN_20260215_2351Z/A/TEST_MATRIX.md       |  15 ++
@@ -47,16 +47,16 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260215_2351Z/C/STRUCTURE_REPORT.md  |  27 ++++
 .../RUNS/RUN_20260215_2351Z/C/TEST_MATRIX.md       |  15 ++
 .../RUNS/RUN_20260215_2351Z/RUN_META.md            |  11 ++
-.../automation/delivery_estimate.py                |  38 +++++
-backend/tests/test_delivery_estimate_fallback.py   |  44 ++++++
+.../automation/delivery_estimate.py                |  39 ++++++
+backend/tests/test_delivery_estimate_fallback.py   |  58 ++++++++
 docs/00_Project_Admin/Progress_Log.md              |   5 +
 docs/_generated/doc_outline.json                   |   5 +
 docs/_generated/doc_registry.compact.json          |   2 +-
 docs/_generated/doc_registry.json                  |   4 +-
 docs/_generated/heading_index.json                 |   6 +
 scripts/live_readonly_shadow_eval.py               |  10 +-
-scripts/test_live_readonly_shadow_eval.py          |   5 +
-33 files changed, 1163 insertions(+), 5 deletions(-)
+scripts/test_live_readonly_shadow_eval.py          |  10 ++
+33 files changed, 1193 insertions(+), 5 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -85,7 +85,7 @@ List commands you ran (include key flags/env if relevant):
 Include test commands + results + links to evidence.
 
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
-- `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pass (1529 tests) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
+- `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pass (1531 tests) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
 
 Paste output snippet proving you ran:
 `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; python scripts/run_ci_checks.py --ci`
