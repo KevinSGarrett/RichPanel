@@ -67,6 +67,24 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("(in 18–24 days)", body)
         self.assertIn("We'll send tracking as soon as it ships.", body)
 
+    def test_preorder_delivery_fallback_variants(self) -> None:
+        variants = ["pre order delivery", "preorder delivery"]
+        for method in variants:
+            with self.subTest(method=method):
+                order_summary = {
+                    "created_at": "2026-02-12",
+                    "shipping_method": method,
+                    "order_tags_raw": "Pre-order",
+                }
+                reply = build_no_tracking_reply(order_summary, inquiry_date="2026-03-14")
+                assert reply is not None
+
+                body = reply["body"]
+                self.assertIn("marked as a pre-order", body)
+                self.assertIn(
+                    "estimated delivery window is April 1–April 7, 2026", body
+                )
+
     def test_non_preorder_does_not_use_preorder_path(self) -> None:
         order_summary = {
             "created_at": "2026-02-12",

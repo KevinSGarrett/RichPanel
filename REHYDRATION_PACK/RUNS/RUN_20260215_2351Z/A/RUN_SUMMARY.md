@@ -29,7 +29,7 @@ Implement preorder ETA fallback for "Pre-order Delivery" (ship date + window + d
 - Branch cleanup done: no (Integrator only)
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci`, `pytest -q` (1531 tests)
+- Tests run: `python scripts/run_ci_checks.py --ci`, `pytest -q` (1532 tests)
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
 
 ## Decisions made

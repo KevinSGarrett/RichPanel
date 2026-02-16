@@ -102,6 +102,7 @@ def _preorder_delivery_fallback_window(
         return None
     raw_method = str(shipping_method).strip()
     # Preorder fallback window is intentionally fixed per B83 requirements.
+    # Source: REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md
     min_days = 3
     max_days = 7
     bucket = "Standard"
@@ -145,6 +146,7 @@ def compute_preorder_delivery_estimate(
     if not window:
         window = _preorder_delivery_fallback_window(shipping_method)
     if not window:
+        # Fail closed for preorder: ship date only, no delivery window.
         return {
             "order_created_date": order_date.isoformat(),
             "inquiry_date": inquiry.isoformat(),
