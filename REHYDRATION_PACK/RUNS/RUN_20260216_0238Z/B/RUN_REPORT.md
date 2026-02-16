@@ -30,19 +30,19 @@ Paste `git diff --stat` (or PR diffstat) here:
 .../RUNS/RUN_20260216_0238Z/A/RUN_SUMMARY.md       |  33 +++++
 .../RUNS/RUN_20260216_0238Z/A/STRUCTURE_REPORT.md  |  27 ++++
 .../RUNS/RUN_20260216_0238Z/A/TEST_MATRIX.md       |  15 ++
-.../RUNS/RUN_20260216_0238Z/B/DOCS_IMPACT_MAP.md   |  30 ++++
+.../RUNS/RUN_20260216_0238Z/B/DOCS_IMPACT_MAP.md   |  31 ++++
 .../RUNS/RUN_20260216_0238Z/B/FIX_REPORT.md        |  21 +++
 .../RUNS/RUN_20260216_0238Z/B/GIT_RUN_PLAN.md      |  58 ++++++++
-.../RUNS/RUN_20260216_0238Z/B/RUN_REPORT.md        |  89 ++++++++++++
+.../RUNS/RUN_20260216_0238Z/B/RUN_REPORT.md        | 134 ++++++++++++++++++
 .../RUNS/RUN_20260216_0238Z/B/RUN_SUMMARY.md       |  35 +++++
-.../RUNS/RUN_20260216_0238Z/B/STRUCTURE_REPORT.md  |  38 +++++
+.../RUNS/RUN_20260216_0238Z/B/STRUCTURE_REPORT.md  |  39 ++++++
 .../RUNS/RUN_20260216_0238Z/B/TEST_MATRIX.md       |  15 ++
 .../RUN_20260216_0238Z/B/deploy_prod_run_url.txt   | Bin 0 -> 140 bytes
 .../RUNS/RUN_20260216_0238Z/B/preflight_prod.json  |  59 ++++++++
 .../RUNS/RUN_20260216_0238Z/B/preflight_prod.md    |  28 ++++
 .../B/prod_runtime_flags_postdeploy.json           | Bin 0 -> 1554 bytes
 .../B/prod_runtime_flags_predeploy.json            | Bin 0 -> 1554 bytes
-.../RUNS/RUN_20260216_0238Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++++
+.../RUN_20260216_0238Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++++
 .../RUNS/RUN_20260216_0238Z/C/DOCS_IMPACT_MAP.md   |  23 +++
 .../RUNS/RUN_20260216_0238Z/C/FIX_REPORT.md        |  21 +++
 .../RUNS/RUN_20260216_0238Z/C/GIT_RUN_PLAN.md      |  58 ++++++++
@@ -56,7 +56,7 @@ docs/_generated/doc_outline.json                   |   5 +
 docs/_generated/doc_registry.compact.json          |   2 +-
 docs/_generated/doc_registry.json                  |   4 +-
 docs/_generated/heading_index.json                 |   6 +
-33 files changed, 1041 insertions(+), 3 deletions(-)
+33 files changed, 1088 insertions(+), 3 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
