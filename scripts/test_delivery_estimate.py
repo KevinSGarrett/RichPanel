@@ -24,6 +24,7 @@ from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     has_preorder_tag,
     normalize_shipping_method,
     parse_transit_days,
+    _is_expedited_24h,
     _format_delivery_window,
     _format_day_window,
 )
@@ -46,6 +47,10 @@ class DeliveryEstimateTests(unittest.TestCase):
     def test_parse_transit_days_empty_returns_none(self) -> None:
         self.assertIsNone(parse_transit_days(None))
         self.assertIsNone(parse_transit_days("   "))
+
+    def test_is_expedited_24h_false_when_missing_or_standard(self) -> None:
+        self.assertFalse(_is_expedited_24h(None))
+        self.assertFalse(_is_expedited_24h("Standard Shipping"))
 
     def test_mapping_fallback_standard_shipping(self) -> None:
         window = normalize_shipping_method("Standard Shipping")
