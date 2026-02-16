@@ -19,7 +19,7 @@ Deploy main (B83 included) to PROD via deploy-prod workflow and capture read-onl
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260216_0414Z`
-- PR: pending
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/255
 - CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
