@@ -177,8 +177,9 @@ def compute_preorder_delivery_estimate(
     except ValueError:
         return None
 
+    # Release date is a calendar offset; processing/transit remain business-day based.
     release_date = order_date + timedelta(days=45)
-    ship_date_human = _format_long_date(release_date)
+    release_date_human = _format_long_date(release_date)
     release_in_days = max(0, (release_date - inquiry).days)
     ship_days_from_inquiry_human = _format_day_window(release_in_days, release_in_days)
 
@@ -195,7 +196,7 @@ def compute_preorder_delivery_estimate(
             "order_created_date": order_date.isoformat(),
             "inquiry_date": inquiry.isoformat(),
             "preorder": True,
-            "preorder_ship_date_human": ship_date_human,
+            "preorder_ship_date_human": release_date_human,
             "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
             "eta_human": None,
         }
@@ -226,7 +227,7 @@ def compute_preorder_delivery_estimate(
         "eta_human": delivery_window_human,
         "is_late": False,
         "preorder": True,
-        "preorder_ship_date_human": ship_date_human,
+        "preorder_ship_date_human": release_date_human,
         "delivery_window_human": delivery_window_human,
         "days_from_inquiry_human": days_from_inquiry_human,
         "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
@@ -516,6 +517,7 @@ def compute_delivery_estimate(
     remaining_max = max(0, total_max - elapsed)
     is_late = elapsed >= total_max
     if not is_late:
+        # Floor avoids confusing "0-1 business days" messaging per B86 requirements.
         if remaining_min < ETA_FLOOR_MIN_DAYS:
             remaining_min = ETA_FLOOR_MIN_DAYS
         if remaining_max < ETA_FLOOR_MAX_DAYS:
