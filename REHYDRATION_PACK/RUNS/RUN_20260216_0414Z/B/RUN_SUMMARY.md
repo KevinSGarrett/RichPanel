@@ -20,7 +20,7 @@ Deploy main (B83 included) to PROD via deploy-prod workflow and capture read-onl
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260216_0414Z`
 - PR: pending
-- CI status at end of run: pending
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 
