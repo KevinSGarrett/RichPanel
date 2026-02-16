@@ -192,9 +192,13 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertEqual(estimate["elapsed_business_days"], 0)
-        self.assertEqual(estimate["remaining_min_days"], 3)
-        self.assertEqual(estimate["remaining_max_days"], 5)
-        self.assertEqual(estimate["eta_human"], "3-5 business days")
+        self.assertEqual(estimate["remaining_min_days"], 6)
+        self.assertEqual(estimate["remaining_max_days"], 10)
+        self.assertEqual(estimate["eta_human"], "6-10 business days")
+        self.assertEqual(estimate["processing_min_days"], 3)
+        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 3)
+        self.assertEqual(estimate["transit_max_days"], 5)
 
     def test_missing_or_invalid_dates_returns_none(self) -> None:
         self.assertIsNone(
@@ -217,9 +221,12 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertEqual(estimate["elapsed_business_days"], 2)
-        self.assertEqual(estimate["remaining_min_days"], 1)
-        self.assertEqual(estimate["remaining_max_days"], 3)
-        self.assertEqual(estimate["eta_human"], "1-3 business days")
+        self.assertEqual(estimate["remaining_min_days"], 4)
+        self.assertEqual(estimate["remaining_max_days"], 8)
+        self.assertEqual(estimate["eta_human"], "4-8 business days")
+        self.assertEqual(estimate["window_min_days"], 6)
+        self.assertEqual(estimate["window_max_days"], 10)
+        self.assertEqual(estimate["delivery_window_human"], "January 9–January 15, 2024")
         self.assertFalse(estimate["is_late"])
 
     def test_weekend_crossing_remaining_window(self) -> None:
@@ -232,37 +239,57 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertEqual(estimate["elapsed_business_days"], 2)
-        self.assertEqual(estimate["remaining_min_days"], 1)
-        self.assertEqual(estimate["remaining_max_days"], 3)
-        self.assertEqual(estimate["eta_human"], "1-3 business days")
+        self.assertEqual(estimate["remaining_min_days"], 4)
+        self.assertEqual(estimate["remaining_max_days"], 8)
+        self.assertEqual(estimate["eta_human"], "4-8 business days")
         self.assertFalse(estimate["is_late"])
 
-    def test_remaining_window_allows_zero_minimum(self) -> None:
+    def test_expedited_override_forces_one_day_transit(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
-            shipping_method="Standard Shipping (3-5 Business Days)",
-            inquiry_date="2024-01-04",
+            shipping_method="Express Shipping (1-2 business days)",
+            inquiry_date="2024-01-02",
         )
 
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertEqual(estimate["remaining_min_days"], 0)
+        self.assertEqual(estimate["processing_min_days"], 1)
+        self.assertEqual(estimate["processing_max_days"], 1)
+        self.assertEqual(estimate["transit_min_days"], 1)
+        self.assertEqual(estimate["transit_max_days"], 1)
+        self.assertEqual(estimate["window_min_days"], 2)
+        self.assertEqual(estimate["window_max_days"], 2)
+        self.assertEqual(estimate["remaining_min_days"], 1)
         self.assertEqual(estimate["remaining_max_days"], 2)
-        self.assertEqual(estimate["eta_human"], "0-2 business days")
+        self.assertEqual(estimate["eta_human"], "1-2 business days")
+        self.assertEqual(estimate["delivery_window_human"], "January 3, 2024")
+
+    def test_remaining_window_floor_prevents_zero_minimum(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",
+            shipping_method="Standard Shipping (3-5 Business Days)",
+            inquiry_date="2024-01-12",
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["remaining_min_days"], 1)
+        self.assertEqual(estimate["remaining_max_days"], 2)
+        self.assertEqual(estimate["eta_human"], "1-2 business days")
         self.assertFalse(estimate["is_late"])
 
     def test_late_window_reports_any_day_now(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
             shipping_method="Standard Shipping (3-5 business days)",
-            inquiry_date="2024-01-09",
+            inquiry_date="2024-01-16",
         )
 
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertTrue(estimate["is_late"])
-        self.assertEqual(estimate["remaining_min_days"], 0)
-        self.assertEqual(estimate["remaining_max_days"], 0)
+        self.assertEqual(estimate["remaining_min_days"], 1)
+        self.assertEqual(estimate["remaining_max_days"], 2)
         self.assertEqual(estimate["eta_human"], "should arrive any day now")
         self.assertGreaterEqual(
             estimate["elapsed_business_days"], estimate["window_max_days"]
@@ -296,9 +323,13 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("March", estimate["preorder_ship_date_human"])
         self.assertIn("29", estimate["preorder_ship_date_human"])
         self.assertIn("2026", estimate["preorder_ship_date_human"])
-        self.assertEqual(estimate["delivery_window_human"], "April 1–April 7, 2026")
+        self.assertEqual(estimate["delivery_window_human"], "April 6–April 14, 2026")
         self.assertEqual(estimate["ship_days_from_inquiry_human"], "15 days")
-        self.assertEqual(estimate["days_from_inquiry_human"], "18–24 days")
+        self.assertEqual(estimate["days_from_inquiry_human"], "23–31 days")
+        self.assertEqual(estimate["processing_min_days"], 3)
+        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 3)
+        self.assertEqual(estimate["transit_max_days"], 7)
 
     def test_has_preorder_tag_variants(self) -> None:
         self.assertTrue(
@@ -365,7 +396,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertIsNone(estimate.get("days_from_inquiry_human"))
+        self.assertEqual(estimate.get("days_from_inquiry_human"), "0 days")
 
     def test_preorder_delivery_estimate_without_shipping_window(self) -> None:
         estimate = compute_preorder_delivery_estimate(
@@ -391,8 +422,9 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(
             reply["body"],
             "Thanks for your patience. Order 12345 was placed on 2024-01-01. "
-            "With Standard (3-5 business days) shipping, It should arrive in about "
-            "1-3 business days. We'll send tracking as soon as it ships.",
+            "Processing typically takes 3-5 business days. With Standard (3-5 business days) "
+            "shipping, the estimated delivery window is January 9–January 15, 2024. "
+            "It should arrive in about 4-8 business days. We'll send tracking as soon as it ships.",
         )
 
     def test_no_tracking_reply_preorder_includes_ship_and_eta(self) -> None:
@@ -407,10 +439,11 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         assert reply is not None
         self.assertIn("pre-order", reply["body"])
-        self.assertIn("scheduled to ship on", reply["body"])
+        self.assertIn("scheduled to release on", reply["body"])
         self.assertIn("in 15 days", reply["body"])
-        self.assertIn("April 1–April 7, 2026", reply["body"])
-        self.assertIn("in 18–24 days", reply["body"])
+        self.assertIn("processing typically takes 3-5 business days", reply["body"])
+        self.assertIn("April 6–April 14, 2026", reply["body"])
+        self.assertIn("Arrives in 23–31 days", reply["body"])
         self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
 
 

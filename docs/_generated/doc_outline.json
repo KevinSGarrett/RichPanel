@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-16 - RUN_20260216_2005Z (B86: ETA processing + expedited overrides)",
+        "anchor": "2026-02-16-run202602162005z-b86-eta-processing-expedited-overrides"
+      },
+      {
+        "level": 3,
         "text": "2026-02-16 - RUN_20260216_0343Z (B85: PROD post-deploy preorder proof)",
         "anchor": "2026-02-16-run202602160343z-b85-prod-post-deploy-preorder-proof"
       },

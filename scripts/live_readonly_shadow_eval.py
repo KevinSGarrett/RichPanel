@@ -1889,7 +1889,7 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         return candidate in body_text
 
     tracking_line = "We'll send tracking as soon as it ships."
-    schedule_phrase = "scheduled to ship on"
+    schedule_phrases = ("scheduled to release on", "scheduled to ship on")
     delivery_phrase = "estimated delivery window is"
     return {
         "preorder_delivery_estimate": preorder_delivery_estimate,
@@ -1909,7 +1909,8 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         "draft_reply_has_preorder_word": "pre-order" in body_lower,
         "draft_reply_has_ship_date": _contains(ship_date_human),
         "draft_reply_has_ship_schedule_phrase": (
-            schedule_phrase in body_lower and _contains(ship_date_human)
+            any(phrase in body_lower for phrase in schedule_phrases)
+            and _contains(ship_date_human)
         ),
         "draft_reply_has_delivery_window": _contains(delivery_window_human),
         "draft_reply_has_estimated_delivery_phrase": (

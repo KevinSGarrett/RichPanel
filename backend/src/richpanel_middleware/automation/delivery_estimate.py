@@ -40,6 +40,29 @@ _PREORDER_DELIVERY_METHODS = {
 }
 
 
+def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
+    if not shipping_method:
+        return False
+    lowered = str(shipping_method).lower()
+    tokens = (
+        "rush",
+        "overnight",
+        "express",
+        "priority",
+        "next day",
+        "next-day",
+        "1 day",
+        "1-day",
+    )
+    return any(token in lowered for token in tokens)
+
+
+def _processing_window_for_method(shipping_method: Optional[str]) -> tuple[int, int, str]:
+    if _is_expedited_24h(shipping_method):
+        return 1, 1, "24 business hours"
+    return 3, 5, format_eta_window(3, 5)
+
+
 def has_preorder_tag(order_tags: Any, order_tags_raw: Any = None) -> bool:
     tokens: List[str] = []
     if isinstance(order_tags, list):
@@ -116,6 +139,21 @@ def _preorder_delivery_fallback_window(
     }
 
 
+def _effective_transit_window(shipping_method: Optional[str]) -> Optional[Dict[str, Any]]:
+    window = normalize_shipping_method(shipping_method)
+    if not window:
+        return None
+    if not _is_expedited_24h(shipping_method):
+        return window
+    return {
+        "bucket": "Priority",
+        "min_days": 1,
+        "max_days": 1,
+        "raw_method": window["raw_method"],
+        "normalized_method": f"Priority ({format_eta_window(1, 1)})",
+    }
+
+
 def compute_preorder_delivery_estimate(
     order_created_at: Any,
     shipping_method: Any,
@@ -135,14 +173,16 @@ def compute_preorder_delivery_estimate(
     except ValueError:
         return None
 
-    ship_date = order_date + timedelta(days=45)
-    ship_date_human = _format_long_date(ship_date)
-    ships_in_days = (ship_date - inquiry).days
-    ship_days_from_inquiry_human = (
-        _format_day_window(ships_in_days, ships_in_days) if ships_in_days >= 0 else None
+    release_date = order_date + timedelta(days=45)
+    ship_date_human = _format_long_date(release_date)
+    release_in_days = max(0, (release_date - inquiry).days)
+    ship_days_from_inquiry_human = _format_day_window(release_in_days, release_in_days)
+
+    processing_min, processing_max, processing_human = _processing_window_for_method(
+        shipping_method
     )
 
-    window = normalize_shipping_method(shipping_method)
+    window = _effective_transit_window(shipping_method)
     if not window:
         window = _preorder_delivery_fallback_window(shipping_method)
     if not window:
@@ -156,22 +196,25 @@ def compute_preorder_delivery_estimate(
             "eta_human": None,
         }
 
-    delivery_min = add_business_days(ship_date, window["min_days"])
-    delivery_max = add_business_days(ship_date, window["max_days"])
+    transit_min, transit_max = window["min_days"], window["max_days"]
+    total_min = processing_min + transit_min
+    total_max = processing_max + transit_max
+    delivery_min = add_business_days(release_date, total_min)
+    delivery_max = add_business_days(release_date, total_max)
     delivery_window_human = _format_delivery_window(delivery_min, delivery_max)
-    days_min = (delivery_min - inquiry).days
-    days_max = (delivery_max - inquiry).days
-    if days_max < 0:
-        days_from_inquiry_human = None
-    else:
-        days_from_inquiry_human = _format_day_window(
-            max(0, days_min), max(0, days_max)
-        )
+    days_min = max(0, (delivery_min - inquiry).days)
+    days_max = max(0, (delivery_max - inquiry).days)
+    days_from_inquiry_human = _format_day_window(days_min, days_max)
 
     return {
         "bucket": window["bucket"],
-        "window_min_days": window["min_days"],
-        "window_max_days": window["max_days"],
+        "window_min_days": total_min,
+        "window_max_days": total_max,
+        "processing_min_days": processing_min,
+        "processing_max_days": processing_max,
+        "processing_human": processing_human,
+        "transit_min_days": transit_min,
+        "transit_max_days": transit_max,
         "raw_method": window["raw_method"],
         "normalized_method": window["normalized_method"],
         "order_created_date": order_date.isoformat(),
@@ -453,24 +496,47 @@ def compute_delivery_estimate(
     if inquiry < order_date:
         return None
 
-    window = normalize_shipping_method(shipping_method)
+    window = _effective_transit_window(shipping_method)
     if not window:
         return None
 
+    processing_min, processing_max, processing_human = _processing_window_for_method(
+        shipping_method
+    )
+    transit_min, transit_max = window["min_days"], window["max_days"]
+    total_min = processing_min + transit_min
+    total_max = processing_max + transit_max
+
     elapsed = business_days_between(order_date, inquiry)
-    remaining_min = max(0, window["min_days"] - elapsed)
-    remaining_max = max(0, window["max_days"] - elapsed)
-    is_late = elapsed >= window["max_days"]
+    remaining_min = max(0, total_min - elapsed)
+    remaining_max = max(0, total_max - elapsed)
+    if remaining_min < 1:
+        remaining_min = 1
+    if remaining_max < 2:
+        remaining_max = 2
+    if remaining_min > remaining_max:
+        remaining_min = remaining_max
+    is_late = elapsed >= total_max
     eta_human = (
         "should arrive any day now"
         if is_late
         else format_eta_window(remaining_min, remaining_max)
     )
+    delivery_min_date = add_business_days(order_date, total_min)
+    delivery_max_date = add_business_days(order_date, total_max)
+    delivery_window_human = _format_delivery_window(
+        delivery_min_date, delivery_max_date
+    )
 
     return {
         "bucket": window["bucket"],
-        "window_min_days": window["min_days"],
-        "window_max_days": window["max_days"],
+        "window_min_days": total_min,
+        "window_max_days": total_max,
+        "processing_min_days": processing_min,
+        "processing_max_days": processing_max,
+        "processing_human": processing_human,
+        "transit_min_days": transit_min,
+        "transit_max_days": transit_max,
         "raw_method": window["raw_method"],
         "normalized_method": window["normalized_method"],
         "order_created_date": order_date.isoformat(),
@@ -480,6 +546,7 @@ def compute_delivery_estimate(
         "remaining_max_days": remaining_max,
         "eta_human": eta_human,
         "is_late": is_late,
+        "delivery_window_human": delivery_window_human,
     }
 
 
@@ -683,6 +750,7 @@ def build_no_tracking_reply(
         ship_days_from_inquiry_human = preorder_estimate.get(
             "ship_days_from_inquiry_human"
         )
+        processing_human = preorder_estimate.get("processing_human")
         method_label = (
             preorder_estimate.get("normalized_method")
             or preorder_estimate.get("raw_method")
@@ -692,12 +760,15 @@ def build_no_tracking_reply(
 
         body = (
             "Thanks for your patience. Your order is marked as a pre-order. "
-            f"It is scheduled to ship on {ship_date_human}"
+            f"It is scheduled to release on {ship_date_human}"
         )
         if ship_days_from_inquiry_human:
             body = f"{body} (in {ship_days_from_inquiry_human})."
         else:
             body = f"{body}."
+
+        if processing_human:
+            body = f"{body} After the release date, processing typically takes {processing_human}."
 
         if delivery_window_human and method_label:
             body = (
@@ -705,7 +776,7 @@ def build_no_tracking_reply(
                 f"{delivery_window_human}"
             )
             if days_from_inquiry_human:
-                body = f"{body} (in {days_from_inquiry_human})."
+                body = f"{body} (Arrives in {days_from_inquiry_human})."
             else:
                 body = f"{body}."
 
@@ -721,16 +792,22 @@ def build_no_tracking_reply(
     if estimate:
         order_date_human = estimate["order_created_date"]
         method_label = estimate["normalized_method"] or estimate["raw_method"]
+        processing_human = estimate.get("processing_human")
+        delivery_window_human = estimate.get("delivery_window_human")
 
         if estimate["is_late"]:
-            eta_sentence = "It is already beyond the expected window, so it should arrive any day now."
+            eta_sentence = (
+                "It is already beyond the expected window, so it should arrive any day now."
+            )
         else:
             eta_sentence = f"It should arrive in about {estimate['eta_human']}."
 
         order_label = f"Order {order_id}" if has_order_id else "Your order"
         body = (
             f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
-            f"With {method_label} shipping, {eta_sentence} "
+            f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
+            f"With {method_label} shipping, the estimated delivery window is "
+            f"{delivery_window_human}. {eta_sentence} "
             "We'll send tracking as soon as it ships."
         )
 

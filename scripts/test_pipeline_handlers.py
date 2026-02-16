@@ -290,9 +290,10 @@ class PipelineTests(unittest.TestCase):
 
         self.assertIsNotNone(reply)
         assert reply is not None
-        self.assertEqual(reply["eta_human"], "1-3 business days")
+        self.assertEqual(reply["eta_human"], "4-8 business days")
         body_lower = reply["body"].lower()
-        self.assertIn("1-3 business days", body_lower)
+        self.assertIn("4-8 business days", body_lower)
+        self.assertIn("estimated delivery window is", body_lower)
         self.assertIn("standard (3-5 business days)", body_lower)
 
     def test_plan_suppresses_when_order_context_missing(self) -> None:

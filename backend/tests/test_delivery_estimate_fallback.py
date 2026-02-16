@@ -61,10 +61,11 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
 
         body = reply["body"]
         self.assertIn("marked as a pre-order", body)
-        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertIn("(in 15 days)", body)
-        self.assertIn("estimated delivery window is April 1–April 7, 2026", body)
-        self.assertIn("(in 18–24 days)", body)
+        self.assertIn("processing typically takes 3-5 business days", body)
+        self.assertIn("estimated delivery window is April 6–April 14, 2026", body)
+        self.assertIn("(Arrives in 23–31 days)", body)
         self.assertIn("We'll send tracking as soon as it ships.", body)
 
     def test_preorder_delivery_fallback_variants(self) -> None:
@@ -82,7 +83,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
                 body = reply["body"]
                 self.assertIn("marked as a pre-order", body)
                 self.assertIn(
-                    "estimated delivery window is April 1–April 7, 2026", body
+                    "estimated delivery window is April 6–April 14, 2026", body
                 )
 
     def test_preorder_delivery_fallback_whitespace_and_case(self) -> None:
@@ -100,7 +101,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
                 body = reply["body"]
                 self.assertIn("marked as a pre-order", body)
                 self.assertIn(
-                    "estimated delivery window is April 1–April 7, 2026", body
+                    "estimated delivery window is April 6–April 14, 2026", body
                 )
 
     def test_non_preorder_does_not_use_preorder_path(self) -> None:
@@ -127,7 +128,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
 
         body = reply["body"]
         self.assertIn("marked as a pre-order", body)
-        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
 
     def test_preorder_unknown_method_fails_closed(self) -> None:
@@ -141,7 +142,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
 
         body = reply["body"]
         self.assertIn("marked as a pre-order", body)
-        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
 
     def test_preorder_empty_shipping_method_fails_closed(self) -> None:
@@ -155,7 +156,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
 
         body = reply["body"]
         self.assertIn("marked as a pre-order", body)
-        self.assertIn("scheduled to ship on Sunday, March 29, 2026", body)
+        self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
 
 
