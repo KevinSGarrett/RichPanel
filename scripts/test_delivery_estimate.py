@@ -260,6 +260,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         assert estimate is not None
         self.assertEqual(estimate["processing_min_days"], 1)
         self.assertEqual(estimate["processing_max_days"], 1)
+        self.assertEqual(estimate["processing_human"], "24 business hours")
         self.assertEqual(estimate["transit_min_days"], 1)
         self.assertEqual(estimate["transit_max_days"], 1)
         self.assertEqual(estimate["window_min_days"], 2)
@@ -351,6 +352,24 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(estimate["processing_max_days"], 5)
         self.assertEqual(estimate["transit_min_days"], 3)
         self.assertEqual(estimate["transit_max_days"], 7)
+
+    def test_preorder_expedited_override_applies(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-12",
+            shipping_method="Express Shipping (1-2 business days)",
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["processing_min_days"], 1)
+        self.assertEqual(estimate["processing_max_days"], 1)
+        self.assertEqual(estimate["transit_min_days"], 1)
+        self.assertEqual(estimate["transit_max_days"], 1)
+        self.assertEqual(estimate["window_min_days"], 2)
+        self.assertEqual(estimate["window_max_days"], 2)
+        self.assertEqual(estimate["delivery_window_human"], "March 31, 2026")
+        self.assertEqual(estimate["days_from_inquiry_human"], "17 days")
 
     def test_has_preorder_tag_variants(self) -> None:
         self.assertTrue(
