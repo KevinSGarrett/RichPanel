@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-16 - RUN_20260216_0343Z (B85: PROD post-deploy preorder proof)",
+        "anchor": "2026-02-16-run202602160343z-b85-prod-post-deploy-preorder-proof"
+      },
+      {
+        "level": 3,
         "text": "2026-02-16 - RUN_20260216_0238Z (B84: PROD deploy for B83 preorder fallback)",
         "anchor": "2026-02-16-run202602160238z-b84-prod-deploy-for-b83-preorder-fallback"
       },
