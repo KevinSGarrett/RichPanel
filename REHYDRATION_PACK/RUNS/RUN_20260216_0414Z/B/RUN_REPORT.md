@@ -18,6 +18,7 @@
 ## What changed (high-level)
 - Captured pre/post deploy PROD runtime flags and deploy workflow URL.
 - Ran prod preflight PASS and updated Progress_Log + registries.
+- Restored missing B85 run artifacts (RUN_20260216_0343Z A/B/C) to satisfy rehydration pack validation.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -107,6 +108,7 @@ Paste output snippet proving you ran:
 - Production safety; verified safe_mode/automation_enabled before and after deploy.
 - PR Agent suggestions reviewed; no changes required (non-blocking).
 - PR Agent noted BOM/timestamp consistency; accepted as non-blocking for this docs-only run.
+- PR Agent noted extra run artifacts; clarified in PR body (restored for validation).
 
 ## Blockers / open questions
 - NONE
