@@ -51,6 +51,7 @@ class DeliveryEstimateTests(unittest.TestCase):
     def test_is_expedited_24h_false_when_missing_or_standard(self) -> None:
         self.assertFalse(_is_expedited_24h(None))
         self.assertFalse(_is_expedited_24h("Standard Shipping"))
+        self.assertFalse(_is_expedited_24h("Super Fast Shipping"))
 
     def test_mapping_fallback_standard_shipping(self) -> None:
         window = normalize_shipping_method("Standard Shipping")
