@@ -33,6 +33,11 @@ DEFAULT_SHIPPING_METHOD_TRANSIT_MAP: Dict[str, tuple[int, int]] = {
 }
 
 _PREORDER_TAG_TOKENS = {"pre-order", "preorder", "pre order"}
+_PREORDER_DELIVERY_METHODS = {
+    "pre order delivery",
+    "preorder delivery",
+    "pre-order delivery",
+}
 
 
 def has_preorder_tag(order_tags: Any, order_tags_raw: Any = None) -> bool:
@@ -78,6 +83,39 @@ def _format_day_window(min_days: int, max_days: int) -> str:
     return f"{min_days}\u2013{max_days} days"
 
 
+def _normalize_preorder_delivery_method(value: Any) -> str:
+    if value is None:
+        return ""
+    text = str(value).strip().lower()
+    if not text:
+        return ""
+    text = " ".join(text.split())
+    text = re.sub(r"\s*-\s*", "-", text)
+    return text
+
+
+def _preorder_delivery_fallback_window(
+    shipping_method: Any,
+) -> Optional[Dict[str, Any]]:
+    normalized = _normalize_preorder_delivery_method(shipping_method)
+    if normalized not in _PREORDER_DELIVERY_METHODS:
+        return None
+    raw_method = str(shipping_method).strip()
+    # Preorder fallback window is intentionally fixed per B83 requirements.
+    # Source: REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md
+    min_days = 3
+    max_days = 7
+    bucket = "Standard"
+    normalized_method = f"{bucket} ({format_eta_window(min_days, max_days)})"
+    return {
+        "bucket": bucket,
+        "min_days": min_days,
+        "max_days": max_days,
+        "raw_method": raw_method,
+        "normalized_method": normalized_method,
+    }
+
+
 def compute_preorder_delivery_estimate(
     order_created_at: Any,
     shipping_method: Any,
@@ -106,6 +144,9 @@ def compute_preorder_delivery_estimate(
 
     window = normalize_shipping_method(shipping_method)
     if not window:
+        window = _preorder_delivery_fallback_window(shipping_method)
+    if not window:
+        # Fail closed for preorder: ship date only, no delivery window.
         return {
             "order_created_date": order_date.isoformat(),
             "inquiry_date": inquiry.isoformat(),

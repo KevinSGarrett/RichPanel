@@ -831,12 +831,18 @@ def _extract_route_decision(result: Dict[str, Any]) -> str:
     if not isinstance(routing, dict):
         return "unknown"
     
-    intent = _normalize_optional_text(routing.get("intent"))
+    intent = _normalize_optional_text(routing.get("intent")).lower()
     if not intent:
         return "unknown"
     
     # Normalize intent to order_status or non_order_status
-    if intent in ("order_status", "order_tracking", "order_inquiry"):
+    if intent in (
+        "order_status",
+        "order_tracking",
+        "order_inquiry",
+        "order_status_tracking",
+        "shipping_delay_not_shipped",
+    ):
         return "order_status"
     
     return "non_order_status"

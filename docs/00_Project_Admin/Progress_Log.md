@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-15 - RUN_20260215_2351Z (B83: preorder ETA fallback + shadow route fix)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260215_2351Z
+- Added preorder delivery fallback window for "Pre-order Delivery" and tests.
+- Fixed shadow-eval route decision classification for order status intents.
+
 ### 2026-02-15 - RUN_20260215_2046Z (B82: PROD preorder proof + go-live checklist)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260215_2046Z
 - Tickets evaluated: 116700, 116759, 116762, 116770, 116805, 116837, 116888, 119207, 119201, 119202, 115699
