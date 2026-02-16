@@ -19,6 +19,7 @@
 - Captured prod deploy evidence (identity, flags, workflow URL, preflight outputs).
 - Merged PR 252 after start and re-deployed main to ensure B83 is in PROD.
 - Updated progress log, generated doc registries, and run artifacts for B84.
+- Normalized deploy URL artifact to plain text (PR Agent advisory).
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -132,6 +133,6 @@ $ python scripts/check_protected_deletes.py --ci
 - None
 
 ## Follow-ups (actionable)
-- [ ] None (PR Agent advisory suggestions reviewed; no changes needed for docs-only PR).
+- [ ] None (PR Agent advisory reviewed; deploy URL normalized, preflight duplication required by prompt).
 
 <!-- End of template -->
