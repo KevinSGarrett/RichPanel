@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-16 - run_20260216_0238z (b84: prod deploy for b83 preorder fallback)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-16-run202602160238z-b84-prod-deploy-for-b83-preorder-fallback"
+    }
+  ],
   "2026-02-15 - run_20260215_2046z (b82: prod preorder proof + go-live checklist)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
