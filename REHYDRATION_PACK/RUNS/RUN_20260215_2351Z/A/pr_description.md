@@ -4,8 +4,8 @@
 **Agents:** A  
 **Labels:** `risk:R2`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** `claude-sonnet-4-5-20250929`  
-**Anthropic response id:** `pending — PR not opened yet`
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01PDPjEBRFf5bFkDenjtSoEJ`
 
 ### 1) Summary
 - Added a preorder-only fallback window for "Pre-order Delivery" so replies include delivery window and days.

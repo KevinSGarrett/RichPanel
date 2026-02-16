@@ -79,12 +79,13 @@ List commands you ran (include key flags/env if relevant):
 - `pytest -q` - unit tests (failed due to missing AWS region).
 - `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - unit tests with AWS region (pass).
 - `gh pr create --title "B83: Preorder ETA window for 'Pre-order Delivery' method (risk:R2)" --body-file REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/pr_description.md --label "risk:R2-medium" --label "gate:claude"` - open PR.
+- `gh pr edit 252 --body-file REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/pr_description.md` - update PR body with Claude gate response id.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
-- `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
+- `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pass (1529 tests) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260215_2351Z/A/RUN_REPORT.md`
 
 Paste output snippet proving you ran:
 `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; python scripts/run_ci_checks.py --ci`
@@ -94,6 +95,15 @@ $ python scripts/check_protected_deletes.py --ci
 
 [OK] CI-equivalent checks passed.
 ```
+
+PR checks (green):
+- validate
+- risk-label-check
+- claude-gate-check
+- Architecture Boundaries / import-linter
+- CodeQL / analyze
+- codecov/patch
+- PR Agent (advisory)
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/00_Project_Admin/Progress_Log.md`, `docs/_generated/*`
