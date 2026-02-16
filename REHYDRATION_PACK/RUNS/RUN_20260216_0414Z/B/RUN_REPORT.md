@@ -80,7 +80,7 @@ List commands you ran (include key flags/env if relevant):
 - `gh run list --workflow deploy-prod.yml --limit 5` / `gh run watch 22049889811 --exit-status` - wait for deploy success.
 - `gh run view 22049889811 --json url --jq ".url" > .../deploy_prod_run_url.txt` - capture deploy URL.
 - `aws ssm get-parameters --names "/rp-mw/prod/safe_mode" "/rp-mw/prod/automation_enabled" --with-decryption --profile rp-admin-prod --region us-east-2 --output json > .../prod_runtime_flags_postdeploy.json` - postdeploy flags.
-- `AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 SHOPIFY_SHOP_DOMAIN=scentimen-t.myshopify.com MW_ALLOW_NETWORK_READS=true RICHPANEL_OUTBOUND_ENABLED=false RICHPANEL_READ_ONLY=true RICHPANEL_WRITE_DISABLED=true SHOPIFY_OUTBOUND_ENABLED=true SHOPIFY_WRITE_DISABLED=true python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check --out-json REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.json --out-md REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.md` - preflight PASS.
+- `AWS_PROFILE=rp-admin-prod AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 SHOPIFY_SHOP_DOMAIN=scentimen-t.myshopify.com MW_ALLOW_NETWORK_READS=true RICHPANEL_OUTBOUND_ENABLED=false RICHPANEL_READ_ONLY=true RICHPANEL_WRITE_DISABLED=true SHOPIFY_OUTBOUND_ENABLED=true SHOPIFY_WRITE_DISABLED=true python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check --out-json REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.json --out-md REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.md` - preflight PASS (skip refresh because deploy-prod already validated the Lambda update).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -88,7 +88,7 @@ Include test commands + results + links to evidence.
 - `python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check --out-json REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.json --out-md REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.md` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/preflight_prod.md`
 - Deploy workflow run URL - success - evidence: https://github.com/KevinSGarrett/RichPanel/actions/runs/22049889811
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260216_0414Z/B/RUN_REPORT.md`
-- Claude gate PASS (comment): https://github.com/KevinSGarrett/RichPanel/pull/255#issuecomment-3906355126 (response id `msg_016kA4YCbX4gJ6KzQBrbgatD`)
+- Claude gate PASS (comment): https://github.com/KevinSGarrett/RichPanel/pull/255#issuecomment-3906355126
 - Codecov patch PASS: https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/255
 
 Paste output snippet proving you ran:
@@ -106,6 +106,7 @@ Paste output snippet proving you ran:
 - Deploy workflow failure; mitigated by watch + recorded URL and stop conditions.
 - Production safety; verified safe_mode/automation_enabled before and after deploy.
 - PR Agent suggestions reviewed; no changes required (non-blocking).
+- PR Agent noted BOM/timestamp consistency; accepted as non-blocking for this docs-only run.
 
 ## Blockers / open questions
 - NONE
