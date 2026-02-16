@@ -518,6 +518,7 @@ def compute_delivery_estimate(
     is_late = elapsed >= total_max
     if not is_late:
         # Floor avoids confusing "0-1 business days" messaging per B86 requirements.
+        # Clamp min to max after flooring to avoid inverted ranges.
         if remaining_min < ETA_FLOOR_MIN_DAYS:
             remaining_min = ETA_FLOOR_MIN_DAYS
         if remaining_max < ETA_FLOOR_MAX_DAYS:
