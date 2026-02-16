@@ -97,9 +97,9 @@ python scripts/run_ci_checks.py --ci
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** yes (120–180s jitter)
-- **Status timestamps:** 2026-02-16T20:39Z–20:47Z (PR checks)
+- **Status timestamps:** 2026-02-16T20:53Z–21:01Z (PR checks)
 - **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/256/checks
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22078457019
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22078670820
 - **Codecov status:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/256
 - **Bugbot status:** https://github.com/KevinSGarrett/RichPanel/pull/256#issuecomment-3910416712
 
