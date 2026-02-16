@@ -32,7 +32,7 @@ Implement new ETA formulas (processing + expedited overrides + preorder release)
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci`
+- Tests run: `python scripts/run_ci_checks.py --ci`, `python scripts/verify_rehydration_pack.py`
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md`
 
 ## Decisions made

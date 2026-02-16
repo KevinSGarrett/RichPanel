@@ -88,18 +88,22 @@ python scripts/run_ci_checks.py --ci
 # output:
 ... tests OK ...
 [OK] CI-equivalent checks passed.
+
+python scripts/verify_rehydration_pack.py
+# output:
+[OK] REHYDRATION_PACK validated (mode=build).
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci`
-- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\7057f6e6-af75-48b9-8821-7f188c6c9fad.txt`)
+- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\d9682cf8-92bd-4810-b274-69b47c243c36.txt`)
 - **Results:** Pass.
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** yes (120–180s jitter)
-- **Status timestamps:** 2026-02-16T20:53Z–21:01Z (PR checks)
+- **Status timestamps:** 2026-02-16T21:05Z–21:12Z (PR checks)
 - **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/256/checks
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22078670820
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22078860322
 - **Codecov status:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/256
 - **Bugbot status:** https://github.com/KevinSGarrett/RichPanel/pull/256#issuecomment-3910416712
 
