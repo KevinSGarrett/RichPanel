@@ -216,6 +216,9 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNone(
             compute_delivery_estimate("2024-01-02", "Standard Shipping", "bad-date")
         )
+        self.assertIsNone(
+            compute_delivery_estimate("2024-01-02", "Mystery Courier", "2024-01-03")
+        )
 
     def test_standard_shipping_canonical_remaining_window(self) -> None:
         estimate = compute_delivery_estimate(
@@ -467,6 +470,18 @@ class DeliveryEstimateTests(unittest.TestCase):
             "shipping, the estimated delivery window is January 9–January 15, 2024. "
             "It should arrive in about 4-8 business days. We'll send tracking as soon as it ships.",
         )
+
+    def test_no_tracking_reply_late_uses_any_day_now(self) -> None:
+        order_summary = {
+            "order_id": "late-1",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping (3-5 business days)",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-16")
+        assert reply is not None
+        body_lower = reply["body"].lower()
+        self.assertIn("any day now", body_lower)
+        self.assertNotIn("1-2 business days", body_lower)
 
     def test_no_tracking_reply_preorder_includes_ship_and_eta(self) -> None:
         order_summary = {
