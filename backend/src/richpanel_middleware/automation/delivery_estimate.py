@@ -10,6 +10,9 @@ from typing import Any, Dict, List, Optional
 
 LOGGER = logging.getLogger(__name__)
 
+ETA_FLOOR_MIN_DAYS = 1
+ETA_FLOOR_MAX_DAYS = 2
+
 DEFAULT_SHIPPING_METHOD_TRANSIT_MAP: Dict[str, tuple[int, int]] = {
     "priority": (1, 1),
     "overnight": (1, 1),
@@ -140,6 +143,7 @@ def _preorder_delivery_fallback_window(
 
 
 def _effective_transit_window(shipping_method: Optional[str]) -> Optional[Dict[str, Any]]:
+    """Return transit window, overriding to 1–1 business day for expedited methods."""
     window = normalize_shipping_method(shipping_method)
     if not window:
         return None
@@ -510,13 +514,13 @@ def compute_delivery_estimate(
     elapsed = business_days_between(order_date, inquiry)
     remaining_min = max(0, total_min - elapsed)
     remaining_max = max(0, total_max - elapsed)
-    if remaining_min < 1:
-        remaining_min = 1
-    if remaining_max < 2:
-        remaining_max = 2
-    if remaining_min > remaining_max:
-        remaining_min = remaining_max
     is_late = elapsed >= total_max
+    if not is_late:
+        if remaining_min < ETA_FLOOR_MIN_DAYS:
+            remaining_min = ETA_FLOOR_MIN_DAYS
+        if remaining_max < ETA_FLOOR_MAX_DAYS:
+            remaining_max = ETA_FLOOR_MAX_DAYS
+        remaining_min = min(remaining_min, remaining_max)
     eta_human = (
         "should arrive any day now"
         if is_late

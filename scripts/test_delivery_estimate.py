@@ -264,6 +264,22 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(estimate["eta_human"], "1-2 business days")
         self.assertEqual(estimate["delivery_window_human"], "January 3, 2024")
 
+    def test_expedited_priority_two_day_still_overrides(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",
+            shipping_method="Priority 2-Day",
+            inquiry_date="2024-01-02",
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["processing_min_days"], 1)
+        self.assertEqual(estimate["processing_max_days"], 1)
+        self.assertEqual(estimate["transit_min_days"], 1)
+        self.assertEqual(estimate["transit_max_days"], 1)
+        self.assertEqual(estimate["window_min_days"], 2)
+        self.assertEqual(estimate["window_max_days"], 2)
+
     def test_remaining_window_floor_prevents_zero_minimum(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
@@ -288,8 +304,8 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertTrue(estimate["is_late"])
-        self.assertEqual(estimate["remaining_min_days"], 1)
-        self.assertEqual(estimate["remaining_max_days"], 2)
+        self.assertEqual(estimate["remaining_min_days"], 0)
+        self.assertEqual(estimate["remaining_max_days"], 0)
         self.assertEqual(estimate["eta_human"], "should arrive any day now")
         self.assertGreaterEqual(
             estimate["elapsed_business_days"], estimate["window_max_days"]
