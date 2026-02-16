@@ -19,7 +19,7 @@ Deploy main (B83 preorder fallback) to AWS PROD via deploy-prod, capture evidenc
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260216_0238Z`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/253
 - CI status at end of run: green (local `run_ci_checks.py --ci`)
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)

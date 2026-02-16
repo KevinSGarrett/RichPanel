@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-02-16
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260216_0238Z`
-- **PR:** none
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/253
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
