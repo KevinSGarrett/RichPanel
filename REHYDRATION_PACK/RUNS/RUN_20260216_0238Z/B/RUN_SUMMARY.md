@@ -8,9 +8,9 @@
 Deploy main (B83 preorder fallback) to AWS PROD via deploy-prod, capture evidence, and keep no-outbound posture.
 
 ## Work completed (bullets)
-- Verified main contains preorder fallback logic and recorded HEAD SHA.
+- Verified main contains preorder fallback logic after PR 252 merge and recorded SHA.
 - Captured AWS PROD identity/region, runtime flags pre/post deploy, and deploy workflow URL.
-- Ran prod read-only preflight and saved artifacts.
+- Re-deployed main after PR 252 merge, re-captured flags and preflight artifacts.
 - Updated progress log and run artifacts for B84 evidence.
 
 ## Files changed

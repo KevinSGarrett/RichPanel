@@ -16,6 +16,7 @@
 
 ## Files/folders modified
 - `docs/00_Project_Admin/Progress_Log.md`
+- `docs/REGISTRY.md`
 - `docs/_generated/doc_outline.json`
 - `docs/_generated/doc_registry.compact.json`
 - `docs/_generated/doc_registry.json`

@@ -290,26 +290,6 @@
     "last_updated": ""
   },
   {
-    "path": "00_Project_Admin/Progress_Log.md",
-    "title": "Progress Log",
-    "section": "00_Project_Admin",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 3563,
-    "approx_tokens": 4631,
-    "last_updated": ""
-  },
-  {
-    "path": "00_Project_Admin/Progress_Log.md",
-    "title": "Progress Log",
-    "section": "00_Project_Admin",
-    "status": "canonical",
-    "in_index": true,
-    "word_count": 3563,
-    "approx_tokens": 4631,
-    "last_updated": ""
-  },
-  {
     "path": "00_Project_Admin/Progress_Wave_Schedule.md",
     "title": "Progress & Wave Schedule",
     "section": "00_Project_Admin",
@@ -4065,8 +4045,8 @@
     "section": "Root",
     "status": "canonical",
     "in_index": true,
-    "word_count": 10908,
-    "approx_tokens": 14180,
+    "word_count": 10892,
+    "approx_tokens": 14159,
     "last_updated": ""
   },
   {

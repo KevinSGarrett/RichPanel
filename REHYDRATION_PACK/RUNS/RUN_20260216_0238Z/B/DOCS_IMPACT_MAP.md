@@ -8,6 +8,7 @@ Goal: document what changed and where documentation must be updated.
 
 ## Docs updated in this run
 - `docs/00_Project_Admin/Progress_Log.md` — added B84 prod deploy evidence entry.
+- `docs/REGISTRY.md` — regenerated doc registry output.
 - `docs/_generated/doc_outline.json` — regenerated doc registry output.
 - `docs/_generated/doc_registry.compact.json` — regenerated doc registry output.
 - `docs/_generated/doc_registry.json` — regenerated doc registry output.
