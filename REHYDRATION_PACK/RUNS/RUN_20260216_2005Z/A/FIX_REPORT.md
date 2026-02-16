@@ -13,8 +13,8 @@
 - likely root cause: progress log update triggers doc registry regeneration; outputs must be committed.
 
 ## Fix applied
-- files changed: `docs/_generated/*` and run artifacts committed.
-- why it works: committed regenerated outputs satisfy the validation check.
+- files changed: ETA floor guard/comment, release date naming, and added ETA tests for late/expedited/unknown cases.
+- why it works: ensures late orders never show floor ranges and closes coverage gaps identified by Codecov/PR Agent.
 
 ## Verification
 - tests run: `python scripts/run_ci_checks.py --ci`

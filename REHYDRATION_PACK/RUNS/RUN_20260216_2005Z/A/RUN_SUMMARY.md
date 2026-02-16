@@ -26,7 +26,7 @@ Implement new ETA formulas (processing + expedited overrides + preorder release)
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260216_2005Z`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/256
 - CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
