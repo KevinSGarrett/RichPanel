@@ -27,7 +27,7 @@ Implement new ETA formulas (processing + expedited overrides + preorder release)
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260216_2005Z`
 - PR: none
-- CI status at end of run: red (generated outputs need commit)
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 
@@ -39,4 +39,4 @@ Implement new ETA formulas (processing + expedited overrides + preorder release)
 - None
 
 ## Issues / follow-ups
-- Commit regenerated outputs (`docs/_generated/*`) and rerun CI-equivalent checks.
+- None

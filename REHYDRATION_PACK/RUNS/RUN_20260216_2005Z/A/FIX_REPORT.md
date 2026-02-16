@@ -13,9 +13,9 @@
 - likely root cause: progress log update triggers doc registry regeneration; outputs must be committed.
 
 ## Fix applied
-- files changed: pending (doc registry outputs to be committed with run artifacts).
-- why it works: committing regenerated outputs satisfies the validation check.
+- files changed: `docs/_generated/*` and run artifacts committed.
+- why it works: committed regenerated outputs satisfy the validation check.
 
 ## Verification
 - tests run: `python scripts/run_ci_checks.py --ci`
-- results: tests passed; validation fails until regenerated outputs are committed.
+- results: pass.

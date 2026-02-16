@@ -64,14 +64,13 @@ Switched to a new branch 'run/RUN_20260216_2005Z'
 python scripts/run_ci_checks.py --ci
 # output:
 ... tests OK ...
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Uncommitted changes: docs/_generated/* and run files
+[OK] CI-equivalent checks passed.
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci`
-- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\9fdf2259-b517-45a5-b989-6411a2b9a73b.txt`)
-- **Results:** Tests passed; CI-equivalent run failed due to regenerated outputs needing commit.
+- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\a3136b93-d6c2-4a2d-9170-375e066f12a9.txt`)
+- **Results:** Pass.
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no (no PR yet)
@@ -123,4 +122,4 @@ Uncommitted changes: docs/_generated/* and run files
 - None.
 
 ## Follow-ups (actionable)
-- Commit regenerated doc registries and run artifacts, then re-run CI-equivalent checks.
+- None.
