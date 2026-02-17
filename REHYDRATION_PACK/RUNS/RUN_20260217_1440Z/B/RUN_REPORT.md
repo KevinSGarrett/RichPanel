@@ -110,6 +110,7 @@ Include test commands + results + links to evidence.
 - `python scripts/verify_agent_prompts_fresh.py` - **PASS** (override; fingerprint recorded) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_agent_prompts_fresh.log`
 - PR labels proof: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/pr_labels.txt`
 - Bugbot trigger comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915242522
+- Claude gate PASS comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120 (response_id: msg_01MxQkxM1RspioSzRxD7SKdk)
 
 ### Evidence snippets
 **STS identity (PROD)**
@@ -168,9 +169,7 @@ required_secrets PASS checked=5
 - **Deploy safety:** deployment from main with explicit workflow run and log capture.
 
 ## Blockers / open questions
-- Claude gate check failed with GitHub API 401; rerun pending. (workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/22103649590)
+- None.
 
 ## Follow-ups (actionable)
-- [ ] Wait for all PR checks to turn green (claude gate, validate, bugbot, codecov).
-- [ ] Capture Claude PASS comment link + response_id and update PR body + RUN_REPORT.
-- [ ] Capture final PR checks/labels proof once all checks are green.
+- [ ] None.

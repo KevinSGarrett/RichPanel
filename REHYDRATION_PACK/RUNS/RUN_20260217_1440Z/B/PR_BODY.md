@@ -2,8 +2,8 @@
 
 **Labels:** `risk:R0-docs`, `gate:claude`  
 **Risk:** risk:R0 (docs-only; label applied: `risk:R0-docs`)  
-**Claude gate model (used):** `claude-haiku-4.5`  
-**Anthropic response id:** `pending — https://github.com/KevinSGarrett/RichPanel/pull/257`  
+**Claude gate model (used):** `claude-haiku-4-5-20251001`  
+**Anthropic response id:** `msg_01MxQkxM1RspioSzRxD7SKdk` — https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120  
 
 ### Summary
 - Captures PROD deploy evidence for B86 ETA processing changes, including safety flag proof and workflow logs.
@@ -23,9 +23,9 @@
   - `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/*`
 
 ### Evidence
-- CI: pending — https://github.com/KevinSGarrett/RichPanel/pull/257/checks
-- Codecov: pending — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/257
-- Bugbot: pending — https://github.com/KevinSGarrett/RichPanel/pull/257
+- CI: pass — https://github.com/KevinSGarrett/RichPanel/pull/257/checks
+- Codecov: pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/257
+- Bugbot: pass — https://github.com/KevinSGarrett/RichPanel/pull/257/checks
 
 ### Reviewer focus
 - Double-check:
