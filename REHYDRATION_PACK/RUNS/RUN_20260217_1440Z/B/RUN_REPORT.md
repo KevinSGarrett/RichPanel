@@ -20,7 +20,51 @@
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-<PENDING>
+```
+.../RUNS/RUN_20260217_1440Z/A/DOCS_IMPACT_MAP.md   |  23 +++
+.../RUNS/RUN_20260217_1440Z/A/FIX_REPORT.md        |  21 +++
+.../RUNS/RUN_20260217_1440Z/A/GIT_RUN_PLAN.md      |  58 ++++++++
+.../RUNS/RUN_20260217_1440Z/A/RUN_REPORT.md        |  63 +++++++++
+.../RUNS/RUN_20260217_1440Z/A/RUN_SUMMARY.md       |  33 +++++
+.../RUNS/RUN_20260217_1440Z/A/STRUCTURE_REPORT.md  |  27 ++++
+.../RUNS/RUN_20260217_1440Z/A/TEST_MATRIX.md       |  15 ++
+.../RUNS/RUN_20260217_1440Z/B/DOCS_IMPACT_MAP.md   |  26 ++++
+.../RUNS/RUN_20260217_1440Z/B/FIX_REPORT.md        |  21 +++
+.../RUNS/RUN_20260217_1440Z/B/GIT_RUN_PLAN.md      |  58 ++++++++
+.../RUNS/RUN_20260217_1440Z/B/RUN_REPORT.md        | 133 ++++++++++++++++++
+.../RUNS/RUN_20260217_1440Z/B/RUN_SUMMARY.md       |  38 +++++
+.../RUNS/RUN_20260217_1440Z/B/STRUCTURE_REPORT.md  |  43 ++++++
+.../RUNS/RUN_20260217_1440Z/B/TEST_MATRIX.md       |  17 +++
+.../RUNS/RUN_20260217_1440Z/B/aws_region_prod.txt  | Bin 0 -> 24 bytes
+.../RUNS/RUN_20260217_1440Z/B/deploy_prod_run_url.txt | Bin 0 -> 140 bytes
+.../RUNS/RUN_20260217_1440Z/B/main_sha.txt         | Bin 0 -> 86 bytes
+.../RUNS/RUN_20260217_1440Z/B/preflight_prod.json  |  59 ++++++++
+.../RUNS/RUN_20260217_1440Z/B/preflight_prod.md    |  28 ++++
+.../B/prod_runtime_flags_lockdown.json             | Bin 0 -> 1554 bytes
+.../B/prod_runtime_flags_postdeploy.json           | Bin 0 -> 1554 bytes
+.../B/prod_runtime_flags_predeploy.json            | Bin 0 -> 1554 bytes
+.../RUN_20260217_1440Z/B/prompt_fingerprint.txt    | Bin 0 -> 134 bytes
+.../RUNS/RUN_20260217_1440Z/B/run_ci_checks.log    | Bin 0 -> 9852 bytes
+.../RUN_20260217_1440Z/B/sts_identity_prod.json    | Bin 0 -> 420 bytes
+.../B/verify_agent_prompts_fresh.log               | Bin 0 -> 124 bytes
+.../B/verify_rehydration_pack.log                  | Bin 0 -> 96 bytes
+.../B/workflow_deploy_prod_22103028676.log         | Bin 0 -> 67382 bytes
+.../RUN_20260217_1440Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++++
+.../RUNS/RUN_20260217_1440Z/C/DOCS_IMPACT_MAP.md   |  23 +++
+.../RUNS/RUN_20260217_1440Z/C/FIX_REPORT.md        |  21 +++
+.../RUNS/RUN_20260217_1440Z/C/GIT_RUN_PLAN.md      |  58 ++++++++
+.../RUNS/RUN_20260217_1440Z/C/RUN_REPORT.md        |  63 +++++++++
+.../RUNS/RUN_20260217_1440Z/C/RUN_SUMMARY.md       |  33 +++++
+.../RUNS/RUN_20260217_1440Z/C/STRUCTURE_REPORT.md  |  27 ++++
+.../RUNS/RUN_20260217_1440Z/C/TEST_MATRIX.md       |  15 ++
+.../RUNS/RUN_20260217_1440Z/RUN_META.md            |  11 ++
+docs/00_Project_Admin/Progress_Log.md              |   6 +
+docs/_generated/doc_outline.json                   |   5 +
+docs/_generated/doc_registry.compact.json          |   2 +-
+docs/_generated/doc_registry.json                  |   4 +-
+docs/_generated/heading_index.json                 |   6 +
+42 files changed, 1090 insertions(+), 3 deletions(-)
+```
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -57,7 +101,7 @@ List commands you ran (include key flags/env if relevant):
 Include test commands + results + links to evidence.
 
 - `python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check` - **PASS** - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/preflight_prod.md`
-- `python scripts/run_ci_checks.py --ci` - **FAIL** (uncommitted changes) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/run_ci_checks.log`
+- `python scripts/run_ci_checks.py --ci` - **PASS** - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/run_ci_checks.log`
 - `python scripts/verify_rehydration_pack.py` - **PASS** - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_rehydration_pack.log`
 - `python scripts/verify_agent_prompts_fresh.py` - **PASS** (override; fingerprint recorded) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_agent_prompts_fresh.log`
 
@@ -99,16 +143,9 @@ required_env PASS env=prod source=ENVIRONMENT
 required_secrets PASS checked=5
 ```
 
-**run_ci_checks output (failure due to uncommitted changes)**
+**run_ci_checks output**
 ```
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Uncommitted changes:
-M docs/00_Project_Admin/Progress_Log.md
-M docs/_generated/doc_outline.json
-M docs/_generated/doc_registry.compact.json
-M docs/_generated/doc_registry.json
-M docs/_generated/heading_index.json
-?? REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/
+[OK] CI-equivalent checks passed.
 ```
 
 **Prompt set fingerprint**
@@ -125,9 +162,8 @@ M docs/_generated/heading_index.json
 - **Deploy safety:** deployment from main with explicit workflow run and log capture.
 
 ## Blockers / open questions
-- run_ci_checks must be re-run after committing regenerated docs and run artifacts.
+- None.
 
 ## Follow-ups (actionable)
-- [ ] Re-run `python scripts/run_ci_checks.py --ci` with clean worktree and update TEST_MATRIX/RUN_REPORT.
-- [ ] Run `python scripts/verify_rehydration_pack.py` and `python scripts/verify_agent_prompts_fresh.py` and capture outputs.
 - [ ] Open PR with required labels and wait for checks/claude gate.
+- [ ] Capture PR labels proof + Claude PASS link/response_id in RUN_REPORT.

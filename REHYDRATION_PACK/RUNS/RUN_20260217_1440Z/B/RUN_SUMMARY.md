@@ -23,12 +23,12 @@ Deploy main (B86 ETA changes) to PROD with safe_mode/automation_enabled locked a
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260217_1440Z`
 - PR: none (not created yet)
-- CI status at end of run: red (run_ci_checks failed due to uncommitted changes)
+- CI status at end of run: green (run_ci_checks passed)
 - Main updated: <yes/no> (Integrator only)
 - Branch cleanup done: <yes/no> (Integrator only)
 
 ## Tests and evidence
-- Tests run: `python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check` (PASS); `python scripts/run_ci_checks.py --ci` (FAIL due to uncommitted changes)
+- Tests run: `python scripts/order_status_preflight_check.py --env prod --skip-refresh-lambda-check` (PASS); `python scripts/run_ci_checks.py --ci` (PASS); `python scripts/verify_rehydration_pack.py` (PASS); `python scripts/verify_agent_prompts_fresh.py` (PASS)
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/`
 
 ## Decisions made
