@@ -110,7 +110,7 @@ Include test commands + results + links to evidence.
 - `python scripts/verify_agent_prompts_fresh.py` - **PASS** (override; fingerprint recorded) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_agent_prompts_fresh.log`
 - PR labels proof: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/pr_labels.txt`
 - Bugbot trigger comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915242522
-- Claude gate PASS comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120 (response_id: msg_01HxMTWYG2eeXcu7stACLZAf)
+- Claude gate PASS comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120 (response_id: msg_018zcj7pVu4EfdFSmdvVRLEA)
 
 ### Evidence snippets
 **STS identity (PROD)**
