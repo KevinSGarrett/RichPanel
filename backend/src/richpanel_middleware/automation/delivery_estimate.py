@@ -141,6 +141,9 @@ def _preorder_delivery_fallback_window(
     max_days = 7
     bucket = "Standard"
     normalized_method = f"{bucket} ({format_eta_window(min_days, max_days)})"
+    eta_human = (
+        "should arrive any day now" if is_late else delivery_window_human
+    )
     return {
         "bucket": bucket,
         "min_days": min_days,
@@ -226,6 +229,7 @@ def compute_preorder_delivery_estimate(
     else:
         days_from_inquiry_human = _format_day_window(max(0, days_min), max(0, days_max))
     is_late = inquiry >= delivery_max
+    eta_human = "should arrive any day now" if is_late else delivery_window_human
 
     return {
         "bucket": window["bucket"],
@@ -240,7 +244,7 @@ def compute_preorder_delivery_estimate(
         "normalized_method": window["normalized_method"],
         "order_created_date": order_date.isoformat(),
         "inquiry_date": inquiry.isoformat(),
-        "eta_human": delivery_window_human,
+        "eta_human": eta_human,
         "is_late": is_late,
         "preorder": True,
         "preorder_ship_date_human": release_date_human,

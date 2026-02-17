@@ -102,11 +102,15 @@ python scripts/run_ci_checks.py --ci
 python scripts/test_delivery_estimate.py
 # output:
 ... tests OK ...
+ 
+python scripts/test_delivery_estimate.py
+# output:
+... tests OK ...
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci`
-- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\c933781d-647b-4504-b765-2873f9a9d1da.txt` and `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\925b5906-4c7b-4863-9bda-65af5dcab727.txt`)
+- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\c933781d-647b-4504-b765-2873f9a9d1da.txt`, `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\925b5906-4c7b-4863-9bda-65af5dcab727.txt`, and `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\3ae7f760-f120-4f7c-b790-f1557b2034d2.txt`)
 - **Results:** Pass.
 
 ## Wait-for-green evidence (required)
