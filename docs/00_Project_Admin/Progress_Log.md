@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-16 - RUN_20260216_2005Z (B86: ETA processing + expedited overrides)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260216_2005Z
+- Updated no-tracking ETA logic to include processing time, expedited overrides, and preorder release-based windows.
+- Updated draft reply messaging and unit tests for new ETA wording and window semantics.
+
 ### 2026-02-16 - RUN_20260216_0343Z (B85: PROD post-deploy preorder proof)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260216_0343Z
 - Tickets evaluated: 116700, 116759, 116762, 116770, 116805, 116837, 116888, 119207, 119201, 119202, 115699

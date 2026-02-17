@@ -149,9 +149,9 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
-            "Your pre-order is scheduled to ship on Sunday, March 29, 2026. "
-            "It ships in 15 days. Delivery window April 1–April 7, 2026. "
-            "Arrives in 18–24 days. We'll send tracking as soon as it ships."
+            "Your pre-order is scheduled to release on Sunday, March 29, 2026. "
+            "It ships in 15 days. Delivery window April 6–April 14, 2026. "
+            "Arrives in 23–31 days. We'll send tracking as soon as it ships."
         )
         parameters = {
             "delivery_estimate": {
@@ -160,10 +160,10 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
                 "inquiry_date": "2026-02-20",
                 "preorder_ship_date_human": "Sunday, March 29, 2026",
                 "ship_days_from_inquiry_human": "15 days",
-                "delivery_window_human": "April 1–April 7, 2026",
-                "days_from_inquiry_human": "18–24 days",
-                "window_min_days": 3,
-                "window_max_days": 7,
+                "delivery_window_human": "April 6–April 14, 2026",
+                "days_from_inquiry_human": "23–31 days",
+                "window_min_days": 6,
+                "window_max_days": 12,
                 "normalized_method": "standard",
                 "raw_method": "Standard",
             },
@@ -176,8 +176,8 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertEqual(result["inquiry_date"], "2026-02-20")
         self.assertTrue(result["preorder_tag_match"])
         self.assertIn("pre-order", result["preorder_tag_matches"])
-        self.assertEqual(result["preorder_window_min_days"], 3)
-        self.assertEqual(result["preorder_window_max_days"], 7)
+        self.assertEqual(result["preorder_window_min_days"], 6)
+        self.assertEqual(result["preorder_window_max_days"], 12)
         self.assertEqual(result["preorder_normalized_method"], "standard")
         self.assertEqual(result["preorder_raw_method"], "Standard")
         self.assertTrue(result["draft_reply_present"])

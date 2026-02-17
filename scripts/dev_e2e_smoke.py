@@ -1148,7 +1148,7 @@ def _order_status_no_tracking_standard_shipping_3_5_payload(
 ) -> Dict[str, Any]:
     """
     John scenario: Monday order, Wednesday ticket, standard shipping (3-5 days),
-    no tracking yet, remaining ETA should be 1-3 business days.
+    no tracking yet, remaining ETA should be 4-8 business days.
     """
     now = datetime.now(timezone.utc)
     ticket_created_at_dt = _most_recent_weekday(now, 2)  # Wednesday
@@ -5087,7 +5087,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
         "order_status_no_tracking_short_window",
         "order_status_no_tracking_standard_shipping_3_5",
     }:
-        window_phrase = "1-3 business days"
+        window_phrase = "4-8 business days"
         method_phrase = "standard (3-5 business days)"
         candidate_windows = []
         candidate_methods = []
@@ -5137,7 +5137,7 @@ def main() -> int:  # pragma: no cover - integration entrypoint
             )
         if not found_window:
             raise SmokeFailure(
-                "No-tracking ETA scenario draft reply did not include the remaining 1-3 business days window."
+                "No-tracking ETA scenario draft reply did not include the remaining 4-8 business days window."
             )
         if not found_method:
             raise SmokeFailure(

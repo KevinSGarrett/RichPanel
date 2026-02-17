@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-16 - run_20260216_2005z (b86: eta processing + expedited overrides)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-16-run202602162005z-b86-eta-processing-expedited-overrides"
+    }
+  ],
   "2026-02-16 - run_20260216_0343z (b85: prod post-deploy preorder proof)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
