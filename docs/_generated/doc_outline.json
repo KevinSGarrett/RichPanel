@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-17 - RUN_20260217_1440Z (B87: PROD deploy evidence for B86 ETA changes)",
+        "anchor": "2026-02-17-run202602171440z-b87-prod-deploy-evidence-for-b86-eta-changes"
+      },
+      {
+        "level": 3,
         "text": "2026-02-16 - RUN_20260216_2005Z (B86: ETA processing + expedited overrides)",
         "anchor": "2026-02-16-run202602162005z-b86-eta-processing-expedited-overrides"
       },

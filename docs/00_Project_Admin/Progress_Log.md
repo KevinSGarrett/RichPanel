@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-17 - RUN_20260217_1440Z (B87: PROD deploy evidence for B86 ETA changes)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260217_1440Z
+- Deployed main (B86 ETA processing + expedited overrides) to PROD.
+- Verified prod runtime flags safe_mode=true and automation_enabled=false before and after deploy.
+- Read-only prod preflight PASS (artifacts in RUN_20260217_1440Z/B).
+
 ### 2026-02-16 - RUN_20260216_2005Z (B86: ETA processing + expedited overrides)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260216_2005Z
 - Updated no-tracking ETA logic to include processing time, expedited overrides, and preorder release-based windows.
