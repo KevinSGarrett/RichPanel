@@ -1,17 +1,17 @@
 # Live Read-Only Shadow Eval Report
 
-- Run ID: `RUN_20260217_1704Z`
-- Generated (UTC): 2026-02-17T17:07:16.242762+00:00
+- Run ID: `RUN_20260217_1730Z`
+- Generated (UTC): 2026-02-17T17:33:15.002351+00:00
 - Environment: `prod`
 - Region: `us-east-2`
 - Stack name: `n/a`
 - Sample mode: `explicit`
-- Tickets requested: 11
-- Tickets scanned: 11
-- Orders matched: 11
-- Tracking found: 10
-- ETA available: 11
-- Tracking or ETA available: 11
+- Tickets requested: 10
+- Tickets scanned: 10
+- Orders matched: 10
+- Tracking found: 6
+- ETA available: 10
+- Tracking or ETA available: 10
 - Match success rate: 100.0%
 - Would reply send: False
 - Errors: 0
@@ -23,14 +23,14 @@
 - Run warnings: none
 
 ## Route Decision Distribution (B61/C)
-- Order Status: 9 (81.8%)
-- Non-Order Status: 2 (18.2%)
+- Order Status: 9 (90.0%)
+- Non-Order Status: 1 (10.0%)
 - Unknown: 0 (0.0%)
 
 ## Match Method Telemetry (B61/C)
-- Order Number: 9 (81.8%)
-- Name + Email: 2 (18.2%)
-- Email Only: 0 (0.0%)
+- Order Number: 9 (90.0%)
+- Name + Email: 0 (0.0%)
+- Email Only: 1 (10.0%)
 - No Match: 0 (0.0%)
 - Parse Error: 0 (0.0%)
 
@@ -57,17 +57,17 @@
 - Match Rate: 100.0% (threshold: drop > 10.0%)
 - API Error Rate: 0.0% (threshold: > 5.0%)
 - Ticket Fetch Failure Rate: 0.0% (warning-only)
-- Order Number Share: 81.8% (threshold: drop > 15.0%)
-- Schema Drift: 54.5% (threshold: > 20.0%)
+- Order Number Share: 90.0% (threshold: drop > 15.0%)
+- Schema Drift: 40.0% (threshold: > 20.0%)
 - **Alerts: 1**
-  - ⚠️ Schema drift (54.5%) exceeds threshold (20.0%)
+  - ⚠️ Schema drift (40.0%) exceeds threshold (20.0%)
 
 ## HTTP Trace Summary
-- Total requests: 208
-- Methods: {"GET": 151, "POST": 57}
-- Services: {"aws_portal": 1, "aws_secretsmanager": 35, "openai": 22, "richpanel": 128, "shipstation": 1, "shopify": 21}
-- Sources: {"aws_sdk": 36, "urllib": 172}
-- AWS operations: {"GetSecretValue": 35}
+- Total requests: 223
+- Methods: {"GET": 147, "POST": 76}
+- Services: {"aws_portal": 1, "aws_secretsmanager": 56, "openai": 20, "richpanel": 118, "shipstation": 8, "shopify": 20}
+- Sources: {"aws_sdk": 57, "urllib": 166}
+- AWS operations: {"GetSecretValue": 56}
 - AWS missing operations: 0
 - Allowed methods only: True
 - Trace path: `REHYDRATION_PACK\RUNS\RUN_20260217_1627Z\C\live_shadow_http_trace.json`

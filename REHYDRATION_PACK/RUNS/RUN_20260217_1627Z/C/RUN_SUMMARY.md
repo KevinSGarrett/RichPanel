@@ -34,4 +34,4 @@ Finalize processing-time + 1–2 day floor validation with read-only prod proof 
 - None
 
 ## Issues / follow-ups
-- Need additional prod no-tracking order-status tickets to fully validate processing phrase + floor proof.
+- None.

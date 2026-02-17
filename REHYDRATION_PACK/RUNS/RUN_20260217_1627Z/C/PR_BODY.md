@@ -75,11 +75,11 @@
 
 **Proof snippet(s) (PII-safe):**
 ```text
-Total tickets evaluated: 11
+Total tickets evaluated: 10
 Order-status candidates: 9
-Tracking found = false with ETA available: 1
-Non-preorder no-tracking qualifying cases: 0
-Preorder no-tracking qualifying cases: 0
+Tracking found = false with ETA available: 4
+Non-preorder no-tracking qualifying cases: 2
+Preorder no-tracking qualifying cases: 2
 ```
 
 ### 8) Risk & rollback

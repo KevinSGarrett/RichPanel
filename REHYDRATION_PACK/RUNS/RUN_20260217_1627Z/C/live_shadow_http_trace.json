@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-17T17:07:16.241197+00:00",
+  "generated_at": "2026-02-17T17:33:15.000212+00:00",
   "entries": [
     {
       "method": "GET",
@@ -36,112 +36,61 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:cd92c15d6341",
+      "path": "/v1/tickets/redacted:08c86bc89d89",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:cd92c15d6341",
+      "path": "/v1/tickets/number/redacted:08c86bc89d89",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:cd92c15d6341",
+      "path": "/api/v1/conversations/redacted:08c86bc89d89",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:cd92c15d6341",
+      "path": "/v1/conversations/redacted:08c86bc89d89",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:cd92c15d6341/messages",
+      "path": "/api/v1/conversations/redacted:08c86bc89d89/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:cd92c15d6341/messages",
+      "path": "/v1/conversations/redacted:08c86bc89d89/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:6c4cf926b500",
+      "path": "/api/v1/conversations/redacted:a2e453a56ae5",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:6c4cf926b500",
+      "path": "/v1/conversations/redacted:a2e453a56ae5",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:6c4cf926b500/messages",
+      "path": "/api/v1/conversations/redacted:a2e453a56ae5/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:6c4cf926b500/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:cd92c15d6341",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:6c4cf926b500",
+      "path": "/v1/conversations/redacted:a2e453a56ae5/messages",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -166,72 +115,6 @@
       "source": "urllib"
     },
     {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:a372973056e6",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:a372973056e6",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:a372973056e6",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:a372973056e6",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:a372973056e6/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:a372973056e6/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:815347320eb3",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:815347320eb3",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:815347320eb3/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:815347320eb3/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
       "method": "POST",
       "path": "/v1/chat/completions",
       "service": "openai",
@@ -252,13 +135,13 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:a372973056e6",
+      "path": "/v1/tickets/number/redacted:08c86bc89d89",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:815347320eb3",
+      "path": "/v1/tickets/redacted:a2e453a56ae5",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -284,958 +167,61 @@
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/redacted:0074fb03dde8",
+      "path": "/v1/tickets/redacted:b7c3c0890f86",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/tickets/number/redacted:0074fb03dde8",
+      "path": "/v1/tickets/number/redacted:b7c3c0890f86",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:0074fb03dde8",
+      "path": "/api/v1/conversations/redacted:b7c3c0890f86",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:0074fb03dde8",
+      "path": "/v1/conversations/redacted:b7c3c0890f86",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:0074fb03dde8/messages",
+      "path": "/api/v1/conversations/redacted:b7c3c0890f86/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:0074fb03dde8/messages",
+      "path": "/v1/conversations/redacted:b7c3c0890f86/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:912f28366cf2",
+      "path": "/api/v1/conversations/redacted:ed3ba44cf7e5",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:912f28366cf2",
+      "path": "/v1/conversations/redacted:ed3ba44cf7e5",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/api/v1/conversations/redacted:912f28366cf2/messages",
+      "path": "/api/v1/conversations/redacted:ed3ba44cf7e5/messages",
       "service": "richpanel",
       "source": "urllib"
     },
     {
       "method": "GET",
-      "path": "/v1/conversations/redacted:912f28366cf2/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:0074fb03dde8",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:912f28366cf2",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:fd6e103a5093",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:fd6e103a5093",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:fd6e103a5093",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:fd6e103a5093",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:fd6e103a5093/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:fd6e103a5093/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:bf91debb5d5f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:bf91debb5d5f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:bf91debb5d5f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:bf91debb5d5f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:fd6e103a5093",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:bf91debb5d5f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:924e4905c954",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:924e4905c954",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:924e4905c954",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:924e4905c954",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:924e4905c954/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:924e4905c954/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:1d008390a1e4",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:1d008390a1e4",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:1d008390a1e4/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:1d008390a1e4/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:924e4905c954",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:1d008390a1e4",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:cb6d57d9b987",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:cb6d57d9b987",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:cb6d57d9b987",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:cb6d57d9b987",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:cb6d57d9b987/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:cb6d57d9b987/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:5ed3d8c86096",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:5ed3d8c86096",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:5ed3d8c86096/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:5ed3d8c86096/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:cb6d57d9b987",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:5ed3d8c86096",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:f427ba602116",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:f427ba602116",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:f427ba602116",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:f427ba602116",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:f427ba602116/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:f427ba602116/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:ef1c8d2c81d0",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ef1c8d2c81d0",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:ef1c8d2c81d0/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ef1c8d2c81d0/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:f427ba602116",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:ef1c8d2c81d0",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:ef6eeba126f7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:ef6eeba126f7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:ef6eeba126f7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ef6eeba126f7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:ef6eeba126f7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:ef6eeba126f7/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:9453cca5701a",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:9453cca5701a",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:9453cca5701a/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:9453cca5701a/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:ef6eeba126f7",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:9453cca5701a",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:dbb9295f3e6c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:dbb9295f3e6c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:dbb9295f3e6c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:dbb9295f3e6c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:dbb9295f3e6c/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:dbb9295f3e6c/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8465f0a008ea",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8465f0a008ea",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:8465f0a008ea/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:8465f0a008ea/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:dbb9295f3e6c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:8465f0a008ea",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "POST",
-      "path": "/",
-      "service": "aws_secretsmanager",
-      "source": "aws_sdk",
-      "operation": "GetSecretValue"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:174deb98a48f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:174deb98a48f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:174deb98a48f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:174deb98a48f",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:174deb98a48f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:174deb98a48f/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:47c4f71fff35",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:47c4f71fff35",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:47c4f71fff35/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:47c4f71fff35/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
-      "service": "shopify",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "POST",
-      "path": "/v1/chat/completions",
-      "service": "openai",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/redacted:48bc2f8f66b1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/tickets/number/redacted:48bc2f8f66b1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:48bc2f8f66b1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:48bc2f8f66b1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:48bc2f8f66b1/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:48bc2f8f66b1/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:797d895aa5c1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:797d895aa5c1",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:797d895aa5c1/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:797d895aa5c1/messages",
+      "path": "/v1/conversations/redacted:ed3ba44cf7e5/messages",
       "service": "richpanel",
       "source": "urllib"
     },
@@ -1282,6 +268,1131 @@
       "method": "POST",
       "path": "/v1/chat/completions",
       "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:b7c3c0890f86",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:ed3ba44cf7e5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:708854bcef12",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:708854bcef12",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:708854bcef12",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:708854bcef12",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:708854bcef12/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:708854bcef12/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:6aa48902e4f6",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:6aa48902e4f6",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:6aa48902e4f6/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:6aa48902e4f6/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:708854bcef12",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:6aa48902e4f6",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:11cf18f9a93b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:11cf18f9a93b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:11cf18f9a93b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:11cf18f9a93b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:11cf18f9a93b/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:11cf18f9a93b/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:d7922b5dc2af",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:d7922b5dc2af",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:d7922b5dc2af/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:d7922b5dc2af/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:11cf18f9a93b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:d7922b5dc2af",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:ea6bf2b11c18",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:ea6bf2b11c18",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ea6bf2b11c18",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ea6bf2b11c18",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:ea6bf2b11c18/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:ea6bf2b11c18/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:707e4f007346",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:707e4f007346",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:707e4f007346/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:707e4f007346/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:ea6bf2b11c18",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:707e4f007346",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:6f5e1b3458dd",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:6f5e1b3458dd",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:6f5e1b3458dd",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:6f5e1b3458dd",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:6f5e1b3458dd/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:6f5e1b3458dd/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:0830e9f372d5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:0830e9f372d5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:0830e9f372d5/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:0830e9f372d5/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:6f5e1b3458dd",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:0830e9f372d5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:b78da3f90574",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:b78da3f90574",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:b78da3f90574",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:b78da3f90574",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:b78da3f90574/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:b78da3f90574/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:5b20ec225e49",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:5b20ec225e49",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:5b20ec225e49/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:5b20ec225e49/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:b78da3f90574",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:5b20ec225e49",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:f17d48a67b22",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:f17d48a67b22",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:f17d48a67b22",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:f17d48a67b22",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:f17d48a67b22/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:f17d48a67b22/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a32cc5eb27ad",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a32cc5eb27ad",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a32cc5eb27ad/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a32cc5eb27ad/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:a07ee7991d1b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:a07ee7991d1b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a07ee7991d1b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a07ee7991d1b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:a07ee7991d1b/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:a07ee7991d1b/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:9fbf3369dc21",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:9fbf3369dc21",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:9fbf3369dc21/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:9fbf3369dc21/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:a07ee7991d1b",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:9fbf3369dc21",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:54d0e65c9210",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:54d0e65c9210",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:54d0e65c9210",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:54d0e65c9210",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:54d0e65c9210/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:54d0e65c9210/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:0b8be5fecac3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:0b8be5fecac3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/conversations/redacted:0b8be5fecac3/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/conversations/redacted:0b8be5fecac3/messages",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:54d0e65c9210",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:0b8be5fecac3",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/shipments",
+      "service": "shipstation",
       "source": "urllib"
     }
   ],

@@ -91,7 +91,7 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/verify_agent_prompts_fresh.py | tee .../verify_agent_prompts_fresh.log` - prompt freshness.
 - `pytest -q | tee .../pytest.log` (AWS_REGION/AWS_DEFAULT_REGION set) - tests.
 - `python scripts/order_status_preflight_check.py --env prod --aws-profile rp-admin-prod --out-json ... --out-md ...` - prod preflight.
-- `python scripts/live_readonly_shadow_eval.py --env prod --region us-east-2 --aws-profile rp-admin-prod --openai-shadow-eval --ticket-id [redacted...] --out ... --summary-md-out ...` - read-only prod shadow eval.
+- `python scripts/live_readonly_shadow_eval.py --env prod --region us-east-2 --aws-profile rp-admin-prod --openai-shadow-eval --ticket-id [redacted...] --out ... --summary-md-out ...` - read-only prod shadow eval (rerun with supplied IDs).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -122,9 +122,9 @@ Paste output snippet proving you ran:
 - OpenAI shadow routing used for intent classification; still read-only with outbound writes disabled.
 
 ## Blockers / open questions
-- Need prod ticket IDs with no-tracking order-status candidates to complete proof for no-tracking messages.
+- None
 
 ## Follow-ups (actionable)
-- [ ] Re-run prod shadow eval with no-tracking order-status tickets (IDs to be supplied by human).
+- [ ] None
 
 <!-- End of template -->
