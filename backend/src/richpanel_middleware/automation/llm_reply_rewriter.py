@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_MODEL = os.environ.get("OPENAI_REPLY_REWRITE_MODEL", "") or os.environ.get(
     "OPENAI_MODEL", "gpt-5.2-chat-latest"
 )
-DEFAULT_TEMPERATURE = 0.0
+DEFAULT_TEMPERATURE = 0.2
 DEFAULT_MAX_TOKENS = int(os.environ.get("OPENAI_REPLY_REWRITE_MAX_TOKENS", 400))
 DEFAULT_CONFIDENCE_THRESHOLD = float(
     os.environ.get("OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD", 0.7)
@@ -70,6 +70,18 @@ def _resolve_rewrite_enabled(explicit: Optional[bool]) -> bool:
     return _to_bool(
         os.environ.get("OPENAI_REPLY_REWRITE_ENABLED"), default=DEFAULT_ENABLED
     )
+
+
+def _resolve_rewrite_temperature() -> float:
+    raw = os.environ.get("OPENAI_REPLY_REWRITE_TEMPERATURE")
+    if raw is None or str(raw).strip() == "":
+        return DEFAULT_TEMPERATURE
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return DEFAULT_TEMPERATURE
+    # Keep rewrite conservative even when configured.
+    return max(0.0, min(value, 0.7))
 
 
 def _fingerprint(text: str, *, length: int = 12) -> str:
@@ -473,7 +485,7 @@ def rewrite_reply(
     request = ChatCompletionRequest(
         model=DEFAULT_MODEL,
         messages=messages,
-        temperature=DEFAULT_TEMPERATURE,
+        temperature=_resolve_rewrite_temperature(),
         max_tokens=DEFAULT_MAX_TOKENS,
         metadata={"conversation_id": conversation_id, "event_id": event_id},
     )

@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-17 - RUN_20260217_2339Z (B89: order-status reply personalization + greeting/signature)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260217_2339Z
+- Added customer message excerpt + first name context to order-status rewrite prompt.
+- Enforced deterministic greeting/signature and added rewrite temperature env support.
+- Added unit tests for prompt context, excerpt sanitization, and greeting/signature enforcement.
+
 ### 2026-02-17 - RUN_20260217_1627Z (B88: PROD read-only validation + proof signals)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260217_1627Z
 - Added PII-safe proof signals for processing time + floor validation in read-only shadow eval.

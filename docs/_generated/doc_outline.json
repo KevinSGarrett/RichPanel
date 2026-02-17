@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-17 - RUN_20260217_2339Z (B89: order-status reply personalization + greeting/signature)",
+        "anchor": "2026-02-17-run202602172339z-b89-order-status-reply-personalization-greetingsignature"
+      },
+      {
+        "level": 3,
         "text": "2026-02-17 - RUN_20260217_1627Z (B88: PROD read-only validation + proof signals)",
         "anchor": "2026-02-17-run202602171627z-b88-prod-read-only-validation-proof-signals"
       },

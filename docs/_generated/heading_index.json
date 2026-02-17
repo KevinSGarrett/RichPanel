@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-17 - run_20260217_2339z (b89: order-status reply personalization + greeting/signature)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-17-run202602172339z-b89-order-status-reply-personalization-greetingsignature"
+    }
+  ],
   "2026-02-17 - run_20260217_1627z (b88: prod read-only validation + proof signals)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
