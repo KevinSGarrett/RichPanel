@@ -4,8 +4,8 @@
 **Agents:** C  
 **Labels:** `risk:R1-low`, `gate:claude`  
 **Risk:** `risk:R1`  
-**Claude gate model (used):** pending  
-**Anthropic response id:** pending — PR not created yet  
+**Claude gate model (used):** `claude-sonnet-4-5-20250929`  
+**Anthropic response id:** `msg_017QHVsmzSZbw1GmNstvK8ZZ` — https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916133805  
 
 ### 1) Summary
 - Add PII-safe processing-time + floor proof signals to read-only shadow eval output.
@@ -64,9 +64,9 @@
 - `python scripts/live_readonly_shadow_eval.py --env prod --region us-east-2 --aws-profile rp-admin-prod --openai-shadow-eval --ticket-id <redacted...>`
 
 ### 7) Results & evidence
-**CI:** pending — PR not created  
-**Codecov:** pending — PR not created  
-**Bugbot:** pending — PR not created  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/pull/258/checks  
+**Codecov:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/258  
+**Bugbot:** pass — https://github.com/KevinSGarrett/RichPanel/pull/258/checks  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/live_shadow_report.json`

@@ -246,6 +246,31 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertEqual(result["processing_human"], "24 business hours")
         self.assertTrue(result["nonpreorder_floor_ok"])
 
+    def test_extract_preorder_proof_signals_missing_delivery_estimate(self) -> None:
+        parameters = {"delivery_estimate": None, "draft_reply": {"body": ""}}
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertIsNone(result["processing_human"])
+        self.assertIsNone(result["remaining_min_days"])
+        self.assertIsNone(result["remaining_max_days"])
+        self.assertIsNone(result["is_late"])
+        self.assertFalse(result["draft_reply_has_processing_phrase"])
+        self.assertFalse(result["draft_reply_has_processing_human"])
+        self.assertIsNone(result["nonpreorder_floor_ok"])
+
+    def test_extract_preorder_proof_signals_empty_draft_reply(self) -> None:
+        parameters = {
+            "delivery_estimate": {
+                "preorder": False,
+                "processing_human": "3-5 business days",
+            },
+            "draft_reply": {"body": ""},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertEqual(result["processing_human"], "3-5 business days")
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_processing_phrase"])
+        self.assertFalse(result["draft_reply_has_processing_human"])
+
     def test_extract_preorder_proof_signals_eta_fallback(self) -> None:
         parameters = {
             "delivery_estimate": None,

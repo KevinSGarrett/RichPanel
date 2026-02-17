@@ -21,7 +21,7 @@ Finalize processing-time + 1–2 day floor validation with read-only prod proof 
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260217_1627Z-b88`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/258
 - CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
