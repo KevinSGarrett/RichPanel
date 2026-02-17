@@ -117,7 +117,7 @@ Paste output snippet proving you ran:
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/258
 - Checks: https://github.com/KevinSGarrett/RichPanel/pull/258/checks
 - Bugbot: pass — https://github.com/KevinSGarrett/RichPanel/pull/258/checks
-- Claude gate: PASS — https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916133805 (response_id: msg_017QHVsmzSZbw1GmNstvK8ZZ)
+- Claude gate: PASS — https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916133805 (response_id: msg_01R5gpGWmePVD9WE4JgGXbki)
 - PR Agent review: https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916134713 (edge-case tests added)
 - PR Agent response: https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916216123
 

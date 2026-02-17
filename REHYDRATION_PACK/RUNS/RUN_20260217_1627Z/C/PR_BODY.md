@@ -5,7 +5,7 @@
 **Labels:** `risk:R1-low`, `gate:claude`  
 **Risk:** `risk:R1`  
 **Claude gate model (used):** `claude-sonnet-4-5-20250929`  
-**Anthropic response id:** `msg_017QHVsmzSZbw1GmNstvK8ZZ` — https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916133805  
+**Anthropic response id:** `msg_01R5gpGWmePVD9WE4JgGXbki` — https://github.com/KevinSGarrett/RichPanel/pull/258#issuecomment-3916133805  
 
 ### 1) Summary
 - Add PII-safe processing-time + floor proof signals to read-only shadow eval output.
