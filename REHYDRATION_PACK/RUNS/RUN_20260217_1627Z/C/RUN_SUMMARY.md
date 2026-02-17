@@ -22,7 +22,7 @@ Finalize processing-time + 1–2 day floor validation with read-only prod proof 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260217_1627Z-b88`
 - PR: none
-- CI status at end of run: red (run_ci_checks pending clean commit)
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 

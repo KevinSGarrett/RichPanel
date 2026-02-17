@@ -23,6 +23,53 @@
 Paste `git diff --stat` (or PR diffstat) here:
 
 <PASTE_DIFFSTAT>
+.../RUNS/RUN_20260217_1627Z/A/DOCS_IMPACT_MAP.md   |   23 +
+.../RUNS/RUN_20260217_1627Z/A/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260217_1627Z/A/GIT_RUN_PLAN.md      |   58 +
+.../RUNS/RUN_20260217_1627Z/A/RUN_REPORT.md        |   63 +
+.../RUNS/RUN_20260217_1627Z/A/RUN_SUMMARY.md       |   33 +
+.../RUNS/RUN_20260217_1627Z/A/STRUCTURE_REPORT.md  |   27 +
+.../RUNS/RUN_20260217_1627Z/A/TEST_MATRIX.md       |   15 +
+.../RUNS/RUN_20260217_1627Z/B/DOCS_IMPACT_MAP.md   |   23 +
+.../RUNS/RUN_20260217_1627Z/B/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260217_1627Z/B/GIT_RUN_PLAN.md      |   58 +
+.../RUNS/RUN_20260217_1627Z/B/RUN_REPORT.md        |   63 +
+.../RUNS/RUN_20260217_1627Z/B/RUN_SUMMARY.md       |   33 +
+.../RUNS/RUN_20260217_1627Z/B/STRUCTURE_REPORT.md  |   27 +
+.../RUNS/RUN_20260217_1627Z/B/TEST_MATRIX.md       |   15 +
+.../RUN_20260217_1627Z/C/AGENT_PROMPTS_ARCHIVE.md  |  156 +++
+.../RUNS/RUN_20260217_1627Z/C/DOCS_IMPACT_MAP.md   |   22 +
+.../RUNS/RUN_20260217_1627Z/C/FIX_REPORT.md        |   21 +
+.../RUNS/RUN_20260217_1627Z/C/GIT_RUN_PLAN.md      |   61 +
+.../RUNS/RUN_20260217_1627Z/C/GO_LIVE_CHECKLIST.md |   26 +
+.../C/PROD_VALIDATION_SUMMARY.md                   |   25 +
+.../RUNS/RUN_20260217_1627Z/C/RUN_REPORT.md        |   79 ++
+.../RUNS/RUN_20260217_1627Z/C/RUN_SUMMARY.md       |   37 +
+.../RUNS/RUN_20260217_1627Z/C/SAFETY_REPORT.md     |   28 +
+.../RUNS/RUN_20260217_1627Z/C/STRUCTURE_REPORT.md  |   36 +
+.../RUNS/RUN_20260217_1627Z/C/TEST_MATRIX.md       |   19 +
+.../RUNS/RUN_20260217_1627Z/C/aws_region_prod.txt  |  Bin 0 -> 24 bytes
+.../C/live_shadow_http_trace.json                  | 1290 ++++++++++++++++++++
+.../RUN_20260217_1627Z/C/live_shadow_report.json   | 1093 +++++++++++++++++
+.../RUN_20260217_1627Z/C/live_shadow_summary.json  |  407 ++++++
+.../RUNS/RUN_20260217_1627Z/C/live_shadow_summary.md    |   91 ++
+.../RUNS/RUN_20260217_1627Z/C/preflight_prod.json  |   69 ++
+.../RUNS/RUN_20260217_1627Z/C/preflight_prod.md    |   30 +
+.../C/prod_runtime_flags_snapshot.json             |  Bin 0 -> 1554 bytes
+.../RUNS/RUN_20260217_1627Z/C/pytest.log           |  Bin 0 -> 3638 bytes
+.../RUNS/RUN_20260217_1627Z/C/run_ci_checks.log    |  Bin 0 -> 9486 bytes
+.../RUN_20260217_1627Z/C/sts_identity_prod.json    |  Bin 0 -> 420 bytes
+.../C/verify_agent_prompts_fresh.log               |  Bin 0 -> 124 bytes
+.../C/verify_rehydration_pack.log                  |  Bin 0 -> 96 bytes
+.../RUNS/RUN_20260217_1627Z/RUN_META.md            |   11 +
+docs/00_Project_Admin/Progress_Log.md              |    5 +
+docs/_generated/doc_outline.json                   |    5 +
+docs/_generated/doc_registry.compact.json          |    2 +-
+docs/_generated/doc_registry.json                  |    4 +-
+docs/_generated/heading_index.json                 |    6 +
+scripts/live_readonly_shadow_eval.py               |   25 +
+scripts/test_live_readonly_shadow_eval.py          |   27 +
+46 files changed, 4052 insertions(+), 3 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -49,7 +96,7 @@ List commands you ran (include key flags/env if relevant):
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- `python scripts/run_ci_checks.py --ci` - fail (generated docs pending commit) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/run_ci_checks.log`
+- `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/run_ci_checks.log`
 - `python scripts/verify_rehydration_pack.py` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/verify_rehydration_pack.log`
 - `python scripts/verify_agent_prompts_fresh.py` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/verify_agent_prompts_fresh.log`
 - `pytest -q` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/pytest.log`
@@ -59,7 +106,12 @@ Include test commands + results + links to evidence.
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
 
-<PASTE_OUTPUT_SNIPPET>
+```
+[OK] RUN_20260217_1627Z is referenced in Progress_Log.md
+[OK] GPT-5.x defaults enforced (no GPT-4 family strings found).
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+[OK] CI-equivalent checks passed.
+```
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/00_Project_Admin/Progress_Log.md`
@@ -74,6 +126,5 @@ Paste output snippet proving you ran:
 
 ## Follow-ups (actionable)
 - [ ] Re-run prod shadow eval with no-tracking order-status tickets (IDs to be supplied by human).
-- [ ] Re-run `python scripts/run_ci_checks.py --ci` after committing regenerated docs.
 
 <!-- End of template -->
