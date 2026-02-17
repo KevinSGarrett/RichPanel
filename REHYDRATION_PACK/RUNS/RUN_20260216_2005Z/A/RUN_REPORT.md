@@ -19,6 +19,7 @@
 ## What changed (high-level)
 - Added processing-time and expedited overrides to ETA calculation and included delivery window dates in messaging.
 - Updated preorder release wording, shadow proof extraction phrase, and related tests.
+- Fixed late preorder messaging and explicit multi-day method parsing; added coverage for ambiguous expedited labels.
 
 ## Diffstat (required)
 ```
@@ -92,11 +93,16 @@ python scripts/run_ci_checks.py --ci
 python scripts/verify_rehydration_pack.py
 # output:
 [OK] REHYDRATION_PACK validated (mode=build).
+
+python scripts/run_ci_checks.py --ci
+# output:
+... tests OK ...
+[OK] CI-equivalent checks passed.
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci`
-- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\d9682cf8-92bd-4810-b274-69b47c243c36.txt`)
+- **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (full output captured at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\c933781d-647b-4504-b765-2873f9a9d1da.txt`)
 - **Results:** Pass.
 
 ## Wait-for-green evidence (required)
@@ -117,8 +123,8 @@ python scripts/verify_rehydration_pack.py
 - **Action taken:** updated ETA floor logic guard, clarified release date naming, added expedited/late/unknown tests.
 
 ### Codecov Findings
-- **Codecov patch status:** pass (100%)
-- **Codecov project status:** pass (94.09% → 100.00% patch)
+- **Codecov patch status:** pass (99.51% of diff hit; target 94.06%)
+- **Codecov project status:** pass
 - **Coverage issues identified:**
   - delivery_estimate.py lines missing — fixed with additional tests
 - **Action taken:** added tests for expedited false cases, preorder expedited path, late messaging.

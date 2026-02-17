@@ -10,6 +10,7 @@ Implement new ETA formulas (processing + expedited overrides + preorder release)
 ## Work completed (bullets)
 - Added processing-time and expedited override logic to ETA computations and message copy.
 - Updated preorder release wording and shadow proof extraction phrase with matching tests.
+- Fixed late preorder messaging and explicit multi-day method parsing; added tests for ambiguous expedited labels.
 - Regenerated docs registry outputs after Progress Log update.
 
 ## Files changed

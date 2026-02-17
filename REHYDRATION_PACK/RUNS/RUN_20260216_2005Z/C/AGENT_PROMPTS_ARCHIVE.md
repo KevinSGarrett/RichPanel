@@ -104,3 +104,26 @@ No prompt (inactive).
 
 ### Agent C
 No prompt (inactive).
+
+## Agent Summary
+
+### Work completed
+- Changed `backend/src/richpanel_middleware/automation/delivery_estimate.py`: expedited overrides, preorder late handling, delivery window guards, and explicit multi-day parsing.
+- Changed `scripts/test_delivery_estimate.py`: added ambiguous expedited tests, ETA floor edge case, late preorder messaging, and delivery window guard tests.
+- Changed `backend/tests/test_delivery_estimate_fallback.py`: added late preorder fallback messaging test.
+- Ran: `python scripts/run_ci_checks.py --ci` → pass.
+- Evidence: `REHYDRATION_PACK/RUNS/RUN_20260216_2005Z/A/RUN_REPORT.md` (latest output at `c:\Users\kevin\.cursor\projects\c-Users-kevin-AppData-Roaming-Cursor-Workspaces-1768173996229-workspace-json\agent-tools\c933781d-647b-4504-b765-2873f9a9d1da.txt`).
+
+### Merge state
+- Branch: `run/RUN_20260216_2005Z`
+- Worktree: `C:\RichPanel_GIT`
+- PR: #256 (open)
+- Last commit: `5a4aa6b`
+- Prompt set fingerprint: `368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be`
+
+### Not done
+- None.
+
+### Handoff notes
+- All functional changes are complete; only run-artifact updates remain.
+- PR checks will re-run after this evidence update; wait for Bugbot + Codecov to go green.
