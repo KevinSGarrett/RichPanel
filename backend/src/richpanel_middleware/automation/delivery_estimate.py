@@ -180,8 +180,12 @@ def compute_preorder_delivery_estimate(
     # Release date is a calendar offset; processing/transit remain business-day based.
     release_date = order_date + timedelta(days=45)
     release_date_human = _format_long_date(release_date)
-    release_in_days = max(0, (release_date - inquiry).days)
-    ship_days_from_inquiry_human = _format_day_window(release_in_days, release_in_days)
+    release_in_days = (release_date - inquiry).days
+    ship_days_from_inquiry_human = (
+        _format_day_window(release_in_days, release_in_days)
+        if release_in_days >= 0
+        else None
+    )
 
     processing_min, processing_max, processing_human = _processing_window_for_method(
         shipping_method
@@ -207,9 +211,13 @@ def compute_preorder_delivery_estimate(
     delivery_min = add_business_days(release_date, total_min)
     delivery_max = add_business_days(release_date, total_max)
     delivery_window_human = _format_delivery_window(delivery_min, delivery_max)
-    days_min = max(0, (delivery_min - inquiry).days)
-    days_max = max(0, (delivery_max - inquiry).days)
-    days_from_inquiry_human = _format_day_window(days_min, days_max)
+    days_min = (delivery_min - inquiry).days
+    days_max = (delivery_max - inquiry).days
+    if days_max < 0:
+        days_from_inquiry_human = None
+    else:
+        days_from_inquiry_human = _format_day_window(max(0, days_min), max(0, days_max))
+    is_late = inquiry >= delivery_max
 
     return {
         "bucket": window["bucket"],
@@ -225,7 +233,7 @@ def compute_preorder_delivery_estimate(
         "order_created_date": order_date.isoformat(),
         "inquiry_date": inquiry.isoformat(),
         "eta_human": delivery_window_human,
-        "is_late": False,
+        "is_late": is_late,
         "preorder": True,
         "preorder_ship_date_human": release_date_human,
         "delivery_window_human": delivery_window_human,
@@ -793,7 +801,7 @@ def build_no_tracking_reply(
             "body": body.strip(),
             "eta_human": delivery_window_human,
             "bucket": preorder_estimate.get("bucket"),
-            "is_late": False,
+            "is_late": preorder_estimate.get("is_late"),
         }
 
     if estimate:
@@ -810,13 +818,21 @@ def build_no_tracking_reply(
             eta_sentence = f"It should arrive in about {estimate['eta_human']}."
 
         order_label = f"Order {order_id}" if has_order_id else "Your order"
-        body = (
-            f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
-            f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
-            f"With {method_label} shipping, the estimated delivery window is "
-            f"{delivery_window_human}. {eta_sentence} "
-            "We'll send tracking as soon as it ships."
-        )
+        if estimate["is_late"]:
+            body = (
+                f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
+                f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
+                f"With {method_label} shipping, {eta_sentence} "
+                "We'll send tracking as soon as it ships."
+            )
+        else:
+            body = (
+                f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
+                f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
+                f"With {method_label} shipping, the estimated delivery window is "
+                f"{delivery_window_human}. {eta_sentence} "
+                "We'll send tracking as soon as it ships."
+            )
 
         return {
             "body": body.strip(),

@@ -440,7 +440,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertEqual(estimate.get("days_from_inquiry_human"), "0 days")
+        self.assertIsNone(estimate.get("days_from_inquiry_human"))
 
     def test_preorder_delivery_estimate_without_shipping_window(self) -> None:
         estimate = compute_preorder_delivery_estimate(
