@@ -141,9 +141,6 @@ def _preorder_delivery_fallback_window(
     max_days = 7
     bucket = "Standard"
     normalized_method = f"{bucket} ({format_eta_window(min_days, max_days)})"
-    eta_human = (
-        "should arrive any day now" if is_late else delivery_window_human
-    )
     return {
         "bucket": bucket,
         "min_days": min_days,

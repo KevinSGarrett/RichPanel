@@ -106,6 +106,10 @@ python scripts/test_delivery_estimate.py
 python scripts/test_delivery_estimate.py
 # output:
 ... tests OK ...
+
+python -m pytest backend/tests/test_delivery_estimate_fallback.py
+# output:
+... 12 passed ...
 ```
 
 ## Tests / Proof (required)
