@@ -47,6 +47,7 @@ def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
     if not shipping_method:
         return False
     lowered = str(shipping_method).lower()
+    numeric_window = parse_transit_days(lowered)
     tokens = (
         "rush",
         "overnight",
@@ -57,6 +58,14 @@ def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
         "1 day",
         "1-day",
     )
+    explicit_multi_day = bool(
+        re.search(r"\b[2-9]\s*-?\s*day\b", lowered)
+        or re.search(r"\b(two|three|four|five|six|seven|eight|nine)\s+day\b", lowered)
+    )
+    if explicit_multi_day and not any(token in lowered for token in ("overnight", "next day", "next-day", "1 day", "1-day")):
+        return False
+    if numeric_window and numeric_window[1] > 1 and explicit_multi_day:
+        return False
     return any(token in lowered for token in tokens)
 
 
@@ -766,6 +775,7 @@ def build_no_tracking_reply(
             "ship_days_from_inquiry_human"
         )
         processing_human = preorder_estimate.get("processing_human")
+        is_late = bool(preorder_estimate.get("is_late"))
         method_label = (
             preorder_estimate.get("normalized_method")
             or preorder_estimate.get("raw_method")
@@ -782,18 +792,25 @@ def build_no_tracking_reply(
         else:
             body = f"{body}."
 
-        if processing_human:
-            body = f"{body} After the release date, processing typically takes {processing_human}."
-
-        if delivery_window_human and method_label:
+        if is_late:
             body = (
-                f"{body} With {method_label} shipping, the estimated delivery window is "
-                f"{delivery_window_human}"
+                f"{body} It is already beyond the expected window, so it should arrive any day now."
             )
-            if days_from_inquiry_human:
-                body = f"{body} (Arrives in {days_from_inquiry_human})."
-            else:
-                body = f"{body}."
+        else:
+            if processing_human:
+                body = (
+                    f"{body} After the release date, processing typically takes {processing_human}."
+                )
+
+            if delivery_window_human and method_label:
+                body = (
+                    f"{body} With {method_label} shipping, the estimated delivery window is "
+                    f"{delivery_window_human}"
+                )
+                if days_from_inquiry_human:
+                    body = f"{body} (Arrives in {days_from_inquiry_human})."
+                else:
+                    body = f"{body}."
 
         body = f"{body} We'll send tracking as soon as it ships."
 
@@ -821,7 +838,6 @@ def build_no_tracking_reply(
         if estimate["is_late"]:
             body = (
                 f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
-                f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
                 f"With {method_label} shipping, {eta_sentence} "
                 "We'll send tracking as soon as it ships."
             )

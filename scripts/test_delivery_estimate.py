@@ -274,7 +274,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(estimate["eta_human"], "1-2 business days")
         self.assertEqual(estimate["delivery_window_human"], "January 3, 2024")
 
-    def test_expedited_priority_two_day_still_overrides(self) -> None:
+    def test_expedited_priority_two_day_does_not_override(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
             shipping_method="Priority 2-Day",
@@ -283,12 +283,12 @@ class DeliveryEstimateTests(unittest.TestCase):
 
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertEqual(estimate["processing_min_days"], 1)
-        self.assertEqual(estimate["processing_max_days"], 1)
-        self.assertEqual(estimate["transit_min_days"], 1)
-        self.assertEqual(estimate["transit_max_days"], 1)
-        self.assertEqual(estimate["window_min_days"], 2)
-        self.assertEqual(estimate["window_max_days"], 2)
+        self.assertEqual(estimate["processing_min_days"], 3)
+        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 2)
+        self.assertEqual(estimate["transit_max_days"], 2)
+        self.assertEqual(estimate["window_min_days"], 5)
+        self.assertEqual(estimate["window_max_days"], 7)
 
     def test_remaining_window_floor_prevents_zero_minimum(self) -> None:
         estimate = compute_delivery_estimate(
@@ -441,6 +441,18 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIsNotNone(estimate)
         assert estimate is not None
         self.assertIsNone(estimate.get("days_from_inquiry_human"))
+        self.assertIsNone(estimate.get("ship_days_from_inquiry_human"))
+
+    def test_preorder_late_sets_is_late(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping",
+            inquiry_date="2026-05-20",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertTrue(estimate.get("is_late"))
 
     def test_preorder_delivery_estimate_without_shipping_window(self) -> None:
         estimate = compute_preorder_delivery_estimate(
@@ -501,6 +513,20 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("April 6–April 14, 2026", reply["body"])
         self.assertIn("Arrives in 23–31 days", reply["body"])
         self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
+
+    def test_no_tracking_reply_preorder_late_any_day_now(self) -> None:
+        order_summary = {
+            "order_id": "PO-LATE",
+            "created_at": "2026-02-01",
+            "shipping_method": "Standard Shipping (3-7 business days)",
+            "order_tags": ["Pre-order"],
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2026-05-20")
+        assert reply is not None
+        body_lower = reply["body"].lower()
+        self.assertIn("pre-order", body_lower)
+        self.assertIn("any day now", body_lower)
+        self.assertNotIn("estimated delivery window is", body_lower)
 
 
 class TrackingUrlTests(unittest.TestCase):
