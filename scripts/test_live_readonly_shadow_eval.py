@@ -150,6 +150,7 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
             "Your pre-order is scheduled to release on Sunday, March 29, 2026. "
+            "After the release date, processing typically takes 3-5 business days. "
             "It ships in 15 days. Delivery window April 6–April 14, 2026. "
             "Arrives in 23–31 days. We'll send tracking as soon as it ships."
         )
@@ -166,6 +167,7 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
                 "window_max_days": 12,
                 "normalized_method": "standard",
                 "raw_method": "Standard",
+                "processing_human": "3-5 business days",
             },
             "order_summary": {"order_tags_raw": "vip, pre-order, springsale"},
             "draft_reply": {"body": body},
@@ -187,6 +189,9 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertTrue(result["draft_reply_has_delivery_window"])
         self.assertTrue(result["draft_reply_has_ship_in_days"])
         self.assertTrue(result["draft_reply_has_arrives_in_days"])
+        self.assertTrue(result["draft_reply_has_processing_phrase"])
+        self.assertTrue(result["draft_reply_has_processing_human"])
+        self.assertEqual(result["processing_human"], "3-5 business days")
         self.assertTrue(result["draft_reply_ends_with_tracking_line"])
         self.assertIsNotNone(result["draft_reply_body_fingerprint"])
         self.assertNotIn("body", result)
@@ -218,6 +223,53 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertFalse(result["draft_reply_ends_with_tracking_line"])
         self.assertIsNone(result["draft_reply_body_fingerprint"])
         self.assertNotIn("body", result)
+
+    def test_extract_preorder_proof_signals_non_preorder_processing_floor(self) -> None:
+        body = (
+            "Great news—your order is moving along! "
+            "Processing typically takes 24 business hours before it ships."
+        )
+        parameters = {
+            "delivery_estimate": {
+                "preorder": False,
+                "processing_human": "24 business hours",
+                "remaining_min_days": 1,
+                "remaining_max_days": 2,
+                "is_late": False,
+            },
+            "draft_reply": {"body": body},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertFalse(result["preorder_delivery_estimate"])
+        self.assertTrue(result["draft_reply_has_processing_phrase"])
+        self.assertTrue(result["draft_reply_has_processing_human"])
+        self.assertEqual(result["processing_human"], "24 business hours")
+        self.assertTrue(result["nonpreorder_floor_ok"])
+
+    def test_extract_preorder_proof_signals_missing_delivery_estimate(self) -> None:
+        parameters = {"delivery_estimate": None, "draft_reply": {"body": ""}}
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertIsNone(result["processing_human"])
+        self.assertIsNone(result["remaining_min_days"])
+        self.assertIsNone(result["remaining_max_days"])
+        self.assertIsNone(result["is_late"])
+        self.assertFalse(result["draft_reply_has_processing_phrase"])
+        self.assertFalse(result["draft_reply_has_processing_human"])
+        self.assertIsNone(result["nonpreorder_floor_ok"])
+
+    def test_extract_preorder_proof_signals_empty_draft_reply(self) -> None:
+        parameters = {
+            "delivery_estimate": {
+                "preorder": False,
+                "processing_human": "3-5 business days",
+            },
+            "draft_reply": {"body": ""},
+        }
+        result = shadow_eval._extract_preorder_proof_signals(parameters)
+        self.assertEqual(result["processing_human"], "3-5 business days")
+        self.assertFalse(result["draft_reply_present"])
+        self.assertFalse(result["draft_reply_has_processing_phrase"])
+        self.assertFalse(result["draft_reply_has_processing_human"])
 
     def test_extract_preorder_proof_signals_eta_fallback(self) -> None:
         parameters = {
