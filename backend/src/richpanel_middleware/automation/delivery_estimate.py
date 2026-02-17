@@ -47,7 +47,6 @@ def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
     if not shipping_method:
         return False
     lowered = str(shipping_method).lower()
-    numeric_window = parse_transit_days(lowered)
     tokens = (
         "rush",
         "overnight",
@@ -59,12 +58,12 @@ def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
         "1-day",
     )
     explicit_multi_day = bool(
-        re.search(r"\b[2-9]\s*-?\s*day\b", lowered)
-        or re.search(r"\b(two|three|four|five|six|seven|eight|nine)\s+day\b", lowered)
+        re.search(r"[2-9]\s*[-]?\s*day", lowered)
+        or re.search(
+            r"(two|three|four|five|six|seven|eight|nine)[\s-]*day", lowered
+        )
     )
-    if explicit_multi_day and not any(token in lowered for token in ("overnight", "next day", "next-day", "1 day", "1-day")):
-        return False
-    if numeric_window and numeric_window[1] > 1 and explicit_multi_day:
+    if explicit_multi_day:
         return False
     return any(token in lowered for token in tokens)
 
@@ -313,12 +312,14 @@ def add_business_days(value: Any, days: int) -> date:
 
 
 def _parse_numeric_window(text: str) -> Optional[tuple[int, int]]:
-    range_match = re.search(r"(\d+)\s*(?:-|\u2013|to)\s*(\d+)", text)
+    range_match = re.search(r"([0-9]+)\s*(?:-|\u2013|to)\s*([0-9]+)", text)
     if range_match:
         first, second = int(range_match.group(1)), int(range_match.group(2))
         return (first, second) if first <= second else (second, first)
 
-    single_match = re.search(r"(\d+)\s*(?:business\s+days?|bd|days?)", text)
+    single_match = re.search(
+        r"([0-9]+)\s*[-]?\s*(?:business\s+days?|bd|days?)", text
+    )
     if single_match:
         number = int(single_match.group(1))
         return number, number

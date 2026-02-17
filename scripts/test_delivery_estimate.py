@@ -290,7 +290,37 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(estimate["window_min_days"], 5)
         self.assertEqual(estimate["window_max_days"], 7)
 
+    def test_expedited_express_three_day_does_not_override(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",
+            shipping_method="Express 3-Day",
+            inquiry_date="2024-01-02",
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["processing_min_days"], 3)
+        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 3)
+        self.assertEqual(estimate["transit_max_days"], 3)
+        self.assertEqual(estimate["window_min_days"], 6)
+        self.assertEqual(estimate["window_max_days"], 8)
+
     def test_remaining_window_floor_prevents_zero_minimum(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",
+            shipping_method="Standard Shipping (3-5 Business Days)",
+            inquiry_date="2024-01-11",
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["remaining_min_days"], 1)
+        self.assertEqual(estimate["remaining_max_days"], 2)
+        self.assertEqual(estimate["eta_human"], "1-2 business days")
+        self.assertFalse(estimate["is_late"])
+
+    def test_remaining_window_floor_zero_one_edge_case(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
             shipping_method="Standard Shipping (3-5 Business Days)",
