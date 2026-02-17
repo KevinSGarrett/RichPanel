@@ -101,11 +101,11 @@ python scripts/verify_rehydration_pack.py
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** yes (120–180s jitter)
-- **Status timestamps:** 2026-02-16T21:20Z–21:33Z (PR checks)
+- **Status timestamps:** 2026-02-16T21:37Z–21:50Z (PR checks)
 - **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/256/checks
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22080737921
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions/runs/22081110286
 - **Codecov status:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/256
-- **Bugbot status:** skipped (Cursor Bugbot) — https://cursor.com
+- **Bugbot status:** pass (Cursor Bugbot) — https://cursor.com
 
 ## PR Health Check (required for PRs)
 
@@ -113,7 +113,7 @@ python scripts/verify_rehydration_pack.py
 - **Bugbot triggered:** yes (`@cursor review`)
 - **Bugbot comment link:** https://github.com/KevinSGarrett/RichPanel/pull/256#issuecomment-3910416712
 - **Findings summary:**
-  - Bugbot check skipped; PR Agent findings reviewed and fixed
+  - Bugbot check pass; PR Agent findings reviewed and fixed
 - **Action taken:** updated ETA floor logic guard, clarified release date naming, added expedited/late/unknown tests.
 
 ### Codecov Findings
