@@ -842,13 +842,21 @@ def build_no_tracking_reply(
                 "We'll send tracking as soon as it ships."
             )
         else:
-            body = (
-                f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
-                f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
-                f"With {method_label} shipping, the estimated delivery window is "
-                f"{delivery_window_human}. {eta_sentence} "
-                "We'll send tracking as soon as it ships."
-            )
+            if delivery_window_human:
+                body = (
+                    f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
+                    f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
+                    f"With {method_label} shipping, the estimated delivery window is "
+                    f"{delivery_window_human}. {eta_sentence} "
+                    "We'll send tracking as soon as it ships."
+                )
+            else:
+                body = (
+                    f"Thanks for your patience. {order_label} was placed on {order_date_human}. "
+                    f"{f'Processing typically takes {processing_human}. ' if processing_human else ''}"
+                    f"With {method_label} shipping, {eta_sentence} "
+                    "We'll send tracking as soon as it ships."
+                )
 
         return {
             "body": body.strip(),

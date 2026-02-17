@@ -483,6 +483,31 @@ class DeliveryEstimateTests(unittest.TestCase):
             "It should arrive in about 4-8 business days. We'll send tracking as soon as it ships.",
         )
 
+    def test_no_tracking_reply_missing_delivery_window_human(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "inquiry_date": "2024-01-03",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "elapsed_business_days": 2,
+            "remaining_min_days": 1,
+            "remaining_max_days": 2,
+            "eta_human": "1-2 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "delivery_window_human": None,
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        self.assertNotIn("estimated delivery window is None", reply["body"])
+        self.assertNotIn("estimated delivery window is", reply["body"])
+
     def test_no_tracking_reply_late_uses_any_day_now(self) -> None:
         order_summary = {
             "order_id": "late-1",
