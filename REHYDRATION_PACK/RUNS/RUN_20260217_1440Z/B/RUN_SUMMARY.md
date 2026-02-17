@@ -22,8 +22,8 @@ Deploy main (B86 ETA changes) to PROD with safe_mode/automation_enabled locked a
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260217_1440Z`
-- PR: none (not created yet)
-- CI status at end of run: green (run_ci_checks passed)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/257
+- CI status at end of run: pending (claude gate/validate/bugbot/codecov)
 - Main updated: <yes/no> (Integrator only)
 - Branch cleanup done: <yes/no> (Integrator only)
 

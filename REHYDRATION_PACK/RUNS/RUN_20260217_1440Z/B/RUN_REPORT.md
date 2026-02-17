@@ -6,7 +6,7 @@
 - **Date (UTC):** 2026-02-17
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260217_1440Z`
-- **PR:** none (not created yet)
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/257
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -96,6 +96,10 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/verify_agent_prompts_fresh.py` - prompt freshness check (override present).
 - `python -c "from scripts.verify_agent_prompts_fresh import ..."` - compute prompt fingerprint.
 - `python scripts/verify_rehydration_pack.py` - validate run artifacts.
+- `gh pr create ...` - open PR #257.
+- `gh pr edit 257 --add-label "risk:R0-docs,gate:claude"` - apply labels.
+- `gh pr view 257 --json labels --jq ...` - capture label proof.
+- `gh pr comment 257 --body "@cursor review"` - trigger Bugbot.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -104,6 +108,8 @@ Include test commands + results + links to evidence.
 - `python scripts/run_ci_checks.py --ci` - **PASS** - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/run_ci_checks.log`
 - `python scripts/verify_rehydration_pack.py` - **PASS** - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_rehydration_pack.log`
 - `python scripts/verify_agent_prompts_fresh.py` - **PASS** (override; fingerprint recorded) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/verify_agent_prompts_fresh.log`
+- PR labels proof: `REHYDRATION_PACK/RUNS/RUN_20260217_1440Z/B/pr_labels.txt`
+- Bugbot trigger comment: https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915242522
 
 ### Evidence snippets
 **STS identity (PROD)**
@@ -162,8 +168,9 @@ required_secrets PASS checked=5
 - **Deploy safety:** deployment from main with explicit workflow run and log capture.
 
 ## Blockers / open questions
-- None.
+- Claude gate check failed with GitHub API 401; rerun pending. (workflow run: https://github.com/KevinSGarrett/RichPanel/actions/runs/22103649590)
 
 ## Follow-ups (actionable)
-- [ ] Open PR with required labels and wait for checks/claude gate.
-- [ ] Capture PR labels proof + Claude PASS link/response_id in RUN_REPORT.
+- [ ] Wait for all PR checks to turn green (claude gate, validate, bugbot, codecov).
+- [ ] Capture Claude PASS comment link + response_id and update PR body + RUN_REPORT.
+- [ ] Capture final PR checks/labels proof once all checks are green.
