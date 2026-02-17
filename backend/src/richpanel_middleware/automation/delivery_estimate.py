@@ -58,7 +58,7 @@ def _is_expedited_24h(shipping_method: Optional[str]) -> bool:
         "1-day",
     )
     explicit_multi_day = bool(
-        re.search(r"[2-9]\s*[-]?\s*day", lowered)
+        re.search(r"(?:[2-9]|[1-9][0-9]+)\s*[-]?\s*day", lowered)
         or re.search(
             r"(two|three|four|five|six|seven|eight|nine)[\s-]*day", lowered
         )

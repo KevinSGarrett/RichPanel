@@ -306,6 +306,22 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertEqual(estimate["window_min_days"], 6)
         self.assertEqual(estimate["window_max_days"], 8)
 
+    def test_expedited_express_ten_day_does_not_override(self) -> None:
+        estimate = compute_delivery_estimate(
+            order_created_at="2024-01-01",
+            shipping_method="Express 10-Day",
+            inquiry_date="2024-01-02",
+        )
+
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["processing_min_days"], 3)
+        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 10)
+        self.assertEqual(estimate["transit_max_days"], 10)
+        self.assertEqual(estimate["window_min_days"], 13)
+        self.assertEqual(estimate["window_max_days"], 15)
+
     def test_remaining_window_floor_prevents_zero_minimum(self) -> None:
         estimate = compute_delivery_estimate(
             order_created_at="2024-01-01",
