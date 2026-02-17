@@ -3,7 +3,7 @@
 **Labels:** `risk:R0-docs`, `gate:claude`  
 **Risk:** risk:R0 (docs-only; label applied: `risk:R0-docs`)  
 **Claude gate model (used):** `claude-haiku-4-5-20251001`  
-**Anthropic response id:** `msg_019Sf6pWiBsKHKHJtL8J3Pm3` — https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120  
+**Anthropic response id:** `msg_01DUMmYdonQpxRLvQUeevJUx` — https://github.com/KevinSGarrett/RichPanel/pull/257#issuecomment-3915270120  
 
 ### Summary
 - Captures PROD deploy evidence for B86 ETA processing changes, including safety flag proof and workflow logs.
