@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-17 - RUN_20260217_1627Z (B88: PROD read-only validation + proof signals)",
+        "anchor": "2026-02-17-run202602171627z-b88-prod-read-only-validation-proof-signals"
+      },
+      {
+        "level": 3,
         "text": "2026-02-17 - RUN_20260217_1440Z (B87: PROD deploy evidence for B86 ETA changes)",
         "anchor": "2026-02-17-run202602171440z-b87-prod-deploy-evidence-for-b86-eta-changes"
       },

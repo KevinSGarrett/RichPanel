@@ -2,10 +2,10 @@
 
 Use this file to coordinate Git/GitHub execution for a run.
 
-**RUN_ID:** <RUN_ID>  
+**RUN_ID:** RUN_20260217_1627Z  
 **Mode:** sequential (default)  
 **Integrator:** C (default; last agent in sequence)  
-**Target branch:** `run/<RUN_ID>`  
+**Target branch:** `run/RUN_20260217_1627Z-b88`  
 **Merge strategy:** merge commit (locked)  
 **Branch cleanup:** yes (required)  
 
@@ -16,7 +16,7 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ## Branch plan
 ### Sequential (default)
-- All agents use: `run/<RUN_ID>`
+- All agents use: `run/RUN_20260217_1627Z-b88`
 
 ### Parallel (only when scopes are disjoint)
 - Agent A: `run/<RUN_ID>-A`
@@ -30,21 +30,24 @@ Use this file to coordinate Git/GitHub execution for a run.
 
 ### Agent A
 - Allowed paths:
-  - <path patterns>
+  - N/A (not used)
 - Locked paths (do not edit):
-  - <path patterns>
+  - N/A
 
 ### Agent B
 - Allowed paths:
-  - <path patterns>
+  - N/A (not used)
 - Locked paths:
-  - <path patterns>
+  - N/A
 
 ### Agent C
 - Allowed paths:
-  - <path patterns>
+  - `scripts/*`
+  - `docs/00_Project_Admin/Progress_Log.md`
+  - `docs/_generated/*`
+  - `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/*`
 - Locked paths:
-  - <path patterns>
+  - None
 
 ---
 

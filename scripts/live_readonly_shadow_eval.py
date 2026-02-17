@@ -1839,6 +1839,10 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     window_max_days = None
     normalized_method = None
     raw_method = None
+    processing_human = None
+    remaining_min_days = None
+    remaining_max_days = None
+    is_late = None
     preorder_delivery_estimate = False
     order_created_date = None
     inquiry_date = None
@@ -1854,6 +1858,10 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         window_max_days = delivery_estimate.get("window_max_days")
         normalized_method = delivery_estimate.get("normalized_method")
         raw_method = delivery_estimate.get("raw_method")
+        processing_human = delivery_estimate.get("processing_human")
+        remaining_min_days = delivery_estimate.get("remaining_min_days")
+        remaining_max_days = delivery_estimate.get("remaining_max_days")
+        is_late = delivery_estimate.get("is_late")
 
     preorder_tag_matches: list[str] = []
     if isinstance(order_summary, dict):
@@ -1891,6 +1899,16 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     tracking_line = "We'll send tracking as soon as it ships."
     schedule_phrases = ("scheduled to release on", "scheduled to ship on")
     delivery_phrase = "estimated delivery window is"
+    processing_phrase = "processing typically takes"
+    nonpreorder_floor_ok = None
+    if not preorder_delivery_estimate:
+        if is_late is False:
+            nonpreorder_floor_ok = (
+                isinstance(remaining_min_days, (int, float))
+                and isinstance(remaining_max_days, (int, float))
+                and remaining_min_days >= 1
+                and remaining_max_days >= 2
+            )
     return {
         "preorder_delivery_estimate": preorder_delivery_estimate,
         "preorder_tag_match": bool(preorder_tag_matches),
@@ -1905,8 +1923,14 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         "preorder_ship_in_days": ship_in_days,
         "preorder_delivery_window_human": delivery_window_human,
         "preorder_arrives_in_days": arrives_in_days,
+        "processing_human": processing_human,
+        "remaining_min_days": remaining_min_days,
+        "remaining_max_days": remaining_max_days,
+        "is_late": is_late,
         "draft_reply_present": bool(body_text),
         "draft_reply_has_preorder_word": "pre-order" in body_lower,
+        "draft_reply_has_processing_phrase": processing_phrase in body_lower,
+        "draft_reply_has_processing_human": _contains(processing_human),
         "draft_reply_has_ship_date": _contains(ship_date_human),
         "draft_reply_has_ship_schedule_phrase": (
             any(phrase in body_lower for phrase in schedule_phrases)
@@ -1918,6 +1942,7 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         ),
         "draft_reply_has_ship_in_days": _contains(ship_in_days),
         "draft_reply_has_arrives_in_days": _contains(arrives_in_days),
+        "nonpreorder_floor_ok": nonpreorder_floor_ok,
         "draft_reply_ends_with_tracking_line": body_text.endswith(tracking_line),
         "draft_reply_body_fingerprint": fingerprint,
     }

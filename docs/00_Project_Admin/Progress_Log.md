@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-17 - RUN_20260217_1627Z (B88: PROD read-only validation + proof signals)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260217_1627Z
+- Added PII-safe proof signals for processing time + floor validation in read-only shadow eval.
+- Capturing prod read-only validation artifacts for processing-time ETA and floor checks.
+
 ### 2026-02-17 - RUN_20260217_1440Z (B87: PROD deploy evidence for B86 ETA changes)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260217_1440Z
 - Deployed main (B86 ETA processing + expedited overrides) to PROD.
