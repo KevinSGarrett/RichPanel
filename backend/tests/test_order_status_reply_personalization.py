@@ -348,6 +348,25 @@ def test_key_details_block_skips_non_dict_draft() -> None:
     assert updated == body
 
 
+def test_key_details_block_skips_missing_estimate() -> None:
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=None,
+        draft_reply={},
+    )
+    assert updated == body
+
+
+def test_key_details_block_handles_empty_body() -> None:
+    updated = pipeline._ensure_key_details_block(
+        "",
+        delivery_estimate={"delivery_window_human": "April 1–April 3, 2026"},
+        draft_reply={},
+    )
+    assert updated == ""
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -390,3 +409,9 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_skips_non_dict_draft(self) -> None:
         test_key_details_block_skips_non_dict_draft()
+
+    def test_key_details_block_skips_missing_estimate(self) -> None:
+        test_key_details_block_skips_missing_estimate()
+
+    def test_key_details_block_handles_empty_body(self) -> None:
+        test_key_details_block_handles_empty_body()
