@@ -372,6 +372,14 @@ def test_default_model_prefers_reply_rewrite_env_restores_original() -> None:
         importlib.reload(rewriter)
 
 
+def test_restore_env_handles_missing_values() -> None:
+    os.environ["OPENAI_REPLY_REWRITE_MODEL"] = "temp"
+    os.environ["OPENAI_MODEL"] = "temp-model"
+    _restore_env(None, None)
+    assert os.environ.get("OPENAI_REPLY_REWRITE_MODEL") is None
+    assert os.environ.get("OPENAI_MODEL") is None
+
+
 class ReplyRewriteValidationTests(unittest.TestCase):
     def test_resolve_rewrite_temperature_env(self) -> None:
         test_resolve_rewrite_temperature_env()
@@ -384,3 +392,6 @@ class ReplyRewriteValidationTests(unittest.TestCase):
 
     def test_default_model_prefers_reply_rewrite_env_restores_original(self) -> None:
         test_default_model_prefers_reply_rewrite_env_restores_original()
+
+    def test_restore_env_handles_missing_values(self) -> None:
+        test_restore_env_handles_missing_values()
