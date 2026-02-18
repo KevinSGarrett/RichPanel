@@ -49,12 +49,26 @@ def test_excerpt_empty_returns_none() -> None:
     assert pipeline._build_customer_message_excerpt("") is None
 
 
+def test_excerpt_boundary_no_truncation() -> None:
+    raw = "x" * pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
+    excerpt = pipeline._build_customer_message_excerpt(raw)
+    assert excerpt == raw
+
+
 def test_extract_customer_first_name_from_payload() -> None:
     payload = {
         "customer_profile": {"first_name": "Sarah"},
         "requester": {"firstName": "Sam"},
     }
     assert pipeline._extract_customer_first_name_from_payload(payload) == "Sarah"
+    assert (
+        pipeline._extract_customer_first_name_from_payload({"firstName": "O'Neil"})
+        == "O'Neil"
+    )
+    assert (
+        pipeline._extract_customer_first_name_from_payload({"firstName": "Mary2"})
+        is None
+    )
     assert pipeline._extract_customer_first_name_from_payload({"first_name": "  "}) is None
     assert pipeline._extract_customer_first_name_from_payload({"first_name": "1234"}) is None
     assert (
@@ -86,6 +100,10 @@ def test_greeting_enforcement() -> None:
     loud = "HEY! Thanks for the update."
     loud_replaced = pipeline._ensure_order_status_greeting(loud, "Sarah")
     assert loud_replaced.startswith("Hi Sarah,\n\n")
+
+    leading_blanks = "\n\nHello there,\nBody"
+    blanks_replaced = pipeline._ensure_order_status_greeting(leading_blanks, None)
+    assert blanks_replaced.startswith("Hi there,\n\n")
 
 
 def test_signature_enforcement_idempotent() -> None:
