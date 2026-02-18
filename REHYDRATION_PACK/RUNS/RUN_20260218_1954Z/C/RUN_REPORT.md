@@ -46,7 +46,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  17 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
- .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 4672 bytes
+ .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 58384 bytes
  .../C/evidence/prod_automation_param.txt           |   1 +
  .../evidence/prod_safe_mode_automation_status.txt  | Bin 0 -> 3922 bytes
  .../C/evidence/prod_safe_mode_param.txt            |   1 +
