@@ -53,6 +53,7 @@ List commands you ran (include key flags/env if relevant):
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 python scripts/run_ci_checks.py --ci - CI-equivalent checks (fails locally due to uncommitted changes).
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 pytest -q - initial pytest run (failed due to AWS region missing).
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q - rerun tests with required region.
+- RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 CLAUDE_GATE_AUDIT_PATH=C:\\Temp\\claude_gate_audit.json python scripts/run_ci_checks.py --ci - final CI-equivalent pass without repo audit artifact.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -62,7 +63,7 @@ Include test commands + results + links to evidence.
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
 
 Paste output snippet proving you ran:
-`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
+`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 CLAUDE_GATE_AUDIT_PATH=C:\\Temp\\claude_gate_audit.json python scripts/run_ci_checks.py --ci`
 
 ```
 [OK] CI-equivalent checks passed.
