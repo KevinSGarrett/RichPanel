@@ -39,10 +39,10 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/B/TEST_MATRIX.md       |  15 +
  .../RUN_20260218_1954Z/C/AGENT_PROMPTS_ARCHIVE.md  | 101 +++
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
- .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  21 +
+ .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  25 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 106 +++
- .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  39 +
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 110 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  16 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 2924 bytes
@@ -55,7 +55,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 32 files changed, 1889 insertions(+), 3 deletions(-)
+ 32 files changed, 1898 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -73,6 +73,7 @@ List commands you ran (include key flags/env if relevant):
 - `npx cdk diff RichpanelMiddleware-staging` - attempted CDK diff (blocked by missing AWS creds).
 - `npx cdk diff RichpanelMiddleware-prod` - attempted CDK diff (blocked by missing AWS creds).
 - `aws sts get-caller-identity --profile rp-admin-prod --output json` - prod identity check (SSO token expired).
+- `git push -u origin run/RUN_20260218_1954Z` - failed (invalid GitHub credentials).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -99,9 +100,11 @@ Paste output snippet proving you ran:
 
 ## Blockers / open questions
 - Missing AWS credentials prevent CDK diffs, safe-mode verification, and deployment.
+- Missing GitHub credentials prevent pushing the branch and opening a PR.
 
 ## Follow-ups (actionable)
 - [ ] Authenticate AWS SSO for staging/prod and rerun CDK diffs + safe-mode verification.
 - [ ] Run staging/prod deployments + read-only proof once AWS access and safe-mode state are verified.
+- [ ] Authenticate GitHub and push branch to open PR.
 
 <!-- End of template -->

@@ -37,3 +37,4 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 
 ## Issues / follow-ups
 - Obtain AWS SSO credentials to run CDK diffs and verify `safe_mode`/`automation_enabled` before deploy.
+- Obtain GitHub credentials to push the branch and open the PR.
