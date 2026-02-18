@@ -1770,7 +1770,9 @@ def execute_order_status_reply(
                 }
             )
 
-        reply_body = _ensure_order_status_greeting(reply_body, customer_first_name)
+        reply_body = _ensure_order_status_greeting(
+            reply_body, reply_context.customer_first_name
+        )
         reply_body = _ensure_holly_signature(reply_body)
 
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
