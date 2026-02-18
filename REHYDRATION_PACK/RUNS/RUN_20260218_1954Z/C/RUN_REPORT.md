@@ -39,14 +39,17 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/B/TEST_MATRIX.md       |  15 +
  .../RUN_20260218_1954Z/C/AGENT_PROMPTS_ARCHIVE.md  | 101 +++
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
- .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  25 +
+ .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  29 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 110 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 121 +++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
- .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  16 +
- .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 2924 bytes
- .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 2924 bytes
+ .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  17 +
+ .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
+ .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 4672 bytes
+ .../C/evidence/prod_automation_param.txt           |   1 +
+ .../evidence/prod_safe_mode_automation_status.txt  | Bin 0 -> 3922 bytes
+ .../C/evidence/prod_safe_mode_param.txt            |   1 +
  .../C/evidence/run_ci_checks.log                   | 977 +++++++++++++++++++++
  .../RUNS/RUN_20260218_1954Z/RUN_META.md            |  11 +
  docs/00_Project_Admin/Progress_Log.md              |   4 +
@@ -55,7 +58,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 32 files changed, 1898 insertions(+), 3 deletions(-)
+ 35 files changed, 1916 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
