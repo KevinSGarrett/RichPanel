@@ -13,4 +13,4 @@ List the tests you ran (or explicitly note none).
 | Pytest (with AWS region) | `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` | pass | `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md` |
 
 ## Notes
-CI checks and pytest passed; pytest required AWS region env vars (1557 tests).
+CI checks and pytest passed; pytest required AWS region env vars (1558 tests).

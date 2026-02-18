@@ -87,7 +87,7 @@ Paste output snippet proving you ran:
 
 ```
 [OK] CI-equivalent checks passed.
-1557 passed, 18 subtests passed in 228.85s (0:03:48)
+1558 passed, 18 subtests passed in 228.75s (0:03:48)
 ```
 
 ## Docs impact (summary)
