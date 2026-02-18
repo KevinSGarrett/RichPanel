@@ -22,7 +22,7 @@ Wire order-status reply personalization (first name + sanitized excerpt), determ
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260217_2339Z
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/259
 - CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
