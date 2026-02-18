@@ -464,9 +464,11 @@ def _ensure_key_details_block(
     body: str,
     *,
     delivery_estimate: Any,
-    draft_reply: Dict[str, Any],
+    draft_reply: Any,
 ) -> str:
     if not body:
+        return body
+    if not isinstance(draft_reply, dict):
         return body
     if draft_reply.get("tracking_url") or draft_reply.get("tracking_number"):
         return body
@@ -1788,7 +1790,7 @@ def execute_order_status_reply(
         reply_body = _ensure_key_details_block(
             reply_body,
             delivery_estimate=delivery_estimate,
-            draft_reply=draft_reply if isinstance(draft_reply, dict) else {},
+            draft_reply=draft_reply,
         )
         reply_body = _ensure_order_status_greeting(
             reply_body, reply_context.customer_first_name

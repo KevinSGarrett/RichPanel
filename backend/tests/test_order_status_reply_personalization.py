@@ -328,6 +328,26 @@ def test_key_details_block_appends_when_no_tracking() -> None:
     assert "Key Details:" in updated
 
 
+def test_key_details_block_skips_non_dict_draft() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply=None,
+    )
+    assert updated == body
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -367,3 +387,6 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_appends_when_no_tracking(self) -> None:
         test_key_details_block_appends_when_no_tracking()
+
+    def test_key_details_block_skips_non_dict_draft(self) -> None:
+        test_key_details_block_skips_non_dict_draft()

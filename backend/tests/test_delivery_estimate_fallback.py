@@ -302,6 +302,38 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             "(Business days are Mon–Fri; holidays may affect timelines.)", body
         )
 
+    def test_no_tracking_reply_non_preorder_late_no_key_details(self) -> None:
+        order_summary = {
+            "order_id": "late-1",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping (3-5 business days)",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-16")
+        assert reply is not None
+        body_lower = reply["body"].lower()
+        self.assertIn("any day now", body_lower)
+        self.assertNotIn("key details:", body_lower)
+
+    def test_no_tracking_reply_missing_window_no_key_details(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "1-2 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "delivery_window_human": None,
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        self.assertNotIn("Key Details:", reply["body"])
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())
