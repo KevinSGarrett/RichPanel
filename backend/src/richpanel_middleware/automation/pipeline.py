@@ -1688,8 +1688,6 @@ def execute_order_status_reply(
         delivery_estimate = parameters.get("delivery_estimate") or order_summary.get(
             "delivery_estimate"
         )
-        if not isinstance(delivery_estimate, dict):
-            delivery_estimate = {}
         reply_context = _build_order_status_reply_context(
             payload=payload,
             draft_reply=draft_reply if isinstance(draft_reply, dict) else {},

@@ -57,6 +57,14 @@ def test_build_order_status_reply_context() -> None:
     assert context.eta_window == "1-3 business days"
     assert context.tracking_number == "1Z999AA10123456784"
 
+    context_fallback = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=None,
+        order_summary={"shipping_method": "Postal"},
+    )
+    assert context_fallback.shipping_method is not None
+
 
 def test_excerpt_is_sanitized_and_truncated() -> None:
     raw = (
