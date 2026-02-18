@@ -461,6 +461,39 @@ def _ensure_holly_signature(body: str) -> str:
     return "\n".join(lines)
 
 
+def _build_order_status_reply_context(
+    *,
+    payload: Dict[str, Any],
+    draft_reply: Dict[str, Any],
+    delivery_estimate: Any,
+    order_summary: Dict[str, Any],
+) -> OrderStatusReplyContext:
+    if not isinstance(delivery_estimate, dict):
+        delivery_estimate = {}
+    eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
+    shipping_method = (
+        delivery_estimate.get("normalized_method")
+        or order_summary.get("shipping_method_name")
+        or order_summary.get("shipping_method")
+    )
+    shipping_method = normalize_shipping_method_for_carrier(
+        shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
+    )
+    customer_first_name = _extract_customer_first_name_from_payload(payload)
+    customer_message_excerpt = _build_customer_message_excerpt(
+        extract_customer_message(payload, default="")
+    )
+    return OrderStatusReplyContext(
+        tracking_number=draft_reply.get("tracking_number"),
+        tracking_url=draft_reply.get("tracking_url"),
+        eta_window=eta_window,
+        shipping_method=shipping_method,
+        carrier=draft_reply.get("carrier"),
+        customer_first_name=customer_first_name,
+        customer_message_excerpt=customer_message_excerpt,
+    )
+
+
 def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
     if not isinstance(order_summary, dict):
         return False
@@ -1657,27 +1690,11 @@ def execute_order_status_reply(
         )
         if not isinstance(delivery_estimate, dict):
             delivery_estimate = {}
-        eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
-        shipping_method = (
-            delivery_estimate.get("normalized_method")
-            or order_summary.get("shipping_method_name")
-            or order_summary.get("shipping_method")
-        )
-        shipping_method = normalize_shipping_method_for_carrier(
-            shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
-        )
-        customer_first_name = _extract_customer_first_name_from_payload(payload)
-        customer_message_excerpt = _build_customer_message_excerpt(
-            extract_customer_message(payload, default="")
-        )
-        reply_context = OrderStatusReplyContext(
-            tracking_number=draft_reply.get("tracking_number"),
-            tracking_url=draft_reply.get("tracking_url"),
-            eta_window=eta_window,
-            shipping_method=shipping_method,
-            carrier=draft_reply.get("carrier"),
-            customer_first_name=customer_first_name,
-            customer_message_excerpt=customer_message_excerpt,
+        reply_context = _build_order_status_reply_context(
+            payload=payload,
+            draft_reply=draft_reply if isinstance(draft_reply, dict) else {},
+            delivery_estimate=delivery_estimate,
+            order_summary=order_summary if isinstance(order_summary, dict) else {},
         )
         intent_language = None
         if isinstance(plan.order_status_intent, OrderStatusIntentArtifact):

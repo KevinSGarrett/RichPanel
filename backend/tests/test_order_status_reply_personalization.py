@@ -37,6 +37,27 @@ def test_reply_context_payload_excludes_none() -> None:
     assert "carrier" not in payload
 
 
+def test_build_order_status_reply_context() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+    draft_reply = {
+        "tracking_number": "1Z999AA10123456784",
+        "tracking_url": "https://tracking.example.com/track/1Z999AA10123456784",
+        "carrier": "UPS",
+    }
+    delivery_estimate = {"eta_human": "1-3 business days", "normalized_method": "ground"}
+    order_summary = {"shipping_method_name": "Ground"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply=draft_reply,
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.customer_first_name == "Sarah"
+    assert context.customer_message_excerpt == "Where is my order?"
+    assert context.eta_window == "1-3 business days"
+    assert context.tracking_number == "1Z999AA10123456784"
+
+
 def test_excerpt_is_sanitized_and_truncated() -> None:
     raw = (
         "Email me at sarah@example.com or call 555-123-4567. "
