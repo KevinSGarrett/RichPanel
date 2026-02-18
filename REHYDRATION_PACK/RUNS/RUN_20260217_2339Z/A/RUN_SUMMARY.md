@@ -23,18 +23,18 @@ Wire order-status reply personalization (first name + sanitized excerpt), determ
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260217_2339Z
 - PR: none
-- CI status at end of run: red (run_ci_checks blocked by pre-existing uncommitted files)
+- CI status at end of run: green
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (fail), `pytest -q` (fail), `pytest -q` with AWS region env (pass)
+- Tests run: `python scripts/run_ci_checks.py --ci` (pass), `pytest -q` (fail), `pytest -q` with AWS region env (pass)
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md`
+- Prompt set fingerprint: `368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be`
 
 ## Decisions made
 - Defaulted rewrite temperature to 0.2 and clamped env override to 0.7 for conservative behavior.
 - Set excerpt limit to 400 chars and require explicit first_name fields only.
 
 ## Issues / follow-ups
-- Resolve pre-existing uncommitted files in `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/*` to allow clean checkout and CI.
 - Investigate untracked `claude_gate_audit.json` in worktree.

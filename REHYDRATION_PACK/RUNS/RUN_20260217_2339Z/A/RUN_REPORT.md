@@ -21,23 +21,38 @@
 Paste `git diff --stat` (or PR diffstat) here:
 
 ```
-warning: in the working copy of 'docs/_generated/doc_outline.json', LF will be replaced by CRLF the next time Git touches it
- .../C/live_shadow_http_trace.json                  | 1202 +-------------------
- .../RUN_20260217_1627Z/C/live_shadow_report.json   |  932 +--------------
- .../RUN_20260217_1627Z/C/live_shadow_summary.json  |  346 +++---
- .../RUN_20260217_1627Z/C/live_shadow_summary.md    |   42 +-
- .../automation/llm_reply_rewriter.py               |   16 +-
- .../automation/order_status_prompts.py             |   49 +-
- .../richpanel_middleware/automation/pipeline.py    |   84 ++
- docs/00_Project_Admin/Progress_Log.md              |    6 +
- docs/_generated/doc_outline.json                   |    5 +
- docs/_generated/doc_registry.compact.json          |    2 +-
- docs/_generated/doc_registry.json                  |    4 +-
- docs/_generated/heading_index.json                 |    6 +
- 12 files changed, 414 insertions(+), 2280 deletions(-)
-warning: in the working copy of 'docs/_generated/doc_registry.compact.json', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'docs/_generated/doc_registry.json', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'docs/_generated/heading_index.json', LF will be replaced by CRLF the next time Git touches it
+ .../RUNS/RUN_20260217_2339Z/A/DOCS_IMPACT_MAP.md   |  26 +++++
+ .../RUNS/RUN_20260217_2339Z/A/FIX_REPORT.md        |  21 ++++
+ .../RUNS/RUN_20260217_2339Z/A/GIT_RUN_PLAN.md      |  67 +++++++++++++
+ .../RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md        | 108 +++++++++++++++++++++
+ .../RUNS/RUN_20260217_2339Z/A/RUN_SUMMARY.md       |  40 ++++++++
+ .../RUNS/RUN_20260217_2339Z/A/STRUCTURE_REPORT.md  |  33 +++++++
+ .../RUNS/RUN_20260217_2339Z/A/TEST_MATRIX.md       |  16 +++
+ .../RUNS/RUN_20260217_2339Z/B/DOCS_IMPACT_MAP.md   |  22 +++++
+ .../RUNS/RUN_20260217_2339Z/B/FIX_REPORT.md        |   3 +
+ .../RUNS/RUN_20260217_2339Z/B/GIT_RUN_PLAN.md      |  18 ++++
+ .../RUNS/RUN_20260217_2339Z/B/RUN_REPORT.md        |  47 +++++++++
+ .../RUNS/RUN_20260217_2339Z/B/RUN_SUMMARY.md       |  31 ++++++
+ .../RUNS/RUN_20260217_2339Z/B/STRUCTURE_REPORT.md  |  25 +++++
+ .../RUNS/RUN_20260217_2339Z/B/TEST_MATRIX.md       |  14 +++
+ .../RUN_20260217_2339Z/C/AGENT_PROMPTS_ARCHIVE.md  |   3 +
+ .../RUNS/RUN_20260217_2339Z/C/DOCS_IMPACT_MAP.md   |  22 +++++
+ .../RUNS/RUN_20260217_2339Z/C/FIX_REPORT.md        |   3 +
+ .../RUNS/RUN_20260217_2339Z/C/GIT_RUN_PLAN.md      |  18 ++++
+ .../RUNS/RUN_20260217_2339Z/C/RUN_REPORT.md        |  47 +++++++++
+ .../RUNS/RUN_20260217_2339Z/C/RUN_SUMMARY.md       |  31 ++++++
+ .../RUNS/RUN_20260217_2339Z/C/STRUCTURE_REPORT.md  |  25 +++++
+ .../RUNS/RUN_20260217_2339Z/C/TEST_MATRIX.md       |  14 +++
+ .../automation/llm_reply_rewriter.py               |  16 ++-
+ .../automation/order_status_prompts.py             |  49 +++++++---
+ .../richpanel_middleware/automation/pipeline.py    |  84 ++++++++++++++++
+ .../test_order_status_reply_personalization.py     |  63 ++++++++++++
+ docs/00_Project_Admin/Progress_Log.md              |   6 ++
+ docs/_generated/doc_outline.json                   |   5 +
+ docs/_generated/doc_registry.compact.json          |   2 +-
+ docs/_generated/doc_registry.json                  |   4 +-
+ docs/_generated/heading_index.json                 |   6 ++
+ 31 files changed, 853 insertions(+), 16 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -53,7 +68,7 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/new_run_folder.py --now` - create run folder.
 - `git branch --show-current` - confirm branch.
 - `git checkout main; git pull; git checkout -b run/RUN_20260217_2339Z` - attempted to base on main (checkout blocked by pre-existing changes).
-- `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (failed due to pre-existing uncommitted files after regen).
+- `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (pass).
 - `pytest -q` - initial pytest run (failed due to NoRegionError).
 - `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pytest rerun (pass).
 - `python scripts/verify_agent_prompts_fresh.py` - prompt repeat guard check.
@@ -63,7 +78,7 @@ List commands you ran (include key flags/env if relevant):
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- `python scripts/run_ci_checks.py --ci` - fail (generated files changed + pre-existing uncommitted files) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md`
+- `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md`
 - `pytest -q` - fail (NoRegionError) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md`
 - `$env:AWS_REGION="us-east-2"; $env:AWS_DEFAULT_REGION="us-east-2"; pytest -q` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_REPORT.md`
 
@@ -71,24 +86,7 @@ Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`
 
 ```
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Hint: run `python scripts/run_ci_checks.py` locally, commit, and push.
-
-Uncommitted changes:
-M REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/live_shadow_http_trace.json
-M REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/live_shadow_report.json
-M REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/live_shadow_summary.json
-M REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/live_shadow_summary.md
-M backend/src/richpanel_middleware/automation/llm_reply_rewriter.py
-M backend/src/richpanel_middleware/automation/order_status_prompts.py
-M backend/src/richpanel_middleware/automation/pipeline.py
-M docs/00_Project_Admin/Progress_Log.md
-M docs/_generated/doc_outline.json
-M docs/_generated/doc_registry.compact.json
-M docs/_generated/doc_registry.json
-M docs/_generated/heading_index.json
-?? REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/
-?? backend/tests/test_order_status_reply_personalization.py
+[OK] CI-equivalent checks passed.
 ```
 
 ## Docs impact (summary)
@@ -100,9 +98,7 @@ M docs/_generated/heading_index.json
 - Name extraction is strict (explicit first_name only) to avoid incorrect personalization.
 
 ## Blockers / open questions
-- `git checkout main` and `run_ci_checks` blocked by pre-existing uncommitted files in `REHYDRATION_PACK/RUNS/RUN_20260217_1627Z/C/*`.
 - Untracked `claude_gate_audit.json` present in worktree (origin unknown).
 
 ## Follow-ups (actionable)
-- [ ] Resolve pre-existing uncommitted run artifacts (RUN_20260217_1627Z/C) to allow clean checkout and CI.
-- [ ] Re-run `python scripts/run_ci_checks.py --ci` on a clean worktree and update this report.
+- [ ] Determine whether `claude_gate_audit.json` should be removed or added to gitignore.
