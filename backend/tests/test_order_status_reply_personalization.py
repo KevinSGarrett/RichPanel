@@ -65,6 +65,14 @@ def test_build_order_status_reply_context() -> None:
     )
     assert context_fallback.shipping_method is not None
 
+    context_shipping = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={"eta_human": "2-4 days"},
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context_shipping.shipping_method is not None
+
 
 def test_excerpt_is_sanitized_and_truncated() -> None:
     raw = (
@@ -158,6 +166,18 @@ def test_greeting_enforcement() -> None:
     assert no_greeting_wrapped.startswith("Hi there,\n\n")
     assert "\n\n\n" not in no_greeting_wrapped
 
+    no_greeting_single = "Status update"
+    no_greeting_single_wrapped = pipeline._ensure_order_status_greeting(
+        no_greeting_single, None
+    )
+    assert no_greeting_single_wrapped.startswith("Hi there,\n\n")
+
+    no_greeting_two = "Status update\nNext line"
+    no_greeting_two_wrapped = pipeline._ensure_order_status_greeting(
+        no_greeting_two, None
+    )
+    assert no_greeting_two_wrapped.startswith("Hi there,\n\n")
+
     already_spaced = "Hi there,\n\nBody line"
     already_spaced_wrapped = pipeline._ensure_order_status_greeting(already_spaced, None)
     assert already_spaced_wrapped.startswith("Hi there,\n\n")
@@ -207,3 +227,8 @@ def test_signature_enforcement_idempotent() -> None:
 
     empty_body = ""
     assert pipeline._ensure_holly_signature(empty_body) == "Holly\nScentiment Customer Support"
+
+    with_body = "Update"
+    assert pipeline._ensure_holly_signature(with_body).endswith(
+        "Holly\nScentiment Customer Support"
+    )
