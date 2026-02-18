@@ -24,8 +24,8 @@ Add deterministic Key Details blocks for ETA/no-tracking replies (preorder + non
 
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260218_1442Z
-- PR: none
-- CI status at end of run: green (local run_ci_checks passed after commits)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/260
+- CI status at end of run: pending (checks running in PR)
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)
 
