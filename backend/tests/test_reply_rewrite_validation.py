@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import unittest
 
 from richpanel_middleware.automation import llm_reply_rewriter as rewriter
 from richpanel_middleware.automation.llm_reply_rewriter import rewrite_reply
@@ -306,3 +307,8 @@ def test_resolve_rewrite_temperature_env() -> None:
             os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
         else:
             os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = original
+
+
+class ReplyRewriteValidationTests(unittest.TestCase):
+    def test_resolve_rewrite_temperature_env(self) -> None:
+        test_resolve_rewrite_temperature_env()

@@ -5,6 +5,7 @@ from richpanel_middleware.automation.order_status_prompts import (
     build_order_status_reply_prompt,
 )
 from richpanel_middleware.automation import pipeline
+import unittest
 
 
 def test_prompt_includes_excerpt_and_first_name() -> None:
@@ -232,3 +233,32 @@ def test_signature_enforcement_idempotent() -> None:
     assert pipeline._ensure_holly_signature(with_body).endswith(
         "Holly\nScentiment Customer Support"
     )
+
+
+class OrderStatusReplyPersonalizationTests(unittest.TestCase):
+    def test_prompt_includes_excerpt_and_first_name(self) -> None:
+        test_prompt_includes_excerpt_and_first_name()
+
+    def test_reply_context_payload_excludes_none(self) -> None:
+        test_reply_context_payload_excludes_none()
+
+    def test_build_order_status_reply_context(self) -> None:
+        test_build_order_status_reply_context()
+
+    def test_excerpt_is_sanitized_and_truncated(self) -> None:
+        test_excerpt_is_sanitized_and_truncated()
+
+    def test_excerpt_empty_returns_none(self) -> None:
+        test_excerpt_empty_returns_none()
+
+    def test_excerpt_boundary_no_truncation(self) -> None:
+        test_excerpt_boundary_no_truncation()
+
+    def test_extract_customer_first_name_from_payload(self) -> None:
+        test_extract_customer_first_name_from_payload()
+
+    def test_greeting_enforcement(self) -> None:
+        test_greeting_enforcement()
+
+    def test_signature_enforcement_idempotent(self) -> None:
+        test_signature_enforcement_idempotent()
