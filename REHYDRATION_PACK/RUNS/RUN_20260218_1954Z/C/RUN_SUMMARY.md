@@ -23,7 +23,7 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260218_1954Z`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/261
 - CI status at end of run: green (local), deploy blocked by AWS creds
 - Main updated: yes
 - Branch cleanup done: no

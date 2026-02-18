@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-02-18
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260218_1954Z`
-- **PR:** none
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/261
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -81,6 +81,8 @@ List commands you ran (include key flags/env if relevant):
 - `$env:AWS_PROFILE='rp-admin-prod'; npx cdk diff RichpanelMiddleware-prod` - prod diff succeeded.
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (not safe).
 - `Remove-Item Env:GH_TOKEN; git push -u origin run/RUN_20260218_1954Z` - push succeeded after unsetting invalid token.
+- `gh pr create --title \"B91: Set OPENAI_REPLY_REWRITE_MODEL=gpt-5.2 in CDK (risk:R3)\" --body-file <path>` - opened PR #261.
+- `gh pr edit 261 --add-label \"risk:R3-high\" --add-label \"gate:claude\"` - applied required labels.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
