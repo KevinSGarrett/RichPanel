@@ -41,8 +41,8 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  29 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 121 +++
- .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 125 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  39 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  17 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
@@ -58,7 +58,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 35 files changed, 1916 insertions(+), 3 deletions(-)
+ 35 files changed, 1919 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
