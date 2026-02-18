@@ -67,6 +67,7 @@ def test_extract_customer_first_name_from_payload() -> None:
         "requester": {"firstName": "Sam"},
     }
     assert pipeline._extract_customer_first_name_from_payload(payload) == "Sarah"
+    assert pipeline._extract_customer_first_name_from_payload("not-a-dict") is None
     assert (
         pipeline._extract_customer_first_name_from_payload({"firstName": "O'Neil"})
         == "O'Neil"

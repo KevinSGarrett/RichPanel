@@ -287,6 +287,8 @@ def test_rewrite_rejects_internal_tags() -> None:
 def test_resolve_rewrite_temperature_env() -> None:
     original = os.environ.get("OPENAI_REPLY_REWRITE_TEMPERATURE")
     try:
+        os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
+        assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE
         os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.9"
         assert rewriter._resolve_rewrite_temperature() == 0.7
         os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.15"
