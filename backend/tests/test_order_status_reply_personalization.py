@@ -45,6 +45,24 @@ def test_excerpt_is_sanitized_and_truncated() -> None:
     assert len(excerpt) <= pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
 
 
+def test_excerpt_empty_returns_none() -> None:
+    assert pipeline._build_customer_message_excerpt("") is None
+
+
+def test_extract_customer_first_name_from_payload() -> None:
+    payload = {
+        "customer_profile": {"first_name": "Sarah"},
+        "requester": {"firstName": "Sam"},
+    }
+    assert pipeline._extract_customer_first_name_from_payload(payload) == "Sarah"
+    assert pipeline._extract_customer_first_name_from_payload({"first_name": "  "}) is None
+    assert pipeline._extract_customer_first_name_from_payload({"first_name": "1234"}) is None
+    assert (
+        pipeline._extract_customer_first_name_from_payload({"first_name": "A" * 65})
+        is None
+    )
+
+
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")
@@ -52,6 +70,10 @@ def test_greeting_enforcement() -> None:
 
     without_name = pipeline._ensure_order_status_greeting(body, None)
     assert without_name.startswith("Hi there,\n\n")
+
+    existing = "Hello team,\n\nHere is the update."
+    replaced = pipeline._ensure_order_status_greeting(existing, "Sarah")
+    assert replaced.startswith("Hi Sarah,\n\n")
 
 
 def test_signature_enforcement_idempotent() -> None:
