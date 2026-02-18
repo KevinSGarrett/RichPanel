@@ -2,8 +2,10 @@
 
 **Run ID:** RUN_20260217_2339Z  
 **Agents:** A (B/C inactive artifacts only)  
-**Labels:** isk:R3-high, gate:claude  
-**Risk:** isk:R3-high  
+**Labels:** 
+isk:R3-high, gate:claude  
+**Risk:** 
+isk:R3-high  
 **Claude gate model (used):** claude-opus-4-5-20251101  
 **Anthropic response id:** pending — https://github.com/KevinSGarrett/RichPanel/pull/259/checks  
 
@@ -81,19 +83,19 @@
 - REHYDRATION_PACK/RUNS/RUN_20260217_2339Z/A/RUN_SUMMARY.md
 
 **Proof snippet(s) (PII-safe):**
-`	ext
+```text
 [OK] CI-equivalent checks passed.
-1553 passed, 18 subtests passed in 228.14s (0:03:48)
-`
+1555 passed, 18 subtests passed in 228.74s (0:03:48)
+```
 
 ### 8) Risk & rollback
-**Risk rationale:** isk:R3-high — customer-facing automation prompt + pipeline changes.
+**Risk rationale:** `risk:R3-high` — customer-facing automation prompt + pipeline changes.
 
 **Failure impact:** Incorrect greeting/signature formatting or missing tone mirroring in customer replies.
 
 **Rollback plan:**
 - Revert PR
-- Re-run python scripts/run_ci_checks.py --ci and pytest -q to confirm rollback
+- Re-run `python scripts/run_ci_checks.py --ci` and `pytest -q` to confirm rollback
 
 ### 9) Reviewer + tool focus
 **Please double-check:**
