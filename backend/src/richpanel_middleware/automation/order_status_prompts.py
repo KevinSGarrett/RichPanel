@@ -26,8 +26,30 @@ Rules:
 - Do NOT include any personal data, names, emails, or order details in the reason.
 - Output JSON only. No extra keys, no commentary, no code fences."""
 
-REPLY_SYSTEM_PROMPT = """You write a short, friendly order-status reply for a customer.
+REPLY_SYSTEM_PROMPT = """You write concise, brand-voice order-status replies for customers.
 Use ONLY the provided context; do not invent facts.
+
+Non-negotiables:
+- Output strict JSON ONLY: {"body":"...","confidence":0.xx,"risk_flags":[]}. No commentary, no code fences.
+- Do not mention AI, bot, automation, or templates.
+- Do not add new commitments (refunds, discounts, guarantees).
+- Do not invent dates, carriers, tracking numbers, or URLs.
+- Preserve any URLs, tracking numbers, and ETA windows already present in the draft verbatim.
+- Do NOT include a greeting or signature in the body (pipeline adds those).
+
+Customer-message awareness:
+- Use customer_message_excerpt to craft 1-2 opening sentences that mirror the customer's concern
+  without quoting verbatim.
+
+Tone mapping:
+- angry/frustrated: acknowledge + apologize once, then steps + timeline.
+- anxious: reassure + timeline.
+- confused: simplify + restate key facts.
+- neutral: friendly + direct.
+
+Formatting:
+- Short paragraphs, no emojis, no slang, concise (~90–180 words typical).
+- Avoid internal tags or system jargon (e.g., mw-*, route-*).
 
 Rules:
 - If tracking_number or tracking_url is provided, include them verbatim.
@@ -36,9 +58,6 @@ Rules:
 - If tracking is missing and eta_window is provided, mention the ETA window and what to do next.
 - If tracking is missing and eta_window is not provided, say a support agent will follow up.
 - If shipping_method is provided, mention it in plain language.
-- Do NOT invent carriers, tracking numbers, or URLs.
-- Avoid internal tags or system jargon (e.g., mw-*, route-*).
-- Keep it concise and helpful.
 
 Return strict JSON ONLY with:
 {
@@ -59,6 +78,20 @@ class OrderStatusReplyContext:
     eta_window: Optional[str] = None
     shipping_method: Optional[str] = None
     carrier: Optional[str] = None
+    customer_first_name: Optional[str] = None
+    customer_message_excerpt: Optional[str] = None
+
+    def as_payload(self) -> Dict[str, Optional[str]]:
+        payload = {
+            "tracking_number": self.tracking_number,
+            "tracking_url": self.tracking_url,
+            "eta_window": self.eta_window,
+            "shipping_method": self.shipping_method,
+            "carrier": self.carrier,
+            "customer_first_name": self.customer_first_name,
+            "customer_message_excerpt": self.customer_message_excerpt,
+        }
+        return {key: value for key, value in payload.items() if value is not None}
 
 
 def build_order_status_intent_prompt(
@@ -85,13 +118,7 @@ def build_order_status_reply_prompt(
     draft_reply: str,
     language: Optional[str] = None,
 ) -> List[ChatMessage]:
-    safe_context = {
-        "tracking_number": context.tracking_number,
-        "tracking_url": context.tracking_url,
-        "eta_window": context.eta_window,
-        "shipping_method": context.shipping_method,
-        "carrier": context.carrier,
-    }
+    safe_context = context.as_payload()
     context_json = json.dumps(safe_context, sort_keys=True, separators=(",", ":"))
     trimmed_draft = draft_reply[:_MAX_DRAFT_CHARS] if draft_reply else ""
     language_hint = (

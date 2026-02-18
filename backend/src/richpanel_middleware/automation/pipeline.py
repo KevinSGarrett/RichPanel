@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import time
 import urllib.parse
 from dataclasses import asdict, dataclass, field, replace
@@ -40,6 +41,7 @@ from richpanel_middleware.automation.order_status_prompts import (
     OrderStatusReplyContext,
     build_order_status_reply_prompt,
 )
+from richpanel_middleware.automation.pii_sanitizer import sanitize_for_openai
 from richpanel_middleware.commerce.order_lookup import (
     extract_order_number_from_payload,
     lookup_order_summary,
@@ -111,6 +113,8 @@ _SKIP_REASON_TAGS = {
 _READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
 _SECRET_VALUE_CACHE_TTL_SECONDS = 900
 _SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
+_MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS = 400
+_SIGNATURE_LINES = ("Holly", "Scentiment Customer Support")
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -372,6 +376,120 @@ def _extract_customer_email_from_payload(payload: Any) -> Optional[str]:
         if normalized:
             return normalized
     return None
+
+
+def _extract_customer_first_name_from_payload(payload: Any) -> Optional[str]:
+    if not isinstance(payload, dict):
+        return None
+    candidates: List[Any] = []
+    for key in ("first_name", "firstName"):
+        candidates.append(payload.get(key))
+    for key in ("customer_profile", "customer", "requester", "sender", "user"):
+        nested = payload.get(key)
+        if isinstance(nested, dict):
+            for name_key in ("first_name", "firstName"):
+                candidates.append(nested.get(name_key))
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        try:
+            normalized = str(candidate).strip()
+        except Exception:
+            continue
+        if not normalized:
+            continue
+        if len(normalized) > 64:
+            continue
+        if normalized.isdigit():
+            continue
+        if re.search(r"\d", normalized):
+            continue
+        return normalized
+    return None
+
+
+def _build_customer_message_excerpt(raw_message: str) -> Optional[str]:
+    sanitized = sanitize_for_openai(raw_message or "", max_chars=None)
+    if not sanitized:
+        return None
+    if len(sanitized) > _MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS:
+        sanitized = sanitized[:_MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS].rstrip()
+    return sanitized or None
+
+
+def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
+    greeting = f"Hi {first_name}," if first_name else "Hi there,"
+    lines = body.splitlines()
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    if not lines:
+        return f"{greeting}\n\n"
+    first_line = lines[0].strip()
+    greeting_match = re.match(r"^(hi|hello|hey)\b", first_line, flags=re.IGNORECASE)
+    if greeting_match:
+        remainder = first_line[greeting_match.end() :].lstrip(" ,:-").strip()
+        if not remainder and not lines[1:]:
+            return f"{greeting}\n\n"
+        updated = [greeting]
+        if remainder:
+            updated.extend(["", remainder])
+        else:
+            if not lines[1:] or lines[1].strip():
+                updated.append("")
+        updated.extend(lines[1:])
+        lines = updated
+    else:
+        lines.insert(0, greeting)
+        if len(lines) == 1 or lines[1].strip():
+            lines.insert(1, "")
+    return "\n".join(lines)
+
+
+def _ensure_holly_signature(body: str) -> str:
+    lines = body.rstrip().splitlines()
+    if len(lines) >= 2 and tuple(lines[-2:]) == _SIGNATURE_LINES:
+        return "\n".join(lines)
+    if lines and lines[-1] == _SIGNATURE_LINES[1]:
+        lines.pop()
+    if lines and lines[-1] == _SIGNATURE_LINES[0]:
+        lines.pop()
+    if lines and lines[-1].strip():
+        lines.append("")
+    lines.extend(_SIGNATURE_LINES)
+    return "\n".join(lines)
+
+
+def _build_order_status_reply_context(
+    *,
+    payload: Dict[str, Any],
+    draft_reply: Dict[str, Any],
+    delivery_estimate: Any,
+    order_summary: Dict[str, Any],
+) -> OrderStatusReplyContext:
+    if not isinstance(delivery_estimate, dict):
+        delivery_estimate = {}
+    eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
+    shipping_method = (
+        delivery_estimate.get("normalized_method")
+        or order_summary.get("shipping_method_name")
+        or order_summary.get("shipping_method")
+    )
+    shipping_method = normalize_shipping_method_for_carrier(
+        shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
+    )
+    customer_first_name = _extract_customer_first_name_from_payload(payload)
+    customer_message_excerpt = _build_customer_message_excerpt(
+        extract_customer_message(payload, default="")
+    )
+    return OrderStatusReplyContext(
+        tracking_number=draft_reply.get("tracking_number"),
+        tracking_url=draft_reply.get("tracking_url"),
+        eta_window=eta_window,
+        shipping_method=shipping_method,
+        carrier=draft_reply.get("carrier"),
+        customer_first_name=customer_first_name,
+        customer_message_excerpt=customer_message_excerpt,
+    )
 
 
 def _tracking_signal_present(order_summary: Dict[str, Any]) -> bool:
@@ -1568,23 +1686,11 @@ def execute_order_status_reply(
         delivery_estimate = parameters.get("delivery_estimate") or order_summary.get(
             "delivery_estimate"
         )
-        if not isinstance(delivery_estimate, dict):
-            delivery_estimate = {}
-        eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
-        shipping_method = (
-            delivery_estimate.get("normalized_method")
-            or order_summary.get("shipping_method_name")
-            or order_summary.get("shipping_method")
-        )
-        shipping_method = normalize_shipping_method_for_carrier(
-            shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
-        )
-        reply_context = OrderStatusReplyContext(
-            tracking_number=draft_reply.get("tracking_number"),
-            tracking_url=draft_reply.get("tracking_url"),
-            eta_window=eta_window,
-            shipping_method=shipping_method,
-            carrier=draft_reply.get("carrier"),
+        reply_context = _build_order_status_reply_context(
+            payload=payload,
+            draft_reply=draft_reply if isinstance(draft_reply, dict) else {},
+            delivery_estimate=delivery_estimate,
+            order_summary=order_summary if isinstance(order_summary, dict) else {},
         )
         intent_language = None
         if isinstance(plan.order_status_intent, OrderStatusIntentArtifact):
@@ -1659,6 +1765,11 @@ def execute_order_status_reply(
                     "error_class": rewrite_result.error_class,
                 }
             )
+
+        reply_body = _ensure_order_status_greeting(
+            reply_body, reply_context.customer_first_name
+        )
+        reply_body = _ensure_holly_signature(reply_body)
 
         comment_payload = {"body": reply_body, "type": "public", "source": "middleware"}
         # Proven-working close payloads for Richpanel (ordered by reliability).
