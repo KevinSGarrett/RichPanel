@@ -425,14 +425,14 @@ def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
     if not lines:
         return f"{greeting}\n\n"
     first_line = lines[0].strip()
-    if re.match(r"^(hi|hello|hey)\b", first_line, flags=re.IGNORECASE):
-        lines[0] = greeting
+    greeting_match = re.match(r"^(hi|hello|hey)\b", first_line, flags=re.IGNORECASE)
+    if greeting_match:
+        remainder = first_line[greeting_match.end() :].lstrip(" ,:-").strip()
+        lines = [greeting] + (["", remainder] if remainder else [""]) + lines[1:]
     else:
         lines.insert(0, greeting)
-    if len(lines) == 1:
-        lines.append("")
-    elif lines[1].strip():
-        lines.insert(1, "")
+        if len(lines) == 1 or lines[1].strip():
+            lines.insert(1, "")
     return "\n".join(lines)
 
 
@@ -442,6 +442,10 @@ def _ensure_holly_signature(body: str) -> str:
         lines.pop()
     if len(lines) >= 2 and tuple(lines[-2:]) == _SIGNATURE_LINES:
         return "\n".join(lines)
+    if lines and lines[-1] == _SIGNATURE_LINES[1]:
+        lines.pop()
+    if lines and lines[-1] == _SIGNATURE_LINES[0]:
+        lines.pop()
     if lines and lines[-1].strip():
         lines.append("")
     lines.extend(_SIGNATURE_LINES)

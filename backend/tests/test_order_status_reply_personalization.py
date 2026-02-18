@@ -78,6 +78,15 @@ def test_greeting_enforcement() -> None:
     empty = pipeline._ensure_order_status_greeting("", "Sarah")
     assert empty.startswith("Hi Sarah,\n\n")
 
+    inline = "Hi Sarah, your order is on the way."
+    inline_replaced = pipeline._ensure_order_status_greeting(inline, "Sarah")
+    assert inline_replaced.startswith("Hi Sarah,\n\n")
+    assert "your order is on the way." in inline_replaced
+
+    loud = "HEY! Thanks for the update."
+    loud_replaced = pipeline._ensure_order_status_greeting(loud, "Sarah")
+    assert loud_replaced.startswith("Hi Sarah,\n\n")
+
 
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
@@ -89,3 +98,13 @@ def test_signature_enforcement_idempotent() -> None:
 
     trailing = signed + "\n\n"
     assert pipeline._ensure_holly_signature(trailing) == signed
+
+    partial = "Update\n\nHolly"
+    assert pipeline._ensure_holly_signature(partial).endswith(
+        "Holly\nScentiment Customer Support"
+    )
+
+    partial_two = "Update\n\nHolly\nScentiment"
+    assert pipeline._ensure_holly_signature(partial_two).endswith(
+        "Holly\nScentiment Customer Support"
+    )
