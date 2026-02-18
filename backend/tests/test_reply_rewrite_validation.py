@@ -291,7 +291,11 @@ def test_resolve_rewrite_temperature_env() -> None:
         assert rewriter._resolve_rewrite_temperature() == 0.7
         os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.15"
         assert rewriter._resolve_rewrite_temperature() == 0.15
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "-0.5"
+        assert rewriter._resolve_rewrite_temperature() == 0.0
         os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "bad"
+        assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "  "
         assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE
         os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = ""
         assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE

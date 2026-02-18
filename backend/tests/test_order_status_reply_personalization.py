@@ -43,6 +43,7 @@ def test_excerpt_is_sanitized_and_truncated() -> None:
     assert "sarah@example.com" not in excerpt
     assert "https://tracking.example.com/track/ABC123" not in excerpt
     assert len(excerpt) <= pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
+    assert excerpt.endswith("x")
 
 
 def test_excerpt_empty_returns_none() -> None:
@@ -54,6 +55,10 @@ def test_excerpt_boundary_no_truncation() -> None:
     raw = "x" * pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
     excerpt = pipeline._build_customer_message_excerpt(raw)
     assert excerpt == raw
+
+    long_raw = "y" * (pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS + 10)
+    long_excerpt = pipeline._build_customer_message_excerpt(long_raw)
+    assert long_excerpt == "y" * pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
 
 
 def test_extract_customer_first_name_from_payload() -> None:
@@ -110,6 +115,10 @@ def test_greeting_enforcement() -> None:
     no_greeting_wrapped = pipeline._ensure_order_status_greeting(no_greeting, None)
     assert no_greeting_wrapped.startswith("Hi there,\n\n")
     assert "\n\n\n" not in no_greeting_wrapped
+
+    already_spaced = "Hi there,\n\nBody line"
+    already_spaced_wrapped = pipeline._ensure_order_status_greeting(already_spaced, None)
+    assert already_spaced_wrapped.startswith("Hi there,\n\n")
 
     greeting_only = "Hey,"
     greeting_only_wrapped = pipeline._ensure_order_status_greeting(greeting_only, "Sarah")
