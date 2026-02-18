@@ -559,6 +559,7 @@ def build_no_tracking_key_details_block(estimate: Any) -> Optional[str]:
     lines.append("(Business days are Mon–Fri; holidays may affect timelines.)")
     return "\n".join(lines)
 
+
 def _insert_key_details_block(body: str, key_details_block: str) -> str:
     tracking_sentence = "We'll send tracking as soon as it ships."
     if tracking_sentence in body:
@@ -571,7 +572,6 @@ def _insert_key_details_block(body: str, key_details_block: str) -> str:
             .rstrip()
         )
     return f"{body.rstrip()}\n\n{key_details_block}"
-
 
 
 def compute_delivery_estimate(
@@ -935,7 +935,6 @@ def build_no_tracking_reply(
         key_details_block = build_no_tracking_key_details_block(estimate)
         if key_details_block:
             body = _insert_key_details_block(body, key_details_block)
-
 
         return {
             "body": body.strip(),
