@@ -56,22 +56,15 @@ List commands you ran (include key flags/env if relevant):
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 python scripts/run_ci_checks.py --ci - fail (generated files changed after regen; working tree not committed) - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
+- RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 pytest -q - fail (NoRegionError) - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
 
 Paste output snippet proving you ran:
-`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 python scripts/run_ci_checks.py --ci`
+`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
 
 ```
-[OK] REHYDRATION_PACK validated (mode=build).
-[OK] RUN_20260218_1442Z is referenced in Progress_Log.md
-...
-[FAIL] Generated files changed after regen. Commit the regenerated outputs.
-Uncommitted changes:
-M backend/src/richpanel_middleware/automation/delivery_estimate.py
-...
-M scripts/test_delivery_estimate.py
+[OK] CI-equivalent checks passed.
 ```
 
 ```

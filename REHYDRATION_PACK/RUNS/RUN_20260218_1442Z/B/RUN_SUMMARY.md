@@ -25,7 +25,7 @@ Add deterministic Key Details blocks for ETA/no-tracking replies (preorder + non
 ## Git/GitHub status (required)
 - Working branch: run/RUN_20260218_1442Z
 - PR: none
-- CI status at end of run: red (local run_ci_checks failed due to uncommitted changes after regen)
+- CI status at end of run: green (local run_ci_checks passed after commits)
 - Main updated: no (Integrator only)
 - Branch cleanup done: no (Integrator only)
 
