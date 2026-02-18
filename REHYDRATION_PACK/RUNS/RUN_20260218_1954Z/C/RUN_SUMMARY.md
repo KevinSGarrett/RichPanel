@@ -36,4 +36,4 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 - Blocked deployment and AWS diffs until valid AWS credentials and prod safe-mode verification are available.
 
 ## Issues / follow-ups
-- Resolve staging assume-role access to account `260475105304` for CDK diff.
+- Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.

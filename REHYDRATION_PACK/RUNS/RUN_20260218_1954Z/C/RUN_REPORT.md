@@ -88,13 +88,14 @@ List commands you ran (include key flags/env if relevant):
 - `gh pr edit 261 --add-label \"risk:R3-high\" --add-label \"gate:claude\"` - applied required labels.
 - `gh pr comment 261 --body \"@cursor review\"` - triggered Bugbot review (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923008521).
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (safe).
-- `$env:AWS_PROFILE='rp-admin-kevin'; npx cdk diff RichpanelMiddleware-staging` - staging diff reattempt (still assume-role blocked).
+- `aws sso login --profile rp-admin-staging` - authenticated staging AWS SSO.
+- `$env:AWS_PROFILE='rp-admin-staging'; npx cdk diff RichpanelMiddleware-staging` - staging diff succeeded (includes unrelated stack changes; change set not created).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/run_ci_checks.log`
-- `npx cdk diff RichpanelMiddleware-staging` - fail (assume-role) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
+- `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 
@@ -115,11 +116,10 @@ Paste output snippet proving you ran:
 - Deployment safety (mitigation: require safe_mode=true + automation_enabled=false before any prod deploy).
 
 ## Blockers / open questions
-- Staging CDK diff blocked by missing assume-role trust to account `260475105304`.
+- Staging CDK diff includes many unrelated stack changes (staging stack drift), violating the “env-var-only” diff requirement.
 
 ## Follow-ups (actionable)
-- [ ] Resolve staging assume-role access for account `260475105304` to complete CDK diff.
-- [ ] Coordinate with human owner to set `safe_mode=true` and `automation_enabled=false` before any deploy.
-- [ ] Run staging/prod deployments + read-only proof once safe-mode state is verified.
+- [ ] Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.
+- [ ] Run staging/prod deployments + read-only proof once staging diff requirement is satisfied.
 
 <!-- End of template -->
