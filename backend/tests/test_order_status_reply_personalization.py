@@ -103,6 +103,11 @@ def test_greeting_enforcement() -> None:
     assert inline_replaced.startswith("Hi Sarah,\n\n")
     assert "your order is on the way." in inline_replaced
 
+    remainder_with_next = "Hi there, status update line\nNext line"
+    remainder_wrapped = pipeline._ensure_order_status_greeting(remainder_with_next, None)
+    assert remainder_wrapped.startswith("Hi there,\n\n")
+    assert "status update line" in remainder_wrapped
+
     loud = "HEY! Thanks for the update."
     loud_replaced = pipeline._ensure_order_status_greeting(loud, "Sarah")
     assert loud_replaced.startswith("Hi Sarah,\n\n")
@@ -123,6 +128,12 @@ def test_greeting_enforcement() -> None:
     greeting_only = "Hey,"
     greeting_only_wrapped = pipeline._ensure_order_status_greeting(greeting_only, "Sarah")
     assert greeting_only_wrapped == "Hi Sarah,\n\n"
+
+    greeting_with_blank = "Hi there,\n\nBody"
+    greeting_with_blank_wrapped = pipeline._ensure_order_status_greeting(
+        greeting_with_blank, None
+    )
+    assert greeting_with_blank_wrapped.startswith("Hi there,\n\n")
 
 
 def test_signature_enforcement_idempotent() -> None:
