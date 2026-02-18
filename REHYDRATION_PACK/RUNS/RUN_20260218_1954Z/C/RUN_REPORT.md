@@ -74,13 +74,21 @@ List commands you ran (include key flags/env if relevant):
 - `npx cdk diff RichpanelMiddleware-prod` - attempted CDK diff (blocked by missing AWS creds).
 - `aws sts get-caller-identity --profile rp-admin-prod --output json` - prod identity check (SSO token expired).
 - `git push -u origin run/RUN_20260218_1954Z` - failed (invalid GitHub credentials).
+- `aws sso login --profile rp-admin-prod` - authenticated prod AWS SSO.
+- `aws sso login --profile rp-admin-kevin` - authenticated staging AWS SSO.
+- `aws sts get-caller-identity --profile rp-admin-prod --output json` - verified prod account ID.
+- `$env:AWS_PROFILE='rp-admin-kevin'; npx cdk diff RichpanelMiddleware-staging` - staging diff failed (assume-role).
+- `$env:AWS_PROFILE='rp-admin-prod'; npx cdk diff RichpanelMiddleware-prod` - prod diff succeeded.
+- `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (not safe).
+- `Remove-Item Env:GH_TOKEN; git push -u origin run/RUN_20260218_1954Z` - push succeeded after unsetting invalid token.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/run_ci_checks.log`
-- `npx cdk diff RichpanelMiddleware-staging` - fail (no AWS creds) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
-- `npx cdk diff RichpanelMiddleware-prod` - fail (no AWS creds) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
+- `npx cdk diff RichpanelMiddleware-staging` - fail (assume-role) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
+- `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
+- `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - fail (safe_mode=false, automation_enabled=true) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
@@ -99,12 +107,12 @@ Paste output snippet proving you ran:
 - Deployment safety (mitigation: require safe_mode=true + automation_enabled=false before any prod deploy).
 
 ## Blockers / open questions
-- Missing AWS credentials prevent CDK diffs, safe-mode verification, and deployment.
-- Missing GitHub credentials prevent pushing the branch and opening a PR.
+- Staging CDK diff blocked by missing assume-role trust to account `260475105304`.
+- Prod safe_mode is `false` and automation_enabled is `true`; no-contact requirement not met.
 
 ## Follow-ups (actionable)
-- [ ] Authenticate AWS SSO for staging/prod and rerun CDK diffs + safe-mode verification.
-- [ ] Run staging/prod deployments + read-only proof once AWS access and safe-mode state are verified.
-- [ ] Authenticate GitHub and push branch to open PR.
+- [ ] Resolve staging assume-role access for account `260475105304` to complete CDK diff.
+- [ ] Coordinate with human owner to set `safe_mode=true` and `automation_enabled=false` before any deploy.
+- [ ] Run staging/prod deployments + read-only proof once safe-mode state is verified.
 
 <!-- End of template -->

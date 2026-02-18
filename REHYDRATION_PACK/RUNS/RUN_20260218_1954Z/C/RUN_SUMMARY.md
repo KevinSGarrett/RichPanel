@@ -36,5 +36,5 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 - Blocked deployment and AWS diffs until valid AWS credentials and prod safe-mode verification are available.
 
 ## Issues / follow-ups
-- Obtain AWS SSO credentials to run CDK diffs and verify `safe_mode`/`automation_enabled` before deploy.
-- Obtain GitHub credentials to push the branch and open the PR.
+- Resolve staging assume-role access to account `260475105304` for CDK diff.
+- Coordinate to set `safe_mode=true` and `automation_enabled=false` before any deploy.
