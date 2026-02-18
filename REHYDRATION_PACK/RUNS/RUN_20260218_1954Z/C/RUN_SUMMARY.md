@@ -24,7 +24,7 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260218_1954Z`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/261
-- CI status at end of run: green (local), deploy blocked by AWS creds
+- CI status at end of run: green (PR checks passing)
 - Main updated: yes
 - Branch cleanup done: no
 
@@ -37,3 +37,4 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 
 ## Issues / follow-ups
 - Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.
+- Resolve staging LogGroup ownership conflict before retrying staging deploy (`/aws/lambda/rp-mw-staging-worker` exists).

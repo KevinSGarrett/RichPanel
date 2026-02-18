@@ -41,7 +41,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  33 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 133 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 134 +++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  18 +
@@ -59,7 +59,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 36 files changed, 1933 insertions(+), 3 deletions(-)
+ 36 files changed, 1934 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -103,6 +103,7 @@ Include test commands + results + links to evidence.
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 - `Deploy Staging Stack` (main) - fail (log group already exists) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log`
+- PR checks green (validate/codecov/bugbot/claude/risk/import-linter/CodeQL) - evidence: https://github.com/KevinSGarrett/RichPanel/pull/261
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
