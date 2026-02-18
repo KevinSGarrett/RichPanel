@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import unittest
@@ -318,9 +319,37 @@ def test_resolve_rewrite_temperature_env_restores_original() -> None:
         os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
 
 
+def test_default_model_prefers_reply_rewrite_env() -> None:
+    original_rewrite = os.environ.get("OPENAI_REPLY_REWRITE_MODEL")
+    original_model = os.environ.get("OPENAI_MODEL")
+    try:
+        os.environ["OPENAI_REPLY_REWRITE_MODEL"] = "gpt-5.2"
+        os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
+        importlib.reload(rewriter)
+        assert rewriter.DEFAULT_MODEL == "gpt-5.2"
+
+        os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
+        os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
+        importlib.reload(rewriter)
+        assert rewriter.DEFAULT_MODEL == "gpt-5.2-chat-latest"
+    finally:
+        if original_rewrite is None:
+            os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
+        else:
+            os.environ["OPENAI_REPLY_REWRITE_MODEL"] = original_rewrite
+        if original_model is None:
+            os.environ.pop("OPENAI_MODEL", None)
+        else:
+            os.environ["OPENAI_MODEL"] = original_model
+        importlib.reload(rewriter)
+
+
 class ReplyRewriteValidationTests(unittest.TestCase):
     def test_resolve_rewrite_temperature_env(self) -> None:
         test_resolve_rewrite_temperature_env()
 
     def test_resolve_rewrite_temperature_env_restores_original(self) -> None:
         test_resolve_rewrite_temperature_env_restores_original()
+
+    def test_default_model_prefers_reply_rewrite_env(self) -> None:
+        test_default_model_prefers_reply_rewrite_env()
