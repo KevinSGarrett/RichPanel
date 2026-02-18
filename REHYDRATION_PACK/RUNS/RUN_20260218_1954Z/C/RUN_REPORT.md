@@ -41,8 +41,8 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 ++
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 141 +++++
- .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 142 +++++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  41 ++
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  19 +
  .../C/evidence/cdk_diff_prod.txt                   |  59 +++
@@ -59,13 +59,15 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.compact.json          |   2 +-
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
+ backend/tests/test_reply_rewrite_validation.py     |  62 ++-
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 38 files changed, 1767 insertions(+), 4 deletions(-)
+ 38 files changed, 1800 insertions(+), 4 deletions(-)
 ```
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
 - `infra/cdk/lib/richpanel-middleware-stack.ts` - add reply rewrite model/temperature env vars to worker Lambda.
+- `backend/tests/test_reply_rewrite_validation.py` - validate rewrite model env selection and restore behavior.
 - `docs/00_Project_Admin/Progress_Log.md` - record B91 run entry.
 - `docs/_generated/*` - regenerated registries after progress log change.
 - `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/*` - required run artifacts and evidence.

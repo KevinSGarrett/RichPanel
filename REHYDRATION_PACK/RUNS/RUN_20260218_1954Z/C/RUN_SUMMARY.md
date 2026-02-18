@@ -10,10 +10,11 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 ## Work completed (bullets)
 - Added worker Lambda env vars for reply rewrite model + temperature in CDK.
 - Updated progress log and captured doc registry regeneration outputs via CI checks.
-- Created run artifacts and captured CDK diff attempts (blocked by missing AWS credentials).
+- Added tests to validate rewrite model env selection and updated run artifacts/evidence.
 
 ## Files changed
 - `infra/cdk/lib/richpanel-middleware-stack.ts`
+- `backend/tests/test_reply_rewrite_validation.py`
 - `docs/00_Project_Admin/Progress_Log.md`
 - `docs/_generated/doc_outline.json`
 - `docs/_generated/doc_registry.compact.json`
