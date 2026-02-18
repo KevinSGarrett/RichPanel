@@ -10,11 +10,16 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
+    build_no_tracking_key_details_block,
     build_no_tracking_reply,
 )
 
 
 class DeliveryEstimateFallbackTests(unittest.TestCase):
+    def test_key_details_block_non_dict_estimate(self) -> None:
+        self.assertIsNone(build_no_tracking_key_details_block(None))
+        self.assertIsNone(build_no_tracking_key_details_block("invalid"))
+
     def test_no_tracking_reply_without_order_id(self) -> None:
         reply = build_no_tracking_reply({}, inquiry_date="2025-01-02")
         assert reply is not None
@@ -134,6 +139,30 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("- Shipping: 3-7 business days", body)
         self.assertIn("- Total ETA: 23–31 days", body)
         self.assertIn("- Estimated delivery: April 6–April 14, 2026", body)
+
+    def test_preorder_key_details_empty_ship_date(self) -> None:
+        delivery_estimate = {
+            "preorder": True,
+            "preorder_ship_date_human": "   ",
+            "ship_days_from_inquiry_human": "15 days",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "days_from_inquiry_human": "23–31 days",
+            "delivery_window_human": "April 6–April 14, 2026",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            {"order_tags_raw": "Pre-order"},
+            inquiry_date="2026-03-14",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertNotIn("- Pre-order release:", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
 
     def test_preorder_delivery_fallback_late_any_day_now(self) -> None:
         order_summary = {

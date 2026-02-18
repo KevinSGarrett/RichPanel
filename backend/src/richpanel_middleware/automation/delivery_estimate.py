@@ -518,6 +518,8 @@ def build_no_tracking_key_details_block(estimate: Any) -> Optional[str]:
     lines = ["Key Details:"]
     if estimate.get("preorder"):
         preorder_ship_date_human = estimate.get("preorder_ship_date_human")
+        if isinstance(preorder_ship_date_human, str) and not preorder_ship_date_human.strip():
+            preorder_ship_date_human = None
         if preorder_ship_date_human:
             ship_line = f"- Pre-order release: {preorder_ship_date_human}"
             ship_days_from_inquiry_human = estimate.get("ship_days_from_inquiry_human")
