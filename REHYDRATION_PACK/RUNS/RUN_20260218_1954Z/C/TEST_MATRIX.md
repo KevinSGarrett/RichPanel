@@ -12,6 +12,7 @@ List the tests you ran (or explicitly note none).
 | CDK diff (staging) | `AWS_PROFILE=rp-admin-staging npx cdk diff RichpanelMiddleware-staging` | pass (diff includes unrelated changes; blocker) | `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt` |
 | CDK diff (prod) | `AWS_PROFILE=rp-admin-prod npx cdk diff RichpanelMiddleware-prod` | pass | `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt` |
 | Prod kill-switch check | `aws ssm get-parameters --names <safe_mode> <automation_enabled>` | pass (safe_mode=true, automation_enabled=false) | `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt` |
+| Deploy Staging Stack (main) | `gh workflow run "Deploy Staging Stack" --ref main` | fail (LogGroup exists) | `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log` |
 
 ## Notes
 AWS SSO credentials are required before CDK diffs and deployment verification can proceed.

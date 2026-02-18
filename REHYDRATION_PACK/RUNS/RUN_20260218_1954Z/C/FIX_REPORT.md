@@ -14,11 +14,15 @@
 - error: `Could not assume role in target account using current credentials (account 151124909266)`
 - where: `npx cdk diff RichpanelMiddleware-staging` with `AWS_PROFILE=rp-admin-kevin`
 - repro steps: run staging diff without role trust for `cdk-hnb659fds-lookup-role-260475105304-us-east-2`
+- error: `ChangeSet 'cdk-deploy-change-set' failed early validation: LogGroup already exists`
+- where: Deploy Staging Stack workflow run 22157069157 (main)
+- repro steps: run staging deploy while `/aws/lambda/rp-mw-staging-worker` exists outside CloudFormation
 
 ## Diagnosis
 - likely root cause: missing/expired AWS SSO credentials for required accounts
 - likely root cause: missing/expired GitHub credentials for pushing to `origin`
 - likely root cause: staging account assumes require different profile/role trust than `rp-admin-kevin`
+- likely root cause: staging CloudWatch LogGroup exists outside stack ownership
 
 ## Fix applied
  - files changed: none

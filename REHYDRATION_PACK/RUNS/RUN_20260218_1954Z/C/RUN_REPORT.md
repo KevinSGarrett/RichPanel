@@ -39,12 +39,12 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/B/TEST_MATRIX.md       |  15 +
  .../RUN_20260218_1954Z/C/AGENT_PROMPTS_ARCHIVE.md  | 101 +++
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
- .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  29 +
+ .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  33 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 125 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 130 +++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  39 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
- .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  17 +
+ .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  18 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
  .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 58384 bytes
  .../C/evidence/prod_automation_param.txt           |   1 +
@@ -58,7 +58,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 35 files changed, 1919 insertions(+), 3 deletions(-)
+ 35 files changed, 1929 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -90,6 +90,8 @@ List commands you ran (include key flags/env if relevant):
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (safe).
 - `aws sso login --profile rp-admin-staging` - authenticated staging AWS SSO.
 - `$env:AWS_PROFILE='rp-admin-staging'; npx cdk diff RichpanelMiddleware-staging` - staging diff succeeded (includes unrelated stack changes; change set not created).
+- `gh workflow run "Deploy Staging Stack" --ref main` - attempted staging sync on main (run 22157069157 failed).
+- `gh run view 22157069157 --log` - captured staging deploy failure log.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -98,6 +100,7 @@ Include test commands + results + links to evidence.
 - `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
+- `Deploy Staging Stack` (main) - fail (log group already exists) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log`
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
@@ -117,9 +120,11 @@ Paste output snippet proving you ran:
 
 ## Blockers / open questions
 - Staging CDK diff includes many unrelated stack changes (staging stack drift), violating the “env-var-only” diff requirement.
+- Staging deploy failed: CloudWatch LogGroup `/aws/lambda/rp-mw-staging-worker` already exists (stack drift/ownership conflict).
 
 ## Follow-ups (actionable)
 - [ ] Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.
 - [ ] Run staging/prod deployments + read-only proof once staging diff requirement is satisfied.
+- [ ] Resolve staging LogGroup ownership conflict (delete/import) before retrying staging deploy.
 
 <!-- End of template -->
