@@ -288,6 +288,26 @@ def test_key_details_block_does_not_duplicate() -> None:
     assert updated == body
 
 
+def test_key_details_block_skips_tracking() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={"tracking_number": "1Z999"},
+    )
+    assert updated == body
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -321,3 +341,6 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_does_not_duplicate(self) -> None:
         test_key_details_block_does_not_duplicate()
+
+    def test_key_details_block_skips_tracking(self) -> None:
+        test_key_details_block_skips_tracking()
