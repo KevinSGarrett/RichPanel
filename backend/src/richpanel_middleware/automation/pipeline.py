@@ -447,8 +447,6 @@ def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
 
 def _ensure_holly_signature(body: str) -> str:
     lines = body.rstrip().splitlines()
-    while lines and not lines[-1].strip():
-        lines.pop()
     if len(lines) >= 2 and tuple(lines[-2:]) == _SIGNATURE_LINES:
         return "\n".join(lines)
     if lines and lines[-1] == _SIGNATURE_LINES[1]:

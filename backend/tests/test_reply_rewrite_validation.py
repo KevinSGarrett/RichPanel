@@ -309,6 +309,18 @@ def test_resolve_rewrite_temperature_env() -> None:
             os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = original
 
 
+def test_resolve_rewrite_temperature_env_restores_original() -> None:
+    os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.25"
+    try:
+        test_resolve_rewrite_temperature_env()
+        assert os.environ.get("OPENAI_REPLY_REWRITE_TEMPERATURE") == "0.25"
+    finally:
+        os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
+
+
 class ReplyRewriteValidationTests(unittest.TestCase):
     def test_resolve_rewrite_temperature_env(self) -> None:
         test_resolve_rewrite_temperature_env()
+
+    def test_resolve_rewrite_temperature_env_restores_original(self) -> None:
+        test_resolve_rewrite_temperature_env_restores_original()

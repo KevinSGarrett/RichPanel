@@ -199,6 +199,12 @@ def test_greeting_enforcement() -> None:
     )
     assert greeting_single_wrapped.startswith("Hi there,\n\n")
 
+    greeting_short = "Hi,\nBody"
+    greeting_short_wrapped = pipeline._ensure_order_status_greeting(
+        greeting_short, None
+    )
+    assert greeting_short_wrapped.startswith("Hi there,\n\n")
+
 
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
