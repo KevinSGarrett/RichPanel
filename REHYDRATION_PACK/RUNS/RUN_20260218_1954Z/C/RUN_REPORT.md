@@ -83,6 +83,7 @@ List commands you ran (include key flags/env if relevant):
 - `Remove-Item Env:GH_TOKEN; git push -u origin run/RUN_20260218_1954Z` - push succeeded after unsetting invalid token.
 - `gh pr create --title \"B91: Set OPENAI_REPLY_REWRITE_MODEL=gpt-5.2 in CDK (risk:R3)\" --body-file <path>` - opened PR #261.
 - `gh pr edit 261 --add-label \"risk:R3-high\" --add-label \"gate:claude\"` - applied required labels.
+- `gh pr comment 261 --body \"@cursor review\"` - triggered Bugbot review (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923008521).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
