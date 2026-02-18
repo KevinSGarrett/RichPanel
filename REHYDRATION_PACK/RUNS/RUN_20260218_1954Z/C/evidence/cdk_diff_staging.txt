@@ -1,0 +1,480 @@
+node.exe : start: Building RichpanelMiddleware-staging Template
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (start: Building...taging Template:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+success: Built RichpanelMiddleware-staging Template
+start: Publishing RichpanelMiddleware-staging Template (260475105304-us-east-2-0dfd0bdc)
+success: Published RichpanelMiddleware-staging Template (260475105304-us-east-2-0dfd0bdc)
+Hold on while we create a read-only change set to get a diff with accurate replacement information (use 
+--no-change-set to use a less accurate but faster template-only diff)
+
+Could not create a change set, will base the diff on template differences (run again with -v to see the reason)
+
+Stack RichpanelMiddleware-staging
+IAM Statement Changes
+
+
+
+
+
+
+    Resource                                                                                                     
+    Effect  Action                         Principal                        Condition 
+]%
+
+]%
+]%
+]%]%
+
+ +  ${AuditTrailTable.Arn}                                                                                       
+    Allow   dynamodb:BatchGetItem          AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            dynamodb:BatchWriteItem                                                   
+                                                                                                                 
+            dynamodb:ConditionCheckItem                                               
+                                                                                                                 
+            dynamodb:DeleteItem                                                       
+                                                                                                                 
+            dynamodb:DescribeTable                                                    
+                                                                                                                 
+            dynamodb:GetItem                                                          
+                                                                                                                 
+            dynamodb:PutItem                                                          
+                                                                                                                 
+            dynamodb:Query                                                            
+                                                                                                                 
+            dynamodb:Scan                                                             
+                                                                                                                 
+            dynamodb:UpdateItem                                                       
+ +  ${AuditTrailTable.Arn}                                                                                       
+    Allow   dynamodb:GetRecords            AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            dynamodb:GetShardIterator                                                 
+]%
+
+]%
+]%
+]%]%
+
+ +  ${ConversationStateTable.Arn}                                                                                
+    Allow   dynamodb:BatchGetItem          AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            dynamodb:BatchWriteItem                                                   
+                                                                                                                 
+            dynamodb:ConditionCheckItem                                               
+                                                                                                                 
+            dynamodb:DeleteItem                                                       
+                                                                                                                 
+            dynamodb:DescribeTable                                                    
+                                                                                                                 
+            dynamodb:GetItem                                                          
+                                                                                                                 
+            dynamodb:PutItem                                                          
+                                                                                                                 
+            dynamodb:Query                                                            
+                                                                                                                 
+            dynamodb:Scan                                                             
+                                                                                                                 
+            dynamodb:UpdateItem                                                       
+ +  ${ConversationStateTable.Arn}                                                                                
+    Allow   dynamodb:GetRecords            AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            dynamodb:GetShardIterator                                                 
+]%
+
+]%
+]%
+]%]%
+
+ +  arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/openai/api_key-??????       
+    Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+]%
+
+]%
+]%
+]%]%
+
+ +  arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/richpanel/api_key-??????    
+    Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+]%
+
+]%
+]%
+]%]%
+
+ +  
+arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/admin_api_token-??????  
+Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+]%
+
+]%
+]%
+]%]%
+
+ +  arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/client_id-??????    
+    Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+]%
+
+]%
+]%
+]%]%
+
+ +  
+arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/client_secret-??????    
+Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+]%
+
+]%
+]%
+]%]%
+
+ +  
+arn:${AWS::Partition}:secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/refresh_token-??????    
+Allow   secretsmanager:DescribeSecret  AWS:${WorkerLambda/ServiceRole}            
+                                                                                                                 
+            secretsmanager:GetSecretValue                                             
+$%
+
+$%
+$%
+$%$%
+
+(NOTE: There may be security-related changes not in this list. See https://github.com/aws/aws-cdk/issues/1299)
+
+Resources
+[+] AWS::DynamoDB::Table ConversationStateTable ConversationStateTable35B2104E
+[+] AWS::DynamoDB::Table AuditTrailTable AuditTrailTable4CEE68C7
+[+] AWS::Logs::LogGroup WorkerLogGroup WorkerLogGroup31FDBE4A
+[+] AWS::CloudWatch::Alarm WorkerErrorRateAlarm WorkerErrorRateAlarmE50E54B6
+[+] AWS::Logs::MetricFilter Richpanel429MetricFilter Richpanel429MetricFilterFAB5B1E6
+[+] AWS::CloudWatch::Alarm Richpanel429SpikeAlarm Richpanel429SpikeAlarm59204F84
+[+] AWS::Logs::MetricFilter Shopify429MetricFilter Shopify429MetricFilterDDB8F0B9
+[+] AWS::CloudWatch::Alarm Shopify429SpikeAlarm Shopify429SpikeAlarmDAB85E6D
+[+] AWS::Logs::MetricFilter OpenAIIntentFailureMetricFilter OpenAIIntentFailureMetricFilter10CC4CB6
+[+] AWS::CloudWatch::Alarm OpenAIIntentFailureAlarm OpenAIIntentFailureAlarm2AB3E8B8
+[+] AWS::CloudWatch::Dashboard OrderStatusMonitoringDashboard OrderStatusMonitoringDashboardCBE11F6D
+[~] AWS::Lambda::Function IngressLambda IngressLambdaECAF4BFE
+  [~] Code
+     [~] .S3Key:
+         [-] 0b52d9938cbb57f59c46704ec191caf2b8f5bb8cc7bba0ffd8ae62ccbda7c79e.zip
+         [+] 7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015.zip
+  [~] Environment
+     [~] .Variables:
+         [~] .WEBHOOK_SECRET_ARN:
+             @@ -1,12 +1,1 @@
+               [-] {
+               [-]   "Fn::Join": [
+               [-]     "",
+               [-]     [
+               [-]       "arn:",
+               [-]       {
+               [-]         "Ref": "AWS::Partition"
+               [-]       },
+               [-]       ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/richpanel/webhook_token"
+               [-]     ]
+               [-]   ]
+               [-] }
+               [+] "rp-mw/staging/richpanel/webhook_token"
+  [~] Handler
+     [-] handler.lambda_handler
+     [+] lambda_handlers.ingress.handler.lambda_handler
+  [~] Metadata
+      [~] .aws:asset:path:
+          [-] asset.0b52d9938cbb57f59c46704ec191caf2b8f5bb8cc7bba0ffd8ae62ccbda7c79e
+          [+] asset.7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015
+[~] AWS::IAM::Policy WorkerLambda/ServiceRole/DefaultPolicy WorkerLambdaServiceRoleDefaultPolicyFC3707DA
+  [~] PolicyDocument
+      [~] .Statement:
+          @@ -35,6 +35,74 @@
+            [ ] },
+            [ ] {
+            [ ]   "Action": [
+            [+]     "dynamodb:BatchGetItem",
+            [+]     "dynamodb:Query",
+            [+]     "dynamodb:GetItem",
+            [+]     "dynamodb:Scan",
+            [+]     "dynamodb:ConditionCheckItem",
+            [+]     "dynamodb:BatchWriteItem",
+            [+]     "dynamodb:PutItem",
+            [+]     "dynamodb:UpdateItem",
+            [+]     "dynamodb:DeleteItem",
+            [+]     "dynamodb:DescribeTable"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::GetAtt": [
+            [+]       "ConversationStateTable35B2104E",
+            [+]       "Arn"
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "dynamodb:GetRecords",
+            [+]     "dynamodb:GetShardIterator"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::GetAtt": [
+            [+]       "ConversationStateTable35B2104E",
+            [+]       "Arn"
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "dynamodb:BatchGetItem",
+            [+]     "dynamodb:Query",
+            [+]     "dynamodb:GetItem",
+            [+]     "dynamodb:Scan",
+            [+]     "dynamodb:ConditionCheckItem",
+            [+]     "dynamodb:BatchWriteItem",
+            [+]     "dynamodb:PutItem",
+            [+]     "dynamodb:UpdateItem",
+            [+]     "dynamodb:DeleteItem",
+            [+]     "dynamodb:DescribeTable"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::GetAtt": [
+            [+]       "AuditTrailTable4CEE68C7",
+            [+]       "Arn"
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "dynamodb:GetRecords",
+            [+]     "dynamodb:GetShardIterator"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::GetAtt": [
+            [+]       "AuditTrailTable4CEE68C7",
+            [+]       "Arn"
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [ ]     "ssm:DescribeParameters",
+            [ ]     "ssm:GetParameters",
+            [ ]     "ssm:GetParameter",
+            @@ -77,6 +145,120 @@
+            [ ] },
+            [ ] {
+            [ ]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/richpanel/api_key-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/openai/api_key-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/admin_api_token-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/client_id-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/client_secret-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [+]     "secretsmanager:GetSecretValue",
+            [+]     "secretsmanager:DescribeSecret"
+            [+]   ],
+            [+]   "Effect": "Allow",
+            [+]   "Resource": {
+            [+]     "Fn::Join": [
+            [+]       "",
+            [+]       [
+            [+]         "arn:",
+            [+]         {
+            [+]           "Ref": "AWS::Partition"
+            [+]         },
+            [+]         ":secretsmanager:us-east-2:260475105304:secret:rp-mw/staging/shopify/refresh_token-??????"
+            [+]       ]
+            [+]     ]
+            [+]   }
+            [+] },
+            [+] {
+            [+]   "Action": [
+            [ ]     "sqs:ReceiveMessage",
+            [ ]     "sqs:ChangeMessageVisibility",
+            [ ]     "sqs:GetQueueUrl",
+[~] AWS::Lambda::Function WorkerLambda WorkerLambdaBD11C0E2
+  [~] Code
+     [~] .S3Key:
+         [-] 18e1e7b7b7826c9001b87fd1880093d7995a9f48aca5a7c0cd36023506518381.zip
+         [+] 7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015.zip
+  [~] Environment
+     [~] .Variables:
+         [+] Added: .AUDIT_TRAIL_TABLE_NAME
+         [+] Added: .CONVERSATION_STATE_TABLE_NAME
+         [+] Added: .MW_ALLOW_ENV_FLAG_OVERRIDE
+         [+] Added: .MW_AUTOMATION_ENABLED_OVERRIDE
+         [+] Added: .MW_ENV
+         [+] Added: .MW_OPENAI_INTENT_ENABLED
+         [+] Added: .MW_OPENAI_REWRITE_ENABLED
+         [+] Added: .MW_OPENAI_ROUTING_ENABLED
+         [+] Added: .MW_OPENAI_SHADOW_ENABLED
+         [+] Added: .MW_OUTBOUND_ALLOWLIST_DOMAINS
+         [+] Added: .MW_OUTBOUND_ALLOWLIST_EMAILS
+         [+] Added: .MW_OUTBOUND_REQUIRE_ALLOWLIST
+         [+] Added: .MW_PROD_WRITES_ACK
+         [+] Added: .MW_SAFE_MODE_OVERRIDE
+         [+] Added: .OPENAI_REPLY_REWRITE_ENABLED
+         [+] Added: .OPENAI_REPLY_REWRITE_MODEL
+         [+] Added: .OPENAI_REPLY_REWRITE_TEMPERATURE
+         [+] Added: .OPENAI_ROUTING_PRIMARY
+         [+] Added: .RICHPANEL_429_COOLDOWN_MULTIPLIER
+         [+] Added: .RICHPANEL_API_KEY_SECRET_ARN
+         [+] Added: .RICHPANEL_BOT_AGENT_ID
+         [+] Added: .RICHPANEL_BOT_AUTHOR_ID
+         [+] Added: .RICHPANEL_HTTP_MAX_ATTEMPTS
+         [+] Added: .RICHPANEL_OUTBOUND_ENABLED
+         [+] Added: .RICHPANEL_RATE_LIMIT_RPS
+         [+] Added: .RICHPANEL_READ_ONLY
+         [+] Added: .RICHPANEL_TOKEN_POOL_ENABLED
+         [+] Added: .RICHPANEL_TOKEN_POOL_SECRET_IDS
+         [+] Added: .RICHPANEL_WRITE_DISABLED
+         [+] Added: .SHOPIFY_OUTBOUND_ENABLED
+         [+] Added: .SHOPIFY_SHOP_DOMAIN
+         [+] Added: .SHOPIFY_WRITE_DISABLED
+  [~] Handler
+     [-] handler.lambda_handler
+     [+] lambda_handlers.worker.handler.lambda_handler
+  [+] ReservedConcurrentExecutions
+     1
+  [~] Timeout
+     [-] 30
+     [+] 60
+  [~] Metadata
+      [~] .aws:asset:path:
+          [-] asset.18e1e7b7b7826c9001b87fd1880093d7995a9f48aca5a7c0cd36023506518381
+          [+] asset.7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015
+
+Outputs
+[+] Output IdempotencyTableName IdempotencyTableName: {"Description":"DynamoDB table name for idempotency 
+records.","Value":{"Ref":"IdempotencyTable22A5A209"}}
+[+] Output ConversationStateTableName ConversationStateTableName: {"Description":"DynamoDB table name for conversation 
+state snapshots.","Value":{"Ref":"ConversationStateTable35B2104E"}}
+[+] Output AuditTrailTableName AuditTrailTableName: {"Description":"DynamoDB table name for audit trail 
+records.","Value":{"Ref":"AuditTrailTable4CEE68C7"}}
+
+
+
+  Number of stacks with differences: 1
+
+
+NOTICES         (What's this? https://github.com/aws/aws-cdk/wiki/CLI-Notices)
+
+34892	CDK CLI collects telemetry data on command usage starting at version 2.1100.0 (unless opted out)
+
+	Overview: We do not collect customer content and we anonymize the
+	          telemetry we do collect. See the attached issue for more
+	          information on what data is collected, why, and how to
+	          opt-out. Telemetry will NOT be collected for any CDK CLI
+	          version prior to version 2.1100.0 - regardless of
+	          opt-in/out. You can also view the telemetry we collect by
+	          logging it to a local file, by adding
+	          `--telemetry-file=my/local/file` to any `cdk` command.
+
+	Affected versions: cli: ^2.1100.0
+
+	More information at: https://github.com/aws/aws-cdk/issues/34892
+
+
+If you dont want to see a notice anymore, use "cdk acknowledge <id>". For example, "cdk acknowledge 34892".

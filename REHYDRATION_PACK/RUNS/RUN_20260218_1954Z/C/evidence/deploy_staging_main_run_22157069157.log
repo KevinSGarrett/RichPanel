@@ -1,0 +1,229 @@
+deploy-staging	Set up job	)"W%%2026-02-18T20:49:31.4703755Z Current runner version: '2.331.0'
+deploy-staging	Set up job	2026-02-18T20:49:31.4729211Z ##[group]Runner Image Provisioner
+deploy-staging	Set up job	2026-02-18T20:49:31.4730156Z Hosted Compute Agent
+deploy-staging	Set up job	2026-02-18T20:49:31.4730794Z Version: 20260123.484
+deploy-staging	Set up job	2026-02-18T20:49:31.4731373Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+deploy-staging	Set up job	2026-02-18T20:49:31.4732528Z Build Date: 2026-01-23T19:41:17Z
+deploy-staging	Set up job	2026-02-18T20:49:31.4733232Z Worker ID: {eb8c627a-008d-45b9-9050-996a21b46b28}
+deploy-staging	Set up job	2026-02-18T20:49:31.4733948Z Azure Region: eastus
+deploy-staging	Set up job	2026-02-18T20:49:31.4734526Z ##[endgroup]
+deploy-staging	Set up job	2026-02-18T20:49:31.4736361Z ##[group]Operating System
+deploy-staging	Set up job	2026-02-18T20:49:31.4736984Z Ubuntu
+deploy-staging	Set up job	2026-02-18T20:49:31.4737587Z 24.04.3
+deploy-staging	Set up job	2026-02-18T20:49:31.4738093Z LTS
+deploy-staging	Set up job	2026-02-18T20:49:31.4738529Z ##[endgroup]
+deploy-staging	Set up job	2026-02-18T20:49:31.4739114Z ##[group]Runner Image
+deploy-staging	Set up job	2026-02-18T20:49:31.4739656Z Image: ubuntu-24.04
+deploy-staging	Set up job	2026-02-18T20:49:31.4740190Z Version: 20260209.23.1
+deploy-staging	Set up job	2026-02-18T20:49:31.4741158Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260209.23/images/ubuntu/Ubuntu2404-Readme.md
+deploy-staging	Set up job	2026-02-18T20:49:31.4743277Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260209.23
+deploy-staging	Set up job	2026-02-18T20:49:31.4744263Z ##[endgroup]
+deploy-staging	Set up job	2026-02-18T20:49:31.4745303Z ##[group]GITHUB_TOKEN Permissions
+deploy-staging	Set up job	2026-02-18T20:49:31.4747440Z Contents: read
+deploy-staging	Set up job	2026-02-18T20:49:31.4748026Z Metadata: read
+deploy-staging	Set up job	2026-02-18T20:49:31.4748586Z ##[endgroup]
+deploy-staging	Set up job	2026-02-18T20:49:31.4750540Z Secret source: Actions
+deploy-staging	Set up job	2026-02-18T20:49:31.4751761Z Prepare workflow directory
+deploy-staging	Set up job	2026-02-18T20:49:31.5132673Z Prepare all required actions
+deploy-staging	Set up job	2026-02-18T20:49:31.5170363Z Getting action download info
+deploy-staging	Set up job	2026-02-18T20:49:31.8454164Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+deploy-staging	Set up job	2026-02-18T20:49:31.9734586Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+deploy-staging	Set up job	2026-02-18T20:49:32.0632045Z Download action repository 'aws-actions/configure-aws-credentials@v4' (SHA:7474bc4690e29a8392af63c5b98e7449536d5c3a)
+deploy-staging	Set up job	2026-02-18T20:49:32.3710584Z Complete job name: deploy-staging
+deploy-staging	Checkout repository	)"W%%2026-02-18T20:49:32.4424261Z ##[group]Run actions/checkout@v4
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4425230Z with:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4425696Z   repository: KevinSGarrett/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4426416Z   token: ***
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4426802Z   ssh-strict: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4427209Z   ssh-user: git
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4427604Z   persist-credentials: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4428079Z   clean: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4428476Z   sparse-checkout-cone-mode: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4428965Z   fetch-depth: 1
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4429350Z   fetch-tags: false
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4429797Z   show-progress: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4430207Z   lfs: false
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4430571Z   submodules: false
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4430974Z   set-safe-directory: true
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4431617Z env:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4432242Z   AWS_REGION: us-east-2
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4432712Z   STACK_NAME: RichpanelMiddleware-staging
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4433237Z   CDK_ENV: staging
+deploy-staging	Checkout repository	2026-02-18T20:49:32.4433638Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5676802Z Syncing repository: KevinSGarrett/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5678635Z ##[group]Getting Git version info
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5679355Z Working directory is '/home/runner/work/RichPanel/RichPanel'
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5680297Z [command]/usr/bin/git version
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5707276Z git version 2.52.0
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5733924Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5750030Z Temporarily overriding HOME='/home/runner/work/_temp/9fb75102-a3d9-4026-8ba1-764db480e3ed' before making global git config changes
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5752649Z Adding repository directory to the temporary git global config as a safe directory
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5764741Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RichPanel/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5805658Z Deleting the contents of '/home/runner/work/RichPanel/RichPanel'
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5809707Z ##[group]Initializing the repository
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5815129Z [command]/usr/bin/git init /home/runner/work/RichPanel/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5913025Z hint: Using 'master' as the name for the initial branch. This default branch name
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5915017Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5916613Z hint: to use in all of your new repositories, which will suppress this warning,
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5917768Z hint: call:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5918333Z hint:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5919086Z hint: 	git config --global init.defaultBranch <name>
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5919745Z hint:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5920302Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5921192Z hint: 'development'. The just-created branch can be renamed via this command:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5922150Z hint:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5922562Z hint: 	git branch -m <name>
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5923004Z hint:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5923851Z hint: Disable this message with "git config set advice.defaultBranchName false"
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5925247Z Initialized empty Git repository in /home/runner/work/RichPanel/RichPanel/.git/
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5929517Z [command]/usr/bin/git remote add origin https://github.com/KevinSGarrett/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5964189Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5964966Z ##[group]Disabling automatic garbage collection
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5968334Z [command]/usr/bin/git config --local gc.auto 0
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5997714Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:32.5998422Z ##[group]Setting up auth
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6004536Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6037769Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6374882Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6409198Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6647468Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6692415Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6935078Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6973635Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6974650Z ##[group]Fetching the repository
+deploy-staging	Checkout repository	2026-02-18T20:49:32.6982515Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0ddd988378bf4fe21c1a5d38d62250fb3f4d593a:refs/remotes/origin/main
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3145254Z From https://github.com/KevinSGarrett/RichPanel
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3147648Z  * [new ref]         0ddd988378bf4fe21c1a5d38d62250fb3f4d593a -> origin/main
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3179652Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3183662Z ##[group]Determining the checkout info
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3184972Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3187512Z [command]/usr/bin/git sparse-checkout disable
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3230430Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3257847Z ##[group]Checking out the ref
+deploy-staging	Checkout repository	2026-02-18T20:49:33.3261389Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+deploy-staging	Checkout repository	2026-02-18T20:49:33.5316817Z Switched to a new branch 'main'
+deploy-staging	Checkout repository	2026-02-18T20:49:33.5320002Z branch 'main' set up to track 'origin/main'.
+deploy-staging	Checkout repository	2026-02-18T20:49:33.5338315Z ##[endgroup]
+deploy-staging	Checkout repository	2026-02-18T20:49:33.5384751Z [command]/usr/bin/git log -1 --format=%H
+deploy-staging	Checkout repository	2026-02-18T20:49:33.5410527Z 0ddd988378bf4fe21c1a5d38d62250fb3f4d593a
+deploy-staging	Set up Node.js	)"W%%2026-02-18T20:49:33.5650684Z ##[group]Run actions/setup-node@v4
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5651187Z with:
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5651520Z   node-version: 20
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5652033Z   always-auth: false
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5652634Z   check-latest: false
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5653145Z   token: ***
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5653475Z env:
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5653803Z   AWS_REGION: us-east-2
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5654192Z   STACK_NAME: RichpanelMiddleware-staging
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5654635Z   CDK_ENV: staging
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.5654969Z ##[endgroup]
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.7485818Z Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
+deploy-staging	Set up Node.js	2026-02-18T20:49:33.7491102Z ##[group]Environment details
+deploy-staging	Set up Node.js	2026-02-18T20:49:34.0839199Z node: v20.20.0
+deploy-staging	Set up Node.js	2026-02-18T20:49:34.0840413Z npm: 10.8.2
+deploy-staging	Set up Node.js	2026-02-18T20:49:34.0840834Z yarn: 1.22.22
+deploy-staging	Set up Node.js	2026-02-18T20:49:34.0842146Z ##[endgroup]
+deploy-staging	Configure AWS credentials via OIDC	)"W%%2026-02-18T20:49:34.1085901Z ##[group]Run aws-actions/configure-aws-credentials@v4
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1086306Z with:
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1086599Z   role-to-assume: arn:aws:iam::260475105304:role/rp-ci-deploy
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1086948Z   aws-region: us-east-2
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1087246Z   role-session-name: github-actions-deploy-staging
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1087602Z   audience: sts.amazonaws.com
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1087894Z   output-env-credentials: true
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1088155Z env:
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1088390Z   AWS_REGION: us-east-2
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1088658Z   STACK_NAME: RichpanelMiddleware-staging
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1088946Z   CDK_ENV: staging
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.1089174Z ##[endgroup]
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.3142948Z Assuming role with OIDC
+deploy-staging	Configure AWS credentials via OIDC	2026-02-18T20:49:34.4794705Z Authenticated as assumedRoleId AROATZJMGWAMGC7LCQ7IW:github-actions-deploy-staging
+deploy-staging	Install dependencies	)"W%%2026-02-18T20:49:34.5265201Z ##[group]Run if [ -f package-lock.json ]; then
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5265729Z [36;1mif [ -f package-lock.json ]; then[0m
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5266060Z [36;1m  npm ci[0m
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5266300Z [36;1melse[0m
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5266534Z [36;1m  npm install[0m
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5266781Z [36;1mfi[0m
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5327764Z shell: /usr/bin/bash -e {0}
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5328098Z env:
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5328333Z   AWS_REGION: us-east-2
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5328630Z   STACK_NAME: RichpanelMiddleware-staging
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5328962Z   CDK_ENV: staging
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5329211Z   AWS_DEFAULT_REGION: us-east-2
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5329814Z   AWS_ACCESS_KEY_ID: ***
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5330251Z   AWS_SECRET_ACCESS_KEY: ***
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5335515Z   AWS_SESSION_TOKEN: ***
+deploy-staging	Install dependencies	2026-02-18T20:49:34.5335799Z ##[endgroup]
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6376514Z 
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6378086Z added 25 packages, and audited 62 packages in 5s
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6378975Z 
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6383632Z 4 packages are looking for funding
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6419613Z   run `npm fund` for details
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6419967Z 
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6436402Z 2 vulnerabilities (1 low, 1 moderate)
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6437124Z 
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6437440Z To address all issues, run:
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6437906Z   npm audit fix
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6438116Z 
+deploy-staging	Install dependencies	2026-02-18T20:49:39.6438347Z Run `npm audit` for details.
+deploy-staging	Deploy staging stack	)"W%%2026-02-18T20:49:39.6635259Z ##[group]Run npx cdk deploy "RichpanelMiddleware-staging" --require-approval never -c env="staging"
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6636049Z [36;1mnpx cdk deploy "RichpanelMiddleware-staging" --require-approval never -c env="staging"[0m
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6689515Z shell: /usr/bin/bash -e {0}
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6689779Z env:
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6689970Z   AWS_REGION: us-east-2
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6690219Z   STACK_NAME: RichpanelMiddleware-staging
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6690485Z   CDK_ENV: staging
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6690685Z   AWS_DEFAULT_REGION: us-east-2
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6691039Z   AWS_ACCESS_KEY_ID: ***
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6691361Z   AWS_SECRET_ACCESS_KEY: ***
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6696355Z   AWS_SESSION_TOKEN: ***
+deploy-staging	Deploy staging stack	2026-02-18T20:49:39.6696589Z ##[endgroup]
+deploy-staging	Deploy staging stack	2026-02-18T20:49:40.3674781Z npm warn exec The following package was not found and will be installed: cdk@2.1106.1
+deploy-staging	Deploy staging stack	2026-02-18T20:49:47.5328098Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:49:47.5329238Z   Synthesis time: 5.58s
+deploy-staging	Deploy staging stack	2026-02-18T20:49:47.5329592Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:49:48.1209163Z RichpanelMiddleware-staging: start: Building RichpanelMiddleware-staging Template
+deploy-staging	Deploy staging stack	2026-02-18T20:49:48.1212549Z RichpanelMiddleware-staging: success: Built RichpanelMiddleware-staging Template
+deploy-staging	Deploy staging stack	2026-02-18T20:49:48.2932950Z RichpanelMiddleware-staging: start: Publishing RichpanelMiddleware-staging Template (260475105304-us-east-2-7f6f28c7)
+deploy-staging	Deploy staging stack	2026-02-18T20:49:48.8948505Z RichpanelMiddleware-staging: success: Published RichpanelMiddleware-staging Template (260475105304-us-east-2-7f6f28c7)
+deploy-staging	Deploy staging stack	2026-02-18T20:49:48.8961281Z RichpanelMiddleware-staging: deploying... [1/1]
+deploy-staging	Deploy staging stack	2026-02-18T20:49:49.9278770Z RichpanelMiddleware-staging: creating CloudFormation changeset...
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2094217Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2095254Z NOTICES         (What's this? https://github.com/aws/aws-cdk/wiki/CLI-Notices)
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2095725Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2098306Z 34892	CDK CLI collects telemetry data on command usage starting at version 2.1100.0 (unless opted out)
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2098937Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2099308Z 	Overview: We do not collect customer content and we anonymize the
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2100197Z 	          telemetry we do collect. See the attached issue for more
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2100981Z 	          information on what data is collected, why, and how to
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2101734Z 	          opt-out. Telemetry will NOT be collected for any CDK CLI
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2102750Z 	          version prior to version 2.1100.0 - regardless of
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2103473Z 	          opt-in/out. You can also view the telemetry we collect by
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2104120Z 	          logging it to a local file, by adding
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2104788Z 	          `--telemetry-file=my/local/file` to any `cdk` command.
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2105216Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2105448Z 	Affected versions: cli: ^2.1100.0
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2105744Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2106143Z 	More information at: https://github.com/aws/aws-cdk/issues/34892
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2106625Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2106650Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2108082Z If you dont want to see a notice anymore, use "cdk acknowledge <id>". For example, "cdk acknowledge 34892".
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2110350Z   RichpanelMiddleware-staging failed: ToolkitError: ChangeSet 'cdk-deploy-change-set' on stack 'RichpanelMiddleware-staging' failed early validation:
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2112855Z   - Resource of type 'AWS::Logs::LogGroup' with identifier '/aws/lambda/rp-mw-staging-worker' already exists. (at /Resources/WorkerLogGroup31FDBE4A)
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.2113877Z 
+deploy-staging	Deploy staging stack	2026-02-18T20:50:01.8535425Z ##[error]Process completed with exit code 1.
+deploy-staging	Post Configure AWS credentials via OIDC	)"W%%2026-02-18T20:50:01.8624484Z Post job cleanup.
+deploy-staging	Post Checkout repository	)"W%%2026-02-18T20:50:01.9954168Z Post job cleanup.
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.0935289Z [command]/usr/bin/git version
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.0974429Z git version 2.52.0
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1020449Z Temporarily overriding HOME='/home/runner/work/_temp/dde3c115-b875-401a-bdd5-ad950ce6e5d1' before making global git config changes
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1022244Z Adding repository directory to the temporary git global config as a safe directory
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1027983Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RichPanel/RichPanel
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1069154Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1105816Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1364683Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1392334Z http.https://github.com/.extraheader
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1406542Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1441338Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1694123Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy-staging	Post Checkout repository	2026-02-18T20:50:02.1728339Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy-staging	Complete job	)"W%%2026-02-18T20:50:02.2086522Z Cleaning up orphan processes

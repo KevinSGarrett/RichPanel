@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-18 - RUN_20260218_1954Z (B91: set OpenAI reply rewrite model in CDK)",
+        "anchor": "2026-02-18-run202602181954z-b91-set-openai-reply-rewrite-model-in-cdk"
+      },
+      {
+        "level": 3,
         "text": "2026-02-18 - RUN_20260218_1442Z (B90: deterministic Key Details block for ETA/no-tracking)",
         "anchor": "2026-02-18-run202602181442z-b90-deterministic-key-details-block-for-etano-tracking"
       },

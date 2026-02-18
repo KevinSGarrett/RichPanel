@@ -1,0 +1,1 @@
+﻿/rp-mw/prod/automation_enabled

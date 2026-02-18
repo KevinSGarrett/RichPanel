@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-18 - RUN_20260218_1954Z (B91: set OpenAI reply rewrite model in CDK)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260218_1954Z
+- Added worker Lambda env vars to pin reply rewrite model to gpt-5.2 and temperature 0.2.
+
 ### 2026-02-18 - RUN_20260218_1442Z (B90: deterministic Key Details block for ETA/no-tracking)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z
 - Added deterministic Key Details block + business-day note for ETA/no-tracking replies (preorder + non-preorder).

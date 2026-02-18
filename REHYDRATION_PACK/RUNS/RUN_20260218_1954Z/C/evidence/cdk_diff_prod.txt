@@ -1,0 +1,59 @@
+node.exe : start: Building RichpanelMiddleware-prod Template
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (start: Building...e-prod Template:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+success: Built RichpanelMiddleware-prod Template
+start: Publishing RichpanelMiddleware-prod Template (878145708918-us-east-2-a93267cb)
+success: Published RichpanelMiddleware-prod Template (878145708918-us-east-2-a93267cb)
+Hold on while we create a read-only change set to get a diff with accurate replacement information (use 
+--no-change-set to use a less accurate but faster template-only diff)
+
+Stack RichpanelMiddleware-prod
+Resources
+[~] AWS::Lambda::Function IngressLambda IngressLambdaECAF4BFE
+  [~] Code
+      [~] .S3Key:
+          [-] d2ae0fdb09e016e064d0096f474c1e9e6df0600064f663f72f4b78016254e056.zip
+          [+] 7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015.zip
+[~] AWS::Lambda::Function WorkerLambda WorkerLambdaBD11C0E2
+  [~] Code
+     [~] .S3Key:
+         [-] d2ae0fdb09e016e064d0096f474c1e9e6df0600064f663f72f4b78016254e056.zip
+         [+] 7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015.zip
+  [~] Environment
+      [~] .Variables:
+          [+] Added: .OPENAI_REPLY_REWRITE_MODEL
+          [+] Added: .OPENAI_REPLY_REWRITE_TEMPERATURE
+[~] AWS::Lambda::Function ShopifyTokenRefreshLambda ShopifyTokenRefreshLambda7058498D
+  [~] Code
+      [~] .S3Key:
+          [-] d2ae0fdb09e016e064d0096f474c1e9e6df0600064f663f72f4b78016254e056.zip
+          [+] 7e74313192558bf1aef248cdd1c9e5312dd57a32ad9ea8c9da416beb87b20015.zip
+
+
+
+  Number of stacks with differences: 1
+
+
+NOTICES         (What's this? https://github.com/aws/aws-cdk/wiki/CLI-Notices)
+
+34892	CDK CLI collects telemetry data on command usage starting at version 2.1100.0 (unless opted out)
+
+	Overview: We do not collect customer content and we anonymize the
+	          telemetry we do collect. See the attached issue for more
+	          information on what data is collected, why, and how to
+	          opt-out. Telemetry will NOT be collected for any CDK CLI
+	          version prior to version 2.1100.0 - regardless of
+	          opt-in/out. You can also view the telemetry we collect by
+	          logging it to a local file, by adding
+	          `--telemetry-file=my/local/file` to any `cdk` command.
+
+	Affected versions: cli: ^2.1100.0
+
+	More information at: https://github.com/aws/aws-cdk/issues/34892
+
+
+If you dont want to see a notice anymore, use "cdk acknowledge <id>". For example, "cdk acknowledge 34892".
