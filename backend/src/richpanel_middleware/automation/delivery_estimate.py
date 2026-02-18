@@ -510,6 +510,8 @@ def build_no_tracking_key_details_block(estimate: Any) -> Optional[str]:
     if estimate.get("is_late"):
         return None
     delivery_window_human = estimate.get("delivery_window_human")
+    if isinstance(delivery_window_human, str) and not delivery_window_human.strip():
+        return None
     if not delivery_window_human:
         return None
 

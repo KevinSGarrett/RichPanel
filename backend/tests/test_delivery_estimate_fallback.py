@@ -110,6 +110,31 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             "(Business days are Mon–Fri; holidays may affect timelines.)", body
         )
 
+    def test_preorder_key_details_missing_processing(self) -> None:
+        delivery_estimate = {
+            "preorder": True,
+            "preorder_ship_date_human": "Sunday, March 29, 2026",
+            "ship_days_from_inquiry_human": "15 days",
+            "processing_human": None,
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "days_from_inquiry_human": "23–31 days",
+            "delivery_window_human": "April 6–April 14, 2026",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            {"order_tags_raw": "Pre-order"},
+            inquiry_date="2026-03-14",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertNotIn("- Processing:", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
+        self.assertIn("- Estimated delivery: April 6–April 14, 2026", body)
+
     def test_preorder_delivery_fallback_late_any_day_now(self) -> None:
         order_summary = {
             "created_at": "2026-02-12",
@@ -325,6 +350,26 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             "is_late": False,
             "processing_human": "3-5 business days",
             "delivery_window_human": None,
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        self.assertNotIn("Key Details:", reply["body"])
+
+    def test_no_tracking_reply_whitespace_window_no_key_details(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "1-2 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "delivery_window_human": "   ",
         }
         reply = build_no_tracking_reply(
             {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},

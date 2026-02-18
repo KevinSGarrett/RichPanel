@@ -308,6 +308,26 @@ def test_key_details_block_skips_tracking() -> None:
     assert updated == body
 
 
+def test_key_details_block_skips_tracking_url_only() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={"tracking_url": "https://tracking.example.com/track/123"},
+    )
+    assert updated == body
+
+
 def test_key_details_block_appends_when_no_tracking() -> None:
     delivery_estimate = {
         "preorder": False,
@@ -403,6 +423,9 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_skips_tracking(self) -> None:
         test_key_details_block_skips_tracking()
+
+    def test_key_details_block_skips_tracking_url_only(self) -> None:
+        test_key_details_block_skips_tracking_url_only()
 
     def test_key_details_block_appends_when_no_tracking(self) -> None:
         test_key_details_block_appends_when_no_tracking()
