@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-18 - RUN_20260218_1442Z (B90: deterministic Key Details block for ETA/no-tracking)",
+        "anchor": "2026-02-18-run202602181442z-b90-deterministic-key-details-block-for-etano-tracking"
+      },
+      {
+        "level": 3,
         "text": "2026-02-17 - RUN_20260217_2339Z (B89: order-status reply personalization + greeting/signature)",
         "anchor": "2026-02-17-run202602172339z-b89-order-status-reply-personalization-greetingsignature"
       },

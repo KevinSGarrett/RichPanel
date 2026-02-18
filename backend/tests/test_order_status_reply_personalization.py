@@ -22,6 +22,7 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
 
     assert messages[0].role == "system"
     assert "Do not mention AI, bot, automation, or templates." in messages[0].content
+    assert "Key Details:" in messages[0].content
     assert "customer_message_excerpt" in messages[1].content
     assert "\"customer_first_name\":\"Sarah\"" in messages[1].content
     assert (
@@ -246,6 +247,47 @@ def test_signature_enforcement_idempotent() -> None:
     )
 
 
+def test_key_details_block_appends_when_missing() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for your patience."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert "Key Details:" in updated
+    assert updated.startswith("Thanks for your patience.")
+
+
+def test_key_details_block_does_not_duplicate() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Intro\n\nKey Details:\n- Processing: 3-5 business days"
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated == body
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -273,3 +315,9 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_signature_enforcement_idempotent(self) -> None:
         test_signature_enforcement_idempotent()
+
+    def test_key_details_block_appends_when_missing(self) -> None:
+        test_key_details_block_appends_when_missing()
+
+    def test_key_details_block_does_not_duplicate(self) -> None:
+        test_key_details_block_does_not_duplicate()

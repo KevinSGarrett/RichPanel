@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-18 - RUN_20260218_1442Z (B90: deterministic Key Details block for ETA/no-tracking)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z
+- Added deterministic Key Details block + business-day note for ETA/no-tracking replies (preorder + non-preorder).
+- Preserved Key Details through rewrite prompt guidance and pipeline enforcement; updated unit tests.
+
 ### 2026-02-17 - RUN_20260217_2339Z (B89: order-status reply personalization + greeting/signature)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260217_2339Z
 - Added customer message excerpt + first name context to order-status rewrite prompt.

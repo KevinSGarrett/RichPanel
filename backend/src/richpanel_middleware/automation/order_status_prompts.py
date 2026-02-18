@@ -35,6 +35,7 @@ Non-negotiables:
 - Do not add new commitments (refunds, discounts, guarantees).
 - Do not invent dates, carriers, tracking numbers, or URLs.
 - Preserve any URLs, tracking numbers, and ETA windows already present in the draft verbatim.
+- If a Key Details: section exists in the draft reply, preserve it verbatim (header, bullets, dates, numbers).
 - Do NOT include a greeting or signature in the body (pipeline adds those).
 
 Customer-message awareness:
