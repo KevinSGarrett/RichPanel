@@ -920,14 +920,18 @@ def build_no_tracking_reply(
                 )
         key_details_block = build_no_tracking_key_details_block(estimate)
         if key_details_block:
-            body = (
-                body.replace(
-                    "We'll send tracking as soon as it ships.",
-                    f"{key_details_block}\n\nWe'll send tracking as soon as it ships.",
-                    1,
+            tracking_sentence = "We'll send tracking as soon as it ships."
+            if tracking_sentence in body:
+                body = (
+                    body.replace(
+                        tracking_sentence,
+                        f"{key_details_block}\n\n{tracking_sentence}",
+                        1,
+                    )
+                    .rstrip()
                 )
-                .rstrip()
-            )
+            else:
+                body = f"{body.rstrip()}\n\n{key_details_block}"
 
         return {
             "body": body.strip(),

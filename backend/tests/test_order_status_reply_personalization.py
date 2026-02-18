@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from richpanel_middleware.automation.llm_reply_rewriter import DEFAULT_MAX_CHARS
 from richpanel_middleware.automation.order_status_prompts import (
     OrderStatusReplyContext,
     build_order_status_reply_prompt,
@@ -407,6 +408,27 @@ def test_key_details_block_empty_draft_reply_appends() -> None:
     assert "Key Details:" in updated
 
 
+def test_key_details_block_respects_max_chars() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "x" * (DEFAULT_MAX_CHARS + 50)
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert "Key Details:" in updated
+    assert len(updated) <= DEFAULT_MAX_CHARS
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -461,3 +483,6 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_empty_draft_reply_appends(self) -> None:
         test_key_details_block_empty_draft_reply_appends()
+
+    def test_key_details_block_respects_max_chars(self) -> None:
+        test_key_details_block_respects_max_chars()

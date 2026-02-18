@@ -31,6 +31,7 @@ from richpanel_middleware.automation.llm_routing import (
     compute_dual_routing,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (
+    DEFAULT_MAX_CHARS,
     ReplyRewriteResult,
     rewrite_reply,
 )
@@ -477,7 +478,21 @@ def _ensure_key_details_block(
         return body
     if re.search(r"Key Details:", body, flags=re.IGNORECASE):
         return body
-    return f"{body.rstrip()}\n\n{key_details_block}"
+    body_trimmed = body.rstrip()
+    separator = "\n\n"
+    max_chars = DEFAULT_MAX_CHARS
+    if isinstance(max_chars, int) and max_chars > 0:
+        reserved = len(separator) + len(key_details_block)
+        if len(body_trimmed) + reserved <= max_chars:
+            return f"{body_trimmed}{separator}{key_details_block}"
+        if reserved >= max_chars:
+            return key_details_block[:max_chars].rstrip()
+        allowed = max_chars - reserved
+        trimmed_body = body_trimmed[:allowed].rstrip()
+        if not trimmed_body:
+            return key_details_block[:max_chars].rstrip()
+        return f"{trimmed_body}{separator}{key_details_block}"
+    return f"{body_trimmed}{separator}{key_details_block}"
 
 
 def _build_order_status_reply_context(
