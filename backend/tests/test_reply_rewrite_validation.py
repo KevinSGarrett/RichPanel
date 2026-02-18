@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 from richpanel_middleware.automation import llm_reply_rewriter as rewriter
 from richpanel_middleware.automation.llm_reply_rewriter import rewrite_reply
@@ -281,3 +282,21 @@ def test_rewrite_rejects_internal_tags() -> None:
     assert result.rewritten is False
     assert result.body == draft
     assert result.reason == "contains_internal_tags"
+
+
+def test_resolve_rewrite_temperature_env() -> None:
+    original = os.environ.get("OPENAI_REPLY_REWRITE_TEMPERATURE")
+    try:
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.9"
+        assert rewriter._resolve_rewrite_temperature() == 0.7
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "0.15"
+        assert rewriter._resolve_rewrite_temperature() == 0.15
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = "bad"
+        assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE
+        os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = ""
+        assert rewriter._resolve_rewrite_temperature() == rewriter.DEFAULT_TEMPERATURE
+    finally:
+        if original is None:
+            os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
+        else:
+            os.environ["OPENAI_REPLY_REWRITE_TEMPERATURE"] = original
