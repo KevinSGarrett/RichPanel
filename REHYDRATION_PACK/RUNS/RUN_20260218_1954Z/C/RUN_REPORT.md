@@ -41,7 +41,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 ++
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 142 +++++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 143 ++++++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  41 ++
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  19 +
@@ -59,9 +59,9 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.compact.json          |   2 +-
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
- backend/tests/test_reply_rewrite_validation.py     |  62 ++-
+ backend/tests/test_reply_rewrite_validation.py     |  73 +++-
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 38 files changed, 1800 insertions(+), 4 deletions(-)
+ 38 files changed, 1812 insertions(+), 4 deletions(-)
 ```
 
 ## Files Changed (required)
