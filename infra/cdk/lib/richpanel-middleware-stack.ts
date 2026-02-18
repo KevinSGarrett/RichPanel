@@ -384,6 +384,8 @@ export class RichpanelMiddlewareStack extends Stack {
             : this.environmentConfig.name === "dev"
               ? "true"
               : "",
+        OPENAI_REPLY_REWRITE_MODEL: "gpt-5.2",
+        OPENAI_REPLY_REWRITE_TEMPERATURE: "0.2",
         ...(this.environmentConfig.name === "dev"
           ? { OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD: "0.7" }
           : {}),
