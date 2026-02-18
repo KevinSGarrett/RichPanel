@@ -47,6 +47,7 @@ def test_excerpt_is_sanitized_and_truncated() -> None:
 
 def test_excerpt_empty_returns_none() -> None:
     assert pipeline._build_customer_message_excerpt("") is None
+    assert pipeline._build_customer_message_excerpt("   ") is None
 
 
 def test_excerpt_boundary_no_truncation() -> None:
@@ -105,6 +106,15 @@ def test_greeting_enforcement() -> None:
     blanks_replaced = pipeline._ensure_order_status_greeting(leading_blanks, None)
     assert blanks_replaced.startswith("Hi there,\n\n")
 
+    no_greeting = "Status update\n\nNext line"
+    no_greeting_wrapped = pipeline._ensure_order_status_greeting(no_greeting, None)
+    assert no_greeting_wrapped.startswith("Hi there,\n\n")
+    assert "\n\n\n" not in no_greeting_wrapped
+
+    greeting_only = "Hey,"
+    greeting_only_wrapped = pipeline._ensure_order_status_greeting(greeting_only, "Sarah")
+    assert greeting_only_wrapped == "Hi Sarah,\n\n"
+
 
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
@@ -126,3 +136,11 @@ def test_signature_enforcement_idempotent() -> None:
     assert pipeline._ensure_holly_signature(partial_two).endswith(
         "Holly\nScentiment Customer Support"
     )
+
+    partial_support = "Update\n\nScentiment Customer Support"
+    assert pipeline._ensure_holly_signature(partial_support).endswith(
+        "Holly\nScentiment Customer Support"
+    )
+
+    empty_body = ""
+    assert pipeline._ensure_holly_signature(empty_body) == "Holly\nScentiment Customer Support"
