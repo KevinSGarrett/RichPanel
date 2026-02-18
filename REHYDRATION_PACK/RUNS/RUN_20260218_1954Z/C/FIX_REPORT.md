@@ -17,16 +17,20 @@
 - error: `ChangeSet 'cdk-deploy-change-set' failed early validation: LogGroup already exists`
 - where: Deploy Staging Stack workflow run 22157069157 (main)
 - repro steps: run staging deploy while `/aws/lambda/rp-mw-staging-worker` exists outside CloudFormation
+- error: staging deploy attempted before prod-only directive
+- where: staging deploy run 22157069157
+- repro steps: ran staging sync before user issued prod-only instructions
 
 ## Diagnosis
 - likely root cause: missing/expired AWS SSO credentials for required accounts
 - likely root cause: missing/expired GitHub credentials for pushing to `origin`
 - likely root cause: staging account assumes require different profile/role trust than `rp-admin-kevin`
 - likely root cause: staging CloudWatch LogGroup exists outside stack ownership
+- likely root cause: earlier run plan followed staging-first requirement before new prod-only directive
 
 ## Fix applied
  - files changed: none
- - why it works: Removed invalid `GH_TOKEN` to allow git to use the keyring credential helper; AWS SSO logins completed for prod/staging profiles, but staging assume-role remains blocked.
+ - why it works: Documented staging attempt as deviation and switched to prod-only gate per updated instructions.
 
 ## Verification
 - tests run: none (blocked)

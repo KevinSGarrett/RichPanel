@@ -34,7 +34,7 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 
 ## Decisions made
 - Blocked deployment and AWS diffs until valid AWS credentials and prod safe-mode verification are available.
+- Switched to prod-only gate per latest directive; staging deploys skipped.
 
 ## Issues / follow-ups
-- Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.
-- Resolve staging LogGroup ownership conflict before retrying staging deploy (`/aws/lambda/rp-mw-staging-worker` exists).
+- Run prod deploy + read-only proof after PR merge.

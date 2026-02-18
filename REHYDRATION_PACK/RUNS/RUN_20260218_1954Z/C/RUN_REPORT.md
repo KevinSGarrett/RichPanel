@@ -13,7 +13,7 @@
 
 ## Objective + stop conditions
 - **Objective:** Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare safe deployment evidence without customer contact.
-- **Stop conditions:** CDK env vars merged; CI checks pass; CDK diffs captured; prod safe-mode verified (safe_mode=true, automation_enabled=false); staging deploy + e2e smoke green; prod deploy + read-only shadow eval proof + Lambda env verification complete.
+- **Stop conditions:** CDK env vars merged; CI checks pass; prod CDK diff captured; prod safe-mode verified (safe_mode=true, automation_enabled=false); prod deploy + read-only shadow eval proof + Lambda env verification complete.
 
 ## What changed (high-level)
 - Added reply rewrite model/temperature env vars to the worker Lambda in CDK.
@@ -39,7 +39,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/B/TEST_MATRIX.md       |  15 +
  .../RUN_20260218_1954Z/C/AGENT_PROMPTS_ARCHIVE.md  | 101 +++
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
- .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  33 +
+ .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
  .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 134 +++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
@@ -59,7 +59,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 36 files changed, 1934 insertions(+), 3 deletions(-)
+ 36 files changed, 1938 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -94,6 +94,8 @@ List commands you ran (include key flags/env if relevant):
 - `gh workflow run "Deploy Staging Stack" --ref main` - attempted staging sync on main (run 22157069157 failed).
 - `gh run view 22157069157 --log` - captured staging deploy failure log.
 - `gh pr comment 261 --body "<triage>"` - documented PR Agent/Claude review triage (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923178300).
+- `gh pr edit 261 --title "B91: Set OPENAI_REPLY_REWRITE_MODEL=gpt-5.2 in PROD infra (risk:R2)" --body-file <path>` - updated PR for prod-only directive.
+- `gh pr edit 261 --remove-label "risk:R3-high" --add-label "risk:R2-medium"` - updated risk label.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -123,12 +125,10 @@ Paste output snippet proving you ran:
 - PR Agent advisory flagged model acceptance/verification; mitigation is required prod shadow eval + Lambda env var proof after deploy.
 
 ## Blockers / open questions
-- Staging CDK diff includes many unrelated stack changes (staging stack drift), violating the “env-var-only” diff requirement.
-- Staging deploy failed: CloudWatch LogGroup `/aws/lambda/rp-mw-staging-worker` already exists (stack drift/ownership conflict).
+- Prod-only directive applied; staging drift acknowledged and staging deploys skipped for this run.
 
 ## Follow-ups (actionable)
-- [ ] Align staging stack (or confirm acceptable) so CDK diff shows only env var additions.
-- [ ] Run staging/prod deployments + read-only proof once staging diff requirement is satisfied.
-- [ ] Resolve staging LogGroup ownership conflict (delete/import) before retrying staging deploy.
+- [ ] Run prod deploy + read-only proof once PR is merged.
+- [ ] Verify Lambda env vars in prod and capture redacted extract.
 
 <!-- End of template -->
