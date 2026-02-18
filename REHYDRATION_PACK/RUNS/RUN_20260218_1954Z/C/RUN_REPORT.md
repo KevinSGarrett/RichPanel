@@ -41,8 +41,8 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  33 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 131 +++
- .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  39 +
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 133 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  18 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
@@ -59,7 +59,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 36 files changed, 1930 insertions(+), 3 deletions(-)
+ 36 files changed, 1933 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -93,6 +93,7 @@ List commands you ran (include key flags/env if relevant):
 - `$env:AWS_PROFILE='rp-admin-staging'; npx cdk diff RichpanelMiddleware-staging` - staging diff succeeded (includes unrelated stack changes; change set not created).
 - `gh workflow run "Deploy Staging Stack" --ref main` - attempted staging sync on main (run 22157069157 failed).
 - `gh run view 22157069157 --log` - captured staging deploy failure log.
+- `gh pr comment 261 --body "<triage>"` - documented PR Agent/Claude review triage (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923178300).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
