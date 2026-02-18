@@ -24,13 +24,13 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260218_1954Z`
 - PR: none
-- CI status at end of run: red (CDK diffs blocked; CI rerun pending)
+- CI status at end of run: green (local), deploy blocked by AWS creds
 - Main updated: yes
 - Branch cleanup done: no
 
 ## Tests and evidence
 - Tests run: `python scripts/run_ci_checks.py --ci`
-- Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/`
+- Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/run_ci_checks.log`
 
 ## Decisions made
 - Blocked deployment and AWS diffs until valid AWS credentials and prod safe-mode verification are available.

@@ -1,0 +1,977 @@
+[Terminal output truncated: ~78KB dropped from beginning]
+backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_appends_when_missing) ... ok
+test_key_details_block_appends_when_no_tracking (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_appends_when_no_tracking) ... ok
+test_key_details_block_does_not_duplicate (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_does_not_duplicate) ... ok
+test_key_details_block_empty_draft_reply_appends (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_empty_draft_reply_appends) ... ok
+test_key_details_block_handles_empty_body (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_handles_empty_body) ... ok
+test_key_details_block_respects_max_chars (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_respects_max_chars) ... ok
+test_key_details_block_skips_missing_estimate (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_skips_missing_estimate) ... ok
+test_key_details_block_skips_non_dict_draft (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_skips_non_dict_draft) ... ok
+test_key_details_block_skips_tracking (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_skips_tracking) ... ok
+test_key_details_block_skips_tracking_url_only (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_skips_tracking_url_only) ... ok
+test_key_details_block_trims_whitespace_body (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_trims_whitespace_body) ... ok
+test_key_details_block_truncates_oversized_block (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_key_details_block_truncates_oversized_block) ... ok
+test_prompt_includes_excerpt_and_first_name (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_prompt_includes_excerpt_and_first_name) ... ok
+test_reply_context_payload_excludes_none (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_reply_context_payload_excludes_none) ... ok
+test_signature_enforcement_idempotent (backend.tests.test_order_status_reply_personalization.OrderStatusReplyPersonalizationTests.test_signature_enforcement_idempotent) ... ok
+test_resolve_rewrite_temperature_env (backend.tests.test_reply_rewrite_validation.ReplyRewriteValidationTests.test_resolve_rewrite_temperature_env) ... ok
+test_resolve_rewrite_temperature_env_restores_original (backend.tests.test_reply_rewrite_validation.ReplyRewriteValidationTests.test_resolve_rewrite_temperature_env_restores_original) ... ok
+test_dry_run_does_not_bypass_write_disabled (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_dry_run_does_not_bypass_write_disabled) ... richpanel.write_blocked
+ok
+test_extract_api_key_handles_json_variants (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_extract_api_key_handles_json_variants) ... ok
+test_load_api_key_extracts_from_json_secret (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_load_api_key_extracts_from_json_secret) ... ok
+test_prod_default_read_only_blocks_writes (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_prod_default_read_only_blocks_writes) ... richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+ok
+test_read_only_env_override_allows_false_but_write_disabled_blocks (backend.tests.test_richpanel_client_safety.RichpanelClientSafetyTests.test_read_only_env_override_allows_false_but_write_disabled_blocks) ... richpanel.write_blocked
+ok
+test_address_change_not_misclassified (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_address_change_not_misclassified) ... ok
+test_cancel_order_not_overridden_by_shipment_phrase (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_cancel_order_not_overridden_by_shipment_phrase) ... ok
+test_delivered_without_issue_stays_order_status_tracking (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_delivered_without_issue_stays_order_status_tracking) ... ok
+test_delivery_issue_maps_to_order_status_delivery_issue (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_delivery_issue_maps_to_order_status_delivery_issue) ... ok
+test_extract_customer_message_from_comments (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_extract_customer_message_from_comments) ... ok
+test_extract_customer_message_from_conversation_messages (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_extract_customer_message_from_conversation_messages) ... ok
+test_extract_customer_message_from_nested_messages (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_extract_customer_message_from_nested_messages) ... ok
+test_extract_customer_message_from_ticket_messages (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_extract_customer_message_from_ticket_messages) ... ok
+test_extract_customer_message_non_dict_returns_default (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_extract_customer_message_non_dict_returns_default) ... ok
+test_order_status_candidate_wins_over_return (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_order_status_candidate_wins_over_return) ... ok
+test_order_status_eta_with_number (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_order_status_eta_with_number) ... ok
+test_order_status_tracking_without_number (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_order_status_tracking_without_number) ... ok
+test_refund_request_not_misclassified (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_refund_request_not_misclassified) ... ok
+test_return_without_shipping_language_stays_return (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_return_without_shipping_language_stays_return) ... ok
+test_shipping_delay_not_shipped_still_matches (backend.tests.test_router_order_status_precedence.RouterOrderStatusPrecedenceTests.test_shipping_delay_not_shipped_still_matches) ... ok
+test_non_prod_allows_default_domain (backend.tests.test_shopify_client_domain_guard.ShopifyClientDomainGuardTests.test_non_prod_allows_default_domain) ... ok
+test_prod_requires_shop_domain (backend.tests.test_shopify_client_domain_guard.ShopifyClientDomainGuardTests.test_prod_requires_shop_domain) ... ok
+test_dhl_tracking_url (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_dhl_tracking_url) ... ok
+test_existing_tracking_url_is_unchanged (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_existing_tracking_url_is_unchanged) ... ok
+test_fedex_tracking_url (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_fedex_tracking_url) ... ok
+test_missing_inputs_return_none (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_missing_inputs_return_none) ... ok
+test_normalize_shipping_method_for_carrier_mismatch (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_normalize_shipping_method_for_carrier_mismatch) ... ok
+test_normalize_shipping_method_preserves_carrier_label (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_normalize_shipping_method_preserves_carrier_label) ... ok
+test_normalize_shipping_method_returns_none_when_missing (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_normalize_shipping_method_returns_none_when_missing) ... ok
+test_normalize_shipping_method_ups_vs_usps (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_normalize_shipping_method_ups_vs_usps) ... ok
+test_tracking_reply_generates_and_persists_url (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_tracking_reply_generates_and_persists_url) ... ok
+test_tracking_reply_ignores_bracket_tracking_string (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_tracking_reply_ignores_bracket_tracking_string) ... ok
+test_tracking_reply_ignores_empty_tracking_number_list (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_tracking_reply_ignores_empty_tracking_number_list) ... ok
+test_unknown_carrier_fallback (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_unknown_carrier_fallback) ... ok
+test_ups_tracking_url (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_ups_tracking_url) ... ok
+test_usps_tracking_url (backend.tests.test_tracking_link_generation.TrackingLinkGenerationTests.test_usps_tracking_url) ... ok
+
+----------------------------------------------------------------------
+Ran 249 tests in 36.360s
+
+OK
+test_build_url_with_params (__main__.RichpanelClientTests.test_build_url_with_params) ... ok
+test_cooldown_exception_paths (__main__.RichpanelClientTests.test_cooldown_exception_paths) ... richpanel.cooldown_failed
+richpanel.cooldown_register_failed
+ok
+test_cooldown_multiplier_invalid_defaults (__main__.RichpanelClientTests.test_cooldown_multiplier_invalid_defaults) ... richpanel.cooldown_multiplier_invalid
+ok
+test_dry_run_default_skips_transport (__main__.RichpanelClientTests.test_dry_run_default_skips_transport) ... ok
+test_env_flag_allows_outbound_requests (__main__.RichpanelClientTests.test_env_flag_allows_outbound_requests) ... ok
+test_env_namespace_is_reflected_in_secret_path (__main__.RichpanelClientTests.test_env_namespace_is_reflected_in_secret_path) ... ok
+test_excerpt_body (__main__.RichpanelClientTests.test_excerpt_body) ... ok
+test_executor_defaults_to_dry_run (__main__.RichpanelClientTests.test_executor_defaults_to_dry_run) ... ok
+test_executor_get_ticket_metadata (__main__.RichpanelClientTests.test_executor_get_ticket_metadata) ... ok
+test_executor_respects_outbound_enabled_flag (__main__.RichpanelClientTests.test_executor_respects_outbound_enabled_flag) ... ok
+test_get_ticket_metadata_conversation_no_invalid (__main__.RichpanelClientTests.test_get_ticket_metadata_conversation_no_invalid) ... ok
+test_get_ticket_metadata_dry_run (__main__.RichpanelClientTests.test_get_ticket_metadata_dry_run) ... ok
+test_get_ticket_metadata_error_paths (__main__.RichpanelClientTests.test_get_ticket_metadata_error_paths) ... ok
+test_get_ticket_metadata_handles_non_dict_ticket_number (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_non_dict_ticket_number) ... ok
+test_get_ticket_metadata_handles_non_dict_ticket_string (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_non_dict_ticket_string) ... ok
+test_get_ticket_metadata_handles_ticket_dict (__main__.RichpanelClientTests.test_get_ticket_metadata_handles_ticket_dict) ... ok
+test_global_rate_limiter_disabled (__main__.RichpanelClientTests.test_global_rate_limiter_disabled) ... ok
+test_global_rate_limiter_enabled (__main__.RichpanelClientTests.test_global_rate_limiter_enabled) ... ok
+test_global_rate_limiter_invalid_value (__main__.RichpanelClientTests.test_global_rate_limiter_invalid_value) ... ok
+test_http_transport_http_error (__main__.RichpanelClientTests.test_http_transport_http_error) ... ok
+test_http_transport_success (__main__.RichpanelClientTests.test_http_transport_success) ... ok
+test_http_transport_url_error (__main__.RichpanelClientTests.test_http_transport_url_error) ... ok
+test_load_api_key_pool_empty (__main__.RichpanelClientTests.test_load_api_key_pool_empty) ... richpanel.token_pool_missing_secret
+ok
+test_load_secret_value_binary (__main__.RichpanelClientTests.test_load_secret_value_binary) ... ok
+test_load_secret_value_error (__main__.RichpanelClientTests.test_load_secret_value_error) ... ok
+test_load_token_pool_missing_secret (__main__.RichpanelClientTests.test_load_token_pool_missing_secret) ... richpanel.token_pool_missing_secret
+ok
+test_merge_headers_and_encode_body (__main__.RichpanelClientTests.test_merge_headers_and_encode_body) ... ok
+test_non_prod_write_unaffected_by_prod_ack (__main__.RichpanelClientTests.test_non_prod_write_unaffected_by_prod_ack) ... ok
+test_parse_cooldown_multiplier_default (__main__.RichpanelClientTests.test_parse_cooldown_multiplier_default) ... ok
+test_parse_cooldown_multiplier_negative (__main__.RichpanelClientTests.test_parse_cooldown_multiplier_negative) ... richpanel.cooldown_multiplier_invalid
+ok
+test_parse_reset_after_epoch_vs_relative (__main__.RichpanelClientTests.test_parse_reset_after_epoch_vs_relative) ... ok
+test_prod_write_ack_allows_write_when_controls_allow (__main__.RichpanelClientTests.test_prod_write_ack_allows_write_when_controls_allow) ... ok
+test_prod_write_ack_does_not_bypass_write_disabled (__main__.RichpanelClientTests.test_prod_write_ack_does_not_bypass_write_disabled) ... richpanel.write_blocked
+ok
+test_prod_write_requires_ack_even_when_write_enabled (__main__.RichpanelClientTests.test_prod_write_requires_ack_even_when_write_enabled) ... richpanel.write_blocked
+ok
+test_rate_limiter_acquire_and_stats (__main__.RichpanelClientTests.test_rate_limiter_acquire_and_stats) ... ok
+test_rate_limiter_timeout (__main__.RichpanelClientTests.test_rate_limiter_timeout) ... richpanel.rate_limiter.timeout
+ok
+test_rate_limiter_timeout_in_request (__main__.RichpanelClientTests.test_rate_limiter_timeout_in_request) ... ok
+test_rate_limiter_waits_over_one_second (__main__.RichpanelClientTests.test_rate_limiter_waits_over_one_second) ... ok
+test_rate_limiter_zero_rate (__main__.RichpanelClientTests.test_rate_limiter_zero_rate) ... richpanel.rate_limiter_invalid_rate
+richpanel.rate_limiter_invalid_rate
+ok
+test_read_only_blocks_non_get (__main__.RichpanelClientTests.test_read_only_blocks_non_get) ... richpanel.write_blocked
+ok
+test_record_trace_timestamp_failure (__main__.RichpanelClientTests.test_record_trace_timestamp_failure) ... ok
+test_redact_url_path_handles_bad_url (__main__.RichpanelClientTests.test_redact_url_path_handles_bad_url) ... ok
+test_redaction_masks_api_key (__main__.RichpanelClientTests.test_redaction_masks_api_key) ... ok
+test_register_cooldown_extends_window (__main__.RichpanelClientTests.test_register_cooldown_extends_window) ... ok
+test_register_cooldown_ignores_non_positive (__main__.RichpanelClientTests.test_register_cooldown_ignores_non_positive) ... ok
+test_request_trace_record_and_clear (__main__.RichpanelClientTests.test_request_trace_record_and_clear) ... ok
+test_resolve_helpers (__main__.RichpanelClientTests.test_resolve_helpers) ... ok
+test_retries_on_429_and_honors_retry_after (__main__.RichpanelClientTests.test_retries_on_429_and_honors_retry_after) ... richpanel.rate_limited status=429
+richpanel.retry
+ok
+test_retries_on_429_honors_reset_header (__main__.RichpanelClientTests.test_retries_on_429_honors_reset_header) ... richpanel.rate_limited status=429
+richpanel.retry
+ok
+test_select_pool_key_empty (__main__.RichpanelClientTests.test_select_pool_key_empty) ... ok
+test_sleep_for_cooldown_no_wait (__main__.RichpanelClientTests.test_sleep_for_cooldown_no_wait) ... ok
+test_sleep_for_cooldown_waits (__main__.RichpanelClientTests.test_sleep_for_cooldown_waits) ... ok
+test_token_pool_rotates_keys (__main__.RichpanelClientTests.test_token_pool_rotates_keys) ... ok
+test_trace_enabled_on_response (__main__.RichpanelClientTests.test_trace_enabled_on_response) ... ok
+test_trace_enabled_on_transport_error (__main__.RichpanelClientTests.test_trace_enabled_on_transport_error) ... richpanel.transport_error
+ok
+test_transport_errors_retry_and_raise (__main__.RichpanelClientTests.test_transport_errors_retry_and_raise) ... richpanel.transport_error
+richpanel.transport_error
+ok
+test_writes_blocked_when_write_disabled_env_set (__main__.RichpanelClientTests.test_writes_blocked_when_write_disabled_env_set) ... richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+richpanel.write_blocked
+ok
+test_prod_write_ack_matches_exact_phrase (__main__.ProdWriteAckTests.test_prod_write_ack_matches_exact_phrase) ... ok
+test_prod_write_ack_matches_rejects_other_values (__main__.ProdWriteAckTests.test_prod_write_ack_matches_rejects_other_values) ... ok
+
+----------------------------------------------------------------------
+Ran 59 tests in 0.006s
+
+OK
+test_coerce_ticket_list (__main__.OrderStatusIntentEvalTests.test_coerce_ticket_list) ... ok
+test_compute_metrics_empty (__main__.OrderStatusIntentEvalTests.test_compute_metrics_empty) ... ok
+test_compute_metrics_non_empty (__main__.OrderStatusIntentEvalTests.test_compute_metrics_non_empty) ... ok
+test_deterministic_baseline_min_score (__main__.OrderStatusIntentEvalTests.test_deterministic_baseline_min_score) ... ok
+test_eval_output_structure_and_no_raw_text (__main__.OrderStatusIntentEvalTests.test_eval_output_structure_and_no_raw_text) ... ok
+test_evaluate_examples_with_llm (__main__.OrderStatusIntentEvalTests.test_evaluate_examples_with_llm) ... ok
+test_extract_message (__main__.OrderStatusIntentEvalTests.test_extract_message) ... ok
+test_extract_message_prefers_conversation (__main__.OrderStatusIntentEvalTests.test_extract_message_prefers_conversation) ... ok
+test_fetch_payload_helpers (__main__.OrderStatusIntentEvalTests.test_fetch_payload_helpers) ... ok
+test_fetch_recent_ticket_ids_errors (__main__.OrderStatusIntentEvalTests.test_fetch_recent_ticket_ids_errors) ... ok
+test_fetch_recent_ticket_ids_success (__main__.OrderStatusIntentEvalTests.test_fetch_recent_ticket_ids_success) ... ok
+test_is_prod_target_variants (__main__.OrderStatusIntentEvalTests.test_is_prod_target_variants) ... ok
+test_label_and_redaction_helpers (__main__.OrderStatusIntentEvalTests.test_label_and_redaction_helpers) ... ok
+test_load_jsonl_dataset_errors (__main__.OrderStatusIntentEvalTests.test_load_jsonl_dataset_errors) ... ok
+test_load_richpanel_examples_success_and_skip (__main__.OrderStatusIntentEvalTests.test_load_richpanel_examples_success_and_skip) ... 2026-02-18 14:06:19,352 WARNING Skipping ticket with no message
+2026-02-18 14:06:19,354 WARNING Skipping ticket with no message
+ok
+test_load_ticket_ids_from_args_and_file (__main__.OrderStatusIntentEvalTests.test_load_ticket_ids_from_args_and_file) ... ok
+test_load_ticket_ids_missing_file_raises (__main__.OrderStatusIntentEvalTests.test_load_ticket_ids_missing_file_raises) ... ok
+test_main_dataset_and_richpanel_paths (__main__.OrderStatusIntentEvalTests.test_main_dataset_and_richpanel_paths) ... 2026-02-18 14:06:19,356 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpowyi6oy1\out.json
+2026-02-18 14:06:19,356 INFO Deterministic metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+2026-02-18 14:06:19,356 INFO LLM metrics: unavailable (llm_not_called)
+2026-02-18 14:06:19,358 INFO Saved summary to C:\Users\kevin\AppData\Local\Temp\tmpowyi6oy1\richpanel.json
+2026-02-18 14:06:19,358 INFO Deterministic metrics: unavailable (None)
+2026-02-18 14:06:19,358 INFO LLM metrics: unavailable (None)
+ok
+test_main_requires_write_disabled_for_prod (__main__.OrderStatusIntentEvalTests.test_main_requires_write_disabled_for_prod) ... ok
+test_print_metrics_available (__main__.OrderStatusIntentEvalTests.test_print_metrics_available) ... 2026-02-18 14:06:19,359 INFO det metrics: precision=1.0 recall=1.0 (tp=1 fp=0 fn=0 tn=0)
+ok
+test_redact_excerpt_empty_returns_none (__main__.OrderStatusIntentEvalTests.test_redact_excerpt_empty_returns_none) ... ok
+test_redact_excerpt_masks_text (__main__.OrderStatusIntentEvalTests.test_redact_excerpt_masks_text) ... ok
+test_require_env_flag (__main__.OrderStatusIntentEvalTests.test_require_env_flag) ... ok
+test_resolve_env_name_priority (__main__.OrderStatusIntentEvalTests.test_resolve_env_name_priority) ... ok
+test_run_richpanel_eval_source_metadata (__main__.OrderStatusIntentEvalTests.test_run_richpanel_eval_source_metadata) ... ok
+test_write_csv_outputs_headers (__main__.OrderStatusIntentEvalTests.test_write_csv_outputs_headers) ... ok
+test_write_summary (__main__.OrderStatusIntentEvalTests.test_write_summary) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.020s
+
+OK
+test_automation_disabled_short_circuits_transport (__main__.OpenAIClientTests.test_automation_disabled_short_circuits_transport) ... ok
+test_env_resolution_uses_env_var (__main__.OpenAIClientTests.test_env_resolution_uses_env_var) ... ok
+test_gpt5_payload_allows_nonzero_temperature (__main__.OpenAIClientTests.test_gpt5_payload_allows_nonzero_temperature) ... ok
+test_gpt5_payload_uses_max_completion_tokens (__main__.OpenAIClientTests.test_gpt5_payload_uses_max_completion_tokens) ... ok
+test_header_redaction_masks_sensitive_keys (__main__.OpenAIClientTests.test_header_redaction_masks_sensitive_keys) ... ok
+test_integrations_namespace_alias (__main__.OpenAIClientTests.test_integrations_namespace_alias) ... ok
+test_max_tokens_must_be_positive (__main__.OpenAIClientTests.test_max_tokens_must_be_positive) ... ok
+test_missing_secret_short_circuits_to_dry_run (__main__.OpenAIClientTests.test_missing_secret_short_circuits_to_dry_run) ... openai.missing_api_key
+ok
+test_network_blocked_short_circuits (__main__.OpenAIClientTests.test_network_blocked_short_circuits) ... ok
+test_non_gpt5_payload_uses_max_tokens_and_metadata (__main__.OpenAIClientTests.test_non_gpt5_payload_uses_max_tokens_and_metadata) ... ok
+test_offline_eval_runs_without_network (__main__.OpenAIClientTests.test_offline_eval_runs_without_network) ... ok
+test_prompt_builder_is_deterministic (__main__.OpenAIClientTests.test_prompt_builder_is_deterministic) ... ok
+test_safe_mode_short_circuits_transport (__main__.OpenAIClientTests.test_safe_mode_short_circuits_transport) ... ok
+test_secret_path_uses_lowercased_env (__main__.OpenAIClientTests.test_secret_path_uses_lowercased_env) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.001s
+
+OK
+test_dummy_clients_exercise_error_branches (__main__.AwsSecretsPreflightTests.test_dummy_clients_exercise_error_branches) ... ok
+test_main_exit_code (__main__.AwsSecretsPreflightTests.test_main_exit_code) ... ok
+test_preflight_account_mismatch_fails (__main__.AwsSecretsPreflightTests.test_preflight_account_mismatch_fails) ... ok
+test_preflight_boto3_unavailable (__main__.AwsSecretsPreflightTests.test_preflight_boto3_unavailable) ... ok
+test_preflight_fail_on_error_includes_secret_detail (__main__.AwsSecretsPreflightTests.test_preflight_fail_on_error_includes_secret_detail) ... ok
+test_preflight_region_mismatch_message (__main__.AwsSecretsPreflightTests.test_preflight_region_mismatch_message) ... ok
+test_preflight_success (__main__.AwsSecretsPreflightTests.test_preflight_success) ... {
+  "overall_status": "PASS"
+}
+[AWS PREFLIGHT] account_id=000000000000 arn=unknown region=us-east-2
+[AWS PREFLIGHT] account_id=151124909266 arn=unknown region=us-east-2
+[AWS PREFLIGHT] account_id=151124909266 arn=unknown region=us-west-1
+[AWS PREFLIGHT] account_id=151124909266 arn=arn:aws:sts::151124909266:role/demo region=us-east-2
+[AWS PREFLIGHT] account_id=unknown arn=unknown region=us-east-2
+[AWS PREFLIGHT] account_id=151124909266 arn=unknown region=us-east-2
+ok
+test_preflight_unknown_env_message (__main__.AwsSecretsPreflightTests.test_preflight_unknown_env_message) ... ok
+test_preflight_writes_output_and_extra_secret (__main__.AwsSecretsPreflightTests.test_preflight_writes_output_and_extra_secret) ... ok
+test_required_secret_ids (__main__.AwsSecretsPreflightTests.test_required_secret_ids) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 4.252s
+
+OK
+test_build_headers_and_encode_body (__main__.ShopifyClientTests.test_build_headers_and_encode_body) ... ok
+test_dry_run_default_skips_transport (__main__.ShopifyClientTests.test_dry_run_default_skips_transport) ... ok
+test_env_namespace_is_reflected_in_secret_path (__main__.ShopifyClientTests.test_env_namespace_is_reflected_in_secret_path) ... ok
+test_expires_in_sets_expiry (__main__.ShopifyClientTests.test_expires_in_sets_expiry) ... ok
+test_extract_secret_field_json_string (__main__.ShopifyClientTests.test_extract_secret_field_json_string) ... ok
+test_extract_secret_field_returns_none_when_key_missing (__main__.ShopifyClientTests.test_extract_secret_field_returns_none_when_key_missing) ... ok
+test_falls_back_to_legacy_secret_when_canonical_missing (__main__.ShopifyClientTests.test_falls_back_to_legacy_secret_when_canonical_missing) ... ok
+test_find_order_by_name_builds_expected_query (__main__.ShopifyClientTests.test_find_order_by_name_builds_expected_query) ... ok
+test_get_order_builds_expected_path_and_query (__main__.ShopifyClientTests.test_get_order_builds_expected_path_and_query) ... ok
+test_get_order_respects_network_blocked_gate (__main__.ShopifyClientTests.test_get_order_respects_network_blocked_gate) ... ok
+test_get_shop_calls_request (__main__.ShopifyClientTests.test_get_shop_calls_request) ... ok
+test_http_transport_http_error (__main__.ShopifyClientTests.test_http_transport_http_error) ... ok
+test_http_transport_success (__main__.ShopifyClientTests.test_http_transport_success) ... ok
+test_http_transport_url_error (__main__.ShopifyClientTests.test_http_transport_url_error) ... ok
+test_integration_refresh_attempt_missing_refresh_token (__main__.ShopifyClientTests.test_integration_refresh_attempt_missing_refresh_token) ... ok
+test_integration_refresh_attempted_already_logged (__main__.ShopifyClientTests.test_integration_refresh_attempted_already_logged) ... shopify.refresh_failed
+shopify.refresh_failed_pre_request
+ok
+test_integration_refresh_failed_log_path (__main__.ShopifyClientTests.test_integration_refresh_failed_log_path) ... shopify.refresh_failed
+shopify.refresh_failed_post_request
+ok
+test_json_secret_parses_refresh_token (__main__.ShopifyClientTests.test_json_secret_parses_refresh_token) ... ok
+test_list_orders_by_email_builds_expected_query (__main__.ShopifyClientTests.test_list_orders_by_email_builds_expected_query) ... ok
+test_load_access_token_binary_secret (__main__.ShopifyClientTests.test_load_access_token_binary_secret) ... ok
+test_load_access_token_boto3_unavailable (__main__.ShopifyClientTests.test_load_access_token_boto3_unavailable) ... ok
+test_load_access_token_secret_lookup_failed (__main__.ShopifyClientTests.test_load_access_token_secret_lookup_failed) ... ok
+test_load_client_credentials_boto3_unavailable (__main__.ShopifyClientTests.test_load_client_credentials_boto3_unavailable) ... ok
+test_load_client_credentials_override (__main__.ShopifyClientTests.test_load_client_credentials_override) ... ok
+test_load_secret_value_binary (__main__.ShopifyClientTests.test_load_secret_value_binary) ... ok
+test_load_secret_value_error_and_empty (__main__.ShopifyClientTests.test_load_secret_value_error_and_empty) ... ok
+test_missing_secret_short_circuits (__main__.ShopifyClientTests.test_missing_secret_short_circuits) ... shopify.missing_token
+ok
+test_non_prod_write_unaffected_by_prod_ack (__main__.ShopifyClientTests.test_non_prod_write_unaffected_by_prod_ack) ... ok
+test_parse_expires_at_and_expires_in (__main__.ShopifyClientTests.test_parse_expires_at_and_expires_in) ... ok
+test_parse_expires_at_invalid_expires_in (__main__.ShopifyClientTests.test_parse_expires_at_invalid_expires_in) ... ok
+test_parse_expires_at_iso_timestamp (__main__.ShopifyClientTests.test_parse_expires_at_iso_timestamp) ... ok
+test_parse_timestamp_empty_string (__main__.ShopifyClientTests.test_parse_timestamp_empty_string) ... ok
+test_parse_timestamp_invalid (__main__.ShopifyClientTests.test_parse_timestamp_invalid) ... ok
+test_parse_timestamp_numeric (__main__.ShopifyClientTests.test_parse_timestamp_numeric) ... ok
+test_persist_token_info_boto3_unavailable (__main__.ShopifyClientTests.test_persist_token_info_boto3_unavailable) ... shopify.refresh_no_secrets_client
+ok
+test_persist_token_info_no_secret_id (__main__.ShopifyClientTests.test_persist_token_info_no_secret_id) ... shopify.refresh_missing_secret_id
+ok
+test_persist_token_info_write_failure (__main__.ShopifyClientTests.test_persist_token_info_write_failure) ... shopify.refresh_secret_write_failed
+ok
+test_prod_write_ack_allows_network (__main__.ShopifyClientTests.test_prod_write_ack_allows_network) ... ok
+test_prod_write_requires_ack (__main__.ShopifyClientTests.test_prod_write_requires_ack) ... shopify.write_blocked
+ok
+test_redaction_masks_tokens (__main__.ShopifyClientTests.test_redaction_masks_tokens) ... ok
+test_refresh_access_token_allows_secret_refresh_source (__main__.ShopifyClientTests.test_refresh_access_token_allows_secret_refresh_source) ... shopify.refresh_missing_client_credentials
+ok
+test_refresh_access_token_client_credentials (__main__.ShopifyClientTests.test_refresh_access_token_client_credentials) ... ok
+test_refresh_access_token_disabled_sets_error (__main__.ShopifyClientTests.test_refresh_access_token_disabled_sets_error) ... ok
+test_refresh_access_token_handles_bad_response (__main__.ShopifyClientTests.test_refresh_access_token_handles_bad_response) ... shopify.refresh_failed
+ok
+test_refresh_access_token_invalid_expires_in (__main__.ShopifyClientTests.test_refresh_access_token_invalid_expires_in) ... ok
+test_refresh_access_token_invalid_payload (__main__.ShopifyClientTests.test_refresh_access_token_invalid_payload) ... ok
+test_refresh_access_token_missing_access_token (__main__.ShopifyClientTests.test_refresh_access_token_missing_access_token) ... ok
+test_refresh_access_token_private_disabled_sets_error (__main__.ShopifyClientTests.test_refresh_access_token_private_disabled_sets_error) ... ok
+test_refresh_access_token_returns_false_without_refresh_token (__main__.ShopifyClientTests.test_refresh_access_token_returns_false_without_refresh_token) ... ok
+test_refresh_access_token_transport_error (__main__.ShopifyClientTests.test_refresh_access_token_transport_error) ... ok
+test_refresh_access_token_updates_secret (__main__.ShopifyClientTests.test_refresh_access_token_updates_secret) ... ok
+test_refresh_error_includes_error_code (__main__.ShopifyClientTests.test_refresh_error_includes_error_code) ... shopify.refresh_failed
+ok
+test_refresh_error_missing_access_token (__main__.ShopifyClientTests.test_refresh_error_missing_access_token) ... ok
+test_refresh_fails_without_client_credentials (__main__.ShopifyClientTests.test_refresh_fails_without_client_credentials) ... ok
+test_refresh_logs_failure_on_401 (__main__.ShopifyClientTests.test_refresh_logs_failure_on_401) ... shopify.refresh_failed
+shopify.refresh_failed_post_request
+ok
+test_refresh_on_401_retries_once (__main__.ShopifyClientTests.test_refresh_on_401_retries_once) ... ok
+test_refresh_on_403_retries_once (__main__.ShopifyClientTests.test_refresh_on_403_retries_once) ... ok
+test_refresh_pre_request_failure_logs_and_continues (__main__.ShopifyClientTests.test_refresh_pre_request_failure_logs_and_continues) ... ok
+test_refresh_pre_request_uses_expired_token (__main__.ShopifyClientTests.test_refresh_pre_request_uses_expired_token) ... ok
+test_refresh_skips_without_refresh_token (__main__.ShopifyClientTests.test_refresh_skips_without_refresh_token) ... ok
+test_refresh_token_source_from_admin_api_token (__main__.ShopifyClientTests.test_refresh_token_source_from_admin_api_token) ... ok
+test_refresh_uses_client_credentials_when_no_refresh_token (__main__.ShopifyClientTests.test_refresh_uses_client_credentials_when_no_refresh_token)
+Token bundle has no refresh_token \u2192 should use client_credentials grant. ... ok
+test_request_logs_forbidden_status (__main__.ShopifyClientTests.test_request_logs_forbidden_status) ... ok
+test_request_raises_on_500 (__main__.ShopifyClientTests.test_request_raises_on_500) ... shopify.retry
+ok
+test_retries_on_429_and_honors_retry_after (__main__.ShopifyClientTests.test_retries_on_429_and_honors_retry_after) ... shopify.rate_limited status=429
+shopify.retry
+ok
+test_safe_mode_short_circuits_before_prod_ack (__main__.ShopifyClientTests.test_safe_mode_short_circuits_before_prod_ack) ... ok
+test_secrets_client_boto3_missing (__main__.ShopifyClientTests.test_secrets_client_boto3_missing) ... ok
+test_shopify_response_json_invalid (__main__.ShopifyClientTests.test_shopify_response_json_invalid) ... ok
+test_short_circuit_reason (__main__.ShopifyClientTests.test_short_circuit_reason) ... ok
+test_sleep_exception_logged (__main__.ShopifyClientTests.test_sleep_exception_logged) ... shopify.sleep_failed
+ok
+test_to_bool (__main__.ShopifyClientTests.test_to_bool) ... ok
+test_token_diagnostics_detects_prefixes (__main__.ShopifyClientTests.test_token_diagnostics_detects_prefixes) ... ok
+test_token_diagnostics_for_override (__main__.ShopifyClientTests.test_token_diagnostics_for_override) ... ok
+test_token_diagnostics_unknown_when_missing (__main__.ShopifyClientTests.test_token_diagnostics_unknown_when_missing) ... ok
+test_transport_error_raises_after_max_attempts (__main__.ShopifyClientTests.test_transport_error_raises_after_max_attempts) ... shopify.transport_error
+ok
+test_transport_error_retries_then_succeeds (__main__.ShopifyClientTests.test_transport_error_retries_then_succeeds) ... shopify.transport_error
+ok
+test_truncate (__main__.ShopifyClientTests.test_truncate) ... ok
+
+----------------------------------------------------------------------
+Ran 77 tests in 0.015s
+
+OK
+test_main_prints_account_and_delegates (__main__.ShopifyTokenHealthCheckWrapperTests.test_main_prints_account_and_delegates) ... ok
+test_module_main_guard (__main__.ShopifyTokenHealthCheckWrapperTests.test_module_main_guard) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+test_dry_run_default_skips_transport (__main__.ShipStationClientTests.test_dry_run_default_skips_transport) ... ok
+test_executor_allows_outbound_when_enabled (__main__.ShipStationClientTests.test_executor_allows_outbound_when_enabled) ... ok
+test_executor_blocks_without_env_flag (__main__.ShipStationClientTests.test_executor_blocks_without_env_flag) ... ok
+test_list_shipments_builds_expected_path_and_sorted_query (__main__.ShipStationClientTests.test_list_shipments_builds_expected_path_and_sorted_query) ... ok
+test_list_shipments_respects_network_blocked_gate (__main__.ShipStationClientTests.test_list_shipments_respects_network_blocked_gate) ... ok
+test_missing_credentials_short_circuits (__main__.ShipStationClientTests.test_missing_credentials_short_circuits) ... shipstation.missing_credentials
+ok
+test_redaction_masks_sensitive_headers (__main__.ShipStationClientTests.test_redaction_masks_sensitive_headers) ... ok
+test_retry_honors_retry_after_header (__main__.ShipStationClientTests.test_retry_honors_retry_after_header) ... shipstation.retry
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 6.191s
+
+OK
+test_baseline_and_payload_field_counts (__main__.OrderIdResolutionCoverageTests.test_baseline_and_payload_field_counts) ... ok
+test_coerce_helpers_handle_exceptions (__main__.OrderIdResolutionCoverageTests.test_coerce_helpers_handle_exceptions) ... ok
+test_extract_comment_text_helpers (__main__.OrderIdResolutionCoverageTests.test_extract_comment_text_helpers) ... ok
+test_extract_customer_identity_from_payload_text (__main__.OrderIdResolutionCoverageTests.test_extract_customer_identity_from_payload_text) ... ok
+test_extract_customer_identity_non_dict_and_messages (__main__.OrderIdResolutionCoverageTests.test_extract_customer_identity_non_dict_and_messages) ... ok
+test_extract_order_id_missing_returns_unknown (__main__.OrderIdResolutionCoverageTests.test_extract_order_id_missing_returns_unknown) ... ok
+test_extract_order_id_priority_and_nested (__main__.OrderIdResolutionCoverageTests.test_extract_order_id_priority_and_nested) ... ok
+test_extract_order_number_from_payload_paths (__main__.OrderIdResolutionCoverageTests.test_extract_order_number_from_payload_paths) ... ok
+test_extract_order_number_from_text_hash_and_order (__main__.OrderIdResolutionCoverageTests.test_extract_order_number_from_text_hash_and_order) ... ok
+test_extract_order_number_from_text_html_anchor_ignored (__main__.OrderIdResolutionCoverageTests.test_extract_order_number_from_text_html_anchor_ignored) ... ok
+test_extract_shopify_fields_and_shipstation_fields (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_fields_and_shipstation_fields) ... ok
+test_extract_shopify_fields_falls_back_to_first_fulfillment (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_fields_falls_back_to_first_fulfillment) ... ok
+test_extract_shopify_fields_prefers_fulfillment_with_tracking (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_fields_prefers_fulfillment_with_tracking) ... ok
+test_extract_shopify_order_identifier_extra_cases (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_order_identifier_extra_cases) ... ok
+test_extract_shopify_order_identifier_variants (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_order_identifier_variants) ... ok
+test_extract_shopify_order_payload_variants (__main__.OrderIdResolutionCoverageTests.test_extract_shopify_order_payload_variants) ... ok
+test_hash_order_number_uses_name_search (__main__.OrderIdResolutionCoverageTests.test_hash_order_number_uses_name_search) ... shipstation.missing_credentials
+ok
+test_list_shopify_orders_by_email_handles_failures (__main__.OrderIdResolutionCoverageTests.test_list_shopify_orders_by_email_handles_failures) ... shopify.match_diagnostics
+shopify.match_diagnostics
+shopify.match_diagnostics
+ok
+test_lookup_order_summary_handles_shopify_and_shipstation_errors (__main__.OrderIdResolutionCoverageTests.test_lookup_order_summary_handles_shopify_and_shipstation_errors) ... ok
+test_lookup_order_summary_identity_resolution_no_orders (__main__.OrderIdResolutionCoverageTests.test_lookup_order_summary_identity_resolution_no_orders) ... ok
+test_lookup_shipstation_skips_when_network_disabled (__main__.OrderIdResolutionCoverageTests.test_lookup_shipstation_skips_when_network_disabled) ... ok
+test_lookup_shopify_by_email_helpers (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_email_helpers) ... ok
+test_lookup_shopify_by_name_diagnostics (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_name_diagnostics) ... shopify.match_diagnostics
+shopify.match_diagnostics
+ok
+test_lookup_shopify_by_name_empty_returns_empty (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_name_empty_returns_empty) ... ok
+test_lookup_shopify_by_name_handles_exception (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_name_handles_exception) ... shopify.match_diagnostics
+ok
+test_lookup_shopify_by_name_handles_hash_prefixed (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_name_handles_hash_prefixed) ... shopify.match_diagnostics
+ok
+test_lookup_shopify_by_name_skips_dry_run_and_errors (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_by_name_skips_dry_run_and_errors) ... shopify.match_diagnostics
+ok
+test_lookup_shopify_handles_404_fallback (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_handles_404_fallback) ... ok
+test_lookup_shopify_skips_when_network_disabled (__main__.OrderIdResolutionCoverageTests.test_lookup_shopify_skips_when_network_disabled) ... ok
+test_match_order_number_from_text_empty (__main__.OrderIdResolutionCoverageTests.test_match_order_number_from_text_empty) ... ok
+test_match_order_number_from_text_prefers_order_keyword (__main__.OrderIdResolutionCoverageTests.test_match_order_number_from_text_prefers_order_keyword) ... ok
+test_match_order_number_from_text_skips_date_like_digits (__main__.OrderIdResolutionCoverageTests.test_match_order_number_from_text_skips_date_like_digits) ... ok
+test_match_order_number_from_text_supports_standalone_digits (__main__.OrderIdResolutionCoverageTests.test_match_order_number_from_text_supports_standalone_digits) ... ok
+test_missing_order_id_falls_back_to_email_name (__main__.OrderIdResolutionCoverageTests.test_missing_order_id_falls_back_to_email_name) ... ok
+test_missing_order_id_falls_back_to_email_only (__main__.OrderIdResolutionCoverageTests.test_missing_order_id_falls_back_to_email_only) ... shipstation.missing_credentials
+ok
+test_order_matches_name_and_email (__main__.OrderIdResolutionCoverageTests.test_order_matches_name_and_email) ... ok
+test_order_matches_name_with_single_word_and_address (__main__.OrderIdResolutionCoverageTests.test_order_matches_name_with_single_word_and_address) ... ok
+test_order_number_comment_uses_name_search (__main__.OrderIdResolutionCoverageTests.test_order_number_comment_uses_name_search) ... ok
+test_order_number_name_search_falls_back_to_identity (__main__.OrderIdResolutionCoverageTests.test_order_number_name_search_falls_back_to_identity) ... shipstation.missing_credentials
+ok
+test_order_number_name_search_uses_hash_prefix (__main__.OrderIdResolutionCoverageTests.test_order_number_name_search_uses_hash_prefix) ... shipstation.missing_credentials
+ok
+test_resolve_orders_by_identity_no_orders (__main__.OrderIdResolutionCoverageTests.test_resolve_orders_by_identity_no_orders) ... ok
+test_select_most_recent_order_handles_bad_dates (__main__.OrderIdResolutionCoverageTests.test_select_most_recent_order_handles_bad_dates) ... ok
+test_select_order_from_name_search_falls_back_to_payload (__main__.OrderIdResolutionCoverageTests.test_select_order_from_name_search_falls_back_to_payload) ... ok
+test_select_order_from_name_search_handles_non_dict (__main__.OrderIdResolutionCoverageTests.test_select_order_from_name_search_handles_non_dict) ... ok
+test_select_order_from_name_search_matches_name_only (__main__.OrderIdResolutionCoverageTests.test_select_order_from_name_search_matches_name_only) ... ok
+test_shopify_match_diagnostics_classification (__main__.OrderIdResolutionCoverageTests.test_shopify_match_diagnostics_classification) ... shopify.match_diagnostics
+shopify.match_diagnostics
+ok
+test_should_enrich_rejects_missing_order_id (__main__.OrderIdResolutionCoverageTests.test_should_enrich_rejects_missing_order_id) ... ok
+test_unknown_order_id_skips_shopify_and_logs (__main__.OrderIdResolutionCoverageTests.test_unknown_order_id_skips_shopify_and_logs) ... ok
+test_extract_shopify_line_item_product_ids_dedup (__main__.OrderLookupTests.test_extract_shopify_line_item_product_ids_dedup) ... ok
+test_extract_shopify_tags_empty_is_ignored (__main__.OrderLookupTests.test_extract_shopify_tags_empty_is_ignored) ... ok
+test_fetch_shopify_line_item_product_ids_dry_run (__main__.OrderLookupTests.test_fetch_shopify_line_item_product_ids_dry_run) ... ok
+test_fetch_shopify_line_item_product_ids_network_disabled (__main__.OrderLookupTests.test_fetch_shopify_line_item_product_ids_network_disabled) ... ok
+test_nested_order_tracking_numeric_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_numeric_is_extracted) ... ok
+test_nested_order_tracking_string_is_extracted (__main__.OrderLookupTests.test_nested_order_tracking_string_is_extracted) ... ok
+test_normalize_shopify_product_id_variants (__main__.OrderLookupTests.test_normalize_shopify_product_id_variants) ... ok
+test_offline_lookup_does_not_call_transports (__main__.OrderLookupTests.test_offline_lookup_does_not_call_transports) ... ok
+test_parse_shopify_tags_dedup_trim (__main__.OrderLookupTests.test_parse_shopify_tags_dedup_trim) ... ok
+test_parse_shopify_tags_empty (__main__.OrderLookupTests.test_parse_shopify_tags_empty) ... ok
+test_payload_fulfillments_list_used_for_tracking_and_carrier (__main__.OrderLookupTests.test_payload_fulfillments_list_used_for_tracking_and_carrier) ... ok
+test_payload_line_item_product_ids_skip_network (__main__.OrderLookupTests.test_payload_line_item_product_ids_skip_network) ... ok
+test_payload_missing_shipping_signals_offline_returns_baseline (__main__.OrderLookupTests.test_payload_missing_shipping_signals_offline_returns_baseline) ... ok
+test_payload_only_summary_skips_network_when_enabled (__main__.OrderLookupTests.test_payload_only_summary_skips_network_when_enabled) ... ok
+test_payload_only_summary_when_network_disabled (__main__.OrderLookupTests.test_payload_only_summary_when_network_disabled) ... ok
+test_payload_opt_in_line_item_product_ids_network_disabled (__main__.OrderLookupTests.test_payload_opt_in_line_item_product_ids_network_disabled) ... ok
+test_payload_opt_in_line_item_product_ids_safe_mode (__main__.OrderLookupTests.test_payload_opt_in_line_item_product_ids_safe_mode) ... ok
+test_payload_opt_in_product_ids_fail_closed_on_404 (__main__.OrderLookupTests.test_payload_opt_in_product_ids_fail_closed_on_404) ... ok
+test_payload_orders_list_candidate_is_used (__main__.OrderLookupTests.test_payload_orders_list_candidate_is_used) ... ok
+test_payload_shipment_dict_used_for_carrier_and_service (__main__.OrderLookupTests.test_payload_shipment_dict_used_for_carrier_and_service) ... ok
+test_payload_shipping_opt_in_line_item_product_ids (__main__.OrderLookupTests.test_payload_shipping_opt_in_line_item_product_ids) ... ok
+test_payload_tracking_dict_id_fallback (__main__.OrderLookupTests.test_payload_tracking_dict_id_fallback) ... ok
+test_payload_tracking_dict_number_is_used_not_stringified (__main__.OrderLookupTests.test_payload_tracking_dict_number_is_used_not_stringified) ... ok
+test_payload_tracking_url_is_extracted (__main__.OrderLookupTests.test_payload_tracking_url_is_extracted) ... ok
+test_shipstation_enrichment_fills_tracking_when_shopify_missing (__main__.OrderLookupTests.test_shipstation_enrichment_fills_tracking_when_shopify_missing) ... ok
+test_shopify_enrichment_merges_fields_when_network_enabled (__main__.OrderLookupTests.test_shopify_enrichment_merges_fields_when_network_enabled) ... ok
+test_shopify_fallback_used_when_payload_has_no_shipping_fields (__main__.OrderLookupTests.test_shopify_fallback_used_when_payload_has_no_shipping_fields) ... ok
+test_shopify_gid_line_item_product_ids_extracted (__main__.OrderLookupTests.test_shopify_gid_line_item_product_ids_extracted) ... ok
+
+----------------------------------------------------------------------
+Ran 76 tests in 10.210s
+
+OK
+test_empty_body_is_rejected (__main__.ReplyRewriteTests.test_empty_body_is_rejected) ... reply_rewrite.parse_failed
+ok
+test_fallback_on_parse_failure_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_parse_failure_preserves_original) ... reply_rewrite.parse_failed
+ok
+test_gates_block_network (__main__.ReplyRewriteTests.test_gates_block_network) ... ok
+test_gates_block_outbound (__main__.ReplyRewriteTests.test_gates_block_outbound) ... ok
+test_gates_block_when_disabled (__main__.ReplyRewriteTests.test_gates_block_when_disabled) ... ok
+test_no_response_returns_fallback (__main__.ReplyRewriteTests.test_no_response_returns_fallback) ... ok
+test_parse_response_brace_and_escape_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_and_escape_inside_string) ... ok
+test_parse_response_brace_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_inside_string) ... ok
+test_parse_response_extracts_embedded_json (__main__.ReplyRewriteTests.test_parse_response_extracts_embedded_json) ... ok
+test_response_id_missing_when_raw_empty (__main__.ReplyRewriteTests.test_response_id_missing_when_raw_empty) ... ok
+test_response_id_raw_missing (__main__.ReplyRewriteTests.test_response_id_raw_missing) ... ok
+test_rewrite_applies_when_enabled_and_safe (__main__.ReplyRewriteTests.test_rewrite_applies_when_enabled_and_safe) ... ok
+test_rewrite_applies_when_tokens_preserved (__main__.ReplyRewriteTests.test_rewrite_applies_when_tokens_preserved) ... ok
+test_rewrite_rejects_missing_tracking_number (__main__.ReplyRewriteTests.test_rewrite_rejects_missing_tracking_number) ... ok
+test_rewrite_rejects_missing_tracking_url (__main__.ReplyRewriteTests.test_rewrite_rejects_missing_tracking_url) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.002s
+
+OK
+test_gating_allows_all_enabled (__main__.GatingTests.test_gating_allows_all_enabled) ... ok
+test_gating_allows_shadow_when_outbound_disabled (__main__.GatingTests.test_gating_allows_shadow_when_outbound_disabled) ... ok
+test_gating_blocks_automation_disabled (__main__.GatingTests.test_gating_blocks_automation_disabled) ... ok
+test_gating_blocks_network_disabled (__main__.GatingTests.test_gating_blocks_network_disabled) ... ok
+test_gating_blocks_safe_mode (__main__.GatingTests.test_gating_blocks_safe_mode) ... ok
+test_gating_blocks_shadow_disabled (__main__.GatingTests.test_gating_blocks_shadow_disabled) ... ok
+test_artifact_contains_deterministic (__main__.ArtifactTests.test_artifact_contains_deterministic) ... ok
+test_artifact_serializable (__main__.ArtifactTests.test_artifact_serializable) ... ok
+test_default_is_false (__main__.PrimaryFlagTests.test_default_is_false) ... ok
+test_default_uses_deterministic (__main__.PrimaryFlagTests.test_default_uses_deterministic) ... ok
+test_high_confidence_uses_llm (__main__.PrimaryFlagOnTests.test_high_confidence_uses_llm) ... ok
+test_low_confidence_uses_deterministic (__main__.PrimaryFlagOnTests.test_low_confidence_uses_deterministic) ... ok
+test_force_primary_respects_threshold (__main__.ForcePrimaryTests.test_force_primary_respects_threshold) ... ok
+test_force_primary_uses_llm_when_confident (__main__.ForcePrimaryTests.test_force_primary_uses_llm_when_confident) ... ok
+test_response_id_reason_when_raw_empty (__main__.ResponseIdReasonTests.test_response_id_reason_when_raw_empty) ... ok
+test_is_valid_with_invalid_intent (__main__.SuggestionTests.test_is_valid_with_invalid_intent) ... ok
+test_is_valid_with_valid_data (__main__.SuggestionTests.test_is_valid_with_valid_data) ... ok
+test_passes_threshold (__main__.SuggestionTests.test_passes_threshold) ... ok
+test_custom_threshold (__main__.ThresholdTests.test_custom_threshold) ... ok
+test_default_threshold (__main__.ThresholdTests.test_default_threshold) ... ok
+test_legacy_confidence_whitespace_falls_back (__main__.ThresholdTests.test_legacy_confidence_whitespace_falls_back) ... ok
+test_min_confidence_above_one_falls_back (__main__.ThresholdTests.test_min_confidence_above_one_falls_back) ... ok
+test_min_confidence_empty_string_falls_back (__main__.ThresholdTests.test_min_confidence_empty_string_falls_back) ... ok
+test_min_confidence_invalid_falls_back (__main__.ThresholdTests.test_min_confidence_invalid_falls_back) ... ok
+test_min_confidence_negative_falls_back (__main__.ThresholdTests.test_min_confidence_negative_falls_back) ... ok
+test_min_confidence_overrides_legacy (__main__.ThresholdTests.test_min_confidence_overrides_legacy) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.002s
+
+OK
+test_empty_body_is_rejected (__main__.ReplyRewriteTests.test_empty_body_is_rejected) ... reply_rewrite.parse_failed
+ok
+test_fallback_on_parse_failure_preserves_original (__main__.ReplyRewriteTests.test_fallback_on_parse_failure_preserves_original) ... reply_rewrite.parse_failed
+ok
+test_gates_block_network (__main__.ReplyRewriteTests.test_gates_block_network) ... ok
+test_gates_block_outbound (__main__.ReplyRewriteTests.test_gates_block_outbound) ... ok
+test_gates_block_when_disabled (__main__.ReplyRewriteTests.test_gates_block_when_disabled) ... ok
+test_no_response_returns_fallback (__main__.ReplyRewriteTests.test_no_response_returns_fallback) ... ok
+test_parse_response_brace_and_escape_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_and_escape_inside_string) ... ok
+test_parse_response_brace_inside_string (__main__.ReplyRewriteTests.test_parse_response_brace_inside_string) ... ok
+test_parse_response_extracts_embedded_json (__main__.ReplyRewriteTests.test_parse_response_extracts_embedded_json) ... ok
+test_response_id_missing_when_raw_empty (__main__.ReplyRewriteTests.test_response_id_missing_when_raw_empty) ... ok
+test_response_id_raw_missing (__main__.ReplyRewriteTests.test_response_id_raw_missing) ... ok
+test_rewrite_applies_when_enabled_and_safe (__main__.ReplyRewriteTests.test_rewrite_applies_when_enabled_and_safe) ... ok
+test_rewrite_applies_when_tokens_preserved (__main__.ReplyRewriteTests.test_rewrite_applies_when_tokens_preserved) ... ok
+test_rewrite_rejects_missing_tracking_number (__main__.ReplyRewriteTests.test_rewrite_rejects_missing_tracking_number) ... ok
+test_rewrite_rejects_missing_tracking_url (__main__.ReplyRewriteTests.test_rewrite_rejects_missing_tracking_url) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.002s
+
+OK
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 0.003s
+
+OK
+test_outbound_disabled_skips_writes_while_allowing_shadow_reads (__main__.ReadOnlyShadowModeTests.test_outbound_disabled_skips_writes_while_allowing_shadow_reads) ... ok
+test_plan_actions_propagates_allow_network_for_shadow_reads (__main__.ReadOnlyShadowModeTests.test_plan_actions_propagates_allow_network_for_shadow_reads) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.173s
+
+OK
+test_prod_requires_write_disabled (__main__.LiveReadonlyShadowEvalGuardTests.test_prod_requires_write_disabled) ... ============================================================================
+OPENAI SHADOW EVAL CONFIG
+MW_OPENAI_ROUTING_ENABLED=True
+MW_OPENAI_SHADOW_ENABLED=True
+MW_OPENAI_INTENT_ENABLED=True
+MW_OPENAI_REWRITE_ENABLED=False
+OPENAI_MODEL=gpt-5.2-chat-latest
+OPENAI_ORDER_STATUS_INTENT_MODEL=gpt-5.2-chat-latest
+OPENAI_REPLY_REWRITE_MODEL=gpt-5.2-chat-latest
+OPENAI_ALLOW_NETWORK=True
+MW_ALLOW_NETWORK_READS=True
+RICHPANEL_OUTBOUND_ENABLED=False
+SAFE_MODE=false (script default)
+OpenAI gating blockers: none
+============================================================================
+ok
+test_build_richpanel_client_sets_base_url (__main__.LiveReadonlyShadowEvalHelpersTests.test_build_richpanel_client_sets_base_url) ... ok
+test_build_shopify_client (__main__.LiveReadonlyShadowEvalHelpersTests.test_build_shopify_client) ... ok
+test_build_summary_payload_rollups (__main__.LiveReadonlyShadowEvalHelpersTests.test_build_summary_payload_rollups) ... ok
+test_channel_extraction_and_classification (__main__.LiveReadonlyShadowEvalHelpersTests.test_channel_extraction_and_classification) ... ok
+test_classify_helpers (__main__.LiveReadonlyShadowEvalHelpersTests.test_classify_helpers) ... ok
+test_classify_match_failure_bucket (__main__.LiveReadonlyShadowEvalHelpersTests.test_classify_match_failure_bucket) ... ok
+test_comment_is_operator_detection (__main__.LiveReadonlyShadowEvalHelpersTests.test_comment_is_operator_detection) ... ok
+test_env_truthy_and_openai_flags (__main__.LiveReadonlyShadowEvalHelpersTests.test_env_truthy_and_openai_flags) ... ok
+test_extract_aws_operation_sources (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_aws_operation_sources) ... ok
+test_extract_comment_message_variants (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_comment_message_variants) ... ok
+test_extract_latest_customer_message (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_latest_customer_message) ... ok
+test_extract_order_number (__main__.LiveReadonlyShadowEvalHelpersTests.test_extract_order_number) ... ok
+test_fetch_recent_ticket_refs_errors_on_status (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_recent_ticket_refs_errors_on_status) ... ok
+test_fetch_recent_ticket_refs_fallbacks_on_forbidden (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_recent_ticket_refs_fallbacks_on_forbidden) ... ok
+test_fetch_recent_ticket_refs_success (__main__.LiveReadonlyShadowEvalHelpersTests.test_fetch_recent_ticket_refs_success) ... ok
+test_http_trace_allows_aws_portal_get (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_allows_aws_portal_get) ... ok
+test_http_trace_allows_aws_readonly_ops (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_allows_aws_readonly_ops) ... ok
+test_http_trace_assert_read_only_unknown_service (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_assert_read_only_unknown_service) ... ok
+test_http_trace_blocks_aws_non_post (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_blocks_aws_non_post) ... ok
+test_http_trace_capture_handles_bad_request (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_capture_handles_bad_request) ... 2026-02-18 14:06:45,338 WARNING HTTP trace capture failed
+Traceback (most recent call last):
+  File "C:\RichPanel_GIT\scripts\live_readonly_shadow_eval.py", line 1491, in _wrapped_urlopen
+    req.get_method() if hasattr(req, "get_method") else "GET"
+    ^^^^^^^^^^^^^^^^
+  File "C:\RichPanel_GIT\scripts\test_live_readonly_shadow_eval.py", line 1901, in get_method
+    raise ValueError("boom")
+ValueError: boom
+ok
+test_http_trace_capture_wraps_urlopen (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_capture_wraps_urlopen) ... ok
+test_http_trace_records_and_asserts (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_records_and_asserts) ... ok
+test_http_trace_records_anthropic_and_unknown (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_records_anthropic_and_unknown) ... ok
+test_http_trace_service_mapping (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_service_mapping) ... ok
+test_http_trace_to_dict (__main__.LiveReadonlyShadowEvalHelpersTests.test_http_trace_to_dict) ... ok
+test_identity_block_handles_api_key_error (__main__.LiveReadonlyShadowEvalHelpersTests.test_identity_block_handles_api_key_error) ... ok
+test_identity_block_hashes_api_key (__main__.LiveReadonlyShadowEvalHelpersTests.test_identity_block_hashes_api_key) ... ok
+test_is_prod_target_detects_env (__main__.LiveReadonlyShadowEvalHelpersTests.test_is_prod_target_detects_env) ... ok
+test_is_prod_target_detects_prod_key_and_base (__main__.LiveReadonlyShadowEvalHelpersTests.test_is_prod_target_detects_prod_key_and_base) ... ok
+test_is_prod_target_detects_secret_hint (__main__.LiveReadonlyShadowEvalHelpersTests.test_is_prod_target_detects_secret_hint) ... ok
+test_is_prod_target_false_for_non_prod (__main__.LiveReadonlyShadowEvalHelpersTests.test_is_prod_target_false_for_non_prod) ... ok
+test_markdown_report_includes_trace_sections (__main__.LiveReadonlyShadowEvalHelpersTests.test_markdown_report_includes_trace_sections) ... ok
+test_normalize_optional_text_handles_exception (__main__.LiveReadonlyShadowEvalHelpersTests.test_normalize_optional_text_handles_exception) ... ok
+test_parse_timestamp_variants (__main__.LiveReadonlyShadowEvalHelpersTests.test_parse_timestamp_variants) ... ok
+test_probe_shopify_dry_run (__main__.LiveReadonlyShadowEvalHelpersTests.test_probe_shopify_dry_run) ... ok
+test_probe_shopify_ok (__main__.LiveReadonlyShadowEvalHelpersTests.test_probe_shopify_ok) ... ok
+test_redact_identifier_empty (__main__.LiveReadonlyShadowEvalHelpersTests.test_redact_identifier_empty) ... ok
+test_redact_identifier_none (__main__.LiveReadonlyShadowEvalHelpersTests.test_redact_identifier_none) ... ok
+test_redact_path_handles_empty (__main__.LiveReadonlyShadowEvalHelpersTests.test_redact_path_handles_empty) ... ok
+test_redact_path_hashes_ids (__main__.LiveReadonlyShadowEvalHelpersTests.test_redact_path_hashes_ids) ... ok
+test_redact_path_keeps_alpha_segment (__main__.LiveReadonlyShadowEvalHelpersTests.test_redact_path_keeps_alpha_segment) ... ok
+test_request_burst_and_retry_after_helpers (__main__.LiveReadonlyShadowEvalHelpersTests.test_request_burst_and_retry_after_helpers) ... ok
+test_require_env_flag_mismatch_raises (__main__.LiveReadonlyShadowEvalHelpersTests.test_require_env_flag_mismatch_raises) ... ok
+test_require_env_flag_missing_raises (__main__.LiveReadonlyShadowEvalHelpersTests.test_require_env_flag_missing_raises) ... ok
+test_require_env_flags_success (__main__.LiveReadonlyShadowEvalHelpersTests.test_require_env_flags_success) ... ok
+test_require_prod_environment_blocks_non_prod (__main__.LiveReadonlyShadowEvalHelpersTests.test_require_prod_environment_blocks_non_prod) ... ok
+test_resolve_env_name_defaults_to_local (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_env_name_defaults_to_local) ... ok
+test_resolve_env_name_prefers_richpanel_env (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_env_name_prefers_richpanel_env) ... ok
+test_resolve_richpanel_base_url_override (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_richpanel_base_url_override) ... ok
+test_resolve_shopify_secrets_client_no_profile (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_shopify_secrets_client_no_profile) ... ok
+test_resolve_shopify_secrets_client_requires_boto3 (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_shopify_secrets_client_requires_boto3) ... ok
+test_resolve_shopify_secrets_client_with_profile (__main__.LiveReadonlyShadowEvalHelpersTests.test_resolve_shopify_secrets_client_with_profile) ... ok
+test_schema_fingerprint_deterministic (__main__.LiveReadonlyShadowEvalHelpersTests.test_schema_fingerprint_deterministic) ... ok
+test_schema_helpers_cover_edges (__main__.LiveReadonlyShadowEvalHelpersTests.test_schema_helpers_cover_edges) ... ok
+test_service_from_hostname (__main__.LiveReadonlyShadowEvalHelpersTests.test_service_from_hostname) ... ok
+test_shadow_utils_list_and_fetch_edge_cases (__main__.LiveReadonlyShadowEvalHelpersTests.test_shadow_utils_list_and_fetch_edge_cases) ... ok
+test_shadow_utils_text_parsing_edges (__main__.LiveReadonlyShadowEvalHelpersTests.test_shadow_utils_text_parsing_edges) ... ok
+test_summarize_comment_metadata (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_comment_metadata) ... ok
+test_summarize_trace_allows_openai_when_enabled (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_allows_openai_when_enabled) ... ok
+test_summarize_trace_aws_allowed_operation (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_aws_allowed_operation) ... ok
+test_summarize_trace_aws_missing_operation (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_aws_missing_operation) ... ok
+test_summarize_trace_aws_non_post (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_aws_non_post) ... ok
+test_summarize_trace_aws_portal_bad_method (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_aws_portal_bad_method) ... ok
+test_summarize_trace_aws_portal_ok (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_aws_portal_ok) ... ok
+test_summarize_trace_counts (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_counts) ... ok
+test_summarize_trace_rejects_unknown_service_and_method (__main__.LiveReadonlyShadowEvalHelpersTests.test_summarize_trace_rejects_unknown_service_and_method) ... ok
+test_sys_path_inserts_backend_src (__main__.LiveReadonlyShadowEvalHelpersTests.test_sys_path_inserts_backend_src) ... ok
+test_to_bool_defaults (__main__.LiveReadonlyShadowEvalHelpersTests.test_to_bool_defaults) ... ok
+
+----------------------------------------------------------------------
+Ran 69 tests in 0.020s
+
+OK
+test_business_day_anchor_skips_weekend (__main__.ScenarioPayloadTests.test_business_day_anchor_skips_weekend) ... ok
+test_iso_business_days_before_validation (__main__.ScenarioPayloadTests.test_iso_business_days_before_validation) ... ok
+test_not_order_status_payload_shape (__main__.ScenarioPayloadTests.test_not_order_status_payload_shape) ... ok
+test_order_status_fallback_email_payload_shape (__main__.ScenarioPayloadTests.test_order_status_fallback_email_payload_shape) ... ok
+test_order_status_no_match_payload_shape (__main__.ScenarioPayloadTests.test_order_status_no_match_payload_shape) ... ok
+test_order_status_no_tracking_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_shape) ... ok
+test_order_status_no_tracking_short_window_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_short_window_shape) ... ok
+test_order_status_no_tracking_standard_shipping_3_5_shape (__main__.ScenarioPayloadTests.test_order_status_no_tracking_standard_shipping_3_5_shape) ... [OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
+[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
+[OK] Wrote created-ticket artifact to C:\Users\kevin\AppData\Local\Temp\tmpp7dy2vqm\created_chat_ticket.json
+[OK] Created sandbox non-email ticket (ticket_number=redacted:a665a4592042, conversation_id=redacted:46e9bc3476c9).
+[OK] Fingerprints (ticket_number=a665a4592042, conversation_id=46e9bc3476c9).
+[OK] Wrote created-ticket artifact to C:\Users\kevin\AppData\Local\Temp\tmppi7vsum5\created.json
+[OK] Created sandbox email ticket (ticket_number=redacted:8d23cf6c86e8, conversation_id=redacted:46e9bc3476c9).
+[OK] Ticket fingerprints (ticket_number=8d23cf6c86e8, conversation_id=46e9bc3476c9).
+ok
+test_order_status_scenario_includes_required_fields (__main__.ScenarioPayloadTests.test_order_status_scenario_includes_required_fields)
+Ensure order_status scenario payload includes all required fields. ... ok
+test_order_status_scenario_is_deterministic (__main__.ScenarioPayloadTests.test_order_status_scenario_is_deterministic)
+Scenario payload should be deterministic for same run_id. ... ok
+test_order_status_scenario_no_pii (__main__.ScenarioPayloadTests.test_order_status_scenario_no_pii)
+Scenario payload must not contain PII patterns. ... ok
+test_order_status_tracking_standard_shipping_shape (__main__.ScenarioPayloadTests.test_order_status_tracking_standard_shipping_shape) ... ok
+test_build_payload_baseline_has_no_scenario (__main__.PayloadBuilderTests.test_build_payload_baseline_has_no_scenario) ... ok
+test_build_payload_not_order_status (__main__.PayloadBuilderTests.test_build_payload_not_order_status) ... ok
+test_build_payload_order_status_fallback_email_match (__main__.PayloadBuilderTests.test_build_payload_order_status_fallback_email_match) ... ok
+test_build_payload_order_status_includes_order_number (__main__.PayloadBuilderTests.test_build_payload_order_status_includes_order_number) ... ok
+test_build_payload_order_status_no_match (__main__.PayloadBuilderTests.test_build_payload_order_status_no_match) ... ok
+test_build_payload_order_status_tracking (__main__.PayloadBuilderTests.test_build_payload_order_status_tracking) ... ok
+test_parse_args_accepts_allow_prod_synthetic_webhook (__main__.ParseArgsTests.test_parse_args_accepts_allow_prod_synthetic_webhook) ... ok
+test_parse_args_accepts_allowlist_flags (__main__.ParseArgsTests.test_parse_args_accepts_allowlist_flags) ... ok
+test_parse_args_accepts_order_match_by_number_flag (__main__.ParseArgsTests.test_parse_args_accepts_order_match_by_number_flag) ... ok
+test_parse_args_accepts_order_number (__main__.ParseArgsTests.test_parse_args_accepts_order_number) ... ok
+test_parse_args_accepts_require_email_channel (__main__.ParseArgsTests.test_parse_args_accepts_require_email_channel) ... ok
+test_parse_args_accepts_require_send_message_used (__main__.ParseArgsTests.test_parse_args_accepts_require_send_message_used) ... ok
+test_allowlist_blocked_overrides_requirements (__main__.TestRequirementFlagResolution.test_allowlist_blocked_overrides_requirements) ... ok
+test_negative_scenario_disables_order_match_requirement (__main__.TestRequirementFlagResolution.test_negative_scenario_disables_order_match_requirement) ... ok
+test_no_match_mode_disables_order_match_requirement (__main__.TestRequirementFlagResolution.test_no_match_mode_disables_order_match_requirement) ... ok
+test_non_order_status_allows_explicit_email_requirements (__main__.TestRequirementFlagResolution.test_non_order_status_allows_explicit_email_requirements) ... ok
+test_non_order_status_defaults_disable_email_requirements (__main__.TestRequirementFlagResolution.test_non_order_status_defaults_disable_email_requirements) ... ok
+test_validate_routing_includes_optional_fields (__main__.RoutingValidationTests.test_validate_routing_includes_optional_fields) ... ok
+test_middleware_encodes_email_based_conversation_id (__main__.URLEncodingTests.test_middleware_encodes_email_based_conversation_id)
+Middleware must URL-encode email-based conversation IDs for write paths. ... ok
+test_middleware_encodes_plus_sign_in_conversation_id (__main__.URLEncodingTests.test_middleware_encodes_plus_sign_in_conversation_id)
+Middleware must URL-encode + signs in conversation IDs. ... ok
+test_compute_draft_reply_body_no_tracking_uses_estimate (__main__.DraftReplyHelperTests.test_compute_draft_reply_body_no_tracking_uses_estimate) ... ok
+test_compute_draft_reply_body_with_tracking (__main__.DraftReplyHelperTests.test_compute_draft_reply_body_with_tracking) ... ok
+test_extract_latest_comment_body_fallback (__main__.DraftReplyHelperTests.test_extract_latest_comment_body_fallback) ... ok
+test_extract_latest_comment_body_prefers_middleware_source (__main__.DraftReplyHelperTests.test_extract_latest_comment_body_prefers_middleware_source) ... ok
+test_extract_latest_comment_body_prefers_operator (__main__.DraftReplyHelperTests.test_extract_latest_comment_body_prefers_operator) ... ok
+test_fetch_latest_reply_hash (__main__.DraftReplyHelperTests.test_fetch_latest_reply_hash) ... ok
+test_fetch_latest_reply_hash_no_network (__main__.DraftReplyHelperTests.test_fetch_latest_reply_hash_no_network) ... ok
+test_diagnose_selects_first_successful_candidate (__main__.DiagnosticsTests.test_diagnose_selects_first_successful_candidate) ... ok
+test_diagnose_skips_without_confirm (__main__.DiagnosticsTests.test_diagnose_skips_without_confirm) ... ok
+test_reply_evidence_message_delta (__main__.ReplyEvidenceTests.test_reply_evidence_message_delta) ... ok
+test_reply_evidence_middleware_source (__main__.ReplyEvidenceTests.test_reply_evidence_middleware_source) ... ok
+test_reply_evidence_middleware_source_requires_delta (__main__.ReplyEvidenceTests.test_reply_evidence_middleware_source_requires_delta) ... ok
+test_reply_evidence_none (__main__.ReplyEvidenceTests.test_reply_evidence_none) ... ok
+test_reply_evidence_status_change_only (__main__.ReplyEvidenceTests.test_reply_evidence_status_change_only) ... ok
+test_reply_evidence_tags_and_update_success (__main__.ReplyEvidenceTests.test_reply_evidence_tags_and_update_success) ... ok
+test_middleware_outcome_accepts_resolved (__main__.CriteriaTests.test_middleware_outcome_accepts_resolved) ... ok
+test_middleware_outcome_counts_positive_tag_added (__main__.CriteriaTests.test_middleware_outcome_counts_positive_tag_added) ... ok
+test_middleware_outcome_ignores_historical_skip_tags (__main__.CriteriaTests.test_middleware_outcome_ignores_historical_skip_tags) ... ok
+test_middleware_outcome_rejects_route_to_support_tag_added (__main__.CriteriaTests.test_middleware_outcome_rejects_route_to_support_tag_added) ... ok
+test_middleware_outcome_rejects_skip_tags (__main__.CriteriaTests.test_middleware_outcome_rejects_skip_tags) ... ok
+test_middleware_outcome_requires_tag_added_not_only_present (__main__.CriteriaTests.test_middleware_outcome_requires_tag_added_not_only_present) ... ok
+test_pii_guard_detects_patterns (__main__.CriteriaTests.test_pii_guard_detects_patterns) ... ok
+test_sanitize_decimals_converts (__main__.CriteriaTests.test_sanitize_decimals_converts) ... ok
+test_outbound_evidence_missing (__main__.OutboundEvidenceTests.test_outbound_evidence_missing) ... ok
+test_outbound_evidence_negative (__main__.OutboundEvidenceTests.test_outbound_evidence_negative) ... ok
+test_outbound_evidence_positive (__main__.OutboundEvidenceTests.test_outbound_evidence_positive) ... ok
+test_outbound_attempted_false_when_all_signals_false (__main__.OutboundAttemptedTests.test_outbound_attempted_false_when_all_signals_false) ... ok
+test_outbound_attempted_unknown_when_no_signals (__main__.OutboundAttemptedTests.test_outbound_attempted_unknown_when_no_signals) ... ok
+test_outbound_attempted_with_allowlist_block (__main__.OutboundAttemptedTests.test_outbound_attempted_with_allowlist_block) ... ok
+test_outbound_attempted_with_message_delta (__main__.OutboundAttemptedTests.test_outbound_attempted_with_message_delta) ... ok
+test_outbound_failure_blocked_by_allowlist (__main__.OutboundFailureClassificationTests.test_outbound_failure_blocked_by_allowlist) ... ok
+test_outbound_failure_none_when_not_required (__main__.OutboundFailureClassificationTests.test_outbound_failure_none_when_not_required) ... ok
+test_outbound_failure_none_when_requirements_met (__main__.OutboundFailureClassificationTests.test_outbound_failure_none_when_requirements_met) ... ok
+test_outbound_failure_request_failed (__main__.OutboundFailureClassificationTests.test_outbound_failure_request_failed) ... ok
+test_outbound_failure_requires_outbound (__main__.OutboundFailureClassificationTests.test_outbound_failure_requires_outbound) ... ok
+test_outbound_failure_requires_send_message (__main__.OutboundFailureClassificationTests.test_outbound_failure_requires_send_message) ... ok
+test_send_message_status_blocked_or_not_operator (__main__.SendMessageStatusTests.test_send_message_status_blocked_or_not_operator) ... ok
+test_send_message_status_failure_tag (__main__.SendMessageStatusTests.test_send_message_status_failure_tag) ... ok
+test_send_message_status_happy_path (__main__.SendMessageStatusTests.test_send_message_status_happy_path) ... ok
+test_send_message_status_missing_tag (__main__.SendMessageStatusTests.test_send_message_status_missing_tag) ... ok
+test_operator_reply_evidence_missing (__main__.OperatorReplyEvidenceTests.test_operator_reply_evidence_missing) ... ok
+test_operator_reply_evidence_present (__main__.OperatorReplyEvidenceTests.test_operator_reply_evidence_present) ... ok
+test_operator_reply_evidence_unknown (__main__.OperatorReplyEvidenceTests.test_operator_reply_evidence_unknown) ... ok
+test_send_message_tag_present_and_added (__main__.SendMessageEvidenceTests.test_send_message_tag_present_and_added) ... ok
+test_send_message_tag_present_not_added (__main__.SendMessageEvidenceTests.test_send_message_tag_present_not_added) ... ok
+test_allowlist_blocked_tag_present_and_added (__main__.AllowlistEvidenceTests.test_allowlist_blocked_tag_present_and_added) ... ok
+test_allowlist_blocked_tag_present_not_added (__main__.AllowlistEvidenceTests.test_allowlist_blocked_tag_present_not_added) ... ok
+test_support_routing_department_for_non_order_status (__main__.SupportRoutingTests.test_support_routing_department_for_non_order_status) ... ok
+test_support_routing_order_status_without_tag (__main__.SupportRoutingTests.test_support_routing_order_status_without_tag) ... ok
+test_support_routing_tag_forces_support (__main__.SupportRoutingTests.test_support_routing_tag_forces_support) ... ok
+test_support_routing_ticket_tags (__main__.SupportRoutingTests.test_support_routing_ticket_tags) ... ok
+test_order_match_failure_from_missing_context_tag (__main__.OrderMatchEvidenceTests.test_order_match_failure_from_missing_context_tag) ... ok
+test_order_match_failure_without_missing_tag (__main__.OrderMatchEvidenceTests.test_order_match_failure_without_missing_tag) ... ok
+test_order_match_ignored_for_non_order_status (__main__.OrderMatchEvidenceTests.test_order_match_ignored_for_non_order_status) ... ok
+test_order_match_no_signal_returns_none (__main__.OrderMatchEvidenceTests.test_order_match_no_signal_returns_none) ... ok
+test_order_match_success_with_draft_action (__main__.OrderMatchEvidenceTests.test_order_match_success_with_draft_action) ... ok
+test_detect_order_match_by_number_exception (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_exception) ... ok
+test_detect_order_match_by_number_missing_order (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_missing_order) ... ok
+test_detect_order_match_by_number_network_disabled (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_network_disabled) ... ok
+test_detect_order_match_by_number_non_dict_summary (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_non_dict_summary) ... ok
+test_detect_order_match_by_number_success (__main__.OrderMatchResolutionTests.test_detect_order_match_by_number_success) ... ok
+test_extract_order_match_method_from_resolution (__main__.OrderMatchResolutionTests.test_extract_order_match_method_from_resolution) ... ok
+test_extract_order_match_method_handles_failure (__main__.OrderMatchResolutionTests.test_extract_order_match_method_handles_failure) ... ok
+test_extract_order_resolution_from_actions (__main__.OrderMatchResolutionTests.test_extract_order_resolution_from_actions) ... ok
+test_extract_order_resolution_from_actions_handles_missing (__main__.OrderMatchResolutionTests.test_extract_order_resolution_from_actions_handles_missing) ... ok
+test_normalize_optional_text (__main__.OrderMatchResolutionTests.test_normalize_optional_text) ... ok
+test_order_resolution_is_not_order_number (__main__.OrderMatchResolutionTests.test_order_resolution_is_not_order_number) ... ok
+test_order_resolution_is_order_number (__main__.OrderMatchResolutionTests.test_order_resolution_is_order_number) ... ok
+test_order_resolution_is_order_number_none (__main__.OrderMatchResolutionTests.test_order_resolution_is_order_number_none) ... ok
+test_probe_order_resolution_from_ticket (__main__.OrderMatchResolutionTests.test_probe_order_resolution_from_ticket) ... ok
+test_probe_order_resolution_from_ticket_requires_email (__main__.OrderMatchResolutionTests.test_probe_order_resolution_from_ticket_requires_email) ... ok
+test_collect_reply_body_candidates_and_flags (__main__.ReplyContentFlagsTests.test_collect_reply_body_candidates_and_flags) ... ok
+test_collect_reply_body_candidates_from_drafts (__main__.ReplyContentFlagsTests.test_collect_reply_body_candidates_from_drafts) ... ok
+test_collect_reply_body_candidates_prefers_latest (__main__.ReplyContentFlagsTests.test_collect_reply_body_candidates_prefers_latest) ... ok
+test_reply_contains_eta_date_iso (__main__.ReplyContentFlagsTests.test_reply_contains_eta_date_iso) ... ok
+test_reply_contains_tracking_number_like (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_number_like) ... ok
+test_reply_contains_tracking_url (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_url) ... ok
+test_reply_contains_tracking_url_false (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_url_false) ... ok
+test_reply_contains_tracking_url_with_expected (__main__.ReplyContentFlagsTests.test_reply_contains_tracking_url_with_expected) ... ok
+test_reply_content_flags_empty_candidates (__main__.ReplyContentFlagsTests.test_reply_content_flags_empty_candidates) ... ok
+test_fetch_recent_shopify_order_number_dry_run (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_dry_run) ... ok
+test_fetch_recent_shopify_order_number_exception (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_exception) ... ok
+test_fetch_recent_shopify_order_number_name_fallback (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_name_fallback) ... ok
+test_fetch_recent_shopify_order_number_no_orders (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_no_orders) ... ok
+test_fetch_recent_shopify_order_number_skips_when_disabled (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_skips_when_disabled) ... ok
+test_fetch_recent_shopify_order_number_success (__main__.OrderNumberResolutionTests.test_fetch_recent_shopify_order_number_success) ... ok
+test_resolve_order_number_empty_candidate (__main__.OrderNumberResolutionTests.test_resolve_order_number_empty_candidate) ... ok
+test_resolve_order_number_env (__main__.OrderNumberResolutionTests.test_resolve_order_number_env) ... ok
+test_resolve_order_number_missing_candidate (__main__.OrderNumberResolutionTests.test_resolve_order_number_missing_candidate) ... ok
+test_resolve_order_number_prefers_arg (__main__.OrderNumberResolutionTests.test_resolve_order_number_prefers_arg) ... ok
+test_resolve_order_number_str_failure (__main__.OrderNumberResolutionTests.test_resolve_order_number_str_failure) ... ok
+test_should_not_skip_allowlist_blocked_when_configured (__main__.AllowlistSkipTests.test_should_not_skip_allowlist_blocked_when_configured) ... ok
+test_should_skip_allowlist_blocked_when_unconfigured (__main__.AllowlistSkipTests.test_should_skip_allowlist_blocked_when_unconfigured) ... ok
+test_unexpected_outbound_blocked (__main__.AllowlistSkipTests.test_unexpected_outbound_blocked) ... ok
+test_unexpected_outbound_blocked_ignored_when_required (__main__.AllowlistSkipTests.test_unexpected_outbound_blocked_ignored_when_required) ... ok
+test_build_skip_proof_payload_has_status_and_fields (__main__.SkipProofPayloadTests.test_build_skip_proof_payload_has_status_and_fields) ... ok
+test_fetch_lambda_allowlist_config (__main__.AllowlistConfigTests.test_fetch_lambda_allowlist_config) ... ok
+test_fetch_lambda_allowlist_config_error (__main__.AllowlistConfigTests.test_fetch_lambda_allowlist_config_error) ... ok
+test_parse_allowlist_entries_basic (__main__.AllowlistConfigTests.test_parse_allowlist_entries_basic) ... ok
+test_parse_allowlist_entries_empty (__main__.AllowlistConfigTests.test_parse_allowlist_entries_empty) ... ok
+test_parse_allowlist_entries_strip_at (__main__.AllowlistConfigTests.test_parse_allowlist_entries_strip_at) ... ok
+test_to_bool_parses_truthy_values (__main__.AllowlistConfigTests.test_to_bool_parses_truthy_values) ... ok
+test_write_proof_payload_marks_pii_fail (__main__.ProofPayloadWriteTests.test_write_proof_payload_marks_pii_fail) ... ok
+test_write_proof_payload_pii_safe (__main__.ProofPayloadWriteTests.test_write_proof_payload_pii_safe) ... ok
+test_append_operator_reply_required_unknown_fails (__main__.OperatorSendMessageHelperTests.test_append_operator_reply_required_unknown_fails) ... ok
+test_append_operator_send_message_criteria_details (__main__.OperatorSendMessageHelperTests.test_append_operator_send_message_criteria_details) ... ok
+test_append_operator_send_message_criteria_details_skips_non_order_status (__main__.OperatorSendMessageHelperTests.test_append_operator_send_message_criteria_details_skips_non_order_status) ... ok
+test_append_send_message_required_missing_fails (__main__.OperatorSendMessageHelperTests.test_append_send_message_required_missing_fails) ... ok
+test_build_operator_send_message_criteria (__main__.OperatorSendMessageHelperTests.test_build_operator_send_message_criteria) ... ok
+test_build_operator_send_message_proof_fields (__main__.OperatorSendMessageHelperTests.test_build_operator_send_message_proof_fields) ... ok
+test_build_operator_send_message_richpanel_fields (__main__.OperatorSendMessageHelperTests.test_build_operator_send_message_richpanel_fields) ... ok
+test_compute_operator_reply_metrics (__main__.OperatorSendMessageHelperTests.test_compute_operator_reply_metrics) ... ok
+test_comment_author_id_from_nested_author (__main__.CommentAuthorIdTests.test_comment_author_id_from_nested_author) ... ok
+test_comment_author_id_missing (__main__.CommentAuthorIdTests.test_comment_author_id_missing) ... ok
+test_comment_author_id_prefers_direct_fields (__main__.CommentAuthorIdTests.test_comment_author_id_prefers_direct_fields) ... ok
+test_load_bot_agent_id_empty_secret_returns_none (__main__.BotAgentIdLoaderTests.test_load_bot_agent_id_empty_secret_returns_none) ... ok
+test_load_bot_agent_id_env_override (__main__.BotAgentIdLoaderTests.test_load_bot_agent_id_env_override) ... ok
+test_load_bot_agent_id_from_secret_json (__main__.BotAgentIdLoaderTests.test_load_bot_agent_id_from_secret_json) ... ok
+test_load_bot_agent_id_from_secret_plain (__main__.BotAgentIdLoaderTests.test_load_bot_agent_id_from_secret_plain) ... ok
+test_load_bot_agent_id_requires_session (__main__.BotAgentIdLoaderTests.test_load_bot_agent_id_requires_session) ... ok
+test_resolve_bot_agent_id_source_env (__main__.BotAgentIdSourceTests.test_resolve_bot_agent_id_source_env) ... ok
+test_resolve_bot_agent_id_source_missing (__main__.BotAgentIdSourceTests.test_resolve_bot_agent_id_source_missing) ... ok
+test_resolve_bot_agent_id_source_secrets (__main__.BotAgentIdSourceTests.test_resolve_bot_agent_id_source_secrets) ... ok
+test_load_bot_agent_id_failure_returns_none (__main__.ReadOnlyGuardTests.test_load_bot_agent_id_failure_returns_none) ... ok
+test_load_bot_agent_id_unrecognized_json_returns_raw (__main__.ReadOnlyGuardTests.test_load_bot_agent_id_unrecognized_json_returns_raw) ... ok
+test_read_only_guard_env_override (__main__.ReadOnlyGuardTests.test_read_only_guard_env_override) ... ok
+test_read_only_guard_false_in_dev (__main__.ReadOnlyGuardTests.test_read_only_guard_false_in_dev) ... ok
+test_read_only_guard_prod_env (__main__.ReadOnlyGuardTests.test_read_only_guard_prod_env) ... ok
+test_read_only_guard_write_disabled (__main__.ReadOnlyGuardTests.test_read_only_guard_write_disabled) ... ok
+test_resolve_author_evidence_with_loader (__main__.AuthorMatchResolverTests.test_resolve_author_evidence_with_loader) ... ok
+test_resolve_author_match_happy_path (__main__.AuthorMatchResolverTests.test_resolve_author_match_happy_path) ... ok
+test_resolve_author_match_missing_inputs (__main__.AuthorMatchResolverTests.test_resolve_author_match_missing_inputs) ... ok
+test_finalize_order_match_method_passthrough (__main__.OrderMatchMethodFinalizerTests.test_finalize_order_match_method_passthrough) ... ok
+test_finalize_order_match_method_probe (__main__.OrderMatchMethodFinalizerTests.test_finalize_order_match_method_probe) ... ok
+test_resolve_order_match_method_from_action (__main__.OrderMatchMethodResolverTests.test_resolve_order_match_method_from_action) ... ok
+test_resolve_order_match_method_from_action_when_missing_success (__main__.OrderMatchMethodResolverTests.test_resolve_order_match_method_from_action_when_missing_success) ... ok
+test_resolve_order_match_method_from_probe (__main__.OrderMatchMethodResolverTests.test_resolve_order_match_method_from_probe) ... ok
+test_extract_outbound_result_falls_back_to_audit (__main__.OutboundResultHelperTests.test_extract_outbound_result_falls_back_to_audit) ... ok
+test_extract_outbound_result_prefers_state (__main__.OutboundResultHelperTests.test_extract_outbound_result_prefers_state) ... ok
+test_resolve_operator_reply_reason_variants (__main__.OutboundResultHelperTests.test_resolve_operator_reply_reason_variants) ... ok
+test_resolve_outbound_endpoint_used (__main__.OutboundResultHelperTests.test_resolve_outbound_endpoint_used) ... ok
+test_resolve_send_message_status_code_fallbacks (__main__.OutboundResultHelperTests.test_resolve_send_message_status_code_fallbacks) ... ok
+test_resolve_send_message_used_fallbacks (__main__.OutboundResultHelperTests.test_resolve_send_message_used_fallbacks) ... ok
+test_send_message_status_from_outbound_result (__main__.OutboundResultHelperTests.test_send_message_status_from_outbound_result) ... ok
+test_send_message_used_from_outbound_result (__main__.OutboundResultHelperTests.test_send_message_used_from_outbound_result) ... ok
+test_build_followup_payload_strips_force_primary (__main__.TicketSnapshotTests.test_build_followup_payload_strips_force_primary) ... ok
+test_fetch_latest_reply_body_handles_non_dict (__main__.TicketSnapshotTests.test_fetch_latest_reply_body_handles_non_dict) ... ok
+test_fetch_ticket_snapshot_captures_comment_author (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_captures_comment_author) ... ok
+test_fetch_ticket_snapshot_comment_fallback (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_comment_fallback) ... ok
+test_fetch_ticket_snapshot_includes_customer_identity (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_includes_customer_identity) ... ok
+test_fetch_ticket_snapshot_missing_operator_flag (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_missing_operator_flag) ... ok
+test_fetch_ticket_snapshot_operator_latest_comment (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_operator_latest_comment) ... ok
+test_fetch_ticket_snapshot_operator_reply (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_operator_reply) ... ok
+test_fetch_ticket_snapshot_retries_on_rate_limit (__main__.TicketSnapshotTests.test_fetch_ticket_snapshot_retries_on_rate_limit) ... ok
+test_auto_close_applied_degrades_to_pass_weak (__main__.ClassificationTests.test_auto_close_applied_degrades_to_pass_weak) ... ok
+test_auto_close_fail_debug_when_criteria_missing (__main__.ClassificationTests.test_auto_close_fail_debug_when_criteria_missing) ... ok
+test_fail_reason_includes_operator_reply (__main__.ClassificationTests.test_fail_reason_includes_operator_reply) ... ok
+test_fail_reason_includes_send_message_tag (__main__.ClassificationTests.test_fail_reason_includes_send_message_tag) ... ok
+test_fail_when_base_pass_false (__main__.ClassificationTests.test_fail_when_base_pass_false) ... ok
+test_fallback_used_marks_pass_weak (__main__.ClassificationTests.test_fallback_used_marks_pass_weak) ... ok
+test_fallback_used_with_failed_criteria_marks_fail_debug (__main__.ClassificationTests.test_fallback_used_with_failed_criteria_marks_fail_debug) ... ok
+test_pass_strong_requires_success_tag (__main__.ClassificationTests.test_pass_strong_requires_success_tag) ... ok
+test_skip_tags_fail (__main__.ClassificationTests.test_skip_tags_fail) ... ok
+test_pii_scan_allows_openai_response_id (__main__.PIISafetyTests.test_pii_scan_allows_openai_response_id) ... ok
+test_pii_scan_detects_email (__main__.PIISafetyTests.test_pii_scan_detects_email) ... ok
+test_pii_scan_detects_event_identifier (__main__.PIISafetyTests.test_pii_scan_detects_event_identifier) ... ok
+test_pii_scan_detects_order_number_flag (__main__.PIISafetyTests.test_pii_scan_detects_order_number_flag) ... ok
+test_pii_scan_detects_ticket_number_flag (__main__.PIISafetyTests.test_pii_scan_detects_ticket_number_flag) ... ok
+test_redact_command_masks_sensitive_flags (__main__.PIISafetyTests.test_redact_command_masks_sensitive_flags) ... ok
+test_build_create_ticket_payload_shape (__main__.AutoTicketHelpersTests.test_build_create_ticket_payload_shape) ... ok
+test_create_ticket_prod_ack_allows (__main__.AutoTicketHelpersTests.test_create_ticket_prod_ack_allows) ... ok
+test_create_ticket_prod_requires_ack (__main__.AutoTicketHelpersTests.test_create_ticket_prod_requires_ack) ... ok
+test_create_ticket_script_prod_ack_allows (__main__.AutoTicketHelpersTests.test_create_ticket_script_prod_ack_allows) ... ok
+test_create_ticket_script_prod_requires_ack (__main__.AutoTicketHelpersTests.test_create_ticket_script_prod_requires_ack) ... ok
+test_extract_created_ticket_fields (__main__.AutoTicketHelpersTests.test_extract_created_ticket_fields) ... ok
+test_prod_synthetic_webhook_allows_with_override_and_ack (__main__.AutoTicketHelpersTests.test_prod_synthetic_webhook_allows_with_override_and_ack) ... ok
+test_prod_synthetic_webhook_baseline_allowed_without_override (__main__.AutoTicketHelpersTests.test_prod_synthetic_webhook_baseline_allowed_without_override) ... ok
+test_prod_synthetic_webhook_requires_explicit_override (__main__.AutoTicketHelpersTests.test_prod_synthetic_webhook_requires_explicit_override) ... ok
+test_redact_identifier (__main__.AutoTicketHelpersTests.test_redact_identifier) ... ok
+test_resolve_smoke_ticket_text_defaults_and_env (__main__.AutoTicketHelpersTests.test_resolve_smoke_ticket_text_defaults_and_env) ... ok
+test_build_chat_ticket_payload_includes_source_for_email (__main__.ChatTicketHelpersTests.test_build_chat_ticket_payload_includes_source_for_email) ... ok
+test_build_chat_ticket_payload_omits_source_for_non_email (__main__.ChatTicketHelpersTests.test_build_chat_ticket_payload_omits_source_for_non_email) ... ok
+test_chat_extract_ticket_fields (__main__.ChatTicketHelpersTests.test_chat_extract_ticket_fields) ... ok
+test_chat_redact_emails_masks_addresses (__main__.ChatTicketHelpersTests.test_chat_redact_emails_masks_addresses) ... ok
+test_chat_require_prod_write_ack_blocks (__main__.ChatTicketHelpersTests.test_chat_require_prod_write_ack_blocks) ... ok
+test_chat_ticket_main_dry_run_fails (__main__.ChatTicketHelpersTests.test_chat_ticket_main_dry_run_fails) ... [FAIL] Richpanel client is in dry-run mode; ticket not created.
+ok
+test_chat_ticket_main_http_error (__main__.ChatTicketHelpersTests.test_chat_ticket_main_http_error) ... [FAIL] Ticket creation failed with status 400: Invalid value for <redacted-email>
+ok
+test_chat_ticket_main_missing_identifiers (__main__.ChatTicketHelpersTests.test_chat_ticket_main_missing_identifiers) ... [FAIL] Ticket creation response missing ticket identifiers.
+ok
+test_chat_ticket_main_requires_boto3 (__main__.ChatTicketHelpersTests.test_chat_ticket_main_requires_boto3) ... [FAIL] boto3 is required to load the Richpanel API key.
+ok
+test_chat_ticket_main_success (__main__.ChatTicketHelpersTests.test_chat_ticket_main_success) ... ok
+test_create_sandbox_email_ticket_dry_run_fails (__main__.ChatTicketHelpersTests.test_create_sandbox_email_ticket_dry_run_fails) ... ok
+test_create_sandbox_email_ticket_http_error_fails (__main__.ChatTicketHelpersTests.test_create_sandbox_email_ticket_http_error_fails) ... ok
+test_create_sandbox_email_ticket_non_json_error (__main__.ChatTicketHelpersTests.test_create_sandbox_email_ticket_non_json_error) ... ok
+test_create_sandbox_email_ticket_success (__main__.ChatTicketHelpersTests.test_create_sandbox_email_ticket_success) ... ok
+test_create_sandbox_email_ticket_write_disabled (__main__.ChatTicketHelpersTests.test_create_sandbox_email_ticket_write_disabled) ... ok
+test_create_ticket_script_non_prod_allows (__main__.ChatTicketHelpersTests.test_create_ticket_script_non_prod_allows) ... ok
+test_create_ticket_script_prod_ack_from_env_allows (__main__.ChatTicketHelpersTests.test_create_ticket_script_prod_ack_from_env_allows) ... ok
+test_sanitize_ts_action_id_fingerprints_event (__main__.ChatTicketHelpersTests.test_sanitize_ts_action_id_fingerprints_event) ... ok
+test_followup_fingerprint_populated_when_performed (__main__.FollowupProofTests.test_followup_fingerprint_populated_when_performed) ... ok
+test_followup_payload_inherits_parent_and_sets_followup_fields (__main__.FollowupProofTests.test_followup_payload_inherits_parent_and_sets_followup_fields) ... ok
+test_followup_proof_handles_missing_event (__main__.FollowupProofTests.test_followup_proof_handles_missing_event) ... ok
+test_redact_path_id_with_suffix (__main__.RedactionHelpersTests.test_redact_path_id_with_suffix) ... ok
+test_redact_path_number_endpoint (__main__.RedactionHelpersTests.test_redact_path_number_endpoint) ... ok
+test_redact_path_unknown (__main__.RedactionHelpersTests.test_redact_path_unknown) ... ok
+test_sanitize_tag_result_redacts_path (__main__.RedactionHelpersTests.test_sanitize_tag_result_redacts_path) ... ok
+test_sanitize_ticket_snapshot_fingerprints (__main__.RedactionHelpersTests.test_sanitize_ticket_snapshot_fingerprints) ... ok
+test_seed_order_id_falls_back_to_run_id (__main__.SeedOrderIdTests.test_seed_order_id_falls_back_to_run_id) ... ok
+test_seed_order_id_uses_conversation_id (__main__.SeedOrderIdTests.test_seed_order_id_uses_conversation_id) ... ok
+test_append_summary_writes_expected_sections (__main__.SummaryAppendTests.test_append_summary_writes_expected_sections) ... ok
+test_openai_evidence_contains_required_fields (__main__.OpenAIEvidenceTests.test_openai_evidence_contains_required_fields) ... ok
+test_openai_intent_evidence_maps_response_id (__main__.OpenAIEvidenceTests.test_openai_intent_evidence_maps_response_id) ... ok
+test_openai_requirements_accept_fallback (__main__.OpenAIEvidenceTests.test_openai_requirements_accept_fallback) ... ok
+test_openai_requirements_fail_when_missing (__main__.OpenAIEvidenceTests.test_openai_requirements_fail_when_missing) ... ok
+test_openai_rewrite_evidence_disabled (__main__.OpenAIEvidenceTests.test_openai_rewrite_evidence_disabled) ... ok
+test_openai_routing_evidence_maps_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_maps_response_id) ... ok
+test_openai_routing_evidence_missing_response_id (__main__.OpenAIEvidenceTests.test_openai_routing_evidence_missing_response_id) ... ok
+test_wait_for_ticket_ready_returns_snapshot (__main__.WaitForTicketReadyTests.test_wait_for_ticket_ready_returns_snapshot) ... ok
+test_wait_for_ticket_ready_times_out (__main__.WaitForTicketReadyTests.test_wait_for_ticket_ready_times_out) ... ok
+test_wait_for_ticket_tags_returns_snapshot (__main__.WaitForTicketTagsTests.test_wait_for_ticket_tags_returns_snapshot) ... ok
+test_wait_for_ticket_tags_times_out (__main__.WaitForTicketTagsTests.test_wait_for_ticket_tags_times_out) ... ok
+test_wait_for_openai_rewrite_audit_record (__main__.OpenAIRewriteWaitTests.test_wait_for_openai_rewrite_audit_record) ... ok
+test_wait_for_openai_rewrite_state_record (__main__.OpenAIRewriteWaitTests.test_wait_for_openai_rewrite_state_record) ... ok
+test_fallback_close_records_alt_paths_and_metadata (__main__.FallbackCloseTests.test_fallback_close_records_alt_paths_and_metadata) ... ok
+
+----------------------------------------------------------------------
+Ran 255 tests in 0.038s
+
+OK
+[OK] No unapproved protected deletes/renames detected (git diff HEAD~1...HEAD).
+
+$ python scripts/regen_doc_registry.py
+
+$ python scripts/regen_reference_registry.py
+
+$ python scripts/regen_plan_checklist.py
+
+$ python scripts/verify_agent_prompts_fresh.py
+
+$ python scripts/verify_rehydration_pack.py
+
+$ python scripts/verify_doc_hygiene.py
+
+$ python scripts/verify_plan_sync.py
+
+$ python scripts/verify_secret_inventory_sync.py
+
+$ python scripts/verify_admin_logs_sync.py
+
+$ python scripts/test_delivery_estimate.py
+
+$ python scripts/verify_openai_model_defaults.py
+
+$ python scripts/test_pipeline_handlers.py
+
+$ python scripts/test_richpanel_client.py
+
+$ python scripts/test_eval_order_status_intent.py
+
+$ python scripts/test_openai_client.py
+
+$ python scripts/test_aws_secrets_preflight.py
+
+$ python scripts/test_shopify_client.py
+
+$ python scripts/test_shopify_token_health_check.py
+
+$ python scripts/test_shipstation_client.py
+
+$ python scripts/test_order_lookup.py
+
+$ python scripts/test_llm_reply_rewriter.py
+
+$ python scripts/test_llm_routing.py
+
+$ python scripts/test_llm_reply_rewriter.py
+
+$ python scripts/test_worker_handler_flag_wiring.py
+
+$ python scripts/test_read_only_shadow_mode.py
+
+$ python scripts/test_live_readonly_shadow_eval.py
+
+$ python scripts/test_e2e_smoke_encoding.py
+
+$ python scripts/check_protected_deletes.py --ci
+
+[OK] CI-equivalent checks passed.
