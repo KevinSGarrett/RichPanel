@@ -85,7 +85,7 @@ isk:R3-high
 **Proof snippet(s) (PII-safe):**
 ```text
 [OK] CI-equivalent checks passed.
-1569 passed, 18 subtests passed in 228.19s (0:03:48)
+1571 passed, 18 subtests passed in 228.47s (0:03:48)
 ```
 
 ### 8) Risk & rollback
