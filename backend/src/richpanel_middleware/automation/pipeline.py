@@ -423,8 +423,7 @@ def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
     while lines and not lines[0].strip():
         lines.pop(0)
     if not lines:
-        lines = [greeting, ""]
-        return "\n".join(lines)
+        return f"{greeting}\n\n"
     first_line = lines[0].strip()
     if re.match(r"^(hi|hello|hey)\b", first_line, flags=re.IGNORECASE):
         lines[0] = greeting
