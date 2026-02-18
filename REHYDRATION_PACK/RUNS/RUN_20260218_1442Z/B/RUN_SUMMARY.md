@@ -19,6 +19,7 @@ Add deterministic Key Details blocks for ETA/no-tracking replies (preorder + non
 - backend/tests/test_delivery_estimate_fallback.py
 - backend/tests/test_order_status_reply_personalization.py
 - scripts/test_delivery_estimate.py
+- .gitignore
 - docs/00_Project_Admin/Progress_Log.md
 - docs/_generated/*
 

@@ -19,22 +19,47 @@
 - Added deterministic Key Details block builder + inserted into no-tracking ETA replies (preorder + non-preorder).
 - Enforced Key Details preservation via rewrite prompt + post-rewrite pipeline append; updated unit tests and docs registry outputs.
 - Added coverage for tracking-present replies skipping Key Details to address Codecov/PR Agent feedback.
+- Added Key Details guard edge-case tests and ignored local Claude audit artifact.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
-.../automation/delivery_estimate.py                | 70 +++++++++++++++++++++-
-.../automation/order_status_prompts.py             |  1 +
-.../richpanel_middleware/automation/pipeline.py    | 24 ++++++++
-backend/tests/test_delivery_estimate_fallback.py   | 34 +++++++++++
-.../test_order_status_reply_personalization.py     | 48 +++++++++++++++
-docs/00_Project_Admin/Progress_Log.md              |  5 ++
-docs/_generated/doc_outline.json                   |  5 ++
-docs/_generated/doc_registry.compact.json          |  2 +-
-docs/_generated/doc_registry.json                  |  4 +-
-docs/_generated/heading_index.json                 |  6 ++
-scripts/test_delivery_estimate.py                  | 34 ++++++++---
-11 files changed, 221 insertions(+), 12 deletions(-)
+.gitignore                                         |   1 +
+.../RUNS/RUN_20260218_1442Z/A/DOCS_IMPACT_MAP.md   |  22 +++
+.../RUNS/RUN_20260218_1442Z/A/FIX_REPORT.md        |  19 +++
+.../RUNS/RUN_20260218_1442Z/A/GIT_RUN_PLAN.md      |  66 +++++++++
+.../RUNS/RUN_20260218_1442Z/A/RUN_REPORT.md        |  52 +++++++
+.../RUNS/RUN_20260218_1442Z/A/RUN_SUMMARY.md       |  31 ++++
+.../RUNS/RUN_20260218_1442Z/A/STRUCTURE_REPORT.md  |  25 ++++
+.../RUNS/RUN_20260218_1442Z/A/TEST_MATRIX.md       |  14 ++
+.../RUNS/RUN_20260218_1442Z/B/DOCS_IMPACT_MAP.md   |  26 ++++
+.../RUNS/RUN_20260218_1442Z/B/FIX_REPORT.md        |  21 +++
+.../RUNS/RUN_20260218_1442Z/B/GIT_RUN_PLAN.md      |  66 +++++++++
+.../RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md        |  92 ++++++++++++
+.../RUNS/RUN_20260218_1442Z/B/RUN_SUMMARY.md       |  40 +++++
+.../RUNS/RUN_20260218_1442Z/B/STRUCTURE_REPORT.md  |  35 +++++
+.../RUNS/RUN_20260218_1442Z/B/TEST_MATRIX.md       |  17 +++
+.../RUN_20260218_1442Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 ++++++++++++++++++++
+.../RUNS/RUN_20260218_1442Z/C/DOCS_IMPACT_MAP.md   |  22 +++
+.../RUNS/RUN_20260218_1442Z/C/FIX_REPORT.md        |  19 +++
+.../RUNS/RUN_20260218_1442Z/C/GIT_RUN_PLAN.md      |  66 +++++++++
+.../RUNS/RUN_20260218_1442Z/C/RUN_REPORT.md        |  52 +++++++
+.../RUNS/RUN_20260218_1442Z/C/RUN_SUMMARY.md       |  31 ++++
+.../RUNS/RUN_20260218_1442Z/C/STRUCTURE_REPORT.md  |  25 ++++
+.../RUNS/RUN_20260218_1442Z/C/TEST_MATRIX.md       |  14 ++
+.../RUNS/RUN_20260218_1442Z/RUN_META.md            |  11 ++
+.../automation/delivery_estimate.py                |  70 ++++++++-
+.../automation/order_status_prompts.py             |   1 +
+.../richpanel_middleware/automation/pipeline.py    |  26 ++++
+backend/tests/test_delivery_estimate_fallback.py   | 161 +++++++++++++++++++++
+.../test_order_status_reply_personalization.py     | 142 ++++++++++++++++++
+docs/00_Project_Admin/Progress_Log.md              |   5 +
+docs/_generated/doc_outline.json                   |   5 +
+docs/_generated/doc_registry.compact.json          |   2 +-
+docs/_generated/doc_registry.json                  |   4 +-
+docs/_generated/heading_index.json                 |   6 +
+scripts/test_delivery_estimate.py                  |  34 ++++-
+35 files changed, 1367 insertions(+), 12 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
@@ -46,6 +71,7 @@ List key files changed (grouped by area) and why:
 - scripts/test_delivery_estimate.py - relax regression assertions and validate Key Details + business-days note.
 - docs/00_Project_Admin/Progress_Log.md - add RUN_20260218_1442Z entry.
 - docs/_generated/* - regenerated doc registries (run_ci_checks).
+- .gitignore - ignore local Claude gate audit artifact.
 
 ## Commands Run (required)
 List commands you ran (include key flags/env if relevant):
@@ -53,7 +79,7 @@ List commands you ran (include key flags/env if relevant):
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 python scripts/run_ci_checks.py --ci - CI-equivalent checks (fails locally due to uncommitted changes).
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 pytest -q - initial pytest run (failed due to AWS region missing).
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q - rerun tests with required region.
-- RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 CLAUDE_GATE_AUDIT_PATH=C:/Temp/claude_gate_audit.json CLAUDE_AUDIT_PATH=C:/Temp/claude_gate_audit.json python scripts/run_ci_checks.py --ci - final CI-equivalent pass without repo audit artifact.
+- RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci - final CI-equivalent pass after ignoring local audit artifact.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -63,7 +89,7 @@ Include test commands + results + links to evidence.
 - RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q - pass - evidence: REHYDRATION_PACK/RUNS/RUN_20260218_1442Z/B/RUN_REPORT.md
 
 Paste output snippet proving you ran:
-`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 CLAUDE_GATE_AUDIT_PATH=C:/Temp/claude_gate_audit.json CLAUDE_AUDIT_PATH=C:/Temp/claude_gate_audit.json python scripts/run_ci_checks.py --ci`
+`RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py --ci`
 
 ```
 [OK] CI-equivalent checks passed.
@@ -71,7 +97,7 @@ Paste output snippet proving you ran:
 
 ```
 RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q
-1587 passed, 18 subtests passed in 229.35s (0:03:49)
+1591 passed, 18 subtests passed in 229.41s (0:03:49)
 ```
 
 ## Docs impact (summary)
