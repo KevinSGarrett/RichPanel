@@ -10,11 +10,31 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
+    build_no_tracking_key_details_block,
     build_no_tracking_reply,
+    _insert_key_details_block,
 )
 
 
 class DeliveryEstimateFallbackTests(unittest.TestCase):
+    def test_key_details_block_non_dict_estimate(self) -> None:
+        self.assertIsNone(build_no_tracking_key_details_block(None))
+        self.assertIsNone(build_no_tracking_key_details_block("invalid"))
+
+    def test_insert_key_details_block_with_tracking_sentence(self) -> None:
+        body = "Update. We'll send tracking as soon as it ships."
+        block = "Key Details:\n- Processing: 3-5 business days"
+        updated = _insert_key_details_block(body, block)
+        self.assertIn("Key Details:", updated)
+        self.assertIn("We'll send tracking as soon as it ships.", updated)
+        self.assertLess(updated.index("Key Details:"), updated.index("We'll send tracking"))
+
+    def test_insert_key_details_block_without_tracking_sentence(self) -> None:
+        body = "Update without tracking sentence."
+        block = "Key Details:\n- Processing: 3-5 business days"
+        updated = _insert_key_details_block(body, block)
+        self.assertTrue(updated.endswith(block))
+
     def test_no_tracking_reply_without_order_id(self) -> None:
         reply = build_no_tracking_reply({}, inquiry_date="2025-01-02")
         assert reply is not None
@@ -66,7 +86,98 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("processing typically takes 3-5 business days", body)
         self.assertIn("estimated delivery window is April 6–April 14, 2026", body)
         self.assertIn("(Arrives in 23–31 days)", body)
+        self.assertIn("Key Details:", body)
+        self.assertIn(
+            "- Pre-order release: Sunday, March 29, 2026 (in 15 days)", body
+        )
+        self.assertIn("- Processing: 3-5 business days", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
+        self.assertIn("- Estimated delivery: April 6–April 14, 2026", body)
+        self.assertIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
         self.assertIn("We'll send tracking as soon as it ships.", body)
+
+    def test_preorder_key_details_without_ship_days(self) -> None:
+        delivery_estimate = {
+            "preorder": True,
+            "preorder_ship_date_human": "Sunday, March 29, 2026",
+            "ship_days_from_inquiry_human": None,
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "days_from_inquiry_human": "23–31 days",
+            "delivery_window_human": "April 6–April 14, 2026",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            {"order_tags_raw": "Pre-order"},
+            inquiry_date="2026-03-14",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertIn("- Pre-order release: Sunday, March 29, 2026", body)
+        self.assertNotIn("(in", body)
+        self.assertIn("- Processing: 3-5 business days", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
+        self.assertIn("- Estimated delivery: April 6–April 14, 2026", body)
+        self.assertIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
+
+    def test_preorder_key_details_missing_processing(self) -> None:
+        delivery_estimate = {
+            "preorder": True,
+            "preorder_ship_date_human": "Sunday, March 29, 2026",
+            "ship_days_from_inquiry_human": "15 days",
+            "processing_human": None,
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "days_from_inquiry_human": "23–31 days",
+            "delivery_window_human": "April 6–April 14, 2026",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            {"order_tags_raw": "Pre-order"},
+            inquiry_date="2026-03-14",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertNotIn("- Processing:", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
+        self.assertIn("- Estimated delivery: April 6–April 14, 2026", body)
+
+    def test_preorder_key_details_empty_ship_date(self) -> None:
+        delivery_estimate = {
+            "preorder": True,
+            "preorder_ship_date_human": "   ",
+            "ship_days_from_inquiry_human": "15 days",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "days_from_inquiry_human": "23–31 days",
+            "delivery_window_human": "April 6–April 14, 2026",
+            "is_late": False,
+        }
+        reply = build_no_tracking_reply(
+            {"order_tags_raw": "Pre-order"},
+            inquiry_date="2026-03-14",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertNotIn("- Pre-order release:", body)
+        self.assertIn("- Shipping: 3-7 business days", body)
+        self.assertIn("- Total ETA: 23–31 days", body)
 
     def test_preorder_delivery_fallback_late_any_day_now(self) -> None:
         order_summary = {
@@ -81,6 +192,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("pre-order", body)
         self.assertIn("any day now", body)
         self.assertNotIn("estimated delivery window", body)
+        self.assertNotIn("key details:", body)
 
     def test_preorder_delivery_fallback_variants(self) -> None:
         variants = ["pre order delivery", "preorder delivery"]
@@ -144,6 +256,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("marked as a pre-order", body)
         self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
+        self.assertNotIn("Key Details:", body)
 
     def test_preorder_unknown_method_fails_closed(self) -> None:
         order_summary = {
@@ -158,6 +271,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("marked as a pre-order", body)
         self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
+        self.assertNotIn("Key Details:", body)
 
     def test_preorder_empty_shipping_method_fails_closed(self) -> None:
         order_summary = {
@@ -172,6 +286,142 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("marked as a pre-order", body)
         self.assertIn("scheduled to release on Sunday, March 29, 2026", body)
         self.assertNotIn("estimated delivery window", body)
+        self.assertNotIn("Key Details:", body)
+
+    def test_no_tracking_reply_non_preorder_includes_key_details(self) -> None:
+        order_summary = {
+            "order_id": "12345",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-03")
+        assert reply is not None
+
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertIn("- Processing: 3-5 business days", body)
+        self.assertIn("- Shipping: 3-5 business days", body)
+        self.assertIn("- Total ETA: 6-10 business days", body)
+        self.assertIn("- Estimated delivery: January 9–January 15, 2024", body)
+        self.assertIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
+
+    def test_no_tracking_key_details_missing_processing(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "4-8 business days",
+            "is_late": False,
+            "processing_human": None,
+            "transit_min_days": 3,
+            "transit_max_days": 5,
+            "window_min_days": 6,
+            "window_max_days": 10,
+            "delivery_window_human": "January 9–January 15, 2024",
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertNotIn("- Processing:", body)
+        self.assertIn("- Shipping: 3-5 business days", body)
+        self.assertIn("- Total ETA: 6-10 business days", body)
+        self.assertIn("- Estimated delivery: January 9–January 15, 2024", body)
+        self.assertIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
+
+    def test_no_tracking_key_details_missing_transit(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "4-8 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "transit_min_days": None,
+            "transit_max_days": None,
+            "window_min_days": 6,
+            "window_max_days": 10,
+            "delivery_window_human": "January 9–January 15, 2024",
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        body = reply["body"]
+        self.assertIn("Key Details:", body)
+        self.assertIn("- Processing: 3-5 business days", body)
+        self.assertNotIn("- Shipping:", body)
+        self.assertIn("- Total ETA: 6-10 business days", body)
+        self.assertIn("- Estimated delivery: January 9–January 15, 2024", body)
+        self.assertIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
+
+    def test_no_tracking_reply_non_preorder_late_no_key_details(self) -> None:
+        order_summary = {
+            "order_id": "late-1",
+            "created_at": "2024-01-01",
+            "shipping_method": "Standard Shipping (3-5 business days)",
+        }
+        reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-16")
+        assert reply is not None
+        body_lower = reply["body"].lower()
+        self.assertIn("any day now", body_lower)
+        self.assertNotIn("key details:", body_lower)
+
+    def test_no_tracking_reply_missing_window_no_key_details(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "1-2 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "delivery_window_human": None,
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        self.assertNotIn("Key Details:", reply["body"])
+
+    def test_no_tracking_reply_whitespace_window_no_key_details(self) -> None:
+        delivery_estimate = {
+            "preorder": False,
+            "order_created_date": "2024-01-01",
+            "bucket": "Standard",
+            "normalized_method": "Standard (3-5 business days)",
+            "raw_method": "Standard Shipping",
+            "eta_human": "1-2 business days",
+            "is_late": False,
+            "processing_human": "3-5 business days",
+            "delivery_window_human": "   ",
+        }
+        reply = build_no_tracking_reply(
+            {"order_id": "12345", "created_at": "2024-01-01", "shipping_method": "Standard"},
+            inquiry_date="2024-01-03",
+            delivery_estimate=delivery_estimate,
+        )
+        assert reply is not None
+        self.assertNotIn("Key Details:", reply["body"])
 
 
 if __name__ == "__main__":

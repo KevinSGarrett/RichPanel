@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from richpanel_middleware.automation.llm_reply_rewriter import DEFAULT_MAX_CHARS
 from richpanel_middleware.automation.order_status_prompts import (
     OrderStatusReplyContext,
     build_order_status_reply_prompt,
@@ -22,6 +23,7 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
 
     assert messages[0].role == "system"
     assert "Do not mention AI, bot, automation, or templates." in messages[0].content
+    assert "Key Details:" in messages[0].content
     assert "customer_message_excerpt" in messages[1].content
     assert "\"customer_first_name\":\"Sarah\"" in messages[1].content
     assert (
@@ -246,6 +248,226 @@ def test_signature_enforcement_idempotent() -> None:
     )
 
 
+def test_key_details_block_appends_when_missing() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for your patience."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert "Key Details:" in updated
+    assert updated.startswith("Thanks for your patience.")
+
+
+def test_key_details_block_does_not_duplicate() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Intro\n\nKey Details:\n- Processing: 3-5 business days"
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated == body
+
+
+def test_key_details_block_skips_tracking() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={"tracking_number": "1Z999"},
+    )
+    assert updated == body
+
+
+def test_key_details_block_skips_tracking_url_only() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={"tracking_url": "https://tracking.example.com/track/123"},
+    )
+    assert updated == body
+
+
+def test_key_details_block_appends_when_no_tracking() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={"tracking_number": None, "tracking_url": None},
+    )
+    assert "Key Details:" in updated
+
+
+def test_key_details_block_skips_non_dict_draft() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply=None,
+    )
+    assert updated == body
+
+
+def test_key_details_block_skips_missing_estimate() -> None:
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=None,
+        draft_reply={},
+    )
+    assert updated == body
+
+
+def test_key_details_block_handles_empty_body() -> None:
+    updated = pipeline._ensure_key_details_block(
+        "",
+        delivery_estimate={"delivery_window_human": "April 1–April 3, 2026"},
+        draft_reply={},
+    )
+    assert updated == ""
+
+
+def test_key_details_block_empty_draft_reply_appends() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "Thanks for the update."
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert "Key Details:" in updated
+
+
+def test_key_details_block_respects_max_chars() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    body = "x" * (DEFAULT_MAX_CHARS + 50)
+    updated = pipeline._ensure_key_details_block(
+        body,
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert "Key Details:" in updated
+    assert len(updated) <= DEFAULT_MAX_CHARS
+
+
+def test_key_details_block_truncates_oversized_block() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "x" * (DEFAULT_MAX_CHARS + 200),
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    updated = pipeline._ensure_key_details_block(
+        "Short body.",
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated.startswith("Key Details:")
+    assert len(updated) <= DEFAULT_MAX_CHARS
+
+
+def test_key_details_block_trims_whitespace_body() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    updated = pipeline._ensure_key_details_block(
+        "   ",
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated.startswith("Key Details:")
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -273,3 +495,39 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_signature_enforcement_idempotent(self) -> None:
         test_signature_enforcement_idempotent()
+
+    def test_key_details_block_appends_when_missing(self) -> None:
+        test_key_details_block_appends_when_missing()
+
+    def test_key_details_block_does_not_duplicate(self) -> None:
+        test_key_details_block_does_not_duplicate()
+
+    def test_key_details_block_skips_tracking(self) -> None:
+        test_key_details_block_skips_tracking()
+
+    def test_key_details_block_skips_tracking_url_only(self) -> None:
+        test_key_details_block_skips_tracking_url_only()
+
+    def test_key_details_block_appends_when_no_tracking(self) -> None:
+        test_key_details_block_appends_when_no_tracking()
+
+    def test_key_details_block_skips_non_dict_draft(self) -> None:
+        test_key_details_block_skips_non_dict_draft()
+
+    def test_key_details_block_skips_missing_estimate(self) -> None:
+        test_key_details_block_skips_missing_estimate()
+
+    def test_key_details_block_handles_empty_body(self) -> None:
+        test_key_details_block_handles_empty_body()
+
+    def test_key_details_block_empty_draft_reply_appends(self) -> None:
+        test_key_details_block_empty_draft_reply_appends()
+
+    def test_key_details_block_respects_max_chars(self) -> None:
+        test_key_details_block_respects_max_chars()
+
+    def test_key_details_block_truncates_oversized_block(self) -> None:
+        test_key_details_block_truncates_oversized_block()
+
+    def test_key_details_block_trims_whitespace_body(self) -> None:
+        test_key_details_block_trims_whitespace_body()

@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name, _to_bool
 from richpanel_middleware.automation.delivery_estimate import (
+    build_no_tracking_key_details_block,
     build_no_tracking_reply,
     build_tracking_reply,
     compute_preorder_delivery_estimate,
@@ -30,6 +31,7 @@ from richpanel_middleware.automation.llm_routing import (
     compute_dual_routing,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (
+    DEFAULT_MAX_CHARS,
     ReplyRewriteResult,
     rewrite_reply,
 )
@@ -457,6 +459,42 @@ def _ensure_holly_signature(body: str) -> str:
         lines.append("")
     lines.extend(_SIGNATURE_LINES)
     return "\n".join(lines)
+
+
+def _ensure_key_details_block(
+    body: str,
+    *,
+    delivery_estimate: Any,
+    draft_reply: Any,
+) -> str:
+    if not body:
+        return body
+    if not isinstance(draft_reply, dict):
+        return body
+    if draft_reply.get("tracking_url") or draft_reply.get("tracking_number"):
+        return body
+    key_details_block = build_no_tracking_key_details_block(delivery_estimate)
+    if not key_details_block:
+        return body
+    if re.search(r"Key Details:", body, flags=re.IGNORECASE):
+        return body
+    body_trimmed = body.rstrip()
+    separator = "\n\n"
+    max_chars = DEFAULT_MAX_CHARS
+    if isinstance(max_chars, int) and max_chars > 0:
+        if not body_trimmed:
+            return key_details_block[:max_chars].rstrip()
+        reserved = len(separator) + len(key_details_block)
+        if len(body_trimmed) + reserved <= max_chars:
+            return f"{body_trimmed}{separator}{key_details_block}"
+        if reserved >= max_chars:
+            return key_details_block[:max_chars].rstrip()
+        allowed = max_chars - reserved
+        trimmed_body = body_trimmed[:allowed].rstrip()
+        if not trimmed_body:
+            return key_details_block[:max_chars].rstrip()
+        return f"{trimmed_body}{separator}{key_details_block}"
+    return f"{body_trimmed}{separator}{key_details_block}"
 
 
 def _build_order_status_reply_context(
@@ -1766,6 +1804,11 @@ def execute_order_status_reply(
                 }
             )
 
+        reply_body = _ensure_key_details_block(
+            reply_body,
+            delivery_estimate=delivery_estimate,
+            draft_reply=draft_reply,
+        )
         reply_body = _ensure_order_status_greeting(
             reply_body, reply_context.customer_first_name
         )

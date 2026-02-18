@@ -38,6 +38,7 @@ secrets/
 # Root-only local artifacts (do not ignore infra/cdk/package-lock.json)
 /package-lock.json
 /trust-*.json
+/claude_gate_audit.json
 /trust-ci-*.json
 /PR_117_FINAL_GATE_STATUS.md
 /final_pr_comment.md

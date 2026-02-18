@@ -504,6 +504,76 @@ def format_eta_window(min_days: int, max_days: int) -> str:
     return f"{min_days}-{max_days} business days"
 
 
+def build_no_tracking_key_details_block(estimate: Any) -> Optional[str]:
+    if not isinstance(estimate, dict):
+        return None
+    if estimate.get("is_late"):
+        return None
+    delivery_window_human = estimate.get("delivery_window_human")
+    if isinstance(delivery_window_human, str) and not delivery_window_human.strip():
+        return None
+    if not delivery_window_human:
+        return None
+
+    lines = ["Key Details:"]
+    if estimate.get("preorder"):
+        preorder_ship_date_human = estimate.get("preorder_ship_date_human")
+        if isinstance(preorder_ship_date_human, str) and not preorder_ship_date_human.strip():
+            preorder_ship_date_human = None
+        if preorder_ship_date_human:
+            ship_line = f"- Pre-order release: {preorder_ship_date_human}"
+            ship_days_from_inquiry_human = estimate.get("ship_days_from_inquiry_human")
+            if ship_days_from_inquiry_human:
+                ship_line = f"{ship_line} (in {ship_days_from_inquiry_human})"
+            lines.append(ship_line)
+        processing_human = estimate.get("processing_human")
+        if processing_human:
+            lines.append(f"- Processing: {processing_human}")
+        transit_min_days = estimate.get("transit_min_days")
+        transit_max_days = estimate.get("transit_max_days")
+        if transit_min_days is not None and transit_max_days is not None:
+            lines.append(
+                f"- Shipping: {format_eta_window(transit_min_days, transit_max_days)}"
+            )
+        days_from_inquiry_human = estimate.get("days_from_inquiry_human")
+        if days_from_inquiry_human:
+            lines.append(f"- Total ETA: {days_from_inquiry_human}")
+        lines.append(f"- Estimated delivery: {delivery_window_human}")
+    else:
+        processing_human = estimate.get("processing_human")
+        if processing_human:
+            lines.append(f"- Processing: {processing_human}")
+        transit_min_days = estimate.get("transit_min_days")
+        transit_max_days = estimate.get("transit_max_days")
+        if transit_min_days is not None and transit_max_days is not None:
+            lines.append(
+                f"- Shipping: {format_eta_window(transit_min_days, transit_max_days)}"
+            )
+        window_min_days = estimate.get("window_min_days")
+        window_max_days = estimate.get("window_max_days")
+        if window_min_days is not None and window_max_days is not None:
+            lines.append(
+                f"- Total ETA: {format_eta_window(window_min_days, window_max_days)}"
+            )
+        lines.append(f"- Estimated delivery: {delivery_window_human}")
+    lines.append("(Business days are Mon–Fri; holidays may affect timelines.)")
+    return "\n".join(lines)
+
+
+def _insert_key_details_block(body: str, key_details_block: str) -> str:
+    tracking_sentence = "We'll send tracking as soon as it ships."
+    if tracking_sentence in body:
+        return (
+            body.replace(
+                tracking_sentence,
+                f"{key_details_block}\n\n{tracking_sentence}",
+                1,
+            )
+            .rstrip()
+        )
+    return f"{body.rstrip()}\n\n{key_details_block}"
+
+
 def compute_delivery_estimate(
     order_created_at: Any, shipping_method: Any, inquiry_date: Any
 ) -> Optional[Dict[str, Any]]:
@@ -813,8 +883,11 @@ def build_no_tracking_reply(
                     body = f"{body} (Arrives in {days_from_inquiry_human})."
                 else:
                     body = f"{body}."
-
-        body = f"{body} We'll send tracking as soon as it ships."
+        key_details_block = build_no_tracking_key_details_block(preorder_estimate)
+        if key_details_block:
+            body = f"{body}\n\n{key_details_block}\n\nWe'll send tracking as soon as it ships."
+        else:
+            body = f"{body} We'll send tracking as soon as it ships."
 
         return {
             "body": body.strip(),
@@ -859,6 +932,9 @@ def build_no_tracking_reply(
                     f"With {method_label} shipping, {eta_sentence} "
                     "We'll send tracking as soon as it ships."
                 )
+        key_details_block = build_no_tracking_key_details_block(estimate)
+        if key_details_block:
+            body = _insert_key_details_block(body, key_details_block)
 
         return {
             "body": body.strip(),
@@ -889,6 +965,7 @@ def build_no_tracking_reply(
 __all__ = [
     "add_business_days",
     "build_carrier_tracking_url",
+    "build_no_tracking_key_details_block",
     "build_tracking_url",
     "build_tracking_reply",
     "build_no_tracking_reply",
