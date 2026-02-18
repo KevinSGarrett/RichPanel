@@ -319,28 +319,56 @@ def test_resolve_rewrite_temperature_env_restores_original() -> None:
         os.environ.pop("OPENAI_REPLY_REWRITE_TEMPERATURE", None)
 
 
+def _assert_default_model_selection() -> None:
+    os.environ["OPENAI_REPLY_REWRITE_MODEL"] = "gpt-5.2"
+    os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
+    importlib.reload(rewriter)
+    assert rewriter.DEFAULT_MODEL == "gpt-5.2"
+
+    os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
+    os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
+    importlib.reload(rewriter)
+    assert rewriter.DEFAULT_MODEL == "gpt-5.2-chat-latest"
+
+
+def _restore_env(
+    original_rewrite: Optional[str], original_model: Optional[str]
+) -> None:
+    if original_rewrite is None:
+        os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
+    else:
+        os.environ["OPENAI_REPLY_REWRITE_MODEL"] = original_rewrite
+    if original_model is None:
+        os.environ.pop("OPENAI_MODEL", None)
+    else:
+        os.environ["OPENAI_MODEL"] = original_model
+    importlib.reload(rewriter)
+
+
 def test_default_model_prefers_reply_rewrite_env() -> None:
     original_rewrite = os.environ.get("OPENAI_REPLY_REWRITE_MODEL")
     original_model = os.environ.get("OPENAI_MODEL")
     try:
-        os.environ["OPENAI_REPLY_REWRITE_MODEL"] = "gpt-5.2"
-        os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
-        importlib.reload(rewriter)
-        assert rewriter.DEFAULT_MODEL == "gpt-5.2"
-
         os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
-        os.environ["OPENAI_MODEL"] = "gpt-5.2-chat-latest"
-        importlib.reload(rewriter)
-        assert rewriter.DEFAULT_MODEL == "gpt-5.2-chat-latest"
+        os.environ.pop("OPENAI_MODEL", None)
+        _assert_default_model_selection()
     finally:
-        if original_rewrite is None:
-            os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
-        else:
-            os.environ["OPENAI_REPLY_REWRITE_MODEL"] = original_rewrite
-        if original_model is None:
-            os.environ.pop("OPENAI_MODEL", None)
-        else:
-            os.environ["OPENAI_MODEL"] = original_model
+        _restore_env(original_rewrite, original_model)
+
+
+def test_default_model_prefers_reply_rewrite_env_restores_original() -> None:
+    original_rewrite = "orig-model"
+    original_model = "orig-routing"
+    os.environ["OPENAI_REPLY_REWRITE_MODEL"] = original_rewrite
+    os.environ["OPENAI_MODEL"] = original_model
+    try:
+        _assert_default_model_selection()
+        _restore_env(original_rewrite, original_model)
+        assert os.environ.get("OPENAI_REPLY_REWRITE_MODEL") == original_rewrite
+        assert os.environ.get("OPENAI_MODEL") == original_model
+    finally:
+        os.environ.pop("OPENAI_REPLY_REWRITE_MODEL", None)
+        os.environ.pop("OPENAI_MODEL", None)
         importlib.reload(rewriter)
 
 
@@ -353,3 +381,6 @@ class ReplyRewriteValidationTests(unittest.TestCase):
 
     def test_default_model_prefers_reply_rewrite_env(self) -> None:
         test_default_model_prefers_reply_rewrite_env()
+
+    def test_default_model_prefers_reply_rewrite_env_restores_original(self) -> None:
+        test_default_model_prefers_reply_rewrite_env_restores_original()
