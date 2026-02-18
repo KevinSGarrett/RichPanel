@@ -21,6 +21,7 @@
 - Added coverage for tracking-present replies skipping Key Details to address Codecov/PR Agent feedback.
 - Added Key Details guard edge-case tests and ignored local Claude audit artifact.
 - Added whitespace delivery-window guard and preorder/track-url edge-case tests.
+- Added empty preorder ship date guard plus non-dict estimate test coverage.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -98,7 +99,7 @@ Paste output snippet proving you ran:
 
 ```
 RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q
-1595 passed, 18 subtests passed in 230.14s (0:03:50)
+1597 passed, 18 subtests passed in 229.68s (0:03:49)
 ```
 
 ## Docs impact (summary)
@@ -117,5 +118,7 @@ RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFA
 - [ ] Ensure CI checks (validate, Codecov, Bugbot, Claude gate) are green before merge.
 
 <!-- End of template -->
+
+
 
 
