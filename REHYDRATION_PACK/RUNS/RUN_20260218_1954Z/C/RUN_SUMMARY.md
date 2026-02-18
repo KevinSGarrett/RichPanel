@@ -37,4 +37,3 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 
 ## Issues / follow-ups
 - Resolve staging assume-role access to account `260475105304` for CDK diff.
-- Coordinate to set `safe_mode=true` and `automation_enabled=false` before any deploy.

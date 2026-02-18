@@ -87,6 +87,8 @@ List commands you ran (include key flags/env if relevant):
 - `gh pr create --title \"B91: Set OPENAI_REPLY_REWRITE_MODEL=gpt-5.2 in CDK (risk:R3)\" --body-file <path>` - opened PR #261.
 - `gh pr edit 261 --add-label \"risk:R3-high\" --add-label \"gate:claude\"` - applied required labels.
 - `gh pr comment 261 --body \"@cursor review\"` - triggered Bugbot review (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923008521).
+- `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (safe).
+- `$env:AWS_PROFILE='rp-admin-kevin'; npx cdk diff RichpanelMiddleware-staging` - staging diff reattempt (still assume-role blocked).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -94,7 +96,7 @@ Include test commands + results + links to evidence.
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/run_ci_checks.log`
 - `npx cdk diff RichpanelMiddleware-staging` - fail (assume-role) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
-- `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - fail (safe_mode=false, automation_enabled=true) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
+- `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 
 Paste output snippet proving you ran:
 `AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 python scripts/run_ci_checks.py`
@@ -114,7 +116,6 @@ Paste output snippet proving you ran:
 
 ## Blockers / open questions
 - Staging CDK diff blocked by missing assume-role trust to account `260475105304`.
-- Prod safe_mode is `false` and automation_enabled is `true`; no-contact requirement not met.
 
 ## Follow-ups (actionable)
 - [ ] Resolve staging assume-role access for account `260475105304` to complete CDK diff.
