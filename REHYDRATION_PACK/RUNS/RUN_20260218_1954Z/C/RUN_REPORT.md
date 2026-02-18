@@ -41,7 +41,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 ++
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 140 +++++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 141 +++++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  40 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  19 +
@@ -60,7 +60,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 38 files changed, 1766 insertions(+), 4 deletions(-)
+ 38 files changed, 1767 insertions(+), 4 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -101,6 +101,7 @@ List commands you ran (include key flags/env if relevant):
 - `python scripts/verify_rehydration_pack.py | Tee-Object <temp> ; Copy-Item <temp> verify_rehydration_pack.log` - rehydration pack validation.
 - `gh pr edit 261 --body-file <path>` - updated PR body for added test + evidence logs.
 - `gh pr comment 261 --body "<triage-update>"` - documented PR Agent/Claude issue resolution (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923325321).
+- `gh pr close 261` + `gh pr reopen 261` - refreshed PR head SHA to latest branch tip after merge UI reported out-of-date.
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
