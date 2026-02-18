@@ -429,6 +429,45 @@ def test_key_details_block_respects_max_chars() -> None:
     assert len(updated) <= DEFAULT_MAX_CHARS
 
 
+def test_key_details_block_truncates_oversized_block() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "x" * (DEFAULT_MAX_CHARS + 200),
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    updated = pipeline._ensure_key_details_block(
+        "Short body.",
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated.startswith("Key Details:")
+    assert len(updated) <= DEFAULT_MAX_CHARS
+
+
+def test_key_details_block_trims_whitespace_body() -> None:
+    delivery_estimate = {
+        "preorder": False,
+        "is_late": False,
+        "delivery_window_human": "April 1–April 3, 2026",
+        "processing_human": "3-5 business days",
+        "transit_min_days": 3,
+        "transit_max_days": 7,
+        "window_min_days": 6,
+        "window_max_days": 12,
+    }
+    updated = pipeline._ensure_key_details_block(
+        "   ",
+        delivery_estimate=delivery_estimate,
+        draft_reply={},
+    )
+    assert updated.startswith("Key Details:")
+
+
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
     def test_prompt_includes_excerpt_and_first_name(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
@@ -486,3 +525,9 @@ class OrderStatusReplyPersonalizationTests(unittest.TestCase):
 
     def test_key_details_block_respects_max_chars(self) -> None:
         test_key_details_block_respects_max_chars()
+
+    def test_key_details_block_truncates_oversized_block(self) -> None:
+        test_key_details_block_truncates_oversized_block()
+
+    def test_key_details_block_trims_whitespace_body(self) -> None:
+        test_key_details_block_trims_whitespace_body()

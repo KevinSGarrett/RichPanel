@@ -12,6 +12,7 @@ if str(SRC) not in sys.path:
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     build_no_tracking_key_details_block,
     build_no_tracking_reply,
+    _insert_key_details_block,
 )
 
 
@@ -19,6 +20,20 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
     def test_key_details_block_non_dict_estimate(self) -> None:
         self.assertIsNone(build_no_tracking_key_details_block(None))
         self.assertIsNone(build_no_tracking_key_details_block("invalid"))
+
+    def test_insert_key_details_block_with_tracking_sentence(self) -> None:
+        body = "Update. We'll send tracking as soon as it ships."
+        block = "Key Details:\n- Processing: 3-5 business days"
+        updated = _insert_key_details_block(body, block)
+        self.assertIn("Key Details:", updated)
+        self.assertIn("We'll send tracking as soon as it ships.", updated)
+        self.assertLess(updated.index("Key Details:"), updated.index("We'll send tracking"))
+
+    def test_insert_key_details_block_without_tracking_sentence(self) -> None:
+        body = "Update without tracking sentence."
+        block = "Key Details:\n- Processing: 3-5 business days"
+        updated = _insert_key_details_block(body, block)
+        self.assertTrue(updated.endswith(block))
 
     def test_no_tracking_reply_without_order_id(self) -> None:
         reply = build_no_tracking_reply({}, inquiry_date="2025-01-02")

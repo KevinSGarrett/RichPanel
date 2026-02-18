@@ -482,6 +482,8 @@ def _ensure_key_details_block(
     separator = "\n\n"
     max_chars = DEFAULT_MAX_CHARS
     if isinstance(max_chars, int) and max_chars > 0:
+        if not body_trimmed:
+            return key_details_block[:max_chars].rstrip()
         reserved = len(separator) + len(key_details_block)
         if len(body_trimmed) + reserved <= max_chars:
             return f"{body_trimmed}{separator}{key_details_block}"
