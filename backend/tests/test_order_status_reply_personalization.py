@@ -107,12 +107,17 @@ def test_excerpt_boundary_no_truncation() -> None:
 
 
 def test_extract_customer_first_name_from_payload() -> None:
+    class _BadStr:
+        def __str__(self) -> str:
+            raise ValueError("boom")
+
     payload = {
         "customer_profile": {"first_name": "Sarah"},
         "requester": {"firstName": "Sam"},
     }
     assert pipeline._extract_customer_first_name_from_payload(payload) == "Sarah"
     assert pipeline._extract_customer_first_name_from_payload("not-a-dict") is None
+    assert pipeline._extract_customer_first_name_from_payload({"first_name": _BadStr()}) is None
     assert (
         pipeline._extract_customer_first_name_from_payload({"firstName": "O'Neil"})
         == "O'Neil"
