@@ -41,12 +41,13 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  33 +
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 130 +++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 131 +++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  39 +
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
  .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  18 +
  .../C/evidence/cdk_diff_prod.txt                   | Bin 0 -> 5766 bytes
  .../C/evidence/cdk_diff_staging.txt                | Bin 0 -> 58384 bytes
+ .../deploy_staging_main_run_22157069157.log        | Bin 0 -> 49852 bytes
  .../C/evidence/prod_automation_param.txt           |   1 +
  .../evidence/prod_safe_mode_automation_status.txt  | Bin 0 -> 3922 bytes
  .../C/evidence/prod_safe_mode_param.txt            |   1 +
@@ -58,7 +59,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 35 files changed, 1929 insertions(+), 3 deletions(-)
+ 36 files changed, 1930 insertions(+), 3 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -117,6 +118,7 @@ Paste output snippet proving you ran:
 ## Risks / edge cases considered
 - Model name rejection risk (mitigation: shadow eval will surface fallback reason and model used).
 - Deployment safety (mitigation: require safe_mode=true + automation_enabled=false before any prod deploy).
+- PR Agent advisory flagged model acceptance/verification; mitigation is required prod shadow eval + Lambda env var proof after deploy.
 
 ## Blockers / open questions
 - Staging CDK diff includes many unrelated stack changes (staging stack drift), violating the “env-var-only” diff requirement.
