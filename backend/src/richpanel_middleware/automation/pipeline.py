@@ -428,7 +428,14 @@ def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
     greeting_match = re.match(r"^(hi|hello|hey)\b", first_line, flags=re.IGNORECASE)
     if greeting_match:
         remainder = first_line[greeting_match.end() :].lstrip(" ,:-").strip()
-        lines = [greeting] + (["", remainder] if remainder else [""]) + lines[1:]
+        updated = [greeting]
+        if remainder:
+            updated.extend(["", remainder])
+        else:
+            if not lines[1:] or lines[1].strip():
+                updated.append("")
+        updated.extend(lines[1:])
+        lines = updated
     else:
         lines.insert(0, greeting)
         if len(lines) == 1 or lines[1].strip():
