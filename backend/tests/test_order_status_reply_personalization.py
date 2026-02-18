@@ -30,6 +30,13 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     assert "Draft reply body" in messages[1].content
 
 
+def test_reply_context_payload_excludes_none() -> None:
+    context = OrderStatusReplyContext(tracking_number="123", carrier=None)
+    payload = context.as_payload()
+    assert payload["tracking_number"] == "123"
+    assert "carrier" not in payload
+
+
 def test_excerpt_is_sanitized_and_truncated() -> None:
     raw = (
         "Email me at sarah@example.com or call 555-123-4567. "
@@ -135,6 +142,12 @@ def test_greeting_enforcement() -> None:
         greeting_with_blank, None
     )
     assert greeting_with_blank_wrapped.startswith("Hi there,\n\n")
+
+    greeting_single = "Hi there,\nBody"
+    greeting_single_wrapped = pipeline._ensure_order_status_greeting(
+        greeting_single, None
+    )
+    assert greeting_single_wrapped.startswith("Hi there,\n\n")
 
 
 def test_signature_enforcement_idempotent() -> None:
