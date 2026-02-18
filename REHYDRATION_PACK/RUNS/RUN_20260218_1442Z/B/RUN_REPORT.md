@@ -18,6 +18,7 @@
 ## What changed (high-level)
 - Added deterministic Key Details block builder + inserted into no-tracking ETA replies (preorder + non-preorder).
 - Enforced Key Details preservation via rewrite prompt + post-rewrite pipeline append; updated unit tests and docs registry outputs.
+- Added coverage for tracking-present replies skipping Key Details to address Codecov/PR Agent feedback.
 
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
@@ -69,7 +70,7 @@ Paste output snippet proving you ran:
 
 ```
 RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFAULT_REGION=us-east-2 pytest -q
-1576 passed, 18 subtests passed in 231.72s (0:03:51)
+1583 passed, 18 subtests passed in 227.89s (0:03:47)
 ```
 
 ## Docs impact (summary)
@@ -79,12 +80,12 @@ RICHPANEL_OUTBOUND_ENABLED=0 RICHPANEL_READ_ONLY=1 AWS_REGION=us-east-2 AWS_DEFA
 ## Risks / edge cases considered
 - Key Details block must not appear for late/no-window cases; builder returns None when late or delivery window missing.
 - Post-rewrite appending must not add duplicates; pipeline only appends when Key Details header is missing and tracking is absent.
+- Tracking-present replies must not add Key Details; added test coverage for skip behavior.
 
 ## Blockers / open questions
 - NONE
 
 ## Follow-ups (actionable)
-- [ ] Open PR from `run/RUN_20260218_1442Z`, apply labels `risk:R3-high` and `gate:claude`, and complete PR template.
 - [ ] Ensure CI checks (validate, Codecov, Bugbot, Claude gate) are green before merge.
 
 <!-- End of template -->
