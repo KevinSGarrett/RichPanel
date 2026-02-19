@@ -387,6 +387,15 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         assert paragraph is not None
         self.assertIn("With your shipping method,", paragraph)
 
+    def test_build_timeline_paragraph_missing_transit_returns_none(self) -> None:
+        estimate = {
+            "processing_human": "3-5 business days",
+            "transit_min_days": None,
+            "transit_max_days": 7,
+            "delivery_window_human": "January 9–January 15, 2024",
+        }
+        assert _build_no_tracking_timeline_paragraph(estimate) is None
+
     def test_no_tracking_key_details_missing_transit(self) -> None:
         delivery_estimate = {
             "preorder": False,

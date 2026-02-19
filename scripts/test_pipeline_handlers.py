@@ -1111,6 +1111,75 @@ class OutboundOrderStatusTests(unittest.TestCase):
         self.assertIsNotNone(reply_context)
         self.assertEqual(reply_context.shipping_method, "FedEx Ground")
 
+    def test_inbound_cta_guard_blocks_rewrite(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "t-cta", "channel": "email", "message": "Where is my order?"}
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "draft_reply": {
+                            "body": "Deterministic draft reply.",
+                            "tracking_number": "TN1",
+                            "tracking_url": "https://example.com/track",
+                            "carrier": "UPS",
+                        },
+                        "order_summary": {"shipping_method": "Ground"},
+                    },
+                }
+            ],
+        )
+        executor = _RecordingExecutor(ticket_channel="email")
+        rewrite_result = ReplyRewriteResult(
+            body="Please reply back if you need anything else.",
+            rewritten=True,
+            reason="rewritten",
+            model="gpt-5.2-chat-latest",
+            confidence=0.9,
+            dry_run=False,
+            fingerprint="fp",
+            llm_called=False,
+            response_id=None,
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.rewrite_reply",
+            return_value=rewrite_result,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_comment_operator_fetch",
+            return_value=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.LOGGER.info"
+        ), mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        send_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ]
+        self.assertEqual(len(send_calls), 1)
+        body = send_calls[0]["kwargs"]["json_body"].get("body", "")
+        self.assertIn("Deterministic draft reply.", body)
+        self.assertNotIn("reply back", body.lower())
+
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
         executor = _RecordingExecutor(ticket_channel="email")
