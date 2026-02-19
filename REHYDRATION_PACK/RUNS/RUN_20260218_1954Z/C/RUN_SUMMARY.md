@@ -13,6 +13,7 @@ Add CDK env vars so reply rewrite uses gpt-5.2 (and temperature 0.2) and prepare
 - Added tests to validate rewrite model env selection and updated run artifacts/evidence.
 - Deployed prod stack and captured Lambda env proof for rewrite model/temperature.
 - Attempted read-only shadow eval; failed due to Richpanel 504 timeout when listing tickets.
+- Retried shadow eval via workflow and per-ticket local runs; workflow blocked by disabled OpenAI routing and local runs failed ticket fetches.
 
 ## Files changed
 - `infra/cdk/lib/richpanel-middleware-stack.ts`
