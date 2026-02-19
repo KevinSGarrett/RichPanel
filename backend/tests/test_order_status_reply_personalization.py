@@ -200,11 +200,17 @@ def test_order_summary_name_fallbacks() -> None:
     summary = {"customer": {"first_name": "Nina"}}
     assert pipeline._extract_customer_first_name(None, summary) == "Nina"
 
+    summary = {"customer": {"firstName": "Uma"}}
+    assert pipeline._extract_customer_first_name(None, summary) == "Uma"
+
     summary = {"customer_name": "Quinn Harper"}
     assert pipeline._extract_customer_first_name(None, summary) == "Quinn"
 
     summary = {"shipping_address_name": "Sam Doe"}
     assert pipeline._extract_customer_first_name(None, summary) == "Sam"
+
+    summary = {"customer_first_name": "   "}
+    assert pipeline._extract_customer_first_name(None, summary) is None
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

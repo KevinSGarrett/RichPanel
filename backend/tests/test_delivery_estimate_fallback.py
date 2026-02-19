@@ -347,6 +347,30 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("shipping takes 3-7 business days", paragraph)
         self.assertIn("about 23–31 days from today", paragraph)
 
+    def test_build_timeline_paragraph_preorder_no_days_from_today(self) -> None:
+        estimate = {
+            "bucket": "Standard",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "delivery_window_human": "April 6–April 14, 2026",
+            "preorder": True,
+        }
+        paragraph = _build_no_tracking_timeline_paragraph(estimate)
+        assert paragraph is not None
+        self.assertIn("after release, processing typically takes 3-5 business days", paragraph)
+        self.assertIn("(Business days are Mon–Fri; holidays may affect timelines.)", paragraph)
+
+    def test_build_timeline_paragraph_blank_window_returns_none(self) -> None:
+        estimate = {
+            "bucket": "Standard",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "delivery_window_human": "   ",
+        }
+        assert _build_no_tracking_timeline_paragraph(estimate) is None
+
     def test_no_tracking_key_details_missing_transit(self) -> None:
         delivery_estimate = {
             "preorder": False,
