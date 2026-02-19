@@ -1399,6 +1399,30 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
     total_price = _coerce_price(
         payload.get("total_price") or payload.get("current_total_price")
     )
+    customer_first_name = None
+    customer_last_name = None
+    customer_name = None
+    customer = payload.get("customer")
+    if isinstance(customer, dict):
+        customer_first_name = _coerce_str(customer.get("first_name"))
+        customer_last_name = _coerce_str(customer.get("last_name"))
+        customer_name = _coerce_str(customer.get("name"))
+    if not customer_first_name:
+        shipping_address = payload.get("shipping_address")
+        if isinstance(shipping_address, dict):
+            customer_first_name = _coerce_str(shipping_address.get("first_name"))
+            if not customer_first_name:
+                shipping_name = _coerce_str(shipping_address.get("name"))
+                if shipping_name:
+                    customer_first_name = shipping_name.split()[0]
+    if not customer_first_name:
+        billing_address = payload.get("billing_address")
+        if isinstance(billing_address, dict):
+            customer_first_name = _coerce_str(billing_address.get("first_name"))
+            if not customer_first_name:
+                billing_name = _coerce_str(billing_address.get("name"))
+                if billing_name:
+                    customer_first_name = billing_name.split()[0]
 
     tracking_number = ""
     carrier = ""
@@ -1473,6 +1497,12 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
         summary["shipping_method_name"] = shipping_method
     if line_item_product_ids:
         summary["line_item_product_ids"] = line_item_product_ids
+    if customer_first_name:
+        summary["customer_first_name"] = customer_first_name
+    if customer_last_name:
+        summary["customer_last_name"] = customer_last_name
+    if customer_name:
+        summary["customer_name"] = customer_name
     tags_raw = payload.get("tags")
     if isinstance(tags_raw, str) and tags_raw.strip():
         parsed_tags = _parse_shopify_tags(tags_raw)

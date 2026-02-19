@@ -236,7 +236,8 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("UPS", draft_reply["body"])
         self.assertIn("Tracking link:", draft_reply["body"])
         self.assertNotIn(
-            "We'll send tracking as soon as it ships.", draft_reply["body"]
+            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            draft_reply["body"],
         )
 
     def test_plan_actions_merges_ticket_snapshot_payload(self) -> None:
@@ -264,6 +265,10 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.lookup_order_summary",
             side_effect=_fake_lookup,
+        ), mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
         ):
             plan_actions(
                 envelope,
@@ -292,9 +297,10 @@ class PipelineTests(unittest.TestCase):
         assert reply is not None
         self.assertEqual(reply["eta_human"], "4-8 business days")
         body_lower = reply["body"].lower()
-        self.assertIn("4-8 business days", body_lower)
-        self.assertIn("estimated delivery window is", body_lower)
-        self.assertIn("standard (3-5 business days)", body_lower)
+        self.assertIn("processing typically takes 3-5 business days", body_lower)
+        self.assertIn("shipping takes 3-5 business days", body_lower)
+        self.assertIn("estimated for january 9–january 15, 2024", body_lower)
+        self.assertIn("about 6-10 business days total", body_lower)
 
     def test_plan_suppresses_when_order_context_missing(self) -> None:
         envelope = build_event_envelope(
@@ -378,6 +384,10 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.compute_preorder_delivery_estimate",
             return_value=preorder_estimate,
+        ), mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
         ):
             plan = plan_actions(
                 envelope, safe_mode=False, automation_enabled=True, allow_network=True
@@ -437,7 +447,11 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.compute_delivery_estimate",
             return_value=standard_estimate,
-        ) as compute_standard_mock:
+        ) as compute_standard_mock, mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
+        ):
             plan = plan_actions(
                 envelope, safe_mode=False, automation_enabled=True, allow_network=True
             )

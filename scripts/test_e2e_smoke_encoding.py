@@ -451,8 +451,10 @@ class DraftReplyHelperTests(unittest.TestCase):
         )
         self.assertIsInstance(body, str)
         body = cast(str, body)
-        self.assertIn("standard (3-5 business days)", body.lower())
-        self.assertIn("4-8 business days", body.lower())
+        self.assertIn("processing typically takes 3-5 business days", body.lower())
+        self.assertIn("shipping takes 3-5 business days", body.lower())
+        self.assertIn("estimated for january 13", body.lower())
+        self.assertIn("about 6-10 business days total", body.lower())
 
     def test_extract_latest_comment_body_prefers_operator(self) -> None:
         comments = [

@@ -149,10 +149,11 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
-            "Your pre-order is scheduled to release on Sunday, March 29, 2026. "
-            "After the release date, processing typically takes 3-5 business days. "
-            "It ships in 15 days. Delivery window April 6–April 14, 2026. "
-            "Arrives in 23–31 days. We'll send tracking as soon as it ships."
+            "Your order includes a pre-order item that releases on Sunday, March 29, 2026 (in 15 days). "
+            "For Standard shipping, after release, processing typically takes 3-5 business days, "
+            "and shipping takes 3-7 business days — so delivery is estimated for April 6–April 14, 2026 "
+            "(about 23–31 days from today). (Business days are Mon–Fri; holidays may affect timelines.) "
+            "Tracking will be emailed automatically once it ships and is scanned by the carrier."
         )
         parameters = {
             "delivery_estimate": {
@@ -276,8 +277,9 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
             "delivery_estimate": None,
             "draft_reply": {
                 "body": (
-                    "Your pre-order ships soon. Estimated delivery window is "
-                    "April 1–April 7, 2026. We'll send tracking as soon as it ships."
+                    "Your pre-order ships soon. Delivery is estimated for "
+                    "April 1–April 7, 2026. "
+                    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
                 ),
                 "eta_human": "April 1–April 7, 2026",
             },
@@ -326,7 +328,8 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_multi_ship_dates(self) -> None:
         body = (
             "Items ship in batches. First ships April 1, 2026. "
-            "Second ships April 15, 2026. We'll send tracking as soon as it ships."
+            "Second ships April 15, 2026. "
+            "Tracking will be emailed automatically once it ships and is scanned by the carrier."
         )
         parameters = {
             "delivery_estimate": {
@@ -352,8 +355,9 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
             "draft_reply": {
                 "body": (
                     "Your pre-order ships April 1, 2026. "
-                    "It ships in 15 days. Delivery window April 5–April 9, 2026. "
-                    "Arrives in 19–23 days. We'll send tracking as soon as it ships."
+                    "It ships in 15 days. Delivery is estimated for April 5–April 9, 2026 "
+                    "(about 19–23 days from today). "
+                    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
                 )
             },
             "order_summary": {"tracking_number": None},
@@ -370,7 +374,10 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         parameters = {
             "delivery_estimate": {"preorder": True},
             "draft_reply": {
-                "body": "Your pre-order ships soon. We'll send tracking as soon as it ships."
+                "body": (
+                    "Your pre-order ships soon. "
+                    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+                )
             },
         }
         result = shadow_eval._extract_preorder_proof_signals(parameters)

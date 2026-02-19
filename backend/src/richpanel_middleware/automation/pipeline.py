@@ -14,7 +14,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from integrations.common import PRODUCTION_ENVIRONMENTS, resolve_env_name, _to_bool
 from richpanel_middleware.automation.delivery_estimate import (
-    build_no_tracking_key_details_block,
     build_no_tracking_reply,
     build_tracking_reply,
     compute_preorder_delivery_estimate,
@@ -31,7 +30,6 @@ from richpanel_middleware.automation.llm_routing import (
     compute_dual_routing,
 )
 from richpanel_middleware.automation.llm_reply_rewriter import (
-    DEFAULT_MAX_CHARS,
     ReplyRewriteResult,
     rewrite_reply,
 )
@@ -117,6 +115,21 @@ _SECRET_VALUE_CACHE_TTL_SECONDS = 900
 _SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
 _MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS = 400
 _SIGNATURE_LINES = ("Holly", "Scentiment Customer Support")
+_INBOUND_CTA_PHRASES = (
+    "feel free to reply",
+    "reply back",
+    "reply here",
+    "reach out",
+    "contact us",
+    "let us know",
+    "please reply",
+    "email us",
+    "call us",
+    "contact support",
+    "our support team",
+    "we're here to help",
+    "we are here to help",
+)
 
 
 def _is_closed_status(value: Optional[str]) -> bool:
@@ -380,6 +393,24 @@ def _extract_customer_email_from_payload(payload: Any) -> Optional[str]:
     return None
 
 
+def _normalize_first_name_candidate(candidate: Any) -> Optional[str]:
+    if candidate is None:
+        return None
+    try:
+        normalized = str(candidate).strip()
+    except Exception:
+        return None
+    if not normalized:
+        return None
+    if len(normalized) > 64:
+        return None
+    if normalized.isdigit():
+        return None
+    if re.search(r"\d", normalized):
+        return None
+    return normalized
+
+
 def _extract_customer_first_name_from_payload(payload: Any) -> Optional[str]:
     if not isinstance(payload, dict):
         return None
@@ -392,22 +423,41 @@ def _extract_customer_first_name_from_payload(payload: Any) -> Optional[str]:
             for name_key in ("first_name", "firstName"):
                 candidates.append(nested.get(name_key))
     for candidate in candidates:
-        if candidate is None:
-            continue
-        try:
-            normalized = str(candidate).strip()
-        except Exception:
-            continue
-        if not normalized:
-            continue
-        if len(normalized) > 64:
-            continue
-        if normalized.isdigit():
-            continue
-        if re.search(r"\d", normalized):
-            continue
-        return normalized
+        normalized = _normalize_first_name_candidate(candidate)
+        if normalized:
+            return normalized
     return None
+
+
+def _extract_customer_first_name_from_order_summary(
+    order_summary: Any,
+) -> Optional[str]:
+    if not isinstance(order_summary, dict):
+        return None
+    candidates: List[Any] = []
+    candidates.append(order_summary.get("customer_first_name"))
+    customer_obj = order_summary.get("customer")
+    if isinstance(customer_obj, dict):
+        candidates.append(customer_obj.get("first_name"))
+        candidates.append(customer_obj.get("firstName"))
+    for key in ("customer_name", "shipping_address_name"):
+        raw = order_summary.get(key)
+        if isinstance(raw, str) and raw.strip():
+            candidates.append(raw.strip().split()[0])
+    for candidate in candidates:
+        normalized = _normalize_first_name_candidate(candidate)
+        if normalized:
+            return normalized
+    return None
+
+
+def _extract_customer_first_name(
+    payload: Any, order_summary: Any
+) -> Optional[str]:
+    first_name = _extract_customer_first_name_from_payload(payload)
+    if first_name:
+        return first_name
+    return _extract_customer_first_name_from_order_summary(order_summary)
 
 
 def _build_customer_message_excerpt(raw_message: str) -> Optional[str]:
@@ -461,40 +511,19 @@ def _ensure_holly_signature(body: str) -> str:
     return "\n".join(lines)
 
 
-def _ensure_key_details_block(
-    body: str,
-    *,
-    delivery_estimate: Any,
-    draft_reply: Any,
-) -> str:
+def _contains_inbound_cta(body: Optional[str]) -> bool:
     if not body:
-        return body
-    if not isinstance(draft_reply, dict):
-        return body
-    if draft_reply.get("tracking_url") or draft_reply.get("tracking_number"):
-        return body
-    key_details_block = build_no_tracking_key_details_block(delivery_estimate)
-    if not key_details_block:
-        return body
-    if re.search(r"Key Details:", body, flags=re.IGNORECASE):
-        return body
-    body_trimmed = body.rstrip()
-    separator = "\n\n"
-    max_chars = DEFAULT_MAX_CHARS
-    if isinstance(max_chars, int) and max_chars > 0:
-        if not body_trimmed:
-            return key_details_block[:max_chars].rstrip()
-        reserved = len(separator) + len(key_details_block)
-        if len(body_trimmed) + reserved <= max_chars:
-            return f"{body_trimmed}{separator}{key_details_block}"
-        if reserved >= max_chars:
-            return key_details_block[:max_chars].rstrip()
-        allowed = max_chars - reserved
-        trimmed_body = body_trimmed[:allowed].rstrip()
-        if not trimmed_body:
-            return key_details_block[:max_chars].rstrip()
-        return f"{trimmed_body}{separator}{key_details_block}"
-    return f"{body_trimmed}{separator}{key_details_block}"
+        return False
+    lowered = body.lower()
+    return any(phrase in lowered for phrase in _INBOUND_CTA_PHRASES)
+
+
+def _apply_inbound_cta_guard(
+    rewritten_body: str, draft_body: str
+) -> tuple[str, bool]:
+    if _contains_inbound_cta(rewritten_body):
+        return draft_body, True
+    return rewritten_body, False
 
 
 def _build_order_status_reply_context(
@@ -515,7 +544,7 @@ def _build_order_status_reply_context(
     shipping_method = normalize_shipping_method_for_carrier(
         shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
     )
-    customer_first_name = _extract_customer_first_name_from_payload(payload)
+    customer_first_name = _extract_customer_first_name(payload, order_summary)
     customer_message_excerpt = _build_customer_message_excerpt(
         extract_customer_message(payload, default="")
     )
@@ -1741,6 +1770,7 @@ def execute_order_status_reply(
             language=intent_language,
         )
 
+        draft_reply_body = reply_body
         original_hash = _fingerprint_reply_body(reply_body)
         rewrite_result: ReplyRewriteResult | None = None
         openai_rewrite = {}
@@ -1804,11 +1834,19 @@ def execute_order_status_reply(
                 }
             )
 
-        reply_body = _ensure_key_details_block(
-            reply_body,
-            delivery_estimate=delivery_estimate,
-            draft_reply=draft_reply,
+        reply_body, inbound_cta_blocked = _apply_inbound_cta_guard(
+            reply_body, draft_reply_body
         )
+        if inbound_cta_blocked:
+            LOGGER.info(
+                "automation.order_status_reply.inbound_cta_blocked",
+                extra={
+                    "event_id": envelope.event_id,
+                    "conversation_id": envelope.conversation_id,
+                    "reason": "inbound_cta_detected",
+                },
+            )
+            openai_rewrite["inbound_cta_blocked"] = True
         reply_body = _ensure_order_status_greeting(
             reply_body, reply_context.customer_first_name
         )

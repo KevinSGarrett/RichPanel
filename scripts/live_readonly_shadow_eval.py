@@ -1896,9 +1896,11 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
             return False
         return candidate in body_text
 
-    tracking_line = "We'll send tracking as soon as it ships."
-    schedule_phrases = ("scheduled to release on", "scheduled to ship on")
-    delivery_phrase = "estimated delivery window is"
+    tracking_line = (
+        "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+    )
+    schedule_phrases = ("releases on", "scheduled to release on", "scheduled to ship on")
+    delivery_phrase = "estimated for"
     processing_phrase = "processing typically takes"
     nonpreorder_floor_ok = None
     if not preorder_delivery_estimate:

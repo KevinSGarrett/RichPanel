@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-19 - run_20260219_0628z (b92-a: naturalness v3 + no key details + no cta)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-19-run202602190628z-b92-a-naturalness-v3-no-key-details-no-cta"
+    }
+  ],
   "2026-02-18 - run_20260218_1954z (b91: set openai reply rewrite model in cdk)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
