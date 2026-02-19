@@ -1,0 +1,214 @@
+{
+  "run_id": "RUN_20260219_0118Z",
+  "timestamp": "2026-02-19T01:18:31.895536+00:00",
+  "environment": "prod",
+  "env_flags": {
+    "MW_ALLOW_NETWORK_READS": "true",
+    "RICHPANEL_WRITE_DISABLED": "true",
+    "RICHPANEL_READ_ONLY": "true",
+    "RICHPANEL_OUTBOUND_ENABLED": "false"
+  },
+  "rewrite_model_used": "gpt-5.2-2025-12-11",
+  "rewrite_model_source": "rewrite_reply",
+  "reply_proof": {
+    "greeting_present": true,
+    "key_details_present": true,
+    "holly_signature_present": true
+  },
+  "reply_proof_source": "final_reply",
+  "target": {
+    "env": "prod",
+    "region": "us-east-2",
+    "stack_name": "RichpanelMiddleware-prod",
+    "richpanel_base_url": "https://api.richpanel.com",
+    "shop_domain": "redacted:06239836ff8b"
+  },
+  "prod_target": true,
+  "sample_mode": "explicit",
+  "conversation_mode": "skipped",
+  "ticket_count": 1,
+  "match_success_rate": 1.0,
+  "match_failure_buckets": {
+    "no_email": 0,
+    "no_order_number": 0,
+    "ambiguous_customer": 0,
+    "no_order_candidates": 0,
+    "order_match_failed": 0,
+    "parse_error": 0,
+    "api_error": 0,
+    "other_failure": 0,
+    "unknown": 0
+  },
+  "tracking_or_eta_available_rate": 1.0,
+  "would_reply_send": false,
+  "top_failure_reasons": [],
+  "counts": {
+    "tickets_requested": 1,
+    "tickets_selected": 1,
+    "tickets_scanned": 1,
+    "order_status_candidates": 1,
+    "orders_matched": 1,
+    "tracking_found": 1,
+    "eta_available": 1,
+    "tracking_or_eta_available": 1,
+    "errors": 0
+  },
+  "shopify_probe": {
+    "enabled": false
+  },
+  "tickets": [
+    {
+      "ticket_id_redacted": "redacted:455d2b629ec5",
+      "channel": "unknown",
+      "ticket_schema_fingerprint": "ccb813fe1a47",
+      "order_resolution": {
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
+      },
+      "shopify_tracking_number": true,
+      "shopify_tracking_redacted": "***",
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": "USPS/UPS® Ground",
+      "computed_eta": {
+        "order_date_redacted": "2026-01-XX",
+        "inquiry_date_redacted": "2026-01-XX",
+        "shipping_method": "Standard (3-7 business days)",
+        "elapsed_business_days": 10,
+        "remaining_min_days": 1,
+        "remaining_max_days": 2,
+        "eta_human": "1-2 business days",
+        "is_late": false,
+        "bucket": "Standard"
+      },
+      "shopify_schema_fingerprint": "7cc9cf8d267e",
+      "comment_count": 14,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "order_status_tracking",
+        "department": "Email Support Team",
+        "reason": "order number present with shipping or tracking language",
+        "primary_source": "deterministic",
+        "confidence": 0.94,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-DAmyODzKz5AxS3EXaX8BoCte4H87J",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": true,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "preorder_proof": {
+        "preorder_delivery_estimate": true,
+        "preorder_tag_match": true,
+        "preorder_tag_matches": [
+          "pre-order"
+        ],
+        "order_created_date": "2026-01-17",
+        "inquiry_date": "2026-01-30",
+        "preorder_window_min_days": 6,
+        "preorder_window_max_days": 12,
+        "preorder_normalized_method": "Standard (3-7 business days)",
+        "preorder_raw_method": "USPS/UPS® Ground",
+        "preorder_ship_date_human": "Tuesday, March 3, 2026",
+        "preorder_ship_in_days": "32 days",
+        "preorder_delivery_window_human": "March 11–March 19, 2026",
+        "preorder_arrives_in_days": "40–48 days",
+        "processing_human": "3-5 business days",
+        "remaining_min_days": null,
+        "remaining_max_days": null,
+        "is_late": false,
+        "draft_reply_present": true,
+        "draft_reply_has_preorder_word": true,
+        "draft_reply_has_processing_phrase": true,
+        "draft_reply_has_processing_human": true,
+        "draft_reply_has_ship_date": true,
+        "draft_reply_has_ship_schedule_phrase": true,
+        "draft_reply_has_delivery_window": true,
+        "draft_reply_has_estimated_delivery_phrase": true,
+        "draft_reply_has_ship_in_days": true,
+        "draft_reply_has_arrives_in_days": true,
+        "nonpreorder_floor_ok": null,
+        "draft_reply_ends_with_tracking_line": true,
+        "draft_reply_body_fingerprint": "82c94b9b6930",
+        "greeting_present": false,
+        "key_details_present": true,
+        "holly_signature_present": false
+      },
+      "rewrite_reply_proof": {
+        "greeting_present": false,
+        "key_details_present": true,
+        "holly_signature_present": false
+      },
+      "rewrite_model_used": "gpt-5.2-2025-12-11",
+      "rewrite_rewritten": false,
+      "rewrite_reason": "unexpected_eta",
+      "final_reply_proof": {
+        "greeting_present": true,
+        "key_details_present": true,
+        "holly_signature_present": true
+      },
+      "order_status_candidate": true,
+      "order_matched": true,
+      "tracking_found": true,
+      "eta_available": true,
+      "elapsed_seconds": 10.828
+    }
+  ],
+  "summary_path": "artifacts\\readonly_shadow\\live_shadow_summary.json",
+  "run_warnings": [],
+  "http_trace_path": "artifacts\\readonly_shadow\\live_shadow_http_trace.json",
+  "http_trace_summary": {
+    "total_requests": 12,
+    "methods": {
+      "GET": 7,
+      "POST": 5
+    },
+    "services": {
+      "aws_portal": 1,
+      "aws_secretsmanager": 2,
+      "richpanel": 4,
+      "shopify": 2,
+      "openai": 3
+    },
+    "sources": {
+      "aws_sdk": 3,
+      "urllib": 9
+    },
+    "aws_operations": {
+      "GetSecretValue": 2
+    },
+    "aws_missing_operations": 0,
+    "aws_sdk_trace_enabled": true,
+    "allowed_methods_only": true
+  },
+  "richpanel_request_burst": null,
+  "richpanel_retry_after_validation": {
+    "checked": 0,
+    "violations": 0
+  },
+  "richpanel_identity": {
+    "richpanel_base_url": "https://api.richpanel.com",
+    "mw_env": "prod",
+    "richpanel_env": "prod",
+    "resolved_env": "prod",
+    "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
+    "api_key_hash": "7ab000f0",
+    "api_key_error": null,
+    "run_started_at": "2026-02-19T01:18:16.062483+00:00",
+    "run_duration_seconds": 15.828
+  },
+  "notes": [
+    "Ticket identifiers are hashed.",
+    "Shopify shop domains are hashed.",
+    "No message bodies or customer identifiers are stored.",
+    "HTTP trace captures urllib.request and AWS SDK (botocore) calls; entries include source and AWS operation metadata."
+  ]
+}

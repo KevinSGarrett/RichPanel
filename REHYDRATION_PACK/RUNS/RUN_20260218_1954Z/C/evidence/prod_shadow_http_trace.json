@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-02-19T01:18:31.894525+00:00",
+  "entries": [
+    {
+      "method": "GET",
+      "path": "/federation/credentials",
+      "service": "aws_portal",
+      "source": "aws_sdk"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:455d2b629ec5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:455d2b629ec5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "service": "aws_secretsmanager",
+      "source": "aws_sdk",
+      "operation": "GetSecretValue"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/number/redacted:455d2b629ec5",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tickets/redacted:665339c9382c",
+      "service": "richpanel",
+      "source": "urllib"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
+      "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
+      "source": "urllib"
+    }
+  ],
+  "aws_sdk_trace_enabled": true,
+  "note": "Captured via urllib.request.urlopen and botocore Endpoint._send (AWS SDK); entries include source and optional aws operation."
+}

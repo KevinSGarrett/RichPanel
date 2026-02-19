@@ -1,0 +1,83 @@
+{
+  "Architectures": [
+    "x86_64"
+  ],
+  "CodeSha256": "eGZ9Z6GThaxveRBsN9loslrURO2gRLI3LtMMbcfEUIk=",
+  "CodeSize": 121059,
+  "Description": "SQS worker that logs events, enforces kill switches, and writes idempotency records.",
+  "Environment": {
+    "Variables": {
+      "AUDIT_TRAIL_TABLE_NAME": "***REDACTED***",
+      "AUTOMATION_ENABLED_PARAM": "/rp-mw/prod/automation_enabled",
+      "CONVERSATION_STATE_TABLE_NAME": "***REDACTED***",
+      "IDEMPOTENCY_TABLE_NAME": "***REDACTED***",
+      "MW_ALLOW_ENV_FLAG_OVERRIDE": "***REDACTED***",
+      "MW_AUTOMATION_ENABLED_OVERRIDE": "***REDACTED***",
+      "MW_ENV": "prod",
+      "MW_OPENAI_INTENT_ENABLED": "***REDACTED***",
+      "MW_OPENAI_REWRITE_ENABLED": "***REDACTED***",
+      "MW_OPENAI_ROUTING_ENABLED": "***REDACTED***",
+      "MW_OPENAI_SHADOW_ENABLED": "***REDACTED***",
+      "MW_OUTBOUND_ALLOWLIST_DOMAINS": "***REDACTED***",
+      "MW_OUTBOUND_ALLOWLIST_EMAILS": "***REDACTED***",
+      "MW_OUTBOUND_REQUIRE_ALLOWLIST": "***REDACTED***",
+      "MW_PROD_WRITES_ACK": "***REDACTED***",
+      "MW_SAFE_MODE_OVERRIDE": "***REDACTED***",
+      "OPENAI_REPLY_REWRITE_ENABLED": "***REDACTED***",
+      "OPENAI_REPLY_REWRITE_MODEL": "gpt-5.2",
+      "OPENAI_REPLY_REWRITE_TEMPERATURE": "0.2",
+      "OPENAI_ROUTING_PRIMARY": "***REDACTED***",
+      "RICHPANEL_429_COOLDOWN_MULTIPLIER": "***REDACTED***",
+      "RICHPANEL_API_KEY_SECRET_ARN": "***REDACTED***",
+      "RICHPANEL_BOT_AGENT_ID": "***REDACTED***",
+      "RICHPANEL_BOT_AUTHOR_ID": "***REDACTED***",
+      "RICHPANEL_HTTP_MAX_ATTEMPTS": "***REDACTED***",
+      "RICHPANEL_OUTBOUND_ENABLED": "***REDACTED***",
+      "RICHPANEL_RATE_LIMIT_RPS": "***REDACTED***",
+      "RICHPANEL_READ_ONLY": "***REDACTED***",
+      "RICHPANEL_TOKEN_POOL_ENABLED": "***REDACTED***",
+      "RICHPANEL_TOKEN_POOL_SECRET_IDS": "***REDACTED***",
+      "RICHPANEL_WRITE_DISABLED": "***REDACTED***",
+      "SAFE_MODE_PARAM": "/rp-mw/prod/safe_mode",
+      "SHOPIFY_OUTBOUND_ENABLED": "***REDACTED***",
+      "SHOPIFY_SHOP_DOMAIN": "***REDACTED***",
+      "SHOPIFY_WRITE_DISABLED": "***REDACTED***"
+    }
+  },
+  "EphemeralStorage": {
+    "Size": 512
+  },
+  "FunctionArn": "arn:aws:lambda:us-east-2:878145708918:function:rp-mw-prod-worker",
+  "FunctionName": "rp-mw-prod-worker",
+  "Handler": "lambda_handlers.worker.handler.lambda_handler",
+  "LastModified": "2026-02-18T23:23:18.000+0000",
+  "LastUpdateStatus": "Successful",
+  "LoggingConfig": {
+    "LogFormat": "Text",
+    "LogGroup": "/aws/lambda/rp-mw-prod-worker"
+  },
+  "MemorySize": 512,
+  "PackageType": "Zip",
+  "RevisionId": "8d638cb4-c2f2-4cfa-9f52-afbb9558cf75",
+  "Role": "arn:aws:iam::878145708918:role/RichpanelMiddleware-prod-WorkerLambdaServiceRole33A-SKcKFfYRiQy2",
+  "Runtime": "python3.11",
+  "RuntimeVersionConfig": {
+    "RuntimeVersionArn": "arn:aws:lambda:us-east-2::runtime:0de7d4de4aef04631dc8443fb686ab8bf14de4d4a348cb0d407cce5f48aef7d8"
+  },
+  "SnapStart": {
+    "ApplyOn": "None",
+    "OptimizationStatus": "Off"
+  },
+  "State": "Active",
+  "Timeout": 60,
+  "TracingConfig": {
+    "Mode": "PassThrough"
+  },
+  "Version": "$LATEST",
+  "VpcConfig": {
+    "Ipv6AllowedForDualStack": false,
+    "SecurityGroupIds": [],
+    "SubnetIds": [],
+    "VpcId": ""
+  }
+}
