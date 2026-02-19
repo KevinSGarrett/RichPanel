@@ -33,12 +33,13 @@ first-name sourcing, block inbound CTAs, and update the rewrite prompt.
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260219_0628Z-B92A`
 - PR: none
-- CI status at end of run: red (run_ci_checks --ci requires clean tree)
+- CI status at end of run: green (local run_ci_checks --ci pass)
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `pytest -q`, `python scripts/verify_agent_prompts_fresh.py`
+- Tests run: `python scripts/run_ci_checks.py --ci`, `pytest -q`,
+  `python scripts/verify_agent_prompts_fresh.py`
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/`
 
 ## Decisions made

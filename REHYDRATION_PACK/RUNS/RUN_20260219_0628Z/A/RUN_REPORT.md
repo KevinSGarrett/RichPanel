@@ -92,7 +92,7 @@ List commands you ran (include key flags/env if relevant):
 - `git pull` - sync with origin/main
 - `python scripts/new_run_folder.py --now` - create run folder
 - `git checkout -b run/RUN_20260219_0628Z-B92A` - create run branch
-- `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (fails until tree is clean)
+- `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (pass)
 - `pytest -q` - full test run (pass)
 - `python scripts/verify_agent_prompts_fresh.py` - prompt repeat guard (override)
 - `python -c "from scripts.verify_agent_prompts_fresh import prompt_set_fingerprint, CURRENT_PROMPTS_PATH; ..."` - compute prompt fingerprint
@@ -134,32 +134,31 @@ Paste output snippet proving you ran:
 ## Agent Summary
 
 ### Work completed
-- Changed `backend/src/richpanel_middleware/automation/delivery_estimate.py`: removed
+- Changed backend/src/richpanel_middleware/automation/delivery_estimate.py: removed
   Key Details block, added timeline paragraph and tracking email line.
-- Changed `backend/src/richpanel_middleware/automation/pipeline.py`: added inbound
+- Changed backend/src/richpanel_middleware/automation/pipeline.py: added inbound
   CTA guard and order_summary name fallback; removed Key Details enforcement.
-- Changed `backend/src/richpanel_middleware/automation/order_status_prompts.py`:
+- Changed backend/src/richpanel_middleware/automation/order_status_prompts.py:
   updated reply system prompt v3 constraints.
-- Changed `backend/src/richpanel_middleware/commerce/order_lookup.py`: added
+- Changed backend/src/richpanel_middleware/commerce/order_lookup.py: added
   Shopify customer name extraction.
-- Updated tests in `backend/tests/*` and `scripts/test_*` to match new copy.
-- Ran: `pytest -q` → pass
-- Ran: `python scripts/verify_agent_prompts_fresh.py` → pass (override)
-- Evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/`
+- Updated tests in backend/tests/* and scripts/test_* to match new copy.
+- Ran: python scripts/run_ci_checks.py --ci -> pass
+- Ran: pytest -q -> pass
+- Ran: python scripts/verify_agent_prompts_fresh.py -> pass (override)
+- Evidence: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/
 
 ### Merge state
-- Branch: `run/RUN_20260219_0628Z-B92A`
-- Worktree: `C:\RichPanel_GIT`
+- Branch: run/RUN_20260219_0628Z-B92A
+- Worktree: C:\RichPanel_GIT
 - PR: none (not created)
-- Last commit: `40b366287b107ba10e5e41ac5a7dbc6cfb45b45a`
-- Prompt set fingerprint: `368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be`
+- Last commit: 922668b604953f38189052d3cc3d5bf1c56e14cb
+- Prompt set fingerprint: 368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be
 
 ### Not done
-- Run `python scripts/run_ci_checks.py --ci` with a clean tree (blocked by untracked
-  prior-run evidence files).
 - Commit changes and open PR with required title/labels/template.
 
 ### Handoff notes
-- Untracked files in `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/` need a
-  decision (delete or add) before CI checks can be green.
-- Logs: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/`.
+- Logs: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/.
+- Confidence: 0.98 (CI-equivalent checks + pytest pass; changes are localized and
+  covered by updated unit tests).
