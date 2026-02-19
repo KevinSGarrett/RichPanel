@@ -5,7 +5,7 @@
 **Labels:** `risk:R2-medium`, `gate:claude`  
 **Risk:** `risk:R2`  
 **Claude gate model (used):** `claude-opus-4-5-20251101`  
-**Anthropic response id:** `msg_0182pW8YLS7PJmLNDsNJRjzL`  
+**Anthropic response id:** `msg_01A7VDu6oyfiC8k5HRAYj8hX`  
 
 ### 1) Summary
 - Preserve deterministic delivery date windows during order-status rewrite validation.
