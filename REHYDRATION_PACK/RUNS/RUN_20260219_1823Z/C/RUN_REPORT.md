@@ -23,14 +23,25 @@
 
 ## Diffstat (required)
 ```
- docs/00_Project_Admin/Progress_Log.md               | 4 ++++
- docs/08_Engineering/Order_Status_OpenAI_Contract.md | 8 ++++++++
- docs/_generated/doc_outline.json                    | 5 +++++
- docs/_generated/doc_registry.compact.json           | 2 +-
- docs/_generated/doc_registry.json                   | 8 ++++----
- docs/_generated/heading_index.json                  | 6 ++++++
- infra/cdk/lib/richpanel-middleware-stack.ts         | 4 +++-
- 7 files changed, 31 insertions(+), 6 deletions(-)
+ .../RUN_20260219_1823Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++
+ .../RUNS/RUN_20260219_1823Z/C/DOCS_IMPACT_MAP.md   |  23 +++
+ .../RUNS/RUN_20260219_1823Z/C/GIT_RUN_PLAN.md      |  62 ++++++++
+ .../RUNS/RUN_20260219_1823Z/C/RUN_REPORT.md        | 171 +++++++++++++++++++++
+ .../RUNS/RUN_20260219_1823Z/C/RUN_SUMMARY.md       |  39 +++++
+ .../RUNS/RUN_20260219_1823Z/C/STRUCTURE_REPORT.md  |  32 ++++
+ .../RUNS/RUN_20260219_1823Z/C/TEST_MATRIX.md       |  16 ++
+ .../C/evidence/run_ci_checks_ci.log                | Bin 0 -> 10060 bytes
+ .../C/evidence/verify_agent_prompts_fresh.log      | Bin 0 -> 124 bytes
+ .../C/evidence/verify_rehydration_pack.log         | Bin 0 -> 96 bytes
+ .../RUNS/RUN_20260219_1823Z/RUN_META.md            |  11 ++
+ docs/00_Project_Admin/Progress_Log.md              |   4 +
+ .../08_Engineering/Order_Status_OpenAI_Contract.md |   8 +
+ docs/_generated/doc_outline.json                   |   5 +
+ docs/_generated/doc_registry.compact.json          |   2 +-
+ docs/_generated/doc_registry.json                  |   8 +-
+ docs/_generated/heading_index.json                 |   6 +
+ infra/cdk/lib/richpanel-middleware-stack.ts        |   4 +-
+ 18 files changed, 541 insertions(+), 6 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -41,6 +52,7 @@
 - `docs/_generated/doc_registry.compact.json`: regenerated docs registry output.
 - `docs/_generated/doc_registry.json`: regenerated docs registry output.
 - `docs/_generated/heading_index.json`: regenerated docs registry output.
+- `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/RUN_META.md`: run metadata record.
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/*`: run artifacts and evidence logs.
 
 ## Commands Run (required)
@@ -109,6 +121,36 @@ git status -sb
  M docs/_generated/heading_index.json
  M infra/cdk/lib/richpanel-middleware-stack.ts
 ?? REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/
+
+Remove-Item -Recurse -Force C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_1823Z\A
+Remove-Item -Recurse -Force C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_1823Z\B
+# output:
+(no output)
+
+git add infra/cdk/lib/richpanel-middleware-stack.ts docs/08_Engineering/Order_Status_OpenAI_Contract.md docs/00_Project_Admin/Progress_Log.md docs/_generated/doc_outline.json docs/_generated/doc_registry.compact.json docs/_generated/doc_registry.json docs/_generated/heading_index.json REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C
+# output:
+(LF/CRLF warnings omitted)
+
+git commit -m "B94: tune reply rewrite limits + temp"
+# output:
+[run/RUN_20260219_1823Z-B94C 5e04e01] B94: tune reply rewrite limits + temp
+ 18 files changed, 551 insertions(+), 6 deletions(-)
+ ... (created run artifacts + evidence logs) ...
+
+git add -A REHYDRATION_PACK/RUNS/RUN_20260219_1823Z
+# output:
+(no output)
+
+git commit -m "B94: clean run artifacts metadata"
+# output:
+[run/RUN_20260219_1823Z-B94C 7ca8f72] B94: clean run artifacts metadata
+ 2 files changed, 11 insertions(+), 21 deletions(-)
+ delete mode 100644 REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/FIX_REPORT.md
+ create mode 100644 REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/RUN_META.md
+
+git diff --stat origin/main...HEAD
+# output:
+... (see Diffstat section) ...
 ```
 
 ## Tests / Proof (required)
