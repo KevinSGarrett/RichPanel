@@ -35,7 +35,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260219_1524Z/B/FIX_REPORT.md        |  21 +++
  .../RUNS/RUN_20260219_1524Z/B/GIT_RUN_PLAN.md      |  65 +++++++++
  .../RUNS/RUN_20260219_1524Z/B/PR_DESCRIPTION.md    | 103 ++++++++++++++
- .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        | 123 ++++++++++++++++
+ .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        | 124 ++++++++++++++++
  .../RUNS/RUN_20260219_1524Z/B/RUN_SUMMARY.md       |  42 ++++++
  .../RUNS/RUN_20260219_1524Z/B/STRUCTURE_REPORT.md  |  34 +++++
  .../RUNS/RUN_20260219_1524Z/B/TEST_MATRIX.md       |  18 +++
@@ -53,18 +53,18 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260219_1524Z/C/STRUCTURE_REPORT.md  |  27 ++++
  .../RUNS/RUN_20260219_1524Z/C/TEST_MATRIX.md       |  15 ++
  .../RUNS/RUN_20260219_1524Z/RUN_META.md            |  11 ++
- .../automation/llm_reply_rewriter.py               |  94 +++++++++++--
- .../automation/order_status_prompts.py             |  12 +-
+ .../automation/llm_reply_rewriter.py               |  97 +++++++++++--
+ .../automation/order_status_prompts.py             |  14 +-
  .../richpanel_middleware/automation/pipeline.py    |   7 +
- .../test_order_status_reply_personalization.py     |  27 +++-
- backend/tests/test_reply_rewrite_validation.py     |  74 +++++++++-
+ .../test_order_status_reply_personalization.py     |  28 +++-
+ backend/tests/test_reply_rewrite_validation.py     |  96 ++++++++++++-
  docs/00_Project_Admin/Progress_Log.md              |   5 +
  docs/_generated/doc_outline.json                   |   5 +
  docs/_generated/doc_registry.compact.json          |   2 +-
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
- scripts/test_llm_reply_rewriter.py                 |  33 +++--
- 40 files changed, 1309 insertions(+), 36 deletions(-)
+ scripts/test_llm_reply_rewriter.py                 |  34 +++--
+ 40 files changed, 1338 insertions(+), 37 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:

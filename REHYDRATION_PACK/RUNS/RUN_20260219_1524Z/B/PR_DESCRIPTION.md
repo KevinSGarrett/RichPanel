@@ -4,8 +4,8 @@
 **Agents:** B  
 **Labels:** `risk:R2-medium`, `gate:claude`  
 **Risk:** `risk:R2`  
-**Claude gate model (used):** pending — gate not run  
-**Anthropic response id:** pending — gate not run  
+**Claude gate model (used):** `claude-opus-4-5-20251101`  
+**Anthropic response id:** `msg_01DhzxzKGVuhKWheLTcuHVkD`  
 
 ### 1) Summary
 - Preserve deterministic delivery date windows during order-status rewrite validation.
@@ -68,9 +68,9 @@
 - Not run (no outbound send or deployment in this agent run).
 
 ### 7) Results & evidence
-**CI:** pending — link after PR  
-**Codecov:** pending — link after PR  
-**Bugbot:** pending — trigger via `@cursor review` after PR  
+**CI:** pass — https://github.com/KevinSGarrett/RichPanel/actions/runs/22189199324  
+**Codecov:** pass — https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/264  
+**Bugbot:** issues addressed — https://github.com/KevinSGarrett/RichPanel/pull/264#discussion_r2828733055  
 
 **Artifacts / proof:**
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1524Z/B/evidence/run_ci_checks_ci.log`
