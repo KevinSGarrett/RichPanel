@@ -117,7 +117,7 @@ List commands you ran (include key flags/env if relevant):
 - `aws lambda get-function-configuration --function-name rp-mw-prod-worker` - captured Lambda env config (redacted).
 - `python scripts/live_readonly_shadow_eval.py --env prod ...` - attempted read-only shadow eval (failed with Richpanel 504 timeout).
 - `gh workflow run "Shadow Live Read-Only Eval" --ref main -f shop-domain=... -f ticket-ids=...` - shadow eval workflow (failed: OpenAI routing disabled in workflow env).
-- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> ...` - local shadow eval retries per ticket (all failed: richpanel_ticket_fetch_failed).
+- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> ...` - local shadow eval retries per ticket (ticket fetch succeeded; conversation endpoints returned 403; Shopify auth failed).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -127,7 +127,7 @@ Include test commands + results + links to evidence.
 - `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `Deploy Prod Stack` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_prod_main_run_22161726807.log`
 - `Shadow Live Read-Only Eval` - fail (OpenAI routing disabled in workflow env) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/shadow_eval_run_22162429932.log`
-- `live_readonly_shadow_eval.py` - fail (richpanel_ticket_fetch_failed for all provided ticket IDs) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
+- `live_readonly_shadow_eval.py` - partial (ticket fetch ok; conversation 403; Shopify auth fail; no rewrite proof) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 - `Deploy Staging Stack` (main) - fail (log group already exists) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log`

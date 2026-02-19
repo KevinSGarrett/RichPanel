@@ -1,6 +1,6 @@
 {
-  "run_id": "RUN_20260219_0007Z",
-  "timestamp": "2026-02-19T00:07:34.684530+00:00",
+  "run_id": "RUN_20260219_0033Z",
+  "timestamp": "2026-02-19T00:34:13.147146+00:00",
   "environment": "prod",
   "env_flags": {
     "MW_ALLOW_NETWORK_READS": "true",
@@ -35,7 +35,7 @@
   "would_reply_send": false,
   "top_failure_reasons": [
     {
-      "reason": "richpanel_ticket_fetch_failed",
+      "reason": "shopify_auth_fail",
       "count": 1
     }
   ],
@@ -48,37 +48,88 @@
     "tracking_found": 0,
     "eta_available": 0,
     "tracking_or_eta_available": 0,
-    "errors": 1
+    "errors": 0
   },
   "shopify_probe": {
     "enabled": false
   },
   "tickets": [
     {
-      "ticket_id_redacted": "redacted:cd92c15d6341",
-      "failure_reason": "richpanel_ticket_fetch_failed",
-      "failure_source": "richpanel_ticket_fetch",
-      "error": {
-        "type": "error"
+      "ticket_id_redacted": "redacted:22c57b9d0280",
+      "channel": "email",
+      "ticket_schema_fingerprint": "217280547918",
+      "order_resolution": {
+        "resolvedBy": "no_match",
+        "confidence": "low",
+        "reason": "shopify_auth_fail",
+        "shopify_diagnostics": {
+          "category": "auth_fail",
+          "status_code": 401,
+          "request_id": "a1a84652-5661-4aca-8124-c0c74888e5ab-1771461233"
+        }
       },
-      "elapsed_seconds": 20.172
+      "shopify_tracking_number": false,
+      "shopify_tracking_redacted": null,
+      "shopify_carrier": null,
+      "shopify_order_created_at": true,
+      "shopify_shipping_method": null,
+      "shopify_schema_fingerprint": "72222260805b",
+      "comment_count": 5,
+      "comment_text_present": true,
+      "comment_operator_flag_present": true,
+      "customer_comment_present": true,
+      "customer_message_present": true,
+      "routing": {
+        "intent": "order_status_tracking",
+        "department": "Email Support Team",
+        "reason": "order number present with shipping or tracking language",
+        "primary_source": "deterministic",
+        "confidence": 0.93,
+        "llm_model": "gpt-5.2-chat-latest",
+        "llm_response_id": "chatcmpl-DAmHQlf7gaVOsg3HQHvQqtKXUfBNs",
+        "llm_gated_reason": null
+      },
+      "would_reply_send": false,
+      "order_id_present": true,
+      "order_number_present": true,
+      "order_created_at_present": true,
+      "tracking_or_shipping_method_present": false,
+      "order_context_missing": [
+        "tracking_or_shipping_method"
+      ],
+      "order_status_candidate": false,
+      "order_matched": false,
+      "tracking_found": false,
+      "eta_available": false,
+      "failure_reason": "shopify_auth_fail",
+      "failure_source": "order_match",
+      "elapsed_seconds": 46.734
     }
   ],
   "summary_path": "artifacts\\readonly_shadow\\live_shadow_summary.json",
   "run_warnings": [],
   "http_trace_path": "artifacts\\readonly_shadow\\live_shadow_http_trace.json",
   "http_trace_summary": {
-    "total_requests": 1,
+    "total_requests": 31,
     "methods": {
-      "GET": 1
+      "GET": 21,
+      "POST": 10
     },
     "services": {
-      "richpanel": 1
+      "aws_portal": 1,
+      "aws_secretsmanager": 8,
+      "richpanel": 12,
+      "shopify": 6,
+      "shipstation": 2,
+      "openai": 2
     },
     "sources": {
-      "urllib": 1
+      "aws_sdk": 9,
+      "urllib": 22
     },
-    "aws_operations": {},
+    "aws_operations": {
+      "GetSecretValue": 8
+    },
     "aws_missing_operations": 0,
     "aws_sdk_trace_enabled": true,
     "allowed_methods_only": true
@@ -94,10 +145,10 @@
     "richpanel_env": "prod",
     "resolved_env": "prod",
     "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
-    "api_key_hash": "c7c17495",
+    "api_key_hash": "7ab000f0",
     "api_key_error": null,
-    "run_started_at": "2026-02-19T00:07:09.521867+00:00",
-    "run_duration_seconds": 25.172
+    "run_started_at": "2026-02-19T00:33:21.399641+00:00",
+    "run_duration_seconds": 51.734
   },
   "notes": [
     "Ticket identifiers are hashed.",
