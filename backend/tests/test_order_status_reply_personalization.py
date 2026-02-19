@@ -24,6 +24,11 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     assert "Do not mention AI, bot, automation, or templates." in messages[0].content
     assert "Do NOT encourage inbound contact" in messages[0].content
     assert "\"reply back\"" in messages[0].content
+    assert "ONE concrete anchor detail" in messages[0].content
+    assert "Do NOT output a \"Key Details\" section title" in messages[0].content
+    assert "\"message us\"" in messages[0].content
+    assert "\"get back to us\"" in messages[0].content
+    assert "\"if you have questions\"" in messages[0].content
     assert "customer_message_excerpt" in messages[1].content
     assert "\"customer_first_name\":\"Sarah\"" in messages[1].content
     assert (
@@ -155,10 +160,24 @@ def test_extract_customer_first_name_from_order_summary() -> None:
 
 def test_inbound_cta_guard_reverts_to_draft() -> None:
     draft = "Deterministic draft reply."
-    rewritten = "Feel free to reply if you have questions."
-    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
-    assert blocked is True
-    assert updated == draft
+    blocked_phrases = [
+        "feel free to reply",
+        "reply back",
+        "reply here",
+        "reach out",
+        "contact us",
+        "let us know",
+        "message us",
+        "get back to us",
+        "if you have questions",
+        "if you have any questions",
+        "if you have any other questions",
+    ]
+    for phrase in blocked_phrases:
+        rewritten = f"Please {phrase} if anything changes."
+        updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+        assert blocked is True
+        assert updated == draft
 
     safe = "Tracking will be emailed automatically once it ships and is scanned by the carrier."
     updated_safe, blocked_safe = pipeline._apply_inbound_cta_guard(safe, draft)

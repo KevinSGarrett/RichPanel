@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-19 - RUN_20260219_1524Z (B93-B: preserve delivery windows + CTA guard)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260219_1524Z
+- Added rewrite validation guard to preserve delivery date ranges and reject unexpected windows.
+- Expanded inbound CTA denylist and tightened order-status prompt constraints + tests.
+
 ### 2026-02-19 - RUN_20260219_0628Z (B92-A: naturalness v3 + no Key Details + no CTA)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z
 - Removed Key Details block from deterministic drafts and pipeline enforcement; added timeline paragraph for no-tracking replies and paragraph-form tracking replies.
