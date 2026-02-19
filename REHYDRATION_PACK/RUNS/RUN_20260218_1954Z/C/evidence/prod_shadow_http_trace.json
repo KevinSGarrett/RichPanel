@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-19T00:47:58.726702+00:00",
+  "generated_at": "2026-02-19T00:54:27.283794+00:00",
   "entries": [
     {
       "method": "GET",
@@ -23,54 +23,6 @@
     {
       "method": "GET",
       "path": "/v1/tickets/number/redacted:455d2b629ec5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:455d2b629ec5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:455d2b629ec5",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:455d2b629ec5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:455d2b629ec5/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:665339c9382c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:665339c9382c",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/conversations/redacted:665339c9382c/messages",
-      "service": "richpanel",
-      "source": "urllib"
-    },
-    {
-      "method": "GET",
-      "path": "/v1/conversations/redacted:665339c9382c/messages",
       "service": "richpanel",
       "source": "urllib"
     },

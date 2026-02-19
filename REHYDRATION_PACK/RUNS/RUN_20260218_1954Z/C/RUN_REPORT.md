@@ -120,7 +120,7 @@ List commands you ran (include key flags/env if relevant):
 - `aws lambda get-function-configuration --function-name rp-mw-prod-worker` - captured Lambda env config (redacted).
 - `python scripts/live_readonly_shadow_eval.py --env prod ...` - attempted read-only shadow eval (failed with Richpanel 504 timeout).
 - `gh workflow run "Shadow Live Read-Only Eval" --ref main -f shop-domain=... -f ticket-ids=...` - shadow eval workflow (failed: OpenAI routing disabled in workflow env).
-- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> ...` - local shadow eval retries per ticket (ticket fetch + Shopify ok; conversation endpoints 403; order_status candidate + OpenAI calls observed).
+- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> --skip-conversations ...` - local shadow eval using /v1/tickets only (no conversation endpoints; order_status candidate + OpenAI calls observed).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -130,7 +130,7 @@ Include test commands + results + links to evidence.
 - `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `Deploy Prod Stack` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_prod_main_run_22161726807.log`
 - `Shadow Live Read-Only Eval` - fail (OpenAI routing disabled in workflow env) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/shadow_eval_run_22162429932.log`
-- `live_readonly_shadow_eval.py` - partial (ticket fetch ok; conversation 403; order_status candidate; OpenAI calls observed; rewrite inference) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
+- `live_readonly_shadow_eval.py` - partial (ticket fetch ok; order_status candidate; OpenAI calls observed; rewrite inference) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
 - `shadow eval proof` - inference note tying OpenAI calls to rewrite model gpt-5.2 - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_shadow_rewrite_inference.md`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`

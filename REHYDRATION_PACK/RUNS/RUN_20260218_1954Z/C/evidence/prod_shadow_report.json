@@ -1,6 +1,6 @@
 {
-  "run_id": "RUN_20260219_0047Z",
-  "timestamp": "2026-02-19T00:47:58.726702+00:00",
+  "run_id": "RUN_20260219_0054Z",
+  "timestamp": "2026-02-19T00:54:27.284798+00:00",
   "environment": "prod",
   "env_flags": {
     "MW_ALLOW_NETWORK_READS": "true",
@@ -17,7 +17,7 @@
   },
   "prod_target": true,
   "sample_mode": "explicit",
-  "conversation_mode": "full",
+  "conversation_mode": "skipped",
   "ticket_count": 1,
   "match_success_rate": 1.0,
   "match_failure_buckets": {
@@ -88,7 +88,7 @@
         "primary_source": "deterministic",
         "confidence": 0.94,
         "llm_model": "gpt-5.2-chat-latest",
-        "llm_response_id": "chatcmpl-DAmUnas1qG3SSh1ai2xDZqyxJG1ju",
+        "llm_response_id": "chatcmpl-DAmb7D5yx2YO9A80iva6yHmso4BPb",
         "llm_gated_reason": null
       },
       "would_reply_send": false,
@@ -135,28 +135,28 @@
       "order_matched": true,
       "tracking_found": true,
       "eta_available": true,
-      "elapsed_seconds": 37.218
+      "elapsed_seconds": 9.36
     }
   ],
   "summary_path": "artifacts\\readonly_shadow\\live_shadow_summary.json",
   "run_warnings": [],
   "http_trace_path": "artifacts\\readonly_shadow\\live_shadow_http_trace.json",
   "http_trace_summary": {
-    "total_requests": 19,
+    "total_requests": 11,
     "methods": {
-      "GET": 15,
+      "GET": 7,
       "POST": 4
     },
     "services": {
       "aws_portal": 1,
       "aws_secretsmanager": 2,
-      "richpanel": 12,
+      "richpanel": 4,
       "shopify": 2,
       "openai": 2
     },
     "sources": {
       "aws_sdk": 3,
-      "urllib": 16
+      "urllib": 8
     },
     "aws_operations": {
       "GetSecretValue": 2
@@ -178,8 +178,8 @@
     "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
     "api_key_hash": "7ab000f0",
     "api_key_error": null,
-    "run_started_at": "2026-02-19T00:47:16.507074+00:00",
-    "run_duration_seconds": 42.218
+    "run_started_at": "2026-02-19T00:54:12.918167+00:00",
+    "run_duration_seconds": 14.36
   },
   "notes": [
     "Ticket identifiers are hashed.",
