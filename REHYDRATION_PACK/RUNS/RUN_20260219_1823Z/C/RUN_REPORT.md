@@ -6,10 +6,10 @@
 - **Date (UTC):** 2026-02-19
 - **Worktree path:** `C:\RichPanel_GIT`
 - **Branch:** `run/RUN_20260219_1823Z-B94C`
-- **PR:** none
+- **PR:** #265 (https://github.com/KevinSGarrett/RichPanel/pull/265)
 - **PR merge strategy:** merge commit
 - **Risk label:** `risk:R2-medium`
-- **gate:claude label:** no
+- **gate:claude label:** no (pending auto-apply)
 - **Claude PASS comment:** N/A
 
 ## Objective + stop conditions
@@ -218,6 +218,10 @@ remote:      https://github.com/KevinSGarrett/RichPanel/pull/new/run/RUN_2026021
 branch 'run/RUN_20260219_1823Z-B94C' set up to track 'origin/run/RUN_20260219_1823Z-B94C'.
 To https://github.com/KevinSGarrett/RichPanel.git
  * [new branch]      run/RUN_20260219_1823Z-B94C -> run/RUN_20260219_1823Z-B94C
+
+gh pr create --title "B94: Tune reply rewrite limits + temp; prod deploy (risk:R2)" --body-file "REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION.md" --label "risk:R2"
+# output:
+https://github.com/KevinSGarrett/RichPanel/pull/265
 ```
 
 ## Tests / Proof (required)

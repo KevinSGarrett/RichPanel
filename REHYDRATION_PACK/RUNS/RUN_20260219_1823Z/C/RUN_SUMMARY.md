@@ -23,7 +23,7 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260219_1823Z-B94C`
-- PR: none
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/265
 - CI status at end of run: green (local run_ci_checks passed)
 - Main updated: no
 - Branch cleanup done: no
