@@ -127,6 +127,11 @@ Remove-Item -Recurse -Force C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_
 # output:
 (no output)
 
+$base="C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_1823Z"
+foreach ($agent in @("A","B")) { ... backfill content ... }
+# output:
+(no output)
+
 git add infra/cdk/lib/richpanel-middleware-stack.ts docs/08_Engineering/Order_Status_OpenAI_Contract.md docs/00_Project_Admin/Progress_Log.md docs/_generated/doc_outline.json docs/_generated/doc_registry.compact.json docs/_generated/doc_registry.json docs/_generated/heading_index.json REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C
 # output:
 (LF/CRLF warnings omitted)
@@ -148,15 +153,35 @@ git commit -m "B94: clean run artifacts metadata"
  delete mode 100644 REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/FIX_REPORT.md
  create mode 100644 REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/RUN_META.md
 
+git add REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/A REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/B
+# output:
+(LF/CRLF warnings omitted)
+
+git commit -m "B94: add backfill artifacts for A/B"
+# output:
+[run/RUN_20260219_1823Z-B94C 0d23c18] B94: add backfill artifacts for A/B
+ 10 files changed, 278 insertions(+)
+ ... (created A/B backfill artifacts) ...
+
 git diff --stat origin/main...HEAD
 # output:
 ... (see Diffstat section) ...
+
+git checkout -- REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/run_ci_checks_ci.log
+# output:
+(no output)
+
+$tempLog="C:\RichPanel_Runs\run_ci_checks_ci.log"
+python scripts/run_ci_checks.py --ci | Tee-Object -FilePath $tempLog
+Copy-Item $tempLog C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_1823Z\C\evidence\run_ci_checks_ci.log -Force
+# output:
+[OK] CI-equivalent checks passed. (see evidence/run_ci_checks_ci.log)
 ```
 
 ## Tests / Proof (required)
-- **Tests run:** `python scripts/run_ci_checks.py --ci` (failed: progress log missing, then generated files uncommitted); `python scripts/verify_rehydration_pack.py`; `python scripts/verify_agent_prompts_fresh.py`
+- **Tests run:** `python scripts/run_ci_checks.py --ci` (passed); `python scripts/verify_rehydration_pack.py`; `python scripts/verify_agent_prompts_fresh.py`
 - **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/`
-- **Results:** CI checks pending (rerun needed after commit); verification scripts passed.
+- **Results:** CI-equivalent checks passed; verification scripts passed.
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no
@@ -207,7 +232,7 @@ git diff --stat origin/main...HEAD
 - Prod safety flags must remain safe_mode=true and automation_enabled=false before any deploy.
 
 ## Blockers / open questions
-- Need passing run_ci_checks after committing regenerated docs and run artifacts.
+- None.
 
 ## Follow-ups (actionable)
-- Rerun `python scripts/run_ci_checks.py --ci` after staging/committing generated docs.
+- None.
