@@ -23,17 +23,28 @@
 
 ## Diffstat (required)
 ```
- .../RUN_20260219_1823Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++
- .../RUNS/RUN_20260219_1823Z/C/DOCS_IMPACT_MAP.md   |  23 +++
- .../RUNS/RUN_20260219_1823Z/C/GIT_RUN_PLAN.md      |  62 ++++++++
- .../RUNS/RUN_20260219_1823Z/C/RUN_REPORT.md        | 171 +++++++++++++++++++++
- .../RUNS/RUN_20260219_1823Z/C/RUN_SUMMARY.md       |  39 +++++
- .../RUNS/RUN_20260219_1823Z/C/STRUCTURE_REPORT.md  |  32 ++++
+ .../RUNS/RUN_20260219_1823Z/A/DOCS_IMPACT_MAP.md   |  22 ++
+ .../RUNS/RUN_20260219_1823Z/A/RUN_REPORT.md        |  46 ++++
+ .../RUNS/RUN_20260219_1823Z/A/RUN_SUMMARY.md       |  32 +++
+ .../RUNS/RUN_20260219_1823Z/A/STRUCTURE_REPORT.md  |  25 +++
+ .../RUNS/RUN_20260219_1823Z/A/TEST_MATRIX.md       |  14 ++
+ .../RUNS/RUN_20260219_1823Z/B/DOCS_IMPACT_MAP.md   |  22 ++
+ .../RUNS/RUN_20260219_1823Z/B/RUN_REPORT.md        |  46 ++++
+ .../RUNS/RUN_20260219_1823Z/B/RUN_SUMMARY.md       |  32 +++
+ .../RUNS/RUN_20260219_1823Z/B/STRUCTURE_REPORT.md  |  25 +++
+ .../RUNS/RUN_20260219_1823Z/B/TEST_MATRIX.md       |  14 ++
+ .../RUN_20260219_1823Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 ++++++++++++++
+ .../RUNS/RUN_20260219_1823Z/C/DOCS_IMPACT_MAP.md   |  23 ++
+ .../RUNS/RUN_20260219_1823Z/C/GIT_RUN_PLAN.md      |  62 ++++++
+ .../RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION.md    | 101 +++++++++
+ .../RUNS/RUN_20260219_1823Z/C/RUN_REPORT.md        | 238 +++++++++++++++++++++
+ .../RUNS/RUN_20260219_1823Z/C/RUN_SUMMARY.md       |  39 ++++
+ .../RUNS/RUN_20260219_1823Z/C/STRUCTURE_REPORT.md  |  32 +++
  .../RUNS/RUN_20260219_1823Z/C/TEST_MATRIX.md       |  16 ++
- .../C/evidence/run_ci_checks_ci.log                | Bin 0 -> 10060 bytes
+ .../C/evidence/run_ci_checks_ci.log                | Bin 0 -> 9082 bytes
  .../C/evidence/verify_agent_prompts_fresh.log      | Bin 0 -> 124 bytes
  .../C/evidence/verify_rehydration_pack.log         | Bin 0 -> 96 bytes
- .../RUNS/RUN_20260219_1823Z/RUN_META.md            |  11 ++
+ .../RUNS/RUN_20260219_1823Z/RUN_META.md            |  11 +
  docs/00_Project_Admin/Progress_Log.md              |   4 +
  .../08_Engineering/Order_Status_OpenAI_Contract.md |   8 +
  docs/_generated/doc_outline.json                   |   5 +
@@ -41,7 +52,7 @@
  docs/_generated/doc_registry.json                  |   8 +-
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   4 +-
- 18 files changed, 541 insertions(+), 6 deletions(-)
+ 29 files changed, 987 insertions(+), 6 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -53,6 +64,8 @@
 - `docs/_generated/doc_registry.json`: regenerated docs registry output.
 - `docs/_generated/heading_index.json`: regenerated docs registry output.
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/RUN_META.md`: run metadata record.
+- `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/A/*`: backfill artifacts for build-mode compliance.
+- `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/B/*`: backfill artifacts for build-mode compliance.
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/*`: run artifacts and evidence logs.
 
 ## Commands Run (required)
@@ -162,6 +175,16 @@ git commit -m "B94: add backfill artifacts for A/B"
 [run/RUN_20260219_1823Z-B94C 0d23c18] B94: add backfill artifacts for A/B
  10 files changed, 278 insertions(+)
  ... (created A/B backfill artifacts) ...
+
+git commit -m "B94: record CI pass evidence"
+# output:
+[run/RUN_20260219_1823Z-B94C cd9253b] B94: record CI pass evidence
+ 4 files changed, 32 insertions(+), 7 deletions(-)
+
+git commit -m "B94: add PR description artifact"
+# output:
+[run/RUN_20260219_1823Z-B94C 42cdbe4] B94: add PR description artifact
+ 1 file changed, 101 insertions(+)
 
 git diff --stat origin/main...HEAD
 # output:
