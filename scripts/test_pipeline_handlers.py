@@ -1179,6 +1179,20 @@ class OutboundOrderStatusTests(unittest.TestCase):
         body = send_calls[0]["kwargs"]["json_body"].get("body", "")
         self.assertIn("Deterministic draft reply.", body)
         self.assertNotIn("reply back", body.lower())
+        self.assertFalse(
+            pipeline_module._contains_inbound_cta("Contactless delivery is used.")
+        )
+
+        payload = {"first_name": "Tori"}
+        summary = {"customer_first_name": "Alex"}
+        self.assertEqual(
+            pipeline_module._extract_customer_first_name(payload, summary), "Tori"
+        )
+
+        summary = {"customer": {"firstName": "Uma"}}
+        self.assertEqual(
+            pipeline_module._extract_customer_first_name(None, summary), "Uma"
+        )
 
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
