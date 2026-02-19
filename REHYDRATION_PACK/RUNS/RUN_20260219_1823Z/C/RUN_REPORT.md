@@ -308,6 +308,14 @@ aws lambda get-function-configuration --function-name rp-mw-prod-worker --region
 aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
 # output:
 ... (see evidence/prod_runtime_flags_table_post_rollback.txt) ...
+
+python scripts/run_ci_checks.py --ci
+# output:
+[OK] CI-equivalent checks passed. (see evidence/run_ci_checks_ci.log)
+
+gh pr edit 265 --body-file "REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION.md"
+# output:
+https://github.com/KevinSGarrett/RichPanel/pull/265
 ```
 
 ## CDK Diff Review (required)
@@ -324,34 +332,31 @@ aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enab
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no
-- **Status timestamps:** N/A
-- **Check rollup proof:** N/A
-- **GitHub Actions run:** N/A
-- **Codecov status:** N/A
-- **Bugbot status:** N/A
+- **Status timestamps:** `2026-02-19T20:00Z` (gh pr checks 265: validate/codeql pending)
+- **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/265/checks
+- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions
+- **Codecov status:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/265
+- **Bugbot status:** https://github.com/KevinSGarrett/RichPanel/pull/265#pullrequestreview-3827983578
 
 ## PR Health Check (required for PRs)
 
 ### Bugbot Findings
-- **Bugbot triggered:** yes/no (`@cursor review` or `bugbot run`)
-- **Bugbot comment link:** <LINK_TO_PR_COMMENT> or "quota exceeded, fallback to manual review"
+- **Bugbot triggered:** yes (Cursor review)
+- **Bugbot comment link:** https://github.com/KevinSGarrett/RichPanel/pull/265#pullrequestreview-3827983578
 - **Findings summary:**
-  - <FINDING_1>: <fixed | deferred | not applicable>
-  - <FINDING_2>: <fixed | deferred | not applicable>
-- **Action taken:** <description of fixes or deferral rationale>
+  - Prompt hardcoded 1000-char limit vs env 1400: fixed (prompt now uses DEFAULT_MAX_CHARS).
+- **Action taken:** Updated `llm_reply_rewriter.py` prompt to use `DEFAULT_MAX_CHARS` and refreshed PR body/docs.
 
 ### Codecov Findings
-- **Codecov patch status:** pass/fail (<percentage>)
-- **Codecov project status:** pass/fail (<percentage change>)
-- **Coverage issues identified:**
-  - <ISSUE_1>: <fixed | acceptable as-is | deferred>
-  - <ISSUE_2>: <fixed | acceptable as-is | deferred>
-- **Action taken:** <description of test additions or rationale>
+- **Codecov patch status:** pass (https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/265)
+- **Codecov project status:** pass
+- **Coverage issues identified:** none
+- **Action taken:** none
 
 ### Claude Gate (if applicable)
-- **gate:claude label present:** yes/no
-- **Claude PASS comment link:** <LINK> or "N/A"
-- **Gate status:** pass/fail or "N/A"
+- **gate:claude label present:** yes
+- **Claude PASS comment link:** https://github.com/KevinSGarrett/RichPanel/pull/265#issuecomment-3929235301
+- **Gate status:** pass
 
 ### E2E Proof (if applicable)
 - **E2E required:** yes/no (yes if changes touch outbound/automation)
@@ -360,7 +365,7 @@ aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enab
 - **E2E result:** pass/fail or "N/A"
 - **Evidence:** <link to TEST_MATRIX.md section> or "N/A"
 
-**Gate compliance:** All Bugbot/Codecov/E2E requirements addressed: yes/no
+**Gate compliance:** All Bugbot/Codecov/E2E requirements addressed: no (validate/CodeQL pending)
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/08_Engineering/Order_Status_OpenAI_Contract.md`, `docs/00_Project_Admin/Progress_Log.md`

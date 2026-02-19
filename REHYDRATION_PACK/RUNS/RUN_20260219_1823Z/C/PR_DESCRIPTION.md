@@ -15,6 +15,7 @@
 - Tune reply rewrite limits (tokens/chars) and temperature for prod.
 - Keep rewrite model pinned to GPT-5.2 and align prompt char limit with config.
 - Document recommended prod tuning and capture run artifacts.
+- Prod stack was rolled back to main; no active prod change from this PR.
 
 ### 2) Why
 - **Problem / risk:** Current rewrite limits are conservative; Step 7 requires prod tuning knobs.
@@ -79,11 +80,14 @@
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/verify_rehydration_pack.log`
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/verify_agent_prompts_fresh.log`
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/prod_runtime_flags_table_post_rollback.txt`
+- `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/lambda_env_openai_rewrite_post_rollback.json`
 
 **Proof snippet(s) (PII-safe):**
 ```text
 [OK] CI-equivalent checks passed.
 ```
+
+Rollback status: prod env vars show `OPENAI_REPLY_REWRITE_TEMPERATURE=0.2` and no max tokens/chars after rollback.
 
 ### 8) Risk & rollback
 **Risk rationale:** `risk:R2` — prod config change affecting reply rewrite output limits/temperature.  
