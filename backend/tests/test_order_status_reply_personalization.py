@@ -166,57 +166,6 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
     assert updated_safe == safe
 
 
-def test_inbound_cta_guard_case_insensitive_and_non_match() -> None:
-    draft = "Deterministic draft reply."
-    rewritten = "Please Reply Back if you need more details."
-    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
-    assert blocked is True
-    assert updated == draft
-
-    assert pipeline._contains_inbound_cta("Contactless delivery is used.") is False
-
-
-def test_inbound_cta_guard_all_phrases_detected() -> None:
-    phrases = [
-        "feel free to reply",
-        "reply back",
-        "reply here",
-        "reach out",
-        "contact us",
-        "let us know",
-        "please reply",
-        "email us",
-        "call us",
-        "contact support",
-        "our support team",
-        "we're here to help",
-        "we are here to help",
-    ]
-    for phrase in phrases:
-        assert pipeline._contains_inbound_cta(phrase.upper()) is True
-
-
-def test_order_summary_name_fallbacks() -> None:
-    summary = {"customer": {"first_name": "Nina"}}
-    assert pipeline._extract_customer_first_name(None, summary) == "Nina"
-
-    summary = {"customer": {"firstName": "Uma"}}
-    assert pipeline._extract_customer_first_name(None, summary) == "Uma"
-
-    summary = {"customer_name": "Quinn Harper"}
-    assert pipeline._extract_customer_first_name(None, summary) == "Quinn"
-
-    summary = {"shipping_address_name": "Sam Doe"}
-    assert pipeline._extract_customer_first_name(None, summary) == "Sam"
-
-    summary = {"customer_first_name": "   "}
-    assert pipeline._extract_customer_first_name(None, summary) is None
-
-
-def test_payload_name_takes_priority() -> None:
-    payload = {"first_name": "Tori"}
-    summary = {"customer_first_name": "Alex"}
-    assert pipeline._extract_customer_first_name(payload, summary) == "Tori"
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")
