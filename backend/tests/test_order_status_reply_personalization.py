@@ -194,6 +194,17 @@ def test_inbound_cta_guard_all_phrases_detected() -> None:
     ]
     for phrase in phrases:
         assert pipeline._contains_inbound_cta(phrase.upper()) is True
+
+
+def test_order_summary_name_fallbacks() -> None:
+    summary = {"customer": {"first_name": "Nina"}}
+    assert pipeline._extract_customer_first_name(None, summary) == "Nina"
+
+    summary = {"customer_name": "Quinn Harper"}
+    assert pipeline._extract_customer_first_name(None, summary) == "Quinn"
+
+    summary = {"shipping_address_name": "Sam Doe"}
+    assert pipeline._extract_customer_first_name(None, summary) == "Sam"
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

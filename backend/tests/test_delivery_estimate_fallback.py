@@ -384,6 +384,10 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         body_lower = reply["body"].lower()
         self.assertIn("any day now", body_lower)
         self.assertNotIn("key details:", body_lower)
+        self.assertNotIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)",
+            reply["body"],
+        )
 
     def test_no_tracking_reply_missing_window_no_key_details(self) -> None:
         delivery_estimate = {
