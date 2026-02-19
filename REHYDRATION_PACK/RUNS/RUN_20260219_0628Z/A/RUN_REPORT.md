@@ -37,6 +37,13 @@
 - Enriched order_summary with customer name fields, added order_summary name
   fallback in the pipeline, and updated the rewrite prompt to v3.
 
+## Why + rollback
+- **Why:** Align order-status replies with Naturalness Upgrade v3 (no Key Details,
+  no inbound CTAs, more reliable greetings, and improved deterministic drafts).
+- **Rollback:** Revert this branch or restore previous logic in
+  `delivery_estimate.py`, `pipeline.py`, and `order_status_prompts.py`; re-run
+  `python scripts/run_ci_checks.py --ci`.
+
 ## Diffstat (required)
 Paste `git diff --stat` (or PR diffstat) here:
 
@@ -101,7 +108,7 @@ List commands you ran (include key flags/env if relevant):
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
 
-- `python scripts/run_ci_checks.py --ci` - fail (dirty tree) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/run_ci_checks_ci.log`
+- `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/run_ci_checks_ci.log`
 - `pytest -q` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/pytest_q.log`
 - `python scripts/verify_agent_prompts_fresh.py` - pass (override) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/verify_agent_prompts_fresh.log`
 - prompt fingerprint - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/prompt_fingerprint.log`
@@ -109,7 +116,9 @@ Include test commands + results + links to evidence.
 Paste output snippet proving you ran:
 `python scripts/run_ci_checks.py --ci`
 
-<PENDING: rerun after clean tree>
+```
+[OK] CI-equivalent checks passed.
+```
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/00_Project_Admin/Progress_Log.md`, `docs/_generated/*`
@@ -122,12 +131,10 @@ Paste output snippet proving you ran:
   preorder release-only copy without fabricated windows.
 
 ## Blockers / open questions
-- run_ci_checks --ci requires a clean worktree; blocked by untracked evidence
-  files under `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/`.
+- None
 
 ## Follow-ups (actionable)
-- [ ] Decide how to handle untracked RUN_20260218_1954Z evidence files (delete or add).
-- [ ] Re-run `python scripts/run_ci_checks.py --ci` after the tree is clean.
+- [ ] Monitor PR checks (validate, risk-label-check, claude-gate-check, codecov/patch, bugbot) and address any review feedback.
 
 <!-- End of template -->
 
@@ -152,14 +159,15 @@ Paste output snippet proving you ran:
 - Branch: run/RUN_20260219_0628Z-B92A
 - Worktree: C:\RichPanel_GIT
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/263 (open)
-- Last commit: 33bedc95a02c384b794571777f09f3de65a0a8ad
+- Last commit: f8e0aa6777e36f62ba7823a7094bf5fc4faa0ee5
 - Prompt set fingerprint: 368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be
 
 ### Not done
-- Push branch to origin (auth required) and open PR with required title/labels/template.
+- Monitor PR checks and resolve Bugbot/Claude review feedback as needed.
+- Ensure Codecov patch >= 93.79%.
 
 ### Handoff notes
 - Logs: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/.
-- git push failed: Invalid username or token.
+- Bugbot trigger comment: https://github.com/KevinSGarrett/RichPanel/pull/263#issuecomment-3925166886
 - Confidence: 0.98 (CI-equivalent checks + pytest pass; changes are localized and
   covered by updated unit tests).
