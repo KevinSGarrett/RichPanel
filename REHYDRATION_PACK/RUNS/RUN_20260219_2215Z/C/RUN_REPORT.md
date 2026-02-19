@@ -58,7 +58,7 @@ scripts/test_pipeline_handlers.py                  |  2 +-
 - `python scripts/run_ci_checks.py --ci` - CI-equivalent checks (rerun until clean).
 
 ## Tests / Proof (required)
-- `python scripts/run_ci_checks.py --ci` - pending clean run; evidence will be updated at `REHYDRATION_PACK/RUNS/RUN_20260219_2215Z/C/evidence/run_ci_checks_ci.log`.
+- `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260219_2215Z/C/evidence/run_ci_checks_ci.log`.
 
 ## Deployment (required for prod changes)
 - Deploy command(s): none
@@ -66,5 +66,4 @@ scripts/test_pipeline_handlers.py                  |  2 +-
 - Outcome: n/a
 
 ## Notes / Follow-ups
-- Run `run_ci_checks.py --ci` on a clean tree and update evidence log.
-- Open PR and wait for checks before deploy.
+- Open PR and wait for required checks before deploy.

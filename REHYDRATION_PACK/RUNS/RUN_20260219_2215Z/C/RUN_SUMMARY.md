@@ -29,12 +29,12 @@ Implement Auto_Reply_Upgrade_003 naturalness patch (draft formatting, prompt upd
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260219_2215Z-B95C`
 - PR: none (pending)
-- CI status at end of run: pending (clean run needed)
+- CI status at end of run: green (local CI-equivalent checks pass)
 - Main updated: no
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (pending clean run)
+- Tests run: `python scripts/run_ci_checks.py --ci`
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260219_2215Z/C/evidence/run_ci_checks_ci.log`
 
 ## Decisions made
