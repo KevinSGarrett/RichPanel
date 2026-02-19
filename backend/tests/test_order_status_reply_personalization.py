@@ -174,6 +174,26 @@ def test_inbound_cta_guard_case_insensitive_and_non_match() -> None:
     assert updated == draft
 
     assert pipeline._contains_inbound_cta("Contactless delivery is used.") is False
+
+
+def test_inbound_cta_guard_all_phrases_detected() -> None:
+    phrases = [
+        "feel free to reply",
+        "reply back",
+        "reply here",
+        "reach out",
+        "contact us",
+        "let us know",
+        "please reply",
+        "email us",
+        "call us",
+        "contact support",
+        "our support team",
+        "we're here to help",
+        "we are here to help",
+    ]
+    for phrase in phrases:
+        assert pipeline._contains_inbound_cta(phrase.upper()) is True
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

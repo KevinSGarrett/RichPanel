@@ -670,6 +670,14 @@ class OrderIdResolutionTests(unittest.TestCase):
         self.assertEqual(summary.get("tracking_number"), "TN2")
         self.assertEqual(summary.get("carrier"), "FedEx")
 
+    def test_extract_shopify_fields_name_fallbacks(self) -> None:
+        payload = {
+            "shipping_address": {"name": "Alex Smith"},
+            "billing_address": {"name": "Jamie Doe"},
+        }
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("customer_first_name"), "Alex")
+
     def test_extract_shopify_fields_falls_back_to_first_fulfillment(self) -> None:
         payload = {"fulfillments": [{"tracking_company": "UPS"}]}
         summary = _extract_shopify_fields(payload)

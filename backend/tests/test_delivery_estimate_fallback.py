@@ -11,6 +11,7 @@ if str(SRC) not in sys.path:
 
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     build_no_tracking_reply,
+    _build_no_tracking_timeline_paragraph,
 )
 
 
@@ -310,6 +311,41 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertNotIn(
             "(Business days are Mon–Fri; holidays may affect timelines.)", body
         )
+
+    def test_build_timeline_paragraph_non_preorder_bucket(self) -> None:
+        estimate = {
+            "bucket": "Standard",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 5,
+            "window_min_days": 6,
+            "window_max_days": 10,
+            "delivery_window_human": "January 9–January 15, 2024",
+            "preorder": False,
+        }
+        paragraph = _build_no_tracking_timeline_paragraph(estimate)
+        assert paragraph is not None
+        self.assertIn("For Standard shipping,", paragraph)
+        self.assertIn("processing typically takes 3-5 business days", paragraph)
+        self.assertIn("shipping takes 3-5 business days", paragraph)
+        self.assertIn("about 6-10 business days total", paragraph)
+
+    def test_build_timeline_paragraph_preorder(self) -> None:
+        estimate = {
+            "bucket": "Standard",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "delivery_window_human": "April 6–April 14, 2026",
+            "days_from_inquiry_human": "23–31 days",
+            "preorder": True,
+        }
+        paragraph = _build_no_tracking_timeline_paragraph(estimate)
+        assert paragraph is not None
+        self.assertIn("For Standard shipping,", paragraph)
+        self.assertIn("after release, processing typically takes 3-5 business days", paragraph)
+        self.assertIn("shipping takes 3-7 business days", paragraph)
+        self.assertIn("about 23–31 days from today", paragraph)
 
     def test_no_tracking_key_details_missing_transit(self) -> None:
         delivery_estimate = {
