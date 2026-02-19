@@ -896,22 +896,15 @@ def build_no_tracking_reply(
 
     if estimate:
         order_date_human = estimate["order_created_date"]
-        delivery_window_human = estimate.get("delivery_window_human")
-
-        if estimate["is_late"]:
-            eta_sentence = (
-                "It is already beyond the expected window, so it should arrive any day now."
-            )
-        else:
-            eta_sentence = f"It should arrive in about {estimate['eta_human']}."
-
         order_label = f"Order {order_id}" if has_order_id else "Your order"
         body = (
             f"Thanks for your patience. We don't have tracking yet for {order_label} "
             f"(placed on {order_date_human})."
         )
         if estimate["is_late"]:
-            body = f"{body} {eta_sentence}"
+            body = (
+                f"{body} It is already beyond the expected window, so it should arrive any day now."
+            )
         else:
             method_label = summary.get("shipping_method") or summary.get(
                 "shipping_method_name"

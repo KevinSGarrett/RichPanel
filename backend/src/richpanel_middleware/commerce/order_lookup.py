@@ -1413,16 +1413,16 @@ def _extract_shopify_fields(payload: Dict[str, Any]) -> OrderSummary:
             customer_first_name = _coerce_str(shipping_address.get("first_name"))
             if not customer_first_name:
                 shipping_name = _coerce_str(shipping_address.get("name"))
-                if shipping_name:
-                    customer_first_name = shipping_name.split()[0]
+                if isinstance(shipping_name, str) and shipping_name.strip():
+                    customer_first_name = shipping_name.strip().split()[0]
     if not customer_first_name:
         billing_address = payload.get("billing_address")
         if isinstance(billing_address, dict):
             customer_first_name = _coerce_str(billing_address.get("first_name"))
             if not customer_first_name:
                 billing_name = _coerce_str(billing_address.get("name"))
-                if billing_name:
-                    customer_first_name = billing_name.split()[0]
+                if isinstance(billing_name, str) and billing_name.strip():
+                    customer_first_name = billing_name.strip().split()[0]
 
     tracking_number = ""
     carrier = ""
