@@ -560,6 +560,7 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         backend_rewrite_tests.test_rewrite_accepts_equivalent_eta_separator()
         backend_rewrite_tests.test_rewrite_rejects_modified_delivery_date_range()
         backend_rewrite_tests.test_rewrite_accepts_delivery_date_dash_variant()
+        backend_rewrite_tests.test_rewrite_accepts_delivery_date_to_variant()
         backend_rewrite_tests.test_rewrite_rejects_unexpected_delivery_date_range()
         backend_rewrite_tests.test_rewrite_rejects_internal_tags()
 

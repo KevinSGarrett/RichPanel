@@ -159,6 +159,8 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         "If the input includes tracking numbers, they must appear verbatim in the output. "
         "If the input includes an ETA window (for example, '1-3 business days'), "
         "preserve the numbers and units exactly. "
+        "If the input includes delivery date ranges (for example, "
+        "'March 12–March 20, 2026'), preserve them verbatim. "
         "Return strict JSON ONLY (no commentary, no code fences) with keys "
         "body (string <= 1000 chars), confidence (0-1 float), "
         "risk_flags (list of strings). "
@@ -283,7 +285,8 @@ def _extract_eta_windows(text: str) -> List[str]:
 
 def _normalize_date_window(token: str) -> str:
     normalized = token.strip().lower()
-    normalized = re.sub(r"\s*(?:–|-|to)\s*", "-", normalized)
+    normalized = re.sub(r"\s*(?:–|-)\s*", "-", normalized)
+    normalized = re.sub(r"\s*\bto\b\s*", "-", normalized)
     normalized = re.sub(r"\s*,\s*", ", ", normalized)
     normalized = re.sub(r"\s+", " ", normalized)
     return normalized.strip()

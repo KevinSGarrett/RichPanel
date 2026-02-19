@@ -26,6 +26,7 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     assert "\"reply back\"" in messages[0].content
     assert "ONE concrete anchor detail" in messages[0].content
     assert "Do NOT output a \"Key Details\" section title" in messages[0].content
+    assert "delivery date ranges" in messages[0].content
     assert "\"message us\"" in messages[0].content
     assert "\"get back to us\"" in messages[0].content
     assert "\"if you have questions\"" in messages[0].content

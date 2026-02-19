@@ -264,6 +264,28 @@ def test_rewrite_accepts_delivery_date_dash_variant() -> None:
     assert result.body == "Your order is expected March 12-March 20, 2026."
 
 
+def test_rewrite_accepts_delivery_date_to_variant() -> None:
+    draft = "Your order is expected October 1–October 5, 2026."
+    client = _StubClient(
+        _response("Your order is expected October 1 to October 5, 2026.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is True
+    assert result.body == "Your order is expected October 1 to October 5, 2026."
+
+
 def test_rewrite_rejects_unexpected_url() -> None:
     draft = "Thanks for your patience. We'll update you soon."
     client = _StubClient(

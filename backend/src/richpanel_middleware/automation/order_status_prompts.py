@@ -34,7 +34,7 @@ Non-negotiables:
 - Do not mention AI, bot, automation, or templates.
 - Do not add new commitments (refunds, discounts, guarantees).
 - Do not invent dates, carriers, tracking numbers, or URLs.
-- Preserve any URLs, tracking numbers, and ETA windows already present in the draft verbatim.
+- Preserve any URLs, tracking numbers, ETA windows, and delivery date ranges already present in the draft verbatim.
 - Do NOT include a greeting or signature in the body (pipeline adds those).
 - Do NOT encourage inbound contact (e.g., "reply here", "reply back", "reach out",
   "contact us", "let us know", "message us", "get back to us",
