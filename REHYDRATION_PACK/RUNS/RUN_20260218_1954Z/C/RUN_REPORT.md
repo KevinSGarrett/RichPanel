@@ -73,7 +73,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/heading_index.json                 |   6 +
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
  scripts/live_readonly_shadow_eval.py               | 143 +++++-
- 50 files changed, 2796 insertions(+), 5 deletions(-)
+ 50 files changed, 2797 insertions(+), 5 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -96,6 +96,7 @@ List commands you ran (include key flags/env if relevant):
 - `aws sso login --profile rp-admin-prod` - authenticated prod AWS SSO.
 - `aws sso login --profile rp-admin-kevin` - authenticated staging AWS SSO.
 - `aws sts get-caller-identity --profile rp-admin-prod --output json` - verified prod account ID.
+- `aws sts get-caller-identity --profile rp-admin-prod --region us-east-2 > sts_identity_prod.json` - captured prod identity evidence.
 - `$env:AWS_PROFILE='rp-admin-kevin'; npx cdk diff RichpanelMiddleware-staging` - staging diff failed (assume-role).
 - `$env:AWS_PROFILE='rp-admin-prod'; npx cdk diff RichpanelMiddleware-prod` - prod diff succeeded.
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (not safe).
@@ -104,6 +105,7 @@ List commands you ran (include key flags/env if relevant):
 - `gh pr edit 261 --add-label \"risk:R3-high\" --add-label \"gate:claude\"` - applied required labels.
 - `gh pr comment 261 --body \"@cursor review\"` - triggered Bugbot review (https://github.com/KevinSGarrett/RichPanel/pull/261#issuecomment-3923008521).
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - verified prod kill switches (safe).
+- `aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled` - captured prod flag snapshot.
 - `aws sso login --profile rp-admin-staging` - authenticated staging AWS SSO.
 - `$env:AWS_PROFILE='rp-admin-staging'; npx cdk diff RichpanelMiddleware-staging` - staging diff succeeded (includes unrelated stack changes; change set not created).
 - `gh workflow run "Deploy Staging Stack" --ref main` - attempted staging sync on main (run 22157069157 failed).
@@ -118,7 +120,9 @@ List commands you ran (include key flags/env if relevant):
 - `gh pr close 261` + `gh pr reopen 261` - refreshed PR head SHA to latest branch tip after merge UI reported out-of-date.
 - `gh workflow run "Deploy Prod Stack" --ref main` - triggered prod deploy after merge.
 - `gh run view 22161726807 --log` - captured prod deploy workflow logs.
+- `deploy_prod_run_url.txt` + `deploy_prod_log.txt` - recorded prod deploy run URL and log.
 - `aws lambda get-function-configuration --function-name rp-mw-prod-worker` - captured Lambda env config (redacted).
+- `python -c "<extract env vars>"` - wrote `prod_lambda_env_openai_rewrite_vars.json`.
 - `python scripts/live_readonly_shadow_eval.py --env prod ...` - attempted read-only shadow eval (failed with Richpanel 504 timeout).
 - `gh workflow run "Shadow Live Read-Only Eval" --ref main -f shop-domain=... -f ticket-ids=...` - shadow eval workflow (failed: OpenAI routing disabled in workflow env).
 - `python scripts/live_readonly_shadow_eval.py --ticket-id <id> --skip-conversations ...` - local shadow eval using /v1/tickets only (no conversation endpoints; order_status candidate + OpenAI calls observed).
@@ -135,6 +139,8 @@ Include test commands + results + links to evidence.
 - `shadow eval proof` - direct proof in report fields - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_shadow_rewrite_inference.md`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
+- `aws sts get-caller-identity --profile rp-admin-prod --region us-east-2` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/sts_identity_prod.json`
+- `aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_flags_snapshot.json`
 - `Deploy Staging Stack` (main) - fail (log group already exists) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log`
 - PR checks green (validate/codecov/bugbot/claude/risk/import-linter/CodeQL) - evidence: https://github.com/KevinSGarrett/RichPanel/pull/261
 
