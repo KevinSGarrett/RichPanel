@@ -362,6 +362,20 @@ aws lambda get-function-configuration --function-name rp-mw-prod-worker --region
 aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
 # output:
 ... (see evidence/prod_runtime_flags_table.txt) ...
+
+git push
+# output:
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+... (PR required) ...
+
+git checkout -b run/RUN_20260219_1823Z-postdeploy
+git push -u origin run/RUN_20260219_1823Z-postdeploy
+# output:
+... (branch pushed) ...
+
+gh pr create --title "B94: post-deploy evidence (risk:R0)" --body-file "REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION_POST_DEPLOY.md" --label "risk:R0"
+# output:
+https://github.com/KevinSGarrett/RichPanel/pull/266
 ```
 
 ## CDK Diff Review (required)
