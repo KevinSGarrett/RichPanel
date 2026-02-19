@@ -633,11 +633,19 @@ class OrderIdResolutionTests(unittest.TestCase):
             "order_number": "777",
             "shipping_lines": [{"title": "Ground"}],
             "line_items": [{"id": 1}],
+            "customer": {
+                "first_name": "Test",
+                "last_name": "User",
+                "name": "Test User",
+            },
         }
         summary = _extract_shopify_fields(payload)
         self.assertEqual(summary.get("order_number"), "777")
         self.assertEqual(summary.get("shipping_method"), "Ground")
         self.assertEqual(summary.get("items_count"), 1)
+        self.assertEqual(summary.get("customer_first_name"), "Test")
+        self.assertEqual(summary.get("customer_last_name"), "User")
+        self.assertEqual(summary.get("customer_name"), "Test User")
 
         self.assertEqual(_extract_shipstation_fields("bad"), {})
         summary = _extract_shipstation_fields(
@@ -661,6 +669,19 @@ class OrderIdResolutionTests(unittest.TestCase):
         summary = _extract_shopify_fields(payload)
         self.assertEqual(summary.get("tracking_number"), "TN2")
         self.assertEqual(summary.get("carrier"), "FedEx")
+
+    def test_extract_shopify_fields_name_fallbacks(self) -> None:
+        payload = {
+            "shipping_address": {"name": "Alex Smith"},
+            "billing_address": {"name": "Jamie Doe"},
+        }
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("customer_first_name"), "Alex")
+
+    def test_extract_shopify_fields_billing_name_fallback(self) -> None:
+        payload = {"billing_address": {"name": "Taylor West"}}
+        summary = _extract_shopify_fields(payload)
+        self.assertEqual(summary.get("customer_first_name"), "Taylor")
 
     def test_extract_shopify_fields_falls_back_to_first_fulfillment(self) -> None:
         payload = {"fulfillments": [{"tracking_company": "UPS"}]}

@@ -31,6 +31,25 @@ from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
 
 
 class DeliveryEstimateTests(unittest.TestCase):
+    def _assert_no_inbound_cta(self, body: str) -> None:
+        lowered = body.lower()
+        for phrase in (
+            "feel free to reply",
+            "reply back",
+            "reply here",
+            "reach out",
+            "contact us",
+            "let us know",
+            "please reply",
+            "email us",
+            "call us",
+            "contact support",
+            "our support team",
+            "we're here to help",
+            "we are here to help",
+        ):
+            self.assertNotIn(phrase, lowered)
+
     def test_business_days_skip_weekend(self) -> None:
         friday = date(2024, 1, 5)
         monday = date(2024, 1, 8)
@@ -524,19 +543,20 @@ class DeliveryEstimateTests(unittest.TestCase):
         assert reply is not None
         body = reply["body"]
         self.assertIn("Thanks for your patience.", body)
-        self.assertIn("Order 12345 was placed on 2024-01-01.", body)
-        self.assertIn("Processing typically takes 3-5 business days.", body)
-        self.assertIn("estimated delivery window is January 9–January 15, 2024.", body)
-        self.assertIn("It should arrive in about 4-8 business days.", body)
-        self.assertIn("Key Details:", body)
-        self.assertIn("- Processing: 3-5 business days", body)
-        self.assertIn("- Shipping: 3-5 business days", body)
-        self.assertIn("- Total ETA: 6-10 business days", body)
-        self.assertIn("- Estimated delivery: January 9–January 15, 2024", body)
+        self.assertIn("Order 12345 (placed on 2024-01-01).", body)
+        self.assertIn("processing typically takes 3-5 business days", body)
+        self.assertIn("shipping takes 3-5 business days", body)
+        self.assertIn("estimated for January 9–January 15, 2024", body)
+        self.assertIn("about 6-10 business days total", body)
         note_line = "(Business days are Mon–Fri; holidays may affect timelines.)"
         self.assertIn(note_line, body)
         self.assertEqual(body.count(note_line), 1)
-        self.assertTrue(body.endswith("We'll send tracking as soon as it ships."))
+        self.assertTrue(
+            body.endswith(
+                "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+            )
+        )
+        self._assert_no_inbound_cta(body)
 
     def test_no_tracking_reply_missing_delivery_window_human(self) -> None:
         delivery_estimate = {
@@ -560,8 +580,7 @@ class DeliveryEstimateTests(unittest.TestCase):
             delivery_estimate=delivery_estimate,
         )
         assert reply is not None
-        self.assertNotIn("estimated delivery window is None", reply["body"])
-        self.assertNotIn("estimated delivery window is", reply["body"])
+        self.assertNotIn("estimated for", reply["body"])
 
     def test_no_tracking_reply_late_uses_any_day_now(self) -> None:
         order_summary = {
@@ -587,24 +606,22 @@ class DeliveryEstimateTests(unittest.TestCase):
             order_summary, inquiry_date="2026-03-14", delivery_estimate=None
         )
         assert reply is not None
-        self.assertIn("pre-order", reply["body"])
-        self.assertIn("scheduled to release on", reply["body"])
+        self.assertIn("pre-order item", reply["body"])
+        self.assertIn("releases on", reply["body"])
         self.assertIn("in 15 days", reply["body"])
         self.assertIn("processing typically takes 3-5 business days", reply["body"])
-        self.assertIn("April 6–April 14, 2026", reply["body"])
-        self.assertIn("Arrives in 23–31 days", reply["body"])
-        self.assertIn("Key Details:", reply["body"])
-        self.assertIn(
-            "- Pre-order release: Sunday, March 29, 2026 (in 15 days)", reply["body"]
-        )
-        self.assertIn("- Processing: 3-5 business days", reply["body"])
-        self.assertIn("- Shipping: 3-7 business days", reply["body"])
-        self.assertIn("- Total ETA: 23–31 days", reply["body"])
-        self.assertIn("- Estimated delivery: April 6–April 14, 2026", reply["body"])
+        self.assertIn("shipping takes 3-7 business days", reply["body"])
+        self.assertIn("estimated for April 6–April 14, 2026", reply["body"])
+        self.assertIn("about 23–31 days from today", reply["body"])
         note_line = "(Business days are Mon–Fri; holidays may affect timelines.)"
         self.assertIn(note_line, reply["body"])
         self.assertEqual(reply["body"].count(note_line), 1)
-        self.assertTrue(reply["body"].endswith("We'll send tracking as soon as it ships."))
+        self.assertTrue(
+            reply["body"].endswith(
+                "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+            )
+        )
+        self._assert_no_inbound_cta(reply["body"])
 
     def test_no_tracking_reply_preorder_late_any_day_now(self) -> None:
         order_summary = {
@@ -618,7 +635,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         body_lower = reply["body"].lower()
         self.assertIn("pre-order", body_lower)
         self.assertIn("any day now", body_lower)
-        self.assertNotIn("estimated delivery window is", body_lower)
+        self.assertNotIn("estimated for", body_lower)
 
 
 class TrackingUrlTests(unittest.TestCase):
@@ -676,6 +693,17 @@ class TrackingUrlTests(unittest.TestCase):
             reply["tracking_url"],
             "https://tools.usps.com/go/TrackConfirmAction?tLabels=ZX999",
         )
+
+    def test_build_tracking_reply_is_paragraph(self) -> None:
+        order_summary = {
+            "tracking_number": "ZX999",
+            "carrier": "USPS",
+        }
+        reply = build_tracking_reply(order_summary)
+        assert reply is not None
+        body = reply["body"]
+        self.assertNotIn("\n-", body)
+        self.assertNotIn("\n", body)
 
 
 def main() -> int:  # pragma: no cover

@@ -12,6 +12,11 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-19 - RUN_20260219_0628Z (B92-A: naturalness v3 + no Key Details + no CTA)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z
+- Removed Key Details block from deterministic drafts and pipeline enforcement; added timeline paragraph for no-tracking replies and paragraph-form tracking replies.
+- Added inbound CTA fail-closed guard plus order_summary first-name enrichment/fallback; updated prompts and tests.
+
 ### 2026-02-18 - RUN_20260218_1954Z (B91: set OpenAI reply rewrite model in CDK)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260218_1954Z
 - Added worker Lambda env vars to pin reply rewrite model to gpt-5.2 and temperature 0.2.

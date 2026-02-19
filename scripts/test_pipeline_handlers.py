@@ -236,7 +236,8 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("UPS", draft_reply["body"])
         self.assertIn("Tracking link:", draft_reply["body"])
         self.assertNotIn(
-            "We'll send tracking as soon as it ships.", draft_reply["body"]
+            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            draft_reply["body"],
         )
 
     def test_plan_actions_merges_ticket_snapshot_payload(self) -> None:
@@ -264,6 +265,10 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.lookup_order_summary",
             side_effect=_fake_lookup,
+        ), mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
         ):
             plan_actions(
                 envelope,
@@ -292,9 +297,10 @@ class PipelineTests(unittest.TestCase):
         assert reply is not None
         self.assertEqual(reply["eta_human"], "4-8 business days")
         body_lower = reply["body"].lower()
-        self.assertIn("4-8 business days", body_lower)
-        self.assertIn("estimated delivery window is", body_lower)
-        self.assertIn("standard (3-5 business days)", body_lower)
+        self.assertIn("processing typically takes 3-5 business days", body_lower)
+        self.assertIn("shipping takes 3-5 business days", body_lower)
+        self.assertIn("estimated for january 9–january 15, 2024", body_lower)
+        self.assertIn("about 6-10 business days total", body_lower)
 
     def test_plan_suppresses_when_order_context_missing(self) -> None:
         envelope = build_event_envelope(
@@ -378,6 +384,10 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.compute_preorder_delivery_estimate",
             return_value=preorder_estimate,
+        ), mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
         ):
             plan = plan_actions(
                 envelope, safe_mode=False, automation_enabled=True, allow_network=True
@@ -437,7 +447,11 @@ class PipelineTests(unittest.TestCase):
         ), mock.patch(
             "richpanel_middleware.automation.pipeline.compute_delivery_estimate",
             return_value=standard_estimate,
-        ) as compute_standard_mock:
+        ) as compute_standard_mock, mock.patch.dict(
+            os.environ,
+            {"AWS_REGION": "us-east-2", "AWS_DEFAULT_REGION": "us-east-2"},
+            clear=False,
+        ):
             plan = plan_actions(
                 envelope, safe_mode=False, automation_enabled=True, allow_network=True
             )
@@ -1096,6 +1110,89 @@ class OutboundOrderStatusTests(unittest.TestCase):
         reply_context = captured.get("context")
         self.assertIsNotNone(reply_context)
         self.assertEqual(reply_context.shipping_method, "FedEx Ground")
+
+    def test_inbound_cta_guard_blocks_rewrite(self) -> None:
+        envelope = build_event_envelope(
+            {"ticket_id": "t-cta", "channel": "email", "message": "Where is my order?"}
+        )
+        plan = ActionPlan(
+            event_id=envelope.event_id,
+            mode="automation_candidate",
+            safe_mode=False,
+            automation_enabled=True,
+            actions=[
+                {
+                    "type": "order_status_draft_reply",
+                    "parameters": {
+                        "draft_reply": {
+                            "body": "Deterministic draft reply.",
+                            "tracking_number": "TN1",
+                            "tracking_url": "https://example.com/track",
+                            "carrier": "UPS",
+                        },
+                        "order_summary": {"shipping_method": "Ground"},
+                    },
+                }
+            ],
+        )
+        executor = _RecordingExecutor(ticket_channel="email")
+        rewrite_result = ReplyRewriteResult(
+            body="Please reply back if you need anything else.",
+            rewritten=True,
+            reason="rewritten",
+            model="gpt-5.2-chat-latest",
+            confidence=0.9,
+            dry_run=False,
+            fingerprint="fp",
+            llm_called=False,
+            response_id=None,
+        )
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.rewrite_reply",
+            return_value=rewrite_result,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_comment_operator_fetch",
+            return_value=False,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", None),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline.LOGGER.info"
+        ), mock.patch.dict(
+            os.environ, {"RICHPANEL_BOT_AGENT_ID": "agent-123"}, clear=False
+        ):
+            result = execute_order_status_reply(
+                envelope,
+                plan,
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=True,
+                outbound_enabled=True,
+                richpanel_executor=cast(RichpanelExecutor, executor),
+            )
+        send_calls = [
+            call
+            for call in executor.calls
+            if call["method"] == "PUT" and call["path"].endswith("/send-message")
+        ]
+        self.assertEqual(len(send_calls), 1)
+        body = send_calls[0]["kwargs"]["json_body"].get("body", "")
+        self.assertIn("Deterministic draft reply.", body)
+        self.assertNotIn("reply back", body.lower())
+        self.assertFalse(
+            pipeline_module._contains_inbound_cta("Contactless delivery is used.")
+        )
+
+        payload = {"first_name": "Tori"}
+        summary = {"customer_first_name": "Alex"}
+        self.assertEqual(
+            pipeline_module._extract_customer_first_name(payload, summary), "Tori"
+        )
+
+        summary = {"customer": {"firstName": "Uma"}}
+        self.assertEqual(
+            pipeline_module._extract_customer_first_name(None, summary), "Uma"
+        )
 
     def test_outbound_email_send_message_path(self) -> None:
         envelope, plan = self._build_order_status_plan()
