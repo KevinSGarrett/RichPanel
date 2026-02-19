@@ -316,6 +316,10 @@ python scripts/run_ci_checks.py --ci
 gh pr edit 265 --body-file "REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION.md"
 # output:
 https://github.com/KevinSGarrett/RichPanel/pull/265
+
+gh pr comment 265 --body "<prompt mismatch fix + rollback note>"
+# output:
+https://github.com/KevinSGarrett/RichPanel/pull/265#issuecomment-3929578211
 ```
 
 ## CDK Diff Review (required)
