@@ -211,6 +211,12 @@ def test_order_summary_name_fallbacks() -> None:
 
     summary = {"customer_first_name": "   "}
     assert pipeline._extract_customer_first_name(None, summary) is None
+
+
+def test_payload_name_takes_priority() -> None:
+    payload = {"first_name": "Tori"}
+    summary = {"customer_first_name": "Alex"}
+    assert pipeline._extract_customer_first_name(payload, summary) == "Tori"
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

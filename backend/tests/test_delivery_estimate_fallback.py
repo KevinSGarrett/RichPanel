@@ -371,6 +371,22 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         }
         assert _build_no_tracking_timeline_paragraph(estimate) is None
 
+    def test_build_timeline_paragraph_missing_method_uses_fallback(self) -> None:
+        estimate = {
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "window_min_days": 6,
+            "window_max_days": 10,
+            "delivery_window_human": "January 9–January 15, 2024",
+            "preorder": False,
+        }
+        paragraph = _build_no_tracking_timeline_paragraph(
+            estimate, fallback_method=None
+        )
+        assert paragraph is not None
+        self.assertIn("With your shipping method,", paragraph)
+
     def test_no_tracking_key_details_missing_transit(self) -> None:
         delivery_estimate = {
             "preorder": False,
