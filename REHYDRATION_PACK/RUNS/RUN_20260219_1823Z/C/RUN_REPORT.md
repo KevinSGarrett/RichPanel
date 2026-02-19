@@ -335,12 +335,12 @@ https://github.com/KevinSGarrett/RichPanel/pull/265#issuecomment-3929578211
 - **Results:** CI-equivalent checks passed; verification scripts passed. Rollback deploy completed with shadow flags confirmed and Lambda env verified.
 
 ## Wait-for-green evidence (required)
-- **Wait loop executed:** no
-- **Status timestamps:** `2026-02-19T20:00Z` (gh pr checks 265: validate/codeql pending)
-- **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/265/checks
-- **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions
-- **Codecov status:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/265
-- **Bugbot status:** https://github.com/KevinSGarrett/RichPanel/pull/265#pullrequestreview-3827983578
+**Wait loop executed:** yes (3x, 20s)
+**Status timestamps:** `2026-02-19T20:06Z` (gh pr checks 265: validate/codeql/bugbot pending)
+**Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/265/checks
+**GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions
+**Codecov status:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/265
+**Bugbot status:** https://github.com/KevinSGarrett/RichPanel/pull/265#pullrequestreview-3827983578
 
 ## PR Health Check (required for PRs)
 
@@ -369,7 +369,7 @@ https://github.com/KevinSGarrett/RichPanel/pull/265#issuecomment-3929578211
 - **E2E result:** pass/fail or "N/A"
 - **Evidence:** <link to TEST_MATRIX.md section> or "N/A"
 
-**Gate compliance:** All Bugbot/Codecov/E2E requirements addressed: no (validate/CodeQL pending)
+**Gate compliance:** All Bugbot/Codecov/E2E requirements addressed: no (validate/CodeQL/Bugbot pending)
 
 ## Docs impact (summary)
 - **Docs updated:** `docs/08_Engineering/Order_Status_OpenAI_Contract.md`, `docs/00_Project_Admin/Progress_Log.md`
