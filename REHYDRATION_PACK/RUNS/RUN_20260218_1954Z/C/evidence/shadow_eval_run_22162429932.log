@@ -60,7 +60,7 @@ live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4540589Z   OPE
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4541398Z   RICHPANEL_API_KEY_OVERRIDE: ***
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4541913Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4542408Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4542957Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4542957Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4543514Z ##[endgroup]
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5632143Z Syncing repository: KevinSGarrett/RichPanel
 live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5634037Z ##[group]Getting Git version info
@@ -140,7 +140,7 @@ live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6588653Z   OPENAI_RE
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6589196Z   RICHPANEL_API_KEY_OVERRIDE: ***
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6589626Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590044Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590495Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590495Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590953Z ##[endgroup]
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.8291926Z ##[group]Installed versions
 live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.8406969Z Successfully set up CPython (3.11.14)
@@ -163,7 +163,7 @@ live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8588754Z   OP
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589213Z   RICHPANEL_API_KEY_OVERRIDE: ***
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589536Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589812Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8590165Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8590165Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8590559Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8591263Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
 live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8591744Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
@@ -221,7 +221,7 @@ live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.56
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688210Z   RICHPANEL_API_KEY_OVERRIDE: ***
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688461Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688705Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688977Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688977Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5689339Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5689766Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
 live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5690366Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
@@ -246,10 +246,10 @@ live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867468Z   SHOPIFY_OUTBOUND_ENABLED: true
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867697Z   OPENAI_ALLOW_NETWORK: false
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867925Z   OPENAI_REPLY_REWRITE_ENABLED: false
-live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5868234Z   RICHPANEL_API_KEY_OVERRIDE: rp-mw/prod/richpanel/api_key
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5868234Z   RICHPANEL_API_KEY_OVERRIDE: ***REDACTED***
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5868664Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: rp-mw/prod/shopify/admin_api_token
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869008Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869281Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869281Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869626Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5870040Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
 live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5870443Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
@@ -314,10 +314,10 @@ live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468076Z   SHOPIFY_OUTBOUND_ENABLED: true
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468324Z   OPENAI_ALLOW_NETWORK: false
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468578Z   OPENAI_REPLY_REWRITE_ENABLED: false
-live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468912Z   RICHPANEL_API_KEY_OVERRIDE: rp-mw/prod/richpanel/api_key
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468912Z   RICHPANEL_API_KEY_OVERRIDE: ***REDACTED***
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469328Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: rp-mw/prod/shopify/admin_api_token
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469688Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469981Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469981Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0470347Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0470783Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
 live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0471719Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
@@ -398,7 +398,7 @@ live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9571953Z   RICHPANEL_API_KEY_OVERRIDE: ***
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572382Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: ***
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572654Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
-live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572943Z   SHOPIFY_SHOP_DOMAIN: scentimen-t.myshopify.com
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572943Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9573313Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9573737Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9574158Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
@@ -411,7 +411,7 @@ live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9576659Z   AWS_SECRET_ACCESS_KEY: ***
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581446Z   AWS_SESSION_TOKEN: ***
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581692Z   INPUT_SAMPLE_SIZE: 10
-live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581958Z   INPUT_TICKET_IDS: 119207,119201,119202,115699,116700
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581958Z   INPUT_TICKET_IDS: redacted_ticket,redacted_ticket,redacted_ticket,redacted_ticket,redacted_ticket
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582264Z   INPUT_SHOPIFY_PROBE: false
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582532Z   INPUT_STACK_NAME: RichpanelMiddleware-prod
 live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582808Z ##[endgroup]

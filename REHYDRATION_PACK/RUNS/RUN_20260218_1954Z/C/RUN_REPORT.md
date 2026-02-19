@@ -23,57 +23,27 @@
 Paste `git diff --stat` (or PR diffstat) here:
 
 ```
- .../RUNS/RUN_20260218_1954Z/A/DOCS_IMPACT_MAP.md   |  23 +
- .../RUNS/RUN_20260218_1954Z/A/FIX_REPORT.md        |  21 +
- .../RUNS/RUN_20260218_1954Z/A/GIT_RUN_PLAN.md      |  58 +++
- .../RUNS/RUN_20260218_1954Z/A/RUN_REPORT.md        |  63 +++
- .../RUNS/RUN_20260218_1954Z/A/RUN_SUMMARY.md       |  33 ++
- .../RUNS/RUN_20260218_1954Z/A/STRUCTURE_REPORT.md  |  27 ++
- .../RUNS/RUN_20260218_1954Z/A/TEST_MATRIX.md       |  15 +
- .../RUNS/RUN_20260218_1954Z/B/DOCS_IMPACT_MAP.md   |  23 +
- .../RUNS/RUN_20260218_1954Z/B/FIX_REPORT.md        |  21 +
- .../RUNS/RUN_20260218_1954Z/B/GIT_RUN_PLAN.md      |  58 +++
- .../RUNS/RUN_20260218_1954Z/B/RUN_REPORT.md        |  63 +++
- .../RUNS/RUN_20260218_1954Z/B/RUN_SUMMARY.md       |  33 ++
- .../RUNS/RUN_20260218_1954Z/B/STRUCTURE_REPORT.md  |  27 ++
- .../RUNS/RUN_20260218_1954Z/B/TEST_MATRIX.md       |  15 +
- .../RUN_20260218_1954Z/C/AGENT_PROMPTS_ARCHIVE.md  | 101 +++++
- .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 ++
- .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 ++
- .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 +++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 164 +++++++
- .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  44 ++
- .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 ++
- .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  24 ++
- .../C/evidence/cdk_diff_prod.txt                   |  59 +++
- .../C/evidence/cdk_diff_staging.txt                | 480 +++++++++++++++++++++
- .../evidence/deploy_prod_main_run_22161726807.log  | Bin 0 -> 67996 bytes
- .../deploy_staging_main_run_22157069157.log        | 229 ++++++++++
- .../C/evidence/prod_automation_param.txt           |   1 +
- .../C/evidence/prod_readonly_shadow_eval.log       | Bin 0 -> 1602 bytes
- .../evidence/prod_safe_mode_automation_status.txt  | Bin 0 -> 3922 bytes
- .../C/evidence/prod_safe_mode_param.txt            |   1 +
+ .gitattributes                                     |   3 +
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        |  62 ++-
+ .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |   3 +
+ .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |   5 +
+ .../C/evidence/deploy_prod_log.txt                 | 295 ++++++++++++++
+ .../C/evidence/deploy_prod_run_url.txt             |   1 +
+ .../C/evidence/prod_flags_snapshot.json            |  23 ++
+ .../prod_lambda_env_openai_rewrite_vars.json       |   4 +
+ .../C/evidence/prod_readonly_shadow_eval.log       |   0
  .../C/evidence/prod_shadow_http_trace.json         |  81 ++++
- .../C/evidence/prod_shadow_report.json             | 214 +++++++++
+ .../C/evidence/prod_shadow_report.json             | 214 ++++++++++
  .../evidence/prod_shadow_rewrite_audit_proof.json  |  11 +
  .../C/evidence/prod_shadow_rewrite_inference.md    |   9 +
  .../C/evidence/prod_shadow_rewrite_proof.json      |  10 +
- .../C/evidence/prod_shadow_summary.json            | 403 +++++++++++++++++
+ .../C/evidence/prod_shadow_summary.json            | 403 ++++++++++++++++++
  .../prod_worker_lambda_config_redacted.json        |  83 ++++
  .../C/evidence/prod_worker_lambda_env_proof.txt    |   2 +
- .../C/evidence/run_ci_checks.log                   | Bin 0 -> 9082 bytes
- .../C/evidence/shadow_eval_run_22162429932.log     | Bin 0 -> 116204 bytes
- .../C/evidence/verify_rehydration_pack.log         | Bin 0 -> 96 bytes
- .../RUNS/RUN_20260218_1954Z/RUN_META.md            |  11 +
- backend/tests/test_reply_rewrite_validation.py     |  73 +++-
- docs/00_Project_Admin/Progress_Log.md              |   4 +
- docs/_generated/doc_outline.json                   |   5 +
- docs/_generated/doc_registry.compact.json          |   2 +-
- docs/_generated/doc_registry.json                  |   4 +-
- docs/_generated/heading_index.json                 |   6 +
- infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- scripts/live_readonly_shadow_eval.py               | 143 +++++-
- 50 files changed, 2797 insertions(+), 5 deletions(-)
+ .../C/evidence/redaction_notes.md                  |   4 +
+ .../C/evidence/shadow_eval_run_22162429932.log     | 451 +++++++++++++++++++++
+ .../C/evidence/sts_identity_prod.json              |   5 +
+ 20 files changed, 1652 insertions(+), 17 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -133,7 +103,7 @@ Include test commands + results + links to evidence.
 - `python scripts/run_ci_checks.py --ci` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/run_ci_checks.log`
 - `python scripts/verify_rehydration_pack.py` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/verify_rehydration_pack.log`
 - `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
-- `Deploy Prod Stack` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_prod_main_run_22161726807.log`
+- `Deploy Prod Stack` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_prod_log.txt`
 - `Shadow Live Read-Only Eval` - fail (OpenAI routing disabled in workflow env) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/shadow_eval_run_22162429932.log`
 - `live_readonly_shadow_eval.py` - pass (rewrite_model_used + greeting/key details/Holly proof fields) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
 - `shadow eval proof` - direct proof in report fields - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_shadow_rewrite_inference.md`

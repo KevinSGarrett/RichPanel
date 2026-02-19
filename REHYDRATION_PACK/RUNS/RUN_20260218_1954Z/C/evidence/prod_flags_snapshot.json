@@ -1,23 +1,23 @@
 {
-    "Parameters": [
-        {
-            "Name": "/rp-mw/prod/automation_enabled",
-            "Type": "String",
-            "Value": "false",
-            "Version": 8,
-            "LastModifiedDate": "2026-02-18T14:27:40.558000-06:00",
-            "ARN": "arn:aws:ssm:us-east-2:878145708918:parameter/rp-mw/prod/automation_enabled",
-            "DataType": "text"
-        },
-        {
-            "Name": "/rp-mw/prod/safe_mode",
-            "Type": "String",
-            "Value": "true",
-            "Version": 7,
-            "LastModifiedDate": "2026-02-18T14:27:28.606000-06:00",
-            "ARN": "arn:aws:ssm:us-east-2:878145708918:parameter/rp-mw/prod/safe_mode",
-            "DataType": "text"
-        }
-    ],
-    "InvalidParameters": []
+  "Parameters": [
+    {
+      "Name": "/rp-mw/prod/automation_enabled",
+      "Type": "String",
+      "Value": "false",
+      "Version": 8,
+      "LastModifiedDate": "2026-02-18T14:27:40.558000-06:00",
+      "ARN": "***REDACTED***",
+      "DataType": "text"
+    },
+    {
+      "Name": "/rp-mw/prod/safe_mode",
+      "Type": "String",
+      "Value": "true",
+      "Version": 7,
+      "LastModifiedDate": "2026-02-18T14:27:28.606000-06:00",
+      "ARN": "***REDACTED***",
+      "DataType": "text"
+    }
+  ],
+  "InvalidParameters": []
 }

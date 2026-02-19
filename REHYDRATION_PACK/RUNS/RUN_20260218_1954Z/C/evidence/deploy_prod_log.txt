@@ -125,7 +125,7 @@ deploy-prod	Set up Node.js	2026-02-18T23:22:36.6152233Z yarn: 1.22.22
 deploy-prod	Set up Node.js	2026-02-18T23:22:36.6153636Z ##[endgroup]
 deploy-prod	Configure AWS credentials via OIDC	???2026-02-18T23:22:36.6393718Z ##[group]Run aws-actions/configure-aws-credentials@v4
 deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6394100Z with:
-deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6394349Z   role-to-assume: arn:aws:iam::878145708918:role/rp-ci-deploy
+deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6394349Z   role-to-assume: arn:aws:iam::REDACTED_ACCOUNT:role/rp-ci-deploy
 deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6394678Z   aws-region: us-east-2
 deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6394931Z   role-session-name: github-actions-deploy-prod
 deploy-prod	Configure AWS credentials via OIDC	2026-02-18T23:22:36.6395244Z   audience: sts.amazonaws.com
@@ -188,10 +188,10 @@ deploy-prod	Deploy prod stack	2026-02-18T23:22:52.8160084Z RichpanelMiddleware-p
 deploy-prod	Deploy prod stack	2026-02-18T23:22:52.8160979Z RichpanelMiddleware-prod: success: Built IngressLambda/Code
 deploy-prod	Deploy prod stack	2026-02-18T23:22:52.8221768Z RichpanelMiddleware-prod: start: Building RichpanelMiddleware-prod Template
 deploy-prod	Deploy prod stack	2026-02-18T23:22:52.8223073Z RichpanelMiddleware-prod: success: Built RichpanelMiddleware-prod Template
-deploy-prod	Deploy prod stack	2026-02-18T23:22:53.0132771Z RichpanelMiddleware-prod: start: Publishing IngressLambda/Code (878145708918-us-east-2-5709c49c)
-deploy-prod	Deploy prod stack	2026-02-18T23:22:53.0164751Z RichpanelMiddleware-prod: start: Publishing RichpanelMiddleware-prod Template (878145708918-us-east-2-b6b3dcc5)
-deploy-prod	Deploy prod stack	2026-02-18T23:22:53.6849464Z RichpanelMiddleware-prod: success: Published RichpanelMiddleware-prod Template (878145708918-us-east-2-b6b3dcc5)
-deploy-prod	Deploy prod stack	2026-02-18T23:22:53.7679071Z RichpanelMiddleware-prod: success: Published IngressLambda/Code (878145708918-us-east-2-5709c49c)
+deploy-prod	Deploy prod stack	2026-02-18T23:22:53.0132771Z RichpanelMiddleware-prod: start: Publishing IngressLambda/Code (REDACTED_ACCOUNT-us-east-2-5709c49c)
+deploy-prod	Deploy prod stack	2026-02-18T23:22:53.0164751Z RichpanelMiddleware-prod: start: Publishing RichpanelMiddleware-prod Template (REDACTED_ACCOUNT-us-east-2-b6b3dcc5)
+deploy-prod	Deploy prod stack	2026-02-18T23:22:53.6849464Z RichpanelMiddleware-prod: success: Published RichpanelMiddleware-prod Template (REDACTED_ACCOUNT-us-east-2-b6b3dcc5)
+deploy-prod	Deploy prod stack	2026-02-18T23:22:53.7679071Z RichpanelMiddleware-prod: success: Published IngressLambda/Code (REDACTED_ACCOUNT-us-east-2-5709c49c)
 deploy-prod	Deploy prod stack	2026-02-18T23:22:53.7691968Z RichpanelMiddleware-prod: deploying... [1/1]
 deploy-prod	Deploy prod stack	2026-02-18T23:22:54.8079861Z RichpanelMiddleware-prod: creating CloudFormation changeset...
 deploy-prod	Deploy prod stack	2026-02-18T23:23:08.8033882Z RichpanelMiddleware-prod | 0/9 | 11:23:06 PM | UPDATE_IN_PROGRESS   | AWS::CloudFormation::Stack      | RichpanelMiddleware-prod User Initiated
@@ -213,14 +213,14 @@ deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5643315Z RichpanelMiddleware-p
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5645320Z RichpanelMiddleware-prod.AutomationEnabledParamPath = /rp-mw/prod/automation_enabled
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5647714Z RichpanelMiddleware-prod.ConversationStateTableName = rp_mw_prod_conversation_state
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5649030Z RichpanelMiddleware-prod.EventsQueueName = rp-mw-prod-events.fifo
-deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5650450Z RichpanelMiddleware-prod.EventsQueueUrl = https://sqs.us-east-2.amazonaws.com/878145708918/rp-mw-prod-events.fifo
+deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5650450Z RichpanelMiddleware-prod.EventsQueueUrl = https://sqs.us-east-2.amazonaws.com/REDACTED_ACCOUNT/rp-mw-prod-events.fifo
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5651836Z RichpanelMiddleware-prod.IdempotencyTableName = rp_mw_prod_idempotency
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5653288Z RichpanelMiddleware-prod.IngressEndpointUrl = https://0rg6x71jw0.execute-api.us-east-2.amazonaws.com
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5654666Z RichpanelMiddleware-prod.NamespacePrefix = /rp-mw/prod
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5655592Z RichpanelMiddleware-prod.SafeModeParamPath = /rp-mw/prod/safe_mode
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5656493Z RichpanelMiddleware-prod.SecretsNamespace = rp-mw/prod
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5657061Z Stack ARN:
-deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5657832Z arn:aws:cloudformation:us-east-2:878145708918:stack/RichpanelMiddleware-prod/825a01e0-fec3-11f0-8031-06844b0d650b
+deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5657832Z arn:aws:cloudformation:us-east-2:REDACTED_ACCOUNT:stack/RichpanelMiddleware-prod/825a01e0-fec3-11f0-8031-06844b0d650b
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5658694Z 
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5658907Z ???  Total time: 44.97s
 deploy-prod	Deploy prod stack	2026-02-18T23:23:32.5659052Z 
@@ -271,7 +271,7 @@ deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5800189Z |  SSM par
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5802133Z |  DynamoDB table name for idempotency records.                  |  IdempotencyTableName       |  rp_mw_prod_idempotency                                                   |
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5803630Z |  SSM parameter path for the safe_mode feature flag.            |  SafeModeParamPath          |  /rp-mw/prod/safe_mode                                                    |
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5804901Z |  Public HTTP API endpoint for webhook ingress.                 |  IngressEndpointUrl         |  https://0rg6x71jw0.execute-api.us-east-2.amazonaws.com                   |
-deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5806112Z |  Queue URL for diagnostics and smoke tests.                    |  EventsQueueUrl             |  https://sqs.us-east-2.amazonaws.com/878145708918/rp-mw-prod-events.fifo  |
+deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5806112Z |  Queue URL for diagnostics and smoke tests.                    |  EventsQueueUrl             |  https://sqs.us-east-2.amazonaws.com/REDACTED_ACCOUNT/rp-mw-prod-events.fifo  |
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5807201Z |  Secrets Manager prefix rp-mw/<env>/...                        |  SecretsNamespace           |  rp-mw/prod                                                               |
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5808242Z |  Base /rp-mw/<env> prefix for parameters and shared config.    |  NamespacePrefix            |  /rp-mw/prod                                                              |
 deploy-prod	Print CloudFormation outputs	2026-02-18T23:23:37.5809389Z |  DynamoDB table name for conversation state snapshots.         |  ConversationStateTableName |  rp_mw_prod_conversation_state                                            |
