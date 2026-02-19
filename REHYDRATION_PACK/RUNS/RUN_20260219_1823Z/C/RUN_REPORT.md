@@ -382,7 +382,7 @@ https://github.com/KevinSGarrett/RichPanel/pull/266
 - **Expected-only env var changes:** no (diff includes Lambda asset S3Key updates for ingress/worker/shopify-token-refresh)
 - **Investigation:** Found ignored `__pycache__` files under `backend/src` and removed them; re-ran diff and S3Key updates still present with a new hash.
 - **Likely cause:** Current `backend/src` content differs from the code currently deployed in prod, so CDK bundles a new asset even for env-var-only changes.
-- **Action:** Rolled back to `main` after unapproved deploy, then deployed merged `main` (B91–B94) with approval.
+- **Action:** Sequence recorded: unapproved deploy → rollback to `main` → PR merged → approved deploy of merged `main` (B91–B94).
 ```
 
 ## Tests / Proof (required)

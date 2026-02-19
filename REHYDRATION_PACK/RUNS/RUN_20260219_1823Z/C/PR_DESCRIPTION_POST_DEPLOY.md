@@ -36,3 +36,6 @@
   - Evidence paths are accurate and redactions safe.
 - Ignore:
   - Generated registries unless CI fails.
+
+### Redaction note
+- Account ID/ARNs appear only where required for proof (STS identity and SSM paths) and contain no secrets.
