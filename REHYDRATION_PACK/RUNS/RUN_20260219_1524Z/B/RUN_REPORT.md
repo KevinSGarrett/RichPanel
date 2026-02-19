@@ -34,7 +34,8 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260219_1524Z/B/DOCS_IMPACT_MAP.md   |  23 +++
  .../RUNS/RUN_20260219_1524Z/B/FIX_REPORT.md        |  21 +++
  .../RUNS/RUN_20260219_1524Z/B/GIT_RUN_PLAN.md      |  65 +++++++++
- .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        | 122 ++++++++++++++++
+ .../RUNS/RUN_20260219_1524Z/B/PR_DESCRIPTION.md    | 103 ++++++++++++++
+ .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        | 123 ++++++++++++++++
  .../RUNS/RUN_20260219_1524Z/B/RUN_SUMMARY.md       |  42 ++++++
  .../RUNS/RUN_20260219_1524Z/B/STRUCTURE_REPORT.md  |  34 +++++
  .../RUNS/RUN_20260219_1524Z/B/TEST_MATRIX.md       |  18 +++
@@ -63,7 +64,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  scripts/test_llm_reply_rewriter.py                 |  33 +++--
- 39 files changed, 1205 insertions(+), 36 deletions(-)
+ 40 files changed, 1309 insertions(+), 36 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
