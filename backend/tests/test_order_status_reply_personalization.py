@@ -166,6 +166,22 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
     assert updated_safe == safe
 
 
+def test_inbound_cta_guard_and_name_fallbacks() -> None:
+    draft = "Deterministic draft reply."
+    rewritten = "Please Reply Back if you need more details."
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == draft
+    assert pipeline._contains_inbound_cta("Contactless delivery is used.") is False
+
+    payload = {"first_name": "Tori"}
+    summary = {"customer_first_name": "Alex"}
+    assert pipeline._extract_customer_first_name(payload, summary) == "Tori"
+
+    summary = {"customer": {"firstName": "Uma"}}
+    assert pipeline._extract_customer_first_name(None, summary) == "Uma"
+
+
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

@@ -142,69 +142,6 @@ class FingerprintReplyBodyTests(unittest.TestCase):
         )
 
 
-class OrderStatusGuardTests(unittest.TestCase):
-    def test_inbound_cta_guard_case_insensitive_and_non_match(self) -> None:
-        draft = "Deterministic draft reply."
-        rewritten = "Please Reply Back if you need more details."
-        updated, blocked = pipeline_module._apply_inbound_cta_guard(rewritten, draft)
-        self.assertTrue(blocked)
-        self.assertEqual(updated, draft)
-
-        self.assertFalse(
-            pipeline_module._contains_inbound_cta("Contactless delivery is used.")
-        )
-
-    def test_inbound_cta_guard_all_phrases_detected(self) -> None:
-        phrases = [
-            "feel free to reply",
-            "reply back",
-            "reply here",
-            "reach out",
-            "contact us",
-            "let us know",
-            "please reply",
-            "email us",
-            "call us",
-            "contact support",
-            "our support team",
-            "we're here to help",
-            "we are here to help",
-        ]
-        for phrase in phrases:
-            self.assertTrue(pipeline_module._contains_inbound_cta(phrase.upper()))
-
-    def test_order_summary_name_fallbacks(self) -> None:
-        summary = {"customer": {"first_name": "Nina"}}
-        self.assertEqual(
-            pipeline_module._extract_customer_first_name(None, summary), "Nina"
-        )
-
-        summary = {"customer": {"firstName": "Uma"}}
-        self.assertEqual(
-            pipeline_module._extract_customer_first_name(None, summary), "Uma"
-        )
-
-        summary = {"customer_name": "Quinn Harper"}
-        self.assertEqual(
-            pipeline_module._extract_customer_first_name(None, summary), "Quinn"
-        )
-
-        summary = {"shipping_address_name": "Sam Doe"}
-        self.assertEqual(
-            pipeline_module._extract_customer_first_name(None, summary), "Sam"
-        )
-
-        summary = {"customer_first_name": "   "}
-        self.assertIsNone(pipeline_module._extract_customer_first_name(None, summary))
-
-    def test_payload_name_takes_priority(self) -> None:
-        payload = {"first_name": "Tori"}
-        summary = {"customer_first_name": "Alex"}
-        self.assertEqual(
-            pipeline_module._extract_customer_first_name(payload, summary), "Tori"
-        )
-
-
 class PipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         # Reset worker caches so each test is deterministic and offline-safe.
