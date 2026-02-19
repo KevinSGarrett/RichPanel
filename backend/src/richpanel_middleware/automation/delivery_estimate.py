@@ -510,12 +510,12 @@ _TRACKING_EMAIL_LINE = (
 )
 
 
-def _normalize_shipping_phrase(
+def _normalize_shipping_label(
     *, estimate: Dict[str, Any], fallback_method: Optional[str] = None
-) -> str:
+) -> Optional[str]:
     bucket = estimate.get("bucket")
     if isinstance(bucket, str) and bucket.strip():
-        return f"For {bucket.strip()} shipping,"
+        return bucket.strip()
     method = (
         estimate.get("normalized_method")
         or estimate.get("raw_method")
@@ -523,9 +523,8 @@ def _normalize_shipping_phrase(
     )
     if isinstance(method, str) and method.strip():
         cleaned = re.sub(r"\s*\(.*?\)\s*$", "", method).strip()
-        if cleaned:
-            return f"For {cleaned} shipping,"
-    return "With your shipping method,"
+        return cleaned or None
+    return None
 
 
 def _build_no_tracking_timeline_paragraph(
@@ -545,7 +544,7 @@ def _build_no_tracking_timeline_paragraph(
     if not delivery_window_human:
         return None
 
-    method_phrase = _normalize_shipping_phrase(
+    method_label = _normalize_shipping_label(
         estimate=estimate, fallback_method=fallback_method
     )
     shipping_window = None
@@ -556,17 +555,18 @@ def _build_no_tracking_timeline_paragraph(
 
     if estimate.get("preorder"):
         days_from_inquiry_human = estimate.get("days_from_inquiry_human")
-        timeline = (
-            f"{method_phrase} "
-            f"after release, processing typically takes {processing_human}, "
-            f"and shipping takes {shipping_window} \u2014 so delivery is estimated for "
-            f"{delivery_window_human}"
-        )
-        if days_from_inquiry_human:
-            timeline = f"{timeline} (about {days_from_inquiry_human} from today)."
+        sentences = [
+            f"After release, processing typically takes {processing_human}.",
+        ]
+        if method_label:
+            sentences.append(f"{method_label} shipping usually takes {shipping_window}.")
         else:
-            timeline = f"{timeline}."
-        return f"{timeline} {_BUSINESS_DAYS_NOTE}"
+            sentences.append(f"Shipping usually takes {shipping_window}.")
+        sentences.append(f"Delivery is estimated for {delivery_window_human}.")
+        if days_from_inquiry_human:
+            sentences.append(f"That's about {days_from_inquiry_human} from today.")
+        sentences.append(_BUSINESS_DAYS_NOTE)
+        return " ".join(sentences)
 
     window_min_days = estimate.get("window_min_days")
     window_max_days = estimate.get("window_max_days")
@@ -574,17 +574,16 @@ def _build_no_tracking_timeline_paragraph(
     if window_min_days is not None and window_max_days is not None:
         total_window = format_eta_window(window_min_days, window_max_days)
 
-    timeline = (
-        f"{method_phrase} "
-        f"processing typically takes {processing_human}, "
-        f"then shipping takes {shipping_window} \u2014 so delivery is estimated for "
-        f"{delivery_window_human}"
-    )
-    if total_window:
-        timeline = f"{timeline} (about {total_window} total)."
+    sentences = [f"Processing typically takes {processing_human}."]
+    if method_label:
+        sentences.append(f"{method_label} shipping usually takes {shipping_window}.")
     else:
-        timeline = f"{timeline}."
-    return f"{timeline} {_BUSINESS_DAYS_NOTE}"
+        sentences.append(f"Shipping usually takes {shipping_window}.")
+    sentences.append(f"Delivery is estimated for {delivery_window_human}.")
+    if total_window:
+        sentences.append(f"That's about {total_window} total.")
+    sentences.append(_BUSINESS_DAYS_NOTE)
+    return " ".join(sentences)
 
 
 def compute_delivery_estimate(
@@ -751,12 +750,20 @@ def build_tracking_reply(order_summary: Dict[str, Any]) -> Optional[Dict[str, An
     link = tracking_url or "(not available)"
     sm = shipping_method
 
-    shipping_sentence = f" Shipping method: {sm}." if sm else ""
-    body = (
-        "Thanks for reaching out — here’s the latest tracking information for your order. "
-        f"Carrier: {cr}. Tracking number: {tn}. Tracking link: {link}."
-        f"{shipping_sentence} Carrier scans can take a few hours to appear in tracking."
-    )
+    detail_sentences: List[str] = []
+    if cr != "(not available)":
+        detail_sentences.append(f"It's going out with {cr}.")
+    if tn != "(not available)":
+        detail_sentences.append(f"Tracking number: {tn}.")
+    if sm:
+        detail_sentences.append(f"Shipping method: {sm}.")
+
+    paragraphs: List[str] = ["Your order has shipped and tracking is available."]
+    if detail_sentences:
+        paragraphs.append(" ".join(detail_sentences))
+    paragraphs.append(f"Tracking link: {link}")
+    paragraphs.append("Carrier scans can take a few hours to appear in tracking.")
+    body = "\n\n".join(paragraphs)
 
     return {
         "body": body.strip(),
@@ -866,7 +873,7 @@ def build_no_tracking_reply(
 
         if ship_date_human:
             body = (
-                "Thanks for your patience. Your order includes a pre-order item that releases on "
+                "Your order includes a pre-order item that releases on "
                 f"{ship_date_human}"
             )
             if ship_days_from_inquiry_human:
@@ -874,21 +881,22 @@ def build_no_tracking_reply(
             else:
                 body = f"{body}."
         else:
-            body = "Thanks for your patience. Your order includes a pre-order item."
+            body = "Your order includes a pre-order item."
 
         if is_late:
             body = (
-                f"{body} It is already beyond the expected window, so it should arrive any day now."
+                f"{body}\n\n"
+                "It is already beyond the expected window, so it should arrive any day now."
             )
         else:
             timeline = _build_no_tracking_timeline_paragraph(
                 preorder_estimate, fallback_method=method_label
             )
             if timeline:
-                body = f"{body} {timeline}"
+                body = f"{body}\n\n{timeline}"
 
         return {
-            "body": f"{body} {_TRACKING_EMAIL_LINE}".strip(),
+            "body": f"{body}\n\n{_TRACKING_EMAIL_LINE}".strip(),
             "eta_human": delivery_window_human,
             "bucket": preorder_estimate.get("bucket"),
             "is_late": preorder_estimate.get("is_late"),
@@ -898,12 +906,12 @@ def build_no_tracking_reply(
         order_date_human = estimate["order_created_date"]
         order_label = f"Order {order_id}" if has_order_id else "Your order"
         body = (
-            f"Thanks for your patience. We don't have tracking yet for {order_label} "
-            f"(placed on {order_date_human})."
+            f"We don't have tracking yet for {order_label} (placed on {order_date_human})."
         )
         if estimate["is_late"]:
             body = (
-                f"{body} It is already beyond the expected window, so it should arrive any day now."
+                f"{body}\n\n"
+                "It is already beyond the expected window, so it should arrive any day now."
             )
         else:
             method_label = summary.get("shipping_method") or summary.get(
@@ -913,10 +921,10 @@ def build_no_tracking_reply(
                 estimate, fallback_method=method_label
             )
             if timeline:
-                body = f"{body} {timeline}"
+                body = f"{body}\n\n{timeline}"
 
         return {
-            "body": f"{body} {_TRACKING_EMAIL_LINE}".strip(),
+            "body": f"{body}\n\n{_TRACKING_EMAIL_LINE}".strip(),
             "eta_human": estimate["eta_human"],
             "bucket": estimate["bucket"],
             "is_late": estimate["is_late"],

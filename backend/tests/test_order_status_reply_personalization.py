@@ -21,11 +21,11 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     )
 
     assert messages[0].role == "system"
-    assert "Do not mention AI, bot, automation, or templates." in messages[0].content
+    assert "Never mention AI, bots, automation, templates" in messages[0].content
     assert "Do NOT encourage inbound contact" in messages[0].content
     assert "\"reply back\"" in messages[0].content
     assert "ONE concrete anchor detail" in messages[0].content
-    assert "Do NOT output a \"Key Details\" section title" in messages[0].content
+    assert "Do NOT output a \"Key Details\" title" in messages[0].content
     assert "delivery date ranges" in messages[0].content
     assert "\"message us\"" in messages[0].content
     assert "\"get back to us\"" in messages[0].content
@@ -175,15 +175,45 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
         "if you have any other questions",
     ]
     for phrase in blocked_phrases:
-        rewritten = f"Please {phrase} if anything changes."
+        rewritten = (
+            "We are on it and reviewing the latest order details now. "
+            "We'll share the next update as soon as it is ready. "
+            f"Please {phrase} if anything changes."
+        )
         updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
         assert blocked is True
-        assert updated == draft
+        assert updated != draft
+        assert "We are on it and reviewing the latest order details now." in updated
+        assert "We'll share the next update as soon as it is ready." in updated
+        assert phrase not in updated.lower()
+
+    rewritten_only = "Please reply here if anything changes."
+    updated_only, blocked_only = pipeline._apply_inbound_cta_guard(
+        rewritten_only, draft
+    )
+    assert blocked_only is True
+    assert updated_only == draft
 
     safe = "Tracking will be emailed automatically once it ships and is scanned by the carrier."
     updated_safe, blocked_safe = pipeline._apply_inbound_cta_guard(safe, draft)
     assert blocked_safe is False
     assert updated_safe == safe
+
+
+def test_shipping_method_window_stripped_in_context() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Standard (3–7 business days)",
+    }
+    order_summary = {"shipping_method_name": "Standard (3–7 business days)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Standard"
 
 
 

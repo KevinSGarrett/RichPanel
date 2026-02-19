@@ -12,6 +12,12 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-19 - RUN_20260219_2215Z (B95-C: naturalness patch for order-status replies)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260219_2215Z
+- Reformatted deterministic drafts for no-tracking and tracking-present replies into short paragraphs.
+- Stripped shipping window from shipping_method context; made inbound CTA guard non-destructive.
+- Replaced order-status reply prompt with stricter formatting + tone rules.
+
 ### 2026-02-19 - RUN_20260219_1823Z (B94-C: prod reply rewrite tuning)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260219_1823Z
 - Tuned reply rewrite max tokens/chars and temperature in CDK; documented prod tuning note.

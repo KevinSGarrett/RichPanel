@@ -150,9 +150,10 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
             "Your order includes a pre-order item that releases on Sunday, March 29, 2026 (in 15 days). "
-            "For Standard shipping, after release, processing typically takes 3-5 business days, "
-            "and shipping takes 3-7 business days — so delivery is estimated for April 6–April 14, 2026 "
-            "(about 23–31 days from today). (Business days are Mon–Fri; holidays may affect timelines.) "
+            "After release, processing typically takes 3-5 business days. "
+            "Standard shipping usually takes 3-7 business days. "
+            "Delivery is estimated for April 6–April 14, 2026. "
+            "That's about 23–31 days from today. (Business days are Mon–Fri; holidays may affect timelines.) "
             "Tracking will be emailed automatically once it ships and is scanned by the carrier."
         )
         parameters = {

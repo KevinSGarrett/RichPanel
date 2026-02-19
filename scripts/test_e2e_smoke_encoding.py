@@ -422,7 +422,7 @@ class DraftReplyHelperTests(unittest.TestCase):
         )
         self.assertIsInstance(body, str)
         body = cast(str, body)
-        self.assertIn("tracking information", body.lower())
+        self.assertIn("tracking is available", body.lower())
 
     def test_compute_draft_reply_body_no_tracking_uses_estimate(self) -> None:
         from richpanel_middleware.automation.delivery_estimate import (
@@ -452,7 +452,7 @@ class DraftReplyHelperTests(unittest.TestCase):
         self.assertIsInstance(body, str)
         body = cast(str, body)
         self.assertIn("processing typically takes 3-5 business days", body.lower())
-        self.assertIn("shipping takes 3-5 business days", body.lower())
+        self.assertIn("standard shipping usually takes 3-5 business days", body.lower())
         self.assertIn("estimated for january 13", body.lower())
         self.assertIn("about 6-10 business days total", body.lower())
 

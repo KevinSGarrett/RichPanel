@@ -73,14 +73,16 @@ class TrackingLinkGenerationTests(unittest.TestCase):
         summary = {"carrier": "FedEx", "tracking_number": [], "shipping_method": "Ground"}
         reply = build_tracking_reply(summary)
         assert reply is not None
-        self.assertIn("Tracking number: (not available)", reply["body"])
+        self.assertIn("Tracking link: (not available)", reply["body"])
+        self.assertNotIn("Tracking number:", reply["body"])
         self.assertNotIn("[]", reply["body"])
 
     def test_tracking_reply_ignores_bracket_tracking_string(self) -> None:
         summary = {"carrier": "FedEx", "tracking_number": "[]"}
         reply = build_tracking_reply(summary)
         assert reply is not None
-        self.assertIn("Tracking number: (not available)", reply["body"])
+        self.assertIn("Tracking link: (not available)", reply["body"])
+        self.assertNotIn("Tracking number:", reply["body"])
 
     def test_normalize_shipping_method_for_carrier_mismatch(self) -> None:
         reply = build_tracking_reply(

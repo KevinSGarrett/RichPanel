@@ -64,8 +64,8 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("pre-order item", body)
         self.assertIn("releases on Sunday, March 29, 2026", body)
         self.assertIn("(in 15 days)", body)
-        self.assertIn("processing typically takes 3-5 business days", body)
-        self.assertIn("shipping takes 3-7 business days", body)
+        self.assertIn("After release, processing typically takes 3-5 business days", body)
+        self.assertIn("Standard shipping usually takes 3-7 business days", body)
         self.assertIn("estimated for April 6–April 14, 2026", body)
         self.assertIn("about 23–31 days from today", body)
         self.assertIn(
@@ -98,8 +98,8 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         body = reply["body"]
         self.assertIn("releases on Sunday, March 29, 2026", body)
         self.assertNotIn("(in", body)
-        self.assertIn("processing typically takes 3-5 business days", body)
-        self.assertIn("shipping takes 3-7 business days", body)
+        self.assertIn("After release, processing typically takes 3-5 business days", body)
+        self.assertIn("Shipping usually takes 3-7 business days", body)
         self.assertIn("estimated for April 6–April 14, 2026", body)
         self.assertIn("about 23–31 days from today", body)
         self.assertIn(
@@ -275,8 +275,8 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         assert reply is not None
 
         body = reply["body"]
-        self.assertIn("processing typically takes 3-5 business days", body)
-        self.assertIn("shipping takes 3-5 business days", body)
+        self.assertIn("Processing typically takes 3-5 business days", body)
+        self.assertIn("Standard shipping usually takes 3-5 business days", body)
         self.assertIn("estimated for January 9–January 15, 2024", body)
         self.assertIn("about 6-10 business days total", body)
         self.assertIn(
@@ -325,9 +325,9 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         }
         paragraph = _build_no_tracking_timeline_paragraph(estimate)
         assert paragraph is not None
-        self.assertIn("For Standard shipping,", paragraph)
-        self.assertIn("processing typically takes 3-5 business days", paragraph)
-        self.assertIn("shipping takes 3-5 business days", paragraph)
+        self.assertIn("Processing typically takes 3-5 business days", paragraph)
+        self.assertIn("Standard shipping usually takes 3-5 business days", paragraph)
+        self.assertIn("Delivery is estimated for January 9–January 15, 2024", paragraph)
         self.assertIn("about 6-10 business days total", paragraph)
 
     def test_build_timeline_paragraph_preorder(self) -> None:
@@ -342,9 +342,9 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         }
         paragraph = _build_no_tracking_timeline_paragraph(estimate)
         assert paragraph is not None
-        self.assertIn("For Standard shipping,", paragraph)
-        self.assertIn("after release, processing typically takes 3-5 business days", paragraph)
-        self.assertIn("shipping takes 3-7 business days", paragraph)
+        self.assertIn("After release, processing typically takes 3-5 business days", paragraph)
+        self.assertIn("Standard shipping usually takes 3-7 business days", paragraph)
+        self.assertIn("Delivery is estimated for April 6–April 14, 2026", paragraph)
         self.assertIn("about 23–31 days from today", paragraph)
 
     def test_build_timeline_paragraph_preorder_no_days_from_today(self) -> None:
@@ -358,7 +358,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         }
         paragraph = _build_no_tracking_timeline_paragraph(estimate)
         assert paragraph is not None
-        self.assertIn("after release, processing typically takes 3-5 business days", paragraph)
+        self.assertIn("After release, processing typically takes 3-5 business days", paragraph)
         self.assertIn("(Business days are Mon–Fri; holidays may affect timelines.)", paragraph)
 
     def test_build_timeline_paragraph_blank_window_returns_none(self) -> None:
@@ -385,7 +385,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             estimate, fallback_method=None
         )
         assert paragraph is not None
-        self.assertIn("With your shipping method,", paragraph)
+        self.assertIn("Shipping usually takes 3-7 business days", paragraph)
 
     def test_build_timeline_paragraph_missing_transit_returns_none(self) -> None:
         estimate = {

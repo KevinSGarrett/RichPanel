@@ -1471,6 +1471,12 @@
       "anchor": "timeline"
     }
   ],
+  "2026-02-19 - run_20260219_2215z (b95-c: naturalness patch for order-status replies)": [
+    {
+      "path": "00_Project_Admin/Progress_Log.md",
+      "anchor": "2026-02-19-run202602192215z-b95-c-naturalness-patch-for-order-status-replies"
+    }
+  ],
   "2026-02-19 - run_20260219_1823z (b94-c: prod reply rewrite tuning)": [
     {
       "path": "00_Project_Admin/Progress_Log.md",
