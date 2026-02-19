@@ -13,6 +13,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -36,7 +37,15 @@ SRC = ROOT / "backend" / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from richpanel_middleware.automation.pipeline import plan_actions, normalize_event  # type: ignore
+from richpanel_middleware.automation.pipeline import (  # type: ignore
+    plan_actions,
+    normalize_event,
+    _build_order_status_reply_context,
+    _ensure_key_details_block,
+    _ensure_order_status_greeting,
+    _ensure_holly_signature,
+)
+from richpanel_middleware.automation.llm_reply_rewriter import rewrite_reply  # type: ignore
 from richpanel_middleware.commerce.order_lookup import lookup_order_summary  # type: ignore
 from richpanel_middleware.automation.delivery_estimate import (  # type: ignore
     compute_delivery_estimate,
@@ -1008,6 +1017,32 @@ def _build_drift_summary(
     }
 
 
+def _build_reply_proof(ticket_results: List[Dict[str, Any]]) -> Dict[str, bool]:
+    greeting_present = False
+    key_details_present = False
+    holly_signature_present = False
+    for result in ticket_results:
+        proof = result.get("final_reply_proof")
+        if not isinstance(proof, dict):
+            proof = result.get("rewrite_reply_proof")
+        if not isinstance(proof, dict):
+            proof = result.get("preorder_proof")
+        if not isinstance(proof, dict):
+            continue
+        greeting_present = greeting_present or bool(proof.get("greeting_present"))
+        key_details_present = key_details_present or bool(
+            proof.get("key_details_present")
+        )
+        holly_signature_present = holly_signature_present or bool(
+            proof.get("holly_signature_present")
+        )
+    return {
+        "greeting_present": greeting_present,
+        "key_details_present": key_details_present,
+        "holly_signature_present": holly_signature_present,
+    }
+
+
 def _compute_drift_watch(
     *,
     ticket_results: List[Dict[str, Any]],
@@ -1820,6 +1855,26 @@ def _extract_order_payload(ticket: Dict[str, Any], convo: Dict[str, Any]) -> Dic
     return merged
 
 
+def _extract_reply_proof_flags(body_text: str) -> Dict[str, bool]:
+    compact = " ".join(re.sub(r"<[^>]+>", " ", body_text or "").split())
+    if not compact:
+        return {
+            "greeting_present": False,
+            "key_details_present": False,
+            "holly_signature_present": False,
+        }
+    compact_lower = compact.lower()
+    return {
+        "greeting_present": bool(
+            re.search(r"\b(hi|hello)\b", compact, flags=re.IGNORECASE)
+        ),
+        "key_details_present": "key details" in compact_lower,
+        "holly_signature_present": bool(
+            re.search(r"\bholly\b", compact, flags=re.IGNORECASE)
+        ),
+    }
+
+
 def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any]:
     delivery_estimate = (
         parameters.get("delivery_estimate") if isinstance(parameters, dict) else None
@@ -1889,6 +1944,7 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
 
     body_text = _normalize_optional_text(body)
     body_lower = body_text.lower()
+    reply_flags = _extract_reply_proof_flags(body_text)
     fingerprint = _fingerprint(body_text) if body_text else None
 
     def _contains(candidate: Optional[str]) -> bool:
@@ -1945,6 +2001,9 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
         "nonpreorder_floor_ok": nonpreorder_floor_ok,
         "draft_reply_ends_with_tracking_line": body_text.endswith(tracking_line),
         "draft_reply_body_fingerprint": fingerprint,
+        "greeting_present": reply_flags["greeting_present"],
+        "key_details_present": reply_flags["key_details_present"],
+        "holly_signature_present": reply_flags["holly_signature_present"],
     }
 
 
@@ -2181,6 +2240,10 @@ def _build_markdown_report(
         f"- Summary path: `{summary_path}`",
         f"- Drift warning: {drift_warning}",
         f"- Run warnings: {', '.join(run_warnings) or 'none'}",
+        f"- Rewrite model used: {report.get('rewrite_model_used')}",
+        f"- Greeting present: {report.get('reply_proof', {}).get('greeting_present')}",
+        f"- Key Details present: {report.get('reply_proof', {}).get('key_details_present')}",
+        f"- Holly signature present: {report.get('reply_proof', {}).get('holly_signature_present')}",
         "",
         "## Route Decision Distribution (B61/C)",
         f"- Order Status: {route_decisions.get('order_status', 0)} ({route_pcts.get('order_status', 0) * 100:.1f}%)",
@@ -2807,6 +2870,62 @@ def main() -> int:
                     result["preorder_proof"] = _extract_preorder_proof_signals(
                         parameters if isinstance(parameters, dict) else {}
                     )
+                    draft_reply_body = ""
+                    draft_reply_payload: Dict[str, Any] = {}
+                    if isinstance(parameters, dict):
+                        draft_reply = parameters.get("draft_reply")
+                        if isinstance(draft_reply, dict):
+                            draft_reply_body = str(draft_reply.get("body") or "")
+                            draft_reply_payload = draft_reply
+                    if draft_reply_body:
+                        rewrite_result = rewrite_reply(
+                            draft_reply_body,
+                            conversation_id=str(
+                                ticket_payload.get("conversation_id") or ticket_id
+                            ),
+                            event_id=f"shadow:{ticket_id}",
+                            safe_mode=False,
+                            automation_enabled=True,
+                            allow_network=_env_truthy(
+                                os.environ.get("OPENAI_ALLOW_NETWORK")
+                            ),
+                            outbound_enabled=False,
+                            rewrite_enabled=True,
+                        )
+                        result["rewrite_reply_proof"] = _extract_reply_proof_flags(
+                            rewrite_result.body or ""
+                        )
+                        result["rewrite_model_used"] = rewrite_result.model
+                        result["rewrite_rewritten"] = rewrite_result.rewritten
+                        result["rewrite_reason"] = rewrite_result.reason
+                    try:
+                        reply_context = _build_order_status_reply_context(
+                            payload=event_payload,
+                            draft_reply=draft_reply_payload,
+                            delivery_estimate=delivery_estimate,
+                            order_summary=effective_summary
+                            if isinstance(effective_summary, dict)
+                            else {},
+                        )
+                        reply_body_final = (
+                            rewrite_result.body
+                            if rewrite_result and rewrite_result.body
+                            else draft_reply_body
+                        )
+                        reply_body_final = _ensure_key_details_block(
+                            reply_body_final,
+                            delivery_estimate=delivery_estimate,
+                            draft_reply=draft_reply_payload,
+                        )
+                        reply_body_final = _ensure_order_status_greeting(
+                            reply_body_final, reply_context.customer_first_name
+                        )
+                        reply_body_final = _ensure_holly_signature(reply_body_final)
+                        result["final_reply_proof"] = _extract_reply_proof_flags(
+                            reply_body_final
+                        )
+                    except Exception as exc:
+                        result["final_reply_proof_error"] = exc.__class__.__name__
 
                 # Use probe_summary (Shopify data) for tracking detection
                 tracking_found = _tracking_present(effective_summary)
@@ -2964,6 +3083,24 @@ def main() -> int:
     timing_summary = _summarize_timing(
         ticket_durations, run_duration_seconds=time.monotonic() - run_started
     )
+    base_model = os.environ.get("OPENAI_MODEL") or "gpt-5.2-chat-latest"
+    rewrite_model_used = next(
+        (
+            result.get("rewrite_model_used")
+            for result in ticket_results
+            if result.get("rewrite_model_used")
+        ),
+        os.environ.get("OPENAI_REPLY_REWRITE_MODEL") or base_model,
+    )
+    rewrite_model_source = "rewrite_reply" if any(
+        result.get("rewrite_model_used") for result in ticket_results
+    ) else "env"
+    reply_proof = _build_reply_proof(ticket_results)
+    reply_proof_source = (
+        "final_reply"
+        if any(result.get("final_reply_proof") for result in ticket_results)
+        else "order_status_draft_reply"
+    )
     summary_payload = _build_summary_payload(
         run_id=run_id,
         tickets_requested=tickets_requested,
@@ -2981,6 +3118,10 @@ def main() -> int:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": env_name,
         "env_flags": enforced_env,
+        "rewrite_model_used": rewrite_model_used,
+        "rewrite_model_source": rewrite_model_source,
+        "reply_proof": reply_proof,
+        "reply_proof_source": reply_proof_source,
         "target": {
             "env": env_name,
             "region": resolved_region or None,

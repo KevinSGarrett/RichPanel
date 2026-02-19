@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-19T00:54:27.283794+00:00",
+  "generated_at": "2026-02-19T01:18:31.894525+00:00",
   "entries": [
     {
       "method": "GET",
@@ -67,6 +67,12 @@
       "method": "GET",
       "path": "/admin/api/redacted:73e4d27b45fe/redacted:13b7a2311a54",
       "service": "shopify",
+      "source": "urllib"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "service": "openai",
       "source": "urllib"
     }
   ],

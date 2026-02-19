@@ -1,6 +1,6 @@
 {
-  "run_id": "RUN_20260219_0054Z",
-  "timestamp": "2026-02-19T00:54:27.284798+00:00",
+  "run_id": "RUN_20260219_0118Z",
+  "timestamp": "2026-02-19T01:18:31.895536+00:00",
   "environment": "prod",
   "env_flags": {
     "MW_ALLOW_NETWORK_READS": "true",
@@ -8,6 +8,14 @@
     "RICHPANEL_READ_ONLY": "true",
     "RICHPANEL_OUTBOUND_ENABLED": "false"
   },
+  "rewrite_model_used": "gpt-5.2-2025-12-11",
+  "rewrite_model_source": "rewrite_reply",
+  "reply_proof": {
+    "greeting_present": true,
+    "key_details_present": true,
+    "holly_signature_present": true
+  },
+  "reply_proof_source": "final_reply",
   "target": {
     "env": "prod",
     "region": "us-east-2",
@@ -88,7 +96,7 @@
         "primary_source": "deterministic",
         "confidence": 0.94,
         "llm_model": "gpt-5.2-chat-latest",
-        "llm_response_id": "chatcmpl-DAmb7D5yx2YO9A80iva6yHmso4BPb",
+        "llm_response_id": "chatcmpl-DAmyODzKz5AxS3EXaX8BoCte4H87J",
         "llm_gated_reason": null
       },
       "would_reply_send": false,
@@ -129,34 +137,50 @@
         "draft_reply_has_arrives_in_days": true,
         "nonpreorder_floor_ok": null,
         "draft_reply_ends_with_tracking_line": true,
-        "draft_reply_body_fingerprint": "82c94b9b6930"
+        "draft_reply_body_fingerprint": "82c94b9b6930",
+        "greeting_present": false,
+        "key_details_present": true,
+        "holly_signature_present": false
+      },
+      "rewrite_reply_proof": {
+        "greeting_present": false,
+        "key_details_present": true,
+        "holly_signature_present": false
+      },
+      "rewrite_model_used": "gpt-5.2-2025-12-11",
+      "rewrite_rewritten": false,
+      "rewrite_reason": "unexpected_eta",
+      "final_reply_proof": {
+        "greeting_present": true,
+        "key_details_present": true,
+        "holly_signature_present": true
       },
       "order_status_candidate": true,
       "order_matched": true,
       "tracking_found": true,
       "eta_available": true,
-      "elapsed_seconds": 9.36
+      "elapsed_seconds": 10.828
     }
   ],
   "summary_path": "artifacts\\readonly_shadow\\live_shadow_summary.json",
   "run_warnings": [],
   "http_trace_path": "artifacts\\readonly_shadow\\live_shadow_http_trace.json",
   "http_trace_summary": {
-    "total_requests": 11,
+    "total_requests": 12,
     "methods": {
       "GET": 7,
-      "POST": 4
+      "POST": 5
     },
     "services": {
       "aws_portal": 1,
       "aws_secretsmanager": 2,
       "richpanel": 4,
       "shopify": 2,
-      "openai": 2
+      "openai": 3
     },
     "sources": {
       "aws_sdk": 3,
-      "urllib": 8
+      "urllib": 9
     },
     "aws_operations": {
       "GetSecretValue": 2
@@ -178,8 +202,8 @@
     "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
     "api_key_hash": "7ab000f0",
     "api_key_error": null,
-    "run_started_at": "2026-02-19T00:54:12.918167+00:00",
-    "run_duration_seconds": 14.36
+    "run_started_at": "2026-02-19T01:18:16.062483+00:00",
+    "run_duration_seconds": 15.828
   },
   "notes": [
     "Ticket identifiers are hashed.",

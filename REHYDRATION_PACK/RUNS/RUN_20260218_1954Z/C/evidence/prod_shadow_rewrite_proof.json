@@ -1,10 +1,10 @@
 {
-  "conversation_id_hash": "665339c9382c",
-  "openai_rewrite": {
-    "model": null,
-    "reason": null,
-    "response_id": null,
-    "rewrite_applied": null,
-    "rewrite_attempted": null
-  }
+  "rewrite_model_used": "gpt-5.2-2025-12-11",
+  "rewrite_model_source": "rewrite_reply",
+  "reply_proof": {
+    "greeting_present": true,
+    "key_details_present": true,
+    "holly_signature_present": true
+  },
+  "reply_proof_source": "final_reply"
 }
