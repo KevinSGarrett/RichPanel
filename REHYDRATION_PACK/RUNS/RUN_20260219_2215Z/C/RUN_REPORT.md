@@ -21,23 +21,46 @@
 - Replaced order-status rewrite prompt and updated tests/registries.
 
 ## Diffstat (required)
-5e9ebf6 B95: naturalness patch for order-status drafts  
-.../automation/delivery_estimate.py                | 94 ++++++++++++----------  
-.../automation/order_status_prompts.py             | 88 ++++++++++++--------  
-.../richpanel_middleware/automation/pipeline.py    | 48 ++++++++++-  
-backend/tests/test_delivery_estimate_fallback.py   | 28 +++----  
-.../test_order_status_reply_personalization.py     | 38 ++++++++-  
-backend/tests/test_tracking_link_generation.py     |  6 +-  
-docs/00_Project_Admin/Progress_Log.md              |  6 ++  
-docs/_generated/doc_outline.json                   |  5 ++  
-docs/_generated/doc_registry.compact.json          |  2 +-  
-docs/_generated/doc_registry.json                  |  4 +-  
-docs/_generated/heading_index.json                 |  6 ++  
-scripts/test_delivery_estimate.py                  | 14 ++--  
-scripts/test_e2e_smoke_encoding.py                 |  4 +-  
-scripts/test_live_readonly_shadow_eval.py          |  7 +-  
-scripts/test_pipeline_handlers.py                  |  2 +-  
-15 files changed, 238 insertions(+), 114 deletions(-)
+.../RUNS/RUN_20260219_2215Z/A/DOCS_IMPACT_MAP.md   |  23 +++  
+.../RUNS/RUN_20260219_2215Z/A/FIX_REPORT.md        |  21 +++  
+.../RUNS/RUN_20260219_2215Z/A/GIT_RUN_PLAN.md      |  58 ++++++++  
+.../RUNS/RUN_20260219_2215Z/A/RUN_REPORT.md        |  63 +++++++++  
+.../RUNS/RUN_20260219_2215Z/A/RUN_SUMMARY.md       |  33 +++++  
+.../RUNS/RUN_20260219_2215Z/A/STRUCTURE_REPORT.md  |  27 ++++  
+.../RUNS/RUN_20260219_2215Z/A/TEST_MATRIX.md       |  15 ++  
+.../RUNS/RUN_20260219_2215Z/B/DOCS_IMPACT_MAP.md   |  23 +++  
+.../RUNS/RUN_20260219_2215Z/B/FIX_REPORT.md        |  21 +++  
+.../RUNS/RUN_20260219_2215Z/B/GIT_RUN_PLAN.md      |  58 ++++++++  
+.../RUNS/RUN_20260219_2215Z/B/RUN_REPORT.md        |  63 +++++++++  
+.../RUNS/RUN_20260219_2215Z/B/RUN_SUMMARY.md       |  33 +++++  
+.../RUNS/RUN_20260219_2215Z/B/STRUCTURE_REPORT.md  |  27 ++++  
+.../RUNS/RUN_20260219_2215Z/B/TEST_MATRIX.md       |  15 ++  
+.../RUN_20260219_2215Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++++  
+.../RUNS/RUN_20260219_2215Z/C/DOCS_IMPACT_MAP.md   |  26 +++  
+.../RUNS/RUN_20260219_2215Z/C/FIX_REPORT.md        |  21 +++  
+.../RUNS/RUN_20260219_2215Z/C/GIT_RUN_PLAN.md      |  62 ++++++++  
+.../RUNS/RUN_20260219_2215Z/C/RUN_REPORT.md        |  69 +++++++++  
+.../RUNS/RUN_20260219_2215Z/C/RUN_SUMMARY.md       |  45 ++++++  
+.../RUNS/RUN_20260219_2215Z/C/STRUCTURE_REPORT.md  |  36 +++++  
+.../RUNS/RUN_20260219_2215Z/C/TEST_MATRIX.md       |  14 ++  
+.../C/evidence/run_ci_checks_ci.log                | Bin 0 -> 283932 bytes  
+.../RUNS/RUN_20260219_2215Z/RUN_META.md            |  11 ++  
+.../automation/delivery_estimate.py                |  94 +++++++------  
+.../automation/order_status_prompts.py             |  88 +++++++-----  
+.../richpanel_middleware/automation/pipeline.py    |  48 ++++++-  
+backend/tests/test_delivery_estimate_fallback.py   |  28 ++--  
+.../test_order_status_reply_personalization.py     |  38 +++++-  
+backend/tests/test_tracking_link_generation.py     |   6 +-  
+docs/00_Project_Admin/Progress_Log.md              |   6 +  
+docs/_generated/doc_outline.json                   |   5 +  
+docs/_generated/doc_registry.compact.json          |   2 +-  
+docs/_generated/doc_registry.json                  |   4 +-  
+docs/_generated/heading_index.json                 |   6 +  
+scripts/test_delivery_estimate.py                  |  14 +-  
+scripts/test_e2e_smoke_encoding.py                 |   4 +-  
+scripts/test_live_readonly_shadow_eval.py          |   7 +-  
+scripts/test_pipeline_handlers.py                  |   2 +-  
+39 files changed, 1158 insertions(+), 114 deletions(-)
 
 ## Files Changed (required)
 - `backend/src/richpanel_middleware/automation/delivery_estimate.py` - reformat deterministic drafts and tracking reply structure.
