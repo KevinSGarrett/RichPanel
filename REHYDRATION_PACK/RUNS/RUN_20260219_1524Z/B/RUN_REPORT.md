@@ -34,12 +34,13 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260219_1524Z/B/DOCS_IMPACT_MAP.md   |  23 +++
  .../RUNS/RUN_20260219_1524Z/B/FIX_REPORT.md        |  21 +++
  .../RUNS/RUN_20260219_1524Z/B/GIT_RUN_PLAN.md      |  65 +++++++++
- .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        |  82 +++++++++++
+ .../RUNS/RUN_20260219_1524Z/B/RUN_REPORT.md        | 122 ++++++++++++++++
  .../RUNS/RUN_20260219_1524Z/B/RUN_SUMMARY.md       |  42 ++++++
  .../RUNS/RUN_20260219_1524Z/B/STRUCTURE_REPORT.md  |  34 +++++
  .../RUNS/RUN_20260219_1524Z/B/TEST_MATRIX.md       |  18 +++
  .../B/evidence/prompt_fingerprint.log              | Bin 0 -> 196 bytes
  .../RUN_20260219_1524Z/B/evidence/pytest_q.log     | Bin 0 -> 3800 bytes
+ .../B/evidence/run_ci_checks_ci.log                | Bin 0 -> 283990 bytes
  .../B/evidence/verify_agent_prompts_fresh.log      | Bin 0 -> 124 bytes
  .../B/evidence/verify_rehydration_pack.log         | Bin 0 -> 96 bytes
  .../RUN_20260219_1524Z/C/AGENT_PROMPTS_ARCHIVE.md  | 156 +++++++++++++++++++++
@@ -62,7 +63,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/doc_registry.json                  |   4 +-
  docs/_generated/heading_index.json                 |   6 +
  scripts/test_llm_reply_rewriter.py                 |  33 +++--
- 38 files changed, 1165 insertions(+), 36 deletions(-)
+ 39 files changed, 1205 insertions(+), 36 deletions(-)
 
 ## Files Changed (required)
 List key files changed (grouped by area) and why:
