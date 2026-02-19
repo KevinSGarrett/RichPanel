@@ -335,8 +335,8 @@ https://github.com/KevinSGarrett/RichPanel/pull/265#issuecomment-3929578211
 - **Results:** CI-equivalent checks passed; verification scripts passed. Rollback deploy completed with shadow flags confirmed and Lambda env verified.
 
 ## Wait-for-green evidence (required)
-**Wait loop executed:** yes (3x, 20s)
-**Status timestamps:** `2026-02-19T20:06Z` (gh pr checks 265: validate/codeql/bugbot pending)
+**Wait loop executed:** yes (4x, 25s)
+**Status timestamps:** `2026-02-19T20:10Z` (gh pr checks 265: validate/CodeQL analyze/Bugbot pending)
 **Check rollup proof:** https://github.com/KevinSGarrett/RichPanel/pull/265/checks
 **GitHub Actions run:** https://github.com/KevinSGarrett/RichPanel/actions
 **Codecov status:** https://app.codecov.io/gh/KevinSGarrett/RichPanel/pull/265
