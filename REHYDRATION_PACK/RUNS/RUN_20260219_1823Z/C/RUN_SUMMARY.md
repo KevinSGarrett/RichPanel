@@ -36,4 +36,4 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - None
 
 ## Issues / follow-ups
-- Push succeeded after switching active GitHub account.
+- Runtime flags could not be set (SCP deny); prod deploy blocked until flags can be updated.

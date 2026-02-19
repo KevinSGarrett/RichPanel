@@ -222,12 +222,42 @@ To https://github.com/KevinSGarrett/RichPanel.git
 gh pr create --title "B94: Tune reply rewrite limits + temp; prod deploy (risk:R2)" --body-file "REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/PR_DESCRIPTION.md" --label "risk:R2"
 # output:
 https://github.com/KevinSGarrett/RichPanel/pull/265
+
+aws sso login --profile rp-admin-prod
+# output:
+Successfully logged into Start URL: https://d-9066183f41.awsapps.com/start
+
+aws sts get-caller-identity --profile rp-admin-prod --output json
+# output:
+... (see evidence/aws_sts_prod.json) ...
+
+gh workflow run set-runtime-flags.yml --ref main -f environment=prod -f safe_mode=true -f automation_enabled=false
+# output:
+(workflow dispatched; see evidence/set_runtime_flags_workflow_failed.log)
+
+aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+# output:
+... (see evidence/prod_runtime_flags_table.txt) ...
+
+gh run list --workflow set-runtime-flags.yml -L 3
+# output:
+completed  failure  Set Runtime Flags  Set Runtime Flags  main  workflow_dispatch  22195907941  16s  2026-02-19T19:03:11Z
+completed  failure  Set Runtime Flags  Set Runtime Flags  main  workflow_dispatch  22195899899  16s  2026-02-19T19:02:58Z
+
+gh run view 22195907941 --log-failed
+# output:
+... (see evidence/set_runtime_flags_workflow_failed.log) ...
+
+aws ssm put-parameter --name /rp-mw/prod/safe_mode --type String --value true --overwrite --region us-east-2 --profile rp-admin-prod
+aws ssm put-parameter --name /rp-mw/prod/automation_enabled --type String --value false --overwrite --region us-east-2 --profile rp-admin-prod
+# output:
+AccessDeniedException (explicit SCP deny). See evidence/prod_runtime_flags_put_failed.log
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci` (passed); `python scripts/verify_rehydration_pack.py`; `python scripts/verify_agent_prompts_fresh.py`
 - **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/`
-- **Results:** CI-equivalent checks passed; verification scripts passed.
+- **Results:** CI-equivalent checks passed; verification scripts passed. Safety gate failed due to SCP deny on SSM flags.
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no
@@ -278,7 +308,8 @@ https://github.com/KevinSGarrett/RichPanel/pull/265
 - Prod safety flags must remain safe_mode=true and automation_enabled=false before any deploy.
 
 ## Blockers / open questions
-- None.
+- SCP explicit deny prevents setting `/rp-mw/prod/safe_mode=true` and `/rp-mw/prod/automation_enabled=false`.
+- Prod deploy blocked until flags can be set to shadow values.
 
 ## Follow-ups (actionable)
-- None.
+- Request org admin to allow SSM PutParameter for prod flags or provide approved path.
