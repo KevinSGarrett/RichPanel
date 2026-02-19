@@ -156,9 +156,10 @@ Paste output snippet proving you ran:
 - Prompt set fingerprint: 368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be
 
 ### Not done
-- Commit changes and open PR with required title/labels/template.
+- Push branch to origin (auth required) and open PR with required title/labels/template.
 
 ### Handoff notes
 - Logs: REHYDRATION_PACK/RUNS/RUN_20260219_0628Z/A/evidence/.
+- git push failed: Invalid username or token.
 - Confidence: 0.98 (CI-equivalent checks + pytest pass; changes are localized and
   covered by updated unit tests).
