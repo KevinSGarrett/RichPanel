@@ -263,11 +263,25 @@ npm run build
 npx cdk diff -c env=prod
 # output:
 ... (see evidence/cdk_diff_prod.txt) ...
+
+git ls-files --others --ignored --exclude-standard backend/src
+# output:
+... (detected __pycache__/*.pyc under backend/src) ...
+
+Get-ChildItem -Path backend\src -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
+# output:
+(no output)
+
+npx cdk diff -c env=prod
+# output:
+... (see evidence/cdk_diff_prod.txt) ...
 ```
 
 ## CDK Diff Review (required)
 - **Expected-only env var changes:** no (diff includes Lambda asset S3Key updates for ingress/worker/shopify-token-refresh)
-- **Action:** STOP before deploy; investigate unexpected asset diff.
+- **Investigation:** Found ignored `__pycache__` files under `backend/src` and removed them; re-ran diff and S3Key updates still present with a new hash.
+- **Likely cause:** Current `backend/src` content differs from the code currently deployed in prod, so CDK bundles a new asset even for env-var-only changes.
+- **Action:** STOP before deploy; require explicit approval to deploy with Lambda code asset updates.
 ```
 
 ## Tests / Proof (required)
