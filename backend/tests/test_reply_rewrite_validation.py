@@ -161,19 +161,21 @@ def test_missing_required_tokens_detects_missing_values() -> None:
         "Tracking link: https://tracking.example.com/track/ABC123 "
         "Tracking number: ABC123"
     )
-    missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta, missing_dates = rewriter._missing_required_tokens(
         original, "Thanks for reaching out."
     )
     assert missing_urls == ["https://tracking.example.com/track/ABC123"]
     assert missing_tracking == ["ABC123"]
     assert missing_eta == []
+    assert missing_dates == []
 
-    missing_urls, missing_tracking, missing_eta = rewriter._missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta, missing_dates = rewriter._missing_required_tokens(
         "Tracking number: ZX98765", "Tracking number: ZX98765"
     )
     assert missing_urls == []
     assert missing_tracking == []
     assert missing_eta == []
+    assert missing_dates == []
 
 
 def test_rewrite_rejects_modified_eta_window() -> None:
@@ -197,6 +199,29 @@ def test_rewrite_rejects_modified_eta_window() -> None:
     assert result.reason == "missing_required_eta"
 
 
+def test_rewrite_rejects_modified_delivery_date_range() -> None:
+    draft = "Your order is expected March 12–March 20, 2026."
+    client = _StubClient(
+        _response("Your order is expected March 13–March 21, 2026.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "missing_required_dates"
+
+
 def test_rewrite_accepts_equivalent_eta_separator() -> None:
     draft = "It should arrive in about 1–3 business days."
     client = _StubClient(_response("It should arrive in about 1-3 business days."))
@@ -215,6 +240,50 @@ def test_rewrite_accepts_equivalent_eta_separator() -> None:
 
     assert result.rewritten is True
     assert result.body == "It should arrive in about 1-3 business days."
+
+
+def test_rewrite_accepts_delivery_date_dash_variant() -> None:
+    draft = "Your order is expected March 12–March 20, 2026."
+    client = _StubClient(
+        _response("Your order is expected March 12-March 20, 2026.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is True
+    assert result.body == "Your order is expected March 12-March 20, 2026."
+
+
+def test_rewrite_accepts_delivery_date_to_variant() -> None:
+    draft = "Your order is expected October 1–October 5, 2026."
+    client = _StubClient(
+        _response("Your order is expected October 1 to October 5, 2026.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is True
+    assert result.body == "Your order is expected October 1 to October 5, 2026."
 
 
 def test_rewrite_rejects_unexpected_url() -> None:
@@ -261,6 +330,29 @@ def test_rewrite_rejects_unexpected_tracking_number() -> None:
     assert result.rewritten is False
     assert result.body == draft
     assert result.reason == "unexpected_tracking"
+
+
+def test_rewrite_rejects_unexpected_delivery_date_range() -> None:
+    draft = "Thanks for your patience. We'll update you soon."
+    client = _StubClient(
+        _response("Estimated delivery is April 1–April 7, 2026.")
+    )
+
+    result = rewrite_reply(
+        draft,
+        conversation_id="conv-test",
+        event_id="evt-test",
+        safe_mode=False,
+        automation_enabled=True,
+        allow_network=True,
+        outbound_enabled=True,
+        rewrite_enabled=True,
+        client=client,
+    )
+
+    assert result.rewritten is False
+    assert result.body == draft
+    assert result.reason == "unexpected_dates"
 
 
 def test_rewrite_rejects_internal_tags() -> None:

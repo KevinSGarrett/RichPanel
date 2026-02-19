@@ -50,6 +50,19 @@ _ETA_SINGLE_REGEX = re.compile(
     r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
 )
 _INTERNAL_TAG_REGEX = re.compile(r"(?i)\b(?:mw-[a-z0-9-]+|route-[a-z0-9-]+)\b")
+_MONTH_NAME_PATTERN = (
+    r"January|February|March|April|May|June|July|August|September|October|November|December"
+)
+_DATE_RANGE_SAME_YEAR_REGEX = re.compile(
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|-|to)\s*"
+    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
+    flags=re.IGNORECASE,
+)
+_DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|-|to)\s*"
+    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
+    flags=re.IGNORECASE,
+)
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -146,6 +159,8 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         "If the input includes tracking numbers, they must appear verbatim in the output. "
         "If the input includes an ETA window (for example, '1-3 business days'), "
         "preserve the numbers and units exactly. "
+        "If the input includes delivery date ranges (for example, "
+        "'March 12–March 20, 2026'), preserve them verbatim. "
         "Return strict JSON ONLY (no commentary, no code fences) with keys "
         "body (string <= 1000 chars), confidence (0-1 float), "
         "risk_flags (list of strings). "
@@ -268,38 +283,66 @@ def _extract_eta_windows(text: str) -> List[str]:
     return _dedupe(windows)
 
 
+def _normalize_date_window(token: str) -> str:
+    normalized = token.strip().lower()
+    normalized = re.sub(r"\s*(?:–|-)\s*", "-", normalized)
+    normalized = re.sub(r"\s*\bto\b\s*", "-", normalized)
+    normalized = re.sub(r"\s*,\s*", ", ", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
+def _extract_date_windows(text: str) -> List[str]:
+    if not text:
+        return []
+    windows: List[str] = []
+    for match in _DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
+        windows.append(_normalize_date_window(match.group(0)))
+    for match in _DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
+        windows.append(_normalize_date_window(match.group(0)))
+    return _dedupe(windows)
+
+
 def _missing_required_tokens(
     original: str, rewritten: str
-) -> Tuple[List[str], List[str], List[str]]:
+) -> Tuple[List[str], List[str], List[str], List[str]]:
     required_urls = _extract_urls(original)
     rewritten_urls = _extract_urls(rewritten)
     required_tracking = _extract_tracking_tokens(original)
     rewritten_tracking = _extract_tracking_tokens(rewritten)
     required_eta = _extract_eta_windows(original)
     rewritten_eta = _extract_eta_windows(rewritten)
+    required_dates = _extract_date_windows(original)
+    rewritten_dates = _extract_date_windows(rewritten)
     missing_urls = [url for url in required_urls if url not in rewritten_urls]
     missing_tracking = [
         token for token in required_tracking if token not in rewritten_tracking
     ]
     missing_eta = [window for window in required_eta if window not in rewritten_eta]
-    return missing_urls, missing_tracking, missing_eta
+    missing_dates = [window for window in required_dates if window not in rewritten_dates]
+    return missing_urls, missing_tracking, missing_eta, missing_dates
 
 
 def _unexpected_tokens(
     original: str, rewritten: str
-) -> Tuple[List[str], List[str], List[str]]:
+) -> Tuple[List[str], List[str], List[str], List[str]]:
     original_urls = _extract_urls(original)
     rewritten_urls = _extract_urls(rewritten)
     original_tracking = _extract_tracking_tokens(original)
     rewritten_tracking = _extract_tracking_tokens(rewritten)
     original_eta = _extract_eta_windows(original)
     rewritten_eta = _extract_eta_windows(rewritten)
+    original_dates = _extract_date_windows(original)
+    rewritten_dates = _extract_date_windows(rewritten)
     unexpected_urls = [url for url in rewritten_urls if url not in original_urls]
     unexpected_tracking = [
         token for token in rewritten_tracking if token not in original_tracking
     ]
     unexpected_eta = [window for window in rewritten_eta if window not in original_eta]
-    return unexpected_urls, unexpected_tracking, unexpected_eta
+    unexpected_dates = [
+        window for window in rewritten_dates if window not in original_dates
+    ]
+    return unexpected_urls, unexpected_tracking, unexpected_eta, unexpected_dates
 
 
 def _contains_internal_tags(text: str) -> bool:
@@ -567,16 +610,18 @@ def rewrite_reply(
             risk_flags=risk_flags,
         )
 
-    missing_urls, missing_tracking, missing_eta = _missing_required_tokens(
+    missing_urls, missing_tracking, missing_eta, missing_dates = _missing_required_tokens(
         reply_body, rewritten_body
     )
-    if missing_urls or missing_tracking or missing_eta:
+    if missing_urls or missing_tracking or missing_eta or missing_dates:
         reason = "missing_required_tokens"
-        if missing_urls and not missing_tracking and not missing_eta:
+        if missing_dates and not missing_urls and not missing_tracking and not missing_eta:
+            reason = "missing_required_dates"
+        elif missing_urls and not missing_tracking and not missing_eta and not missing_dates:
             reason = "missing_required_urls"
-        elif missing_tracking and not missing_urls and not missing_eta:
+        elif missing_tracking and not missing_urls and not missing_eta and not missing_dates:
             reason = "missing_required_tracking"
-        elif missing_eta and not missing_urls and not missing_tracking:
+        elif missing_eta and not missing_urls and not missing_tracking and not missing_dates:
             reason = "missing_required_eta"
         LOGGER.info(
             "reply_rewrite.validation_failed",
@@ -587,6 +632,7 @@ def rewrite_reply(
                 "missing_urls": len(missing_urls),
                 "missing_tracking": len(missing_tracking),
                 "missing_eta": len(missing_eta),
+                "missing_dates": len(missing_dates),
             },
         )
         return ReplyRewriteResult(
@@ -603,16 +649,38 @@ def rewrite_reply(
             risk_flags=risk_flags,
         )
 
-    unexpected_urls, unexpected_tracking, unexpected_eta = _unexpected_tokens(
+    unexpected_urls, unexpected_tracking, unexpected_eta, unexpected_dates = _unexpected_tokens(
         reply_body, rewritten_body
     )
-    if unexpected_urls or unexpected_tracking or unexpected_eta:
+    if unexpected_urls or unexpected_tracking or unexpected_eta or unexpected_dates:
         reason = "unexpected_tokens"
-        if unexpected_urls and not unexpected_tracking and not unexpected_eta:
+        if (
+            unexpected_dates
+            and not unexpected_urls
+            and not unexpected_tracking
+            and not unexpected_eta
+        ):
+            reason = "unexpected_dates"
+        elif (
+            unexpected_urls
+            and not unexpected_tracking
+            and not unexpected_eta
+            and not unexpected_dates
+        ):
             reason = "unexpected_urls"
-        elif unexpected_tracking and not unexpected_urls and not unexpected_eta:
+        elif (
+            unexpected_tracking
+            and not unexpected_urls
+            and not unexpected_eta
+            and not unexpected_dates
+        ):
             reason = "unexpected_tracking"
-        elif unexpected_eta and not unexpected_urls and not unexpected_tracking:
+        elif (
+            unexpected_eta
+            and not unexpected_urls
+            and not unexpected_tracking
+            and not unexpected_dates
+        ):
             reason = "unexpected_eta"
         LOGGER.info(
             "reply_rewrite.validation_failed",
@@ -623,6 +691,7 @@ def rewrite_reply(
                 "unexpected_urls": len(unexpected_urls),
                 "unexpected_tracking": len(unexpected_tracking),
                 "unexpected_eta": len(unexpected_eta),
+                "unexpected_dates": len(unexpected_dates),
             },
         )
         return ReplyRewriteResult(

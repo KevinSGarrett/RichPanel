@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-19 - RUN_20260219_1524Z (B93-B: preserve delivery windows + CTA guard)",
+        "anchor": "2026-02-19-run202602191524z-b93-b-preserve-delivery-windows-cta-guard"
+      },
+      {
+        "level": 3,
         "text": "2026-02-19 - RUN_20260219_0628Z (B92-A: naturalness v3 + no Key Details + no CTA)",
         "anchor": "2026-02-19-run202602190628z-b92-a-naturalness-v3-no-key-details-no-cta"
       },
