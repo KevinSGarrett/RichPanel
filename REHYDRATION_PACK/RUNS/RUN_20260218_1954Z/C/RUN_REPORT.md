@@ -41,14 +41,17 @@ Paste `git diff --stat` (or PR diffstat) here:
  .../RUNS/RUN_20260218_1954Z/C/DOCS_IMPACT_MAP.md   |  26 +
  .../RUNS/RUN_20260218_1954Z/C/FIX_REPORT.md        |  37 ++
  .../RUNS/RUN_20260218_1954Z/C/GIT_RUN_PLAN.md      |  61 ++
- .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 156 +++++++
+ .../RUNS/RUN_20260218_1954Z/C/RUN_REPORT.md        | 161 +++++++
  .../RUNS/RUN_20260218_1954Z/C/RUN_SUMMARY.md       |  44 ++
  .../RUNS/RUN_20260218_1954Z/C/STRUCTURE_REPORT.md  |  31 +
- .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  23 +
- .../C/evidence/prod_shadow_http_trace.json         | Bin 0 -> 3112 bytes
- .../C/evidence/prod_shadow_report.json             |  81 ++++
- .../C/evidence/prod_shadow_summary.json            |  98 ++++
- .../C/evidence/shadow_eval_run_22162429932.log     | Bin 0 -> 57838 bytes
+ .../RUNS/RUN_20260218_1954Z/C/TEST_MATRIX.md       |  24 ++
+ .../C/evidence/prod_shadow_http_trace.json         | 123 ++++++
+ .../C/evidence/prod_shadow_report.json             | 190 ++++++++
+ .../evidence/prod_shadow_rewrite_audit_proof.json  |  11 +
+ .../C/evidence/prod_shadow_rewrite_inference.md    |   7 +
+ .../C/evidence/prod_shadow_rewrite_proof.json      |  10 +
+ .../C/evidence/prod_shadow_summary.json            | 403 +++++++++++++++++
+ .../C/evidence/shadow_eval_run_22162429932.log     | Bin 0 -> 116204 bytes
  .../evidence/deploy_prod_main_run_22161726807.log  | Bin 0 -> 67996 bytes
  .../C/evidence/prod_readonly_shadow_eval.log       | Bin 0 -> 1602 bytes
  .../prod_worker_lambda_config_redacted.json        |  83 ++++
@@ -69,7 +72,7 @@ Paste `git diff --stat` (or PR diffstat) here:
  docs/_generated/heading_index.json                 |   6 +
  backend/tests/test_reply_rewrite_validation.py     |  73 +++-
  infra/cdk/lib/richpanel-middleware-stack.ts        |   2 +
- 42 files changed, 1917 insertions(+), 4 deletions(-)
+ 49 files changed, 2667 insertions(+), 4 deletions(-)
 ```
 
 ## Files Changed (required)
@@ -117,7 +120,7 @@ List commands you ran (include key flags/env if relevant):
 - `aws lambda get-function-configuration --function-name rp-mw-prod-worker` - captured Lambda env config (redacted).
 - `python scripts/live_readonly_shadow_eval.py --env prod ...` - attempted read-only shadow eval (failed with Richpanel 504 timeout).
 - `gh workflow run "Shadow Live Read-Only Eval" --ref main -f shop-domain=... -f ticket-ids=...` - shadow eval workflow (failed: OpenAI routing disabled in workflow env).
-- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> ...` - local shadow eval retries per ticket (ticket fetch succeeded; conversation endpoints returned 403; Shopify auth failed).
+- `python scripts/live_readonly_shadow_eval.py --ticket-id <id> ...` - local shadow eval retries per ticket (ticket fetch + Shopify ok; conversation endpoints 403; order_status candidate + OpenAI calls observed).
 
 ## Tests / Proof (required)
 Include test commands + results + links to evidence.
@@ -127,7 +130,8 @@ Include test commands + results + links to evidence.
 - `npx cdk diff RichpanelMiddleware-staging` - pass (diff includes unrelated changes; blocker) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_staging.txt`
 - `Deploy Prod Stack` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_prod_main_run_22161726807.log`
 - `Shadow Live Read-Only Eval` - fail (OpenAI routing disabled in workflow env) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/shadow_eval_run_22162429932.log`
-- `live_readonly_shadow_eval.py` - partial (ticket fetch ok; conversation 403; Shopify auth fail; no rewrite proof) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
+- `live_readonly_shadow_eval.py` - partial (ticket fetch ok; conversation 403; order_status candidate; OpenAI calls observed; rewrite inference) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_readonly_shadow_eval.log`
+- `shadow eval proof` - inference note tying OpenAI calls to rewrite model gpt-5.2 - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_shadow_rewrite_inference.md`
 - `npx cdk diff RichpanelMiddleware-prod` - pass - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/cdk_diff_prod.txt`
 - `aws ssm get-parameters --names <safe_mode> <automation_enabled>` - pass (safe_mode=true, automation_enabled=false) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/prod_safe_mode_automation_status.txt`
 - `Deploy Staging Stack` (main) - fail (log group already exists) - evidence: `REHYDRATION_PACK/RUNS/RUN_20260218_1954Z/C/evidence/deploy_staging_main_run_22157069157.log`

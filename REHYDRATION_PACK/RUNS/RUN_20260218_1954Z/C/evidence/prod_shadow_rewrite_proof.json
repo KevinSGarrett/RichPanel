@@ -1,0 +1,10 @@
+{
+  "conversation_id_hash": "665339c9382c",
+  "openai_rewrite": {
+    "model": null,
+    "reason": null,
+    "response_id": null,
+    "rewrite_applied": null,
+    "rewrite_attempted": null
+  }
+}

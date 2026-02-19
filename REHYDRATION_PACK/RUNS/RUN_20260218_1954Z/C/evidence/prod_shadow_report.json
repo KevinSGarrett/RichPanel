@@ -1,6 +1,6 @@
 {
-  "run_id": "RUN_20260219_0033Z",
-  "timestamp": "2026-02-19T00:34:13.147146+00:00",
+  "run_id": "RUN_20260219_0047Z",
+  "timestamp": "2026-02-19T00:47:58.726702+00:00",
   "environment": "prod",
   "env_flags": {
     "MW_ALLOW_NETWORK_READS": "true",
@@ -19,7 +19,7 @@
   "sample_mode": "explicit",
   "conversation_mode": "full",
   "ticket_count": 1,
-  "match_success_rate": 0.0,
+  "match_success_rate": 1.0,
   "match_failure_buckets": {
     "no_email": 0,
     "no_order_number": 0,
@@ -27,27 +27,22 @@
     "no_order_candidates": 0,
     "order_match_failed": 0,
     "parse_error": 0,
-    "api_error": 1,
+    "api_error": 0,
     "other_failure": 0,
     "unknown": 0
   },
-  "tracking_or_eta_available_rate": 0.0,
+  "tracking_or_eta_available_rate": 1.0,
   "would_reply_send": false,
-  "top_failure_reasons": [
-    {
-      "reason": "shopify_auth_fail",
-      "count": 1
-    }
-  ],
+  "top_failure_reasons": [],
   "counts": {
     "tickets_requested": 1,
     "tickets_selected": 1,
     "tickets_scanned": 1,
-    "order_status_candidates": 0,
-    "orders_matched": 0,
-    "tracking_found": 0,
-    "eta_available": 0,
-    "tracking_or_eta_available": 0,
+    "order_status_candidates": 1,
+    "orders_matched": 1,
+    "tracking_found": 1,
+    "eta_available": 1,
+    "tracking_or_eta_available": 1,
     "errors": 0
   },
   "shopify_probe": {
@@ -55,26 +50,33 @@
   },
   "tickets": [
     {
-      "ticket_id_redacted": "redacted:22c57b9d0280",
-      "channel": "email",
-      "ticket_schema_fingerprint": "217280547918",
+      "ticket_id_redacted": "redacted:455d2b629ec5",
+      "channel": "unknown",
+      "ticket_schema_fingerprint": "ccb813fe1a47",
       "order_resolution": {
-        "resolvedBy": "no_match",
-        "confidence": "low",
-        "reason": "shopify_auth_fail",
-        "shopify_diagnostics": {
-          "category": "auth_fail",
-          "status_code": 401,
-          "request_id": "a1a84652-5661-4aca-8124-c0c74888e5ab-1771461233"
-        }
+        "resolvedBy": "richpanel_order_number",
+        "confidence": "high",
+        "reason": "shopify_name_match",
+        "order_number_source": "order_number_field"
       },
-      "shopify_tracking_number": false,
-      "shopify_tracking_redacted": null,
+      "shopify_tracking_number": true,
+      "shopify_tracking_redacted": "***",
       "shopify_carrier": null,
       "shopify_order_created_at": true,
-      "shopify_shipping_method": null,
-      "shopify_schema_fingerprint": "72222260805b",
-      "comment_count": 5,
+      "shopify_shipping_method": "USPS/UPS® Ground",
+      "computed_eta": {
+        "order_date_redacted": "2026-01-XX",
+        "inquiry_date_redacted": "2026-01-XX",
+        "shipping_method": "Standard (3-7 business days)",
+        "elapsed_business_days": 10,
+        "remaining_min_days": 1,
+        "remaining_max_days": 2,
+        "eta_human": "1-2 business days",
+        "is_late": false,
+        "bucket": "Standard"
+      },
+      "shopify_schema_fingerprint": "7cc9cf8d267e",
+      "comment_count": 14,
       "comment_text_present": true,
       "comment_operator_flag_present": true,
       "customer_comment_present": true,
@@ -84,51 +86,80 @@
         "department": "Email Support Team",
         "reason": "order number present with shipping or tracking language",
         "primary_source": "deterministic",
-        "confidence": 0.93,
+        "confidence": 0.94,
         "llm_model": "gpt-5.2-chat-latest",
-        "llm_response_id": "chatcmpl-DAmHQlf7gaVOsg3HQHvQqtKXUfBNs",
+        "llm_response_id": "chatcmpl-DAmUnas1qG3SSh1ai2xDZqyxJG1ju",
         "llm_gated_reason": null
       },
       "would_reply_send": false,
       "order_id_present": true,
       "order_number_present": true,
       "order_created_at_present": true,
-      "tracking_or_shipping_method_present": false,
-      "order_context_missing": [
-        "tracking_or_shipping_method"
-      ],
-      "order_status_candidate": false,
-      "order_matched": false,
-      "tracking_found": false,
-      "eta_available": false,
-      "failure_reason": "shopify_auth_fail",
-      "failure_source": "order_match",
-      "elapsed_seconds": 46.734
+      "tracking_or_shipping_method_present": true,
+      "order_context_missing": [],
+      "preorder_proof": {
+        "preorder_delivery_estimate": true,
+        "preorder_tag_match": true,
+        "preorder_tag_matches": [
+          "pre-order"
+        ],
+        "order_created_date": "2026-01-17",
+        "inquiry_date": "2026-01-30",
+        "preorder_window_min_days": 6,
+        "preorder_window_max_days": 12,
+        "preorder_normalized_method": "Standard (3-7 business days)",
+        "preorder_raw_method": "USPS/UPS® Ground",
+        "preorder_ship_date_human": "Tuesday, March 3, 2026",
+        "preorder_ship_in_days": "32 days",
+        "preorder_delivery_window_human": "March 11–March 19, 2026",
+        "preorder_arrives_in_days": "40–48 days",
+        "processing_human": "3-5 business days",
+        "remaining_min_days": null,
+        "remaining_max_days": null,
+        "is_late": false,
+        "draft_reply_present": true,
+        "draft_reply_has_preorder_word": true,
+        "draft_reply_has_processing_phrase": true,
+        "draft_reply_has_processing_human": true,
+        "draft_reply_has_ship_date": true,
+        "draft_reply_has_ship_schedule_phrase": true,
+        "draft_reply_has_delivery_window": true,
+        "draft_reply_has_estimated_delivery_phrase": true,
+        "draft_reply_has_ship_in_days": true,
+        "draft_reply_has_arrives_in_days": true,
+        "nonpreorder_floor_ok": null,
+        "draft_reply_ends_with_tracking_line": true,
+        "draft_reply_body_fingerprint": "82c94b9b6930"
+      },
+      "order_status_candidate": true,
+      "order_matched": true,
+      "tracking_found": true,
+      "eta_available": true,
+      "elapsed_seconds": 37.218
     }
   ],
   "summary_path": "artifacts\\readonly_shadow\\live_shadow_summary.json",
   "run_warnings": [],
   "http_trace_path": "artifacts\\readonly_shadow\\live_shadow_http_trace.json",
   "http_trace_summary": {
-    "total_requests": 31,
+    "total_requests": 19,
     "methods": {
-      "GET": 21,
-      "POST": 10
+      "GET": 15,
+      "POST": 4
     },
     "services": {
       "aws_portal": 1,
-      "aws_secretsmanager": 8,
+      "aws_secretsmanager": 2,
       "richpanel": 12,
-      "shopify": 6,
-      "shipstation": 2,
+      "shopify": 2,
       "openai": 2
     },
     "sources": {
-      "aws_sdk": 9,
-      "urllib": 22
+      "aws_sdk": 3,
+      "urllib": 16
     },
     "aws_operations": {
-      "GetSecretValue": 8
+      "GetSecretValue": 2
     },
     "aws_missing_operations": 0,
     "aws_sdk_trace_enabled": true,
@@ -147,8 +178,8 @@
     "api_key_secret_id": "rp-mw/prod/richpanel/api_key",
     "api_key_hash": "7ab000f0",
     "api_key_error": null,
-    "run_started_at": "2026-02-19T00:33:21.399641+00:00",
-    "run_duration_seconds": 51.734
+    "run_started_at": "2026-02-19T00:47:16.507074+00:00",
+    "run_duration_seconds": 42.218
   },
   "notes": [
     "Ticket identifiers are hashed.",
