@@ -36,4 +36,4 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - None
 
 ## Issues / follow-ups
-- Git push failed due to missing credentials; re-authenticate and push branch.
+- Push succeeded after switching active GitHub account.

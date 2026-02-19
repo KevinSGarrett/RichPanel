@@ -204,6 +204,20 @@ git push -u origin run/RUN_20260219_1823Z-B94C
 # output:
 remote: Invalid username or token. Password authentication is not supported for Git operations.
 fatal: Authentication failed for 'https://github.com/KevinSGarrett/RichPanel.git/'
+
+$env:GH_TOKEN=""
+gh auth switch -h github.com -u KevinSGarrett
+gh auth setup-git
+# output:
+✓ Switched active account for github.com to KevinSGarrett
+
+git push -u origin run/RUN_20260219_1823Z-B94C
+# output:
+remote: Create a pull request for 'run/RUN_20260219_1823Z-B94C' on GitHub by visiting:
+remote:      https://github.com/KevinSGarrett/RichPanel/pull/new/run/RUN_20260219_1823Z-B94C
+branch 'run/RUN_20260219_1823Z-B94C' set up to track 'origin/run/RUN_20260219_1823Z-B94C'.
+To https://github.com/KevinSGarrett/RichPanel.git
+ * [new branch]      run/RUN_20260219_1823Z-B94C -> run/RUN_20260219_1823Z-B94C
 ```
 
 ## Tests / Proof (required)
