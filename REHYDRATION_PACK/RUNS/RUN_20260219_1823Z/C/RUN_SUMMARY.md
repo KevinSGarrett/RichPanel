@@ -11,7 +11,7 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - Added reply rewrite tuning env vars in worker Lambda configuration.
 - Documented recommended production tuning in OpenAI contract; updated progress log and regenerated doc registry outputs.
 - Investigated CDK diff scope; removed backend `__pycache__` artifacts and re-ran diff.
-- Rolled back prod stack to `main` and verified Lambda env vars + safety flags.
+- Rolled back unapproved deploy, then deployed merged `main` and verified Lambda env vars + safety flags.
 
 ## Files changed
 - `infra/cdk/lib/richpanel-middleware-stack.ts`
@@ -26,8 +26,9 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260219_1823Z-B94C`
 - PR: https://github.com/KevinSGarrett/RichPanel/pull/265
-- CI status at end of run: green (local run_ci_checks passed)
-- Main updated: no
+- Post-deploy evidence PR: https://github.com/KevinSGarrett/RichPanel/pull/266
+- CI status at end of run: green (all checks passed)
+- Main updated: yes (PR merged)
 - Branch cleanup done: no
 
 ## Tests and evidence
@@ -35,7 +36,7 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/`
 
 ## Decisions made
-- None
+- Proceeded with deploy only after PR merge and safety flags verified.
 
 ## Issues / follow-ups
-- Fix PR issues (prompt max chars mismatch) and re-run checks; no further prod actions without explicit approval.
+- None
