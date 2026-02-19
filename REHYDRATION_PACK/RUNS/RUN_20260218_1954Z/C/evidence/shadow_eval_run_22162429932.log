@@ -1,0 +1,451 @@
+live-readonly-shadow-eval	Set up job	???2026-02-18T23:49:44.3528903Z Current runner version: '2.331.0'
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3564250Z ##[group]Runner Image Provisioner
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3565524Z Hosted Compute Agent
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3566452Z Version: 20260123.484
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3567702Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3569001Z Build Date: 2026-01-23T19:41:17Z
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3570252Z Worker ID: {3b839946-29df-48ee-85a2-9563f80698f7}
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3571767Z Azure Region: eastus2
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3572621Z ##[endgroup]
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3575569Z ##[group]Operating System
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3576670Z Ubuntu
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3577529Z 24.04.3
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3578662Z LTS
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3579491Z ##[endgroup]
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3580293Z ##[group]Runner Image
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3581641Z Image: ubuntu-24.04
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3582654Z Version: 20260209.23.1
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3584680Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260209.23/images/ubuntu/Ubuntu2404-Readme.md
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3587809Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260209.23
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3589697Z ##[endgroup]
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3591840Z ##[group]GITHUB_TOKEN Permissions
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3594853Z Contents: read
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3595793Z Metadata: read
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3597233Z ##[endgroup]
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3600174Z Secret source: Actions
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.3601872Z Prepare workflow directory
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.4403029Z Prepare all required actions
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.4460236Z Getting action download info
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.6796257Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.8355967Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:44.9208062Z Download action repository 'aws-actions/configure-aws-credentials@v4' (SHA:7474bc4690e29a8392af63c5b98e7449536d5c3a)
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:45.1726123Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+live-readonly-shadow-eval	Set up job	2026-02-18T23:49:45.3876388Z Complete job name: live-readonly-shadow-eval
+live-readonly-shadow-eval	Checkout repository	???2026-02-18T23:49:45.4528253Z ##[group]Run actions/checkout@v4
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4529135Z with:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4529581Z   repository: KevinSGarrett/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4530278Z   token: ***
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4530683Z   ssh-strict: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4531253Z   ssh-user: git
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4531693Z   persist-credentials: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4532167Z   clean: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4532589Z   sparse-checkout-cone-mode: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4533093Z   fetch-depth: 1
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4533505Z   fetch-tags: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4533921Z   show-progress: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4534335Z   lfs: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4534725Z   submodules: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4535153Z   set-safe-directory: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4535830Z env:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4536226Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4536664Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4537119Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4537563Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4538050Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4538616Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4539123Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4539601Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4540093Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4540589Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4541398Z   RICHPANEL_API_KEY_OVERRIDE: ***
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4541913Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4542408Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4542957Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.4543514Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5632143Z Syncing repository: KevinSGarrett/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5634037Z ##[group]Getting Git version info
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5634783Z Working directory is '/home/runner/work/RichPanel/RichPanel'
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5636093Z [command]/usr/bin/git version
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5644499Z git version 2.52.0
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5670439Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5691609Z Temporarily overriding HOME='/home/runner/work/_temp/9ec96240-935e-4cdd-8e11-2e43f664c1bb' before making global git config changes
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5693133Z Adding repository directory to the temporary git global config as a safe directory
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5697056Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RichPanel/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5736738Z Deleting the contents of '/home/runner/work/RichPanel/RichPanel'
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5740233Z ##[group]Initializing the repository
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5744996Z [command]/usr/bin/git init /home/runner/work/RichPanel/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5861680Z hint: Using 'master' as the name for the initial branch. This default branch name
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5863487Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5865537Z hint: to use in all of your new repositories, which will suppress this warning,
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5867059Z hint: call:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5867946Z hint:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5869041Z hint: 	git config --global init.defaultBranch <name>
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5870167Z hint:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5871448Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5873191Z hint: 'development'. The just-created branch can be renamed via this command:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5874677Z hint:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5875440Z hint: 	git branch -m <name>
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5876304Z hint:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5877407Z hint: Disable this message with "git config set advice.defaultBranchName false"
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5879391Z Initialized empty Git repository in /home/runner/work/RichPanel/RichPanel/.git/
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5882572Z [command]/usr/bin/git remote add origin https://github.com/KevinSGarrett/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5916690Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5917967Z ##[group]Disabling automatic garbage collection
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5922144Z [command]/usr/bin/git config --local gc.auto 0
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5952312Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5953926Z ##[group]Setting up auth
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5960451Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.5993896Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6355151Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6386057Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6621172Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6654726Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6891475Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6926672Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6927631Z ##[group]Fetching the repository
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:45.6936225Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0a5b9a5e70194cde087ecff15eff48bdd67dbbb8:refs/remotes/origin/main
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3938875Z From https://github.com/KevinSGarrett/RichPanel
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3942052Z  * [new ref]         0a5b9a5e70194cde087ecff15eff48bdd67dbbb8 -> origin/main
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3977508Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3978550Z ##[group]Determining the checkout info
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3980128Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.3986201Z [command]/usr/bin/git sparse-checkout disable
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.4031902Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.4064552Z ##[group]Checking out the ref
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.4069030Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.6199354Z Switched to a new branch 'main'
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.6201355Z branch 'main' set up to track 'origin/main'.
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.6216941Z ##[endgroup]
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.6259043Z [command]/usr/bin/git log -1 --format=%H
+live-readonly-shadow-eval	Checkout repository	2026-02-18T23:49:46.6284180Z 0a5b9a5e70194cde087ecff15eff48bdd67dbbb8
+live-readonly-shadow-eval	Set up Python	???2026-02-18T23:49:46.6579199Z ##[group]Run actions/setup-python@v5
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6580111Z with:
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6580766Z   python-version: 3.11
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6581695Z   check-latest: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6582713Z   token: ***
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6583348Z   update-environment: true
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6583795Z   allow-prereleases: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6584211Z   freethreaded: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6584589Z env:
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6584943Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6585327Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6585691Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6586082Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6586505Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6586946Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6587375Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6587809Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6588227Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6588653Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6589196Z   RICHPANEL_API_KEY_OVERRIDE: ***
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6589626Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590044Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590495Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.6590953Z ##[endgroup]
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.8291926Z ##[group]Installed versions
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.8406969Z Successfully set up CPython (3.11.14)
+live-readonly-shadow-eval	Set up Python	2026-02-18T23:49:46.8408001Z ##[endgroup]
+live-readonly-shadow-eval	Install dependencies	???2026-02-18T23:49:46.8518335Z ##[group]Run python -m pip install --upgrade pip
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8518859Z [36;1mpython -m pip install --upgrade pip[0m
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8519203Z [36;1mpip install boto3[0m
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8585647Z shell: /usr/bin/bash -e {0}
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8585986Z env:
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8586213Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8586475Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8586722Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8587037Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8587332Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8587636Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8587910Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8588188Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8588469Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8588754Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589213Z   RICHPANEL_API_KEY_OVERRIDE: ***
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589536Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8589812Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8590165Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8590559Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8591263Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8591744Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8592175Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8592592Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8593021Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:46.8593388Z ##[endgroup]
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:49.0782772Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (26.0.1)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.0502170Z Collecting boto3
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.1182635Z   Downloading boto3-1.42.52-py3-none-any.whl.metadata (6.7 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.3665440Z Collecting botocore<1.43.0,>=1.42.52 (from boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.3744436Z   Downloading botocore-1.42.52-py3-none-any.whl.metadata (5.9 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.3922095Z Collecting jmespath<2.0.0,>=0.7.1 (from boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4004443Z   Downloading jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4231375Z Collecting s3transfer<0.17.0,>=0.16.0 (from boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4307778Z   Downloading s3transfer-0.16.0-py3-none-any.whl.metadata (1.7 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4484481Z Collecting python-dateutil<3.0.0,>=2.1 (from botocore<1.43.0,>=1.42.52->boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4556707Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4818410Z Collecting urllib3!=2.2.0,<3,>=1.25.4 (from botocore<1.43.0,>=1.42.52->boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.4891842Z   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.5070444Z Collecting six>=1.5 (from python-dateutil<3.0.0,>=2.1->botocore<1.43.0,>=1.42.52->boto3)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.5147968Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.5534640Z Downloading boto3-1.42.52-py3-none-any.whl (140 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.5752266Z Downloading botocore-1.42.52-py3-none-any.whl (14.6 MB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6502038Z    ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????? 14.6/14.6 MB 214.6 MB/s  0:00:00
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6585300Z Downloading jmespath-1.1.0-py3-none-any.whl (20 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6682168Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6795956Z Downloading s3transfer-0.16.0-py3-none-any.whl (86 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6891260Z Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.6986857Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:50.7457394Z Installing collected packages: urllib3, six, jmespath, python-dateutil, botocore, s3transfer, boto3
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:51.4870417Z 
+live-readonly-shadow-eval	Install dependencies	2026-02-18T23:49:51.4882525Z Successfully installed boto3-1.42.52 botocore-1.42.52 jmespath-1.1.0 python-dateutil-2.9.0.post0 s3transfer-0.16.0 six-1.17.0 urllib3-2.6.3
+live-readonly-shadow-eval	Select secret source (optional)	???2026-02-18T23:49:51.5628497Z ##[group]Run set -euo pipefail
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5628841Z [36;1mset -euo pipefail[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5629099Z [36;1mENV_NAME="${ENVIRONMENT:-prod}"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5629438Z [36;1mSECRETS_NAMESPACE="rp-mw/${ENV_NAME}"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5629710Z [36;1m{[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5630001Z [36;1m  echo "SECRETS_NAMESPACE=${SECRETS_NAMESPACE}"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5630434Z [36;1m  echo "RICHPANEL_API_KEY_OVERRIDE=${SECRETS_NAMESPACE}/richpanel/api_key"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5631271Z [36;1m  echo "SHOPIFY_ACCESS_TOKEN_OVERRIDE=${SECRETS_NAMESPACE}/shopify/admin_api_token"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5631714Z [36;1m} >> "$GITHUB_ENV"[0m
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5685123Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5685460Z env:
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5685645Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5685886Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5686093Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5686319Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5686606Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5686865Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5687104Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5687338Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5687577Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5687822Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688210Z   RICHPANEL_API_KEY_OVERRIDE: ***
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688461Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: 
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688705Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5688977Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5689339Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5689766Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5690366Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5690740Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5691327Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5691719Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+live-readonly-shadow-eval	Select secret source (optional)	2026-02-18T23:49:51.5692029Z ##[endgroup]
+live-readonly-shadow-eval	Configure AWS credentials (optional)	???2026-02-18T23:49:51.5864143Z ##[group]Run aws-actions/configure-aws-credentials@v4
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5864485Z with:
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5864739Z   role-to-assume: arn:aws:iam::151124909266:role/rp-ci-deploy
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5865053Z   aws-region: us-east-2
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5865276Z   audience: sts.amazonaws.com
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5865513Z   output-env-credentials: true
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5865736Z env:
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5865904Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5866108Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5866305Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5866511Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5866751Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867008Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867245Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867468Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867697Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5867925Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5868234Z   RICHPANEL_API_KEY_OVERRIDE: ***REDACTED***
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5868664Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: rp-mw/prod/shopify/admin_api_token
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869008Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869281Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5869626Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5870040Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5870443Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5870802Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5871479Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5871859Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5872182Z   SECRETS_NAMESPACE: rp-mw/prod
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.5872411Z ##[endgroup]
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.8021307Z Assuming role with OIDC
+live-readonly-shadow-eval	Configure AWS credentials (optional)	2026-02-18T23:49:51.9848188Z Authenticated as assumedRoleId AROASGL57DTJCQLLRD6QW:GitHubActions
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	???2026-02-18T23:49:52.0402991Z ##[group]Run python - <<'PY'
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0403335Z [36;1mpython - <<'PY'[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0403561Z [36;1mimport os[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0403766Z [36;1mimport boto3[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0403970Z [36;1m[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0404261Z [36;1mdef resolve_secret(value: str | None, label: str) -> str | None:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0404637Z [36;1m    if not value:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0404867Z [36;1m        return None[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0405259Z [36;1m    if value.startswith("arn:aws:secretsmanager:") or value.startswith("rp-mw/"):[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0405722Z [36;1m        client = boto3.client([0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0406001Z [36;1m            "secretsmanager",[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0406345Z [36;1m            region_name=os.environ.get("AWS_REGION", "us-east-2"),[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0406693Z [36;1m        )[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0406962Z [36;1m        resp = client.get_secret_value(SecretId=value)[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0407329Z [36;1m        secret_string = resp.get("SecretString")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0407676Z [36;1m        if not secret_string:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0407944Z [36;1m            raise SystemExit([0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0408252Z [36;1m                f"{label} missing SecretString for {value}"[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0408565Z [36;1m            )[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0408816Z [36;1m        print(f"::add-mask::{secret_string}")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0409119Z [36;1m        return secret_string[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0409400Z [36;1m    print(f"::add-mask::{value}")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0409832Z [36;1m    return value[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0410050Z [36;1m[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0410232Z [36;1moutput_lines = [][0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0410471Z [36;1mrichpanel = resolve_secret([0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0410782Z [36;1m    os.environ.get("RICHPANEL_API_KEY_OVERRIDE"),[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0411379Z [36;1m    "RICHPANEL_API_KEY_OVERRIDE",[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0411832Z [36;1m)[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0412024Z [36;1mif richpanel:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0412359Z [36;1m    output_lines.append(f"RICHPANEL_API_KEY_OVERRIDE={richpanel}")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0412743Z [36;1mshopify = resolve_secret([0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0413057Z [36;1m    os.environ.get("SHOPIFY_ACCESS_TOKEN_OVERRIDE"),[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0413399Z [36;1m    "SHOPIFY_ACCESS_TOKEN_OVERRIDE",[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0413665Z [36;1m)[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0413851Z [36;1mif shopify:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0414168Z [36;1m    output_lines.append(f"SHOPIFY_ACCESS_TOKEN_OVERRIDE={shopify}")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0414539Z [36;1m[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0414725Z [36;1mif output_lines:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0415068Z [36;1m    with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0415518Z [36;1m        env_file.write("\n".join(output_lines) + "\n")[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0415828Z [36;1mPY[0m
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0465929Z shell: /usr/bin/bash -e {0}
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0466186Z env:
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0466385Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0466615Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0466823Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0467042Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0467300Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0467569Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0467827Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468076Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468324Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468578Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0468912Z   RICHPANEL_API_KEY_OVERRIDE: ***REDACTED***
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469328Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: rp-mw/prod/shopify/admin_api_token
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469688Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0469981Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0470347Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0470783Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0471719Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0472119Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0472500Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0472881Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0473233Z   SECRETS_NAMESPACE: rp-mw/prod
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0473532Z   AWS_DEFAULT_REGION: us-east-2
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0473884Z   AWS_ACCESS_KEY_ID: ***
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0474208Z   AWS_SECRET_ACCESS_KEY: ***
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0478744Z   AWS_SESSION_TOKEN: ***
+live-readonly-shadow-eval	Resolve AWS Secrets Manager IDs (optional)	2026-02-18T23:49:52.0478972Z ##[endgroup]
+live-readonly-shadow-eval	Run live read-only shadow evaluation	???2026-02-18T23:49:52.9501224Z ##[group]Run set -euo pipefail
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9501725Z [36;1mset -euo pipefail[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9502208Z [36;1mif [ -z "${SHOPIFY_ACCESS_TOKEN_OVERRIDE:-}" ] && [ -n "${SHOPIFY_ACCESS_TOKEN_FALLBACK:-}" ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9502829Z [36;1m  export SHOPIFY_ACCESS_TOKEN_OVERRIDE="${SHOPIFY_ACCESS_TOKEN_FALLBACK}"[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9503225Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9503470Z [36;1mif [ -z "${SHOPIFY_SHOP_DOMAIN:-}" ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9503995Z [36;1m  echo "SHOPIFY_SHOP_DOMAIN is required (set workflow input or PROD_SHOPIFY_SHOP_DOMAIN secret)."[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9504485Z [36;1m  exit 2[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9504692Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9504947Z [36;1mif [[ "${INPUT_TICKET_IDS:-}" == "__none__" ]]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9505463Z [36;1m  INPUT_TICKET_IDS=""[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9505697Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9505892Z [36;1mTICKET_ARGS=()[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9506146Z [36;1mif [ -n "${INPUT_TICKET_IDS:-}" ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9506527Z [36;1m  IFS=',' read -ra IDS <<< "${INPUT_TICKET_IDS}"[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9506861Z [36;1m  for id in "${IDS[@]}"; do[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9507145Z [36;1m    trimmed="$(echo "$id" | xargs)"[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9507427Z [36;1m    if [ -n "$trimmed" ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9507723Z [36;1m      TICKET_ARGS+=(--ticket-id "$trimmed")[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508006Z [36;1m    fi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508198Z [36;1m  done[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508377Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508552Z [36;1m[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508736Z [36;1mSAMPLE_ARGS=()[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9508990Z [36;1mif [ ${#TICKET_ARGS[@]} -eq 0 ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9509323Z [36;1m  if [[ ! "${INPUT_SAMPLE_SIZE:-}" =~ ^[0-9]+$ ]]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9509726Z [36;1m    echo "Invalid sample-size input: ${INPUT_SAMPLE_SIZE}"[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9510068Z [36;1m    exit 2[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9510264Z [36;1m  fi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9510528Z [36;1m  SAMPLE_ARGS=(--max-tickets "${INPUT_SAMPLE_SIZE}")[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9510840Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9511206Z [36;1m[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9511399Z [36;1mPROBE_ARGS=()[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9511678Z [36;1mif [[ "${INPUT_SHOPIFY_PROBE:-}" == "true" ]]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9512007Z [36;1m  PROBE_ARGS=(--shopify-probe)[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9512268Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9512442Z [36;1m[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9512623Z [36;1mSTACK_ARGS=()[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9512873Z [36;1mif [ -n "${INPUT_STACK_NAME:-}" ]; then[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9513216Z [36;1m  STACK_ARGS=(--stack-name "${INPUT_STACK_NAME}")[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9513513Z [36;1mfi[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9513685Z [36;1m[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9513929Z [36;1mpython scripts/live_readonly_shadow_eval.py \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9514266Z [36;1m  --env prod \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9514500Z [36;1m  --region "${AWS_REGION}" \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9514769Z [36;1m  "${SAMPLE_ARGS[@]}" \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9515026Z [36;1m  "${TICKET_ARGS[@]}" \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9515264Z [36;1m  "${PROBE_ARGS[@]}" \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9515503Z [36;1m  "${STACK_ARGS[@]}" \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9515827Z [36;1m  --out artifacts/readonly_shadow/live_shadow_report.json \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9516290Z [36;1m  --summary-md-out artifacts/readonly_shadow/live_shadow_summary.md \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9516698Z [36;1m  --allow-ticket-fetch-failures \[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9516988Z [36;1m  --allow-empty-sample[0m
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9568241Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9568598Z env:
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9568798Z   AWS_REGION: us-east-2
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9569041Z   ENVIRONMENT: prod
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9569265Z   RICHPANEL_ENV: prod
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9569493Z   MW_ALLOW_NETWORK_READS: true
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9569751Z   RICHPANEL_OUTBOUND_ENABLED: false
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9570023Z   RICHPANEL_WRITE_DISABLED: true
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9570474Z   RICHPANEL_READ_ONLY: true
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9570717Z   SHOPIFY_OUTBOUND_ENABLED: true
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9570969Z   OPENAI_ALLOW_NETWORK: false
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9571548Z   OPENAI_REPLY_REWRITE_ENABLED: false
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9571953Z   RICHPANEL_API_KEY_OVERRIDE: ***
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572382Z   SHOPIFY_ACCESS_TOKEN_OVERRIDE: ***
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572654Z   SHOPIFY_ACCESS_TOKEN_FALLBACK: 
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9572943Z   SHOPIFY_SHOP_DOMAIN: redacted:06239836ff8b
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9573313Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9573737Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9574158Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9574685Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9575071Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9575458Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9575802Z   SECRETS_NAMESPACE: rp-mw/prod
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9576060Z   AWS_DEFAULT_REGION: us-east-2
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9576340Z   AWS_ACCESS_KEY_ID: ***
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9576659Z   AWS_SECRET_ACCESS_KEY: ***
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581446Z   AWS_SESSION_TOKEN: ***
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581692Z   INPUT_SAMPLE_SIZE: 10
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9581958Z   INPUT_TICKET_IDS: redacted_ticket,redacted_ticket,redacted_ticket,redacted_ticket,redacted_ticket
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582264Z   INPUT_SHOPIFY_PROBE: false
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582532Z   INPUT_STACK_NAME: RichpanelMiddleware-prod
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:52.9582808Z ##[endgroup]
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2534691Z OpenAI routing disabled. Pass --allow-deterministic-only to proceed.
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2535491Z ============================================================================
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2535929Z OPENAI SHADOW EVAL CONFIG
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2536188Z MW_OPENAI_ROUTING_ENABLED=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2536446Z MW_OPENAI_SHADOW_ENABLED=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2536725Z MW_OPENAI_INTENT_ENABLED=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2536982Z MW_OPENAI_REWRITE_ENABLED=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2537246Z OPENAI_MODEL=gpt-5.2-chat-latest
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2537554Z OPENAI_ORDER_STATUS_INTENT_MODEL=gpt-5.2-chat-latest
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2537913Z OPENAI_REPLY_REWRITE_MODEL=gpt-5.2-chat-latest
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2538208Z OPENAI_ALLOW_NETWORK=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2538449Z MW_ALLOW_NETWORK_READS=True
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2538706Z RICHPANEL_OUTBOUND_ENABLED=False
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2538970Z SAFE_MODE=false (script default)
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2539709Z OpenAI gating blockers: MW_OPENAI_ROUTING_ENABLED=false, MW_OPENAI_INTENT_ENABLED=false, OPENAI_ALLOW_NETWORK=false, RICHPANEL_OUTBOUND_ENABLED=false and MW_OPENAI_SHADOW_ENABLED=false
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2540517Z ============================================================================
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2541227Z !!! WARNING: Results will undercount order-status; not comparable to production intent.
+live-readonly-shadow-eval	Run live read-only shadow evaluation	2026-02-18T23:49:53.2810490Z ##[error]Process completed with exit code 1.
+live-readonly-shadow-eval	Post Configure AWS credentials (optional)	???2026-02-18T23:49:53.2896697Z Post job cleanup.
+live-readonly-shadow-eval	Post Checkout repository	???2026-02-18T23:49:53.4201806Z Post job cleanup.
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5175027Z [command]/usr/bin/git version
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5212212Z git version 2.52.0
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5256890Z Temporarily overriding HOME='/home/runner/work/_temp/85a738cc-102b-44da-9d83-4253452b21e8' before making global git config changes
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5258326Z Adding repository directory to the temporary git global config as a safe directory
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5270823Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RichPanel/RichPanel
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5308275Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5343463Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5595765Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5618933Z http.https://github.com/.extraheader
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5633060Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5665493Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5909435Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+live-readonly-shadow-eval	Post Checkout repository	2026-02-18T23:49:53.5943673Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+live-readonly-shadow-eval	Complete job	???2026-02-18T23:49:53.6298273Z Cleaning up orphan processes
