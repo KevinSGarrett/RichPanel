@@ -32,8 +32,8 @@ first-name sourcing, block inbound CTAs, and update the rewrite prompt.
 
 ## Git/GitHub status (required)
 - Working branch: `run/RUN_20260219_0628Z-B92A`
-- PR: none
-- CI status at end of run: green (local run_ci_checks --ci pass)
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/263
+- CI status at end of run: green (local run_ci_checks --ci pass; PR checks pending)
 - Main updated: no
 - Branch cleanup done: no
 

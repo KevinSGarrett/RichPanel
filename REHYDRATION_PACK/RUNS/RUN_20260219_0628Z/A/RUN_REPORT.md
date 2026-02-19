@@ -8,7 +8,7 @@
 - **Date (UTC):** 2026-02-19
 - **Worktree path:** C:\RichPanel_GIT
 - **Branch:** run/RUN_20260219_0628Z-B92A
-- **PR:** none
+- **PR:** https://github.com/KevinSGarrett/RichPanel/pull/263
 - **PR merge strategy:** merge commit (required)
 
 ## Objective + stop conditions
@@ -151,8 +151,8 @@ Paste output snippet proving you ran:
 ### Merge state
 - Branch: run/RUN_20260219_0628Z-B92A
 - Worktree: C:\RichPanel_GIT
-- PR: none (not created)
-- Last commit: 0bd7f0a9d1f071d79abf52a53b0cb6db4be94b24
+- PR: https://github.com/KevinSGarrett/RichPanel/pull/263 (open)
+- Last commit: 33bedc95a02c384b794571777f09f3de65a0a8ad
 - Prompt set fingerprint: 368a0bead623dc3453c42deef52a418166c7175a181feb8005c4b0ed0cbd34be
 
 ### Not done
