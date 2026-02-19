@@ -199,6 +199,11 @@ python scripts/run_ci_checks.py --ci | Tee-Object -FilePath $tempLog
 Copy-Item $tempLog C:\RichPanel_GIT\REHYDRATION_PACK\RUNS\RUN_20260219_1823Z\C\evidence\run_ci_checks_ci.log -Force
 # output:
 [OK] CI-equivalent checks passed. (see evidence/run_ci_checks_ci.log)
+
+git push -u origin run/RUN_20260219_1823Z-B94C
+# output:
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/KevinSGarrett/RichPanel.git/'
 ```
 
 ## Tests / Proof (required)

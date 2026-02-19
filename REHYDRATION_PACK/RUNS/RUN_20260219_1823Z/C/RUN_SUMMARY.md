@@ -29,11 +29,11 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - Branch cleanup done: no
 
 ## Tests and evidence
-- Tests run: `python scripts/run_ci_checks.py --ci` (failed; rerun pending), `python scripts/verify_rehydration_pack.py`, `python scripts/verify_agent_prompts_fresh.py`
+- Tests run: `python scripts/run_ci_checks.py --ci` (passed), `python scripts/verify_rehydration_pack.py`, `python scripts/verify_agent_prompts_fresh.py`
 - Evidence path/link: `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/`
 
 ## Decisions made
 - None
 
 ## Issues / follow-ups
-- Rerun `python scripts/run_ci_checks.py --ci` after staging/committing regenerated docs.
+- Git push failed due to missing credentials; re-authenticate and push branch.
