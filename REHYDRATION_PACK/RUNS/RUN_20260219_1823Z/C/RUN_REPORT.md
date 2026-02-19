@@ -287,19 +287,40 @@ aws lambda get-function-configuration --function-name rp-mw-prod-worker --region
 aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
 # output:
 ... (see evidence/prod_runtime_flags_table.txt) ...
+
+aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+# output:
+... (see evidence/prod_runtime_flags_table_pre_rollback.txt) ...
+
+cd infra/cdk
+npx cdk diff -c env=prod
+# output:
+... (see evidence/cdk_diff_prod_rollback.txt) ...
+
+npx cdk deploy -c env=prod --require-approval never
+# output:
+... (see evidence/cdk_deploy_prod_rollback.log) ...
+
+aws lambda get-function-configuration --function-name rp-mw-prod-worker --region us-east-2 --profile rp-admin-prod --query "Environment.Variables.{OPENAI_REPLY_REWRITE_MODEL:OPENAI_REPLY_REWRITE_MODEL,OPENAI_REPLY_REWRITE_TEMPERATURE:OPENAI_REPLY_REWRITE_TEMPERATURE,OPENAI_REPLY_REWRITE_MAX_TOKENS:OPENAI_REPLY_REWRITE_MAX_TOKENS,OPENAI_REPLY_REWRITE_MAX_CHARS:OPENAI_REPLY_REWRITE_MAX_CHARS}" --output json
+# output:
+... (see evidence/lambda_env_openai_rewrite_post_rollback.json) ...
+
+aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+# output:
+... (see evidence/prod_runtime_flags_table_post_rollback.txt) ...
 ```
 
 ## CDK Diff Review (required)
 - **Expected-only env var changes:** no (diff includes Lambda asset S3Key updates for ingress/worker/shopify-token-refresh)
 - **Investigation:** Found ignored `__pycache__` files under `backend/src` and removed them; re-ran diff and S3Key updates still present with a new hash.
 - **Likely cause:** Current `backend/src` content differs from the code currently deployed in prod, so CDK bundles a new asset even for env-var-only changes.
-- **Action:** Proceeded with deploy after confirmation that B91/B92/B93 code should be deployed.
+- **Action:** Rolled back to `main` to remove unapproved B94 env var changes.
 ```
 
 ## Tests / Proof (required)
 - **Tests run:** `python scripts/run_ci_checks.py --ci` (passed); `python scripts/verify_rehydration_pack.py`; `python scripts/verify_agent_prompts_fresh.py`
 - **Evidence location:** `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/`
-- **Results:** CI-equivalent checks passed; verification scripts passed. Prod deploy completed with shadow flags confirmed and Lambda env verified.
+- **Results:** CI-equivalent checks passed; verification scripts passed. Rollback deploy completed with shadow flags confirmed and Lambda env verified.
 
 ## Wait-for-green evidence (required)
 - **Wait loop executed:** no

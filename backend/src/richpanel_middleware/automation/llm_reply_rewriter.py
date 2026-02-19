@@ -162,7 +162,7 @@ def _build_prompt(reply_body: str) -> List[ChatMessage]:
         "If the input includes delivery date ranges (for example, "
         "'March 12–March 20, 2026'), preserve them verbatim. "
         "Return strict JSON ONLY (no commentary, no code fences) with keys "
-        "body (string <= 1000 chars), confidence (0-1 float), "
+        f"body (string <= {DEFAULT_MAX_CHARS} chars), confidence (0-1 float), "
         "risk_flags (list of strings). "
         "If the input seems risky or contains sensitive data, add 'suspicious_content' "
         "to risk_flags and keep the original tone."

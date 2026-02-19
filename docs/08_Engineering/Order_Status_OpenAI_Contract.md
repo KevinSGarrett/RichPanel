@@ -219,6 +219,7 @@ Both phases are **fail-closed by default** and operate in **advisory mode** unti
 - Max chars: `OPENAI_REPLY_REWRITE_MAX_CHARS=1400`
 - Temp: `OPENAI_REPLY_REWRITE_TEMPERATURE=0.25`
 - Note: Still fail-closed; validation unchanged.
+- Rationale: Allows longer, complete replies while keeping temperature low for stability.
 
 **Evidence Fields (logged + persisted):**
 

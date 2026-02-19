@@ -13,13 +13,14 @@
 
 ### 1) Summary
 - Tune reply rewrite limits (tokens/chars) and temperature for prod.
-- Keep rewrite model pinned to GPT-5.2.
+- Keep rewrite model pinned to GPT-5.2 and align prompt char limit with config.
 - Document recommended prod tuning and capture run artifacts.
 
 ### 2) Why
 - **Problem / risk:** Current rewrite limits are conservative; Step 7 requires prod tuning knobs.
 - **Pre-change failure mode:** Rewrites truncated early and lower variability than desired.
 - **Why this approach:** Minimal CDK env var updates + doc note; no logic changes.
+  - Update prompt cap to reflect the env-configured max chars.
 
 ### 3) Expected behavior & invariants
 **Must hold (invariants):**
@@ -36,6 +37,7 @@
 **Core changes:**
 - Add `OPENAI_REPLY_REWRITE_MAX_TOKENS=700` and `OPENAI_REPLY_REWRITE_MAX_CHARS=1400`.
 - Update `OPENAI_REPLY_REWRITE_TEMPERATURE=0.25`.
+- Update reply rewrite prompt to use configured max chars instead of hardcoded 1000.
 - Document recommended prod tuning values.
 
 **Design decisions (why this way):**
@@ -45,6 +47,7 @@
 ### 5) Scope / files touched
 **Runtime code:**
 - `infra/cdk/lib/richpanel-middleware-stack.ts`
+- `backend/src/richpanel_middleware/automation/llm_reply_rewriter.py`
 
 **Tests:**
 - None added (config-only).
@@ -75,6 +78,7 @@
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/run_ci_checks_ci.log`
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/verify_rehydration_pack.log`
 - `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/verify_agent_prompts_fresh.log`
+- `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/prod_runtime_flags_table_post_rollback.txt`
 
 **Proof snippet(s) (PII-safe):**
 ```text
@@ -90,6 +94,9 @@
 - Revert PR.
 - Redeploy previous CDK stack template.
 - Re-run `npx cdk diff -c env=prod` to confirm rollback.
+
+**CDK asset diff note:**
+- Diff may include Lambda asset S3Key updates because prod code is behind B91–B93 changes; deploy should be treated as code+config sync, not config-only.
 
 ### 9) Reviewer + tool focus
 **Please double-check:**

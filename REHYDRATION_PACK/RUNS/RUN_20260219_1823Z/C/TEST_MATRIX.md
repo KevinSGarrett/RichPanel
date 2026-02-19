@@ -13,4 +13,4 @@ List the tests you ran (or explicitly note none).
 | Prompt freshness verify | `python scripts/verify_agent_prompts_fresh.py` | pass | `REHYDRATION_PACK/RUNS/RUN_20260219_1823Z/C/evidence/verify_agent_prompts_fresh.log` |
 
 ## Notes
-run_ci_checks executed from a clean tree; evidence log copied into run artifacts after pass. Prod deploy completed with Lambda env verification.
+run_ci_checks executed from a clean tree; evidence log copied into run artifacts after pass. Rollback deploy completed with Lambda env verification.

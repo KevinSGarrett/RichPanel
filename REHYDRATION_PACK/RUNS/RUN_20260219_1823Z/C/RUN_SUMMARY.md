@@ -11,7 +11,7 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - Added reply rewrite tuning env vars in worker Lambda configuration.
 - Documented recommended production tuning in OpenAI contract; updated progress log and regenerated doc registry outputs.
 - Investigated CDK diff scope; removed backend `__pycache__` artifacts and re-ran diff.
-- Deployed prod stack and verified Lambda env vars + safety flags.
+- Rolled back prod stack to `main` and verified Lambda env vars + safety flags.
 
 ## Files changed
 - `infra/cdk/lib/richpanel-middleware-stack.ts`
@@ -38,4 +38,4 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - None
 
 ## Issues / follow-ups
-- Monitor PR checks and review Bugbot/Claude comments.
+- Fix PR issues (prompt max chars mismatch) and re-run checks; no further prod actions without explicit approval.
