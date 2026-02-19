@@ -12,6 +12,10 @@ This is the canonical **long-lived** progress record for the project.
 - **Phase B (Build):** implementation runs (Cursor agents), tests, deployments, and releases
 
 ## Timeline
+### 2026-02-19 - RUN_20260219_1823Z (B94-C: prod reply rewrite tuning)
+- Source: REHYDRATION_PACK/RUNS/RUN_20260219_1823Z
+- Tuned reply rewrite max tokens/chars and temperature in CDK; documented prod tuning note.
+
 ### 2026-02-19 - RUN_20260219_1524Z (B93-B: preserve delivery windows + CTA guard)
 - Source: REHYDRATION_PACK/RUNS/RUN_20260219_1524Z
 - Added rewrite validation guard to preserve delivery date ranges and reject unexpected windows.

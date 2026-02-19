@@ -385,7 +385,9 @@ export class RichpanelMiddlewareStack extends Stack {
               ? "true"
               : "",
         OPENAI_REPLY_REWRITE_MODEL: "gpt-5.2",
-        OPENAI_REPLY_REWRITE_TEMPERATURE: "0.2",
+        OPENAI_REPLY_REWRITE_TEMPERATURE: "0.25",
+        OPENAI_REPLY_REWRITE_MAX_TOKENS: "700",
+        OPENAI_REPLY_REWRITE_MAX_CHARS: "1400",
         ...(this.environmentConfig.name === "dev"
           ? { OPENAI_REPLY_REWRITE_CONFIDENCE_THRESHOLD: "0.7" }
           : {}),

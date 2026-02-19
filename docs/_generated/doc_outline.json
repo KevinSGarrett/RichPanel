@@ -1234,6 +1234,11 @@
       },
       {
         "level": 3,
+        "text": "2026-02-19 - RUN_20260219_1823Z (B94-C: prod reply rewrite tuning)",
+        "anchor": "2026-02-19-run202602191823z-b94-c-prod-reply-rewrite-tuning"
+      },
+      {
+        "level": 3,
         "text": "2026-02-19 - RUN_20260219_1524Z (B93-B: preserve delivery windows + CTA guard)",
         "anchor": "2026-02-19-run202602191524z-b93-b-preserve-delivery-windows-cta-guard"
       },
