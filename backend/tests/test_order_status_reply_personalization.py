@@ -164,6 +164,16 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
     updated_safe, blocked_safe = pipeline._apply_inbound_cta_guard(safe, draft)
     assert blocked_safe is False
     assert updated_safe == safe
+
+
+def test_inbound_cta_guard_case_insensitive_and_non_match() -> None:
+    draft = "Deterministic draft reply."
+    rewritten = "Please Reply Back if you need more details."
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == draft
+
+    assert pipeline._contains_inbound_cta("Contactless delivery is used.") is False
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     with_name = pipeline._ensure_order_status_greeting(body, "Sarah")

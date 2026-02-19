@@ -307,6 +307,9 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         body = reply["body"]
         self.assertNotIn("processing typically takes", body)
         self.assertNotIn("estimated for January 9–January 15, 2024", body)
+        self.assertNotIn(
+            "(Business days are Mon–Fri; holidays may affect timelines.)", body
+        )
 
     def test_no_tracking_key_details_missing_transit(self) -> None:
         delivery_estimate = {
