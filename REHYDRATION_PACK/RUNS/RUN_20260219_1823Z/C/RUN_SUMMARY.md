@@ -36,4 +36,4 @@ Implement Step 7 reply rewrite tuning env vars in CDK, document prod tuning, and
 - None
 
 ## Issues / follow-ups
-- Runtime flags could not be set (SCP deny); prod deploy blocked until flags can be updated.
+- CDK diff includes Lambda asset S3Key updates beyond env var changes; deploy blocked until diff scope is approved.

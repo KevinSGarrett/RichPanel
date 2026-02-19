@@ -252,6 +252,22 @@ aws ssm put-parameter --name /rp-mw/prod/safe_mode --type String --value true --
 aws ssm put-parameter --name /rp-mw/prod/automation_enabled --type String --value false --overwrite --region us-east-2 --profile rp-admin-prod
 # output:
 AccessDeniedException (explicit SCP deny). See evidence/prod_runtime_flags_put_failed.log
+
+aws ssm get-parameters --names /rp-mw/prod/safe_mode /rp-mw/prod/automation_enabled --region us-east-2 --profile rp-admin-prod --output table
+# output:
+... (see evidence/prod_runtime_flags_table.txt) ...
+
+cd infra/cdk
+npm ci
+npm run build
+npx cdk diff -c env=prod
+# output:
+... (see evidence/cdk_diff_prod.txt) ...
+```
+
+## CDK Diff Review (required)
+- **Expected-only env var changes:** no (diff includes Lambda asset S3Key updates for ingress/worker/shopify-token-refresh)
+- **Action:** STOP before deploy; investigate unexpected asset diff.
 ```
 
 ## Tests / Proof (required)
