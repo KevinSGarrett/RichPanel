@@ -319,8 +319,19 @@ def _strip_unexpected_timing_tokens(
     if not (unexpected_eta or unexpected_dates):
         return rewritten_body
     stripped = rewritten_body
-    for token in unexpected_eta + unexpected_dates:
-        if token:
+    unexpected_eta_set = set(unexpected_eta)
+    unexpected_dates_set = set(unexpected_dates)
+    verbatim_eta = extract_eta_windows_verbatim(rewritten_body)
+    verbatim_dates = extract_date_windows_verbatim(rewritten_body)
+    for token, normalized in _normalize_verbatim_tokens(
+        verbatim_eta, normalize_fn=extract_eta_windows_normalized
+    ):
+        if normalized and normalized in unexpected_eta_set:
+            stripped = stripped.replace(token, "")
+    for token, normalized in _normalize_verbatim_tokens(
+        verbatim_dates, normalize_fn=extract_date_windows_normalized
+    ):
+        if normalized and normalized in unexpected_dates_set:
             stripped = stripped.replace(token, "")
     stripped = re.sub(r"[ \t]+", " ", stripped)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped)
