@@ -162,6 +162,54 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertIn("3-5 business days", result.body)
         self.assertIn("7-10 days", result.body)
 
+    def test_rewrite_strips_unexpected_date_when_original_has_none(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Estimated delivery is April 1–April 7, 2026.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for your patience."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-date",
+            event_id="evt-unexpected-date",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertNotIn("April 1–April 7, 2026", result.body)
+
+    def test_rewrite_strips_unexpected_eta_when_original_has_none(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Arrives in 2-4 business days.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for reaching out."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-eta",
+            event_id="evt-unexpected-eta",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertNotIn("2-4 business days", result.body)
+
     def test_rewrite_repairs_em_dash_eta_tokens(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
