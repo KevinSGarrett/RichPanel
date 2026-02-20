@@ -336,6 +336,8 @@ def _strip_unexpected_timing_tokens(
         if normalized and normalized in unexpected_dates_set:
             stripped, count = _strip_token_occurrences(stripped, token)
             removed += count
+    if removed == 0:
+        return rewritten_body
     stripped = re.sub(r"[ \t]+", " ", stripped)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped)
     if stripped != rewritten_body:
