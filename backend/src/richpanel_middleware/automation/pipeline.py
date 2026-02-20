@@ -177,8 +177,13 @@ def _strip_shipping_method_window(value: Optional[str]) -> Optional[str]:
         return None
     if not normalized:
         return None
+    # Strip only explicit time-window parentheticals (digits or business-day wording).
+    # Avoid removing descriptive method names like "Express (Next Day)".
     cleaned = re.sub(
-        r"\s*\(([^)]*day[^)]*)\)\s*$", "", normalized, flags=re.IGNORECASE
+        r"\s*\(([^)]*(?:\d+\s*[-–]?\s*\d*|business\s+day|bd)[^)]*)\)\s*$",
+        "",
+        normalized,
+        flags=re.IGNORECASE,
     ).strip()
     return cleaned or normalized
 
@@ -569,6 +574,7 @@ def _apply_inbound_cta_guard(
         return rewritten_body, False
     if not cleaned:
         return draft_body, True
+    # Guard against replies that are mostly CTA after stripping; keep only if still substantial.
     if len(cleaned) < max(40, int(len(rewritten_body) * 0.5)):
         return draft_body, True
     return cleaned, True

@@ -200,6 +200,29 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
     assert updated_safe == safe
 
 
+def test_inbound_cta_guard_boundary_threshold() -> None:
+    draft = "Deterministic draft reply."
+    base = "We are reviewing the latest details now. We'll share the next update soon."
+    cta = "Please reply here if anything changes."
+    rewritten = f"{base} {cta}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == base
+
+
+def test_inbound_cta_guard_preserves_non_cta_paragraphs() -> None:
+    draft = "Deterministic draft reply."
+    para1 = "We are reviewing the latest details now."
+    para2 = "Please reply here if anything changes."
+    para3 = "We'll share the next update as soon as it is ready."
+    rewritten = f"{para1}\n\n{para2}\n\n{para3}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert para2.lower() not in updated.lower()
+    assert para1 in updated
+    assert para3 in updated
+
+
 def test_shipping_method_window_stripped_in_context() -> None:
     payload = {"message": "Where is my order?"}
     delivery_estimate = {
@@ -214,6 +237,22 @@ def test_shipping_method_window_stripped_in_context() -> None:
         order_summary=order_summary,
     )
     assert context.shipping_method == "Standard"
+
+
+def test_shipping_method_window_does_not_strip_descriptive_day() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Express (Next Day)",
+    }
+    order_summary = {"shipping_method_name": "Express (Next Day)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Express (Next Day)"
 
 
 

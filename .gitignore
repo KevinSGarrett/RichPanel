@@ -71,6 +71,8 @@ runs/*
 *.zip
 RichPanel_BACKUP*
 RichPanel_BACKUP_FULL_*
+# Local large archives
+/RichPanel_GIT_F126.rar
 # Chat artifacts / backups
 *.zip
 RichPanel_BACKUP*
