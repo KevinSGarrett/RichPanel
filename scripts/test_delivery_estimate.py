@@ -542,15 +542,15 @@ class DeliveryEstimateTests(unittest.TestCase):
         reply = build_no_tracking_reply(order_summary, inquiry_date="2024-01-03")
         assert reply is not None
         body = reply["body"]
-        self.assertIn("Thanks for your patience.", body)
-        self.assertIn("Order 12345 (placed on 2024-01-01).", body)
-        self.assertIn("processing typically takes 3-5 business days", body)
-        self.assertIn("shipping takes 3-5 business days", body)
+        self.assertIn("We don't have tracking yet for Order 12345 (placed on 2024-01-01).", body)
+        self.assertIn("Processing typically takes 3-5 business days", body)
+        self.assertIn("Standard shipping usually takes 3-5 business days", body)
         self.assertIn("estimated for January 9–January 15, 2024", body)
         self.assertIn("about 6-10 business days total", body)
         note_line = "(Business days are Mon–Fri; holidays may affect timelines.)"
         self.assertIn(note_line, body)
         self.assertEqual(body.count(note_line), 1)
+        self.assertIn("\n\n", body)
         self.assertTrue(
             body.endswith(
                 "Tracking will be emailed automatically once it ships and is scanned by the carrier."
@@ -610,12 +610,13 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("releases on", reply["body"])
         self.assertIn("in 15 days", reply["body"])
         self.assertIn("processing typically takes 3-5 business days", reply["body"])
-        self.assertIn("shipping takes 3-7 business days", reply["body"])
+        self.assertIn("Standard shipping usually takes 3-7 business days", reply["body"])
         self.assertIn("estimated for April 6–April 14, 2026", reply["body"])
         self.assertIn("about 23–31 days from today", reply["body"])
         note_line = "(Business days are Mon–Fri; holidays may affect timelines.)"
         self.assertIn(note_line, reply["body"])
         self.assertEqual(reply["body"].count(note_line), 1)
+        self.assertIn("\n\n", reply["body"])
         self.assertTrue(
             reply["body"].endswith(
                 "Tracking will be emailed automatically once it ships and is scanned by the carrier."
@@ -703,7 +704,8 @@ class TrackingUrlTests(unittest.TestCase):
         assert reply is not None
         body = reply["body"]
         self.assertNotIn("\n-", body)
-        self.assertNotIn("\n", body)
+        self.assertIn("\n\n", body)
+        self.assertIn("Tracking link:", body)
 
 
 def main() -> int:  # pragma: no cover

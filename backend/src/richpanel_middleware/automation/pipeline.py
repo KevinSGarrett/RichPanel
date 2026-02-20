@@ -168,6 +168,26 @@ def _normalize_optional_text(value: Any) -> Optional[str]:
     return normalized or None
 
 
+def _strip_shipping_method_window(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return value
+    try:
+        normalized = str(value).strip()
+    except Exception:
+        return None
+    if not normalized:
+        return None
+    # Strip only explicit time-window parentheticals (digits or business-day wording).
+    # Avoid removing descriptive method names like "Express (Next Day)".
+    cleaned = re.sub(
+        r"\s*\(([^)]*(?:\d+\s*[-–]?\s*\d*|business\s+day|bd)[^)]*)\)\s*$",
+        "",
+        normalized,
+        flags=re.IGNORECASE,
+    ).strip()
+    return cleaned or normalized
+
+
 def _normalize_email(value: Any) -> Optional[str]:
     normalized = _normalize_optional_text(value)
     if not normalized:
@@ -523,12 +543,51 @@ def _contains_inbound_cta(body: Optional[str]) -> bool:
     return any(phrase in lowered for phrase in _INBOUND_CTA_PHRASES)
 
 
+def _strip_inbound_cta_sentences(body: str) -> tuple[str, bool]:
+    paragraphs = re.split(r"\n{2,}", body.strip())
+    removed_any = False
+    kept_paragraphs: List[str] = []
+    for paragraph in paragraphs:
+        if not paragraph.strip():
+            continue
+        sentences = re.split(r"(?<=[.!?])\s+", paragraph.strip())
+        kept_sentences: List[str] = []
+        for sentence in sentences:
+            if _contains_inbound_cta(sentence):
+                removed_any = True
+                continue
+            kept_sentences.append(sentence)
+        if kept_sentences:
+            kept_paragraphs.append(" ".join(kept_sentences))
+    if not removed_any:
+        return body, False
+    return "\n\n".join(kept_paragraphs).strip(), True
+
+
 def _apply_inbound_cta_guard(
     rewritten_body: str, draft_body: str
 ) -> tuple[str, bool]:
-    if _contains_inbound_cta(rewritten_body):
+    if not _contains_inbound_cta(rewritten_body):
+        return rewritten_body, False
+    cleaned, removed = _strip_inbound_cta_sentences(rewritten_body)
+    if not removed:
+        return rewritten_body, False
+    if not cleaned:
         return draft_body, True
-    return rewritten_body, False
+    # Guard against replies that are mostly CTA after stripping; keep only if still substantial.
+    # 0.3 ratio (not 0.5): when each paragraph has one CTA + one good sentence, stripping
+    # legitimately removes ~50% of content — a 0.5 threshold would incorrectly fall back to draft.
+    threshold = max(40, int(len(rewritten_body) * 0.3))
+    if len(cleaned) < threshold:
+        LOGGER.info(
+            "Inbound CTA guard fallback to draft; cleaned length %s < threshold %s "
+            "(original length %s).",
+            len(cleaned),
+            threshold,
+            len(rewritten_body),
+        )
+        return draft_body, True
+    return cleaned, True
 
 
 def _build_order_status_reply_context(
@@ -549,6 +608,7 @@ def _build_order_status_reply_context(
     shipping_method = normalize_shipping_method_for_carrier(
         shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
     )
+    shipping_method = _strip_shipping_method_window(shipping_method)
     customer_first_name = _extract_customer_first_name(payload, order_summary)
     customer_message_excerpt = _build_customer_message_excerpt(
         extract_customer_message(payload, default="")

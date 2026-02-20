@@ -298,7 +298,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(reply["eta_human"], "4-8 business days")
         body_lower = reply["body"].lower()
         self.assertIn("processing typically takes 3-5 business days", body_lower)
-        self.assertIn("shipping takes 3-5 business days", body_lower)
+        self.assertIn("standard shipping usually takes 3-5 business days", body_lower)
         self.assertIn("estimated for january 9–january 15, 2024", body_lower)
         self.assertIn("about 6-10 business days total", body_lower)
 

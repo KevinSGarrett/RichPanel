@@ -21,11 +21,11 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     )
 
     assert messages[0].role == "system"
-    assert "Do not mention AI, bot, automation, or templates." in messages[0].content
+    assert "Never mention AI, bots, automation, templates" in messages[0].content
     assert "Do NOT encourage inbound contact" in messages[0].content
     assert "\"reply back\"" in messages[0].content
     assert "ONE concrete anchor detail" in messages[0].content
-    assert "Do NOT output a \"Key Details\" section title" in messages[0].content
+    assert "Do NOT output a \"Key Details\" title" in messages[0].content
     assert "delivery date ranges" in messages[0].content
     assert "\"message us\"" in messages[0].content
     assert "\"get back to us\"" in messages[0].content
@@ -175,15 +175,134 @@ def test_inbound_cta_guard_reverts_to_draft() -> None:
         "if you have any other questions",
     ]
     for phrase in blocked_phrases:
-        rewritten = f"Please {phrase} if anything changes."
+        rewritten = (
+            "We are on it and reviewing the latest order details now. "
+            "We'll share the next update as soon as it is ready. "
+            f"Please {phrase} if anything changes."
+        )
         updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
         assert blocked is True
-        assert updated == draft
+        assert updated != draft
+        assert "We are on it and reviewing the latest order details now." in updated
+        assert "We'll share the next update as soon as it is ready." in updated
+        assert phrase not in updated.lower()
+
+    rewritten_only = "Please reply here if anything changes."
+    updated_only, blocked_only = pipeline._apply_inbound_cta_guard(
+        rewritten_only, draft
+    )
+    assert blocked_only is True
+    assert updated_only == draft
 
     safe = "Tracking will be emailed automatically once it ships and is scanned by the carrier."
     updated_safe, blocked_safe = pipeline._apply_inbound_cta_guard(safe, draft)
     assert blocked_safe is False
     assert updated_safe == safe
+
+
+def test_inbound_cta_guard_boundary_threshold() -> None:
+    draft = "Deterministic draft reply."
+    base = "We are reviewing the latest details now. We'll share the next update soon."
+    cta = "Please reply here if anything changes."
+    rewritten = f"{base} {cta}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == base
+
+
+def test_inbound_cta_guard_fallback_when_mostly_cta() -> None:
+    draft = "Deterministic draft reply."
+    rewritten = (
+        "Order is processing. "
+        "Please reply back if you have any questions or need anything else at all."
+    )
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == draft
+
+
+def test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs() -> None:
+    draft = "Deterministic draft reply."
+    para1 = "Thanks for your patience. Please reply back if anything changes."
+    para2 = "We are preparing your order. If you have any questions, let us know."
+    rewritten = f"{para1}\n\n{para2}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert "Please reply back" not in updated
+    assert "If you have any questions" not in updated
+    assert "Thanks for your patience." in updated
+    assert "We are preparing your order." in updated
+    assert "\n\n" in updated
+
+
+def test_inbound_cta_guard_preserves_non_cta_paragraphs() -> None:
+    draft = "Deterministic draft reply."
+    para1 = "We are reviewing the latest details now."
+    para2 = "Please reply here if anything changes."
+    para3 = "We'll share the next update as soon as it is ready."
+    rewritten = f"{para1}\n\n{para2}\n\n{para3}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert para2.lower() not in updated.lower()
+    assert para1 in updated
+    assert para3 in updated
+
+
+def test_shipping_method_window_stripped_in_context() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Standard (3–7 business days)",
+    }
+    order_summary = {"shipping_method_name": "Standard (3–7 business days)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Standard"
+
+
+def test_shipping_method_window_does_not_strip_descriptive_day() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Express (Next Day)",
+    }
+    order_summary = {"shipping_method_name": "Express (Next Day)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Express (Next Day)"
+
+
+def test_shipping_method_window_does_not_strip_descriptive_day_delivery() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Express (Next Day Delivery)",
+    }
+    order_summary = {"shipping_method_name": "Express (Next Day Delivery)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Express (Next Day Delivery)"
+
+
+def test_strip_shipping_method_window_priority_two_day() -> None:
+    assert pipeline._strip_shipping_method_window("Priority (2-Day)") == "Priority"
+
+
+def test_strip_shipping_method_window_none_or_empty() -> None:
+    assert pipeline._strip_shipping_method_window(None) is None
+    assert pipeline._strip_shipping_method_window("") == ""
 
 
 
@@ -264,6 +383,8 @@ def test_greeting_enforcement() -> None:
     assert greeting_short_wrapped.startswith("Hi there,\n\n")
 
 
+
+
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     signed = pipeline._ensure_holly_signature(body)
@@ -297,6 +418,50 @@ def test_signature_enforcement_idempotent() -> None:
     assert pipeline._ensure_holly_signature(with_body).endswith(
         "Holly\nScentiment Customer Support"
     )
+
+
+class OrderStatusReplyPersonalizationCoverageTests(unittest.TestCase):
+    def test_unittest_adapter_inbound_cta_guard_boundary(self) -> None:
+        test_inbound_cta_guard_boundary_threshold()
+
+    def test_unittest_adapter_inbound_cta_guard_fallback(self) -> None:
+        test_inbound_cta_guard_fallback_when_mostly_cta()
+
+    def test_unittest_adapter_inbound_cta_guard_multi_paragraph(self) -> None:
+        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
+
+    def test_unittest_adapter_shipping_method_descriptive_day_delivery(self) -> None:
+        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
+
+    def test_unittest_adapter_shipping_method_priority_two_day(self) -> None:
+        test_strip_shipping_method_window_priority_two_day()
+
+    def test_unittest_adapter_shipping_method_none_or_empty(self) -> None:
+        test_strip_shipping_method_window_none_or_empty()
+
+
+class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
+    def test_execute_pytest_style_functions(self) -> None:
+        test_prompt_includes_excerpt_and_first_name()
+        test_reply_context_payload_excludes_none()
+        test_build_order_status_reply_context()
+        test_excerpt_is_sanitized_and_truncated()
+        test_excerpt_empty_returns_none()
+        test_excerpt_boundary_no_truncation()
+        test_extract_customer_first_name_from_payload()
+        test_extract_customer_first_name_from_order_summary()
+        test_inbound_cta_guard_reverts_to_draft()
+        test_inbound_cta_guard_boundary_threshold()
+        test_inbound_cta_guard_fallback_when_mostly_cta()
+        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
+        test_inbound_cta_guard_preserves_non_cta_paragraphs()
+        test_shipping_method_window_stripped_in_context()
+        test_shipping_method_window_does_not_strip_descriptive_day()
+        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
+        test_strip_shipping_method_window_priority_two_day()
+        test_strip_shipping_method_window_none_or_empty()
+        test_greeting_enforcement()
+        test_signature_enforcement_idempotent()
 
 
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
