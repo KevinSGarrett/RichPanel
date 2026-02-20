@@ -148,6 +148,16 @@ def test_prompt_omits_required_verbatim_section_for_whitespace_draft() -> None:
     assert "Required Verbatim Tokens" not in user_content
 
 
+def test_sanitize_verbatim_token_strips_unexpected_chars() -> None:
+    from richpanel_middleware.automation import order_status_prompts
+
+    token = "April 10–April 20, 2026!!!"
+    assert (
+        order_status_prompts._sanitize_verbatim_token(token)
+        == "April 10–April 20, 2026"
+    )
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
@@ -562,6 +572,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_prompt_sanitizes_verbatim_tokens()
         test_prompt_includes_date_range_with_to_separator()
         test_prompt_omits_required_verbatim_section_for_whitespace_draft()
+        test_sanitize_verbatim_token_strips_unexpected_chars()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()

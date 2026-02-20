@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+import re
 from typing import Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import ChatMessage
@@ -118,6 +119,8 @@ def _sanitize_verbatim_token(token: str) -> str:
         return ""
     # Keep tokens single-line to avoid prompt formatting surprises.
     cleaned = " ".join(str(token).split())
+    # Restrict to known-safe characters for ETA/date tokens.
+    cleaned = re.sub(r"[^A-Za-z0-9\s,\-–—]", "", cleaned)
     return cleaned.strip()
 
 
