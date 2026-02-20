@@ -12,6 +12,7 @@ if str(SRC) not in sys.path:
 from richpanel_middleware.automation.delivery_estimate import (  # noqa: E402
     build_no_tracking_reply,
     _build_no_tracking_timeline_paragraph,
+    _normalize_shipping_label,
 )
 
 
@@ -33,6 +34,18 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("We don't have tracking updates yet", reply["body"])
         self.assertIn("We'll send tracking as soon as it's ready", reply["body"])
         self.assertIsNone(reply["eta_human"])
+
+    def test_normalize_shipping_label_prefers_bucket_then_method(self) -> None:
+        estimate = {"bucket": "Standard", "normalized_method": "Ground (3-7 business days)"}
+        self.assertEqual(
+            _normalize_shipping_label(estimate=estimate, fallback_method=None),
+            "Standard",
+        )
+        estimate_no_bucket = {"normalized_method": "Ground (3-7 business days)"}
+        self.assertEqual(
+            _normalize_shipping_label(estimate=estimate_no_bucket, fallback_method=None),
+            "Ground",
+        )
 
     def test_build_no_tracking_reply_none_order_summary(self) -> None:
         reply = build_no_tracking_reply(None, inquiry_date="2025-01-02")

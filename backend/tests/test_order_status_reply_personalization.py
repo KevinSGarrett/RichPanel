@@ -326,6 +326,26 @@ def test_greeting_enforcement() -> None:
     assert inline_replaced.startswith("Hi Sarah,\n\n")
     assert "your order is on the way." in inline_replaced
 
+
+class OrderStatusReplyPersonalizationCoverageTests(unittest.TestCase):
+    def test_unittest_adapter_inbound_cta_guard_boundary(self) -> None:
+        test_inbound_cta_guard_boundary_threshold()
+
+    def test_unittest_adapter_inbound_cta_guard_fallback(self) -> None:
+        test_inbound_cta_guard_fallback_when_mostly_cta()
+
+    def test_unittest_adapter_inbound_cta_guard_multi_paragraph(self) -> None:
+        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
+
+    def test_unittest_adapter_shipping_method_descriptive_day_delivery(self) -> None:
+        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
+
+    def test_unittest_adapter_shipping_method_priority_two_day(self) -> None:
+        test_strip_shipping_method_window_priority_two_day()
+
+    def test_unittest_adapter_shipping_method_none_or_empty(self) -> None:
+        test_strip_shipping_method_window_none_or_empty()
+
     remainder_with_next = "Hi there, status update line\nNext line"
     remainder_wrapped = pipeline._ensure_order_status_greeting(remainder_with_next, None)
     assert remainder_wrapped.startswith("Hi there,\n\n")
