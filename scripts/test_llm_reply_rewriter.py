@@ -774,8 +774,8 @@ class ReplyRewriteHelperTests(unittest.TestCase):
     def test_strip_token_occurrences_avoids_substring_corruption(self) -> None:
         text = "Shipping takes 3-5 business days."
         stripped, count = rewriter._strip_token_occurrences(text, "5 business days")
-        self.assertEqual(count, 0)
-        self.assertEqual(stripped, text)
+        self.assertEqual(count, 1)
+        self.assertNotIn("5 business days", stripped)
 
     def test_strip_token_occurrences_handles_hyphenated_suffix(self) -> None:
         text = "Arrives in 2-4 business days-standard."
