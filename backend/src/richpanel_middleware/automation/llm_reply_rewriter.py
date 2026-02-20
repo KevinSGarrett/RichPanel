@@ -358,7 +358,7 @@ def _strip_token_occurrences(text: str, token: str) -> Tuple[str, int]:
     if not token:
         return text, 0
     pattern = re.compile(
-        rf"(?<![A-Za-z0-9–—-]){re.escape(token)}(?![A-Za-z0-9–—-])"
+        rf"(?<![A-Za-z0-9]){re.escape(token)}(?![A-Za-z0-9])"
     )
     return pattern.subn("", text)
 
