@@ -664,6 +664,33 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         self.assertNotIn("2-4 business days", stripped)
         self.assertNotIn("April 1–April 7, 2026", stripped)
 
+    def test_strip_unexpected_timing_tokens_dates_only(self) -> None:
+        original = "Thanks for your patience."
+        rewritten = "Estimated delivery is April 1–April 7, 2026."
+        _, _, unexpected_eta, unexpected_dates = rewriter._unexpected_tokens(
+            original, rewritten
+        )
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        self.assertNotIn("April 1–April 7, 2026", stripped)
+
+    def test_strip_unexpected_timing_tokens_collapses_whitespace(self) -> None:
+        original = "Thanks for your patience."
+        rewritten = "Arrives in 2-4 business days.\t\tPlease wait."
+        _, _, unexpected_eta, unexpected_dates = rewriter._unexpected_tokens(
+            original, rewritten
+        )
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        self.assertNotIn("2-4 business days", stripped)
+        self.assertNotIn("\t", stripped)
+
     def test_missing_required_eta_detects_changes(self) -> None:
         original = "Arrives in 1-3 business days."
         rewritten = "Arrives in 2-4 business days."

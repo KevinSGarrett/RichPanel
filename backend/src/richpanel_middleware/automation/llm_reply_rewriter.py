@@ -319,6 +319,7 @@ def _strip_unexpected_timing_tokens(
     if not (unexpected_eta or unexpected_dates):
         return rewritten_body
     stripped = rewritten_body
+    removed = 0
     unexpected_eta_set = set(unexpected_eta)
     unexpected_dates_set = set(unexpected_dates)
     verbatim_eta = extract_eta_windows_verbatim(rewritten_body)
@@ -328,13 +329,24 @@ def _strip_unexpected_timing_tokens(
     ):
         if normalized and normalized in unexpected_eta_set:
             stripped = stripped.replace(token, "")
+            removed += 1
     for token, normalized in _normalize_verbatim_tokens(
         verbatim_dates, normalize_fn=extract_date_windows_normalized
     ):
         if normalized and normalized in unexpected_dates_set:
             stripped = stripped.replace(token, "")
+            removed += 1
     stripped = re.sub(r"[ \t]+", " ", stripped)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped)
+    if stripped != rewritten_body:
+        LOGGER.info(
+            "reply_rewrite.stripped_unexpected_timing_tokens",
+            extra={
+                "removed": removed,
+                "unexpected_eta": len(unexpected_eta),
+                "unexpected_dates": len(unexpected_dates),
+            },
+        )
     return stripped.strip()
 
 
