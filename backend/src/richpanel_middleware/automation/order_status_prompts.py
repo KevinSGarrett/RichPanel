@@ -117,6 +117,9 @@ def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
 def _sanitize_verbatim_token(token: str) -> str:
     if not token:
         return ""
+    # Reject obvious markup/injection characters before sanitization.
+    if re.search(r"[<>{}\[\]\\]", str(token)):
+        return ""
     # Keep tokens single-line to avoid prompt formatting surprises.
     cleaned = " ".join(str(token).split())
     # Restrict to known-safe characters for ETA/date tokens.

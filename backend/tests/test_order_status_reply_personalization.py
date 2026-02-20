@@ -176,6 +176,13 @@ def test_sanitize_verbatim_token_drops_invalid_token() -> None:
     assert order_status_prompts._sanitize_verbatim_token("!!!") == ""
 
 
+def test_sanitize_verbatim_token_rejects_html() -> None:
+    from richpanel_middleware.automation import order_status_prompts
+
+    token = "April 10–<script>alert(1)</script>April 20, 2026"
+    assert order_status_prompts._sanitize_verbatim_token(token) == ""
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
@@ -593,6 +600,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_sanitize_verbatim_token_strips_unexpected_chars()
         test_prompt_sanitization_strips_prompt_injection()
         test_sanitize_verbatim_token_drops_invalid_token()
+        test_sanitize_verbatim_token_rejects_html()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()
