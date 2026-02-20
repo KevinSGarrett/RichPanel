@@ -334,7 +334,7 @@ def test_rewrite_rejects_unexpected_tracking_number() -> None:
     assert result.reason == "unexpected_tracking"
 
 
-def test_rewrite_rejects_unexpected_delivery_date_range() -> None:
+def test_rewrite_accepts_unexpected_delivery_date_range_after_strip() -> None:
     draft = "Thanks for your patience. We'll update you soon."
     client = _StubClient(
         _response("Estimated delivery is April 1–April 7, 2026.")

@@ -777,12 +777,12 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         backend_rewrite_tests.test_rewrite_applies_when_tokens_preserved()
         backend_rewrite_tests.test_extract_urls_and_tracking_tokens()
         backend_rewrite_tests.test_missing_required_tokens_detects_missing_values()
-        backend_rewrite_tests.test_rewrite_rejects_modified_eta_window()
+        backend_rewrite_tests.test_rewrite_accepts_modified_eta_window_after_strip()
         backend_rewrite_tests.test_rewrite_accepts_equivalent_eta_separator()
-        backend_rewrite_tests.test_rewrite_rejects_modified_delivery_date_range()
+        backend_rewrite_tests.test_rewrite_accepts_modified_delivery_date_range_after_strip()
         backend_rewrite_tests.test_rewrite_accepts_delivery_date_dash_variant()
         backend_rewrite_tests.test_rewrite_accepts_delivery_date_to_variant()
-        backend_rewrite_tests.test_rewrite_rejects_unexpected_delivery_date_range()
+        backend_rewrite_tests.test_rewrite_accepts_unexpected_delivery_date_range_after_strip()
         backend_rewrite_tests.test_rewrite_rejects_internal_tags()
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
