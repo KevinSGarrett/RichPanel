@@ -64,6 +64,20 @@ def test_prompt_omits_required_verbatim_section_without_tokens() -> None:
     assert "Required Verbatim Tokens" not in user_content
 
 
+def test_prompt_includes_verbatim_tokens_with_unicode_dashes() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = (
+        "Delivery is estimated for April 10—April 20, 2026 "
+        "(about 49–59 days from today)."
+    )
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "- April 10—April 20, 2026" in user_content
+    assert "- 49–59 days" in user_content
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
@@ -468,6 +482,9 @@ class OrderStatusReplyPersonalizationCoverageTests(unittest.TestCase):
 class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
     def test_execute_pytest_style_functions(self) -> None:
         test_prompt_includes_excerpt_and_first_name()
+        test_prompt_includes_required_verbatim_tokens_from_draft()
+        test_prompt_omits_required_verbatim_section_without_tokens()
+        test_prompt_includes_verbatim_tokens_with_unicode_dashes()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()

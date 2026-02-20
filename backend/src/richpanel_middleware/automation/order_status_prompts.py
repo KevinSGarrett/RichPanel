@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import ChatMessage
-from richpanel_middleware.automation import llm_reply_rewriter as rewrite_validator
+from richpanel_middleware.automation import validation_patterns
 
 INTENT_SYSTEM_PROMPT = """You are a customer support intent classifier for order status automation.
 Decide whether the customer message is asking about order status or tracking.
@@ -97,30 +97,11 @@ _MAX_TICKET_CHARS = 2000
 _MAX_DRAFT_CHARS = 2000
 
 def _extract_verbatim_eta_windows(text: str) -> List[str]:
-    if not text:
-        return []
-    windows: List[str] = []
-    spans: List[Tuple[int, int]] = []
-    for match in rewrite_validator._ETA_RANGE_REGEX.finditer(text):
-        spans.append(match.span())
-        windows.append(match.group(0).strip())
-    for match in rewrite_validator._ETA_SINGLE_REGEX.finditer(text):
-        start, end = match.span()
-        if any(start < span_end and end > span_start for span_start, span_end in spans):
-            continue
-        windows.append(match.group(0).strip())
-    return rewrite_validator._dedupe(windows)
+    return validation_patterns.extract_eta_windows_verbatim(text)
 
 
 def _extract_verbatim_date_windows(text: str) -> List[str]:
-    if not text:
-        return []
-    windows: List[str] = []
-    for match in rewrite_validator._DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
-        windows.append(match.group(0).strip())
-    for match in rewrite_validator._DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
-        windows.append(match.group(0).strip())
-    return rewrite_validator._dedupe(windows)
+    return validation_patterns.extract_date_windows_verbatim(text)
 
 
 def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
@@ -129,7 +110,7 @@ def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
     required = _extract_verbatim_eta_windows(
         draft_reply
     ) + _extract_verbatim_date_windows(draft_reply)
-    return rewrite_validator._dedupe(required)
+    return validation_patterns._dedupe(required)
 
 
 @dataclass
