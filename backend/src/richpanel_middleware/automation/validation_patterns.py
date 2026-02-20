@@ -7,19 +7,19 @@ _MONTH_NAME_PATTERN = (
     r"January|February|March|April|May|June|July|August|September|October|November|December"
 )
 ETA_RANGE_REGEX = re.compile(
-    r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
+    r"\b(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
     flags=re.IGNORECASE,
 )
 ETA_SINGLE_REGEX = re.compile(
     r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
 )
 DATE_RANGE_SAME_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|-|to)\s*"
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|—|-|to)\s*"
     rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
     flags=re.IGNORECASE,
 )
 DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|-|to)\s*"
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|—|-|to)\s*"
     rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
     flags=re.IGNORECASE,
 )
