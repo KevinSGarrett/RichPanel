@@ -129,6 +129,25 @@ def test_prompt_sanitizes_verbatim_tokens() -> None:
     assert "- 49–59 days" in user_content
 
 
+def test_prompt_includes_date_range_with_to_separator() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = "Delivery is estimated for April 10 to April 20, 2026."
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "- April 10 to April 20, 2026" in user_content
+
+
+def test_prompt_omits_required_verbatim_section_for_whitespace_draft() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply="   \n  ", language="en"
+    )
+    user_content = messages[1].content
+    assert "Required Verbatim Tokens" not in user_content
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
@@ -541,6 +560,8 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_prompt_eta_overlap_prefers_range_only()
         test_prompt_omits_required_verbatim_section_for_empty_draft()
         test_prompt_sanitizes_verbatim_tokens()
+        test_prompt_includes_date_range_with_to_separator()
+        test_prompt_omits_required_verbatim_section_for_whitespace_draft()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()

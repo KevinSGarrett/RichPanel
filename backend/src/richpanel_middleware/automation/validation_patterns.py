@@ -81,6 +81,10 @@ def extract_date_windows_normalized(text: str) -> List[str]:
     return dedupe(windows)
 
 
+# Verbatim extractors preserve original dash/case for prompt injection,
+# while normalized extractors collapse dash variants for validator matching.
+
+
 def extract_eta_windows_verbatim(text: str) -> List[str]:
     if not text:
         return []
