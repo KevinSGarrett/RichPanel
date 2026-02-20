@@ -310,6 +310,23 @@ def _append_missing_timing_tokens(
     return f"{rewritten_body.rstrip()}\n\n{suffix}"
 
 
+def _strip_unexpected_timing_tokens(
+    rewritten_body: str,
+    *,
+    unexpected_eta: List[str],
+    unexpected_dates: List[str],
+) -> str:
+    if not (unexpected_eta or unexpected_dates):
+        return rewritten_body
+    stripped = rewritten_body
+    for token in unexpected_eta + unexpected_dates:
+        if token:
+            stripped = stripped.replace(token, "")
+    stripped = re.sub(r"[ \t]+", " ", stripped)
+    stripped = re.sub(r"\n{3,}", "\n\n", stripped)
+    return stripped.strip()
+
+
 def _missing_required_tokens(
     original: str, rewritten: str
 ) -> Tuple[List[str], List[str], List[str], List[str]]:
@@ -674,6 +691,32 @@ def rewrite_reply(
     unexpected_urls, unexpected_tracking, unexpected_eta, unexpected_dates = _unexpected_tokens(
         reply_body, rewritten_body
     )
+    if (unexpected_eta or unexpected_dates) and not unexpected_urls and not unexpected_tracking:
+        cleaned_body = _strip_unexpected_timing_tokens(
+            rewritten_body,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        if cleaned_body != rewritten_body:
+            rewritten_body = cleaned_body
+            missing_urls, missing_tracking, missing_eta, missing_dates = _missing_required_tokens(
+                reply_body, rewritten_body
+            )
+            if (missing_eta or missing_dates) and not missing_urls and not missing_tracking:
+                required_eta = extract_eta_windows_verbatim(reply_body)
+                required_dates = extract_date_windows_verbatim(reply_body)
+                repaired_body = _append_missing_timing_tokens(
+                    rewritten_body,
+                    required_eta=required_eta,
+                    required_dates=required_dates,
+                    missing_eta=missing_eta,
+                    missing_dates=missing_dates,
+                )
+                if repaired_body != rewritten_body:
+                    rewritten_body = repaired_body
+            unexpected_urls, unexpected_tracking, unexpected_eta, unexpected_dates = _unexpected_tokens(
+                reply_body, rewritten_body
+            )
     if unexpected_urls or unexpected_tracking or unexpected_eta or unexpected_dates:
         reason = "unexpected_tokens"
         if (
