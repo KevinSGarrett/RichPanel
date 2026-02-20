@@ -340,6 +340,8 @@ def _strip_unexpected_timing_tokens(
         return rewritten_body
     stripped = re.sub(r"[ \t]+", " ", stripped)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped)
+    if len(re.findall(r"[A-Za-z]+", stripped)) < 4:
+        return rewritten_body
     if stripped != rewritten_body:
         LOGGER.info(
             "reply_rewrite.stripped_unexpected_timing_tokens",

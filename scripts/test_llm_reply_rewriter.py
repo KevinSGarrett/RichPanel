@@ -166,7 +166,7 @@ class ReplyRewriteTests(unittest.TestCase):
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
-            message='{"body": "Estimated delivery is April 1–April 7, 2026.", "confidence": 0.92, "risk_flags": []}',
+            message='{"body": "Estimated delivery is April 1–April 7, 2026. We will keep you posted.", "confidence": 0.92, "risk_flags": []}',
             status_code=200,
             url="https://example.com",
         )
@@ -190,7 +190,7 @@ class ReplyRewriteTests(unittest.TestCase):
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
             model="gpt-5.2-chat-latest",
-            message='{"body": "Arrives in 2-4 business days.", "confidence": 0.92, "risk_flags": []}',
+            message='{"body": "Arrives in 2-4 business days. We will follow up shortly.", "confidence": 0.92, "risk_flags": []}',
             status_code=200,
             url="https://example.com",
         )
@@ -209,6 +209,29 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertTrue(result.rewritten)
         self.assertEqual(result.reason, "applied")
         self.assertNotIn("2-4 business days", result.body)
+
+    def test_rewrite_falls_back_when_stripped_body_too_short(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Estimated delivery is April 1–April 7, 2026.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for your patience."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-date-short",
+            event_id="evt-unexpected-date-short",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, original)
 
     def test_rewrite_repairs_em_dash_eta_tokens(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
