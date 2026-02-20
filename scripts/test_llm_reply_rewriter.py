@@ -107,6 +107,34 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.reason, "applied")
         self.assertEqual(client.calls, 1)
 
+    def test_rewrite_repairs_missing_eta_tokens(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "We are reviewing the latest details now.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = (
+            "Delivery is estimated for April 10–April 20, 2026 "
+            "(about 49–59 days from today)."
+        )
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-repair",
+            event_id="evt-eta-repair",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertIn("49–59 days", result.body)
+        self.assertIn("April 10–April 20, 2026", result.body)
+
     def test_gates_block_network(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
