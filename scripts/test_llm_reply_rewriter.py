@@ -748,6 +748,12 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         )
         self.assertEqual(stripped, rewritten)
 
+    def test_strip_token_occurrences_avoids_substring_corruption(self) -> None:
+        text = "Shipping takes 3-5 business days."
+        stripped, count = rewriter._strip_token_occurrences(text, "5 business days")
+        self.assertEqual(count, 0)
+        self.assertEqual(stripped, text)
+
     def test_missing_required_eta_detects_changes(self) -> None:
         original = "Arrives in 1-3 business days."
         rewritten = "Arrives in 2-4 business days."

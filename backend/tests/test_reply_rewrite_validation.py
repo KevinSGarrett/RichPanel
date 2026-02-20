@@ -178,7 +178,7 @@ def test_missing_required_tokens_detects_missing_values() -> None:
     assert missing_dates == []
 
 
-def test_rewrite_rejects_modified_eta_window() -> None:
+def test_rewrite_accepts_modified_eta_window_after_strip() -> None:
     draft = "It should arrive in about 1-3 business days."
     client = _StubClient(_response("It should arrive in about 2-4 business days."))
 
@@ -200,7 +200,7 @@ def test_rewrite_rejects_modified_eta_window() -> None:
     assert "2-4 business days" not in result.body
 
 
-def test_rewrite_rejects_modified_delivery_date_range() -> None:
+def test_rewrite_accepts_modified_delivery_date_range_after_strip() -> None:
     draft = "Your order is expected March 12–March 20, 2026."
     client = _StubClient(
         _response("Your order is expected March 13–March 21, 2026.")

@@ -328,14 +328,14 @@ def _strip_unexpected_timing_tokens(
         verbatim_eta, normalize_fn=extract_eta_windows_normalized
     ):
         if normalized and normalized in unexpected_eta_set:
-            stripped = stripped.replace(token, "")
-            removed += 1
+            stripped, count = _strip_token_occurrences(stripped, token)
+            removed += count
     for token, normalized in _normalize_verbatim_tokens(
         verbatim_dates, normalize_fn=extract_date_windows_normalized
     ):
         if normalized and normalized in unexpected_dates_set:
-            stripped = stripped.replace(token, "")
-            removed += 1
+            stripped, count = _strip_token_occurrences(stripped, token)
+            removed += count
     stripped = re.sub(r"[ \t]+", " ", stripped)
     stripped = re.sub(r"\n{3,}", "\n\n", stripped)
     if stripped != rewritten_body:
@@ -348,6 +348,15 @@ def _strip_unexpected_timing_tokens(
             },
         )
     return stripped.strip()
+
+
+def _strip_token_occurrences(text: str, token: str) -> Tuple[str, int]:
+    if not token:
+        return text, 0
+    pattern = re.compile(
+        rf"(?<![A-Za-z0-9]){re.escape(token)}(?![A-Za-z0-9])"
+    )
+    return pattern.subn("", text)
 
 
 def _missing_required_tokens(
