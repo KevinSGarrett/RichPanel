@@ -17,6 +17,10 @@ from richpanel_middleware.integrations.openai import (
     OpenAIClient,
     OpenAIRequestError,
 )
+from richpanel_middleware.automation.validation_patterns import (
+    extract_date_windows_normalized,
+    extract_eta_windows_normalized,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,13 +47,7 @@ SUSPICIOUS_PATTERNS = [
 
 _URL_REGEX = re.compile(r"https?://[^\s<>\"']+")
 _INTERNAL_TAG_REGEX = re.compile(r"(?i)\b(?:mw-[a-z0-9-]+|route-[a-z0-9-]+)\b")
-from richpanel_middleware.automation.validation_patterns import (
-    extract_date_windows_normalized,
-    extract_eta_windows_normalized,
-    extract_date_windows_verbatim,
-    extract_eta_windows_verbatim,
-    _dedupe,
-)
+
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:

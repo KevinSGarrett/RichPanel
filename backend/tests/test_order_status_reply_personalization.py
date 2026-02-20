@@ -78,6 +78,46 @@ def test_prompt_includes_verbatim_tokens_with_unicode_dashes() -> None:
     assert "- 49–59 days" in user_content
 
 
+def test_prompt_includes_eta_window_with_em_dash() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = "Delivery should arrive in about 49—59 days."
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "- 49—59 days" in user_content
+
+
+def test_prompt_includes_single_day_eta_token() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = "Processing typically takes 5 business days."
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "- 5 business days" in user_content
+
+
+def test_prompt_eta_overlap_prefers_range_only() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = "Processing typically takes 3-5 business days."
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "- 3-5 business days" in user_content
+    assert "- 5 business days" not in user_content
+
+
+def test_prompt_omits_required_verbatim_section_for_empty_draft() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply="", language="en"
+    )
+    user_content = messages[1].content
+    assert "Required Verbatim Tokens" not in user_content
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
@@ -485,6 +525,10 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_prompt_includes_required_verbatim_tokens_from_draft()
         test_prompt_omits_required_verbatim_section_without_tokens()
         test_prompt_includes_verbatim_tokens_with_unicode_dashes()
+        test_prompt_includes_eta_window_with_em_dash()
+        test_prompt_includes_single_day_eta_token()
+        test_prompt_eta_overlap_prefers_range_only()
+        test_prompt_omits_required_verbatim_section_for_empty_draft()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()

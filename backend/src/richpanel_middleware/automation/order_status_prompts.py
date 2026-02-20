@@ -110,7 +110,7 @@ def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
     required = _extract_verbatim_eta_windows(
         draft_reply
     ) + _extract_verbatim_date_windows(draft_reply)
-    return validation_patterns._dedupe(required)
+    return validation_patterns.dedupe(required)
 
 
 @dataclass
