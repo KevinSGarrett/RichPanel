@@ -326,50 +326,6 @@ def test_greeting_enforcement() -> None:
     assert inline_replaced.startswith("Hi Sarah,\n\n")
     assert "your order is on the way." in inline_replaced
 
-
-class OrderStatusReplyPersonalizationCoverageTests(unittest.TestCase):
-    def test_unittest_adapter_inbound_cta_guard_boundary(self) -> None:
-        test_inbound_cta_guard_boundary_threshold()
-
-    def test_unittest_adapter_inbound_cta_guard_fallback(self) -> None:
-        test_inbound_cta_guard_fallback_when_mostly_cta()
-
-    def test_unittest_adapter_inbound_cta_guard_multi_paragraph(self) -> None:
-        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
-
-    def test_unittest_adapter_shipping_method_descriptive_day_delivery(self) -> None:
-        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
-
-    def test_unittest_adapter_shipping_method_priority_two_day(self) -> None:
-        test_strip_shipping_method_window_priority_two_day()
-
-    def test_unittest_adapter_shipping_method_none_or_empty(self) -> None:
-        test_strip_shipping_method_window_none_or_empty()
-
-
-class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
-    def test_execute_pytest_style_functions(self) -> None:
-        test_prompt_includes_excerpt_and_first_name()
-        test_reply_context_payload_excludes_none()
-        test_build_order_status_reply_context()
-        test_excerpt_is_sanitized_and_truncated()
-        test_excerpt_empty_returns_none()
-        test_excerpt_boundary_no_truncation()
-        test_extract_customer_first_name_from_payload()
-        test_extract_customer_first_name_from_order_summary()
-        test_inbound_cta_guard_reverts_to_draft()
-        test_inbound_cta_guard_boundary_threshold()
-        test_inbound_cta_guard_fallback_when_mostly_cta()
-        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
-        test_inbound_cta_guard_preserves_non_cta_paragraphs()
-        test_shipping_method_window_stripped_in_context()
-        test_shipping_method_window_does_not_strip_descriptive_day()
-        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
-        test_strip_shipping_method_window_priority_two_day()
-        test_strip_shipping_method_window_none_or_empty()
-        test_greeting_enforcement()
-        test_signature_enforcement_idempotent()
-
     remainder_with_next = "Hi there, status update line\nNext line"
     remainder_wrapped = pipeline._ensure_order_status_greeting(remainder_with_next, None)
     assert remainder_wrapped.startswith("Hi there,\n\n")
@@ -427,6 +383,8 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
     assert greeting_short_wrapped.startswith("Hi there,\n\n")
 
 
+
+
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     signed = pipeline._ensure_holly_signature(body)
@@ -460,6 +418,50 @@ def test_signature_enforcement_idempotent() -> None:
     assert pipeline._ensure_holly_signature(with_body).endswith(
         "Holly\nScentiment Customer Support"
     )
+
+
+class OrderStatusReplyPersonalizationCoverageTests(unittest.TestCase):
+    def test_unittest_adapter_inbound_cta_guard_boundary(self) -> None:
+        test_inbound_cta_guard_boundary_threshold()
+
+    def test_unittest_adapter_inbound_cta_guard_fallback(self) -> None:
+        test_inbound_cta_guard_fallback_when_mostly_cta()
+
+    def test_unittest_adapter_inbound_cta_guard_multi_paragraph(self) -> None:
+        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
+
+    def test_unittest_adapter_shipping_method_descriptive_day_delivery(self) -> None:
+        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
+
+    def test_unittest_adapter_shipping_method_priority_two_day(self) -> None:
+        test_strip_shipping_method_window_priority_two_day()
+
+    def test_unittest_adapter_shipping_method_none_or_empty(self) -> None:
+        test_strip_shipping_method_window_none_or_empty()
+
+
+class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
+    def test_execute_pytest_style_functions(self) -> None:
+        test_prompt_includes_excerpt_and_first_name()
+        test_reply_context_payload_excludes_none()
+        test_build_order_status_reply_context()
+        test_excerpt_is_sanitized_and_truncated()
+        test_excerpt_empty_returns_none()
+        test_excerpt_boundary_no_truncation()
+        test_extract_customer_first_name_from_payload()
+        test_extract_customer_first_name_from_order_summary()
+        test_inbound_cta_guard_reverts_to_draft()
+        test_inbound_cta_guard_boundary_threshold()
+        test_inbound_cta_guard_fallback_when_mostly_cta()
+        test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs()
+        test_inbound_cta_guard_preserves_non_cta_paragraphs()
+        test_shipping_method_window_stripped_in_context()
+        test_shipping_method_window_does_not_strip_descriptive_day()
+        test_shipping_method_window_does_not_strip_descriptive_day_delivery()
+        test_strip_shipping_method_window_priority_two_day()
+        test_strip_shipping_method_window_none_or_empty()
+        test_greeting_enforcement()
+        test_signature_enforcement_idempotent()
 
 
 class OrderStatusReplyPersonalizationTests(unittest.TestCase):
