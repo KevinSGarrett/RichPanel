@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-import re
 from typing import Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import ChatMessage
+from richpanel_middleware.automation import llm_reply_rewriter as rewrite_validator
 
 INTENT_SYSTEM_PROMPT = """You are a customer support intent classifier for order status automation.
 Decide whether the customer message is asking about order status or tracking.
@@ -96,78 +96,40 @@ risk_flags examples:
 _MAX_TICKET_CHARS = 2000
 _MAX_DRAFT_CHARS = 2000
 
-_MONTH_NAME_PATTERN = (
-    r"January|February|March|April|May|June|July|August|September|October|November|December"
-)
-_ETA_RANGE_REGEX = re.compile(
-    r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
-    flags=re.IGNORECASE,
-)
-_ETA_SINGLE_REGEX = re.compile(
-    r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
-)
-_DATE_RANGE_SAME_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|-|to)\s*"
-    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
-    flags=re.IGNORECASE,
-)
-_DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|-|to)\s*"
-    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
-    flags=re.IGNORECASE,
-)
-
-
-def _normalize_eta_unit(unit: str) -> str:
-    return re.sub(r"\s+", " ", unit.strip().lower())
-
-
-def _normalize_date_window(token: str) -> str:
-    normalized = token.strip().lower()
-    normalized = re.sub(r"\s*(?:–|-)\s*", "-", normalized)
-    normalized = re.sub(r"\s*\bto\b\s*", "-", normalized)
-    normalized = re.sub(r"\s*,\s*", ", ", normalized)
-    normalized = re.sub(r"\s+", " ", normalized)
-    return normalized.strip()
-
-
-def _extract_eta_windows(text: str) -> List[str]:
+def _extract_verbatim_eta_windows(text: str) -> List[str]:
     if not text:
         return []
     windows: List[str] = []
     spans: List[Tuple[int, int]] = []
-    for match in _ETA_RANGE_REGEX.finditer(text):
+    for match in rewrite_validator._ETA_RANGE_REGEX.finditer(text):
         spans.append(match.span())
-        min_days = match.group(1)
-        max_days = match.group(2)
-        unit = _normalize_eta_unit(match.group(3))
-        windows.append(f"{min_days}-{max_days} {unit}")
-    for match in _ETA_SINGLE_REGEX.finditer(text):
+        windows.append(match.group(0).strip())
+    for match in rewrite_validator._ETA_SINGLE_REGEX.finditer(text):
         start, end = match.span()
         if any(start < span_end and end > span_start for span_start, span_end in spans):
             continue
-        days = match.group(1)
-        unit = _normalize_eta_unit(match.group(2))
-        windows.append(f"{days} {unit}")
-    return list(dict.fromkeys(windows))
+        windows.append(match.group(0).strip())
+    return rewrite_validator._dedupe(windows)
 
 
-def _extract_date_windows(text: str) -> List[str]:
+def _extract_verbatim_date_windows(text: str) -> List[str]:
     if not text:
         return []
     windows: List[str] = []
-    for match in _DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
-        windows.append(_normalize_date_window(match.group(0)))
-    for match in _DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
-        windows.append(_normalize_date_window(match.group(0)))
-    return list(dict.fromkeys(windows))
+    for match in rewrite_validator._DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
+        windows.append(match.group(0).strip())
+    for match in rewrite_validator._DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
+        windows.append(match.group(0).strip())
+    return rewrite_validator._dedupe(windows)
 
 
 def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
     if not draft_reply:
         return []
-    required = _extract_eta_windows(draft_reply) + _extract_date_windows(draft_reply)
-    return list(dict.fromkeys(required))
+    required = _extract_verbatim_eta_windows(
+        draft_reply
+    ) + _extract_verbatim_date_windows(draft_reply)
+    return rewrite_validator._dedupe(required)
 
 
 @dataclass

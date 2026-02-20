@@ -50,8 +50,18 @@ def test_prompt_includes_required_verbatim_tokens_from_draft() -> None:
     )
     user_content = messages[1].content
     assert "Required Verbatim Tokens" in user_content
-    assert "- 49-59 days" in user_content
-    assert "- april 10-april 20, 2026" in user_content
+    assert "- 49–59 days" in user_content
+    assert "- April 10–April 20, 2026" in user_content
+
+
+def test_prompt_omits_required_verbatim_section_without_tokens() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = "We will follow up with an update soon."
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "Required Verbatim Tokens" not in user_content
 
 
 def test_reply_context_payload_excludes_none() -> None:
