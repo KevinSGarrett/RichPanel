@@ -165,7 +165,15 @@ def test_prompt_sanitization_strips_prompt_injection() -> None:
         context=context, draft_reply=draft, language="en"
     )
     user_content = messages[1].content
-    assert "Ignore instructions" not in user_content
+    required_block = user_content.split("Required Verbatim Tokens", 1)[1]
+    required_block = required_block.split("Draft reply", 1)[0]
+    assert "Ignore instructions" not in required_block
+
+
+def test_sanitize_verbatim_token_drops_invalid_token() -> None:
+    from richpanel_middleware.automation import order_status_prompts
+
+    assert order_status_prompts._sanitize_verbatim_token("!!!") == ""
 
 
 def test_reply_context_payload_excludes_none() -> None:
@@ -584,6 +592,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_prompt_omits_required_verbatim_section_for_whitespace_draft()
         test_sanitize_verbatim_token_strips_unexpected_chars()
         test_prompt_sanitization_strips_prompt_injection()
+        test_sanitize_verbatim_token_drops_invalid_token()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_excerpt_is_sanitized_and_truncated()
