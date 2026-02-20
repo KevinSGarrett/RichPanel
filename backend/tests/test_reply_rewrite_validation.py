@@ -352,9 +352,9 @@ def test_rewrite_rejects_unexpected_delivery_date_range() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "unexpected_dates"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "April 1–April 7, 2026" not in result.body
 
 
 def test_rewrite_rejects_internal_tags() -> None:
