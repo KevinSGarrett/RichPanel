@@ -121,7 +121,16 @@ def _sanitize_verbatim_token(token: str) -> str:
     cleaned = " ".join(str(token).split())
     # Restrict to known-safe characters for ETA/date tokens.
     cleaned = re.sub(r"[^A-Za-z0-9\s,\-–—]", "", cleaned)
-    return cleaned.strip()
+    cleaned = cleaned.strip()
+    if not cleaned:
+        return ""
+    # Ensure sanitized tokens still match expected ETA/date patterns.
+    if (
+        validation_patterns.extract_eta_windows_verbatim(cleaned)
+        or validation_patterns.extract_date_windows_verbatim(cleaned)
+    ):
+        return cleaned
+    return ""
 
 
 @dataclass

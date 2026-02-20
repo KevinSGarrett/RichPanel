@@ -135,6 +135,33 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertIn("49–59 days", result.body)
         self.assertIn("April 10–April 20, 2026", result.body)
 
+    def test_rewrite_repairs_multiple_eta_tokens(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "We are reviewing the latest details now.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = (
+            "Processing typically takes 3-5 business days, and shipping takes 7-10 days."
+        )
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-multi",
+            event_id="evt-eta-multi",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertIn("3-5 business days", result.body)
+        self.assertIn("7-10 days", result.body)
+
     def test_gates_block_network(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
