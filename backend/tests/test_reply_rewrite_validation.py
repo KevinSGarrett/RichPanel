@@ -194,9 +194,9 @@ def test_rewrite_rejects_modified_eta_window() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "missing_required_eta"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "1-3 business days" in result.body
 
 
 def test_rewrite_rejects_modified_delivery_date_range() -> None:
@@ -217,9 +217,9 @@ def test_rewrite_rejects_modified_delivery_date_range() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "missing_required_dates"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "March 12–March 20, 2026" in result.body
 
 
 def test_rewrite_accepts_equivalent_eta_separator() -> None:
