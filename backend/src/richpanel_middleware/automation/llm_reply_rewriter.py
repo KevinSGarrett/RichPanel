@@ -17,6 +17,12 @@ from richpanel_middleware.integrations.openai import (
     OpenAIClient,
     OpenAIRequestError,
 )
+from richpanel_middleware.automation.validation_patterns import (
+    extract_date_windows_normalized,
+    extract_date_windows_verbatim,
+    extract_eta_windows_normalized,
+    extract_eta_windows_verbatim,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,27 +48,8 @@ SUSPICIOUS_PATTERNS = [
 ]
 
 _URL_REGEX = re.compile(r"https?://[^\s<>\"']+")
-_ETA_RANGE_REGEX = re.compile(
-    r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
-    flags=re.IGNORECASE,
-)
-_ETA_SINGLE_REGEX = re.compile(
-    r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
-)
 _INTERNAL_TAG_REGEX = re.compile(r"(?i)\b(?:mw-[a-z0-9-]+|route-[a-z0-9-]+)\b")
-_MONTH_NAME_PATTERN = (
-    r"January|February|March|April|May|June|July|August|September|October|November|December"
-)
-_DATE_RANGE_SAME_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|-|to)\s*"
-    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
-    flags=re.IGNORECASE,
-)
-_DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
-    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|-|to)\s*"
-    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
-    flags=re.IGNORECASE,
-)
+
 
 
 def _to_bool(value: Optional[str], default: bool = False) -> bool:
@@ -258,49 +245,69 @@ def _extract_tracking_tokens(text: str) -> List[str]:
     return _dedupe(tokens)
 
 
-def _normalize_eta_unit(unit: str) -> str:
-    return re.sub(r"\s+", " ", unit.strip().lower())
-
-
 def _extract_eta_windows(text: str) -> List[str]:
-    if not text:
-        return []
-    windows: List[str] = []
-    spans: List[Tuple[int, int]] = []
-    for match in _ETA_RANGE_REGEX.finditer(text):
-        spans.append(match.span())
-        min_days = match.group(1)
-        max_days = match.group(2)
-        unit = _normalize_eta_unit(match.group(3))
-        windows.append(f"{min_days}-{max_days} {unit}")
-    for match in _ETA_SINGLE_REGEX.finditer(text):
-        start, end = match.span()
-        if any(start < span_end and end > span_start for span_start, span_end in spans):
-            continue
-        days = match.group(1)
-        unit = _normalize_eta_unit(match.group(2))
-        windows.append(f"{days} {unit}")
-    return _dedupe(windows)
-
-
-def _normalize_date_window(token: str) -> str:
-    normalized = token.strip().lower()
-    normalized = re.sub(r"\s*(?:–|-)\s*", "-", normalized)
-    normalized = re.sub(r"\s*\bto\b\s*", "-", normalized)
-    normalized = re.sub(r"\s*,\s*", ", ", normalized)
-    normalized = re.sub(r"\s+", " ", normalized)
-    return normalized.strip()
+    return extract_eta_windows_normalized(text)
 
 
 def _extract_date_windows(text: str) -> List[str]:
-    if not text:
-        return []
-    windows: List[str] = []
-    for match in _DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
-        windows.append(_normalize_date_window(match.group(0)))
-    for match in _DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
-        windows.append(_normalize_date_window(match.group(0)))
-    return _dedupe(windows)
+    return extract_date_windows_normalized(text)
+
+
+def _normalize_verbatim_tokens(
+    tokens: List[str], *, normalize_fn
+) -> List[Tuple[str, Optional[str]]]:
+    normalized: List[Tuple[str, Optional[str]]] = []
+    for token in tokens:
+        normalized_value = None
+        values = normalize_fn(token)
+        if values:
+            normalized_value = values[0]
+        normalized.append((token, normalized_value))
+    return normalized
+
+
+def _append_missing_timing_tokens(
+    rewritten_body: str,
+    *,
+    required_eta: List[str],
+    required_dates: List[str],
+    missing_eta: List[str],
+    missing_dates: List[str],
+) -> str:
+    if not (missing_eta or missing_dates):
+        return rewritten_body
+    missing_eta_set = set(missing_eta)
+    missing_dates_set = set(missing_dates)
+    eta_tokens = [
+        token
+        for token, normalized in _normalize_verbatim_tokens(
+            required_eta, normalize_fn=extract_eta_windows_normalized
+        )
+        if normalized and normalized in missing_eta_set
+    ]
+    date_tokens = [
+        token
+        for token, normalized in _normalize_verbatim_tokens(
+            required_dates, normalize_fn=extract_date_windows_normalized
+        )
+        if normalized and normalized in missing_dates_set
+    ]
+    additions: List[str] = []
+    if eta_tokens:
+        additions.append(f"Estimated timing: {'; '.join(eta_tokens)}.")
+    if date_tokens:
+        additions.append(f"Delivery window: {'; '.join(date_tokens)}.")
+    if not additions:
+        return rewritten_body
+    suffix = " ".join(additions)
+    LOGGER.info(
+        "reply_rewrite.repaired_missing_timing_tokens",
+        extra={
+            "missing_eta": len(missing_eta),
+            "missing_dates": len(missing_dates),
+        },
+    )
+    return f"{rewritten_body.rstrip()}\n\n{suffix}"
 
 
 def _missing_required_tokens(
@@ -613,6 +620,21 @@ def rewrite_reply(
     missing_urls, missing_tracking, missing_eta, missing_dates = _missing_required_tokens(
         reply_body, rewritten_body
     )
+    if (missing_eta or missing_dates) and not missing_urls and not missing_tracking:
+        required_eta = extract_eta_windows_verbatim(reply_body)
+        required_dates = extract_date_windows_verbatim(reply_body)
+        repaired_body = _append_missing_timing_tokens(
+            rewritten_body,
+            required_eta=required_eta,
+            required_dates=required_dates,
+            missing_eta=missing_eta,
+            missing_dates=missing_dates,
+        )
+        if repaired_body != rewritten_body:
+            rewritten_body = repaired_body
+            missing_urls, missing_tracking, missing_eta, missing_dates = _missing_required_tokens(
+                reply_body, rewritten_body
+            )
     if missing_urls or missing_tracking or missing_eta or missing_dates:
         reason = "missing_required_tokens"
         if missing_dates and not missing_urls and not missing_tracking and not missing_eta:

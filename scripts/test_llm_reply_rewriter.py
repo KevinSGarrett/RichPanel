@@ -107,6 +107,111 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertEqual(result.reason, "applied")
         self.assertEqual(client.calls, 1)
 
+    def test_rewrite_repairs_missing_eta_tokens(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "We are reviewing the latest details now.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = (
+            "Delivery is estimated for April 10–April 20, 2026 "
+            "(about 49–59 days from today)."
+        )
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-repair",
+            event_id="evt-eta-repair",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertIn("49–59 days", result.body)
+        self.assertIn("April 10–April 20, 2026", result.body)
+
+    def test_rewrite_repairs_multiple_eta_tokens(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "We are reviewing the latest details now.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = (
+            "Processing typically takes 3-5 business days, and shipping takes 7-10 days."
+        )
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-multi",
+            event_id="evt-eta-multi",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertIn("3-5 business days", result.body)
+        self.assertIn("7-10 days", result.body)
+
+    def test_rewrite_repairs_em_dash_eta_tokens(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "We are reviewing the latest details now.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Delivery should arrive in about 49—59 days."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-emdash",
+            event_id="evt-eta-emdash",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertIn("49—59 days", result.body)
+
+    def test_rewrite_skips_repair_when_missing_url(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Your order has shipped.", "confidence": 0.9, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = (
+            "Tracking link: https://example.com/track/123. "
+            "Delivery is estimated for April 10–April 20, 2026."
+        )
+        result = rewrite_reply(
+            original,
+            conversation_id="t-eta-missing-url",
+            event_id="evt-eta-missing-url",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.reason, "missing_required_tokens")
+
     def test_gates_block_network(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(

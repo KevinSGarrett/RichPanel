@@ -196,7 +196,7 @@ def test_rewrite_rejects_modified_eta_window() -> None:
 
     assert result.rewritten is False
     assert result.body == draft
-    assert result.reason == "missing_required_eta"
+    assert result.reason == "unexpected_eta"
 
 
 def test_rewrite_rejects_modified_delivery_date_range() -> None:
@@ -219,7 +219,7 @@ def test_rewrite_rejects_modified_delivery_date_range() -> None:
 
     assert result.rewritten is False
     assert result.body == draft
-    assert result.reason == "missing_required_dates"
+    assert result.reason == "unexpected_dates"
 
 
 def test_rewrite_accepts_equivalent_eta_separator() -> None:

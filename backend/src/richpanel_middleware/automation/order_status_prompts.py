@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+import re
+from typing import Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import ChatMessage
+from richpanel_middleware.automation import validation_patterns
 
 INTENT_SYSTEM_PROMPT = """You are a customer support intent classifier for order status automation.
 Decide whether the customer message is asking about order status or tracking.
@@ -95,6 +97,44 @@ risk_flags examples:
 _MAX_TICKET_CHARS = 2000
 _MAX_DRAFT_CHARS = 2000
 
+def _extract_verbatim_eta_windows(text: str) -> List[str]:
+    return validation_patterns.extract_eta_windows_verbatim(text)
+
+
+def _extract_verbatim_date_windows(text: str) -> List[str]:
+    return validation_patterns.extract_date_windows_verbatim(text)
+
+
+def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
+    if not draft_reply:
+        return []
+    required = _extract_verbatim_eta_windows(
+        draft_reply
+    ) + _extract_verbatim_date_windows(draft_reply)
+    return validation_patterns.dedupe([_sanitize_verbatim_token(t) for t in required])
+
+
+def _sanitize_verbatim_token(token: str) -> str:
+    if not token:
+        return ""
+    # Reject obvious markup/injection characters before sanitization.
+    if re.search(r"[<>{}\[\]\\]", str(token)):
+        return ""
+    # Keep tokens single-line to avoid prompt formatting surprises.
+    cleaned = " ".join(str(token).split())
+    # Restrict to known-safe characters for ETA/date tokens.
+    cleaned = re.sub(r"[^A-Za-z0-9\s,–—-]", "", cleaned)
+    cleaned = cleaned.strip()
+    if not cleaned:
+        return ""
+    # Ensure sanitized tokens still match expected ETA/date patterns.
+    if (
+        validation_patterns.extract_eta_windows_verbatim(cleaned)
+        or validation_patterns.extract_date_windows_verbatim(cleaned)
+    ):
+        return cleaned
+    return ""
+
 
 @dataclass
 class OrderStatusReplyContext:
@@ -149,10 +189,19 @@ def build_order_status_reply_prompt(
     language_hint = (
         f"Write the reply in language: {language}.\n\n" if language else ""
     )
+    required_tokens = _build_required_verbatim_tokens(trimmed_draft)
+    required_block = ""
+    if required_tokens:
+        required_lines = "\n".join(f"- {token}" for token in required_tokens)
+        required_block = (
+            "Required Verbatim Tokens (MUST appear exactly as written):\n"
+            f"{required_lines}\n\n"
+        )
     user_content = (
         f"{language_hint}"
         "Context (use only these facts):\n"
         f"{context_json}\n\n"
+        f"{required_block}"
         "Draft reply (facts to preserve):\n"
         f"{trimmed_draft}"
     )
