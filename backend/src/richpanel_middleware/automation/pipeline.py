@@ -575,7 +575,9 @@ def _apply_inbound_cta_guard(
     if not cleaned:
         return draft_body, True
     # Guard against replies that are mostly CTA after stripping; keep only if still substantial.
-    threshold = max(40, int(len(rewritten_body) * 0.5))
+    # 0.3 ratio (not 0.5): when each paragraph has one CTA + one good sentence, stripping
+    # legitimately removes ~50% of content — a 0.5 threshold would incorrectly fall back to draft.
+    threshold = max(40, int(len(rewritten_body) * 0.3))
     if len(cleaned) < threshold:
         LOGGER.info(
             "Inbound CTA guard fallback to draft; cleaned length %s < threshold %s "

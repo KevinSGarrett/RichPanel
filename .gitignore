@@ -34,6 +34,7 @@ secrets/
 # Allow repo-tracked Bugbot rules while keeping other Cursor artifacts local
 /.cursor/rules/*
 !/.cursor/rules/*.mdc
+.claude/
 
 # Root-only local artifacts (do not ignore infra/cdk/package-lock.json)
 /package-lock.json
