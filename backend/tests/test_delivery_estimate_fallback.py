@@ -360,6 +360,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         assert paragraph is not None
         self.assertIn("After release, processing typically takes 3-5 business days", paragraph)
         self.assertIn("(Business days are Mon–Fri; holidays may affect timelines.)", paragraph)
+        self.assertNotIn("from today", paragraph)
 
     def test_build_timeline_paragraph_blank_window_returns_none(self) -> None:
         estimate = {

@@ -210,6 +210,31 @@ def test_inbound_cta_guard_boundary_threshold() -> None:
     assert updated == base
 
 
+def test_inbound_cta_guard_fallback_when_mostly_cta() -> None:
+    draft = "Deterministic draft reply."
+    rewritten = (
+        "Order is processing. "
+        "Please reply back if you have any questions or need anything else at all."
+    )
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert updated == draft
+
+
+def test_inbound_cta_guard_removes_multiple_cta_sentences_across_paragraphs() -> None:
+    draft = "Deterministic draft reply."
+    para1 = "Thanks for your patience. Please reply back if anything changes."
+    para2 = "We are preparing your order. If you have any questions, let us know."
+    rewritten = f"{para1}\n\n{para2}"
+    updated, blocked = pipeline._apply_inbound_cta_guard(rewritten, draft)
+    assert blocked is True
+    assert "Please reply back" not in updated
+    assert "If you have any questions" not in updated
+    assert "Thanks for your patience." in updated
+    assert "We are preparing your order." in updated
+    assert "\n\n" in updated
+
+
 def test_inbound_cta_guard_preserves_non_cta_paragraphs() -> None:
     draft = "Deterministic draft reply."
     para1 = "We are reviewing the latest details now."
@@ -253,6 +278,22 @@ def test_shipping_method_window_does_not_strip_descriptive_day() -> None:
         order_summary=order_summary,
     )
     assert context.shipping_method == "Express (Next Day)"
+
+
+def test_shipping_method_window_does_not_strip_descriptive_day_delivery() -> None:
+    payload = {"message": "Where is my order?"}
+    delivery_estimate = {
+        "eta_human": "1-3 business days",
+        "normalized_method": "Express (Next Day Delivery)",
+    }
+    order_summary = {"shipping_method_name": "Express (Next Day Delivery)"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=delivery_estimate,
+        order_summary=order_summary,
+    )
+    assert context.shipping_method == "Express (Next Day Delivery)"
 
 
 
