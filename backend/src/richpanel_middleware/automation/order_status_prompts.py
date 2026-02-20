@@ -120,7 +120,7 @@ def _sanitize_verbatim_token(token: str) -> str:
     # Keep tokens single-line to avoid prompt formatting surprises.
     cleaned = " ".join(str(token).split())
     # Restrict to known-safe characters for ETA/date tokens.
-    cleaned = re.sub(r"[^A-Za-z0-9\s,\-–—]", "", cleaned)
+    cleaned = re.sub(r"[^A-Za-z0-9\s,–—-]", "", cleaned)
     cleaned = cleaned.strip()
     if not cleaned:
         return ""

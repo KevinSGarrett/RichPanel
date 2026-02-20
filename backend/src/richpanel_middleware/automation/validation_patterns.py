@@ -26,6 +26,7 @@ DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
 
 
 def dedupe(items: List[str]) -> List[str]:
+    # Extraction order matters; range patterns run before single-day matches.
     seen = set()
     deduped: List[str] = []
     for item in items:

@@ -300,6 +300,13 @@ def _append_missing_timing_tokens(
     if not additions:
         return rewritten_body
     suffix = " ".join(additions)
+    LOGGER.info(
+        "reply_rewrite.repaired_missing_timing_tokens",
+        extra={
+            "missing_eta": len(missing_eta),
+            "missing_dates": len(missing_dates),
+        },
+    )
     return f"{rewritten_body.rstrip()}\n\n{suffix}"
 
 
