@@ -296,6 +296,15 @@ def test_shipping_method_window_does_not_strip_descriptive_day_delivery() -> Non
     assert context.shipping_method == "Express (Next Day Delivery)"
 
 
+def test_strip_shipping_method_window_priority_two_day() -> None:
+    assert pipeline._strip_shipping_method_window("Priority (2-Day)") == "Priority"
+
+
+def test_strip_shipping_method_window_none_or_empty() -> None:
+    assert pipeline._strip_shipping_method_window(None) is None
+    assert pipeline._strip_shipping_method_window("") == ""
+
+
 
 def test_greeting_enforcement() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
