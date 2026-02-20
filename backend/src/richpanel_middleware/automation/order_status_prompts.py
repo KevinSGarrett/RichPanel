@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+import re
+from typing import Dict, List, Optional, Tuple
 
 from richpanel_middleware.integrations.openai import ChatMessage
 
@@ -95,6 +96,79 @@ risk_flags examples:
 _MAX_TICKET_CHARS = 2000
 _MAX_DRAFT_CHARS = 2000
 
+_MONTH_NAME_PATTERN = (
+    r"January|February|March|April|May|June|July|August|September|October|November|December"
+)
+_ETA_RANGE_REGEX = re.compile(
+    r"\b(\d+)\s*(?:-|–|to)\s*(\d+)\s*(business\s+days?|bd|days?)\b",
+    flags=re.IGNORECASE,
+)
+_ETA_SINGLE_REGEX = re.compile(
+    r"\b(\d+)\s*(business\s+days?|bd|days?)\b", flags=re.IGNORECASE
+)
+_DATE_RANGE_SAME_YEAR_REGEX = re.compile(
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}}\s*(?:–|-|to)\s*"
+    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
+    flags=re.IGNORECASE,
+)
+_DATE_RANGE_DIFFERENT_YEAR_REGEX = re.compile(
+    rf"\b(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\s*(?:–|-|to)\s*"
+    rf"(?:{_MONTH_NAME_PATTERN})\s+\d{{1,2}},\s*\d{{4}}\b",
+    flags=re.IGNORECASE,
+)
+
+
+def _normalize_eta_unit(unit: str) -> str:
+    return re.sub(r"\s+", " ", unit.strip().lower())
+
+
+def _normalize_date_window(token: str) -> str:
+    normalized = token.strip().lower()
+    normalized = re.sub(r"\s*(?:–|-)\s*", "-", normalized)
+    normalized = re.sub(r"\s*\bto\b\s*", "-", normalized)
+    normalized = re.sub(r"\s*,\s*", ", ", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
+def _extract_eta_windows(text: str) -> List[str]:
+    if not text:
+        return []
+    windows: List[str] = []
+    spans: List[Tuple[int, int]] = []
+    for match in _ETA_RANGE_REGEX.finditer(text):
+        spans.append(match.span())
+        min_days = match.group(1)
+        max_days = match.group(2)
+        unit = _normalize_eta_unit(match.group(3))
+        windows.append(f"{min_days}-{max_days} {unit}")
+    for match in _ETA_SINGLE_REGEX.finditer(text):
+        start, end = match.span()
+        if any(start < span_end and end > span_start for span_start, span_end in spans):
+            continue
+        days = match.group(1)
+        unit = _normalize_eta_unit(match.group(2))
+        windows.append(f"{days} {unit}")
+    return list(dict.fromkeys(windows))
+
+
+def _extract_date_windows(text: str) -> List[str]:
+    if not text:
+        return []
+    windows: List[str] = []
+    for match in _DATE_RANGE_SAME_YEAR_REGEX.finditer(text):
+        windows.append(_normalize_date_window(match.group(0)))
+    for match in _DATE_RANGE_DIFFERENT_YEAR_REGEX.finditer(text):
+        windows.append(_normalize_date_window(match.group(0)))
+    return list(dict.fromkeys(windows))
+
+
+def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
+    if not draft_reply:
+        return []
+    required = _extract_eta_windows(draft_reply) + _extract_date_windows(draft_reply)
+    return list(dict.fromkeys(required))
+
 
 @dataclass
 class OrderStatusReplyContext:
@@ -149,10 +223,19 @@ def build_order_status_reply_prompt(
     language_hint = (
         f"Write the reply in language: {language}.\n\n" if language else ""
     )
+    required_tokens = _build_required_verbatim_tokens(trimmed_draft)
+    required_block = ""
+    if required_tokens:
+        required_lines = "\n".join(f"- {token}" for token in required_tokens)
+        required_block = (
+            "Required Verbatim Tokens (MUST appear exactly as written):\n"
+            f"{required_lines}\n\n"
+        )
     user_content = (
         f"{language_hint}"
         "Context (use only these facts):\n"
         f"{context_json}\n\n"
+        f"{required_block}"
         "Draft reply (facts to preserve):\n"
         f"{trimmed_draft}"
     )

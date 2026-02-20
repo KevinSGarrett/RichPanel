@@ -39,6 +39,21 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     assert "Draft reply body" in messages[1].content
 
 
+def test_prompt_includes_required_verbatim_tokens_from_draft() -> None:
+    context = OrderStatusReplyContext(customer_first_name="Sarah")
+    draft = (
+        "Delivery is estimated for April 10–April 20, 2026 "
+        "(about 49–59 days from today)."
+    )
+    messages = build_order_status_reply_prompt(
+        context=context, draft_reply=draft, language="en"
+    )
+    user_content = messages[1].content
+    assert "Required Verbatim Tokens" in user_content
+    assert "- 49-59 days" in user_content
+    assert "- april 10-april 20, 2026" in user_content
+
+
 def test_reply_context_payload_excludes_none() -> None:
     context = OrderStatusReplyContext(tracking_number="123", carrier=None)
     payload = context.as_payload()
