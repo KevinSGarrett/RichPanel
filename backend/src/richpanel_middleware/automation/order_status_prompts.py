@@ -110,7 +110,15 @@ def _build_required_verbatim_tokens(draft_reply: str) -> List[str]:
     required = _extract_verbatim_eta_windows(
         draft_reply
     ) + _extract_verbatim_date_windows(draft_reply)
-    return validation_patterns.dedupe(required)
+    return validation_patterns.dedupe([_sanitize_verbatim_token(t) for t in required])
+
+
+def _sanitize_verbatim_token(token: str) -> str:
+    if not token:
+        return ""
+    # Keep tokens single-line to avoid prompt formatting surprises.
+    cleaned = " ".join(str(token).split())
+    return cleaned.strip()
 
 
 @dataclass
