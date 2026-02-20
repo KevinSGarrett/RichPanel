@@ -178,7 +178,7 @@ def test_missing_required_tokens_detects_missing_values() -> None:
     assert missing_dates == []
 
 
-def test_rewrite_rejects_modified_eta_window() -> None:
+def test_rewrite_accepts_modified_eta_window_after_strip() -> None:
     draft = "It should arrive in about 1-3 business days."
     client = _StubClient(_response("It should arrive in about 2-4 business days."))
 
@@ -194,12 +194,13 @@ def test_rewrite_rejects_modified_eta_window() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "unexpected_eta"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "1-3 business days" in result.body
+    assert "2-4 business days" not in result.body
 
 
-def test_rewrite_rejects_modified_delivery_date_range() -> None:
+def test_rewrite_accepts_modified_delivery_date_range_after_strip() -> None:
     draft = "Your order is expected March 12–March 20, 2026."
     client = _StubClient(
         _response("Your order is expected March 13–March 21, 2026.")
@@ -217,9 +218,10 @@ def test_rewrite_rejects_modified_delivery_date_range() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "unexpected_dates"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "March 12–March 20, 2026" in result.body
+    assert "March 13–March 21, 2026" not in result.body
 
 
 def test_rewrite_accepts_equivalent_eta_separator() -> None:
@@ -332,10 +334,10 @@ def test_rewrite_rejects_unexpected_tracking_number() -> None:
     assert result.reason == "unexpected_tracking"
 
 
-def test_rewrite_rejects_unexpected_delivery_date_range() -> None:
+def test_rewrite_accepts_unexpected_delivery_date_range_after_strip() -> None:
     draft = "Thanks for your patience. We'll update you soon."
     client = _StubClient(
-        _response("Estimated delivery is April 1–April 7, 2026.")
+        _response("Estimated delivery is April 1–April 7, 2026. We will follow up soon.")
     )
 
     result = rewrite_reply(
@@ -350,9 +352,9 @@ def test_rewrite_rejects_unexpected_delivery_date_range() -> None:
         client=client,
     )
 
-    assert result.rewritten is False
-    assert result.body == draft
-    assert result.reason == "unexpected_dates"
+    assert result.rewritten is True
+    assert result.reason == "applied"
+    assert "April 1–April 7, 2026" not in result.body
 
 
 def test_rewrite_rejects_internal_tags() -> None:

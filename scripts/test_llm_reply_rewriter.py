@@ -162,6 +162,77 @@ class ReplyRewriteTests(unittest.TestCase):
         self.assertIn("3-5 business days", result.body)
         self.assertIn("7-10 days", result.body)
 
+    def test_rewrite_strips_unexpected_date_when_original_has_none(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Estimated delivery is April 1–April 7, 2026. We will keep you posted.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for your patience."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-date",
+            event_id="evt-unexpected-date",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertNotIn("April 1–April 7, 2026", result.body)
+
+    def test_rewrite_strips_unexpected_eta_when_original_has_none(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Arrives in 2-4 business days. We will follow up shortly.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for reaching out."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-eta",
+            event_id="evt-unexpected-eta",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertTrue(result.rewritten)
+        self.assertEqual(result.reason, "applied")
+        self.assertNotIn("2-4 business days", result.body)
+
+    def test_rewrite_falls_back_when_stripped_body_too_short(self) -> None:
+        os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
+        response = ChatCompletionResponse(
+            model="gpt-5.2-chat-latest",
+            message='{"body": "Estimated delivery is April 1–April 7, 2026.", "confidence": 0.92, "risk_flags": []}',
+            status_code=200,
+            url="https://example.com",
+        )
+        client = _fake_client(response=response)
+        original = "Thanks for your patience."
+        result = rewrite_reply(
+            original,
+            conversation_id="t-unexpected-date-short",
+            event_id="evt-unexpected-date-short",
+            safe_mode=False,
+            automation_enabled=True,
+            allow_network=True,
+            outbound_enabled=True,
+            client=cast(OpenAIClient, client),
+        )
+        self.assertFalse(result.rewritten)
+        self.assertEqual(result.body, original)
+
     def test_rewrite_repairs_em_dash_eta_tokens(self) -> None:
         os.environ["OPENAI_REPLY_REWRITE_ENABLED"] = "true"
         response = ChatCompletionResponse(
@@ -638,6 +709,80 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         windows = rewriter._extract_eta_windows(text)
         self.assertEqual(windows, ["1-3 business days", "2 days"])
 
+    def test_strip_unexpected_timing_tokens_noop(self) -> None:
+        rewritten = "Thanks for your patience."
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=[],
+            unexpected_dates=[],
+        )
+        self.assertEqual(stripped, rewritten)
+
+    def test_strip_unexpected_timing_tokens_removes_eta_and_dates(self) -> None:
+        original = "Thanks for your patience."
+        rewritten = (
+            "Estimated delivery is April 1–April 7, 2026. "
+            "Arrives in 2-4 business days."
+        )
+        _, _, unexpected_eta, unexpected_dates = rewriter._unexpected_tokens(
+            original, rewritten
+        )
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        self.assertNotIn("2-4 business days", stripped)
+        self.assertNotIn("April 1–April 7, 2026", stripped)
+
+    def test_strip_unexpected_timing_tokens_dates_only(self) -> None:
+        original = "Thanks for your patience."
+        rewritten = "Estimated delivery is April 1–April 7, 2026. We will follow up soon."
+        _, _, unexpected_eta, unexpected_dates = rewriter._unexpected_tokens(
+            original, rewritten
+        )
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        self.assertNotIn("April 1–April 7, 2026", stripped)
+
+    def test_strip_unexpected_timing_tokens_collapses_whitespace(self) -> None:
+        original = "Thanks for your patience."
+        rewritten = "Arrives in 2-4 business days.\t\tPlease wait for updates."
+        _, _, unexpected_eta, unexpected_dates = rewriter._unexpected_tokens(
+            original, rewritten
+        )
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=unexpected_eta,
+            unexpected_dates=unexpected_dates,
+        )
+        self.assertNotIn("2-4 business days", stripped)
+        self.assertNotIn("\t", stripped)
+
+    def test_strip_unexpected_timing_tokens_no_match_keeps_text(self) -> None:
+        rewritten = "Thanks for your patience."
+        stripped = rewriter._strip_unexpected_timing_tokens(
+            rewritten,
+            unexpected_eta=["2-4 business days"],
+            unexpected_dates=["April 1–April 7, 2026"],
+        )
+        self.assertEqual(stripped, rewritten)
+
+    def test_strip_token_occurrences_avoids_substring_corruption(self) -> None:
+        text = "Shipping takes 3-5 business days."
+        stripped, count = rewriter._strip_token_occurrences(text, "5 business days")
+        self.assertEqual(count, 1)
+        self.assertNotIn("5 business days", stripped)
+
+    def test_strip_token_occurrences_handles_hyphenated_suffix(self) -> None:
+        text = "Arrives in 2-4 business days-standard."
+        stripped, count = rewriter._strip_token_occurrences(text, "2-4 business days")
+        self.assertEqual(count, 1)
+        self.assertNotIn("2-4 business days", stripped)
+
     def test_missing_required_eta_detects_changes(self) -> None:
         original = "Arrives in 1-3 business days."
         rewritten = "Arrives in 2-4 business days."
@@ -661,12 +806,12 @@ class ReplyRewriteHelperTests(unittest.TestCase):
         backend_rewrite_tests.test_rewrite_applies_when_tokens_preserved()
         backend_rewrite_tests.test_extract_urls_and_tracking_tokens()
         backend_rewrite_tests.test_missing_required_tokens_detects_missing_values()
-        backend_rewrite_tests.test_rewrite_rejects_modified_eta_window()
+        backend_rewrite_tests.test_rewrite_accepts_modified_eta_window_after_strip()
         backend_rewrite_tests.test_rewrite_accepts_equivalent_eta_separator()
-        backend_rewrite_tests.test_rewrite_rejects_modified_delivery_date_range()
+        backend_rewrite_tests.test_rewrite_accepts_modified_delivery_date_range_after_strip()
         backend_rewrite_tests.test_rewrite_accepts_delivery_date_dash_variant()
         backend_rewrite_tests.test_rewrite_accepts_delivery_date_to_variant()
-        backend_rewrite_tests.test_rewrite_rejects_unexpected_delivery_date_range()
+        backend_rewrite_tests.test_rewrite_accepts_unexpected_delivery_date_range_after_strip()
         backend_rewrite_tests.test_rewrite_rejects_internal_tags()
 
     def test_response_id_reason_set_when_raw_empty(self) -> None:
