@@ -35,6 +35,7 @@ os.environ.setdefault("AUDIT_TRAIL_TTL_SECONDS", "3600")
 from richpanel_middleware.automation.pipeline import (  # noqa: E402
     LOOP_PREVENTION_TAG,
     FOLLOWUP_REOPEN_TAG,
+    TicketMetadata,
     execute_order_status_reply,
     ActionPlan,
 )
@@ -252,25 +253,41 @@ class FollowupReopenTests(unittest.TestCase):
     def test_dry_run_reopen_uses_dry_run_true(self) -> None:
         """When allow_network=False, reopen PUT must carry dry_run=True."""
         executor = mock.MagicMock(spec=RichpanelExecutor)
-        payload = {
-            "status": "CLOSED",
-            "tags": [LOOP_PREVENTION_TAG],
-            "via": {"channel": "email"},
-        }
-        get_resp = RichpanelResponse(
-            status_code=200,
-            headers={},
-            body=json.dumps(payload).encode(),
-            url="https://app.richpanel.com/v1/tickets/test-conv-1",
-            dry_run=True,
-        )
         dry_resp = _ok_response(dry_run=True)
 
         def side_effect(method: str, path: str, **kwargs: Any) -> RichpanelResponse:
-            return get_resp if method == "GET" else dry_resp
+            return dry_resp
 
         executor.execute.side_effect = side_effect
-        _run(executor, allow_network=False)
+        with mock.patch(
+            "richpanel_middleware.automation.pipeline.resolve_env_name",
+            return_value=("dev", "dev"),
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._outbound_block_reason",
+            return_value=None,
+        ), mock.patch(
+            "richpanel_middleware.automation.pipeline._safe_ticket_snapshot_fetch",
+            return_value=(
+                TicketMetadata(
+                    status="CLOSED",
+                    tags={LOOP_PREVENTION_TAG},
+                    status_code=200,
+                    dry_run=True,
+                ),
+                "email",
+                "customer@example.com",
+                {},
+            ),
+        ):
+            execute_order_status_reply(
+                _build_envelope(),
+                _build_plan(),
+                safe_mode=False,
+                automation_enabled=True,
+                allow_network=False,
+                outbound_enabled=True,
+                richpanel_executor=executor,
+            )
 
         put_calls = [c for c in executor.execute.call_args_list if c.args[0] == "PUT"]
         reopen_calls = [
@@ -279,6 +296,7 @@ class FollowupReopenTests(unittest.TestCase):
             if "/add-tags" not in c.args[1]
             and c.kwargs.get("json_body", {}).get("ticket", {}).get("state") == "open"
         ]
+        self.assertGreater(len(reopen_calls), 0, "Expected reopen PUT call in dry-run path")
         for c in reopen_calls:
             self.assertTrue(
                 c.kwargs.get("dry_run"),
