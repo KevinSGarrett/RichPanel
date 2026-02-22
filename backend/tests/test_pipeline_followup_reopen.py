@@ -153,6 +153,8 @@ class FollowupReopenTests(unittest.TestCase):
             and c.kwargs.get("json_body", {}).get("ticket", {}).get("state") == "open"
         ]
         self.assertTrue(len(reopen_calls) >= 1, "Expected reopen PUT call but got none")
+        for c in reopen_calls:
+            self.assertEqual(c.kwargs.get("json_body", {}).get("ticket", {}).get("status"), "OPEN")
 
     def test_reopen_put_is_first_put_call(self) -> None:
         """Reopen must happen before routing tags are added."""
@@ -168,6 +170,7 @@ class FollowupReopenTests(unittest.TestCase):
             "First PUT must be reopen, not add-tags",
         )
         self.assertEqual(first_body.get("ticket", {}).get("state"), "open")
+        self.assertEqual(first_body.get("ticket", {}).get("status"), "OPEN")
 
     def test_routing_tags_added_after_reopen(self) -> None:
         """route-email-support-team tag must be added after reopening."""
@@ -259,6 +262,9 @@ class FollowupReopenTests(unittest.TestCase):
             return dry_resp
 
         executor.execute.side_effect = side_effect
+        # In true dry-run mode _safe_ticket_snapshot_fetch returns empty metadata
+        # (it does not parse ticket tags/status), so patch snapshot metadata to
+        # deterministically exercise the reopen branch and assert dry_run wiring.
         with mock.patch(
             "richpanel_middleware.automation.pipeline.resolve_env_name",
             return_value=("dev", "dev"),
@@ -301,6 +307,10 @@ class FollowupReopenTests(unittest.TestCase):
             self.assertTrue(
                 c.kwargs.get("dry_run"),
                 "Reopen PUT must use dry_run=True when allow_network=False",
+            )
+            self.assertEqual(
+                c.kwargs.get("json_body", {}).get("ticket", {}).get("status"),
+                "OPEN",
             )
 
     def test_routing_tags_added_when_reopen_raises(self) -> None:

@@ -1685,7 +1685,7 @@ def execute_order_status_reply(
                     reopen_response = executor.execute(
                         "PUT",
                         f"/v1/tickets/{encoded_id}",
-                        json_body={"ticket": {"state": "open"}},
+                        json_body={"ticket": {"state": "open", "status": "OPEN"}},
                         dry_run=not allow_network,
                     )
                     responses.append(
