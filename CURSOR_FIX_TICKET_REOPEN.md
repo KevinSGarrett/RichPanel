@@ -7,6 +7,34 @@
 
 ---
 
+> **CONFIDENCE NOTE — READ BEFORE STARTING**
+>
+> The root cause and code logic are well-understood (90%+ confidence). However, the reopen API
+> payload `{"ticket": {"state": "open"}}` has **never been tested in this system** — not in DEV,
+> not in PROD. Every proof file from every smoke run (B54, B58, B59, B73, B75…) shows
+> `"status_after": "closed"` after customer follow-ups. There is no evidence of automatic
+> ticket reopening ever having worked. The manual reopening visible in run logs was a human doing
+> it via the RichpanelClient for test-prep purposes only.
+>
+> **DEV verification of this payload is therefore non-negotiable before PROD deploy.**
+> If the API call returns non-200 or the ticket does not become OPEN in the DEV Richpanel
+> sandbox, stop — the payload is wrong and the fix must be revised before PROD.
+
+---
+
+> **DEV ENVIRONMENT STATUS — READ BEFORE STARTING**
+>
+> The DEV AWS environment has **not been deployed to in a long time**. All recent updates
+> (B75 auto-close fix, B76–B95, PR #269 verbatim-token work) were deployed to PROD only.
+> DEV is running significantly older code — possibly code that predates the B75 auto-close
+> fix that caused this bug.
+>
+> **Do NOT skip the DEV sync step (section 7.0).** Deploying the fix to a stale DEV
+> environment will produce meaningless test results — you would be testing the fix on top
+> of code that does not match main.
+
+---
+
 ## 1. What Is Broken and Exactly Why
 
 ### 1.1 The Expected End-to-End Flow
@@ -570,13 +598,89 @@ gh pr merge --squash --delete-branch
 
 ## 7. Deploy
 
-### 7.1 Deploy to DEV first
+> **Order is mandatory: DEV sync → DEV verification → PROD.**
+> Do not skip any step. Do not deploy to PROD if DEV verification fails.
 
-GitHub → **Actions** → **Deploy Dev Stack** → **Run workflow** → branch: `main` → **Run workflow**.
+---
 
-Wait for the workflow to complete (usually 3–5 minutes). Verify the CloudFormation outputs table is printed at the end.
+### 7.0 — Pre-flight: Sync DEV with current `main` (REQUIRED — DEV is stale)
 
-### 7.2 Verify in DEV via E2E smoke test
+**Why:** DEV AWS has not been deployed to in a long time. All recent code changes — including the
+B75 auto-close fix that introduced this bug, and everything since — were deployed to PROD only.
+DEV is running old code. If you skip this step and run the smoke test against stale DEV code,
+the results are meaningless.
+
+**Do this BEFORE applying or testing the fix:**
+
+1. Go to GitHub → **Actions** → **Deploy Dev Stack**.
+2. Click **Run workflow** (top-right of the workflow list).
+3. Set **Branch:** `main` (not the fix branch, not any feature branch — `main`).
+4. Click the green **Run workflow** button.
+5. Watch the run. It may take **5–10 minutes** if the DEV environment has gone dormant or if
+   CloudFormation needs to re-provision resources. This is normal after a long gap.
+6. Confirm the run ends green with no errors and the CloudFormation outputs table is visible in
+   the logs.
+
+**Optional sanity check — verify DEV baseline is alive before adding the fix:**
+
+If you want to confirm DEV is actually processing tickets correctly after the sync (recommended
+after a long gap), run a baseline smoke first without `--followup`:
+
+```bash
+python scripts/dev_e2e_smoke.py \
+  --env dev \
+  --region us-east-2 \
+  --stack-name RichpanelMiddleware-dev \
+  --wait-seconds 120 \
+  --profile rp-admin-kevin \
+  --scenario order_status \
+  --ticket-number <fresh DEV ticket number> \
+  --require-outbound \
+  --require-openai-routing \
+  --require-openai-rewrite \
+  --proof-path /tmp/dev_baseline_proof.json
+```
+
+Expected result: `"sent": true`, auto-reply received, ticket auto-closed. If this fails, DEV
+infrastructure is broken independently of this fix — resolve that first before proceeding.
+
+**How to get a fresh DEV ticket number:**
+Log in to the Richpanel DEV sandbox (not PROD). Send a new inbound customer message from a
+test customer. The ticket ID will appear in the Richpanel DEV conversation list. Use that
+integer ticket ID as `--ticket-number`.
+
+---
+
+### 7.1 — Deploy the fix to DEV
+
+After the PR is merged to `main` and DEV is confirmed synced (step 7.0 above):
+
+1. GitHub → **Actions** → **Deploy Dev Stack**.
+2. Click **Run workflow**.
+3. Branch: `main`.
+4. Click **Run workflow**.
+5. Wait for completion (3–8 minutes). Confirm no errors and CloudFormation outputs printed.
+
+This deploys the fix (reopen logic + `FOLLOWUP_REOPEN_TAG`) to the DEV Lambda.
+
+---
+
+### 7.2 — Verify the fix in DEV Richpanel sandbox (CRITICAL GATE — cannot skip)
+
+**Why this is non-negotiable:**
+The reopen API payload `{"ticket": {"state": "open"}}` has never been tested in this system.
+No proof file from any smoke run has ever shown `"status_after": "OPEN"` for a follow-up.
+This DEV test is the **first real live test** of whether Richpanel's API accepts this payload
+and actually reopens a closed ticket. If it doesn't work, the fix needs a different payload —
+and you need to know that before deploying to PROD.
+
+**Steps:**
+
+1. In the Richpanel **DEV** sandbox, get a fresh DEV ticket number (follow a new inbound message
+   through auto-close so the ticket is in `CLOSED` state, or use the smoke test's auto-close
+   phase as the setup step).
+
+2. Run the full order-status + followup smoke test against DEV:
 
 ```bash
 python scripts/dev_e2e_smoke.py \
@@ -594,26 +698,52 @@ python scripts/dev_e2e_smoke.py \
   --proof-path /tmp/followup_reopen_proof.json
 ```
 
-Open `/tmp/followup_reopen_proof.json` and confirm:
+3. Open `/tmp/followup_reopen_proof.json` and look for:
 
 ```json
 "followup": {
-  "status_after": "OPEN",      <-- KEY: was "closed" before fix
+  "status_after": "OPEN",      <-- MUST be "OPEN"; was always "closed" before fix
   "reply_sent": false,
   "routed_to_support": true
 }
 ```
 
-Also check in Richpanel DEV UI:
-1. Ticket status = **OPEN** (not CLOSED).
-2. Tags include: `route-email-support-team`, `mw-followup-reopened`, `mw-skip-followup-after-auto-reply`.
-3. Ticket is visible in Email Support Team queue.
+4. In Richpanel **DEV** UI (sandbox):
+   - Ticket status = **OPEN** (not CLOSED, not RESOLVED).
+   - Tags present: `route-email-support-team`, `mw-followup-reopened`,
+     `mw-skip-followup-after-auto-reply`, `mw-auto-replied`.
+   - Ticket is visible in the Email Support Team queue / inbox.
 
-### 7.3 Deploy to PROD
+5. In CloudWatch Logs for `/aws/lambda/rp-mw-dev-worker`, confirm the Lambda logged:
 
-Only after DEV verification passes:
+```json
+{"action": "reopen_for_followup", "status": 200, "dry_run": false}
+```
 
-GitHub → **Actions** → **Deploy Prod Stack** → **Run workflow** → branch: `main` → **Run workflow**.
+**If any of the above checks fail:**
+
+- `status_after` is still `"closed"` **or** the reopen PUT returns non-200:
+  The API payload `{"ticket": {"state": "open"}}` is incorrect for this Richpanel version.
+  **Stop. Do NOT deploy to PROD.** Investigate the correct reopen payload — possibilities
+  include `{"ticket": {"status": "OPEN"}}`, `{"ticket": {"state": "open", "status": "OPEN"}}`,
+  or a different endpoint. Update Change 2 in `pipeline.py`, re-run unit tests, open a new PR,
+  and repeat the DEV verification cycle.
+
+- Ticket shows OPEN in proof JSON but is not visible in agent queue:
+  The routing or queue assignment may require an additional field. Check Richpanel DEV UI
+  carefully and compare with a ticket that was manually opened to see what differs.
+
+---
+
+### 7.3 — Deploy to PROD
+
+**Only after all DEV checks in 7.2 pass without exception.**
+
+1. GitHub → **Actions** → **Deploy Prod Stack**.
+2. Click **Run workflow**.
+3. Branch: `main`.
+4. Click **Run workflow**.
+5. Wait for completion. Confirm no errors.
 
 ---
 
