@@ -41,6 +41,7 @@ from richpanel_middleware.automation.pipeline import (  # noqa: E402
 from richpanel_middleware.integrations.richpanel.client import (  # noqa: E402
     RichpanelExecutor,
     RichpanelResponse,
+    TransportError,
 )
 from richpanel_middleware.ingest.envelope import build_event_envelope  # noqa: E402
 
@@ -283,6 +284,40 @@ class FollowupReopenTests(unittest.TestCase):
                 c.kwargs.get("dry_run"),
                 "Reopen PUT must use dry_run=True when allow_network=False",
             )
+
+    def test_routing_tags_added_when_reopen_raises(self) -> None:
+        """Routing tags must still be applied if reopen PUT raises transport error."""
+        executor = mock.MagicMock(spec=RichpanelExecutor)
+        payload = {
+            "status": "CLOSED",
+            "tags": [LOOP_PREVENTION_TAG],
+            "via": {"channel": "email"},
+        }
+        get_resp = RichpanelResponse(
+            status_code=200,
+            headers={},
+            body=json.dumps(payload).encode(),
+            url="https://app.richpanel.com/v1/tickets/test-conv-1",
+            dry_run=False,
+        )
+
+        def side_effect(method: str, path: str, **kwargs: Any) -> RichpanelResponse:
+            if method == "GET":
+                return get_resp
+            if method == "PUT" and "/add-tags" not in path:
+                raise TransportError("timeout")
+            return _ok_response()
+
+        executor.execute.side_effect = side_effect
+        result = _run(executor)
+
+        all_tags: List[str] = []
+        for c in executor.execute.call_args_list:
+            if c.args[0] == "PUT" and "/add-tags" in c.args[1]:
+                all_tags.extend(c.kwargs.get("json_body", {}).get("tags", []))
+
+        self.assertIn("route-email-support-team", all_tags)
+        self.assertFalse(result.get("sent"))
 
 
 if __name__ == "__main__":

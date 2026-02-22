@@ -1681,25 +1681,38 @@ def execute_order_status_reply(
             # tags is invisible to agents. We reopen when closed and continue to
             # the routing step regardless of reopen success (fail-open).
             if _is_closed_status(ticket_status):
-                reopen_response = executor.execute(
-                    "PUT",
-                    f"/v1/tickets/{encoded_id}",
-                    json_body={"ticket": {"state": "open"}},
-                    dry_run=not allow_network,
-                )
-                responses.append(
-                    {
-                        "action": "reopen_for_followup",
-                        "status": reopen_response.status_code,
-                        "dry_run": reopen_response.dry_run,
-                    }
-                )
-                if 200 <= reopen_response.status_code < 300 and not reopen_response.dry_run:
-                    executor.execute(
+                try:
+                    reopen_response = executor.execute(
                         "PUT",
-                        f"/v1/tickets/{encoded_id}/add-tags",
-                        json_body={"tags": [FOLLOWUP_REOPEN_TAG]},
+                        f"/v1/tickets/{encoded_id}",
+                        json_body={"ticket": {"state": "open"}},
                         dry_run=not allow_network,
+                    )
+                    responses.append(
+                        {
+                            "action": "reopen_for_followup",
+                            "status": reopen_response.status_code,
+                            "dry_run": reopen_response.dry_run,
+                        }
+                    )
+                    if (
+                        200 <= reopen_response.status_code < 300
+                        and not reopen_response.dry_run
+                    ):
+                        executor.execute(
+                            "PUT",
+                            f"/v1/tickets/{encoded_id}/add-tags",
+                            json_body={"tags": [FOLLOWUP_REOPEN_TAG]},
+                            dry_run=not allow_network,
+                        )
+                except (RichpanelRequestError, SecretLoadError, TransportError) as exc:
+                    responses.append(
+                        {
+                            "action": "reopen_for_followup",
+                            "status": 0,
+                            "dry_run": not allow_network,
+                            "error": exc.__class__.__name__,
+                        }
                     )
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
             # no escalation). Preserve loop-prevention tag to avoid repeated replies.
