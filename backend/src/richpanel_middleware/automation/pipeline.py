@@ -98,6 +98,7 @@ SKIP_STATUS_READ_FAILED_TAG = "mw-skip-status-read-failed"
 ORDER_LOOKUP_FAILED_TAG = "mw-order-lookup-failed"
 ORDER_STATUS_SUPPRESSED_TAG = "mw-order-status-suppressed"
 ORDER_LOOKUP_MISSING_PREFIX = "mw-order-lookup-missing"
+FOLLOWUP_REOPEN_TAG = "mw-followup-reopened"
 # Follow-up after auto-reply should route to support without escalation.
 _ESCALATION_REASONS: set[str] = {"missing_bot_agent_id", "reply_close_failed"}
 _SKIP_REASON_TAGS = {
@@ -1674,9 +1675,34 @@ def execute_order_status_reply(
         is_email_channel = channel_detected == "email"
 
         if loop_prevention_tag in (ticket_metadata.tags or set()):
+            # If the ticket was hard-closed by the auto-reply automation, reopen it
+            # so the Email Support Team can see it in their Richpanel queue.
+            # Richpanel only surfaces OPEN tickets; a CLOSED ticket with routing
+            # tags is invisible to agents. We reopen when closed and continue to
+            # the routing step regardless of reopen success (fail-open).
+            if _is_closed_status(ticket_status):
+                reopen_response = executor.execute(
+                    "PUT",
+                    f"/v1/tickets/{encoded_id}",
+                    json_body={"ticket": {"state": "open"}},
+                    dry_run=not allow_network,
+                )
+                responses.append(
+                    {
+                        "action": "reopen_for_followup",
+                        "status": reopen_response.status_code,
+                        "dry_run": reopen_response.dry_run,
+                    }
+                )
+                if 200 <= reopen_response.status_code < 300 and not reopen_response.dry_run:
+                    executor.execute(
+                        "PUT",
+                        f"/v1/tickets/{encoded_id}/add-tags",
+                        json_body={"tags": [FOLLOWUP_REOPEN_TAG]},
+                        dry_run=not allow_network,
+                    )
             # Route follow-ups after auto-reply to Email Support Team (no duplicate reply,
-            # no escalation). Preserve loop-prevention tag to avoid repeated replies,
-            # even if the ticket is already closed.
+            # no escalation). Preserve loop-prevention tag to avoid repeated replies.
             result = _route_email_support(
                 "followup_after_auto_reply", ticket_status=ticket_status
             )
