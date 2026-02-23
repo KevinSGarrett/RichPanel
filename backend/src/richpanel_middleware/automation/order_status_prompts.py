@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from richpanel_middleware.integrations.openai import ChatMessage
 from richpanel_middleware.automation import validation_patterns
@@ -318,7 +318,7 @@ class OrderStatusReplyContext:
     # Kept for backward-compat / verbatim-token extraction
     eta_window: Optional[str] = None
 
-    def as_payload(self) -> Dict[str, Optional[str]]:
+    def as_payload(self) -> Dict[str, Union[str, bool]]:
         payload = {
             "tracking_number": self.tracking_number,
             "tracking_url": self.tracking_url,
