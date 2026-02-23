@@ -236,7 +236,7 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("UPS", draft_reply["body"])
         self.assertIn("Tracking link:", draft_reply["body"])
         self.assertNotIn(
-            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            "Tracking will be emailed automatically to the email address on file once it ships and is scanned by the carrier.",
             draft_reply["body"],
         )
 

@@ -506,7 +506,8 @@ def format_eta_window(min_days: int, max_days: int) -> str:
 
 _BUSINESS_DAYS_NOTE = "(Business days are Mon–Fri; holidays may affect timelines.)"
 _TRACKING_EMAIL_LINE = (
-    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+    "Tracking will be emailed automatically to the email address on file "
+    "once it ships and is scanned by the carrier."
 )
 
 
@@ -861,11 +862,9 @@ def build_no_tracking_reply(
         if isinstance(ship_date_human, str) and not ship_date_human.strip():
             ship_date_human = None
         delivery_window_human = preorder_estimate.get("delivery_window_human")
-        days_from_inquiry_human = preorder_estimate.get("days_from_inquiry_human")
         ship_days_from_inquiry_human = preorder_estimate.get(
             "ship_days_from_inquiry_human"
         )
-        processing_human = preorder_estimate.get("processing_human")
         is_late = bool(preorder_estimate.get("is_late"))
         method_label = summary.get("shipping_method") or summary.get(
             "shipping_method_name"
@@ -880,8 +879,18 @@ def build_no_tracking_reply(
                 body = f"{body} (in {ship_days_from_inquiry_human})."
             else:
                 body = f"{body}."
+            if not is_late:
+                body = (
+                    f"{body} To ensure everything arrives together, the full order will "
+                    "ship once the pre-order item is available."
+                )
         else:
             body = "Your order includes a pre-order item."
+            if not is_late:
+                body = (
+                    f"{body} To ensure everything arrives together, the full order "
+                    "will ship once the pre-order item is available."
+                )
 
         if is_late:
             body = (

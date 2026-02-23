@@ -553,7 +553,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("\n\n", body)
         self.assertTrue(
             body.endswith(
-                "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+                "Tracking will be emailed automatically to the email address on file once it ships and is scanned by the carrier."
             )
         )
         self._assert_no_inbound_cta(body)
@@ -619,7 +619,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertIn("\n\n", reply["body"])
         self.assertTrue(
             reply["body"].endswith(
-                "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+                "Tracking will be emailed automatically to the email address on file once it ships and is scanned by the carrier."
             )
         )
         self._assert_no_inbound_cta(reply["body"])

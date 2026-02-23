@@ -21,22 +21,40 @@ def test_prompt_includes_excerpt_and_first_name() -> None:
     )
 
     assert messages[0].role == "system"
+
+    # v4 non-negotiables (unchanged)
     assert "Never mention AI, bots, automation, templates" in messages[0].content
     assert "Do NOT encourage inbound contact" in messages[0].content
-    assert "\"reply back\"" in messages[0].content
-    assert "ONE concrete anchor detail" in messages[0].content
+    assert '"reply back"' in messages[0].content
     assert "Do NOT output a \"Key Details\" title" in messages[0].content
     assert "delivery date ranges" in messages[0].content
-    assert "\"message us\"" in messages[0].content
-    assert "\"get back to us\"" in messages[0].content
-    assert "\"if you have questions\"" in messages[0].content
+    assert '"message us"' in messages[0].content
+    assert '"get back to us"' in messages[0].content
+    assert '"if you have questions"' in messages[0].content
+
+    # v4 new requirements
+    assert "DO NOT REUSE DRAFT PHRASING" in messages[0].content
+    assert "brief thanks for reaching out" in messages[0].content
+    assert "NEVER open with" in messages[0].content
+    assert "Write complete sentences" in messages[0].content
+    assert "3–4 short paragraphs" in messages[0].content
+    assert "IGNORE IDs / CODES" in messages[0].content
+
+    # REMOVED: "Max 2 sentences per paragraph" is no longer in v4
+    assert "Max 2 sentences per paragraph" not in messages[0].content
+
+    # v4 new: NATURAL FACT WEAVING section must be present
+    assert "NATURAL FACT WEAVING" in messages[0].content
+
+    # User message still contains context JSON and reference draft
     assert "customer_message_excerpt" in messages[1].content
-    assert "\"customer_first_name\":\"Sarah\"" in messages[1].content
-    assert (
-        "Where is my order? I'm worried it won't arrive in time."
-        in messages[1].content
-    )
+    assert '"customer_first_name":"Sarah"' in messages[1].content
+    assert "Where is my order? I'm worried" in messages[1].content
+    # After Change 5, the reference draft label changes to "Reference draft"
+    assert "Reference draft" in messages[1].content
     assert "Draft reply body" in messages[1].content
+    # After Change 5, the structured facts block is present
+    assert "Order facts" in messages[1].content
 
 
 def test_prompt_includes_required_verbatim_tokens_from_draft() -> None:
@@ -49,7 +67,7 @@ def test_prompt_includes_required_verbatim_tokens_from_draft() -> None:
         context=context, draft_reply=draft, language="en"
     )
     user_content = messages[1].content
-    assert "Required Verbatim Tokens" in user_content
+    assert "Required verbatim tokens" in user_content
     assert "- 49–59 days" in user_content
     assert "- April 10–April 20, 2026" in user_content
 
@@ -61,7 +79,7 @@ def test_prompt_omits_required_verbatim_section_without_tokens() -> None:
         context=context, draft_reply=draft, language="en"
     )
     user_content = messages[1].content
-    assert "Required Verbatim Tokens" not in user_content
+    assert "Required verbatim tokens" not in user_content
 
 
 def test_prompt_includes_verbatim_tokens_with_unicode_dashes() -> None:
@@ -115,7 +133,7 @@ def test_prompt_omits_required_verbatim_section_for_empty_draft() -> None:
         context=context, draft_reply="", language="en"
     )
     user_content = messages[1].content
-    assert "Required Verbatim Tokens" not in user_content
+    assert "Required verbatim tokens" not in user_content
 
 
 def test_prompt_sanitizes_verbatim_tokens() -> None:
@@ -145,7 +163,7 @@ def test_prompt_omits_required_verbatim_section_for_whitespace_draft() -> None:
         context=context, draft_reply="   \n  ", language="en"
     )
     user_content = messages[1].content
-    assert "Required Verbatim Tokens" not in user_content
+    assert "Required verbatim tokens" not in user_content
 
 
 def test_sanitize_verbatim_token_strips_unexpected_chars() -> None:
@@ -165,8 +183,8 @@ def test_prompt_sanitization_strips_prompt_injection() -> None:
         context=context, draft_reply=draft, language="en"
     )
     user_content = messages[1].content
-    required_block = user_content.split("Required Verbatim Tokens", 1)[1]
-    required_block = required_block.split("Draft reply", 1)[0]
+    required_block = user_content.split("Required verbatim tokens", 1)[1]
+    required_block = required_block.split("Reference draft", 1)[0]
     assert "Ignore instructions" not in required_block
 
 
@@ -225,6 +243,126 @@ def test_build_order_status_reply_context() -> None:
         order_summary={"shipping_method_name": "Ground"},
     )
     assert context_shipping.shipping_method is not None
+    assert context_shipping.days_from_today is None
+
+
+def test_build_order_status_reply_context_preserves_unknown_preorder_state() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+
+    context_no_estimate = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=None,
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context_no_estimate.is_preorder is None
+
+    context_missing_preorder_key = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={"eta_human": "2-4 days"},
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context_missing_preorder_key.is_preorder is None
+
+
+def test_build_order_status_reply_context_normalizes_is_late_to_bool() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={
+            "preorder": True,
+            "is_late": 1,
+            "days_from_inquiry_human": "2-3 days",
+        },
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context.is_late is True
+
+
+def test_prompt_order_facts_block_full_preorder_context() -> None:
+    context = OrderStatusReplyContext(
+        customer_first_name="Vincent",
+        customer_message_excerpt="When will this ship?",
+        is_preorder=True,
+        is_late=False,
+        preorder_release_date="Tuesday, February 24, 2026 (in 4 days)",
+        processing_time="3-5 business days",
+        shipping_method="Standard shipping",
+        transit_time="3-7 business days",
+        delivery_date_range="March 4-March 12, 2026",
+        days_from_today="12-20 days",
+    )
+    messages = build_order_status_reply_prompt(
+        context=context,
+        draft_reply="Reference draft text",
+    )
+    user_content = messages[1].content
+    assert "Order facts — weave ALL of these naturally" in user_content
+    assert "- Order type: PRE-ORDER" in user_content
+    assert (
+        "- Pre-order release / ship date: Tuesday, February 24, 2026 (in 4 days)"
+        in user_content
+    )
+    assert (
+        "- Shipping rule: Full order ships together once pre-order item is available "
+        "— do not ship partial orders" in user_content
+    )
+    assert "- Processing time: 3-5 business days" in user_content
+    assert "- Shipping method: Standard shipping" in user_content
+    assert "- Shipping transit time: 3-7 business days" in user_content
+    assert "- Estimated delivery date range: March 4-March 12, 2026" in user_content
+    assert "- Days from today: 12-20 days" in user_content
+
+
+def test_prompt_omits_late_dependent_preorder_facts_when_late_unknown() -> None:
+    context = OrderStatusReplyContext(
+        customer_first_name="Vincent",
+        customer_message_excerpt="Where is my order?",
+        is_preorder=True,
+        is_late=None,
+        preorder_release_date="Tuesday, February 24, 2026 (in 4 days)",
+        processing_time="3-5 business days",
+        shipping_method="Standard shipping",
+        transit_time="3-7 business days",
+        delivery_date_range="March 4-March 12, 2026",
+        days_from_today="12-20 days",
+    )
+    messages = build_order_status_reply_prompt(
+        context=context,
+        draft_reply="Reference draft text",
+    )
+    user_content = messages[1].content
+    assert "- Order type: PRE-ORDER" in user_content
+    assert (
+        "Shipping rule: Full order ships together once pre-order item is available"
+        not in user_content
+    )
+    assert "Delivery status: Past expected window — reply should say order" not in user_content
+    assert "- Processing time: 3-5 business days" not in user_content
+
+
+def test_prompt_omits_ships_together_fact_for_late_preorder() -> None:
+    context = OrderStatusReplyContext(
+        customer_first_name="Vincent",
+        customer_message_excerpt="Where is my order?",
+        is_preorder=True,
+        is_late=True,
+        preorder_release_date="Tuesday, February 24, 2026 (in 4 days)",
+    )
+    messages = build_order_status_reply_prompt(
+        context=context,
+        draft_reply="Reference draft text",
+    )
+    user_content = messages[1].content
+    assert "- Order type: PRE-ORDER" in user_content
+    assert (
+        "Shipping rule: Full order ships together once pre-order item is available"
+        not in user_content
+    )
+    assert "Delivery status: Past expected window — reply should say order" in user_content
 
 
 def test_excerpt_is_sanitized_and_truncated() -> None:
@@ -256,6 +394,84 @@ def test_excerpt_boundary_no_truncation() -> None:
     long_raw = "y" * (pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS + 10)
     long_excerpt = pipeline._build_customer_message_excerpt(long_raw)
     assert long_excerpt == "y" * pipeline._MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS
+
+
+def test_excerpt_strips_order_refs_and_codes() -> None:
+    """
+    _build_customer_message_excerpt must remove order number lines and
+    all-caps code strings so the LLM anchors on the human concern, not IDs.
+    """
+    from richpanel_middleware.automation.pipeline import _build_customer_message_excerpt
+
+    raw_message = (
+        "Order #: 1250746\n"
+        "XDGADYUIAFDUAOQWRE\n"
+        "Hiii, I was just wanting to know if there was any update in my order.\n"
+        "I ordered this over 5 days ago and still haven't received nothing!"
+    )
+    result = _build_customer_message_excerpt(raw_message)
+    assert result is not None
+    assert "1250746" not in result
+    assert "XDGADYUIAFDUAOQWRE" not in result
+    assert "over 5 days ago" in result
+    assert "haven't received nothing" in result
+
+
+def test_excerpt_strips_standalone_order_number() -> None:
+    """
+    Order number on its own line should be removed.
+    This tests a standalone reference line — NOT an inline reference.
+    """
+    from richpanel_middleware.automation.pipeline import _build_customer_message_excerpt
+
+    raw_message = "order #1156136\nWhere is my order? Can you give me a status?"
+    result = _build_customer_message_excerpt(raw_message)
+    assert result is not None
+    assert "1156136" not in result
+    assert "Where is my order" in result
+
+
+def test_excerpt_preserves_inline_order_number_in_sentence() -> None:
+    """
+    Order numbers that are embedded inside a human sentence must NOT be
+    stripped — removing the whole line would erase the customer's concern.
+    The v4 REPLY_SYSTEM_PROMPT IGNORE IDs / CODES rule handles these at
+    the LLM layer.
+    """
+    from richpanel_middleware.automation.pipeline import _build_customer_message_excerpt
+
+    raw_message = (
+        "Where is my order #1156136 can you please give me a status or a refund.\n"
+        "Edward A. Ferrell"
+    )
+    result = _build_customer_message_excerpt(raw_message)
+    assert result is not None
+    assert "Where is my order" in result
+    assert "status or a refund" in result
+    assert "1156136" in result
+
+
+def test_excerpt_all_reference_lines_returns_none() -> None:
+    """If the entire message is order IDs / codes, return None."""
+    from richpanel_middleware.automation.pipeline import _build_customer_message_excerpt
+
+    raw_message = "1252259\nXDGADYUIAFDUAOQWRE"
+    result = _build_customer_message_excerpt(raw_message)
+    assert result is None
+
+
+def test_excerpt_keeps_order_number_in_context_sentence() -> None:
+    """
+    Order numbers embedded inside a human sentence (single-line message, no
+    standalone reference line) must NOT be stripped.
+    """
+    from richpanel_middleware.automation.pipeline import _build_customer_message_excerpt
+
+    raw_message = "Where is my order #1156136? Can you give me a refund?"
+    result = _build_customer_message_excerpt(raw_message)
+    assert result is not None
+    assert "Where is my order" in result
+    assert "1156136" in result
 
 
 def test_extract_customer_first_name_from_payload() -> None:
@@ -532,7 +748,7 @@ def test_greeting_enforcement() -> None:
 def test_signature_enforcement_idempotent() -> None:
     body = "Thanks for reaching out - here's what we see so far..."
     signed = pipeline._ensure_holly_signature(body)
-    assert signed.endswith("Holly\nScentiment Customer Support")
+    assert signed.endswith("Warm regards,\nHolly\nScentiment Customer Support")
 
     signed_again = pipeline._ensure_holly_signature(signed)
     assert signed_again == signed
@@ -542,25 +758,28 @@ def test_signature_enforcement_idempotent() -> None:
 
     partial = "Update\n\nHolly"
     assert pipeline._ensure_holly_signature(partial).endswith(
-        "Holly\nScentiment Customer Support"
+        "Warm regards,\nHolly\nScentiment Customer Support"
     )
 
     partial_two = "Update\n\nHolly\nScentiment"
     assert pipeline._ensure_holly_signature(partial_two).endswith(
-        "Holly\nScentiment Customer Support"
+        "Warm regards,\nHolly\nScentiment Customer Support"
     )
 
     partial_support = "Update\n\nScentiment Customer Support"
     assert pipeline._ensure_holly_signature(partial_support).endswith(
-        "Holly\nScentiment Customer Support"
+        "Warm regards,\nHolly\nScentiment Customer Support"
     )
 
     empty_body = ""
-    assert pipeline._ensure_holly_signature(empty_body) == "Holly\nScentiment Customer Support"
+    assert (
+        pipeline._ensure_holly_signature(empty_body)
+        == "Warm regards,\nHolly\nScentiment Customer Support"
+    )
 
     with_body = "Update"
     assert pipeline._ensure_holly_signature(with_body).endswith(
-        "Holly\nScentiment Customer Support"
+        "Warm regards,\nHolly\nScentiment Customer Support"
     )
 
 
@@ -603,9 +822,19 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_sanitize_verbatim_token_rejects_html()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
+        test_build_order_status_reply_context_preserves_unknown_preorder_state()
+        test_build_order_status_reply_context_normalizes_is_late_to_bool()
+        test_prompt_order_facts_block_full_preorder_context()
+        test_prompt_omits_late_dependent_preorder_facts_when_late_unknown()
+        test_prompt_omits_ships_together_fact_for_late_preorder()
         test_excerpt_is_sanitized_and_truncated()
         test_excerpt_empty_returns_none()
         test_excerpt_boundary_no_truncation()
+        test_excerpt_strips_order_refs_and_codes()
+        test_excerpt_strips_standalone_order_number()
+        test_excerpt_preserves_inline_order_number_in_sentence()
+        test_excerpt_all_reference_lines_returns_none()
+        test_excerpt_keeps_order_number_in_context_sentence()
         test_extract_customer_first_name_from_payload()
         test_extract_customer_first_name_from_order_summary()
         test_inbound_cta_guard_reverts_to_draft()
