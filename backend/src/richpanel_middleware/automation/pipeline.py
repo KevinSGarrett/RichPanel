@@ -18,6 +18,7 @@ from richpanel_middleware.automation.delivery_estimate import (
     build_tracking_reply,
     compute_preorder_delivery_estimate,
     compute_delivery_estimate,
+    format_eta_window,
     normalize_shipping_method,
     normalize_shipping_method_for_carrier,
 )
@@ -115,7 +116,7 @@ _READ_ONLY_ENVIRONMENTS = {"prod", "production", "staging"}
 _SECRET_VALUE_CACHE_TTL_SECONDS = 900
 _SECRET_VALUE_CACHE: Dict[str, Dict[str, Any]] = {}
 _MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS = 400
-_SIGNATURE_LINES = ("Holly", "Scentiment Customer Support")
+_SIGNATURE_LINES = ("Warm regards,", "Holly", "Scentiment Customer Support")
 _INBOUND_CTA_PHRASES = (
     "feel free to reply",
     "reply back",
@@ -486,8 +487,37 @@ def _extract_customer_first_name(
     return _extract_customer_first_name_from_order_summary(order_summary)
 
 
+def _filter_reference_only_lines(text: str) -> str:
+    lines = text.splitlines()
+    kept: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            kept.append(line)
+            continue
+        # Pattern 1: "Order #: 1250746", "Order #1156136", "#1252259", "1252259"
+        # Uses [\s#:]* — handles any combination of hash/colon/space separators
+        if re.match(
+            r"^(?:order\b)?[\s#:]*\d{5,}\s*$", stripped, flags=re.IGNORECASE
+        ):
+            continue
+        # Pattern 2: All-caps alphanumeric code >= 10 chars (e.g., XDGADYUIAFDUAOQWRE)
+        if re.match(r"^[A-Z0-9]{10,}$", stripped):
+            continue
+        # Pattern 3: Only digits/punctuation, no letters
+        if re.match(r"^[\d\s\-#:.,/\\]+$", stripped) and not re.search(
+            r"[a-zA-Z]", stripped
+        ):
+            continue
+        kept.append(line)
+    return "\n".join(kept)
+
+
 def _build_customer_message_excerpt(raw_message: str) -> Optional[str]:
-    sanitized = sanitize_for_openai(raw_message or "", max_chars=None)
+    filtered = _filter_reference_only_lines(raw_message or "").strip()
+    if not filtered:
+        return None
+    sanitized = sanitize_for_openai(filtered, max_chars=None)
     if not sanitized:
         return None
     if len(sanitized) > _MAX_CUSTOMER_MESSAGE_EXCERPT_CHARS:
@@ -525,12 +555,14 @@ def _ensure_order_status_greeting(body: str, first_name: Optional[str]) -> str:
 
 def _ensure_holly_signature(body: str) -> str:
     lines = body.rstrip().splitlines()
-    if len(lines) >= 2 and tuple(lines[-2:]) == _SIGNATURE_LINES:
+    # Check if last 3 lines already match the full signature
+    if len(lines) >= 3 and tuple(lines[-3:]) == _SIGNATURE_LINES:
         return "\n".join(lines)
-    if lines and lines[-1] == _SIGNATURE_LINES[1]:
-        lines.pop()
-    if lines and lines[-1] == _SIGNATURE_LINES[0]:
-        lines.pop()
+    # Remove any partial signature lines
+    for sig_line in reversed(_SIGNATURE_LINES):
+        if lines and lines[-1] == sig_line:
+            lines.pop()
+    # Add blank line separator, then full 3-line signature
     if lines and lines[-1].strip():
         lines.append("")
     lines.extend(_SIGNATURE_LINES)
@@ -610,6 +642,38 @@ def _build_order_status_reply_context(
         shipping_method, draft_reply.get("carrier") if isinstance(draft_reply, dict) else None
     )
     shipping_method = _strip_shipping_method_window(shipping_method)
+    is_preorder: Optional[bool] = None
+    preorder_release_date: Optional[str] = None
+    processing_time: Optional[str] = None
+    transit_time: Optional[str] = None
+    delivery_date_range: Optional[str] = None
+    days_from_today: Optional[str] = None
+    is_late: Optional[bool] = None
+
+    if isinstance(delivery_estimate, dict):
+        is_preorder = bool(delivery_estimate.get("preorder"))
+
+        ship_date = delivery_estimate.get("preorder_ship_date_human")
+        ship_days = delivery_estimate.get("ship_days_from_inquiry_human")
+        if ship_date:
+            preorder_release_date = (
+                f"{ship_date} (in {ship_days})" if ship_days else ship_date
+            )
+
+        processing_time = delivery_estimate.get("processing_human")
+
+        t_min = delivery_estimate.get("transit_min_days")
+        t_max = delivery_estimate.get("transit_max_days")
+        if t_min is not None and t_max is not None:
+            transit_time = format_eta_window(t_min, t_max)
+
+        delivery_date_range = delivery_estimate.get("delivery_window_human")
+
+        days_from_today = (
+            delivery_estimate.get("days_from_inquiry_human")
+            or delivery_estimate.get("eta_human")
+        )
+        is_late = delivery_estimate.get("is_late")
     customer_first_name = _extract_customer_first_name(payload, order_summary)
     customer_message_excerpt = _build_customer_message_excerpt(
         extract_customer_message(payload, default="")
@@ -622,6 +686,13 @@ def _build_order_status_reply_context(
         carrier=draft_reply.get("carrier"),
         customer_first_name=customer_first_name,
         customer_message_excerpt=customer_message_excerpt,
+        is_preorder=is_preorder,
+        preorder_release_date=preorder_release_date,
+        processing_time=processing_time,
+        transit_time=transit_time,
+        delivery_date_range=delivery_date_range,
+        days_from_today=days_from_today,
+        is_late=is_late,
     )
 
 

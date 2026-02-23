@@ -85,7 +85,8 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
             "(Business days are Mon–Fri; holidays may affect timelines.)", body
         )
         self.assertIn(
-            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            "Tracking will be emailed automatically to the email address on file "
+            "once it ships and is scanned by the carrier.",
             body,
         )
 
@@ -143,7 +144,8 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertNotIn("estimated for April 6–April 14, 2026", body)
         self.assertNotIn("(Business days are Mon–Fri", body)
         self.assertIn(
-            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            "Tracking will be emailed automatically to the email address on file "
+            "once it ships and is scanned by the carrier.",
             body,
         )
 
@@ -169,9 +171,42 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         self.assertIn("pre-order item", body)
         self.assertNotIn("releases on", body)
         self.assertIn(
-            "Tracking will be emailed automatically once it ships and is scanned by the carrier.",
+            "Tracking will be emailed automatically to the email address on file "
+            "once it ships and is scanned by the carrier.",
             body,
         )
+
+    def test_preorder_draft_includes_ships_together_sentence(self) -> None:
+        """
+        build_no_tracking_reply for a preorder order must include the
+        'To ensure everything arrives together' sentence to answer the
+        customer's implicit 'why is everything delayed?' question.
+        """
+        from richpanel_middleware.automation.delivery_estimate import build_no_tracking_reply
+        from datetime import date
+
+        order_summary = {
+            "order_id": "1250746",
+            "created_at": "2026-02-15",
+            "shipping_method": "Standard Shipping",
+            "order_tags": ["pre-order"],
+        }
+        result = build_no_tracking_reply(
+            order_summary, inquiry_date=date(2026, 2, 20)
+        )
+        assert result is not None
+        body = result["body"]
+        assert "pre-order" in body.lower() or "preorder" in body.lower()
+        assert "To ensure everything arrives together" in body
+
+    def test_tracking_email_line_includes_email_on_file(self) -> None:
+        """
+        _TRACKING_EMAIL_LINE must mention 'email address on file' so customers
+        know where to look for tracking.
+        """
+        from richpanel_middleware.automation.delivery_estimate import _TRACKING_EMAIL_LINE
+
+        assert "email address on file" in _TRACKING_EMAIL_LINE
 
     def test_preorder_delivery_fallback_late_any_day_now(self) -> None:
         order_summary = {
