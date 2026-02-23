@@ -879,15 +879,18 @@ def build_no_tracking_reply(
                 body = f"{body} (in {ship_days_from_inquiry_human})."
             else:
                 body = f"{body}."
-            body = (
-                f"{body} To ensure everything arrives together, the full order will "
-                "ship once the pre-order item is available."
-            )
+            if not is_late:
+                body = (
+                    f"{body} To ensure everything arrives together, the full order will "
+                    "ship once the pre-order item is available."
+                )
         else:
-            body = (
-                "Your order includes a pre-order item. To ensure everything arrives "
-                "together, the full order will ship once the pre-order item is available."
-            )
+            body = "Your order includes a pre-order item."
+            if not is_late:
+                body = (
+                    f"{body} To ensure everything arrives together, the full order "
+                    "will ship once the pre-order item is available."
+                )
 
         if is_late:
             body = (

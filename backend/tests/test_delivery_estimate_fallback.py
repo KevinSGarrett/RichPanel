@@ -220,6 +220,7 @@ class DeliveryEstimateFallbackTests(unittest.TestCase):
         body = reply["body"].lower()
         self.assertIn("pre-order", body)
         self.assertIn("any day now", body)
+        self.assertNotIn("to ensure everything arrives together", body)
         self.assertNotIn("estimated delivery window", body)
         self.assertNotIn("key details:", body)
 
