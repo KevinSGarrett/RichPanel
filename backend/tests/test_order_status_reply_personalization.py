@@ -245,6 +245,60 @@ def test_build_order_status_reply_context() -> None:
     assert context_shipping.shipping_method is not None
 
 
+def test_build_order_status_reply_context_preserves_unknown_preorder_state() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+
+    context_no_estimate = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate=None,
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context_no_estimate.is_preorder is None
+
+    context_missing_preorder_key = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={"eta_human": "2-4 days"},
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context_missing_preorder_key.is_preorder is None
+
+
+def test_prompt_order_facts_block_full_preorder_context() -> None:
+    context = OrderStatusReplyContext(
+        customer_first_name="Vincent",
+        customer_message_excerpt="When will this ship?",
+        is_preorder=True,
+        preorder_release_date="Tuesday, February 24, 2026 (in 4 days)",
+        processing_time="3-5 business days",
+        shipping_method="Standard shipping",
+        transit_time="3-7 business days",
+        delivery_date_range="March 4-March 12, 2026",
+        days_from_today="12-20 days",
+    )
+    messages = build_order_status_reply_prompt(
+        context=context,
+        draft_reply="Reference draft text",
+    )
+    user_content = messages[1].content
+    assert "Order facts — weave ALL of these naturally" in user_content
+    assert "- Order type: PRE-ORDER" in user_content
+    assert (
+        "- Pre-order release / ship date: Tuesday, February 24, 2026 (in 4 days)"
+        in user_content
+    )
+    assert (
+        "- Shipping rule: Full order ships together once pre-order item is available "
+        "— do not ship partial orders" in user_content
+    )
+    assert "- Processing time: 3-5 business days" in user_content
+    assert "- Shipping method: Standard shipping" in user_content
+    assert "- Shipping transit time: 3-7 business days" in user_content
+    assert "- Estimated delivery date range: March 4-March 12, 2026" in user_content
+    assert "- Days from today: 12-20 days" in user_content
+
+
 def test_excerpt_is_sanitized_and_truncated() -> None:
     raw = (
         "Email me at sarah@example.com or call 555-123-4567. "
@@ -702,6 +756,8 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_sanitize_verbatim_token_rejects_html()
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
+        test_build_order_status_reply_context_preserves_unknown_preorder_state()
+        test_prompt_order_facts_block_full_preorder_context()
         test_excerpt_is_sanitized_and_truncated()
         test_excerpt_empty_returns_none()
         test_excerpt_boundary_no_truncation()
