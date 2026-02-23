@@ -630,11 +630,18 @@ def _build_order_status_reply_context(
     delivery_estimate: Any,
     order_summary: Dict[str, Any],
 ) -> OrderStatusReplyContext:
-    if not isinstance(delivery_estimate, dict):
-        delivery_estimate = {}
-    eta_window = delivery_estimate.get("eta_human") or draft_reply.get("eta_human")
+    delivery_estimate_payload = (
+        delivery_estimate if isinstance(delivery_estimate, dict) else None
+    )
+    eta_window = (
+        delivery_estimate_payload.get("eta_human") if delivery_estimate_payload else None
+    ) or draft_reply.get("eta_human")
     shipping_method = (
-        delivery_estimate.get("normalized_method")
+        (
+            delivery_estimate_payload.get("normalized_method")
+            if delivery_estimate_payload
+            else None
+        )
         or order_summary.get("shipping_method_name")
         or order_summary.get("shipping_method")
     )
@@ -650,30 +657,32 @@ def _build_order_status_reply_context(
     days_from_today: Optional[str] = None
     is_late: Optional[bool] = None
 
-    if isinstance(delivery_estimate, dict):
-        is_preorder = bool(delivery_estimate.get("preorder"))
+    if delivery_estimate_payload is not None:
+        preorder_flag = delivery_estimate_payload.get("preorder")
+        if preorder_flag is not None:
+            is_preorder = bool(preorder_flag)
 
-        ship_date = delivery_estimate.get("preorder_ship_date_human")
-        ship_days = delivery_estimate.get("ship_days_from_inquiry_human")
+        ship_date = delivery_estimate_payload.get("preorder_ship_date_human")
+        ship_days = delivery_estimate_payload.get("ship_days_from_inquiry_human")
         if ship_date:
             preorder_release_date = (
                 f"{ship_date} (in {ship_days})" if ship_days else ship_date
             )
 
-        processing_time = delivery_estimate.get("processing_human")
+        processing_time = delivery_estimate_payload.get("processing_human")
 
-        t_min = delivery_estimate.get("transit_min_days")
-        t_max = delivery_estimate.get("transit_max_days")
+        t_min = delivery_estimate_payload.get("transit_min_days")
+        t_max = delivery_estimate_payload.get("transit_max_days")
         if t_min is not None and t_max is not None:
             transit_time = format_eta_window(t_min, t_max)
 
-        delivery_date_range = delivery_estimate.get("delivery_window_human")
+        delivery_date_range = delivery_estimate_payload.get("delivery_window_human")
 
         days_from_today = (
-            delivery_estimate.get("days_from_inquiry_human")
-            or delivery_estimate.get("eta_human")
+            delivery_estimate_payload.get("days_from_inquiry_human")
+            or delivery_estimate_payload.get("eta_human")
         )
-        is_late = delivery_estimate.get("is_late")
+        is_late = delivery_estimate_payload.get("is_late")
     customer_first_name = _extract_customer_first_name(payload, order_summary)
     customer_message_excerpt = _build_customer_message_excerpt(
         extract_customer_message(payload, default="")
