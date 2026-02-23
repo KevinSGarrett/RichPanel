@@ -507,7 +507,8 @@ def format_eta_window(min_days: int, max_days: int) -> str:
 _BUSINESS_DAYS_NOTE = "(Business days are Mon–Fri; holidays may affect timelines.)"
 _TRACKING_EMAIL_LINE = (
     "Tracking will be emailed automatically to the email address on file "
-    "once it ships and is scanned by the carrier."
+    "once it ships and is scanned by the carrier. "
+    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
 )
 
 
@@ -912,8 +913,7 @@ def build_no_tracking_reply(
         order_date_human = estimate["order_created_date"]
         order_label = f"Order {order_id}" if has_order_id else "Your order"
         body = (
-            f"We don't have a tracking number available yet for {order_label}, "
-            f"placed on {order_date_human}."
+            f"We don't have tracking yet for {order_label} (placed on {order_date_human})."
         )
         if estimate["is_late"]:
             body = (
