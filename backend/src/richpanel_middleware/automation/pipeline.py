@@ -681,7 +681,9 @@ def _build_order_status_reply_context(
         days_from_today = delivery_estimate_payload.get("days_from_inquiry_human")
         if days_from_today is None and is_preorder:
             days_from_today = delivery_estimate_payload.get("eta_human")
-        is_late = delivery_estimate_payload.get("is_late")
+        late_flag = delivery_estimate_payload.get("is_late")
+        if late_flag is not None:
+            is_late = bool(late_flag)
     customer_first_name = _extract_customer_first_name(payload, order_summary)
     customer_message_excerpt = _build_customer_message_excerpt(
         extract_customer_message(payload, default="")

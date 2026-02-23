@@ -266,6 +266,22 @@ def test_build_order_status_reply_context_preserves_unknown_preorder_state() -> 
     assert context_missing_preorder_key.is_preorder is None
 
 
+def test_build_order_status_reply_context_normalizes_is_late_to_bool() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={
+            "preorder": True,
+            "is_late": 1,
+            "days_from_inquiry_human": "2-3 days",
+        },
+        order_summary={"shipping_method_name": "Ground"},
+    )
+    assert context.is_late is True
+
+
 def test_prompt_order_facts_block_full_preorder_context() -> None:
     context = OrderStatusReplyContext(
         customer_first_name="Vincent",
@@ -779,6 +795,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_reply_context_payload_excludes_none()
         test_build_order_status_reply_context()
         test_build_order_status_reply_context_preserves_unknown_preorder_state()
+        test_build_order_status_reply_context_normalizes_is_late_to_bool()
         test_prompt_order_facts_block_full_preorder_context()
         test_prompt_omits_ships_together_fact_for_late_preorder()
         test_excerpt_is_sanitized_and_truncated()
