@@ -385,10 +385,11 @@ def build_order_status_reply_prompt(
             facts_lines.append(
                 f"Pre-order release / ship date: {context.preorder_release_date}"
             )
-        facts_lines.append(
-            "Shipping rule: Full order ships together once pre-order item "
-            "is available — do not ship partial orders"
-        )
+        if not context.is_late:
+            facts_lines.append(
+                "Shipping rule: Full order ships together once pre-order item "
+                "is available — do not ship partial orders"
+            )
     elif context.is_preorder is False:
         facts_lines.append("Order type: Standard (non-pre-order)")
 

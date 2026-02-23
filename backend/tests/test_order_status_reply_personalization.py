@@ -243,6 +243,7 @@ def test_build_order_status_reply_context() -> None:
         order_summary={"shipping_method_name": "Ground"},
     )
     assert context_shipping.shipping_method is not None
+    assert context_shipping.days_from_today is None
 
 
 def test_build_order_status_reply_context_preserves_unknown_preorder_state() -> None:
@@ -297,6 +298,27 @@ def test_prompt_order_facts_block_full_preorder_context() -> None:
     assert "- Shipping transit time: 3-7 business days" in user_content
     assert "- Estimated delivery date range: March 4-March 12, 2026" in user_content
     assert "- Days from today: 12-20 days" in user_content
+
+
+def test_prompt_omits_ships_together_fact_for_late_preorder() -> None:
+    context = OrderStatusReplyContext(
+        customer_first_name="Vincent",
+        customer_message_excerpt="Where is my order?",
+        is_preorder=True,
+        is_late=True,
+        preorder_release_date="Tuesday, February 24, 2026 (in 4 days)",
+    )
+    messages = build_order_status_reply_prompt(
+        context=context,
+        draft_reply="Reference draft text",
+    )
+    user_content = messages[1].content
+    assert "- Order type: PRE-ORDER" in user_content
+    assert (
+        "Shipping rule: Full order ships together once pre-order item is available"
+        not in user_content
+    )
+    assert "Delivery status: Past expected window — reply should say order" in user_content
 
 
 def test_excerpt_is_sanitized_and_truncated() -> None:
@@ -758,6 +780,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_build_order_status_reply_context()
         test_build_order_status_reply_context_preserves_unknown_preorder_state()
         test_prompt_order_facts_block_full_preorder_context()
+        test_prompt_omits_ships_together_fact_for_late_preorder()
         test_excerpt_is_sanitized_and_truncated()
         test_excerpt_empty_returns_none()
         test_excerpt_boundary_no_truncation()
