@@ -507,8 +507,7 @@ def format_eta_window(min_days: int, max_days: int) -> str:
 _BUSINESS_DAYS_NOTE = "(Business days are Mon–Fri; holidays may affect timelines.)"
 _TRACKING_EMAIL_LINE = (
     "Tracking will be emailed automatically to the email address on file "
-    "once it ships and is scanned by the carrier. "
-    "Tracking will be emailed automatically once it ships and is scanned by the carrier."
+    "once it ships and is scanned by the carrier."
 )
 
 
