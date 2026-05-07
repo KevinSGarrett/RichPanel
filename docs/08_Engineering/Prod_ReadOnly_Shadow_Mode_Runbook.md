@@ -290,10 +290,10 @@ What it does:
 - Captures a redacted HTTP trace to `artifacts/readonly_shadow/live_readonly_shadow_eval_http_trace_<RUN_ID>.json`
   (or `live_shadow_http_trace.json` when `--out` is used) and fails if any non-GET calls are observed
 
-### Preorder proof (tag +45)
+### Preorder proof (tag +60)
 
 - Detection: preorder is **only** when Shopify order tags include `Pre-order` (case-insensitive variants).
-- Ship date rule: `order_date + 45` calendar days.
+- Ship date rule: `order_date + 60` calendar days.
 - Delivery window: `ship_date + shipping window` (business days) based on the shipping method.
 - Proof run (read-only, no customer contact):
 

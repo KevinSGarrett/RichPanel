@@ -76,16 +76,15 @@ RIGHT (naturally woven — facts embedded in flowing sentences):
   March 4–March 12, 2026, which is about 12–20 days from today."
 
 RIGHT — pre-order example:
-  "Your order includes a pre-order item, releasing Tuesday, February 24
-  (just four days away). To make sure everything arrives together, your
-  full order will ship once that item is available. After it releases,
-  please allow 3–5 business days for processing, with Standard shipping
-  adding 3–7 business days from there — putting estimated delivery around
-  March 4–March 12, 2026."
+  "Your order includes a pre-order item with an estimated ship date of
+  Tuesday, February 24 (just four days away). To make sure everything
+  arrives together, your full order will ship once that item is available.
+  Once it ships, Standard shipping usually takes 3–7 business days, putting
+  delivery around February 27–March 4, 2026."
 
 What makes the "RIGHT" versions work:
-- Facts are introduced with context ("Once it's on its way...", "After it
-  releases...", "To make sure everything arrives together...")
+- Facts are introduced with context ("Once it's on its way...", "Once it
+  ships...", "To make sure everything arrives together...")
 - Sentences connect to each other logically (cause → effect, timeline flow)
 - Numbers appear once each — not repeated in multiple phrasings
 - The reader learns what to expect and why, in a natural order
@@ -184,19 +183,23 @@ If tracking is NOT provided:
 
 - If preorder is indicated:
   1. State that the order includes a pre-order item.
-  2. State the pre-order release/ship date.
-  3. State that "your full order will ship once the pre-order item is available,
+  2. State that the pre-order base timeline is 60 calendar days from the order date.
+  3. State the pre-order ship/availability date.
+  4. State that selected shipping transit is added after that date.
+  5. State that "your full order will ship once the pre-order item is available,
      so that everything arrives together."
-  4. Give the processing + shipping timeline AFTER the release date.
-  5. End with a forward-looking confirmation sentence:
+  6. Do not mention a separate pre-order processing time.
+  7. Do not use release-based processing phrasing.
+  8. Preserve verbatim date/window facts from context.
+  9. End with a forward-looking confirmation sentence:
      "You'll receive a shipping confirmation with tracking details as soon as
      your order is on the way." (This is preferred over the generic tracking
      email line for pre-order replies, as it sounds more reassuring.)
 
 - Include ALL timing facts (preserve verbatim numbers/dates from draft/context):
-  * processing time window (e.g., "3–5 business days")
+  * processing time window when provided (non-preorders)
   * shipping/transit time window (e.g., "3–7 business days")
-  * total ETA window (e.g., "6–12 business days") OR days-from-today range
+  * total ETA window OR days-from-today range
   * estimated delivery date range (e.g., "March 4–March 12, 2026")
 
 - Include the business-days note once: "Business days are Mon–Fri; holidays may
@@ -383,8 +386,10 @@ def build_order_status_reply_prompt(
         facts_lines.append("Order type: PRE-ORDER")
         if context.preorder_release_date:
             facts_lines.append(
-                f"Pre-order release / ship date: {context.preorder_release_date}"
+                f"Pre-order ship / availability date: {context.preorder_release_date}"
             )
+        facts_lines.append("Pre-order base timeline: 60 calendar days from order date")
+        facts_lines.append("Transit rule: Add selected shipping transit after ship date")
         if context.is_late is False:
             facts_lines.append(
                 "Shipping rule: Full order ships together once pre-order item "
@@ -399,7 +404,7 @@ def build_order_status_reply_prompt(
             "should arrive any day now"
         )
     elif context.is_late is False:
-        if context.processing_time:
+        if context.is_preorder is not True and context.processing_time:
             facts_lines.append(f"Processing time: {context.processing_time}")
         if context.shipping_method:
             facts_lines.append(f"Shipping method: {context.shipping_method}")

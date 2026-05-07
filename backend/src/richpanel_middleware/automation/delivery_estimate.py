@@ -12,6 +12,7 @@ LOGGER = logging.getLogger(__name__)
 
 ETA_FLOOR_MIN_DAYS = 1
 ETA_FLOOR_MAX_DAYS = 2
+PREORDER_BASE_CALENDAR_DAYS = 60
 
 DEFAULT_SHIPPING_METHOD_TRANSIT_MAP: Dict[str, tuple[int, int]] = {
     "priority": (1, 1),
@@ -173,7 +174,7 @@ def compute_preorder_delivery_estimate(
     order_tags: Any = None,
     order_tags_raw: Any = None,
 ) -> Optional[Dict[str, Any]]:
-    """Compute a tag-based preorder delivery window (ship date = order_date + 45 days)."""
+    """Compute preorder ETA: 60 calendar days from order date plus shipping transit."""
     if not has_preorder_tag(order_tags, order_tags_raw):
         return None
     if not order_created_at or not inquiry_date:
@@ -185,18 +186,14 @@ def compute_preorder_delivery_estimate(
     except ValueError:
         return None
 
-    # Release date is a calendar offset; processing/transit remain business-day based.
-    release_date = order_date + timedelta(days=45)
-    release_date_human = _format_long_date(release_date)
-    release_in_days = (release_date - inquiry).days
+    # Pre-order ship date uses a fixed calendar offset from order date.
+    ship_date = order_date + timedelta(days=PREORDER_BASE_CALENDAR_DAYS)
+    ship_date_human = _format_long_date(ship_date)
+    release_in_days = (ship_date - inquiry).days
     ship_days_from_inquiry_human = (
         _format_day_window(release_in_days, release_in_days)
         if release_in_days >= 0
         else None
-    )
-
-    processing_min, processing_max, processing_human = _processing_window_for_method(
-        shipping_method
     )
 
     window = _effective_transit_window(shipping_method)
@@ -208,16 +205,16 @@ def compute_preorder_delivery_estimate(
             "order_created_date": order_date.isoformat(),
             "inquiry_date": inquiry.isoformat(),
             "preorder": True,
-            "preorder_ship_date_human": release_date_human,
+            "preorder_ship_date_human": ship_date_human,
             "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
             "eta_human": None,
         }
 
     transit_min, transit_max = window["min_days"], window["max_days"]
-    total_min = processing_min + transit_min
-    total_max = processing_max + transit_max
-    delivery_min = add_business_days(release_date, total_min)
-    delivery_max = add_business_days(release_date, total_max)
+    total_min = transit_min
+    total_max = transit_max
+    delivery_min = add_business_days(ship_date, total_min)
+    delivery_max = add_business_days(ship_date, total_max)
     delivery_window_human = _format_delivery_window(delivery_min, delivery_max)
     days_min = (delivery_min - inquiry).days
     days_max = (delivery_max - inquiry).days
@@ -232,9 +229,9 @@ def compute_preorder_delivery_estimate(
         "bucket": window["bucket"],
         "window_min_days": total_min,
         "window_max_days": total_max,
-        "processing_min_days": processing_min,
-        "processing_max_days": processing_max,
-        "processing_human": processing_human,
+        "processing_min_days": None,
+        "processing_max_days": None,
+        "processing_human": None,
         "transit_min_days": transit_min,
         "transit_max_days": transit_max,
         "raw_method": window["raw_method"],
@@ -244,7 +241,7 @@ def compute_preorder_delivery_estimate(
         "eta_human": eta_human,
         "is_late": is_late,
         "preorder": True,
-        "preorder_ship_date_human": release_date_human,
+        "preorder_ship_date_human": ship_date_human,
         "delivery_window_human": delivery_window_human,
         "days_from_inquiry_human": days_from_inquiry_human,
         "ship_days_from_inquiry_human": ship_days_from_inquiry_human,
@@ -551,23 +548,28 @@ def _build_no_tracking_timeline_paragraph(
     shipping_window = None
     if transit_min_days is not None and transit_max_days is not None:
         shipping_window = format_eta_window(transit_min_days, transit_max_days)
-    if not processing_human or not shipping_window:
-        return None
-
     if estimate.get("preorder"):
+        if not shipping_window:
+            return None
         days_from_inquiry_human = estimate.get("days_from_inquiry_human")
-        sentences = [
-            f"After release, processing typically takes {processing_human}.",
-        ]
+        sentences = []
+        sentences.append(
+            f"Pre-orders follow a {PREORDER_BASE_CALENDAR_DAYS}-calendar-day timeline from the order date."
+        )
         if method_label:
-            sentences.append(f"{method_label} shipping usually takes {shipping_window}.")
+            sentences.append(
+                f"Once it ships, {method_label} shipping usually takes {shipping_window}."
+            )
         else:
-            sentences.append(f"Shipping usually takes {shipping_window}.")
+            sentences.append(f"Once it ships, delivery usually takes {shipping_window}.")
         sentences.append(f"Delivery is estimated for {delivery_window_human}.")
         if days_from_inquiry_human:
             sentences.append(f"That's about {days_from_inquiry_human} from today.")
         sentences.append(_BUSINESS_DAYS_NOTE)
         return " ".join(sentences)
+
+    if not processing_human or not shipping_window:
+        return None
 
     window_min_days = estimate.get("window_min_days")
     window_max_days = estimate.get("window_max_days")
@@ -872,7 +874,7 @@ def build_no_tracking_reply(
 
         if ship_date_human:
             body = (
-                "Your order includes a pre-order item that releases on "
+                "Your order includes a pre-order item that is expected to ship on "
                 f"{ship_date_human}"
             )
             if ship_days_from_inquiry_human:

@@ -669,7 +669,11 @@ def _build_order_status_reply_context(
                 f"{ship_date} (in {ship_days})" if ship_days else ship_date
             )
 
-        processing_time = delivery_estimate_payload.get("processing_human")
+        # Preorder context should not include separate processing time.
+        if is_preorder:
+            processing_time = None
+        else:
+            processing_time = delivery_estimate_payload.get("processing_human")
 
         t_min = delivery_estimate_payload.get("transit_min_days")
         t_max = delivery_estimate_payload.get("transit_max_days")

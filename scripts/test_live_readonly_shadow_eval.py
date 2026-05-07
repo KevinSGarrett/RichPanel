@@ -149,11 +149,11 @@ class LiveReadonlyShadowEvalB61CTests(unittest.TestCase):
 class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
     def test_extract_preorder_proof_signals_preorder(self) -> None:
         body = (
-            "Your order includes a pre-order item that releases on Sunday, March 29, 2026 (in 15 days). "
-            "After release, processing typically takes 3-5 business days. "
-            "Standard shipping usually takes 3-7 business days. "
-            "Delivery is estimated for April 6–April 14, 2026. "
-            "That's about 23–31 days from today. (Business days are Mon–Fri; holidays may affect timelines.) "
+            "Your order includes a pre-order item that is expected to ship on Monday, April 13, 2026 (in 30 days). "
+            "Pre-orders follow a 60-calendar-day timeline from the order date. "
+            "Once it ships, Standard shipping usually takes 3-7 business days. "
+            "Delivery is estimated for April 16–April 22, 2026. "
+            "That's about 33–39 days from today. (Business days are Mon–Fri; holidays may affect timelines.) "
             "Tracking will be emailed automatically to the email address on file once it ships and is scanned by the carrier."
         )
         parameters = {
@@ -161,15 +161,15 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
                 "preorder": True,
                 "order_created_date": "2026-02-12",
                 "inquiry_date": "2026-02-20",
-                "preorder_ship_date_human": "Sunday, March 29, 2026",
-                "ship_days_from_inquiry_human": "15 days",
-                "delivery_window_human": "April 6–April 14, 2026",
-                "days_from_inquiry_human": "23–31 days",
-                "window_min_days": 6,
-                "window_max_days": 12,
+                "preorder_ship_date_human": "Monday, April 13, 2026",
+                "ship_days_from_inquiry_human": "30 days",
+                "delivery_window_human": "April 16–April 22, 2026",
+                "days_from_inquiry_human": "33–39 days",
+                "window_min_days": 3,
+                "window_max_days": 7,
                 "normalized_method": "standard",
                 "raw_method": "Standard",
-                "processing_human": "3-5 business days",
+                "processing_human": None,
             },
             "order_summary": {"order_tags_raw": "vip, pre-order, springsale"},
             "draft_reply": {"body": body},
@@ -180,8 +180,8 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertEqual(result["inquiry_date"], "2026-02-20")
         self.assertTrue(result["preorder_tag_match"])
         self.assertIn("pre-order", result["preorder_tag_matches"])
-        self.assertEqual(result["preorder_window_min_days"], 6)
-        self.assertEqual(result["preorder_window_max_days"], 12)
+        self.assertEqual(result["preorder_window_min_days"], 3)
+        self.assertEqual(result["preorder_window_max_days"], 7)
         self.assertEqual(result["preorder_normalized_method"], "standard")
         self.assertEqual(result["preorder_raw_method"], "Standard")
         self.assertTrue(result["draft_reply_present"])
@@ -191,9 +191,9 @@ class LiveReadonlyShadowEvalPreorderProofTests(unittest.TestCase):
         self.assertTrue(result["draft_reply_has_delivery_window"])
         self.assertTrue(result["draft_reply_has_ship_in_days"])
         self.assertTrue(result["draft_reply_has_arrives_in_days"])
-        self.assertTrue(result["draft_reply_has_processing_phrase"])
-        self.assertTrue(result["draft_reply_has_processing_human"])
-        self.assertEqual(result["processing_human"], "3-5 business days")
+        self.assertFalse(result["draft_reply_has_processing_phrase"])
+        self.assertFalse(result["draft_reply_has_processing_human"])
+        self.assertIsNone(result["processing_human"])
         self.assertTrue(result["draft_reply_ends_with_tracking_line"])
         self.assertIsNotNone(result["draft_reply_body_fingerprint"])
         self.assertNotIn("body", result)
