@@ -13969,10 +13969,10 @@
       "anchor": "validate-shopify-token-read-only"
     }
   ],
-  "preorder proof (tag +45)": [
+  "preorder proof (tag +60)": [
     {
       "path": "08_Engineering/Prod_ReadOnly_Shadow_Mode_Runbook.md",
-      "anchor": "preorder-proof-tag-45"
+      "anchor": "preorder-proof-tag-60"
     }
   ],
   "daily live read-only shadow eval (ci)": [
