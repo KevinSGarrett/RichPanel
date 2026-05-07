@@ -1899,7 +1899,13 @@ def _extract_preorder_proof_signals(parameters: Dict[str, Any]) -> Dict[str, Any
     tracking_line = (
         "Tracking will be emailed automatically to the email address on file once it ships and is scanned by the carrier."
     )
-    schedule_phrases = ("releases on", "scheduled to release on", "scheduled to ship on")
+    schedule_phrases = (
+        "scheduled to release on",
+        "scheduled to ship on",
+        "estimated ship date",
+        "expected to ship on",
+        "pre-order ship date is",
+    )
     delivery_phrase = "estimated for"
     processing_phrase = "processing typically takes"
     nonpreorder_floor_ok = None

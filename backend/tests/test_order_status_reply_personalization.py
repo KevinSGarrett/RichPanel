@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SRC = ROOT / "backend" / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
 from richpanel_middleware.automation.order_status_prompts import (
     OrderStatusReplyContext,
     build_order_status_reply_prompt,
@@ -282,6 +290,32 @@ def test_build_order_status_reply_context_normalizes_is_late_to_bool() -> None:
     assert context.is_late is True
 
 
+def test_build_order_status_reply_context_omits_processing_for_preorder() -> None:
+    payload = {"first_name": "Sarah", "message": "Where is my order?"}
+    context = pipeline._build_order_status_reply_context(
+        payload=payload,
+        draft_reply={},
+        delivery_estimate={
+            "preorder": True,
+            "preorder_ship_date_human": "Monday, April 13, 2026",
+            "ship_days_from_inquiry_human": "30 days",
+            "processing_human": "3-5 business days",
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "delivery_window_human": "April 16–April 22, 2026",
+            "days_from_inquiry_human": "33–39 days",
+            "is_late": False,
+        },
+        order_summary={"shipping_method_name": "Standard Shipping"},
+    )
+    assert context.is_preorder is True
+    assert context.preorder_release_date == "Monday, April 13, 2026 (in 30 days)"
+    assert context.transit_time == "3-7 business days"
+    assert context.delivery_date_range == "April 16–April 22, 2026"
+    assert context.days_from_today == "33–39 days"
+    assert context.processing_time is None
+
+
 def test_prompt_order_facts_block_full_preorder_context() -> None:
     context = OrderStatusReplyContext(
         customer_first_name="Vincent",
@@ -303,14 +337,16 @@ def test_prompt_order_facts_block_full_preorder_context() -> None:
     assert "Order facts — weave ALL of these naturally" in user_content
     assert "- Order type: PRE-ORDER" in user_content
     assert (
-        "- Pre-order release / ship date: Tuesday, February 24, 2026 (in 4 days)"
+        "- Pre-order ship / availability date: Tuesday, February 24, 2026 (in 4 days)"
         in user_content
     )
+    assert "- Pre-order base timeline: 60 calendar days from order date" in user_content
+    assert "- Transit rule: Add selected shipping transit after ship date" in user_content
     assert (
         "- Shipping rule: Full order ships together once pre-order item is available "
         "— do not ship partial orders" in user_content
     )
-    assert "- Processing time: 3-5 business days" in user_content
+    assert "- Processing time: 3-5 business days" not in user_content
     assert "- Shipping method: Standard shipping" in user_content
     assert "- Shipping transit time: 3-7 business days" in user_content
     assert "- Estimated delivery date range: March 4-March 12, 2026" in user_content
@@ -824,6 +860,7 @@ class OrderStatusReplyPersonalizationUnittestAdapter(unittest.TestCase):
         test_build_order_status_reply_context()
         test_build_order_status_reply_context_preserves_unknown_preorder_state()
         test_build_order_status_reply_context_normalizes_is_late_to_bool()
+        test_build_order_status_reply_context_omits_processing_for_preorder()
         test_prompt_order_facts_block_full_preorder_context()
         test_prompt_omits_late_dependent_preorder_facts_when_late_unknown()
         test_prompt_omits_ships_together_fact_for_late_preorder()

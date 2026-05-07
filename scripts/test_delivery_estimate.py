@@ -411,14 +411,14 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertIn("March", estimate["preorder_ship_date_human"])
-        self.assertIn("29", estimate["preorder_ship_date_human"])
+        self.assertIn("April", estimate["preorder_ship_date_human"])
+        self.assertIn("13", estimate["preorder_ship_date_human"])
         self.assertIn("2026", estimate["preorder_ship_date_human"])
-        self.assertEqual(estimate["delivery_window_human"], "April 6–April 14, 2026")
-        self.assertEqual(estimate["ship_days_from_inquiry_human"], "15 days")
-        self.assertEqual(estimate["days_from_inquiry_human"], "23–31 days")
-        self.assertEqual(estimate["processing_min_days"], 3)
-        self.assertEqual(estimate["processing_max_days"], 5)
+        self.assertEqual(estimate["delivery_window_human"], "April 16–April 22, 2026")
+        self.assertEqual(estimate["ship_days_from_inquiry_human"], "30 days")
+        self.assertEqual(estimate["days_from_inquiry_human"], "33–39 days")
+        self.assertIsNone(estimate["processing_min_days"])
+        self.assertIsNone(estimate["processing_max_days"])
         self.assertEqual(estimate["transit_min_days"], 3)
         self.assertEqual(estimate["transit_max_days"], 7)
 
@@ -431,14 +431,52 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         self.assertIsNotNone(estimate)
         assert estimate is not None
-        self.assertEqual(estimate["processing_min_days"], 1)
-        self.assertEqual(estimate["processing_max_days"], 1)
+        self.assertIsNone(estimate["processing_min_days"])
+        self.assertIsNone(estimate["processing_max_days"])
         self.assertEqual(estimate["transit_min_days"], 1)
         self.assertEqual(estimate["transit_max_days"], 1)
-        self.assertEqual(estimate["window_min_days"], 2)
-        self.assertEqual(estimate["window_max_days"], 2)
-        self.assertEqual(estimate["delivery_window_human"], "March 31, 2026")
-        self.assertEqual(estimate["days_from_inquiry_human"], "17 days")
+        self.assertEqual(estimate["window_min_days"], 1)
+        self.assertEqual(estimate["window_max_days"], 1)
+        self.assertIsNone(estimate["processing_human"])
+        self.assertEqual(estimate["preorder_ship_date_human"], "Monday, April 13, 2026")
+        self.assertEqual(estimate["delivery_window_human"], "April 14, 2026")
+        self.assertEqual(estimate["days_from_inquiry_human"], "31 days")
+
+    def test_preorder_standard_three_five_example_c(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-01",
+            shipping_method="Standard Shipping (3-5 business days)",
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["preorder_ship_date_human"], "Thursday, April 2, 2026")
+        self.assertEqual(estimate["delivery_window_human"], "April 7–April 9, 2026")
+        self.assertEqual(estimate["window_min_days"], 3)
+        self.assertEqual(estimate["window_max_days"], 5)
+        self.assertEqual(estimate["transit_min_days"], 3)
+        self.assertEqual(estimate["transit_max_days"], 5)
+        self.assertIsNone(estimate["processing_human"])
+
+    def test_preorder_delivery_fallback_transit_only_no_processing(self) -> None:
+        estimate = compute_preorder_delivery_estimate(
+            order_created_at="2026-02-12",
+            shipping_method="Pre-order Delivery",
+            inquiry_date="2026-03-14",
+            order_tags=["Pre-order"],
+        )
+        self.assertIsNotNone(estimate)
+        assert estimate is not None
+        self.assertEqual(estimate["preorder_ship_date_human"], "Monday, April 13, 2026")
+        self.assertEqual(estimate["delivery_window_human"], "April 16–April 22, 2026")
+        self.assertEqual(estimate["window_min_days"], 3)
+        self.assertEqual(estimate["window_max_days"], 7)
+        self.assertEqual(estimate["transit_min_days"], 3)
+        self.assertEqual(estimate["transit_max_days"], 7)
+        self.assertIsNone(estimate["processing_min_days"])
+        self.assertIsNone(estimate["processing_max_days"])
+        self.assertIsNone(estimate["processing_human"])
 
     def test_has_preorder_tag_variants(self) -> None:
         self.assertTrue(
@@ -532,6 +570,7 @@ class DeliveryEstimateTests(unittest.TestCase):
         self.assertTrue(estimate.get("preorder"))
         self.assertIsNotNone(estimate.get("preorder_ship_date_human"))
         self.assertIsNone(estimate.get("delivery_window_human"))
+        self.assertIsNone(estimate.get("eta_human"))
 
     def test_no_tracking_reply_non_preorder_regression(self) -> None:
         order_summary = {
@@ -607,12 +646,16 @@ class DeliveryEstimateTests(unittest.TestCase):
         )
         assert reply is not None
         self.assertIn("pre-order item", reply["body"])
-        self.assertIn("releases on", reply["body"])
-        self.assertIn("in 15 days", reply["body"])
-        self.assertIn("processing typically takes 3-5 business days", reply["body"])
-        self.assertIn("Standard shipping usually takes 3-7 business days", reply["body"])
-        self.assertIn("estimated for April 6–April 14, 2026", reply["body"])
-        self.assertIn("about 23–31 days from today", reply["body"])
+        self.assertIn("expected to ship on Monday, April 13, 2026", reply["body"])
+        self.assertIn("in 30 days", reply["body"])
+        self.assertIn(
+            "Pre-orders follow a 60-calendar-day timeline from the order date.",
+            reply["body"],
+        )
+        self.assertIn("Once it ships, Standard shipping usually takes 3-7 business days", reply["body"])
+        self.assertIn("estimated for April 16–April 22, 2026", reply["body"])
+        self.assertIn("about 33–39 days from today", reply["body"])
+        self.assertNotIn("processing typically takes", reply["body"].lower())
         note_line = "(Business days are Mon–Fri; holidays may affect timelines.)"
         self.assertIn(note_line, reply["body"])
         self.assertEqual(reply["body"].count(note_line), 1)

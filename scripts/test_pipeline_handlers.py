@@ -363,17 +363,20 @@ class PipelineTests(unittest.TestCase):
         }
         preorder_estimate = {
             "preorder": True,
-            "preorder_ship_date_human": "Sunday, March 29, 2026",
-            "delivery_window_human": "April 1–April 7, 2026",
-            "days_from_inquiry_human": "53–56 days",
+            "preorder_ship_date_human": "Monday, April 13, 2026",
+            "delivery_window_human": "April 16–April 22, 2026",
+            "days_from_inquiry_human": "33–39 days",
             "bucket": "Standard",
-            "normalized_method": "Standard (3-5 business days)",
+            "normalized_method": "Standard (3-7 business days)",
             "raw_method": "Standard Shipping",
-            "order_created_date": "2026-02-01",
-            "inquiry_date": "2026-02-09",
+            "order_created_date": "2026-02-12",
+            "inquiry_date": "2026-03-14",
             "window_min_days": 3,
-            "window_max_days": 5,
-            "ship_days_from_inquiry_human": "49 days",
+            "window_max_days": 7,
+            "transit_min_days": 3,
+            "transit_max_days": 7,
+            "ship_days_from_inquiry_human": "30 days",
+            "processing_human": None,
         }
         with mock.patch(
             "richpanel_middleware.automation.pipeline.lookup_order_summary",
@@ -404,7 +407,9 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(params.get("delivery_estimate", {}).get("preorder"))
         draft_reply = params.get("draft_reply", {})
         self.assertIn("pre-order", draft_reply.get("body", ""))
-        self.assertIn("Sunday, March 29, 2026", draft_reply.get("body", ""))
+        self.assertIn("Monday, April 13, 2026", draft_reply.get("body", ""))
+        self.assertIn("April 16–April 22, 2026", draft_reply.get("body", ""))
+        self.assertNotIn("processing typically takes", draft_reply.get("body", "").lower())
 
     def test_plan_falls_back_to_standard_estimate_when_preorder_none(self) -> None:
         envelope = build_event_envelope(
