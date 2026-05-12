@@ -208,7 +208,7 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
                 return text
         return ""
 
-    def _iter_message_texts(container: Dict[str, Any]) -> List[str]:
+    def _iter_message_texts(container: Dict[str, Any], keys: Sequence[str]) -> List[str]:
         messages = container.get("messages") or container.get("conversation_messages") or []
         if not isinstance(messages, list):
             return []
@@ -224,7 +224,7 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
             ).lower()
             if sender and sender not in {"customer", "user", "end_user", "shopper"}:
                 continue
-            candidate = _extract_from_dict(message, primary_keys)
+            candidate = _extract_from_dict(message, keys)
             if candidate:
                 texts.append(candidate)
         return texts
@@ -238,11 +238,11 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
         direct = _extract_from_dict(ticket, primary_keys)
         if direct:
             return direct
-        nested_texts = _iter_message_texts(ticket)
+        nested_texts = _iter_message_texts(ticket, primary_keys)
         if nested_texts:
             return nested_texts[0]
 
-    nested_texts = _iter_message_texts(payload)
+    nested_texts = _iter_message_texts(payload, primary_keys)
     if nested_texts:
         return nested_texts[0]
 
@@ -263,6 +263,15 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
         direct = _extract_from_dict(ticket, fallback_keys)
         if direct:
             return direct
+
+    if isinstance(ticket, dict):
+        nested_texts = _iter_message_texts(ticket, fallback_keys)
+        if nested_texts:
+            return nested_texts[0]
+
+    nested_texts = _iter_message_texts(payload, fallback_keys)
+    if nested_texts:
+        return nested_texts[0]
 
     if isinstance(comments, list):
         for comment in reversed(comments):

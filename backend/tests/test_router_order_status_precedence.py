@@ -134,3 +134,21 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
     def test_extract_customer_message_falls_back_to_subject_when_no_body(self) -> None:
         payload = {"subject": "Where is my order?"}
         self.assertEqual(extract_customer_message(payload), "Where is my order?")
+
+    def test_extract_customer_message_fallback_from_conversation_subject(self) -> None:
+        payload = {
+            "conversation_messages": [
+                {"sender_type": "customer", "subject": "Where is my order?"},
+            ]
+        }
+        self.assertEqual(extract_customer_message(payload), "Where is my order?")
+
+    def test_extract_customer_message_fallback_from_ticket_message_title(self) -> None:
+        payload = {
+            "ticket": {
+                "messages": [
+                    {"sender_type": "customer", "title": "Need order status"},
+                ]
+            }
+        }
+        self.assertEqual(extract_customer_message(payload), "Need order status")
