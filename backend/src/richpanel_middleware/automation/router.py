@@ -185,17 +185,18 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
     if not isinstance(payload, dict):
         return default
 
-    def _extract_from_dict(source: Dict[str, Any]) -> str:
-        for key in (
-            "customer_message",
-            "message",
-            "body",
-            "text",
-            "customer_note",
-            "content",
-            "subject",
-            "title",
-        ):
+    primary_keys = (
+        "customer_message",
+        "message",
+        "body",
+        "text",
+        "customer_note",
+        "content",
+    )
+    fallback_keys = ("subject", "title")
+
+    def _extract_from_dict(source: Dict[str, Any], keys: Sequence[str]) -> str:
+        for key in keys:
             value = source.get(key)
             if value is None:
                 continue
@@ -207,7 +208,7 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
                 return text
         return ""
 
-    def _iter_message_texts(container: Dict[str, Any]) -> List[str]:
+    def _iter_message_texts(container: Dict[str, Any], keys: Sequence[str]) -> List[str]:
         messages = container.get("messages") or container.get("conversation_messages") or []
         if not isinstance(messages, list):
             return []
@@ -223,25 +224,25 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
             ).lower()
             if sender and sender not in {"customer", "user", "end_user", "shopper"}:
                 continue
-            candidate = _extract_from_dict(message)
+            candidate = _extract_from_dict(message, keys)
             if candidate:
                 texts.append(candidate)
         return texts
 
-    direct = _extract_from_dict(payload)
+    direct = _extract_from_dict(payload, primary_keys)
     if direct:
         return direct
 
     ticket = payload.get("ticket")
     if isinstance(ticket, dict):
-        direct = _extract_from_dict(ticket)
+        direct = _extract_from_dict(ticket, primary_keys)
         if direct:
             return direct
-        nested_texts = _iter_message_texts(ticket)
+        nested_texts = _iter_message_texts(ticket, primary_keys)
         if nested_texts:
             return nested_texts[0]
 
-    nested_texts = _iter_message_texts(payload)
+    nested_texts = _iter_message_texts(payload, primary_keys)
     if nested_texts:
         return nested_texts[0]
 
@@ -250,7 +251,33 @@ def extract_customer_message(payload: Dict[str, Any], *, default: str = "") -> s
         for comment in reversed(comments):
             if not isinstance(comment, dict):
                 continue
-            candidate = _extract_from_dict(comment)
+            candidate = _extract_from_dict(comment, primary_keys)
+            if candidate:
+                return candidate
+
+    direct = _extract_from_dict(payload, fallback_keys)
+    if direct:
+        return direct
+
+    if isinstance(ticket, dict):
+        direct = _extract_from_dict(ticket, fallback_keys)
+        if direct:
+            return direct
+
+    if isinstance(ticket, dict):
+        nested_texts = _iter_message_texts(ticket, fallback_keys)
+        if nested_texts:
+            return nested_texts[0]
+
+    nested_texts = _iter_message_texts(payload, fallback_keys)
+    if nested_texts:
+        return nested_texts[0]
+
+    if isinstance(comments, list):
+        for comment in reversed(comments):
+            if not isinstance(comment, dict):
+                continue
+            candidate = _extract_from_dict(comment, fallback_keys)
             if candidate:
                 return candidate
 
