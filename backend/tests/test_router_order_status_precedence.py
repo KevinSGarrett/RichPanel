@@ -105,3 +105,32 @@ class RouterOrderStatusPrecedenceTests(unittest.TestCase):
 
     def test_extract_customer_message_non_dict_returns_default(self) -> None:
         self.assertEqual(extract_customer_message("nope", default="fallback"), "fallback")
+
+    def test_extract_customer_message_prefers_comment_over_generic_subject(self) -> None:
+        payload = {
+            "subject": "Your contact request on Scentiment",
+            "comments": [
+                {
+                    "created_at": "2026-05-12T15:06:03.367Z",
+                    "body": "Your contact request on Scentiment",
+                },
+                {
+                    "created_at": "2026-05-12T15:06:04.303Z",
+                    "body": (
+                        "I was trying to get an update for my order as per it has been "
+                        "partially fulfilled since Friday."
+                    ),
+                },
+            ],
+        }
+        self.assertEqual(
+            extract_customer_message(payload),
+            (
+                "I was trying to get an update for my order as per it has been partially "
+                "fulfilled since Friday."
+            ),
+        )
+
+    def test_extract_customer_message_falls_back_to_subject_when_no_body(self) -> None:
+        payload = {"subject": "Where is my order?"}
+        self.assertEqual(extract_customer_message(payload), "Where is my order?")
